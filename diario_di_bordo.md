@@ -154,3 +154,34 @@ profilo grezzo con cui far girare il resto della pipeline. Si raffina dopo.
 Quasi tutti i progetti analizzati partono da un CV gia esistente. Costruire
 il profilo tramite dialogo guidato a domande successive e raro: e quindi un
 elemento distintivo e originale di AI-CV-COACH.
+
+---
+
+## Fase 0 – Riflessione di chiusura
+
+### Cos'e stata la Fase 0
+Una fase di osservazione e preparazione, senza ancora costruire nulla di
+visibile. Lo scopo era studiare e capire le funzioni gia esistenti in
+progetti online simili al mio e capire come, combinandole, possano dare
+forma alla mia web app. In parallelo ho configurato gli strumenti di lavoro
+e ricevuto un'infarinatura su molti aspetti tecnici che affrontero piu
+concretamente in seguito. Ho anche imparato a strutturare cronologicamente
+il lavoro, per arrivare per gradi a una versione funzionante dell'app con
+le caratteristiche desiderate.
+
+### Con cosa arrivo alla Fase 1
+- Una pipeline ragionata da seguire (struttura -> confronta -> valuta ->
+  genera), non piu solo un'idea generica di progetto.
+- Idee concrete su come affrontare i problemi che la mia app deve risolvere,
+  in particolare il vincolo anti-invenzione.
+- Un repository ordinato con documentazione, analisi e diario, e l'abitudine
+  al ciclo commit/push verificato.
+- La chiarezza che la priorita della Fase 1 e il dialogo guidato (in versione
+  minima/MVP), primo anello della pipeline ed elemento distintivo del progetto.
+
+### Il metodo di lavoro
+Mi sono trovato molto bene con l'approccio step-by-step, i commit frequenti,
+il diario di bordo e l'abitudine a ragionare prima di mettere per iscritto.
+Decido di mantenere lo stesso metodo nella Fase 1.
+
+### Stato: Fase 0 completata.
