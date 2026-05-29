@@ -185,3 +185,59 @@ il diario di bordo e l'abitudine a ragionare prima di mettere per iscritto.
 Decido di mantenere lo stesso metodo nella Fase 1.
 
 ### Stato: Fase 0 completata.
+
+---
+
+# Fase 1 – Prototipo base v0
+
+## Appunti di apertura della Fase 1
+
+### Decisione di metodo: ruoli e divisione del lavoro
+A partire dalla Fase 1 il lavoro si sviluppa con tre figure distinte:
+- Io (Mirco) sono il regista: decido cosa fare, in che ordine, e do l'ok
+  a ogni passo. Resto il responsabile della comprensione e delle scelte.
+- Claude (chat) e il tutor: progettazione, concetti, ragionamento sulle
+  scelte, prompt design, documentazione, somme di fine step/fase.
+- Claude Code e l'assistente operativo: scrittura concreta di codice ed
+  esecuzione di comandi, dopo che il pezzo e stato pensato a parole.
+
+Regola d'oro: prima ragioniamo in chat, poi se serve costruiamo con
+Claude Code. Mai il contrario. Da test fatto in autonomia
+(claude-code-test-1) ho gia adottato l'accordo "ogni decisione di Claude
+Code mi viene sottoposta prima dell'esecuzione: accetto, rifiuto, modifico,
+studio". Mantengo questo accordo per tutta la Fase 1.
+
+### 💡 Mia idea progettuale: lista delle "domande in sospeso"
+Durante il dialogo guidato, se l'AI non riesce a strutturare bene una
+risposta dell'utente, oppure se l'utente non sa o evita la domanda, la
+domanda viene messa da parte in una lista interna delle "domande in
+sospeso" invece di insistere sul momento. Il dialogo prosegue.
+A fine dialogo si analizzano le domande accumulate e si pone un secondo
+giro mirato, con domande riformulate in base ai concetti delle questioni
+rimaste aperte, per provare a colmare i vuoti.
+
+Perche e utile:
+- E un'altra applicazione del principio "AI propone, utente conferma":
+  l'AI dichiara apertamente quando non ha capito invece di riempire il
+  profilo con dati approssimati. Difesa anti-invenzione.
+- Rende il dialogo meno opprimente: ci si sposta dalla domanda difficile
+  e si torna dopo, quando l'utente ha "scaldato i muscoli" parlando di se.
+- Aggiunge una funzione che nessuno dei 4 progetti analizzati gestiva
+  esplicitamente: e un altro elemento distintivo di AI-CV-COACH.
+
+Sfumature da rispettare:
+- La lista deve restare piccola: troppe domande in sospeso = segnale che
+  il dialogo e troppo lungo o invasivo, da ripensare.
+- Il secondo giro si fa una volta sola, non in loop infinito.
+- Distinguere due casi: (A) l'AI non ha capito -> ha senso riformulare;
+  (B) l'utente ha saltato o non sa -> va rispettato.
+
+Nota tecnica: non e una "cartella" del filesystem, e una lista interna
+del programma (concetto di "pending_questions" o "coda di fallback").
+Il design preciso si vedra in prompt_design.md quando ci arriveremo.
+
+### Punto di partenza della Fase 1
+Dialogo guidato in versione MVP (minimo funzionante): poche domande, anche
+senza tutto il meccanismo di conferma e senza ancora la lista delle domande
+in sospeso. L'obiettivo del primo giro e ottenere un profilo grezzo con cui
+far girare il resto della pipeline. Il raffinamento viene dopo.
