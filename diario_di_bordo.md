@@ -409,3 +409,28 @@ Aprire una scheda col `+` non dà Ubuntu ma il terminale di default (PowerShell)
 💡 *Mia intuizione / scelta ragionata* — Le due superfici di esposizione (repo vs app in esecuzione) sono il modo giusto per ragionare sulla sicurezza della chiave. Documentare tutto su GitHub, da solo, non bastava a giustificare l'aiutante Node: il repo era già protetto dal `.gitignore`. Quello che l'aiutante Node previene è un'altra cosa — la chiave visibile nel browser dell'app pubblicata. Capire *quale* problema sto risolvendo evita di scegliere una soluzione giusta per il motivo sbagliato.
 
 💡 *Mia intuizione / scelta ragionata* — Delegare a Claude Code la *scrittura* di un commit è comodo, ma il confine è il *controllo*: leggere cosa sta per fare prima di confermare resta compito mio. Stavolta è filata liscia perché la posta era bassa (un file da due righe); quando i commit toccheranno codice vero, quel "leggo prima di confermare" sarà la rete vera, non un passaggio formale.
+
+### Step 1.6 — Decisione di architettura a due fasi (HTML+Node → VB.NET) e allineamento del README
+
+*Chiarita la rotta tecnologica del progetto e aggiornata la documentazione di conseguenza. Nessun codice scritto: è uno step di decisione e di messa in ordine.*
+
+**Cosa ho fatto**
+Deciso l'impianto tecnologico del progetto su due fasi: il prototipo (Fasi 1–2) usa un frontend in HTML più un aiutante locale in Node (utility temporanea che custodisce la chiave API e fa da tramite verso l'API LLM); in Fase 3, a prototipo consolidato, il progetto migrerà su un'unica applicazione VB.NET sotto Windows 11. Ho ristrutturato la sezione "Tecnologie previste" del `README.md` distinguendo le due fasi, allineato la fase 3 della roadmap (non più "backend Python" ma migrazione a VB.NET) e aggiunto una riga di copyright. Stabilita inoltre una regola sulla paternità dei commit.
+
+**Cosa ho imparato**
+- Il frontend e il "motore" sono pezzi staccabili, collegati solo da un'interfaccia (la coppia richiesta/risposta verso l'AI): posso sostituire il primo senza toccare il secondo. È questo che rende la migrazione possibile senza buttare il lavoro di valore.
+- Una pagina HTML nel browser non può custodire un segreto: tutto ciò che la pagina "sa" è visibile a chi la apre. Per questo il prototipo ha bisogno dell'aiutante Node come custode della chiave. Un programma vero come VB.NET potrà invece tenere la chiave e chiamare l'API da sé, rendendo l'aiutante superfluo.
+- Il valore del progetto (il dialogo guidato, i prompt, il vincolo anti-invenzione) vive sopra la tecnologia: non è né HTML né VB.NET, e migra intatto.
+
+**Dove ho faticato / cosa non era ovvio**
+Allo Step 1.5 avevo motivato la scelta dell'aiutante Node dicendo che "l'app è destinata a essere mostrata al pubblico". Ragionando sulla migrazione ho dovuto precisare quel ragionamento: la versione pubblica sarà quella VB.NET, mentre l'attuale frontend HTML + aiutante Node è impalcatura temporanea, pensata per girare in locale sul mio PC. Quindi oggi l'aiutante Node non serve "perché l'app è pubblica" (non lo è ancora), ma per un motivo più ristretto e tecnico: anche solo per provare le chiamate in locale, il browser non può tenere la chiave. Non ho riscritto lo Step 1.5: resta com'era, perché il diario deve mostrare come il pensiero è evoluto, non far finta di aver capito tutto subito.
+
+**Cosa ho deciso e perché**
+- Architettura a due fasi: HTML + aiutante Node per il prototipo (Fasi 1–2), VB.NET in Fase 3. La migrazione è collocata a prototipo consolidato, non subito: prima valido l'idea e i prompt con l'MVP nell'ambiente che ho già montato (WSL/Node), poi reimplemento nella tecnologia finale.
+- Aiutante Node trattato come utility temporanea e usa-e-getta, non come materia di studio: lo configuro tramite Claude Code, non lo approfondisco riga per riga; alla migrazione sparisce. Mi basta sapere accenderlo e spegnerlo.
+- README aggiornato in forma programmatica ("prevede"), non al presente ("usa"): documenta la decisione senza dichiarare pezzi che ancora non esistono.
+- Paternità dei commit: i commit riportano esclusivamente la mia paternità (© 2026 Mirco Parenti), senza co-autorship di Claude se non richiesta esplicitamente.
+
+💡 *Mia intuizione / scelta ragionata* — Trattare l'aiutante Node come "impalcatura da cantiere" è economia, non pigrizia: studiarne il codice sarebbe tempo sprecato, visto che alla migrazione verrà smontato. Metto l'attenzione dove resta valore (il dialogo), non dove verrà buttato.
+
+💡 *Mia intuizione / scelta ragionata* — La migrazione HTML→VB.NET non mi spaventa più da quando ho capito il confine tra "faccia" e "motore": butterò solo il frontend HTML e l'aiutante Node, mentre il cuore del progetto (dialogo, prompt, schema, anti-invenzione) resta. Non butto via tutto, butto via l'impalcatura.
