@@ -26,7 +26,7 @@ Ogni fase del progetto viene chiusa con documentazione, riflessioni e cronologia
 1. Fase 0 – Setup e analisi preliminare.
 2. Fase 1 – Prototipo base v0.
 3. Fase 2 – Profile Manager guidato v1.
-4. Fase 3 – Backend leggero Python v2, opzionale ma consigliato.
+4. Fase 3 – Migrazione a un'applicazione VB.NET sotto Windows 11.
 
 ## Vincolo etico principale
 
@@ -34,9 +34,20 @@ L'applicazione non deve inventare esperienze, competenze, titoli di studio o ris
 
 ## Tecnologie previste
 
-- HTML
-- CSS
-- JavaScript
-- Python, opzionale nelle fasi successive
-- API LLM
-- Git e GitHub
+Il progetto attraversa due fasi tecnologiche distinte.
+
+**Fase MVP (attuale):**
+
+- Frontend in HTML, CSS e JavaScript, eseguito nel browser.
+- Un aiutante locale in Node.js: utility di servizio che custodisce la chiave API e fa da tramite verso l'API LLM, in modo che la chiave non sia mai esposta nel browser.
+- API di un LLM per la strutturazione del profilo e le elaborazioni.
+
+**Fase target (dopo la validazione di prompt e schema):**
+
+- Migrazione a un'unica applicazione VB.NET sotto Windows 11, che assolverà sia il frontend sia la chiamata diretta all'API LLM, rendendo superfluo l'aiutante Node.
+
+In entrambe le fasi: Git e GitHub per il versionamento.
+
+---
+
+© 2026 Mirco Parenti
