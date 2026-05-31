@@ -1,3 +1,4 @@
+# Prompt design – AI-CV-COACH
 
 Questo documento raccoglie i prompt progettati e usati nello sviluppo di AI-CV-COACH.
 
@@ -104,11 +105,11 @@ formato di scambio interno.
 
 ### Raccolta profilo utente
 
-## Raccolta profilo utente — testi del dialogo (MVP)
+**Raccolta profilo utente — testi del dialogo (MVP)**
 
 Scheletro: ordine fisso, un argomento per turno, loop di conferma. Due tipi di turno: singolo (`nome`) e ripetibile (gli altri). I testi qui sotto sono bozze di lavoro: il fraseggio fine va calibrato nel contesto ("frasi visibili nel contesto").
 
-### Turno `nome` (singolo)
+#### Turno `nome` (singolo)
 
 Ciao!
 Ti chiederò sia le esperienze formali (lavori, studi, corsi), sia quelle informali (cose fatte per amici, famiglia, passioni): contano entrambe, spesso è proprio l'insieme a fare la differenza in una candidatura.
@@ -117,7 +118,7 @@ Allora, per iniziare:
 
 * Come ti chiami?
 
-### Turno `esperienze_formali` (ripetibile)
+#### Turno `esperienze_formali` (ripetibile)
 
 **Apertura + patto:**
 
@@ -144,7 +145,7 @@ Perfetto, segnata.
 
 (se l'utente ne ha un'altra → "Raccontami la prossima.")
 
-### Turno `esperienze_informali` (ripetibile)
+#### Turno `esperienze_informali` (ripetibile)
 
 **Apertura + patto:**
 
@@ -164,7 +165,7 @@ Ho capito bene? Se c'è qualcosa da sistemare dimmelo, altrimenti andiamo avanti
 
 **Reminder-ponte + riapertura:** come nel turno formali, adattato.
 
-### Regole trasversali ai turni ripetibili (logica di prompt, non testo visibile)
+#### Regole trasversali ai turni ripetibili (logica di prompt, non testo visibile)
 
 1. **Campo vuoto** → mostrato come `(non specificata)`, mai riempito d'ufficio.
 2. **Normalizzazione leggera**: l'AI riordina e ripulisce (toglie riempitivi, false partenze; mette il dato nel campo giusto), resta aderente alle parole dell'utente. Niente sinonimi "professionali", niente dettagli aggiunti. Conserva il "circa" se l'utente è incerto: non irrigidire un forse in un sì.

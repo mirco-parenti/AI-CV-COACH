@@ -54,15 +54,15 @@ Difficoltà:
 
 ---
 
-## Note generali
+Note generali
 
 Da aggiornare alla fine di ogni fase.
 
 ---
 
-## Fase 0 – Step 0.5 – Analisi di progetti simili
+### Step 0.5 – Analisi di progetti simili
 
-### Progetti analizzati (dettaglio completo in research_notes.md)
+**Progetti analizzati (dettaglio completo in research_notes.md)**
 1. Resume-Matcher (srbhr) — https://github.com/srbhr/Resume-Matcher
    Lente: vincolo anti-invenzione (master resume, fonte chiusa).
 2. resume-job-matcher (sliday) — https://github.com/sliday/resume-job-matcher
@@ -72,7 +72,7 @@ Da aggiornare alla fine di ogni fase.
 4. ResumeLM (olyaiy) — https://github.com/olyaiy/resume-lm
    Lente: gestione dati utente e pattern "AI propone, utente conferma".
 
-### Cosa ho fatto
+**Cosa ho fatto**
 - Imparato a cercare progetti su GitHub e a valutarli con criteri rapidi
   (stelle, data ultimo aggiornamento, descrizione).
 - Analizzato 4 progetti open source simili ad AI-CV-COACH, usando una
@@ -83,7 +83,7 @@ Da aggiornare alla fine di ogni fase.
   4. ResumeLM -> gestione dati utente e dialogo.
 - Documentato ogni progetto in research_notes.md con commit separati.
 
-### Cosa ho imparato
+**Cosa ho imparato**
 - La pipeline del progetto ha 4 anelli: struttura i dati (estrazione) ->
   confronta profilo e annuncio -> assegna punteggio -> genera output.
 - Esistono due famiglie di scoring: una affidata all'LLM (coglie le
@@ -97,7 +97,7 @@ Da aggiornare alla fine di ogni fase.
 - Distinzione "AI-enabled" vs "AI-first": l'AI e uno strumento di supporto
   discreto al servizio dell'utente, non il padrone del processo.
 
-### 💡 Mie intuizioni / scelte ragionate
+**💡 Mie intuizioni / scelte ragionate**
 - Ho capito che i principi anti-invenzione (fonte chiusa, compiti ristretti,
   output strutturato, conferma dell'utente) non sono separati: sono facce
   della stessa idea, cioe togliere liberta all'AI per ancorarla alla realta.
@@ -123,7 +123,7 @@ Da aggiornare alla fine di ogni fase.
   il profilo e la fonte chiusa da cui tutto pesca) ed e l'elemento
   distintivo e raro del progetto, quindi e un requisito fondante.
 
-### Dove ho faticato / cosa non era ovvio
+**Dove ho faticato / cosa non era ovvio**
 - All'inizio non era ovvio che "tirare le somme" e "scrivere il diario"
   fossero due attivita diverse: prima si ragiona, poi si mette per iscritto.
 - Capire la differenza tra le due famiglie di scoring ha richiesto un
@@ -131,7 +131,7 @@ Da aggiornare alla fine di ogni fase.
 - Ho dovuto distinguere il ruolo del diario (appunti grezzi di pensiero) da
   quello di research_notes.md (archivio dettagliato dei dati sui progetti).
 
-### Cosa ho deciso e perche
+**Cosa ho deciso e perche**
 - Scelto Resume-Matcher come primo progetto da analizzare, applicando criteri
   di qualita: molte stelle (maturita) e aggiornamento recente (progetto vivo).
 - Approfondito lo scoring come secondo tema, perche e un deliverable del
@@ -145,21 +145,21 @@ Da aggiornare alla fine di ogni fase.
 - Deciso di evidenziare nel diario le intuizioni e scelte ragionate con
   un'etichetta dedicata, perche sono la parte piu utile per la relazione.
 
-### Nota su come procederemo (da ricordare per la Fase 1)
+**Nota su come procederemo (da ricordare per la Fase 1)**
 Il dialogo guidato in Fase 1 sara una versione minima (MVP): poche domande,
 anche senza tutto il meccanismo di conferma raffinato, giusto per ottenere un
 profilo grezzo con cui far girare il resto della pipeline. Si raffina dopo.
 
-### Nota di posizionamento (per la relazione finale)
+**Nota di posizionamento (per la relazione finale)**
 Quasi tutti i progetti analizzati partono da un CV gia esistente. Costruire
 il profilo tramite dialogo guidato a domande successive e raro: e quindi un
 elemento distintivo e originale di AI-CV-COACH.
 
 ---
 
-## Fase 0 – Riflessione di chiusura
+### Riflessione di chiusura
 
-### Cos'e stata la Fase 0
+**Cos'e stata la Fase 0**
 Una fase di osservazione e preparazione, senza ancora costruire nulla di
 visibile. Lo scopo era studiare e capire le funzioni gia esistenti in
 progetti online simili al mio e capire come, combinandole, possano dare
@@ -169,7 +169,7 @@ concretamente in seguito. Ho anche imparato a strutturare cronologicamente
 il lavoro, per arrivare per gradi a una versione funzionante dell'app con
 le caratteristiche desiderate.
 
-### Con cosa arrivo alla Fase 1
+**Con cosa arrivo alla Fase 1**
 - Una pipeline ragionata da seguire (struttura -> confronta -> valuta ->
   genera), non piu solo un'idea generica di progetto.
 - Idee concrete su come affrontare i problemi che la mia app deve risolvere,
@@ -179,20 +179,20 @@ le caratteristiche desiderate.
 - La chiarezza che la priorita della Fase 1 e il dialogo guidato (in versione
   minima/MVP), primo anello della pipeline ed elemento distintivo del progetto.
 
-### Il metodo di lavoro
+**Il metodo di lavoro**
 Mi sono trovato molto bene con l'approccio step-by-step, i commit frequenti,
 il diario di bordo e l'abitudine a ragionare prima di mettere per iscritto.
 Decido di mantenere lo stesso metodo nella Fase 1.
 
-### Stato: Fase 0 completata.
+**Stato: Fase 0 completata.**
 
 ---
 
-# Fase 1 – Prototipo base v0
+## Fase 1 – Prototipo base v0
 
-## Appunti di apertura della Fase 1
+### Appunti di apertura della Fase 1
 
-### Decisione di metodo: ruoli e divisione del lavoro
+**Decisione di metodo: ruoli e divisione del lavoro**
 A partire dalla Fase 1 il lavoro si sviluppa con tre figure distinte:
 - Io (Mirco) sono il regista: decido cosa fare, in che ordine, e do l'ok
   a ogni passo. Resto il responsabile della comprensione e delle scelte.
@@ -207,7 +207,7 @@ Claude Code. Mai il contrario. Da test fatto in autonomia
 Code mi viene sottoposta prima dell'esecuzione: accetto, rifiuto, modifico,
 studio". Mantengo questo accordo per tutta la Fase 1.
 
-### 💡 Mia idea progettuale: lista delle "domande in sospeso"
+**💡 Mia idea progettuale: lista delle "domande in sospeso"**
 Durante il dialogo guidato, se l'AI non riesce a strutturare bene una
 risposta dell'utente, oppure se l'utente non sa o evita la domanda, la
 domanda viene messa da parte in una lista interna delle "domande in
@@ -236,7 +236,7 @@ Nota tecnica: non e una "cartella" del filesystem, e una lista interna
 del programma (concetto di "pending_questions" o "coda di fallback").
 Il design preciso si vedra in prompt_design.md quando ci arriveremo.
 
-### Punto di partenza della Fase 1
+**Punto di partenza della Fase 1**
 Dialogo guidato in versione MVP (minimo funzionante): poche domande, anche
 senza tutto il meccanismo di conferma e senza ancora la lista delle domande
 in sospeso. L'obiettivo del primo giro e ottenere un profilo grezzo con cui
@@ -244,9 +244,9 @@ far girare il resto della pipeline. Il raffinamento viene dopo.
 
 ---
 
-## Fase 1 – Step 1.1 – Struttura del profilo utente
+### Step 1.1 – Struttura del profilo utente
 
-### Cosa ho fatto
+**Cosa ho fatto**
 Definita la struttura del profilo utente per l'MVP: il "modulo" che il
 dialogo guidato dovra riempire. La struttura e volutamente minimale per
 restare in scala MVP.
@@ -260,7 +260,7 @@ Campi (nomi tecnici JSON):
 - competenze (lista di stringhe)
 - formazione (lista; ogni voce: titolo, istituto, anno)
 
-### Cosa ho imparato
+**Cosa ho imparato**
 - Distinzione fondamentale tra "nome tecnico" del campo (breve, in
   inglese o italiano pulito, senza spazi, lo vede solo il programma)
   e "testo visibile" all'utente (naturale, descrittivo, lungo a piacere).
@@ -269,7 +269,7 @@ Campi (nomi tecnici JSON):
   si decide quali caselle esistono. Poi si formulano le domande per
   riempirle. L'ordine inverso porta a chiedere cose a caso.
 
-### 💡 Mia intuizione / scelta ragionata: le esperienze informali
+**💡 Mia intuizione / scelta ragionata: le esperienze informali**
 Ho proposto di aggiungere un campo dedicato per esperienze non formali
 (lavoretti, aiuti in famiglia, volontariato, esperienze brevi senza titoli
 o certificati). Motivazioni:
@@ -291,13 +291,13 @@ Sfumature decise:
   formali. La formulazione precisa del prompt verra decisa quando saremo
   nel contesto della generazione CV.
 
-### Dove ho faticato / cosa non era ovvio
+**Dove ho faticato / cosa non era ovvio**
 Ho inizialmente proposto come nome del campo una frase descrittiva
 ("competenze acquisite anche tramite esperienze pratiche non formali").
 Ragionando, ho capito che era un "testo visibile all'utente", non un
 "nome tecnico" da JSON. Distinzione utile per il futuro.
 
-### Cosa ho deciso e perche
+**Cosa ho deciso e perche**
 - Partire da 5 campi essenziali, non di piu: in MVP, meno e meglio.
   Aggiungeremo (contatti, lingue, ecc.) solo dopo aver visto la pipeline
   girare.
@@ -308,7 +308,7 @@ Ragionando, ho capito che era un "testo visibile all'utente", non un
   servono davvero (prompt di generazione CV), invece di tararli a vuoto
   adesso.
 
-  ### Step 1.2 — Struttura del dialogo guidato (MVP)
+### Step 1.2 — Struttura del dialogo guidato (MVP)
 
 *Definito lo scheletro del dialogo, non ancora i testi delle domande.*
 
