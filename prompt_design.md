@@ -111,12 +111,41 @@ Scheletro: ordine fisso, un argomento per turno, loop di conferma. Due tipi di t
 
 #### Turno `nome` (singolo)
 
+**Testo visibile (turno singolo):**
+
 Ciao!
 Ti chiederò sia le esperienze formali (lavori, studi, corsi), sia quelle informali (cose fatte per amici, famiglia, passioni): contano entrambe, spesso è proprio l'insieme a fare la differenza in una candidatura.
 Useremo le tue risposte — solo quelle — per preparare un CV e una lettera di presentazione su misura per un qualsiasi annuncio di lavoro che ti interessa.
 Allora, per iniziare:
 
 * Come ti chiami?
+
+**Prompt di strutturazione (logica di prompt):**
+
+Prompt inviato all'AI per ricavare il campo `nome` dalla risposta dell'utente. Il programma inserisce la risposta dell'utente al posto del segnaposto e invia il tutto all'AI, che risponde unicamente con il JSON.
+
+```
+Sei un assistente che struttura in formato JSON la risposta di un utente.
+Il tuo compito in questo turno è ricavare SOLO il nome e cognome dell'utente dalla sua risposta.
+
+Regole:
+- Usa esclusivamente ciò che l'utente ha scritto. Non aggiungere, non correggere, non completare nulla.
+- Se nella risposta non è presente un nome (l'utente rifiuta, divaga, o scrive qualcosa di confuso), lascia il campo vuoto.
+- Non interpretare come nome parole che chiaramente non lo sono (es. un saluto, un verbo, una frase generica).
+- Rispondi unicamente con il JSON richiesto, senza testo prima o dopo.
+
+Formato della risposta:
+{"nome": "<nome e cognome dell'utente, oppure stringa vuota>"}
+
+Risposta dell'utente:
+"<qui il programma inserirà ciò che ha scritto l'utente>"
+```
+
+**Note specifiche del turno nome (logica di prompt):**
+
+- **Output solo-frammento**: l'AI restituisce solo il pezzo che riguarda questo turno (`{"nome": "..."}`), non l'intero profilo. È il programma a unire il frammento al profilo. Compito ristretto = meno spazio per inventare, e la "memoria" del profilo vive nel codice, non nel modello.
+- **Uscita sempre in JSON**, anche per un singolo campo: il programma deve poter leggere la risposta in modo inequivocabile. È lo stampo riusato nei turni ricchi (esperienze, formazione), dove il frammento avrà più campi.
+- **Vuoto, non indovinato**: se la risposta non contiene un nome, il campo resta vuoto (`{"nome": ""}`). Applicazione del "default sicuro" al primo campo; il vuoto verrà gestito dalla scheda di conferma e, in futuro, da pending_questions.
 
 #### Turno `esperienze_formali` (ripetibile)
 
