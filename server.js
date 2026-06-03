@@ -73,8 +73,33 @@ Risposta dell'utente:
 "${rispostaUtente}"`;
   },
 
-  // I prompt degli altri turni (esperienze_informali, competenze, formazione)
-  // verranno aggiunti qui, uno alla volta.
+  esperienze_informali(rispostaUtente) {
+    return `Sei un assistente che struttura in formato JSON la risposta di un utente.
+Il tuo compito in questo turno è ricavare le ESPERIENZE INFORMALI descritte dall'utente: attività che NON sono un lavoro vero e proprio — aiuti a familiari, amici o vicini, una mano in associazioni o eventi, volontariato, passioni che hanno insegnato qualcosa, esperienze brevi e occasionali.
+
+Per ogni esperienza raccogli questi campi (tutti facoltativi per natura):
+- "cosa_facevo": l'attività svolta
+- "quando": il periodo o la frequenza (es. "le estati 2018-2020")
+- "con_chi": persone, famiglia, gruppo o realtà con cui l'ha svolta
+
+Regole:
+- Usa esclusivamente ciò che l'utente ha scritto. Non aggiungere, non correggere, non completare, non inventare nulla.
+- Se un campo non è presente nella risposta, lascialo come stringa vuota "". Mai riempirlo a indovinare. Per queste esperienze è normale che "quando" e "con_chi" manchino.
+- Se l'utente racconta più esperienze nella stessa risposta, estraile tutte: una voce della lista per ogni esperienza.
+- Normalizzazione leggera: riordina e ripulisci le parole dell'utente (togli riempitivi e false partenze, metti il dato nel campo giusto), ma resta aderente a ciò che ha detto. Niente sinonimi "professionali", niente dettagli aggiunti. Se l'utente è incerto, conserva l'incertezza.
+- Considera SOLO esperienze informali. Se l'utente racconta un lavoro formale vero e proprio (impiego retribuito con ruolo e azienda), NON includerlo qui: appartiene a un altro turno.
+- Se la risposta non contiene alcuna esperienza informale, restituisci una lista vuota.
+- Rispondi unicamente con il JSON richiesto, senza testo prima o dopo.
+
+Formato della risposta:
+{"esperienze_informali": [{"cosa_facevo": "", "quando": "", "con_chi": ""}]}
+
+Risposta dell'utente:
+"${rispostaUtente}"`;
+  },
+
+  // I prompt degli altri turni (competenze, formazione) verranno aggiunti qui,
+  // uno alla volta.
 };
 
 // Chiama l'API di Anthropic con un prompt già costruito e restituisce il testo
