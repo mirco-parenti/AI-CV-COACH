@@ -1,5 +1,9 @@
 // Server locale che fa da tramite tra una pagina web e l'API di Anthropic.
-// Unico compito: strutturare in JSON il nome e cognome dell'utente.
+// Compito: strutturare in JSON la risposta dell'utente per UN turno del dialogo.
+//
+// Il server è SENZA STATO: riceve { turno, risposta }, sceglie il prompt del
+// turno richiesto, chiama l'LLM e restituisce il frammento JSON prodotto, così
+// com'è. La memoria del profilo e il flusso del dialogo vivono nel front-end.
 //
 // La chiave API viene letta da ANTHROPIC_API_KEY nel file .env (mai nel codice).
 
@@ -18,11 +22,16 @@ if (!API_KEY) {
 
 const PORT = 3000;
 const MODEL = "claude-haiku-4-5";
-const MAX_TOKENS = 100;
+// 400 token: bastano per il nome e lasciano spazio ai frammenti più ricchi
+// (esperienze, formazione, lista competenze) che aggiungeremo al registro.
+const MAX_TOKENS = 400;
 
-// Prompt fisso per questo turno. <RISPOSTA_UTENTE> viene sostituito col testo ricevuto.
-function buildPrompt(rispostaUtente) {
-  return `Sei un assistente che struttura in formato JSON la risposta di un utente.
+// Registro dei prompt di estrazione: un turno → una funzione che, data la
+// risposta dell'utente, costruisce il prompt da inviare all'LLM.
+// Aggiungere un turno = aggiungere una voce qui, senza toccare l'impianto.
+const PROMPTS = {
+  nome(rispostaUtente) {
+    return `Sei un assistente che struttura in formato JSON la risposta di un utente.
 Il tuo compito in questo turno è ricavare SOLO il nome e cognome dell'utente dalla sua risposta.
 
 Regole:
@@ -36,10 +45,15 @@ Formato della risposta:
 
 Risposta dell'utente:
 "${rispostaUtente}"`;
-}
+  },
 
-// Chiama l'API di Anthropic e restituisce il testo prodotto dal modello.
-async function chiamaAnthropic(rispostaUtente) {
+  // I prompt degli altri turni (esperienze_formali, esperienze_informali,
+  // competenze, formazione) verranno aggiunti qui, uno alla volta.
+};
+
+// Chiama l'API di Anthropic con un prompt già costruito e restituisce il testo
+// prodotto dal modello.
+async function chiamaAnthropic(prompt) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -50,7 +64,7 @@ async function chiamaAnthropic(rispostaUtente) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      messages: [{ role: "user", content: buildPrompt(rispostaUtente) }],
+      messages: [{ role: "user", content: prompt }],
     }),
   });
 
@@ -86,7 +100,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.url !== "/struttura-nome") {
+  if (req.url !== "/struttura") {
     inviaJson(res, 404, { errore: "Endpoint non trovato." });
     return;
   }
@@ -102,11 +116,21 @@ const server = http.createServer((req, res) => {
   });
 
   req.on("end", async () => {
-    let risposta;
+    let turno, risposta;
     try {
-      risposta = JSON.parse(body).risposta;
+      ({ turno, risposta } = JSON.parse(body));
     } catch {
-      inviaJson(res, 400, { errore: 'Body non valido: atteso JSON { "risposta": "..." }.' });
+      inviaJson(res, 400, {
+        errore: 'Body non valido: atteso JSON { "turno": "...", "risposta": "..." }.',
+      });
+      return;
+    }
+
+    if (typeof turno !== "string" || !Object.hasOwn(PROMPTS, turno)) {
+      inviaJson(res, 400, {
+        errore: 'Campo "turno" mancante o sconosciuto.',
+        turni_validi: Object.keys(PROMPTS),
+      });
       return;
     }
 
@@ -116,7 +140,8 @@ const server = http.createServer((req, res) => {
     }
 
     try {
-      const jsonModello = await chiamaAnthropic(risposta);
+      const prompt = PROMPTS[turno](risposta);
+      const jsonModello = await chiamaAnthropic(prompt);
       // Restituiamo ESCLUSIVAMENTE il JSON ricevuto dal modello, verbatim.
       res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
       res.end(jsonModello);
@@ -129,5 +154,6 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
   console.log(`Server in ascolto su http://localhost:${PORT}`);
-  console.log(`Endpoint: POST http://localhost:${PORT}/struttura-nome`);
+  console.log(`Endpoint: POST http://localhost:${PORT}/struttura`);
+  console.log(`Turni disponibili: ${Object.keys(PROMPTS).join(", ")}`);
 });

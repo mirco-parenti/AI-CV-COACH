@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Test — Struttura nome</title>
+    <title>Test — Struttura turno</title>
     <style>
       body {
         font-family: system-ui, sans-serif;
@@ -27,6 +27,8 @@
         cursor: pointer;
       }
       button:disabled { cursor: default; opacity: 0.6; }
+      select { font: inherit; padding: 0.4rem; }
+      .riga { margin-bottom: 0.75rem; }
       pre {
         background: #f4f4f4;
         padding: 1rem;
@@ -39,21 +41,33 @@
     </style>
   </head>
   <body>
-    <h1>Test endpoint <code>POST /struttura-nome</code></h1>
-    <p>Scrivi una risposta come se fossi l'utente, poi invia.</p>
+    <h1>Test endpoint <code>POST /struttura</code></h1>
+    <p>Scegli il turno, scrivi una risposta come se fossi l'utente, poi invia.</p>
+
+    <div class="riga">
+      <label for="turno">Turno:</label>
+      <select id="turno">
+        <option value="nome">nome</option>
+        <option value="esperienze_formali">esperienze_formali</option>
+        <option value="esperienze_informali">esperienze_informali</option>
+        <option value="competenze">competenze</option>
+        <option value="formazione">formazione</option>
+      </select>
+    </div>
 
     <label for="risposta">Risposta dell'utente:</label>
     <textarea id="risposta" placeholder="Es: Ciao, mi chiamo Mario Rossi"></textarea>
 
-    <button id="invia">Struttura nome</button>
+    <button id="invia">Struttura</button>
 
     <h2>Risposta del server</h2>
     <pre id="output"></pre>
 
     <script>
-      const ENDPOINT = "http://localhost:3000/struttura-nome";
+      const ENDPOINT = "http://localhost:3000/struttura";
       const bottone = document.getElementById("invia");
       const campo = document.getElementById("risposta");
+      const selettoreTurno = document.getElementById("turno");
       const output = document.getElementById("output");
 
       bottone.addEventListener("click", async () => {
@@ -65,7 +79,10 @@
           const res = await fetch(ENDPOINT, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ risposta: campo.value }),
+            body: JSON.stringify({
+              turno: selettoreTurno.value,
+              risposta: campo.value,
+            }),
           });
           const testo = await res.text();
           // Mostriamo il JSON così com'è arrivato dal server (verbatim dal modello).
