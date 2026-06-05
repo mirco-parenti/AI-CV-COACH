@@ -390,7 +390,67 @@ Risposta dell'utente:
 
 ### Analisi annuncio di lavoro
 
-Da definire.
+L'anello 2 prende il testo di un annuncio di lavoro e ne estrae una versione strutturata dei requisiti, da confrontare poi col profilo (anello 3) e da usare nella generazione (anello 4). Stesso DNA dei turni del profilo — output strutturato, compito ristretto, anti-invenzione — ma qui la fonte di verità è il **testo dell'annuncio**, non l'utente. Il rischio gemello del "gonfiamento" è aggiungere requisiti "tipici" non scritti: si estrae solo ciò che l'annuncio dichiara.
+
+Lo schema ha due zone: il **nucleo confrontabile** col profilo (competenze, esperienza e formazione richieste) — è ciò che rende possibile il match dell'anello 3 — e i **campi di contesto** (titolo, sede, contratto, mansioni, benefit), non confrontabili ma utili a chi cerca lavoro e alla generazione di CV e lettera.
+
+#### Schema JSON (vuoto)
+
+```json
+{
+  "competenze_richieste": [{ "testo": "", "priorita": "" }],
+  "esperienza_richiesta": [{ "testo": "", "priorita": "" }],
+  "formazione_richiesta": [{ "testo": "", "priorita": "" }],
+  "titolo": "",
+  "sede": "",
+  "contratto": { "tipo": "", "durata": "", "orario": "", "retribuzione": "" },
+  "mansioni": [],
+  "benefit": []
+}
+```
+
+#### Schema JSON (con voci di esempio)
+
+```json
+{
+  "competenze_richieste": [
+    { "testo": "uso del registratore di cassa", "priorita": "richiesto" },
+    { "testo": "inglese base", "priorita": "preferenziale" }
+  ],
+  "esperienza_richiesta": [
+    { "testo": "1 anno come cameriere", "priorita": "richiesto" }
+  ],
+  "formazione_richiesta": [
+    { "testo": "diploma alberghiero", "priorita": "preferenziale" }
+  ],
+  "titolo": "Cameriere di sala",
+  "sede": "Firenze, centro",
+  "contratto": { "tipo": "tempo determinato", "durata": "6 mesi", "orario": "full-time", "retribuzione": "" },
+  "mansioni": ["servizio ai tavoli", "preparazione della sala", "gestione della cassa"],
+  "benefit": ["pasto incluso", "due giorni di riposo a settimana"]
+}
+```
+
+#### Note sui campi
+
+- `competenze_richieste`, `esperienza_richiesta`, `formazione_richiesta` — liste di oggetti `{ testo, priorita }`. Sono il nucleo confrontabile col profilo (rispettivamente con `competenze`, `esperienze_formali`/`esperienze_informali`, `formazione`).
+- `priorita` — uno tra `richiesto` (l'annuncio dice indispensabile/richiesto), `preferenziale` (gradito/preferenziale/plus), `non specificata` (l'annuncio non lo qualifica). Si assegna **solo se esplicito**; in mancanza, `non specificata` (default sicuro).
+- `titolo` — il ruolo dell'annuncio (stringa).
+- `sede` — il luogo di lavoro (es. città, zona, "da remoto").
+- `contratto` — sotto-oggetto a campi opzionali (tipo, durata, orario, retribuzione); si riempie solo ciò che l'annuncio dichiara (es. la retribuzione spesso non è indicata → resta vuota).
+- `mansioni` — lista di stringhe: cosa si farà nel ruolo (diverso da cosa si deve possedere).
+- `benefit` — lista di stringhe: extra oltre la paga (buoni pasto, smart working, formazione, ecc.), distinti dai termini del `contratto`.
+
+#### Regole d'uso (anti-invenzione)
+
+1. **Solo ciò che è scritto**: nessun requisito, mansione o benefit "tipico" o "plausibile" va aggiunto se non presente nel testo dell'annuncio.
+2. **Priorità solo se esplicita**: `priorita` vale `richiesto`/`preferenziale` solo quando l'annuncio lo qualifica; altrimenti `non specificata`.
+3. **Campi mancanti vuoti**: stringa vuota o lista vuota, mai riempiti a indovinare.
+4. **Normalizzazione leggera**: si riordina e ripulisce restando aderenti alle parole dell'annuncio; niente parafrasi che aggiungono o tolgono significato.
+
+#### Prompt di analisi annuncio
+
+Da definire (prossimo passo).
 
 ### Confronto profilo-annuncio
 
