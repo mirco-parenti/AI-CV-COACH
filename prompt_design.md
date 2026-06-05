@@ -406,4 +406,30 @@ Da definire.
 
 ## Problemi e mitigazioni
 
-Da compilare durante lo sviluppo.
+Sintesi dei principali rischi (soprattutto anti-invenzione) incontrati e delle
+difese di design adottate. La narrazione completa — come sono emersi e perché ho
+scelto così — vive nel `diario_di_bordo.md`, ai passi indicati.
+
+**1. Gonfiamento delle competenze** — chiedere "che sai fare?" a freddo invita l'utente a vendersi.
+- *Mitigazione:* ancoraggio leggero + formulazione della domanda; il prompt estrae solo ciò che l'utente dichiara (niente dedotto); normalizzazione leggera, senza gergo professionale.
+- *Narrazione:* diario Step 1.2–1.4; note del turno `competenze`.
+
+**2. Promozione di esperienze informali a formali.**
+- *Mitigazione:* campo `esperienze_informali` dedicato + guardie incrociate nei prompt (ogni turno esclude l'altro tipo).
+- *Narrazione:* diario Step 1.1; regola schema 2.
+
+**3. Campi non detti riempiti a indovinare.**
+- *Mitigazione:* default sicuro — campo mancante = `(non specificata)`, mai inventato.
+- *Narrazione:* diario Step 1.2; regola trasversale 1.
+
+**4. Risposte non strutturabili o saltate dall'utente.**
+- *Mitigazione:* `pending_questions` — la domanda si accantona e si riprende in un secondo giro a fine dialogo *(pianificata, non ancora costruita)*.
+- *Narrazione:* diario apertura Fase 1.
+
+**5. Più voci raccontate in una sola risposta.**
+- *Mitigazione:* estrai-tutte (lista) + conferma in blocco.
+- *Narrazione:* diario Step 1.3 → 1.8; regola trasversale 4.
+
+**6. Scoring incoerente della "famiglia A"** *(anello 3, futuro)*.
+- *Mitigazione:* punteggio presentato come orientativo + farlo giustificare elencando i requisiti soddisfatti/non soddisfatti.
+- *Narrazione:* research_notes progetti 2–3; diario Step 0.5.
