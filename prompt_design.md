@@ -399,7 +399,7 @@ Lo schema ha due zone: il **nucleo confrontabile** col profilo (competenze, espe
 ```json
 {
   "competenze_richieste": [{ "testo": "", "priorita": "" }],
-  "esperienza_richiesta": [{ "testo": "", "priorita": "" }],
+  "esperienza_richiesta": [{ "testo": "", "priorita": "", "anni": "" }],
   "formazione_richiesta": [{ "testo": "", "priorita": "" }],
   "titolo": "",
   "sede": [],
@@ -418,7 +418,7 @@ Lo schema ha due zone: il **nucleo confrontabile** col profilo (competenze, espe
     { "testo": "inglese base", "priorita": "preferenziale" }
   ],
   "esperienza_richiesta": [
-    { "testo": "1 anno come cameriere", "priorita": "richiesto" }
+    { "testo": "1 anno come cameriere", "priorita": "richiesto", "anni": 1 }
   ],
   "formazione_richiesta": [
     { "testo": "diploma alberghiero", "priorita": "preferenziale" }
@@ -433,8 +433,9 @@ Lo schema ha due zone: il **nucleo confrontabile** col profilo (competenze, espe
 
 #### Note sui campi
 
-- `competenze_richieste`, `esperienza_richiesta`, `formazione_richiesta` — liste di oggetti `{ testo, priorita }`. Sono il nucleo confrontabile col profilo (rispettivamente con `competenze`, `esperienze_formali`/`esperienze_informali`, `formazione`).
-- `priorita` — uno tra `richiesto` (l'annuncio dice indispensabile/richiesto), `preferenziale` (gradito/preferenziale/plus), `non specificata` (l'annuncio non lo qualifica). Si assegna **solo se esplicito**; in mancanza, `non specificata` (default sicuro).
+- `competenze_richieste`, `esperienza_richiesta`, `formazione_richiesta` — liste di oggetti `{ testo, priorita }` (in `esperienza_richiesta` c'è anche `anni`). Sono il nucleo confrontabile col profilo (rispettivamente con `competenze`, `esperienze_formali`/`esperienze_informali`, `formazione`).
+- `priorita` — uno tra `richiesto` (l'annuncio dice indispensabile/richiesto), `preferenziale` (gradito/preferenziale/plus), `non specificata` (l'annuncio non lo qualifica). Si assegna **solo se esplicito**; in mancanza, `non specificata` (default sicuro). Per assegnarla, l'AI ragiona "a secchi" (parte obbligatoria vs preferenziale dell'annuncio), ma il dato resta per-voce — così gestiamo anche il terzo stato `non specificata`, che i due secchi non avrebbero dove mettere.
+- `anni` (solo in `esperienza_richiesta`) — il numero di anni richiesti, come intero, quando l'annuncio lo indica (es. "2 anni" → 2); vuoto se non c'è un numero. Il `testo` riporta sempre la frase per intero. Se l'annuncio non richiede esperienza, `esperienza_richiesta` contiene una sola voce con `testo`: "Nessuna esperienza richiesta".
 - `titolo` — il ruolo dell'annuncio (stringa).
 - `sede` — i luoghi di lavoro, come lista di stringhe (una voce per sede distinta; "da remoto" è una voce valida).
 - `contratto` — sotto-oggetto a campi opzionali (tipo, durata, orario, retribuzione); si riempie solo ciò che l'annuncio dichiara (es. la retribuzione spesso non è indicata → resta vuota).
@@ -455,25 +456,30 @@ Prompt inviato all'AI per strutturare un annuncio di lavoro nello schema qui sop
 ```
 Sei un assistente che struttura in formato JSON il testo di un annuncio di lavoro.
 Il tuo compito è ricavare dall'annuncio i requisiti e le informazioni, organizzandoli nello schema richiesto.
+Il prompt è diviso in sezioni numerate: ognuna è un compito a sé (in futuro ognuna potrà diventare un prompt separato).
 
-Nucleo confrontabile — distingui tre tipi di requisito, ognuno una lista di oggetti { "testo": ..., "priorita": ... }:
-- "competenze_richieste": abilità pratiche o trasversali che il candidato deve possedere (es. uso della cassa, lavoro in team).
-- "esperienza_richiesta": esperienze pregresse o anni di lavoro richiesti (es. "1 anno come cameriere", "esperienza nella ristorazione").
-- "formazione_richiesta": titoli di studio, qualifiche o corsi richiesti (es. diploma alberghiero, patentino HACCP).
+# 1 — NUCLEO CONFRONTABILE (i requisiti)
+Distingui tre tipi di requisito, ognuno una lista di oggetti:
+- "competenze_richieste": abilità pratiche o trasversali che il candidato deve possedere (es. uso della cassa, lavoro in team). Voci: { "testo", "priorita" }.
+- "esperienza_richiesta": esperienze pregresse o anni di lavoro richiesti (es. "1 anno come cameriere", "esperienza nella ristorazione"). Voci: { "testo", "priorita", "anni" }.
+- "formazione_richiesta": titoli di studio, qualifiche o corsi richiesti (es. diploma alberghiero, patentino HACCP). Voci: { "testo", "priorita" }.
+Campo "anni" (solo nell'esperienza): metti il numero di anni come intero quando l'annuncio lo indica (es. "almeno 2 anni" → 2); lascialo vuoto quando non c'è un numero. Il "testo" riporta sempre la frase per intero.
+Se l'annuncio dichiara che non serve esperienza, metti in "esperienza_richiesta" una sola voce con "testo": "Nessuna esperienza richiesta".
 
-Campi di contesto:
+# 2 — CAMPI DI CONTESTO
 - "titolo": il ruolo dell'annuncio.
 - "sede": i luoghi di lavoro, come lista di stringhe (una voce per sede distinta; "da remoto" è una voce valida).
 - "contratto": oggetto { "tipo", "durata", "orario", "retribuzione" }; riempi solo i campi che l'annuncio dichiara.
 - "mansioni": cosa si farà concretamente nel ruolo, come lista di stringhe.
 - "benefit": vantaggi offerti oltre la paga (buoni pasto, smart working, formazione, ecc.), come lista di stringhe.
 
-Priorità (campo "priorita" di ogni requisito):
-- "richiesto": l'annuncio lo qualifica come obbligatorio (parole come "richiesto", "indispensabile", "necessario", "obbligatorio", o perché elencato in una sezione di requisiti richiesti).
-- "preferenziale": l'annuncio lo qualifica come gradito ma non obbligatorio ("gradito", "preferibile", "preferenziale", "costituisce un plus / titolo preferenziale", o perché in una sezione di preferenze).
+# 3 — PRIORITÀ (campo "priorita" di ogni requisito)
+Ragiona "a secchi": molti annunci dividono i requisiti in una parte OBBLIGATORIA e una PREFERENZIALE. Sfrutta questa divisione per assegnare la priorità di ogni voce.
+- "richiesto": l'annuncio lo qualifica come obbligatorio (parole come "richiesto", "indispensabile", "necessario", "obbligatorio", o perché sta in una sezione di requisiti obbligatori/richiesti).
+- "preferenziale": l'annuncio lo qualifica come gradito ma non obbligatorio ("gradito", "preferibile", "preferenziale", "costituisce un plus / titolo preferenziale", o perché sta in una sezione di preferenze).
 - "non specificata": l'annuncio non lo qualifica in alcun modo. NON dedurre la priorità dall'importanza che il requisito sembra avere: usa solo segnali espliciti, di parola o di sezione.
 
-Regole generali:
+# 4 — REGOLE GENERALI (anti-invenzione)
 - Usa esclusivamente ciò che l'annuncio scrive. Non aggiungere requisiti, mansioni o benefit "tipici" o "plausibili" non presenti nel testo. Non inventare nulla.
 - Distingui mansioni e requisiti: ciò che si FARÀ va in "mansioni"; ciò che il candidato deve AVERE va nei tre requisiti. Non mettere lo stesso elemento in entrambi.
 - Non duplicare: ogni requisito va in una sola delle tre dimensioni, la più calzante.
@@ -483,10 +489,10 @@ Regole generali:
 - Se il testo non è un annuncio di lavoro, restituisci lo schema con tutti i campi vuoti.
 - Rispondi unicamente con il JSON richiesto, senza testo prima o dopo.
 
-Formato della risposta:
+# 5 — FORMATO DELLA RISPOSTA
 {
   "competenze_richieste": [{ "testo": "", "priorita": "" }],
-  "esperienza_richiesta": [{ "testo": "", "priorita": "" }],
+  "esperienza_richiesta": [{ "testo": "", "priorita": "", "anni": "" }],
   "formazione_richiesta": [{ "testo": "", "priorita": "" }],
   "titolo": "",
   "sede": [],
