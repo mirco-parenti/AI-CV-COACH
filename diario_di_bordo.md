@@ -480,3 +480,25 @@ Rispetto allo Step 1.7 ho tenuto un ritmo più stretto: invece di validare un bl
 💡 *Mia intuizione / scelta ragionata* — L'anello 1 (raccolta del profilo via dialogo) è il pezzo distintivo e raro del progetto, ed è il primo a diventare funzionante end-to-end. Tenere il ritmo "un turno alla volta, decido io" proprio su questo anello è stato giusto: è il cuore originale di AI-CV-COACH, il punto dove non valeva la pena delegare le scelte di forma.
 
 💡 *Mia intuizione / scelta ragionata* — Il riepilogo leggibile non è "il JSON vestito bene": è il confine tra il sistema e la persona. Il programma lavora in JSON perché gli serve preciso e confrontabile; l'utente vede il riepilogo perché gli serve comprensibile. Tenere le due forme separate è la stessa disciplina anti-invenzione di sempre — ogni cosa nel formato giusto per chi la usa.
+
+### Step 1.9 — Allineamento della documentazione e maturazione nell'uso di Claude Code
+
+*Step di consolidamento, senza nuove funzioni: ho riportato i prompt definitivi nel design e riordinato la documentazione. Il valore vero di questo passo, più che nel codice, sta nel modo in cui ho gestito Claude Code — e nel fatto che ormai lavoro quasi solo lì.*
+
+**Cosa ho fatto**
+Allineato `prompt_design.md` al codice già validato: portati i quattro prompt che vivevano solo in `server.js` dentro il documento di design, aggiornata la regola sui "più voci insieme" alla scelta presa allo Step 1.8 (estrai-tutte + conferma in blocco), e aggiunta la sezione "Problemi e mitigazioni" come elenco sintetico che rimanda al diario. Tutto su un branch dedicato, verificato e poi fuso in `main`.
+
+**Cosa ho imparato — il passaggio da Claude (chat) a Claude Code**
+All'inizio della Fase 1 avevo separato i ruoli: ragionare il design con Claude chat, poi costruire con Claude Code. In pratica i due ruoli si sono fusi: ormai progetto e implemento nello stesso posto, dentro Claude Code, che propone le scelte, mi fa le domande giuste e poi scrive. È più fluido — un filo solo invece di due — ma sposta tutto il peso del controllo su di me: devo leggere e approvare passo per passo, perché è sparita la "tappa di ragionamento" separata che prima faceva da filtro.
+
+**Dove ho faticato / cosa non era ovvio**
+Che Claude Code, se non lo sorvegli, "deriva". In questa sessione l'ho colto su due cose concrete: i messaggi di commit erano finiti in italiano invece che in inglese (la convenzione del mio repo) e portavano un co-autore "Claude" che non volevo. Le ho fatte correggere e ho fissato la regola. Lezione: delegare l'esecuzione non è delegare il controllo — e il controllo è reale solo quando becchi un errore vero, non quando fila tutto liscio.
+
+**Cosa ho deciso e perché**
+- Documentazione: `prompt_design.md` tiene i prompt **definitivi e aggiornati**, il diario tiene la **narrazione**; niente duplicati (i problemi già raccontati nel diario li ho solo richiamati nella nuova sezione, non riscritti).
+- Commit: d'ora in poi **titolo e descrizione in inglese, solo paternità mia**; quelli già pubblicati li lascio come sono (riscrivere storia già su GitHub non vale il disturbo).
+- Branch dedicato anche per sole modifiche di documentazione: stesso metodo degli step di codice, `main` resta sempre pubblicabile.
+
+💡 *Mia intuizione / scelta ragionata* — La fusione dei due "Claude" in uno solo non cambia il mio ruolo: resto il regista. Anzi, lo rende più impegnativo, perché senza la tappa intermedia di Claude chat sono io l'unico filtro tra la proposta e il codice. Lavorare bene con Claude Code è meno "fare domande" e più "saper verificare".
+
+💡 *Mia intuizione / scelta ragionata* — Far auto-verificare Claude Code (controlli automatici sui file, confronto prompt-codice carattere per carattere) è diventato parte del metodo: non mi fido di "fatto", chiedo la prova. È la versione operativa del "verifico con i miei occhi" dello Step 0.3.
