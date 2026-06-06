@@ -617,3 +617,24 @@ Allo Step 1.13 avevo introdotto `altri_requisiti` chiamandolo "non confrontabile
 L'estensione del profilo — una sezione per domicilio, patente, disponibilità, automunito, ecc., a specchio di `altri_requisiti` — la farò **nell'anello 3 (match)**, quando servirà davvero per il confronto. Da fare con la solita anti-invenzione e con un occhio alla sensibilità dei dati personali (domicilio, età).
 
 💡 *Mia intuizione / scelta ragionata* — "Non confrontabile" non era una proprietà dell'annuncio, era una mancanza del mio profilo. Distinguere "il dato non è matchabile" da "non ho ancora dove confrontarlo" evita di chiudere porte che sono solo da aprire più avanti.
+
+### Step 1.15 — Avvio anello 3: il match semantico lo fa l'LLM, non una tassonomia
+
+*Aperto il terzo anello (confronto profilo↔annuncio + punteggio). La prima decisione di fondo: come gestire il "stessa competenza, parole diverse".*
+
+**Cosa ho deciso e perché**
+Il match deve risolvere il problema "stessa competenza, parole diverse" ("me la cavo alla cassa" deve combaciare con "uso del registratore di cassa"). Avevo in tasca il **taxonomy mapping** (mappare le skill su una tassonomia standard ESCO/O*NET). Ma ho deciso di **delegare il matching semantico all'LLM** invece di integrare una tassonomia esterna, per tre motivi:
+- l'LLM **capisce il contesto e qualunque fraseggio**, incluso il linguaggio informale dei nostri utenti, dove una tassonomia "professionale" arranca;
+- una tassonomia/embedding è **rigida** (limitata dalla sua copertura);
+- integrarla davvero sarebbe un **detour fuori dal nostro stack** (Node + Claude; ESCO/O*NET è roba Python/ML/dati), per giunta in parte usa-e-getta verso VB.NET.
+La tassonomia formale resta un **raffinamento futuro** (categorie standardizzate, utili per statistiche su grandi volumi, non per il singolo match).
+
+**Cosa ho imparato**
+Che a volte la soluzione "più semplice" è anche **più affidabile** per il nostro caso: delegare la comprensione all'LLM batte una lista di embedding preimpostata, perché si adatta. Con un'accortezza: l'LLM può **sovra-matchare** (giudicare equivalenti cose che non lo sono). Per questo l'anti-invenzione vale anche nel match — l'LLM deve **giustificare** ogni giudizio, con granularità *soddisfatto / in parte / non soddisfatto*, ancorato al testo reale del profilo; e il punteggio resta **orientativo** (famiglia A, scelta dello Step 0.5).
+
+**Cosa ho fatto**
+Registrata la decisione nella sezione "Confronto profilo-annuncio" di `prompt_design.md` e aggiornata la nota di memoria sul taxonomy mapping. Scopo MVP: confronto sulle tre dimensioni confrontabili (competenze, esperienza, formazione); `altri_requisiti` (richiede l'estensione del profilo) e la tassonomia formale rimandati. Il prompt di confronto e il calcolo del punteggio sono il prossimo passo.
+
+💡 *Mia intuizione / scelta ragionata* — Non confondere lo strumento con l'obiettivo. L'obiettivo era "match robusto sui sinonimi", non "usare ESCO/O*NET". Visto che l'LLM raggiunge l'obiettivo da solo, la tassonomia esterna diventa un costo senza un beneficio che oggi mi serve.
+
+💡 *Mia intuizione / scelta ragionata* — L'anti-invenzione non riguarda solo l'estrazione: vale anche nel match. Un LLM che "decide" che due cose combaciano può inventare un'equivalenza che non c'è. Per questo gli chiederò di giustificare ogni giudizio e lo ancorerò al testo del profilo: anche *giudicare*, non solo estrarre, deve restare fedele ai fatti.

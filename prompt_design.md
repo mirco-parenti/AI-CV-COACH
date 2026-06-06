@@ -522,7 +522,15 @@ qui il programma inserirà il testo dell'annuncio
 
 ### Confronto profilo-annuncio
 
-Da definire.
+L'anello 3 confronta il profilo (anello 1) con l'annuncio strutturato (anello 2) e produce un **punteggio di match orientativo**, giustificato.
+
+**Approccio (deciso): matching semantico delegato all'LLM.** Per ogni requisito dell'annuncio è l'LLM a giudicare se il profilo lo soddisfa, riconoscendo da sé le equivalenze ("me la cavo alla cassa" soddisfa "uso del registratore di cassa") — senza una tassonomia/embedding esterna. Scelto rispetto all'integrazione ESCO/O*NET perché l'LLM è più flessibile e copre anche il linguaggio informale dei nostri utenti, e perché una tassonomia esterna sarebbe un detour fuori dal nostro stack (Node + Claude). La tassonomia formale (ESCO/O*NET, categorie standardizzate) resta un raffinamento futuro, utile per analisi su grandi volumi, non per il singolo match.
+
+**Anti-allucinazione anche nel match** (gli stessi anticorpi dell'estrazione): l'LLM deve **giustificare** ogni giudizio; granularità a tre stati (**soddisfatto / in parte / non soddisfatto**); ancorato al testo reale del profilo (non inventare competenze che il candidato non ha); il punteggio è **orientativo** (famiglia A — è l'LLM a dare il voto, scelta dello Step 0.5).
+
+**Scopo MVP:** confronto sulle tre dimensioni confrontabili (competenze, esperienza, formazione). `altri_requisiti` è confrontabile ma richiede prima l'estensione del profilo (rimandato). Il taxonomy mapping formale è rimandato (vedi sopra).
+
+*Dettaglio del prompt di confronto e del calcolo del punteggio: in definizione.*
 
 ### Generazione CV mirato
 
