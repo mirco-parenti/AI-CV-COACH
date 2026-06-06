@@ -392,7 +392,7 @@ Risposta dell'utente:
 
 L'anello 2 prende il testo di un annuncio di lavoro e ne estrae una versione strutturata dei requisiti, da confrontare poi col profilo (anello 3) e da usare nella generazione (anello 4). Stesso DNA dei turni del profilo — output strutturato, compito ristretto, anti-invenzione — ma qui la fonte di verità è il **testo dell'annuncio**, non l'utente. Il rischio gemello del "gonfiamento" è aggiungere requisiti "tipici" non scritti: si estrae solo ciò che l'annuncio dichiara.
 
-Lo schema ha tre gruppi: il **nucleo confrontabile** col profilo (competenze, esperienza e formazione richieste) — è ciò che rende possibile il match dell'anello 3 —; gli **altri requisiti** non confrontabili (`altri_requisiti`: domicilio, disponibilità, patente, ecc.); e i **campi di contesto** (titolo, sede, contratto, mansioni, benefit), utili a chi cerca lavoro e alla generazione di CV e lettera.
+Lo schema ha tre gruppi: il **nucleo confrontabile** col profilo (competenze, esperienza e formazione richieste) — è ciò che rende possibile il match dell'anello 3 —; gli **altri requisiti** (`altri_requisiti`: domicilio, disponibilità, patente, ecc.), anch'essi confrontabili col candidato ma per i quali il profilo va ancora esteso (anello 3); e i **campi di contesto** (titolo, sede, contratto, mansioni, benefit), utili a chi cerca lavoro e alla generazione di CV e lettera.
 
 #### Schema JSON (vuoto)
 
@@ -440,7 +440,7 @@ Lo schema ha tre gruppi: il **nucleo confrontabile** col profilo (competenze, es
 - `competenze_richieste`, `esperienza_richiesta`, `formazione_richiesta` — liste di oggetti `{ testo, priorita }` (in `esperienza_richiesta` c'è anche `anni`). Sono il nucleo confrontabile col profilo (rispettivamente con `competenze`, `esperienze_formali`/`esperienze_informali`, `formazione`).
 - `priorita` — uno tra `richiesto`, `preferenziale`, `non specificata`. Si assegna **comprendendo il senso** dell'annuncio, non solo le parole: se è palese che un requisito è obbligatorio (es. "con esperienza", un titolo di studio indicato) → `richiesto`; se è un desiderio o c'è un attenuante esplicito ("gradito", "esperienza anche minima") → `preferenziale`; solo se davvero non si capisce → `non specificata`. Il dato resta **per-voce** (non a due secchi), così gestiamo anche il terzo stato che i due secchi non avrebbero dove mettere.
 - `anni` (solo in `esperienza_richiesta`) — il numero di anni richiesti, come intero, quando l'annuncio lo indica (es. "2 anni" → 2); vuoto se non c'è un numero. Il `testo` riporta sempre la frase per intero. Se l'annuncio non richiede esperienza, `esperienza_richiesta` contiene una sola voce con `testo`: "Nessuna esperienza richiesta".
-- `altri_requisiti` — lista di `{ testo, priorita }` per i requisiti che NON sono competenze, esperienza o formazione (es. domicilio/residenza, disponibilità a turni/weekend/trasferte, patente, automunito, età minima, iscrizione a un albo, idoneità). NON confrontabile col profilo: serve come informazione, non per il match.
+- `altri_requisiti` — lista di `{ testo, priorita }` per i requisiti che NON sono competenze, esperienza o formazione (es. domicilio/residenza, disponibilità a turni/weekend/trasferte, patente, automunito, età minima, iscrizione a un albo, idoneità). Confrontabile col candidato, ma richiede che il profilo venga esteso per catturare questi dati (da fare nell'anello 3, a specchio di questo campo).
 - `titolo` — il ruolo dell'annuncio (stringa).
 - `sede` — i luoghi di lavoro, come lista di stringhe (una voce per sede distinta; "da remoto" è una voce valida).
 - `contratto` — sotto-oggetto a campi opzionali (tipo, durata, orario, retribuzione); si riempie solo ciò che l'annuncio dichiara (es. la retribuzione spesso non è indicata → resta vuota).
@@ -471,7 +471,7 @@ Distingui quattro tipi di requisito, ognuno una lista di oggetti. I primi tre so
 - "competenze_richieste": abilità pratiche o trasversali che il candidato deve possedere (es. uso della cassa, lavoro in team). Voci: { "testo", "priorita" }.
 - "esperienza_richiesta": esperienze pregresse o anni di lavoro richiesti (es. "1 anno come cameriere", "esperienza nella ristorazione"). Voci: { "testo", "priorita", "anni" }.
 - "formazione_richiesta": titoli di studio, qualifiche o corsi richiesti (es. diploma alberghiero, patentino HACCP). Voci: { "testo", "priorita" }.
-Il quarto NON si confronta col profilo:
+Il quarto è confrontabile col candidato, ma richiede che il profilo venga esteso per catturare questi dati:
 - "altri_requisiti": requisiti che il candidato deve soddisfare ma che NON sono competenze, esperienza o formazione. Esempi: domicilio/residenza in una certa zona; disponibilità (a turni, weekend, trasferte, reperibilità); patente di guida (es. patente B); automunito; età minima; iscrizione a un albo professionale; idoneità/visita medica. Voci: { "testo", "priorita" }. NON metterci competenze, esperienza o formazione: quelle vanno nelle loro liste.
 Campo "anni" (solo nell'esperienza): metti il numero di anni come intero quando l'annuncio lo indica (es. "almeno 2 anni" → 2); lascialo vuoto quando non c'è un numero. Il "testo" riporta sempre la frase per intero.
 Se l'annuncio dichiara che non serve esperienza, metti in "esperienza_richiesta" una sola voce con "testo": "Nessuna esperienza richiesta".

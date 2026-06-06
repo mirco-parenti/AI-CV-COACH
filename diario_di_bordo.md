@@ -605,3 +605,15 @@ Il secondo problema non l'avevo notato a occhio: l'ho trovato applicando il **ri
 💡 *Mia intuizione / scelta ragionata* — Gli annunci veri sono una miniera di casi limite che a tavolino non immagini (un "plus" fuori posto, un domicilio tra i requisiti). Ogni annuncio nuovo affina la regola: la qualità del prompt si costruisce sul campo, un caso alla volta.
 
 💡 *Mia intuizione / scelta ragionata* — "Comprendere il senso oltre il testo" e "verificare anche testualmente" non si contraddicono: vanno insieme. Leggo il significato (PROFIS è un plus → facoltativo) e insieme controllo che nessuna parola dell'annuncio sia andata persa (il domicilio). Senso e letteralità, non l'uno o l'altro.
+
+### Step 1.14 — `altri_requisiti` è confrontabile: relabel e profilo da estendere
+
+*Ripensandoci: i requisiti di `altri_requisiti` (domicilio, patente, disponibilità…) sono eccome confrontabili col candidato. L'avevo etichettato "non confrontabile" troppo in fretta — il limite è il profilo, non l'annuncio.*
+
+**Cosa ho deciso e perché**
+Allo Step 1.13 avevo introdotto `altri_requisiti` chiamandolo "non confrontabile col profilo". Era una semplificazione sbagliata: domicilio, patente, automunito, disponibilità sono spesso paletti veri ed è esattamente ciò che vuoi confrontare col candidato ("automunito richiesto" → ce l'ha?). Il vero limite non è l'annuncio, ma il **profilo**, che oggi non cattura questi dati. Ho quindi rietichettato `altri_requisiti` come **confrontabile** (in `prompt_design.md` e `server.js`, tenuti in sync), con la nota che il profilo va esteso per supportarlo. L'estrazione non cambia: cambia il significato che gli diamo.
+
+**Cosa rimando (e perché)**
+L'estensione del profilo — una sezione per domicilio, patente, disponibilità, automunito, ecc., a specchio di `altri_requisiti` — la farò **nell'anello 3 (match)**, quando servirà davvero per il confronto. Da fare con la solita anti-invenzione e con un occhio alla sensibilità dei dati personali (domicilio, età).
+
+💡 *Mia intuizione / scelta ragionata* — "Non confrontabile" non era una proprietà dell'annuncio, era una mancanza del mio profilo. Distinguere "il dato non è matchabile" da "non ho ancora dove confrontarlo" evita di chiudere porte che sono solo da aprire più avanti.

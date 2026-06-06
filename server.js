@@ -153,7 +153,7 @@ Distingui quattro tipi di requisito, ognuno una lista di oggetti. I primi tre so
 - "competenze_richieste": abilità pratiche o trasversali che il candidato deve possedere (es. uso della cassa, lavoro in team). Voci: { "testo", "priorita" }.
 - "esperienza_richiesta": esperienze pregresse o anni di lavoro richiesti (es. "1 anno come cameriere", "esperienza nella ristorazione"). Voci: { "testo", "priorita", "anni" }.
 - "formazione_richiesta": titoli di studio, qualifiche o corsi richiesti (es. diploma alberghiero, patentino HACCP). Voci: { "testo", "priorita" }.
-Il quarto NON si confronta col profilo:
+Il quarto è confrontabile col candidato, ma richiede che il profilo venga esteso per catturare questi dati:
 - "altri_requisiti": requisiti che il candidato deve soddisfare ma che NON sono competenze, esperienza o formazione. Esempi: domicilio/residenza in una certa zona; disponibilità (a turni, weekend, trasferte, reperibilità); patente di guida (es. patente B); automunito; età minima; iscrizione a un albo professionale; idoneità/visita medica. Voci: { "testo", "priorita" }. NON metterci competenze, esperienza o formazione: quelle vanno nelle loro liste.
 Campo "anni" (solo nell'esperienza): metti il numero di anni come intero quando l'annuncio lo indica (es. "almeno 2 anni" → 2); lascialo vuoto quando non c'è un numero. Il "testo" riporta sempre la frase per intero.
 Se l'annuncio dichiara che non serve esperienza, metti in "esperienza_richiesta" una sola voce con "testo": "Nessuna esperienza richiesta".
