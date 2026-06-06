@@ -667,3 +667,30 @@ Il **prompt del Giro 1** e lo **schema di output** sono ora scritti in `prompt_d
 💡 *Mia intuizione / scelta ragionata* — Il quarto esito `non determinabile` (escluso dal conteggio) è anti-invenzione allo stato puro: di fronte a ciò che il profilo non dice, o a ciò che non è "soddisfacibile" (un benefit, una clausola di contratto), la risposta onesta è "non si sa" — e una cosa che non si sa non deve né premiare né punire il punteggio. Forzare un sì/no lì sarebbe inventare. Così il contesto può entrare nel voto senza sporcarlo di verdetti finti.
 
 💡 *Mia intuizione / scelta ragionata* — Un peso fisso per i requisiti `non specificata` (il "3 piatto") buttava via ciò che l'LLM sa già fare: capire che, per un cuoco, un "HACCP" buttato lì conta e un "Photoshop" buttato lì no. Mirco ha posto la condizione giusta: il 3 non è una scorciatoia — l'LLM deve prima *ragionare sull'intenzione* della frase (non fermarsi al testo), e solo se davvero non la coglie ripiega su "media". È di nuovo la nostra bussola: in estrazione si resta fedeli al testo, ma nel match si comprende il senso — e qui pesare un requisito ambiguo È comprendere il senso.
+
+### Step 1.17 — Anello 3 in funzione: cablaggio, validazione sul campo e voto in stelle
+
+*L'anello 3 smette di essere progetto su carta: lo cablo in `server.js`, lo provo su 9 combinazioni reali, e i test mi costringono a sistemare il punteggio. Alla fine il match diventa un voto in stelle.*
+
+**Cosa ho fatto**
+- Cablato il confronto in `server.js`: nuovo endpoint `POST /confronta` (due input: profilo + annuncio), il prompt del Giro 1 in sync col `prompt_design`, il Giro 2 (`calcolaMatch`) col calcolo deterministico, e la pagina `test-confronto.html`.
+- Validato sul campo: 9 combinazioni (3 profili × 3 annunci) estratti dalle pipeline 1 e 2.
+- Aggiunto il **passo finale**: il `finale` (0–100) diventa un voto in **stelle 0–5** (un decimale) — il match definitivo.
+
+**Dove ho faticato / cosa il test ha rotto**
+Il primo giro di validazione ha mostrato un punteggio **bimodale**: `score_base` o ~96 o 0, mai in mezzo, e tutti i match positivi appiattiti a ~76. Un profilo debole (Anna su un entry-level) prendeva **76 come** un magazziniere perfetto. Causa, trovata ispezionando i giudizi: l'LLM marcava le **lacune** del profilo come `non determinabile` (escluse dal conteggio) invece che `non soddisfatto` → le mancanze sparivano e la base si gonfiava.
+
+**Cosa ho deciso e perché**
+- **Confine `non soddisfatto` / `non determinabile` per-dimensione.** `non determinabile` = «non avevo modo di saperlo» (altri_requisiti non ancora raccolti, contesto lato-offerta, requisito dichiarato assente), NON «non l'ha detto». Una competenza/esperienza/formazione non dichiarata — dimensioni che raccogliamo apposta nel dialogo — è `non soddisfatto`. Ri-test: discriminazione tornata (Anna×entry 76 → 51).
+- **Sentinel "Nessuna esperienza richiesta" escluso nel codice** (deterministico): l'LLM lo neutralizzava a intermittenza (una volta sì, una no). Spostato in `calcolaMatch` — non è un requisito da soddisfare. Anna×entry 51 → 15.
+- **Clamp tenuto a −20/+10.** L'avevo messo in dubbio, ma sui dati post-fix fa il suo lavoro: àncora la base (ora onesta) e lascia all'AI un nudge bilanciato. I due casi in cui scatta tirano in direzioni opposte e vengono frenati bene (Giulia tenuta su a 72, Anna tenuta giù a 15); allargarlo peggiorerebbe uno dei due.
+- **`altri_requisiti richiesto` → `non determinabile` è corretto, non un difetto.** La patente B di Marco non era ricavabile dai dati raccolti: tenerla `non determinabile` è l'anti-invenzione che volevamo (l'AI resta cauta sui match forti, e va bene). Estendere il profilo è un miglioramento futuro, non la toppa a un bug.
+
+**Esito**
+Colonna entry da `[76, 78, 76]` (piatta) a **`[3.6, 3.1, 0.8]`** stelle: buon fit > sovraqualificato-fuori-ruolo > debole. Mismatch a 0.3. Il sistema ora distingue la **qualità** del match, non solo match/non-match.
+
+💡 *Mia intuizione / scelta ragionata* — "Prima il test, poi la valutazione." Far girare il sistema su casi veri ha trovato in cinque minuti un difetto che a tavolino non avevo visto: la base che satura. Nessuna quantità di ragionamento sostituisce un dato reale che ti contraddice.
+
+💡 *Mia intuizione / scelta ragionata* — `non determinabile` faceva due lavori opposti ("non ho modo di saperlo" e "non l'ha detto") travestiti da uno. Separarli ha sbloccato tutto. Certi bug non sono nel codice ma in un concetto che porta due significati sotto la stessa etichetta.
+
+💡 *Mia intuizione / scelta ragionata* — Avevo puntato il dito sul clamp; il colpevole era la base. I dati hanno detto "il clamp va bene", e gli ho creduto invece di toccarlo per forza. Rivedere non vuol dire per forza cambiare.

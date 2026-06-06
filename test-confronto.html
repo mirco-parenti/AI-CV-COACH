@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test confronto profilo ↔ annuncio (anello 3)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 1000px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    h1 { font-size: 1.4rem; }
+    .due { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .due > div { flex: 1; min-width: 320px; }
+    textarea { width: 100%; height: 320px; font-family: ui-monospace, monospace; font-size: 0.8rem; box-sizing: border-box; }
+    button { margin-top: 1rem; padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: wait; }
+    .punteggio { margin-top: 1.5rem; padding: 1rem; background: #f4f6f8; border-radius: 8px; }
+    .match { font-size: 2.2rem; font-weight: 700; }
+    .dettagli { color: #555; font-size: 0.9rem; }
+    .nota { margin-top: 0.5rem; padding: 0.6rem; background: #fff3cd; border-radius: 6px; font-size: 0.9rem; }
+    .lettura { margin-top: 0.8rem; font-style: italic; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.85rem; }
+    th, td { border: 1px solid #ddd; padding: 0.4rem 0.5rem; text-align: left; vertical-align: top; }
+    th { background: #eef1f4; }
+    .esito-soddisfatto { color: #1a7f37; font-weight: 600; }
+    .esito-in.parte { color: #9a6700; font-weight: 600; }
+    .esito-non.soddisfatto { color: #cf222e; font-weight: 600; }
+    .esito-non.determinabile { color: #888; font-style: italic; }
+    .errore { color: #cf222e; margin-top: 1rem; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Test confronto profilo ↔ annuncio (anello 3)</h1>
+  <p>Due input: il <strong>profilo</strong> (output anello 1) e l'<strong>annuncio</strong> (output anello 2), entrambi JSON già strutturati. Il server fa il Giro 1 (LLM) poi il Giro 2 (codice).</p>
+
+  <div class="due">
+    <div>
+      <label><strong>Profilo (JSON)</strong></label>
+      <textarea id="profilo"></textarea>
+    </div>
+    <div>
+      <label><strong>Annuncio (JSON)</strong></label>
+      <textarea id="annuncio"></textarea>
+    </div>
+  </div>
+
+  <button id="vai">Confronta</button>
+
+  <div id="risultato"></div>
+
+  <script>
+    // Esempio precaricato (cameriere) per provare subito.
+    const ESEMPIO_PROFILO = {
+      nome: "Luca Rossi",
+      esperienze_formali: [
+        { ruolo: "cameriere", azienda: "Bar Centrale", durata: "1 anno", cosa_facevo: "servizio ai tavoli e gestione della cassa" }
+      ],
+      esperienze_informali: [
+        { cosa_facevo: "aiutavo in cucina alle feste di paese", quando: "estati 2019-2021", con_chi: "pro loco" }
+      ],
+      competenze: ["uso della cassa", "lavoro in team", "servizio ai tavoli"],
+      formazione: [
+        { titolo: "Diploma alberghiero", istituto: "IPSSAR", anno: "2018" }
+      ]
+    };
+
+    const ESEMPIO_ANNUNCIO = {
+      competenze_richieste: [
+        { testo: "uso della cassa", priorita: "richiesto" },
+        { testo: "conoscenza dei vini", priorita: "preferenziale" },
+        { testo: "inglese", priorita: "non specificata" }
+      ],
+      esperienza_richiesta: [
+        { testo: "esperienza come cameriere", priorita: "richiesto", anni: "1" }
+      ],
+      formazione_richiesta: [
+        { testo: "diploma alberghiero", priorita: "preferenziale" }
+      ],
+      altri_requisiti: [
+        { testo: "automunito", priorita: "richiesto" }
+      ],
+      titolo: "Cameriere di sala",
+      sede: ["Milano"],
+      contratto: { tipo: "tempo determinato", durata: "6 mesi", orario: "full-time", retribuzione: "" },
+      mansioni: ["servizio ai tavoli", "accoglienza clienti"],
+      benefit: ["buoni pasto"]
+    };
+
+    const elProfilo = document.getElementById("profilo");
+    const elAnnuncio = document.getElementById("annuncio");
+    const elRisultato = document.getElementById("risultato");
+    const btn = document.getElementById("vai");
+
+    elProfilo.value = JSON.stringify(ESEMPIO_PROFILO, null, 2);
+    elAnnuncio.value = JSON.stringify(ESEMPIO_ANNUNCIO, null, 2);
+
+    btn.addEventListener("click", async () => {
+      elRisultato.innerHTML = "";
+      let profilo, annuncio;
+      try {
+        profilo = JSON.parse(elProfilo.value);
+      } catch {
+        mostraErrore("Il JSON del profilo non è valido.");
+        return;
+      }
+      try {
+        annuncio = JSON.parse(elAnnuncio.value);
+      } catch {
+        mostraErrore("Il JSON dell'annuncio non è valido.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Sto confrontando…";
+      try {
+        const res = await fetch("http://localhost:3000/confronta", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ profilo, annuncio })
+        });
+        const dati = await res.json();
+        if (!res.ok) {
+          mostraErrore("Errore dal server:\n" + JSON.stringify(dati, null, 2));
+          return;
+        }
+        mostraRisultato(dati);
+      } catch (err) {
+        mostraErrore("Impossibile contattare il server (è avviato su localhost:3000?).\n" + err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Confronta";
+      }
+    });
+
+    function mostraErrore(msg) {
+      elRisultato.innerHTML = '<div class="errore"></div>';
+      elRisultato.querySelector(".errore").textContent = msg;
+    }
+
+    function mostraRisultato(d) {
+      const stelle = (d.stelle ?? null);
+      let html = '<div class="punteggio">';
+      html += '<div class="match">' + (stelle != null ? "★ " + stelle.toFixed(1) + " / 5" : "—") + "</div>";
+      html += '<div class="dettagli">match ' + (d.match_finale ?? "—") + "/100 · conteggio " + (d.score_base ?? "—") +
+              " · numero dell'AI " + (d.numero_llm ?? "—") + "</div>";
+      if (d.nota) html += '<div class="nota">' + escapeHtml(d.nota) + "</div>";
+      if (d.lettura_insieme) html += '<div class="lettura">' + escapeHtml(d.lettura_insieme) + "</div>";
+      html += "</div>";
+
+      html += "<table><thead><tr>" +
+              "<th>Requisito</th><th>Categoria</th><th>Priorità</th><th>Importanza</th><th>Esito</th><th>Spiegazione</th>" +
+              "</tr></thead><tbody>";
+      for (const g of d.giudizi || []) {
+        const cl = "esito-" + (g.esito || "").replace(/\s+/g, ".");
+        html += "<tr>" +
+          "<td>" + escapeHtml(g.requisito) + "</td>" +
+          "<td>" + escapeHtml(g.categoria) + "</td>" +
+          "<td>" + escapeHtml(g.priorita) + "</td>" +
+          "<td>" + escapeHtml(g.importanza) + "</td>" +
+          '<td class="' + cl + '">' + escapeHtml(g.esito) + "</td>" +
+          "<td>" + escapeHtml(g.spiegazione) + "</td>" +
+          "</tr>";
+      }
+      html += "</tbody></table>";
+      elRisultato.innerHTML = html;
+    }
+
+    function escapeHtml(x) {
+      return String(x ?? "").replace(/[&<>"]/g, (c) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    }
+  </script>
+</body>
+</html>

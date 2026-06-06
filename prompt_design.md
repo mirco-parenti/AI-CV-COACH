@@ -542,14 +542,21 @@ L'anello 3 confronta il profilo (anello 1) con l'annuncio strutturato (anello 2)
 
 **Anti-allucinazione anche nel match** (gli stessi anticorpi dell'estrazione): ogni giudizio **giustificato** e **ancorato al testo reale** del profilo (non inventare competenze che il candidato non ha); granularità a quattro stati (incluso `non determinabile` per ciò che non si può dire); punteggio **orientativo** (famiglia A — l'LLM dà il voto, il codice lo rende consistente).
 
+**Confine `non soddisfatto` / `non determinabile` (cruciale per il punteggio).** `non determinabile` (escluso dal conteggio) vuol dire «non avevo modo di saperlo», **non** «il candidato non l'ha detto». Vale solo per: `altri_requisiti` (dati che il profilo non raccoglie ancora), contesto lato-offerta (benefit, contratto), o un requisito dichiarato assente ("Nessuna esperienza richiesta"). Una **competenza/esperienza/formazione** non dichiarata dal candidato — dimensioni che raccogliamo apposta nel dialogo — è invece **`non soddisfatto`** (lacuna reale, conta 0): registrare un'assenza non è invenzione. *Senza questo confine lo `score_base` satura (le lacune sparivano dal conto come `non determinabile`); validato sul campo con le 9 combinazioni di simulazione.*
+
 **Formula del punteggio (Giro 2, nel codice).** Punti per esito: `soddisfatto = 1` · `in parte = 0.5` · `non soddisfatto = 0`. L'esito `non determinabile` è **escluso dal conteggio** (non entra né a numeratore né a denominatore). Peso per voce: nel **nucleo** conta la priorità — `richiesto = 5` · `preferenziale = 1`; per le voci `non specificata` il peso lo dà l'**importanza stimata dall'LLM** (`alta = 5` · `media = 3` · `bassa = 1`), con il `3` come **fallback** solo quando l'intenzione è davvero ambigua. Ogni voce di **contesto** pesa `0.2` (1/5 di un preferenziale, sempre sotto il nucleo).
 
 ```
-score_base = 100 × Σ(punti · peso) / Σ(peso)    // solo voci con esito determinato; peso = priorità (nucleo) o 0.2 (contesto)
+score_base = 100 × Σ(punti · peso) / Σ(peso)    // escluse: 'non determinabile' e il sentinel "Nessuna esperienza richiesta"
 delta      = numero_LLM − score_base             // quanto l'LLM dissente, con segno
 corr       = clamp(delta, −20, +10)              // asimmetrico: anti-invenzione (in dubbio non gonfiare)
 finale     = round(score_base + corr)            // bloccato in [0, 100]
+stelle     = round(finale / 20, 1 decimale)      // PASSO FINALE: il match definitivo, 0–5 stelle
 ```
+
+- **`stelle` è il voto definitivo** (0–5, un decimale): è la conversione del `finale` (0–100) ÷ 20. Tutto il resto (`score_base`, `numero_llm`, `finale`) è il "dietro le quinte" del calcolo.
+- **Sentinel "Nessuna esperienza richiesta" escluso dal conteggio** (deterministico, nel codice): è una voce che dichiara l'*assenza* di un requisito, non un requisito da soddisfare; lasciarla la rendeva un falso positivo che gonfiava la base.
+- **Bound del clamp (`−20 / +10`) tarati sui dati di simulazione** e rivedibili (costanti nominate nel codice).
 
 - **Asimmetria −20 / +10:** l'LLM può *abbassare* fino a 20 punti (cogliere un deal-breaker) ma *alzare* solo fino a 10 (non gonfiare il match).
 - **Nota di scarto legata al clamp:** quando il clamp taglia (l'LLM voleva spostare più del consentito) c'è un dissenso forte → si mostra la nota, es. *"il conteggio darebbe 75, ma manca un requisito potenzialmente decisivo (patente C): match 55."*
@@ -578,9 +585,10 @@ Riconosci le equivalenze di significato, anche nel linguaggio informale ("me la 
 Assegna uno di questi quattro esiti:
 - soddisfatto: il profilo copre chiaramente la voce.
 - in parte: la copre solo parzialmente, o in modo affine ma non pieno.
-- non soddisfatto: dai dati del profilo si capisce che NON la copre.
-- non determinabile: non c'è base nel profilo per dirlo (dato assente), oppure la voce non è qualcosa che il candidato "soddisfa" (es. un benefit offerto, le condizioni del contratto). Nel dubbio fra "non soddisfatto" e "non determinabile", scegli non determinabile: meglio "non si sa" che inventare un verdetto.
-Giustifica ogni esito in una frase, ancorata a ciò che il profilo dice (o non dice). Non attribuire al candidato competenze, esperienze o dati che non ha dichiarato.
+- non soddisfatto: il profilo NON la copre. Per competenze, esperienza e formazione — che raccogliamo apposta nel dialogo col candidato — se, dopo aver cercato equivalenze su TUTTO il profilo, non c'è traccia della voce, è non soddisfatto: è una lacuna reale, non un dubbio.
+- non determinabile (NON entra nel conteggio): usalo SOLO quando non hai alcun modo di valutare la voce: (a) altri_requisiti (domicilio, patente, disponibilità: dati che il profilo non raccoglie ancora); (b) contesto lato-offerta che il candidato non "soddisfa" (benefit, condizioni di contratto); (c) quando l'annuncio dichiara l'ASSENZA di un requisito (es. "Nessuna esperienza richiesta": non c'è nulla da soddisfare).
+DISTINZIONE CHIAVE: "non determinabile" significa «non avevo modo di saperlo», NON «il candidato non l'ha detto». Una competenza/esperienza/formazione che il candidato semplicemente non ha dichiarato è non soddisfatto, mai non determinabile.
+Giustifica ogni esito in una frase, ancorata a ciò che il profilo dice (o non dice). Non attribuire al candidato competenze, esperienze o dati che non ha dichiarato: questo sarebbe inventare; registrare un'assenza come non soddisfatto è invece corretto.
 
 Per le voci con priorità "non specificata" (l'annuncio le ha elencate senza dire se obbligatorie o gradite) fai un passo in più: stima quanto contano DAVVERO per questo ruolo e mettilo in "importanza". Non fermarti al testo: RAGIONA sull'intenzione della frase nel contesto dell'annuncio e del mestiere. Chiediti — per QUESTO lavoro, è un requisito che il datore dà per scontato, o un di più marginale? (Per un cuoco: "HACCP" buttato lì conta molto; "Photoshop" buttato lì conta poco.)
 - alta: chiaramente un requisito atteso per il ruolo.

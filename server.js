@@ -26,6 +26,9 @@ const MODEL = "claude-haiku-4-5";
 // frammenti del profilo. Per i turni del profilo è solo headroom: il modello
 // produce poco e si ferma da sé.
 const MAX_TOKENS = 1500;
+// Il confronto (anello 3) produce una lista di giudizi voce-per-voce + lettura
+// d'insieme: serve più spazio dei singoli frammenti.
+const MAX_TOKENS_CONFRONTO = 4000;
 
 // Registro dei prompt di estrazione: un turno → una funzione che, data la
 // risposta dell'utente, costruisce il prompt da inviare all'LLM.
@@ -203,9 +206,181 @@ ${rispostaUtente}
   },
 };
 
+// ----------------------------------------------------------------------------
+// ANELLO 3 — CONFRONTO PROFILO <-> ANNUNCIO (due giri: prima l'LLM, poi il codice)
+// ----------------------------------------------------------------------------
+
+// Giro 1 — il prompt che fa giudicare l'LLM. Ingresso: i due JSON GIA' strutturati
+// (profilo dell'anello 1, annuncio dell'anello 2), non testo grezzo. Identico al
+// prompt in prompt_design.md ("Confronto profilo-annuncio").
+function promptConfronto(profilo, annuncio) {
+  return `Sei un assistente che confronta un profilo professionale con un annuncio di lavoro per stimare quanto il candidato è adatto. Ricevi due fonti già strutturate (due JSON, non testo grezzo): il profilo del candidato e l'annuncio. Giudica, voce per voce, quanto il profilo soddisfa ciò che l'annuncio chiede, poi dai una valutazione d'insieme. Non inventare nulla: giudica solo in base a ciò che le due fonti dichiarano davvero.
+
+# 1 — LE DUE FONTI
+Ricevi due JSON dentro tag delimitatori:
+- <profilo>: il candidato — nome, esperienze_formali, esperienze_informali, competenze, formazione (più eventuali dati personali, se presenti).
+- <annuncio>: l'annuncio già strutturato — i requisiti (competenze_richieste, esperienza_richiesta, formazione_richiesta, altri_requisiti), ognuno con la sua priorita, e i campi di contesto (titolo, sede, contratto, mansioni, benefit).
+Sono già estratti: fidati di ciò che contengono, non re-interpretare testo grezzo.
+
+# 2 — COSA CONFRONTARE
+Giudichi due gruppi:
+- Il nucleo — le quattro liste di requisiti. È ciò che conta di più.
+- Il contesto — titolo, sede, contratto, mansioni, benefit. Conta meno (un quinto del nucleo), ma va giudicato anch'esso.
+Dai un giudizio per OGNI voce delle quattro liste di requisiti, e un giudizio per OGNI campo di contesto presente (valutato nel suo insieme). Non saltarne nessuno; non aggiungerne di inventati.
+
+# 3 — COME GIUDICARE
+Confronta ogni voce contro il PROFILO INTERO, non solo contro la sezione omonima: una competenza richiesta può essere soddisfatta da un'esperienza dichiarata, e viceversa.
+Riconosci le equivalenze di significato, anche nel linguaggio informale ("me la cavo alla cassa" soddisfa "uso del registratore di cassa"); ma non forzare equivalenze che non ci sono.
+Assegna uno di questi quattro esiti:
+- soddisfatto: il profilo copre chiaramente la voce.
+- in parte: la copre solo parzialmente, o in modo affine ma non pieno.
+- non soddisfatto: il profilo NON la copre. Per competenze, esperienza e formazione — che raccogliamo apposta nel dialogo col candidato — se, dopo aver cercato equivalenze su TUTTO il profilo, non c'è traccia della voce, è non soddisfatto: è una lacuna reale, non un dubbio.
+- non determinabile (NON entra nel conteggio): usalo SOLO quando non hai alcun modo di valutare la voce: (a) altri_requisiti (domicilio, patente, disponibilità: dati che il profilo non raccoglie ancora); (b) contesto lato-offerta che il candidato non "soddisfa" (benefit, condizioni di contratto); (c) quando l'annuncio dichiara l'ASSENZA di un requisito (es. "Nessuna esperienza richiesta": non c'è nulla da soddisfare).
+DISTINZIONE CHIAVE: "non determinabile" significa «non avevo modo di saperlo», NON «il candidato non l'ha detto». Una competenza/esperienza/formazione che il candidato semplicemente non ha dichiarato è non soddisfatto, mai non determinabile.
+Giustifica ogni esito in una frase, ancorata a ciò che il profilo dice (o non dice). Non attribuire al candidato competenze, esperienze o dati che non ha dichiarato: questo sarebbe inventare; registrare un'assenza come non soddisfatto è invece corretto.
+
+Per le voci con priorità "non specificata" (l'annuncio le ha elencate senza dire se obbligatorie o gradite) fai un passo in più: stima quanto contano DAVVERO per questo ruolo e mettilo in "importanza". Non fermarti al testo: RAGIONA sull'intenzione della frase nel contesto dell'annuncio e del mestiere. Chiediti — per QUESTO lavoro, è un requisito che il datore dà per scontato, o un di più marginale? (Per un cuoco: "HACCP" buttato lì conta molto; "Photoshop" buttato lì conta poco.)
+- alta: chiaramente un requisito atteso per il ruolo.
+- bassa: chiaramente un di più marginale.
+- media: usala SOLO se, dopo averci ragionato sul serio, l'intenzione resta davvero ambigua. Non è una scorciatoia: prima pensa e cerca di capire l'intenzione, e solo se non ci riesci metti "media".
+Motiva sempre nella spiegazione perché hai scelto alta, bassa o media.
+
+# 4 — LETTURA D'INSIEME E NUMERO
+Dopo i giudizi, aggiungi:
+- lettura_insieme: una sintesi onesta del match in poche frasi — punti di forza, lacune, eventuali paletti decisivi.
+- numero_complessivo: un intero da 0 a 100, la TUA stima generale di quanto il candidato è adatto, considerando tutto con senso e logica. Dai più peso ai requisiti richiesto e ai paletti decisivi; il contesto pesa poco. È una stima orientativa: non gonfiarla.
+
+# 5 — FORMATO DELLA RISPOSTA
+Rispondi solo con un oggetto JSON, senza testo prima o dopo e senza virgolette di codice:
+{
+  "giudizi": [
+    {
+      "requisito": "<per i requisiti, il testo della voce dell'annuncio; per il contesto, il campo e il suo contenuto in breve>",
+      "categoria": "competenze | esperienza | formazione | altri_requisiti | contesto",
+      "priorita": "richiesto | preferenziale | non specificata",
+      "importanza": "<solo per le voci 'non specificata': alta | media | bassa>",
+      "esito": "soddisfatto | in parte | non soddisfatto | non determinabile",
+      "spiegazione": "<perché, ancorata al profilo>"
+    }
+  ],
+  "lettura_insieme": "<sintesi del match>",
+  "numero_complessivo": 0
+}
+Regole sul formato:
+- priorita: ricopiala dall'annuncio così com'è; per i campi di contesto (che non hanno priorità) metti "non specificata".
+- categoria: per le voci di contesto usa sempre "contesto".
+- importanza: compilala SOLO per le voci con priorità "non specificata"; per tutte le altre lasciala vuota ("").
+
+<profilo>
+${JSON.stringify(profilo, null, 2)}
+</profilo>
+
+<annuncio>
+${JSON.stringify(annuncio, null, 2)}
+</annuncio>`;
+}
+
+// Giro 2 — il punteggio "codicesco": deterministico, a partire dai giudizi
+// dell'LLM. Pesi e regole stanno in prompt_design.md ("Formula del punteggio").
+const PUNTI = { soddisfatto: 1, "in parte": 0.5, "non soddisfatto": 0 };
+const PESO_PRIORITA = { richiesto: 5, preferenziale: 1 };
+const PESO_IMPORTANZA = { alta: 5, media: 3, bassa: 1 };
+const PESO_CONTESTO = 0.2;
+const PESO_FALLBACK = 3; // 'non specificata' senza importanza chiara -> neutro
+// Fusione col numero dell'LLM: correzione limitata e asimmetrica (anti-invenzione:
+// più margine per abbassare che per alzare). Tarati sui dati di simulazione.
+const CLAMP_GIU = -20;
+const CLAMP_SU = 10;
+
+function norm(x) {
+  return typeof x === "string" ? x.trim().toLowerCase() : "";
+}
+
+function clamp(x, min, max) {
+  return Math.max(min, Math.min(max, x));
+}
+
+// Peso di una singola voce giudicata: il contesto vale 0.2; nel nucleo conta la
+// priorità, e le 'non specificata' usano l'importanza stimata dall'LLM.
+function pesoVoce(g) {
+  if (norm(g.categoria) === "contesto") return PESO_CONTESTO;
+  const priorita = norm(g.priorita);
+  if (priorita === "non specificata") {
+    return PESO_IMPORTANZA[norm(g.importanza)] ?? PESO_FALLBACK;
+  }
+  return PESO_PRIORITA[priorita] ?? PESO_FALLBACK;
+}
+
+// Toglie l'eventuale recinto ```json ... ``` e fa il parse. Lo fa il server
+// perché il Giro 2 deve leggere i giudizi, non solo inoltrarli.
+function estraiJson(testo) {
+  const pulito = testo
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "");
+  return JSON.parse(pulito);
+}
+
+// Dai giudizi (Giro 1) e dal numero dell'LLM calcola il match finale (Giro 2).
+function calcolaMatch(giudizi, numeroComplessivo) {
+  let numeratore = 0;
+  let denominatore = 0;
+  for (const g of giudizi) {
+    // Le voci che dichiarano l'ASSENZA di un requisito (es. "Nessuna esperienza
+    // richiesta", sentinel della pipeline 2) non sono requisiti da soddisfare:
+    // restano fuori dal conteggio in modo deterministico, senza dipendere dall'LLM.
+    if (norm(g.requisito).includes("nessuna esperienza richiesta")) continue;
+    const esito = norm(g.esito);
+    if (esito === "non determinabile") continue; // escluso dal conteggio
+    const punti = PUNTI[esito];
+    if (punti === undefined) continue; // esito non riconosciuto -> ignora prudentemente
+    const peso = pesoVoce(g);
+    numeratore += punti * peso;
+    denominatore += peso;
+  }
+
+  const numLLM = Number(numeroComplessivo);
+  const llmValido = Number.isFinite(numLLM);
+
+  let scoreBase = null;
+  let finale = null;
+  let tagliato = false;
+  let nota = null;
+
+  if (denominatore === 0) {
+    // Nessuna voce determinabile: il conteggio non esiste, ci si affida al numero dell'LLM.
+    finale = llmValido ? clamp(Math.round(numLLM), 0, 100) : null;
+  } else {
+    scoreBase = Math.round((100 * numeratore) / denominatore);
+    if (!llmValido) {
+      finale = clamp(scoreBase, 0, 100);
+    } else {
+      const delta = numLLM - scoreBase;
+      const corr = clamp(delta, CLAMP_GIU, CLAMP_SU); // asimmetrico: anti-invenzione
+      finale = clamp(Math.round(scoreBase + corr), 0, 100);
+      tagliato = delta < CLAMP_GIU || delta > CLAMP_SU;
+      if (tagliato) {
+        nota = `Il conteggio dei requisiti darebbe ${scoreBase}, ma la valutazione d'insieme dell'AI lo porta verso ${numLLM}: match finale ${finale}.`;
+      }
+    }
+  }
+
+  // Passo finale: il match vero, convertito in stelle 0-5 con un decimale.
+  const stelle = finale === null ? null : Math.round((finale / 20) * 10) / 10;
+
+  return {
+    score_base: scoreBase,
+    numero_llm: llmValido ? numLLM : null,
+    match_finale: finale,
+    stelle,
+    scarto_tagliato: tagliato,
+    nota,
+  };
+}
+
 // Chiama l'API di Anthropic con un prompt già costruito e restituisce il testo
 // prodotto dal modello.
-async function chiamaAnthropic(prompt) {
+async function chiamaAnthropic(prompt, maxTokens = MAX_TOKENS) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -215,7 +390,7 @@ async function chiamaAnthropic(prompt) {
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: MAX_TOKENS,
+      max_tokens: maxTokens,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -242,6 +417,96 @@ function inviaJson(res, status, oggetto) {
   res.end(JSON.stringify(oggetto));
 }
 
+// Gestione di /struttura: un turno del profilo o l'analisi dell'annuncio.
+// Restituisce ESCLUSIVAMENTE il JSON prodotto dal modello, verbatim.
+async function gestisciStruttura(body, res) {
+  let turno, risposta;
+  try {
+    ({ turno, risposta } = JSON.parse(body));
+  } catch {
+    inviaJson(res, 400, {
+      errore: 'Body non valido: atteso JSON { "turno": "...", "risposta": "..." }.',
+    });
+    return;
+  }
+
+  if (typeof turno !== "string" || !Object.hasOwn(PROMPTS, turno)) {
+    inviaJson(res, 400, {
+      errore: 'Campo "turno" mancante o sconosciuto.',
+      turni_validi: Object.keys(PROMPTS),
+    });
+    return;
+  }
+
+  if (typeof risposta !== "string") {
+    inviaJson(res, 400, { errore: 'Campo "risposta" mancante o non testuale.' });
+    return;
+  }
+
+  try {
+    const prompt = PROMPTS[turno](risposta);
+    const jsonModello = await chiamaAnthropic(prompt);
+    // Restituiamo ESCLUSIVAMENTE il JSON ricevuto dal modello, verbatim.
+    res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+    res.end(jsonModello);
+  } catch (err) {
+    console.error(err);
+    inviaJson(res, 502, { errore: "Errore nella chiamata all'API di Anthropic." });
+  }
+}
+
+// Gestione di /confronta (anello 3): Giro 1 (l'LLM giudica) poi Giro 2 (il
+// codice calcola). Ingresso: { profilo, annuncio } come oggetti JSON già
+// strutturati (output degli anelli 1 e 2).
+async function gestisciConfronta(body, res) {
+  let profilo, annuncio;
+  try {
+    ({ profilo, annuncio } = JSON.parse(body));
+  } catch {
+    inviaJson(res, 400, {
+      errore: 'Body non valido: atteso JSON { "profilo": {...}, "annuncio": {...} }.',
+    });
+    return;
+  }
+
+  if (!profilo || !annuncio || typeof profilo !== "object" || typeof annuncio !== "object") {
+    inviaJson(res, 400, {
+      errore: 'Servono entrambi i campi "profilo" e "annuncio" come oggetti JSON strutturati.',
+    });
+    return;
+  }
+
+  try {
+    // Giro 1 — l'LLM giudica voce per voce.
+    const prompt = promptConfronto(profilo, annuncio);
+    const testoModello = await chiamaAnthropic(prompt, MAX_TOKENS_CONFRONTO);
+
+    let giro1;
+    try {
+      giro1 = estraiJson(testoModello);
+    } catch {
+      inviaJson(res, 502, {
+        errore: "La risposta dell'AI non è un JSON valido.",
+        grezzo: testoModello,
+      });
+      return;
+    }
+
+    const giudizi = Array.isArray(giro1.giudizi) ? giro1.giudizi : [];
+    // Giro 2 — il codice calcola il punteggio deterministico dai giudizi.
+    const punteggio = calcolaMatch(giudizi, giro1.numero_complessivo);
+
+    inviaJson(res, 200, {
+      giudizi,
+      lettura_insieme: giro1.lettura_insieme ?? "",
+      ...punteggio,
+    });
+  } catch (err) {
+    console.error(err);
+    inviaJson(res, 502, { errore: "Errore nella chiamata all'API di Anthropic." });
+  }
+}
+
 const server = http.createServer((req, res) => {
   setCors(res);
 
@@ -252,7 +517,8 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.url !== "/struttura") {
+  const rotta = req.url;
+  if (rotta !== "/struttura" && rotta !== "/confronta") {
     inviaJson(res, 404, { errore: "Endpoint non trovato." });
     return;
   }
@@ -268,38 +534,10 @@ const server = http.createServer((req, res) => {
   });
 
   req.on("end", async () => {
-    let turno, risposta;
-    try {
-      ({ turno, risposta } = JSON.parse(body));
-    } catch {
-      inviaJson(res, 400, {
-        errore: 'Body non valido: atteso JSON { "turno": "...", "risposta": "..." }.',
-      });
-      return;
-    }
-
-    if (typeof turno !== "string" || !Object.hasOwn(PROMPTS, turno)) {
-      inviaJson(res, 400, {
-        errore: 'Campo "turno" mancante o sconosciuto.',
-        turni_validi: Object.keys(PROMPTS),
-      });
-      return;
-    }
-
-    if (typeof risposta !== "string") {
-      inviaJson(res, 400, { errore: 'Campo "risposta" mancante o non testuale.' });
-      return;
-    }
-
-    try {
-      const prompt = PROMPTS[turno](risposta);
-      const jsonModello = await chiamaAnthropic(prompt);
-      // Restituiamo ESCLUSIVAMENTE il JSON ricevuto dal modello, verbatim.
-      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-      res.end(jsonModello);
-    } catch (err) {
-      console.error(err);
-      inviaJson(res, 502, { errore: "Errore nella chiamata all'API di Anthropic." });
+    if (rotta === "/struttura") {
+      await gestisciStruttura(body, res);
+    } else {
+      await gestisciConfronta(body, res);
     }
   });
 });
@@ -307,5 +545,6 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`Server in ascolto su http://localhost:${PORT}`);
   console.log(`Endpoint: POST http://localhost:${PORT}/struttura`);
+  console.log(`Endpoint: POST http://localhost:${PORT}/confronta`);
   console.log(`Turni disponibili: ${Object.keys(PROMPTS).join(", ")}`);
 });
