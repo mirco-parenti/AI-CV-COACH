@@ -1,6 +1,6 @@
 # AI-CV-COACH
 
-**Stato:** 🚧 In sviluppo attivo — Fase 1 di 4 (MVP dialogo guidato)
+**Stato:** 🚧 In sviluppo attivo — MVP, pipeline a 4 anelli: ✅ profilo guidato · ✅ analisi annuncio · ✅ confronto + punteggio (match in stelle 0–5) · ⬜ generazione CV/lettera
 
 AI-CV-COACH è una web app sperimentale sviluppata come progetto di stage presso Aviolab AI.
 

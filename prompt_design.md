@@ -665,10 +665,14 @@ scelto così — vive nel `diario_di_bordo.md`, ai passi indicati.
 - *Mitigazione:* estrai-tutte (lista) + conferma in blocco.
 - *Narrazione:* diario Step 1.3 → 1.8; regola trasversale 4.
 
-**6. Scoring incoerente della "famiglia A"** *(anello 3, futuro)*.
-- *Mitigazione:* punteggio presentato come orientativo + farlo giustificare elencando i requisiti soddisfatti/non soddisfatti.
-- *Narrazione:* research_notes progetti 2–3; diario Step 0.5.
+**6. Scoring incoerente della "famiglia A"** *(anello 3, risolto)*.
+- *Mitigazione:* architettura ibrida — l'LLM dà i giudizi per-voce + un numero d'insieme, il **codice** calcola il punteggio deterministico (stessi giudizi → stesso voto) e riconcilia il numero dell'LLM con un clamp limitato e asimmetrico. Punteggio sempre orientativo e giustificato (giudizio + spiegazione per ogni voce), convertito infine in stelle 0–5.
+- *Narrazione:* research_notes progetti 2–3; diario Step 0.5, 1.16–1.17.
 
 **7. Requisiti "tipici" non scritti aggiunti all'annuncio** *(anello 2, il gemello del gonfiamento)*.
 - *Mitigazione:* si estrae solo ciò che l'annuncio dichiara (mai requisiti "tipici" non scritti); la priorità dei requisiti estratti si valuta dal senso del testo; campi mancanti vuoti.
 - *Narrazione:* diario Step 1.10; sezione "Analisi annuncio di lavoro".
+
+**8. Punteggio che non discrimina la qualità del match** *(anello 3, scoperto validando sul campo)*.
+- *Mitigazione:* confine `non soddisfatto` / `non determinabile` per-dimensione — una competenza/esperienza/formazione non dichiarata è una **lacuna** (`non soddisfatto`, conta 0), non un "non si sa"; `non determinabile` (escluso dal conteggio) vale solo per dati mai raccolti (`altri_requisiti`), contesto lato-offerta, o requisito dichiarato assente. Più: sentinel "Nessuna esperienza richiesta" escluso nel codice. Senza questo confine lo `score_base` saturava (~96 o 0) e non distingueva un fit scarso da uno ottimo.
+- *Narrazione:* diario Step 1.17; validazione sulle 9 combinazioni di simulazione (profili × annunci).
