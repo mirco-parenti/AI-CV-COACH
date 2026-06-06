@@ -638,3 +638,32 @@ Registrata la decisione nella sezione "Confronto profilo-annuncio" di `prompt_de
 💡 *Mia intuizione / scelta ragionata* — Non confondere lo strumento con l'obiettivo. L'obiettivo era "match robusto sui sinonimi", non "usare ESCO/O*NET". Visto che l'LLM raggiunge l'obiettivo da solo, la tassonomia esterna diventa un costo senza un beneficio che oggi mi serve.
 
 💡 *Mia intuizione / scelta ragionata* — L'anti-invenzione non riguarda solo l'estrazione: vale anche nel match. Un LLM che "decide" che due cose combaciano può inventare un'equivalenza che non c'è. Per questo gli chiederò di giustificare ogni giudizio e lo ancorerò al testo del profilo: anche *giudicare*, non solo estrarre, deve restare fedele ai fatti.
+
+### Step 1.16 — Il motore del confronto: due giri (LLM → codice) e la formula del punteggio
+
+*Progettato per intero il cuore dell'anello 3: come LLM e codice si dividono il lavoro nel match, e come nasce il punteggio. Niente codice ancora — prima il ragionamento, come sempre.*
+
+**Cosa ho fatto**
+Disegnato l'architettura del confronto e la formula del punteggio, fissandole nella sezione "Confronto profilo-annuncio" di `prompt_design.md`. Allineato `altri_requisiti` come pienamente confrontabile in tutti i file (intro schema, prompt, nota campo, `server.js` — sync verificato) e aggiornata la nota di memoria.
+
+**Cosa ho deciso e perché**
+- **Due giri in sequenza stretta.** *Giro 1 — LLM (controllo generale)*: da solo e prima, sui **due JSON già estratti** (profilo dell'anello 1 + annuncio dell'anello 2 — **non** i testi grezzi); ragiona con senso e logica su tutto e consegna il lavoro finito: giudizi per-requisito (`soddisfatto / in parte / non soddisfatto` + spiegazione, confrontati contro il **profilo intero**), una lettura d'insieme e un **suo numero complessivo**. *Giro 2 — Codice*: solo dopo, prende quell'output e produce il punteggio. Mai il contrario, mai in parallelo.
+- **Ibrido: l'LLM comprende, il codice rende consistente.** L'LLM fa ciò che sa fare (cogliere equivalenze, contesto, senso); il codice fa ciò che sa fare (sommare in modo deterministico e trasparente). Così il punteggio eredita solo la variabilità dei giudizi a stati discreti, non quella di un numero "a sensazione".
+- **`altri_requisiti` dentro al nucleo confrontabile, pari importanza.** Corretto rispetto allo Step 1.15 (dove l'avevo rimandato dall'MVP): domicilio, patente, automunito sono spesso **paletti decisivi**, quindi pesano come gli altri tre. L'estensione del profilo a specchio diventa un raffinamento futuro, **non** un prerequisito al match.
+- **La formula.** Punti per esito `1 / 0.5 / 0`; peso per priorità `richiesto 5 / preferenziale 1`; le voci `non specificata` le pesa l'**LLM caso per caso** (importanza `alta 5 / media 3 / bassa 1`, col 3 come fallback dell'incertezza vera). La categoria non pesa, le quattro del nucleo sono pari. `score_base` deterministico dai giudizi; poi si **fonde** il numero dell'LLM come correzione **limitata**: `clamp(−20, +10)`. Il **contesto** entra anch'esso nel voto, ma pesa **1/5** del nucleo (Mirco ha voluto considerarlo). E un **quarto esito**, `non determinabile` — per ciò che non si può dire o che non si "soddisfa" (un benefit offerto, le condizioni di contratto, un dato assente dal profilo) — viene **escluso dal conteggio**, per non inventare un verdetto.
+
+**Dove ho faticato / cosa non era ovvio**
+Sul peso di `altri_requisiti` ho sbagliato direzione: l'avevo messo a "pesa meno" del nucleo, e Mirco mi ha corretto — è di **prioritaria importanza** (un "automunito richiesto" può escluderti). Bonificato ovunque. Lì ho anche capito che la differenza di peso la deve fare la **priorità** (richiesto vs preferenziale), non la categoria.
+
+**Cosa rimando (e perché)**
+Il **prompt del Giro 1** e lo **schema di output** sono ora scritti in `prompt_design.md` (5 sezioni, 4 esiti). Resta il **cablaggio in `server.js`** con un **nuovo endpoint** (qui gli input sono due, non il singolo `{turno, risposta}`) e una pagina di test, più il codice del Giro 2 (la formula). L'estensione del profilo a specchio di `altri_requisiti`. E un **limite noto**: un requisito *davvero* squalificante non azzera il punteggio (tetto −20) — trattarlo come paletto rigido è un raffinamento futuro, segnalato per non nasconderlo.
+
+💡 *Mia intuizione / scelta ragionata* — Dividere "chi giudica" da "chi conta" risolve il vecchio limite della famiglia A (il voto incoerente): l'LLM porta la comprensione, il codice porta la riproducibilità. Stessi giudizi → stesso punteggio.
+
+💡 *Mia intuizione / scelta ragionata* — L'asimmetria `−20 / +10` è l'anti-invenzione messa in numeri: l'AI è libera di **abbassare** il match quando fiuta un paletto (sicuro), ma può **alzarlo** solo di poco (gonfiare è il rischio). E quando il clamp taglia, lo **mostriamo**: il dissenso forte diventa una nota, non sparisce nella matematica.
+
+💡 *Mia intuizione / scelta ragionata* — Il confronto lavora su **strutturato ↔ strutturato**, mai su testo grezzo. L'estrazione (con i suoi anticorpi) ha già fatto il suo lavoro: il match si fida dei dati puliti, costa meno token e non rischia di re-inventare rileggendo l'annuncio.
+
+💡 *Mia intuizione / scelta ragionata* — Il quarto esito `non determinabile` (escluso dal conteggio) è anti-invenzione allo stato puro: di fronte a ciò che il profilo non dice, o a ciò che non è "soddisfacibile" (un benefit, una clausola di contratto), la risposta onesta è "non si sa" — e una cosa che non si sa non deve né premiare né punire il punteggio. Forzare un sì/no lì sarebbe inventare. Così il contesto può entrare nel voto senza sporcarlo di verdetti finti.
+
+💡 *Mia intuizione / scelta ragionata* — Un peso fisso per i requisiti `non specificata` (il "3 piatto") buttava via ciò che l'LLM sa già fare: capire che, per un cuoco, un "HACCP" buttato lì conta e un "Photoshop" buttato lì no. Mirco ha posto la condizione giusta: il 3 non è una scorciatoia — l'LLM deve prima *ragionare sull'intenzione* della frase (non fermarsi al testo), e solo se davvero non la coglie ripiega su "media". È di nuovo la nostra bussola: in estrazione si resta fedeli al testo, ma nel match si comprende il senso — e qui pesare un requisito ambiguo È comprendere il senso.
