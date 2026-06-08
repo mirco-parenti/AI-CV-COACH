@@ -712,3 +712,29 @@ Colonna entry da `[76, 78, 76]` (piatta) a **`[3.6, 3.1, 0.8]`** stelle: buon fi
 Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero era *dove* tracciare il confine: non "Sonnet ovunque per sicurezza" (costo e lentezza inutili sui compiti meccanici), ma neanche "Haiku ovunque per risparmio" (il match ne soffre). Il confine giusto coincide con quello che il progetto già traccia da sempre: estrazione vs comprensione.
 
 💡 *Mia intuizione / scelta ragionata* — La stessa linea che separa "estrarre fedele al testo" da "comprendere il senso" (la bussola dell'anello 3) separa anche i due modelli. Non è una coincidenza: dove il compito cambia natura, cambia anche lo strumento giusto. Pagare Sonnet sull'estrazione sarebbe sprecare ragionamento dove serve solo precisione.
+
+### Step 1.19 — Setting di governance: regole, memoria e il comando "aggiorna-tutto"
+
+*Uno step non di codice ma di metodo: ho separato e fissato le regole di lavoro, riordinato la memoria e definito come tenere allineati i file. Un setup importante, prima di tornare a costruire (anello 4).*
+
+**Cosa ho fatto**
+- Separato le regole in due cassetti: **`regole_globali`** (`~/.claude/CLAUDE.md`, valide in ogni mio progetto) e **`regole_di_progetto`** (`CLAUDE.md` nella repo, solo AI-CV-COACH).
+- Creato **`idee_future.md`** come raccolta unica dei raffinamenti futuri, consolidando un backlog prima sparso (handoff, memoria, diario).
+- Ripulito l'auto-memoria dai doppioni confluiti nelle regole.
+- Definito il comando **"aggiorna-tutto"** con una **tabella "modalità per file"**, e un **marker** per le regole nuove.
+
+**Cosa ho imparato**
+- La differenza tra **le mie regole** (come lavoro con l'IA) e le **regole del prodotto** (l'anti-invenzione, che vive nei prompt): vanno tenute separate anche se si somigliano.
+- Concetti git che non avevo chiari: **working tree**, file **tracciati/non tracciati**, **merge fast-forward**.
+- Che lo **scope** è tutto: regola universale → globale, regola specifica → progetto.
+
+**Dove ho faticato / cosa non era ovvio**
+- All'inizio avevo messo tutto in un'unica lista; solo distinguendo lo scope ho sciolto l'inghippo.
+- Ho dovuto stanare regole già scritte e sparse (es. la sicurezza nell'eliminare un branch) per non perderle.
+
+**Cosa ho deciso e perché**
+- Ogni regola in una sola casa (globale vs progetto), niente duplicati.
+- "aggiorna-tutto" lavora sul **working tree** ed **esclude** i file sensibili/gitignored.
+- Tengo uno Step anche per il metodo: questo progetto è la mia avventura nello studio dell'IA, e il *come* lavoro ne fa parte.
+
+💡 *Mia intuizione / scelta ragionata* — Separare le mie regole da quelle del prodotto non è pignoleria: è ciò che mi farà riusare lo stesso metodo su ogni progetto futuro senza trascinarmi dietro le specificità di questo. Lo scope è la chiave.
