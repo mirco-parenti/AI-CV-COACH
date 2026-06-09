@@ -43,6 +43,10 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    struttura; poi aggiornalo solo se serve. Se lo aggiorni devi farlo con lo stesso stile
    e la stessa struttura. Poi passa al successivo. Se non serve aggiornarlo, passa
    direttamente al successivo.
+9. **Nomenclatura dei due CV (anello 4)**: in chat distingui **sempre** i due output
+   della generazione con marker chiari e distinti — **📄 CV-1** (base, generato dopo
+   l'anello 1) e **🎯 CV-2** (mirato, generato dopo l'anello 3). Usali ogni volta che
+   parli dei due CV.
 
 ## Contesto del progetto (fatti stabili + puntatori, niente stato copiato)
 

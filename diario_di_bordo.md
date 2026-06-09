@@ -738,3 +738,27 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - Tengo uno Step anche per il metodo: questo progetto è la mia avventura nello studio dell'IA, e il *come* lavoro ne fa parte.
 
 💡 *Mia intuizione / scelta ragionata* — Separare le mie regole da quelle del prodotto non è pignoleria: è ciò che mi farà riusare lo stesso metodo su ogni progetto futuro senza trascinarmi dietro le specificità di questo. Lo scope è la chiave.
+
+### Step 1.20 — Anello 4: due CV (base e mirato) e lo schema, prima dei prompt
+
+*Dopo lo Step di governance ho aperto l'anello 4, la generazione. Niente codice ancora: ho ragionato l'architettura con l'assistente e fissato lo schema dati, tenendo i prompt per il passo successivo. Un anello delicato, perché è dove il vincolo anti-invenzione rischia di più.*
+
+**Cosa ho fatto**
+- Deciso **due percorsi**: **📄 CV-1** (base, generato dal solo profilo dopo l'anello 1) e **🎯 CV-2** (mirato, generato dopo l'anello 3 e orientato all'annuncio). Chi vuole solo un CV si ferma al primo; chi cerca *quel* posto fa il percorso completo.
+- Fissato la **fonte di verità**: sempre il **profilo** (anello 1, JSON). Nel CV-2 il CV-1 entra **solo come riferimento di stile**, mai come fonte di fatti.
+- Scelto la **forma dell'output**: **JSON a sezioni**, con l'impaginazione lasciata al front-end (impalcatura usa-e-getta).
+- Definito le **sezioni** del CV e scritto lo **schema JSON** in `prompt_design.md` (vuoto + esempio + note + regole d'uso), sul principio **campi-fatto ricopiati / campi-prosa generati ma vincolati**.
+- Aggiunto la regola di progetto **#9** (marker 📄 CV-1 / 🎯 CV-2 in chat) e annotato in `idee_future.md` il **turno contatti** e il **riordino dinamico delle sezioni**.
+
+**Cosa ho imparato**
+- La distinzione **campi-fatto / campi-prosa** è la leva che rende l'anti-invenzione **verificabile**: i fatti si controllano 1:1 col profilo, la prosa resta confinata a due campi.
+- Ogni passaggio attraverso l'LLM è un'occasione di **deriva dal vero**: per questo il CV-2 non si fida del CV-1 per i fatti, ma solo per lo stile.
+
+**Dove ho faticato / cosa non era ovvio**
+- La tensione della **modifica manuale del CV-1**: se l'utente corregge lì un *fatto*, resta intrappolato nel CV-1 e il CV-2 lo ignorerebbe. L'ho sciolta decidendo che nel CV-1 si rifinisce la **forma**; i **fatti** si correggono nel profilo (anello 1), unica casa della verità.
+
+**Cosa ho deciso e perché**
+- **Schema prima dei prompt**, e **prima CV-1, poi CV-2**: il mirato si appoggia al base, progettarlo al buio non avrebbe senso. Testerò il CV-1 sui casi reali **prima** di disegnare il CV-2 (test prima, valutazione dopo).
+- **Ordine delle sezioni fisso** nell'MVP: il "mirare" vive nel **contenuto** (cosa il sommario mette in risalto, quanto dettaglio do a un'esperienza), non nel riordino.
+
+💡 *Mia intuizione / scelta ragionata* — Il valore dell'anello 4 sta quasi tutto in **due campi di prosa**: `sommario` e `descrizione`. Tutto il resto del CV è verità ricopiata dal profilo. Sapere *dove* si concentra il rischio mi dice anche dove concentrare l'attenzione quando scriverò i prompt.

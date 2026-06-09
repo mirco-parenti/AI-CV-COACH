@@ -640,7 +640,109 @@ qui il programma inserirà l'annuncio strutturato (JSON)
 </annuncio>
 ```
 
-### Generazione CV mirato
+### Generazione del CV
+
+L'anello 4 genera il CV in **due varianti**, distinte in modo inequivocabile dal campo
+`tipo`: **📄 CV-1** (`cv_base`, generato dopo l'anello 1 dal solo profilo) e **🎯 CV-2**
+(`cv_mirato`, generato dopo l'anello 3 e orientato all'annuncio). Entrambe condividono
+**lo stesso schema** descritto qui sotto. L'output è **JSON a sezioni**: l'impaginazione
+la fa il front-end (impalcatura usa-e-getta), non l'LLM.
+
+Principio guida dello schema — due tipi di campo:
+- **campi-fatto** (nome, ruolo, azienda, durata, quando, competenze, titolo, istituto,
+  anno) → **ricopiati** dal profilo, verbatim o con normalizzazione minima. Verificabili 1:1.
+- **campi-prosa** (`sommario`, `descrizione`) → **generati** dall'LLM, ma **vincolati ai
+  soli fatti del profilo**: riformulano, non aggiungono.
+
+#### Schema JSON (vuoto)
+
+```json
+{
+  "tipo": "cv_base",
+  "intestazione": { "nome": "" },
+  "sommario": "",
+  "esperienze_professionali": [],
+  "altre_esperienze": [],
+  "competenze": [],
+  "formazione": []
+}
+```
+
+#### Schema JSON (con voci di esempio)
+
+```json
+{
+  "tipo": "cv_base",
+  "intestazione": { "nome": "Mario Rossi" },
+  "sommario": "Cameriere con esperienza nel servizio di sala e nella gestione della cassa, diplomato all'istituto alberghiero.",
+  "esperienze_professionali": [
+    {
+      "ruolo": "Cameriere",
+      "azienda": "Bar Centrale",
+      "durata": "1 anno",
+      "descrizione": "Servizio ai tavoli e gestione della cassa."
+    }
+  ],
+  "altre_esperienze": [
+    {
+      "descrizione": "Supporto stagionale a una ditta artigiana di idraulica a conduzione familiare.",
+      "quando": "2018-2020, periodi estivi"
+    }
+  ],
+  "competenze": [
+    "Lavoro in team",
+    "Uso del registratore di cassa"
+  ],
+  "formazione": [
+    {
+      "titolo": "Diploma alberghiero",
+      "istituto": "Istituto Cellini",
+      "anno": "2022"
+    }
+  ]
+}
+```
+
+#### Note sui campi
+
+- `tipo` — stringa, **solo** `"cv_base"` (📄 CV-1) o `"cv_mirato"` (🎯 CV-2). Distingue in
+  modo inequivocabile le due varianti.
+- `intestazione.nome` — **campo-fatto**, ricopiato da `nome` del profilo. I contatti non
+  sono ancora nello schema profilo (MVP): per ora l'intestazione contiene solo il nome
+  (vedi `idee_future.md`, "Turno contatti nell'anello 1").
+- `sommario` — **campo-prosa**, generato. Sintesi del profilo in tono CV; in `cv_mirato`
+  mette in risalto ciò che combacia con l'annuncio. Vincolo: nessun fatto assente dal profilo.
+- `esperienze_professionali` — lista, da `esperienze_formali`. `ruolo`/`azienda`/`durata`
+  sono campi-fatto ricopiati; `descrizione` è campo-prosa generato da `cosa_facevo`,
+  riformulato senza fatti nuovi.
+- `altre_esperienze` — lista, da `esperienze_informali`. `descrizione` (campo-prosa che
+  fonde `cosa_facevo` e `con_chi`) + `quando` (campo-fatto ricopiato). **Mai** `ruolo` o
+  `azienda`: non vanno promosse a esperienze professionali.
+- `competenze` — lista di stringhe, ricopiate dal profilo.
+- `formazione` — lista, da `formazione`. `titolo`/`istituto`/`anno` ricopiati.
+
+#### Regole d'uso (anti-invenzione, valide per 📄 CV-1 e 🎯 CV-2)
+
+1. **Campi-fatto vs campi-prosa**: i campi-fatto sono ricopiati dal profilo (verbatim o
+   normalizzazione minima); i campi-prosa (`sommario`, `descrizione`) sono generati ma
+   vincolati ai soli fatti del profilo.
+2. **Nessun fatto nuovo**: il CV non aggiunge esperienze, competenze, titoli o dettagli
+   non presenti nel profilo, neanche se "impliciti" o plausibili.
+3. **No promozione**: le `altre_esperienze` non si presentano mai come esperienze
+   professionali (niente `ruolo`/`azienda`).
+4. **Sezioni vuote omesse**: se il profilo non ha una categoria, la lista resta vuota e il
+   front-end omette la sezione. Mai riempita a indovinare.
+5. **Fonte di verità = profilo (anello 1), sempre.** In 🎯 CV-2 il 📄 CV-1 entra solo come
+   riferimento di **stile**, mai come fonte di fatti.
+6. **Ordine**: si mantiene l'ordine del profilo, per voci e per sezioni (MVP); il riordino
+   per rilevanza è rimandato (vedi `idee_future.md`).
+7. L'output è sempre **JSON valido** conforme a questo schema.
+
+#### Prompt — 📄 CV-1 (base)
+
+Da definire.
+
+#### Prompt — 🎯 CV-2 (mirato)
 
 Da definire.
 

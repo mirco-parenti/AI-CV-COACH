@@ -20,8 +20,10 @@ Le idee nuove si annotano con **data e motivo**. Aggiornato con "aggiorna-tutto"
   che oggi escono `non determinabile`. **Non è un prerequisito** (`altri_requisiti` è già
   confrontabile). Attenzione alla **sensibilità** dei dati personali (domicilio, età);
   probabile nuovo turno nell'anello 1. *(Diario Step 1.14.)*
-- **Campi profilo aggiuntivi**: contatti, lingue, link — da valutare dopo l'MVP.
-  *(prompt_design.md, note schema profilo.)*
+- **Turno contatti nell'anello 1**: aggiungere un turno che raccolga i contatti
+  (e in prospettiva lingue, link) nel profilo. Diventa concreto con l'anello 4: oggi
+  l'**intestazione del CV ha solo il nome**, perché i contatti non sono nello schema MVP.
+  *(2026-06-09 — emerso nel design dell'anello 4; prompt_design.md, note schema profilo.)*
 - **Campi annuncio aggiuntivi**: `livello` (impiegato/operaio/quadro), `settore` — fuori
   per ora (schema snello). *(prompt_design.md, "Da valutare in futuro".)*
 - **Decomposizione dei prompt**: il prompt unico dell'annuncio è già diviso in 5 sezioni
@@ -52,3 +54,8 @@ Le idee nuove si annotano con **data e motivo**. Aggiornato con "aggiorna-tutto"
 - **Testo visibile per le esperienze informali** nel CV: come presentarle senza
   "promuoverle" a formali. *(prompt_design.md, note schema profilo — da affrontare nel
   design dell'anello 4.)*
+- **Riordino dinamico delle sezioni nel CV mirato**: nell'MVP l'ordine delle sezioni è
+  **fisso** in entrambi i CV (base e mirato) e il "mirare" avviene nel **contenuto**
+  (sommario, dettaglio delle voci); far variare ordine/enfasi delle sezioni in base al
+  confronto (anello 3) è rimandato. *(2026-06-09 — deciso nel design dell'anello 4:
+  ordine fisso per semplicità e verificabilità.)*
