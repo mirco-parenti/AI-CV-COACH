@@ -52,7 +52,7 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
 
 - **Come far girare il progetto**: Node ≥ 20.12, **niente dipendenze npm**, chiave in
   `.env` (`ANTHROPIC_API_KEY`, gitignored). Avvio: `npm start` → `http://localhost:3000`.
-  Endpoint: `POST /struttura`, `POST /confronta` e `POST /genera-cv`. Stop del server: `fuser -k 3000/tcp`.
+  Endpoint: `POST /struttura`, `POST /confronta`, `POST /genera-cv` e `POST /genera-lettera`. Stop del server: `fuser -k 3000/tcp`.
 - **Stato e pipeline (fonte viva)**: per pipeline e stato aggiornati vedi
   `README.md` (sezione *Stato*) e l'ultimo `### Step` del `diario_di_bordo.md`.
   **Non duplicare qui lo stato** (così questo file non va mai stantio).
@@ -80,6 +80,6 @@ un file nuovo, aggiungi qui la sua riga.
 | `idee_future.md` | Aggiungi le idee nuove / spunta quelle realizzate con ✅ + puntatore; quando si accumulano, raccoglile in una sezione «Realizzate» in fondo (così il backlog attivo resta solo-futuro e non induce in errore); non copiare lo stato. |
 | `CLAUDE.md` | Ratifica i marker confermati (togli 🔖); riflette regole e contesti aggiornati. |
 | `research_notes.md` | **Statico**: solo se c'è nuova ricerca su progetti simili. |
-| `index.html`, `test-annuncio.html`, `test-confronto.html`, `test-cv.html`, `test-cv-mirato.html` (e ogni `test-*.html`) | Impalcatura usa-e-getta: solo se è cambiato il front-end/test (qualità minore). |
+| `index.html`, `test-annuncio.html`, `test-confronto.html`, `test-cv.html`, `test-cv-mirato.html`, `test-lettera.html` (e ogni `test-*.html`) | Impalcatura usa-e-getta: solo se è cambiato il front-end/test (qualità minore). |
 | `.gitignore`, `.gitattributes`, `package.json` | Config: solo se serve un cambiamento concreto. |
 | `.env`, `.claude/`, `node_modules/`, gitignored | **MAI** toccati. |

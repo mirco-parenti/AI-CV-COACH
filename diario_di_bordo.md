@@ -810,3 +810,28 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Due pagine di test distinte** (`test-cv.html` e `test-cv-mirato.html`) invece di una sola con un interruttore: tengono separati i due percorsi (base e mirato) e si leggono più chiare.
 
 💡 *Mia intuizione / scelta ragionata* — Il 🎯 CV-2 ha confermato sul campo l'intuizione dello Step 1.20: tutto il valore (e tutto il rischio) si concentra nel **sommario**. Lì si è vista la mira funzionare — apre con i requisiti `richiesto`+`soddisfatto`, retrocede il resto — *senza* nominare né compensare ciò che mancava. La mira giusta non è dire di più: è scegliere cosa dire per primo, tra le cose vere.
+
+### Step 1.23 — La ✉️ lettera di presentazione: motivata nel tono, fedele nei fatti
+
+*L'ultimo pezzo della generazione. La lettera è il formato dove l'anti-invenzione fa più male — una lettera di presentazione è persuasiva per natura — e proprio per questo è stato il design più delicato. La chiave l'ha data una distinzione netta che ho deciso con l'assistente: l'atteggiamento si può esprimere, i fatti no.*
+
+**Cosa ho fatto**
+- Ragionato il design e sciolto il nodo centrale: la lettera **suona motivata** (volontà, interesse, entusiasmo, enfasi sui punti di forza) ma ogni **fatto** viene solo dal profilo. La distinzione operativa è **atteggiamento** (ammesso, è il tono) vs **fatti** (esperienze, competenze, titoli, storie: solo dal profilo, mai inventati).
+- Fissato gli **ingressi**: `profilo` (unica fonte di fatti) + `annuncio` (bersaglio) + `giudizi` (mira) + il `🎯 CV-2` come **riferimento di coerenza** (stessa storia del CV), mai come fonte di fatti.
+- Scelto l'**output a blocchi** (`apertura`, `corpo`, `chiusura`, `firma`): isola il `corpo`, dove vivono le affermazioni da verificare, dalle formule di cortesia.
+- Scritto il **prompt** (`lettera_mirata`), identico in `prompt_design.md` e `server.js` (sync char-by-char), e cablato il nuovo endpoint **`/genera-lettera`**.
+- Aggiunto **`test-lettera.html`** come pagina separata: esegue il flusso intero (anello 3 → 🎯 CV-2 → ✉️ lettera).
+
+**Cosa ho imparato**
+- La regola **atteggiamento/fatti** è la versione più affilata del principio campi-prosa: la prosa può portare *tono* motivazionale, ma la *sostanza* resta bloccata al profilo. Sul campo ha tenuto: la lettera dice "sono motivata, convinta di poter contribuire" (atteggiamento) e poi solo fatti reali (Conad, cassa, ragioneria, lavoro in squadra).
+- Il guard-rail del **tacere sui gap** vale per la lettera ancora più che per il CV: nel test la lettera non ha nominato né l'inglese (non soddisfatto) né la disponibilità weekend, e non li ha compensati inventando.
+
+**Dove ho faticato / cosa non era ovvio**
+- Tarare *quanto* entusiasmo concedere senza scivolare nell'invenzione: il confine non è la quantità di calore, ma la sua natura — interesse generico per il ruolo sì, motivazioni biografiche inventate ("ho sempre sognato di…") no.
+- Accettare il **CV-2 in ingresso**: ribaltava la scelta fatta per il CV-2 (dove non passavo il CV-1). L'ho accettato perché qui la ragione è la **coerenza** tra lettera e CV, e il CV-2 è già vincolato ai fatti — col paletto esplicito che resta riferimento di stile/coerenza, non fonte di fatti.
+
+**Cosa ho deciso e perché**
+- **Endpoint dedicato** `/genera-lettera` invece di estendere `/genera-cv`: l'output è un documento diverso (lettera, non CV), e tenerli separati è più leggibile (anche se entrambi sono impalcatura che non migra a VB.NET).
+- **Pagina di test separata** `test-lettera.html`, coerente con la scelta di tenere distinti i percorsi di prova.
+
+💡 *Mia intuizione / scelta ragionata* — La lettera è la prova che l'anti-invenzione non è un freno alla persuasione: si può **proporre con convinzione** restando veri. Il trucco non è inventare entusiasmo su fatti finti, ma mettere calore vero attorno a fatti reali. Con questo si chiude tutta la generazione dell'anello 4: 📄 CV-1, 🎯 CV-2 e ✉️ lettera.

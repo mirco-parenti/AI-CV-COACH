@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test generazione lettera (anello 4 — ✉️ lettera mirata)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 1000px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    h1 { font-size: 1.4rem; }
+    .due { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .due > div { flex: 1; min-width: 320px; }
+    textarea { width: 100%; height: 320px; font-family: ui-monospace, monospace; font-size: 0.8rem; box-sizing: border-box; }
+    button { margin-top: 1rem; padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: wait; }
+    .match { margin-top: 1rem; padding: 0.8rem 1.2rem; background: #eef6ee; border-radius: 8px; font-size: 0.9rem; }
+    .match .stelle { font-size: 1.1rem; font-weight: 600; }
+    .match ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+    .lettera { margin-top: 1rem; padding: 1.5rem 1.8rem; background: #fffdf7; border: 1px solid #e6e2d6; border-radius: 8px; line-height: 1.5; }
+    .lettera .apertura { white-space: pre-wrap; }
+    .lettera .corpo { white-space: pre-wrap; margin: 1rem 0; }
+    .lettera .chiusura { white-space: pre-wrap; }
+    .lettera .firma { margin-top: 0.5rem; font-weight: 600; }
+    pre.grezzo { margin-top: 1rem; padding: 1rem; background: #1e1e1e; color: #d4d4d4; border-radius: 8px; overflow: auto; font-size: 0.8rem; }
+    .errore { color: #cf222e; margin-top: 1rem; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Test generazione lettera (anello 4 — ✉️ lettera mirata)</h1>
+  <p>Due input: il <strong>profilo</strong> (anello 1) e l'<strong>annuncio</strong> (anello 2). La pagina esegue il flusso completo: <strong>anello 3</strong> (<code>/confronta</code>) → 🎯 <strong>CV-2</strong> (<code>/genera-cv</code>) → ✉️ <strong>lettera</strong> (<code>/genera-lettera</code>, con profilo+annuncio+giudizi+CV). Il match in alto serve a verificare l'anti-invenzione: la lettera deve <strong>tacere sui gap</strong> (requisiti non soddisfatti) e non inventare fatti.</p>
+
+  <div class="due">
+    <div>
+      <label><strong>Profilo (JSON)</strong></label>
+      <textarea id="profilo"></textarea>
+    </div>
+    <div>
+      <label><strong>Annuncio (JSON)</strong></label>
+      <textarea id="annuncio"></textarea>
+    </div>
+  </div>
+
+  <button id="vai">Genera lettera</button>
+
+  <div id="risultato"></div>
+
+  <script>
+    // Esempi precaricati (commessa ↔ addetta vendite) per provare subito.
+    const ESEMPIO_PROFILO = {
+      nome: "Giulia Bianchi",
+      esperienze_formali: [
+        { ruolo: "Commessa", azienda: "Supermercato Conad", durata: "2 anni (2021-2023)", cosa_facevo: "Rifornimento scaffali, assistenza ai clienti e gestione della cassa" },
+        { ruolo: "Cameriera", azienda: "Trattoria Da Luigi", durata: "estate 2020", cosa_facevo: "" }
+      ],
+      esperienze_informali: [
+        { cosa_facevo: "Davo ripetizioni di matematica a ragazzi delle medie", quando: "2019-2021", con_chi: "figli di amici e vicini" }
+      ],
+      competenze: ["Uso del registratore di cassa", "Lavoro in squadra", "Pazienza con i clienti"],
+      formazione: [
+        { titolo: "Diploma di ragioneria", istituto: "ITC Pacioli", anno: "2019" }
+      ]
+    };
+
+    const ESEMPIO_ANNUNCIO = {
+      competenze_richieste: [
+        { testo: "uso del registratore di cassa", priorita: "richiesto" },
+        { testo: "conoscenza inglese base", priorita: "preferenziale" }
+      ],
+      esperienza_richiesta: [
+        { testo: "esperienza nella vendita al dettaglio", priorita: "richiesto", anni: 1 }
+      ],
+      formazione_richiesta: [
+        { testo: "diploma di scuola superiore", priorita: "preferenziale" }
+      ],
+      altri_requisiti: [
+        { testo: "disponibilità a lavorare nei weekend", priorita: "richiesto" }
+      ],
+      titolo: "Addetta alle vendite",
+      sede: ["Bologna"],
+      contratto: { tipo: "tempo determinato", durata: "6 mesi", orario: "part-time", retribuzione: "" },
+      mansioni: ["Assistenza clienti", "Gestione cassa", "Rifornimento scaffali"],
+      benefit: []
+    };
+
+    const elProfilo = document.getElementById("profilo");
+    const elAnnuncio = document.getElementById("annuncio");
+    const elRisultato = document.getElementById("risultato");
+    const btn = document.getElementById("vai");
+
+    elProfilo.value = JSON.stringify(ESEMPIO_PROFILO, null, 2);
+    elAnnuncio.value = JSON.stringify(ESEMPIO_ANNUNCIO, null, 2);
+
+    btn.addEventListener("click", async () => {
+      elRisultato.innerHTML = "";
+      let profilo, annuncio;
+      try {
+        profilo = JSON.parse(elProfilo.value);
+      } catch {
+        mostraErrore("Il JSON del profilo non è valido.");
+        return;
+      }
+      try {
+        annuncio = JSON.parse(elAnnuncio.value);
+      } catch {
+        mostraErrore("Il JSON dell'annuncio non è valido.");
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        // Anello 3 — confronto, per ricavare i giudizi (segnale di mira).
+        btn.textContent = "Anello 3: confronto…";
+        const confronto = await postJson("/confronta", { profilo, annuncio });
+        if (confronto.errore) { mostraErrore("Errore dall'anello 3 (/confronta):\n" + JSON.stringify(confronto)); return; }
+        const giudizi = confronto.giudizi || [];
+
+        // Anello 4 — 🎯 CV-2 mirato (riferimento di coerenza per la lettera).
+        btn.textContent = "Anello 4: 🎯 CV-2…";
+        const cv = await postJson("/genera-cv", { profilo, annuncio, giudizi });
+        if (cv.errore) { mostraErrore("Errore dal CV mirato (/genera-cv):\n" + JSON.stringify(cv)); return; }
+
+        // Anello 4 — ✉️ lettera mirata dai quattro ingressi.
+        btn.textContent = "Anello 4: ✉️ lettera…";
+        const lettera = await postJson("/genera-lettera", { profilo, annuncio, giudizi, cv });
+        if (lettera.errore) { mostraErrore("Errore dalla lettera (/genera-lettera):\n" + JSON.stringify(lettera)); return; }
+
+        mostra(confronto, lettera);
+      } catch (err) {
+        mostraErrore("Impossibile contattare il server (è avviato su localhost:3000?).\n" + err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Genera lettera";
+      }
+    });
+
+    // POST JSON e ritorna l'oggetto. Il server restituisce sempre JSON pulito;
+    // stripRecinto resta come difesa in più.
+    async function postJson(path, payload) {
+      const res = await fetch("http://localhost:3000" + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const testo = await res.text();
+      if (!res.ok) {
+        try { return JSON.parse(testo); } catch { return { errore: testo }; }
+      }
+      return JSON.parse(stripRecinto(testo));
+    }
+
+    function stripRecinto(t) {
+      return t.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+    }
+
+    function mostraErrore(msg) {
+      elRisultato.innerHTML = '<div class="errore"></div>';
+      elRisultato.querySelector(".errore").textContent = msg;
+    }
+
+    // Mostra il match (anello 3, per il controllo "tace sui gap") e poi la lettera.
+    function mostra(confronto, lettera) {
+      let html = '<div class="match">';
+      if (confronto.stelle !== undefined) html += '<div class="stelle">Match: ' + escapeHtml(confronto.stelle) + " ★ (per verificare cosa la lettera deve tacere)</div>";
+      html += "<ul>";
+      for (const g of (confronto.giudizi || [])) {
+        const peso = g.priorita || g.importanza || "";
+        html += "<li>[" + escapeHtml(g.esito) + "] " + (peso ? "(" + escapeHtml(peso) + ") " : "") + escapeHtml(g.requisito) + "</li>";
+      }
+      html += "</ul></div>";
+
+      html += '<div class="lettera">';
+      if (lettera.apertura) html += '<div class="apertura">' + escapeHtml(lettera.apertura) + "</div>";
+      if (lettera.corpo) html += '<div class="corpo">' + escapeHtml(lettera.corpo) + "</div>";
+      if (lettera.chiusura) html += '<div class="chiusura">' + escapeHtml(lettera.chiusura) + "</div>";
+      if (lettera.firma) html += '<div class="firma">' + escapeHtml(lettera.firma) + "</div>";
+      html += "</div>";
+
+      html += '<pre class="grezzo">' + escapeHtml(JSON.stringify(lettera, null, 2)) + "</pre>";
+      elRisultato.innerHTML = html;
+    }
+
+    function escapeHtml(x) {
+      return String(x ?? "").replace(/[&<>"]/g, (c) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    }
+  </script>
+</body>
+</html>
