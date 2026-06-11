@@ -479,8 +479,27 @@ function inviaJson(res, status, oggetto) {
   res.end(JSON.stringify(oggetto));
 }
 
+// Ripulisce il JSON del modello (toglie l'eventuale recinto ```json), lo VALIDA
+// e lo invia al client. Convenzione: il server garantisce sempre JSON pulito.
+// Se il modello ha prodotto JSON non valido (es. troncato dal limite di token),
+// risponde 502 col grezzo invece di passare al client un testo non parsabile.
+function inviaJsonModello(res, jsonModello) {
+  let oggetto;
+  try {
+    oggetto = estraiJson(jsonModello);
+  } catch {
+    inviaJson(res, 502, {
+      errore: "La risposta dell'AI non è un JSON valido.",
+      grezzo: jsonModello,
+    });
+    return;
+  }
+  res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
+  res.end(JSON.stringify(oggetto));
+}
+
 // Gestione di /struttura: un turno del profilo o l'analisi dell'annuncio.
-// Restituisce ESCLUSIVAMENTE il JSON prodotto dal modello, verbatim.
+// Restituisce il JSON prodotto dal modello, validato e ripulito lato server.
 async function gestisciStruttura(body, res) {
   let turno, risposta;
   try {
@@ -508,9 +527,8 @@ async function gestisciStruttura(body, res) {
   try {
     const prompt = PROMPTS[turno](risposta);
     const jsonModello = await chiamaAnthropic(prompt);
-    // Restituiamo ESCLUSIVAMENTE il JSON ricevuto dal modello, verbatim.
-    res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-    res.end(jsonModello);
+    // Validiamo lato server e restituiamo JSON pulito (vedi inviaJsonModello).
+    inviaJsonModello(res, jsonModello);
   } catch (err) {
     console.error(err);
     inviaJson(res, 502, { errore: "Errore nella chiamata all'API di Anthropic." });
@@ -571,7 +589,7 @@ async function gestisciConfronta(body, res) {
 
 // Gestione di /genera-cv (anello 4): genera il 📄 CV-1 dal profilo. Ingresso:
 // { profilo } come oggetto JSON già strutturato (output dell'anello 1).
-// Restituisce ESCLUSIVAMENTE il JSON del CV prodotto dal modello, verbatim.
+// Restituisce il JSON del CV prodotto dal modello, validato e ripulito lato server.
 async function gestisciGeneraCv(body, res) {
   let profilo;
   try {
@@ -593,9 +611,8 @@ async function gestisciGeneraCv(body, res) {
   try {
     const prompt = promptGeneraCv(profilo);
     const jsonModello = await chiamaAnthropic(prompt, MAX_TOKENS_CV, MODEL_RAGIONAMENTO);
-    // Restituiamo ESCLUSIVAMENTE il JSON ricevuto dal modello, verbatim.
-    res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-    res.end(jsonModello);
+    // Validiamo lato server e restituiamo JSON pulito (vedi inviaJsonModello).
+    inviaJsonModello(res, jsonModello);
   } catch (err) {
     console.error(err);
     inviaJson(res, 502, { errore: "Errore nella chiamata all'API di Anthropic." });

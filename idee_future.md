@@ -13,6 +13,14 @@ Le idee nuove si annotano con **data e motivo**. Aggiornato con "aggiorna-tutto"
 - **Integrazione front-end**: oggi `index.html` fa solo l'anello 1; gli anelli 2 e 3
   vivono solo nelle `test-*.html`. Unirli in un unico flusso utente reale
   (dialogo → incolla annuncio → match in stelle). *(Backlog handoff.)*
+- **Estrazione JSON robusta al preambolo**: `estraiJson` (lato server, usato da tutti gli
+  endpoint) toglie il **recinto** ```` ```json ```` ma non un eventuale **preambolo in
+  prosa** prima del JSON; in quel caso `JSON.parse` fallisce e l'endpoint risponde 502.
+  Sui prompt rigidi (`/struttura`, `/genera-cv`) non capita in pratica; può capitare quando
+  il modello "si mette a spiegare" (visto su `/confronta` con un annuncio fuori-schema).
+  Idea: estrarre il blocco JSON anche con prosa attorno (primo `{` … ultimo `}`). Non è un
+  prerequisito (con input ben formati gli endpoint partono già con `{`).
+  *(2026-06-11 — emerso testando il 📄 CV-1 e introducendo la validazione JSON lato server.)*
 
 ## Profilo, annuncio & schema
 - **Estensione del profilo** a specchio di `altri_requisiti` (domicilio, disponibilità,
