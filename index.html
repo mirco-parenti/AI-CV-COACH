@@ -120,6 +120,64 @@
         formazione: [],
       };
 
+      // --- Anti-perdita: magazzino dei frammenti instradati ad altri turni ---
+      // Quando l'utente, in un turno, accenna a qualcosa di competenza di un
+      // altro turno, l'estrazione lo restituisce in "altrove" (parole esatte
+      // dell'utente). Lo accantoniamo qui per categoria di destinazione e lo
+      // riproponiamo — strutturato e da confermare — quando si apre quel turno
+      // (instradamento in avanti) o, se il turno è già passato, nella passata
+      // finale prima del riepilogo (instradamento all'indietro).
+      const pending = {
+        esperienze_formali: [],
+        esperienze_informali: [],
+        competenze: [],
+        formazione: [],
+      };
+
+      // Etichetta leggibile di una categoria del profilo (per i messaggi).
+      const ETICHETTE_CATEGORIA = {
+        esperienze_formali: "esperienze di lavoro",
+        esperienze_informali: "esperienze informali",
+        competenze: "competenze",
+        formazione: "studi e formazione",
+      };
+      const etichettaCategoria = (dest) => ETICHETTE_CATEGORIA[dest] || dest;
+
+      // Travasa i frammenti di fr.altrove nel magazzino pending, per categoria.
+      // `escludi` evita di re-instradare verso la categoria che stiamo già
+      // smaltendo (no loop sullo stesso secchio).
+      function raccogliAltrove(fr, escludi) {
+        const a = fr && fr.altrove;
+        if (!a || typeof a !== "object") return;
+        for (const dest of Object.keys(pending)) {
+          if (dest === escludi) continue;
+          const lista = a[dest];
+          if (!Array.isArray(lista)) continue;
+          for (const t of lista) {
+            if (typeof t === "string" && t.trim()) pending[dest].push(t.trim());
+          }
+        }
+      }
+
+      // Come sopra ma SENZA ri-parcheggiare: ritorna solo l'elenco dei frammenti
+      // instradati altrove. Lo usa l'iniezione per non innescare il ping-pong:
+      // un frammento già parcheggiato viene tentato una volta sola nel suo turno;
+      // ciò che non si struttura lì non rimbalza, lo si dichiara "lasciato fuori".
+      function altroveLeftover(fr, escludi) {
+        const a = fr && fr.altrove;
+        const out = [];
+        if (!a || typeof a !== "object") return out;
+        for (const dest of Object.keys(pending)) {
+          if (dest === escludi) continue;
+          const lista = a[dest];
+          if (!Array.isArray(lista)) continue;
+          for (const t of lista) {
+            if (typeof t === "string" && t.trim()) out.push(t.trim());
+          }
+        }
+        return out;
+      }
+
       // --- Stato della fase di generazione (anelli 2-4), riempito dopo il
       //     profilo: l'annuncio strutturato, i giudizi del confronto e il CV
       //     mirato (riferimento di coerenza per la lettera). ---
@@ -457,25 +515,50 @@
         });
       }
 
+      // Righe di una voce-oggetto per la scheda: i campi del turno, più una riga
+      // "Tipo" solo se valorizzata (tirocinio/stage), in testa per darle risalto.
+      function righeVoce(turno, voce) {
+        const righe = [];
+        const tipo = (voce.tipo || "").trim();
+        if (tipo) righe.push({ etichetta: "Tipo", valore: tipo });
+        for (const c of turno.campi) {
+          righe.push({ etichetta: c.etichetta, valore: (voce[c.chiave] || "").trim() });
+        }
+        return righe;
+      }
+
       // Mostra la scheda di conferma in blocco per una lista di voci-oggetto.
       function mostraVoci(turno, voci) {
         aiDice("Ecco cosa ho capito:");
-        for (const voce of voci) {
-          const righe = turno.campi.map((c) => ({
-            etichetta: c.etichetta,
-            valore: (voce[c.chiave] || "").trim(),
-          }));
-          schedaCampi(null, righe);
+        for (const voce of voci) schedaCampi(null, righeVoce(turno, voce));
+      }
+
+      // Anteprima delle voci ricavate da un frammento parcheggiato: lista nuda
+      // per le competenze (stringhe), schede a campi per le altre categorie.
+      function anteprimaVoci(dest, voci) {
+        if (dest === "competenze") {
+          schedaLista(null, voci);
+        } else {
+          const turno = trovaTurno(dest);
+          for (const voce of voci) schedaCampi(null, righeVoce(turno, voce));
         }
       }
 
       // Turno "ripetibile": lista di voci, conferma in blocco, poi loop
-      // "altro o procediamo?".
+      // "altro o procediamo?". All'ingresso smaltisce prima i frammenti
+      // parcheggiati per questo turno (instradamento in avanti).
       function gestisciRipetibile(turno) {
+        if (pending[turno.chiave].length) {
+          return smaltisciPending(turno.chiave, () => chiediRipetibile(turno));
+        }
+        chiediRipetibile(turno);
+      }
+
+      function chiediRipetibile(turno) {
         chiediTesto("La tua risposta…", async (risposta) => {
           utenteDice(risposta);
           const fr = await chiamaConAttesa(turno.chiave, risposta);
-          if (!fr) return gestisciRipetibile(turno);
+          if (!fr) return chiediRipetibile(turno);
 
           const voci = fr[turno.chiave] || [];
           if (voci.length === 0) {
@@ -486,10 +569,16 @@
                 primario: true,
                 onClick: () => {
                   aiDice("Va bene, raccontamela come viene.");
-                  gestisciRipetibile(turno);
+                  chiediRipetibile(turno);
                 },
               },
-              { etichetta: "Passiamo oltre", onClick: passaAlProssimo },
+              {
+                etichetta: "Passiamo oltre",
+                onClick: () => {
+                  raccogliAltrove(fr);
+                  passaAlProssimo();
+                },
+              },
             ]);
             return;
           }
@@ -501,6 +590,7 @@
               primario: true,
               onClick: () => {
                 profilo[turno.chiave].push(...voci);
+                raccogliAltrove(fr);
                 chiediAltro(turno);
               },
             },
@@ -508,7 +598,7 @@
               etichetta: "Correggi",
               onClick: () => {
                 aiDice("Va bene, raccontamela di nuovo.");
-                gestisciRipetibile(turno);
+                chiediRipetibile(turno);
               },
             },
           ]);
@@ -524,7 +614,7 @@
             primario: true,
             onClick: () => {
               aiDice(turno.riapertura);
-              gestisciRipetibile(turno);
+              chiediRipetibile(turno);
             },
           },
           { etichetta: "Procediamo", onClick: passaAlProssimo },
@@ -532,11 +622,19 @@
       }
 
       // Turno "blocco" (competenze): raccolta in blocco + un solo giro di aggiunta.
+      // All'ingresso smaltisce prima i frammenti parcheggiati per questo turno.
       function gestisciBlocco(turno) {
+        if (pending[turno.chiave].length) {
+          return smaltisciPending(turno.chiave, () => chiediBlocco(turno));
+        }
+        chiediBlocco(turno);
+      }
+
+      function chiediBlocco(turno) {
         chiediTesto("La tua risposta…", async (risposta) => {
           utenteDice(risposta);
           const fr = await chiamaConAttesa(turno.chiave, risposta);
-          if (!fr) return gestisciBlocco(turno);
+          if (!fr) return chiediBlocco(turno);
 
           const voci = fr[turno.chiave] || [];
           if (voci.length === 0 && profilo[turno.chiave].length === 0) {
@@ -547,15 +645,22 @@
                 primario: true,
                 onClick: () => {
                   aiDice("Va bene, cosa ti riesce bene?");
-                  gestisciBlocco(turno);
+                  chiediBlocco(turno);
                 },
               },
-              { etichetta: "Passiamo oltre", onClick: passaAlProssimo },
+              {
+                etichetta: "Passiamo oltre",
+                onClick: () => {
+                  raccogliAltrove(fr);
+                  passaAlProssimo();
+                },
+              },
             ]);
             return;
           }
 
           profilo[turno.chiave].push(...voci);
+          raccogliAltrove(fr);
           mostraCompetenze();
           chiediScelta([
             {
@@ -577,6 +682,7 @@
           const fr = await chiamaConAttesa(turno.chiave, risposta);
           if (!fr) return aggiungiCompetenzeUnGiro(turno);
           profilo[turno.chiave].push(...(fr[turno.chiave] || []));
+          raccogliAltrove(fr);
           mostraCompetenze();
           chiediScelta([
             { etichetta: "Confermiamo", primario: true, onClick: passaAlProssimo },
@@ -589,9 +695,115 @@
         schedaLista(null, profilo.competenze);
       }
 
-      // --- Chiusura: riepilogo leggibile del profilo -----------------------
+      // --- Anti-perdita: l'iniezione di un frammento parcheggiato ----------
 
+      // Smaltisce i frammenti parcheggiati per la categoria `dest`: li struttura
+      // col prompt di quel turno, li mostra e fa scegliere all'utente
+      // (aggiungi / correggi / scarta). Nulla entra nel profilo senza la sua
+      // conferma. In ogni ramo, alla fine, chiama prosegui().
+      //
+      // Regola di TERMINAZIONE: un frammento entrato qui è consumato UNA volta
+      // sola — non torna mai nel magazzino `pending` da dentro questa funzione.
+      // Ciò che il turno di destinazione non sa strutturare non rimbalza (niente
+      // ping-pong fra categorie): lo dichiariamo "lasciato fuori" (perdita resa
+      // visibile, mai silenziosa). Così la passata finale converge sempre.
+      async function smaltisciPending(dest, prosegui) {
+        const frammenti = pending[dest].splice(0);
+        if (!frammenti.length) return prosegui();
+
+        aiDice(
+          "Prima avevi accennato a qualcosa che riguarda «" +
+            etichettaCategoria(dest) +
+            "», e l'avevo tenuto da parte. Vediamolo ora:"
+        );
+        utenteDice(frammenti.join(" / "));
+
+        const fr = await chiamaConAttesa(dest, frammenti.join("\n"));
+        if (!fr) {
+          aiDice(
+            "Non sono riuscita a leggerlo (problema col server), quindi lo lascio fuori: «" +
+              frammenti.join(" / ") + "»."
+          );
+          return prosegui();
+        }
+
+        const voci = fr[dest] || [];
+        const fuori = altroveLeftover(fr, dest); // NON ri-parcheggiati
+
+        if (!voci.length) {
+          aiDice(
+            "Questo non sono riuscita a collocarlo in nessuna sezione, quindi lo lascio fuori: «" +
+              (fuori.length ? fuori.join(" / ") : frammenti.join(" / ")) + "»."
+          );
+          return prosegui();
+        }
+
+        anteprimaVoci(dest, voci);
+        chiediScelta([
+          {
+            etichetta: "Sì, aggiungilo",
+            primario: true,
+            onClick: () => {
+              profilo[dest].push(...voci);
+              aiDice("Fatto, l'ho aggiunto.");
+              if (fuori.length) {
+                aiDice(
+                  "Una parte non l'ho saputa collocare, la lascio fuori: «" +
+                    fuori.join(" / ") + "»."
+                );
+              }
+              prosegui();
+            },
+          },
+          {
+            etichetta: "Correggi",
+            onClick: () => {
+              aiDice("Va bene, riscrivimelo come va detto.");
+              chiediTesto("La tua correzione…", async (risposta) => {
+                utenteDice(risposta);
+                const fr2 = await chiamaConAttesa(dest, risposta);
+                if (!fr2) return prosegui();
+                const voci2 = fr2[dest] || [];
+                if (voci2.length) {
+                  profilo[dest].push(...voci2);
+                  anteprimaVoci(dest, voci2);
+                  aiDice("Aggiornato e aggiunto.");
+                } else {
+                  aiDice("Non ho colto una voce da aggiungere. Proseguiamo.");
+                }
+                prosegui();
+              });
+            },
+          },
+          {
+            etichetta: "Scartalo",
+            onClick: () => {
+              aiDice("Va bene, lo lascio perdere.");
+              prosegui();
+            },
+          },
+        ]);
+      }
+
+      // --- Chiusura: passata finale + riepilogo leggibile del profilo ------
+
+      // Prima del riepilogo recupera, uno alla volta, gli eventuali frammenti
+      // ancora parcheggiati la cui destinazione è un turno già passato
+      // (instradamento all'indietro). Ricorsiva finché il magazzino è vuoto.
       function chiudiDialogo() {
+        passataFinale(mostraRiepilogo);
+      }
+
+      function passataFinale(dopo) {
+        const dest = Object.keys(pending).find((k) => pending[k].length);
+        if (!dest) return dopo();
+        aiDice(
+          "Prima di chiudere, recuperiamo una cosa che avevi accennato e non avevamo ancora registrato."
+        );
+        smaltisciPending(dest, () => passataFinale(dopo));
+      }
+
+      function mostraRiepilogo() {
         aiDice(
           "Perfetto, abbiamo finito di costruire il tuo profilo.\n" +
             "Ecco un riepilogo di quello che ho raccolto:"
@@ -627,11 +839,7 @@
         }
         const turno = trovaTurno(chiave);
         voci.forEach((voce, i) => {
-          const righe = turno.campi.map((c) => ({
-            etichetta: c.etichetta,
-            valore: (voce[c.chiave] || "").trim(),
-          }));
-          schedaCampi(titolo + " " + (i + 1), righe);
+          schedaCampi(titolo + " " + (i + 1), righeVoce(turno, voce));
         });
       }
 

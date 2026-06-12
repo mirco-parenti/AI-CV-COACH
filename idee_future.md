@@ -39,9 +39,23 @@ Le idee nuove si annotano con **data e motivo**. Aggiornato con "aggiorna-tutto"
   numerate, pensate per diventare sotto-prompt separati. *(Diario Step 1.10.)*
 
 ## Dialogo (anello 1)
+- ✅ **Anti-perdita con instradamento (`altrove`) + tirocinio (`tipo`)**: **realizzato** —
+  ciò che accenno nel turno sbagliato non si perde più (frammenti verbatim in `altrove`,
+  riproposti e da confermare nel turno giusto: in avanti, o nella passata finale
+  all'indietro); uno stage/tirocinio è marcato e reso esplicito nel CV senza spacciarlo
+  per impiego. *(diario Step 1.26; prompt_design.md, "Convenzione anti-perdita: il campo
+  `altrove`" e nota schema `tipo`.)*
 - **pending_questions**: accantonare le domande saltate o non strutturabili e riprenderle
-  in un secondo giro a fine dialogo. Pianificato, non costruito. *(Diario apertura Fase 1,
-  Step 1.2.)*
+  in un secondo giro a fine dialogo. Pianificato, non costruito. È **cugino** dell'anti-perdita
+  (Step 1.26) ma caso diverso: lì recupero contenuto dato nel turno sbagliato, qui una
+  *domanda* saltata. *(Diario apertura Fase 1, Step 1.2.)*
+- **Collocazione manuale degli "esclusi"**: oggi un frammento che nessun turno sa
+  strutturare (es. "Vittoria Concorso Servizio Civile 2022", contenuto di confine) viene
+  **dichiarato "lasciato fuori"** — terminazione garantita, perdita visibile, niente
+  ping-pong (guard anti-rimbalzo **già realizzato**: nello smaltimento non si ri-parcheggia,
+  Step 1.26). Idea futura: invece di lasciarlo fuori, far **scegliere all'utente** in quale
+  sezione collocarlo (o crearne una voce a mano). *(2026-06-12 — emersa nel collaudo
+  headless dell'anti-perdita, Step 1.26.)*
 - **Rifiniture MVP rimandate**: rimozione di singole competenze, routing a linguaggio
   naturale (oggi bottoni), editing campo-per-campo. *(Diario Step 1.8.)*
 - **Formato del riepilogo leggibile** del profilo: da decidere insieme all'interfaccia.

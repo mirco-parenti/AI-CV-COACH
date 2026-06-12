@@ -52,7 +52,8 @@ formato di scambio interno.
       "ruolo": "Cameriere",
       "azienda": "Bar Centrale",
       "durata": "1 anno",
-      "cosa_facevo": "Servizio ai tavoli e gestione cassa"
+      "cosa_facevo": "Servizio ai tavoli e gestione cassa",
+      "tipo": ""
     }
   ],
   "esperienze_informali": [
@@ -82,7 +83,11 @@ formato di scambio interno.
 - `esperienze_formali` — lista. Esperienze lavorative riconosciute con
   ruolo, azienda, durata e descrizione. I sotto-campi sono attesi ma non
   obbligatori: se un dato manca (es. la durata non e ricordata con
-  precisione), si lascia vuoto, non si inventa.
+  precisione), si lascia vuoto, non si inventa. Sotto-campo opzionale
+  `tipo`: vuoto per un impiego normale, `"tirocinio"`/`"stage"` **solo se
+  l'utente lo dichiara apertamente** (mai dedotto). Distingue un tirocinio
+  da un impiego pur restando nella stessa lista; l'anello 4 lo rende
+  esplicito nel CV senza presentarlo come impiego dipendente.
 - `esperienze_informali` — lista. Attivita non formali (lavoretti, aiuti
   in famiglia, volontariato, esperienze brevi). **Tutti i sotto-campi
   sono opzionali per scelta progettuale.** Per natura, queste esperienze
@@ -102,6 +107,31 @@ formato di scambio interno.
 3. L'AI non aggiunge competenze, esperienze o titoli che l'utente non
    ha menzionato, neanche se appaiono "implicite" o "plausibili".
 4. L'output strutturato e sempre JSON valido conforme a questo schema.
+
+### Convenzione anti-perdita: il campo `altrove`
+
+I quattro turni-contenuto del dialogo (`esperienze_formali`,
+`esperienze_informali`, `competenze`, `formazione`) restituiscono, oltre al
+proprio campo, un campo **`altrove`**: un oggetto in cui finiscono i
+frammenti che l'utente ha accennato **in quel turno ma che appartengono a
+un'altra categoria** del profilo, copiati **verbatim** (parole dell'utente)
+e classificati per categoria di destinazione. Serve a non perdere mai
+un'informazione data nel turno sbagliato (rovescio dell'anti-invenzione:
+qui il rischio è la **perdita**, non l'aggiunta).
+
+Forma: `"altrove": { "<categoria>": ["<frammento>"], ... }`, oppure
+`"altrove": {}` se non c'è nulla per altre categorie. Il turno che *nota*
+l'overflow **non lo struttura**: lo strutturerà il turno di destinazione,
+col proprio prompt. La **tassonomia delle quattro categorie è identica in
+tutti i prompt** di turno (è il metro condiviso di classificazione).
+
+Chi consuma `altrove` è il front-end (impalcatura, `index.html`): accantona
+i frammenti in un magazzino `pending` e li ripropone — **strutturati e da
+confermare dall'utente** — quando si apre il turno di destinazione
+(instradamento in avanti) o, se quel turno è già passato, in una passata
+finale prima del riepilogo (instradamento all'indietro). Nulla entra nel
+profilo senza conferma: l'LLM **propone** l'instradamento, l'utente
+**dispone**. La narrazione della decisione è nel `diario_di_bordo.md`.
 
 ### Da definire piu avanti
 
@@ -197,18 +227,32 @@ Per ogni esperienza raccogli questi campi:
 - "azienda": il posto o l'azienda dove l'ha svolta
 - "durata": quanto è durata (es. "1 anno", "estate 2020")
 - "cosa_facevo": cosa faceva concretamente
+- "tipo": compila SOLO se l'utente dichiara apertamente che si tratta di un tirocinio o di uno stage; in quel caso metti "tirocinio" o "stage" (la parola usata dall'utente). Altrimenti lascia "" (impiego normale). Non dedurlo mai.
 
 Regole:
 - Usa esclusivamente ciò che l'utente ha scritto. Non aggiungere, non correggere, non completare, non inventare nulla.
 - Se un campo non è presente nella risposta, lascialo come stringa vuota "". Mai riempirlo a indovinare.
 - Se l'utente racconta più esperienze nella stessa risposta, estraile tutte: una voce della lista per ogni esperienza.
 - Normalizzazione leggera: riordina e ripulisci le parole dell'utente (togli riempitivi e false partenze, metti il dato nel campo giusto), ma resta aderente a ciò che ha detto. Niente sinonimi "professionali", niente dettagli aggiunti. Se l'utente è incerto ("circa un anno"), conserva l'incertezza.
-- Considera SOLO esperienze di lavoro formali. Se l'utente racconta attività informali (aiuti a familiari o amici, volontariato, passioni), NON includerle: non sono esperienze formali.
+- Nel campo principale considera SOLO esperienze di lavoro formali (inclusi tirocini e stage). Se l'utente racconta attività di altra natura (volontariato, aiuti, passioni, titoli o corsi, competenze), NON metterle qui: raccoglile in "altrove" (vedi sotto).
 - Se la risposta non contiene alcuna esperienza di lavoro formale, restituisci una lista vuota.
 - Rispondi unicamente con il JSON richiesto, senza testo prima o dopo.
 
+# Materiale per altri turni — campo "altrove"
+Oltre al compito qui sopra, può capitare che l'utente, nella stessa risposta, accenni a qualcosa che appartiene a un'ALTRA categoria del profilo, non a questo turno. Non scartarlo MAI: raccoglilo nel campo "altrove", con le parole esatte dell'utente, diviso per categoria di destinazione. Sarà l'utente a confermarlo quando arriverà il turno giusto.
+Le categorie del profilo sono quattro:
+- "esperienze_formali": lavori veri e propri, riconosciuti — impieghi con un ruolo e un datore di lavoro; inclusi tirocini e stage.
+- "esperienze_informali": attività che NON sono un lavoro vero e proprio — volontariato, aiuti a familiari, amici o vicini, una mano in associazioni o eventi, passioni che hanno insegnato qualcosa, esperienze brevi e occasionali.
+- "competenze": abilità pratiche, competenze trasversali o qualità personali che l'utente dichiara di avere.
+- "formazione": titoli di studio, diplomi, qualifiche, corsi di formazione, percorsi di studio strutturati.
+Regole per "altrove":
+- Nel campo principale qui sopra va ciò che appartiene alla categoria di QUESTO turno; in "altrove" va SOLO ciò che appartiene a una categoria DIVERSA.
+- Copia le parole dell'utente così come sono (verbatim), senza riscriverle né strutturarle: ci penserà il turno di destinazione.
+- Classifica ogni frammento in UNA sola categoria, la più calzante secondo le definizioni qui sopra. Nel dubbio fra due: un titolo, un diploma o un corso → "formazione"; un'attività svolta → l'esperienza giusta (formale o informale); un'abilità o una qualità dichiarata → "competenze".
+- Non aggiungere e non inventare nulla. Se non c'è materiale per altre categorie, restituisci "altrove": {}.
+
 Formato della risposta:
-{"esperienze_formali": [{"ruolo": "", "azienda": "", "durata": "", "cosa_facevo": ""}]}
+{"esperienze_formali": [{"ruolo": "", "azienda": "", "durata": "", "cosa_facevo": "", "tipo": ""}], "altrove": {"<categoria>": ["<frammento testuale>"]}}
 
 Risposta dell'utente:
 "<qui il programma inserirà ciò che ha scritto l'utente>"
@@ -252,12 +296,25 @@ Regole:
 - Se un campo non è presente nella risposta, lascialo come stringa vuota "". Mai riempirlo a indovinare. Per queste esperienze è normale che "quando" e "con_chi" manchino.
 - Se l'utente racconta più esperienze nella stessa risposta, estraile tutte: una voce della lista per ogni esperienza.
 - Normalizzazione leggera: riordina e ripulisci le parole dell'utente (togli riempitivi e false partenze, metti il dato nel campo giusto), ma resta aderente a ciò che ha detto. Niente sinonimi "professionali", niente dettagli aggiunti. Se l'utente è incerto, conserva l'incertezza.
-- Considera SOLO esperienze informali. Se l'utente racconta un lavoro formale vero e proprio (impiego retribuito con ruolo e azienda), NON includerlo qui: appartiene a un altro turno.
+- Nel campo principale considera SOLO esperienze informali. Se l'utente racconta attività di altra natura (un lavoro formale, un titolo o un corso, una competenza), NON metterle qui: raccoglile in "altrove" (vedi sotto).
 - Se la risposta non contiene alcuna esperienza informale, restituisci una lista vuota.
 - Rispondi unicamente con il JSON richiesto, senza testo prima o dopo.
 
+# Materiale per altri turni — campo "altrove"
+Oltre al compito qui sopra, può capitare che l'utente, nella stessa risposta, accenni a qualcosa che appartiene a un'ALTRA categoria del profilo, non a questo turno. Non scartarlo MAI: raccoglilo nel campo "altrove", con le parole esatte dell'utente, diviso per categoria di destinazione. Sarà l'utente a confermarlo quando arriverà il turno giusto.
+Le categorie del profilo sono quattro:
+- "esperienze_formali": lavori veri e propri, riconosciuti — impieghi con un ruolo e un datore di lavoro; inclusi tirocini e stage.
+- "esperienze_informali": attività che NON sono un lavoro vero e proprio — volontariato, aiuti a familiari, amici o vicini, una mano in associazioni o eventi, passioni che hanno insegnato qualcosa, esperienze brevi e occasionali.
+- "competenze": abilità pratiche, competenze trasversali o qualità personali che l'utente dichiara di avere.
+- "formazione": titoli di studio, diplomi, qualifiche, corsi di formazione, percorsi di studio strutturati.
+Regole per "altrove":
+- Nel campo principale qui sopra va ciò che appartiene alla categoria di QUESTO turno; in "altrove" va SOLO ciò che appartiene a una categoria DIVERSA.
+- Copia le parole dell'utente così come sono (verbatim), senza riscriverle né strutturarle: ci penserà il turno di destinazione.
+- Classifica ogni frammento in UNA sola categoria, la più calzante secondo le definizioni qui sopra. Nel dubbio fra due: un titolo, un diploma o un corso → "formazione"; un'attività svolta → l'esperienza giusta (formale o informale); un'abilità o una qualità dichiarata → "competenze".
+- Non aggiungere e non inventare nulla. Se non c'è materiale per altre categorie, restituisci "altrove": {}.
+
 Formato della risposta:
-{"esperienze_informali": [{"cosa_facevo": "", "quando": "", "con_chi": ""}]}
+{"esperienze_informali": [{"cosa_facevo": "", "quando": "", "con_chi": ""}], "altrove": {"<categoria>": ["<frammento testuale>"]}}
 
 Risposta dell'utente:
 "<qui il programma inserirà ciò che ha scritto l'utente>"
@@ -307,8 +364,21 @@ Regole:
 - Se la risposta non contiene alcuna competenza, restituisci una lista vuota.
 - Rispondi unicamente con il JSON richiesto, senza testo prima o dopo.
 
+# Materiale per altri turni — campo "altrove"
+Oltre al compito qui sopra, può capitare che l'utente, nella stessa risposta, accenni a qualcosa che appartiene a un'ALTRA categoria del profilo, non a questo turno. Non scartarlo MAI: raccoglilo nel campo "altrove", con le parole esatte dell'utente, diviso per categoria di destinazione. Sarà l'utente a confermarlo quando arriverà il turno giusto.
+Le categorie del profilo sono quattro:
+- "esperienze_formali": lavori veri e propri, riconosciuti — impieghi con un ruolo e un datore di lavoro; inclusi tirocini e stage.
+- "esperienze_informali": attività che NON sono un lavoro vero e proprio — volontariato, aiuti a familiari, amici o vicini, una mano in associazioni o eventi, passioni che hanno insegnato qualcosa, esperienze brevi e occasionali.
+- "competenze": abilità pratiche, competenze trasversali o qualità personali che l'utente dichiara di avere.
+- "formazione": titoli di studio, diplomi, qualifiche, corsi di formazione, percorsi di studio strutturati.
+Regole per "altrove":
+- Nel campo principale qui sopra va ciò che appartiene alla categoria di QUESTO turno; in "altrove" va SOLO ciò che appartiene a una categoria DIVERSA.
+- Copia le parole dell'utente così come sono (verbatim), senza riscriverle né strutturarle: ci penserà il turno di destinazione.
+- Classifica ogni frammento in UNA sola categoria, la più calzante secondo le definizioni qui sopra. Nel dubbio fra due: un titolo, un diploma o un corso → "formazione"; un'attività svolta → l'esperienza giusta (formale o informale); un'abilità o una qualità dichiarata → "competenze".
+- Non aggiungere e non inventare nulla. Se non c'è materiale per altre categorie, restituisci "altrove": {}.
+
 Formato della risposta:
-{"competenze": ["<competenza>", "<competenza>"]}
+{"competenze": ["<competenza>", "<competenza>"], "altrove": {"<categoria>": ["<frammento testuale>"]}}
 
 Risposta dell'utente:
 "<qui il programma inserirà ciò che ha scritto l'utente>"
@@ -379,8 +449,21 @@ Regole:
 - Se la risposta non contiene alcun titolo di studio o corso, restituisci una lista vuota.
 - Rispondi unicamente con il JSON richiesto, senza testo prima o dopo.
 
+# Materiale per altri turni — campo "altrove"
+Oltre al compito qui sopra, può capitare che l'utente, nella stessa risposta, accenni a qualcosa che appartiene a un'ALTRA categoria del profilo, non a questo turno. Non scartarlo MAI: raccoglilo nel campo "altrove", con le parole esatte dell'utente, diviso per categoria di destinazione. Sarà l'utente a confermarlo quando arriverà il turno giusto.
+Le categorie del profilo sono quattro:
+- "esperienze_formali": lavori veri e propri, riconosciuti — impieghi con un ruolo e un datore di lavoro; inclusi tirocini e stage.
+- "esperienze_informali": attività che NON sono un lavoro vero e proprio — volontariato, aiuti a familiari, amici o vicini, una mano in associazioni o eventi, passioni che hanno insegnato qualcosa, esperienze brevi e occasionali.
+- "competenze": abilità pratiche, competenze trasversali o qualità personali che l'utente dichiara di avere.
+- "formazione": titoli di studio, diplomi, qualifiche, corsi di formazione, percorsi di studio strutturati.
+Regole per "altrove":
+- Nel campo principale qui sopra va ciò che appartiene alla categoria di QUESTO turno; in "altrove" va SOLO ciò che appartiene a una categoria DIVERSA.
+- Copia le parole dell'utente così come sono (verbatim), senza riscriverle né strutturarle: ci penserà il turno di destinazione.
+- Classifica ogni frammento in UNA sola categoria, la più calzante secondo le definizioni qui sopra. Nel dubbio fra due: un titolo, un diploma o un corso → "formazione"; un'attività svolta → l'esperienza giusta (formale o informale); un'abilità o una qualità dichiarata → "competenze".
+- Non aggiungere e non inventare nulla. Se non c'è materiale per altre categorie, restituisci "altrove": {}.
+
 Formato della risposta:
-{"formazione": [{"titolo": "", "istituto": "", "anno": ""}]}
+{"formazione": [{"titolo": "", "istituto": "", "anno": ""}], "altrove": {"<categoria>": ["<frammento testuale>"]}}
 
 Risposta dell'utente:
 "<qui il programma inserirà ciò che ha scritto l'utente>"
@@ -755,7 +838,7 @@ Genera un CV con le sezioni qui sotto, ricavandole dal profilo. Alcuni campi si 
 - "tipo": metti sempre la stringa "cv_base".
 - "intestazione": { "nome" } — ricopia il nome dal profilo.
 - "sommario": campo-prosa. Una sintesi d'insieme del profilo (vedi sezione 2).
-- "esperienze_professionali": una voce per ogni esperienza formale del profilo, { "ruolo", "azienda", "durata", "descrizione" }. Ricopia ruolo, azienda e durata (campi-fatto); scrivi "descrizione" sintetizzando "cosa_facevo" (campo-prosa, vedi sezione 2).
+- "esperienze_professionali": una voce per ogni esperienza formale del profilo, { "ruolo", "azienda", "durata", "descrizione" }. Ricopia ruolo, azienda e durata (campi-fatto); scrivi "descrizione" sintetizzando "cosa_facevo" (campo-prosa, vedi sezione 2). Se l'esperienza del profilo ha "tipo" valorizzato (tirocinio o stage), rendi esplicito il tipo nel campo "ruolo" (es. "Tirocinio — Test e sviluppo applicazioni AI", "Stage — …") e presentala come tirocinio/stage, non come un impiego dipendente. Se "tipo" è vuoto, è un impiego normale: non chiamarlo tirocinio.
 - "altre_esperienze": una voce per ogni esperienza informale del profilo, { "descrizione", "quando" }. Scrivi "descrizione" a partire da "cosa_facevo" e "con_chi" (campo-prosa); ricopia "quando". NON aggiungere ruolo o azienda: queste esperienze non vanno presentate come impieghi formali.
 - "competenze": ricopia la lista delle competenze dal profilo.
 - "formazione": una voce per ogni titolo del profilo, { "titolo", "istituto", "anno" }. Ricopia i campi dal profilo.
@@ -806,7 +889,7 @@ Genera un CV con le sezioni qui sotto, ricavandole dal profilo. Alcuni campi si 
 - "tipo": metti sempre la stringa "cv_mirato".
 - "intestazione": { "nome" } — ricopia il nome dal profilo.
 - "sommario": campo-prosa. Una sintesi d'insieme del profilo, orientata all'annuncio (vedi sezione 2).
-- "esperienze_professionali": una voce per ogni esperienza formale del profilo, { "ruolo", "azienda", "durata", "descrizione" }. Ricopia ruolo, azienda e durata (campi-fatto); scrivi "descrizione" sintetizzando "cosa_facevo" (campo-prosa, vedi sezione 2).
+- "esperienze_professionali": una voce per ogni esperienza formale del profilo, { "ruolo", "azienda", "durata", "descrizione" }. Ricopia ruolo, azienda e durata (campi-fatto); scrivi "descrizione" sintetizzando "cosa_facevo" (campo-prosa, vedi sezione 2). Se l'esperienza del profilo ha "tipo" valorizzato (tirocinio o stage), rendi esplicito il tipo nel campo "ruolo" (es. "Tirocinio — Test e sviluppo applicazioni AI", "Stage — …") e presentala come tirocinio/stage, non come un impiego dipendente. Se "tipo" è vuoto, è un impiego normale: non chiamarlo tirocinio.
 - "altre_esperienze": una voce per ogni esperienza informale del profilo, { "descrizione", "quando" }. Scrivi "descrizione" a partire da "cosa_facevo" e "con_chi" (campo-prosa); ricopia "quando". NON aggiungere ruolo o azienda: queste esperienze non vanno presentate come impieghi formali.
 - "competenze": ricopia la lista delle competenze dal profilo.
 - "formazione": una voce per ogni titolo del profilo, { "titolo", "istituto", "anno" }. Ricopia i campi dal profilo.
