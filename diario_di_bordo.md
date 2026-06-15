@@ -910,3 +910,28 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Terminazione per costruzione (dopo il collaudo)**: nello smaltimento un frammento è **consumato una volta sola** e non rientra mai in `pending`; ciò che non si struttura **non rimbalza**, lo dichiaro **"lasciato fuori"**. Ho scelto *terminazione garantita + perdita visibile* invece di *re-instradamento perfetto*: per un contenuto di confine come il servizio civile l'unico modo per non avvitarsi è fermarsi e dirlo. Ri-collaudato: converge fino alla generazione, 6/6 verdi (stage con `tipo`, corso in avanti, magazziniere all'indietro, `pending` svuotato). La scelta più ricca — far collocare all'utente gli "esclusi" — è annotata in `idee_future`.
 
 💡 *Mia intuizione / scelta ragionata* — Il filo che tiene insieme tutto il prodotto è la **fedeltà ai miei dati**, e ha due nemici simmetrici: aggiungere ciò che non ho detto (invenzione) e perdere ciò che ho detto (smarrimento). Finora avevo guardato solo il primo. La lezione di questo step è che la stessa rete — *l'LLM propone, io confermo* — li ferma entrambi: non lascia entrare il falso e non lascia uscire il vero.
+
+### Step 1.27 — Il disegno top-down: mettere per iscritto l'architettura nata di fatto
+
+*Il mio tutor ha osservato una cosa giusta: ho costruito CV-COACH dal basso — prima i prompt, gli schemi, gli anelli; l'architettura è emersa strada facendo, mai disegnata. Mi ha dato una traccia strutturale (introduzione, funzioni fondamentali, emissione documenti) e mi ha chiesto di svilupparla in un documento completo, per poi, in un secondo tempo, riallineare il progetto a quel disegno. Questo step è il primo passo: il documento, non ancora il riallineamento del codice.*
+
+**Cosa ho fatto**
+- **Nuovo file `architettura.md`**: ho sviluppato la traccia del tutor in un disegno top-down completo. Per ogni funzione una griglia fissa — *cosa fa · cosa entra → cosa esce · dove vive oggi · stato* — con la mappa esplicita fra il mio vocabolario (**anelli 1-4**) e il suo (**voci 2.x**).
+- **Le funzioni e i loro buchi**: ho mappato dove ogni voce vive nel progetto e ho marcato i **tre gap** — la **mitigazione (2.2.4)**, resa componente esplicito tra anello 3 e anello 4, e le due fonti di profilo mancanti (**2.1.2** estrazione da CV preesistente, **2.1.3** da LinkedIn/web).
+- **Quattro viste che la traccia funzionale non copriva**: una **vista-dati** ("un profilo, molti CV": il profilo come hub disaccoppiante da cui tutto si dirama), i **principi trasversali** (JSON come scambio, compito ristretto, architettura ibrida, due modelli, le due bussole etiche, normalizzazione leggera), una **vista runtime** (front-end ↔ aiutante Node ↔ LLM, gli endpoint come confini) e una **vista evolutiva** (cosa migra verso VB.NET — prompt+schema — vs cosa è impalcatura).
+- **Niente duplicati**: il documento **rimanda** a `prompt_design.md` per prompt e schemi, a `README`/`diario` per lo stato, a `idee_future.md` per il backlog — non li ricopia. Verificato a macchina che `/struttura` serve davvero sia l'anello 1 sia l'anello 2 (così l'avevo scritto). Aggiunta la riga di `architettura.md` alla tabella di `CLAUDE.md` con modalità **statico-strutturale**.
+
+**Cosa ho imparato**
+- **Una scomposizione per funzioni è una sola vista, non l'architettura intera.** La traccia del tutor è ottima come asse funzionale (i *verbi*: estrai, confronta, genera), ma da sola non bastava: mancava la vista dei *sostantivi* — gli artefatti dati che fluiscono. Per questo progetto i dati **sono** l'architettura.
+- **Disegnare dopo aver costruito ha un vantaggio**: il disegno non è un'ipotesi, è la fotografia di scelte già validate sul campo. Scrivendolo ho dovuto dare un nome a cose che facevo senza nominarle — "un profilo, molti CV", "fonte di fatti vs segnale di mira", "l'LLM comprende, il codice rende consistente".
+
+**Dove ho faticato / cosa non era ovvio**
+- Decidere **quanto** aggiungere alla traccia senza gonfiarla: è un MVP di tirocinio, non serve un trattato di architettura. Ho scelto la proporzione — vista-dati e principi come sezioni piene (sono il cuore), runtime ed evolutiva come sezioni brevi.
+- Il rischio del **documento-bussola stantio**: un'architettura disallineata dal codice è peggio di nessuna. Da qui la scelta sulla modalità di aggiornamento (sotto).
+
+**Cosa ho deciso e perché**
+- **`architettura.md` indipendente dai prompt e dallo stato**: vive al livello del disegno e punta agli altri file, così non invecchia a ogni step e non duplica nulla (regola di progetto #4).
+- **Incluso in "aggiorna-tutto", ma in modalità *statico-strutturale***: avevo pensato di lasciarlo fuori (è anche una bozza per il tutor, con vita propria), ma escluderlo rischiava di farlo restare indietro proprio quando i gap si chiuderanno (Fase C, ❌ → ✅). Soluzione: dentro l'inventario, ma toccato **solo quando cambia il disegno**, mai per lo stato corrente. Stessa logica conservativa di `research_notes.md`.
+- **Il documento prima del codice**: niente modifiche a `server.js` o `prompt_design.md` finché il disegno non è approvato (anche dal tutor). Inverto il metodo bottom-up usato finora — il codice seguirà l'architettura, non il contrario.
+
+💡 *Mia intuizione / scelta ragionata* — Costruire dal basso mi ha dato un sistema che **funziona**; disegnare dall'alto mi dà un sistema che **so spiegare**. Non sono in conflitto: il bottom-up ha trovato le soluzioni, il top-down ne rivela la forma e dove mancano pezzi. Il documento non cambia una riga di codice, ma cambia cosa vedo quando lo guardo — ed è da lì che parte il lavoro che resta.
