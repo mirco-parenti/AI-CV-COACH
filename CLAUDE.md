@@ -56,6 +56,10 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
 - **Stato e pipeline (fonte viva)**: per pipeline e stato aggiornati vedi
   `README.md` (sezione *Stato*) e l'ultimo `### Step` del `diario_di_bordo.md`.
   **Non duplicare qui lo stato** (così questo file non va mai stantio).
+- **Architettura (puntatore)**: il disegno **top-down** del sistema — funzioni (voci 2.x ↔
+  anelli 1-4), vista-dati ("un profilo, molti CV"), principi trasversali, runtime e gap
+  aperti — è in `architettura.md`. È la bussola per progettare i componenti mancanti; il
+  file è **statico-strutturale** (si aggiorna solo quando cambia il disegno, non lo stato).
 - **Modelli (puntatore)**: quali modelli si usano e con che criterio (estrazione vs
   ragionamento) è in `prompt_design.md` ("Modelli usati") e nelle costanti
   `MODEL_SEMPLICE` / `MODEL_RAGIONAMENTO` di `server.js`.

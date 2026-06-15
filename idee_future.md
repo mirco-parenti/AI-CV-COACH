@@ -9,6 +9,23 @@ pipeline sta nel `README.md` (sezione *Stato*) e nell'ultimo `### Step` del
 voce dice **cos'è · perché è futura · dove se ne parla** (puntatore a diario/prompt_design).
 Le idee nuove si annotano con **data e motivo**. Aggiornato con "aggiorna-tutto".
 
+## Gap del disegno top-down (Fase B/C)
+
+Tre componenti previsti dall'architettura ma **non ancora costruiti**, identificati
+formalmente nel disegno top-down. Il dettaglio (cosa entra → esce, complessità, dove si
+innesta) è in `architettura.md` §8: qui resta solo il puntatore, per tenere il backlog
+completo senza duplicare.
+- **Mitigazione e sintesi (2.2.4)** — bridging argomentativo fra anello 3 e anello 4: dai
+  gap del match → argomenti di equivalenza funzionale ancorati al profilo. Complessità
+  media. *(2026-06-15 — formalizzato nel disegno top-down; diario Step 1.27; architettura.md §8.)*
+- **Estrazione da CV preesistente (2.1.2)** — parsing di un CV (PDF/testo) → stesso profilo
+  JSON. Complessità alta. *(2026-06-15 — formalizzato nel disegno top-down; architettura.md §8.)*
+- **Estrazione da LinkedIn / sito web (2.1.3)** — fetch di un link pubblico → stesso profilo
+  JSON. Complessità alta. *(2026-06-15 — formalizzato nel disegno top-down; architettura.md §8.)*
+
+Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annunci insieme)
+— prospettiva futura, non gap dell'MVP. *(architettura.md §8.)*
+
 ## Front-end & pipeline
 - ✅ **Integrazione front-end**: **realizzata** — i quattro anelli sono ora un unico flusso
   in `index.html` (dialogo profilo → bivio 📄 CV-1 / annuncio → confronto in stelle →

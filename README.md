@@ -8,7 +8,7 @@ L'obiettivo del progetto è aiutare un utente a costruire un profilo professiona
 
 ## Stato del progetto
 
-Questo è un progetto di apprendimento sviluppato in modo trasparente nell'ambito del mio tirocinio presso Aviolab AI. Il repository documenta sia il codice sia il metodo di lavoro, incluso un diario di bordo (`diario_di_bordo.md`) che traccia decisioni e ragionamenti a ogni passo.
+Questo è un progetto di apprendimento sviluppato in modo trasparente nell'ambito del mio tirocinio presso Aviolab AI. Il repository documenta sia il codice sia il metodo di lavoro, incluso un diario di bordo (`diario_di_bordo.md`) che traccia decisioni e ragionamenti a ogni passo e un documento di architettura (`architettura.md`) che disegna il sistema dall'alto — funzioni, dati e principi.
 
 Ogni fase del progetto viene chiusa con documentazione, riflessioni e cronologia di commit verificabile, prima di passare alla successiva.
 
