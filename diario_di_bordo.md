@@ -935,3 +935,52 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Il documento prima del codice**: niente modifiche a `server.js` o `prompt_design.md` finché il disegno non è approvato (anche dal tutor). Inverto il metodo bottom-up usato finora — il codice seguirà l'architettura, non il contrario.
 
 💡 *Mia intuizione / scelta ragionata* — Costruire dal basso mi ha dato un sistema che **funziona**; disegnare dall'alto mi dà un sistema che **so spiegare**. Non sono in conflitto: il bottom-up ha trovato le soluzioni, il top-down ne rivela la forma e dove mancano pezzi. Il documento non cambia una riga di codice, ma cambia cosa vedo quando lo guardo — ed è da lì che parte il lavoro che resta.
+
+### Step 1.28 — La mitigazione (2.2.4): nominare un gap senza mentire
+
+*Con l'architettura approvata dal tutor, ho aperto la Fase B — chiudere i gap del disegno — partendo dal più abbordabile: la **mitigazione**. È il componente fra il confronto (anello 3) e la generazione (anello 4) che, dati i requisiti che non possiedo, cerca nel mio profilo qualcosa di funzionalmente affine e ne costruisce l'argomento (il classico "non sono laureato, ma ho una lunga esperienza sul campo"). Questo step è progettazione: prompt e schema, non ancora codice.*
+
+**Cosa ho fatto**
+- **Progettato il produttore** in `prompt_design.md`: nuovo artefatto `mitigazioni` (lista di `{ requisito_gap, categoria, esito_origine, elemento_profilo, ponte }`) + il prompt che lo genera, su **Sonnet** (serve cogliere equivalenze funzionali, come nel confronto). Ingressi: profilo + i giudizi dell'anello 3; lavora **solo** sui gap reali (`non soddisfatto` / `in parte`).
+- **Connessa la mitigazione alla ✉️ lettera**: aggiunto il 5° blocco `<mitigazioni>` al prompt della lettera e riscritta la regola sui gap — da «la lettera tace sui gap» a «**tace sui gap non mitigabili; usa le mitigazioni fornite per nominare onestamente un gap e il suo ponte**».
+- **Aggiorna-tutto**: propagato il lavoro a `architettura.md` (decisione di design: le mitigazioni le consuma la sola lettera), `README` (Stato), `idee_future.md` (gap 2.2.4 spuntato come progettato), e questa pagina.
+
+**Cosa ho imparato**
+- La mitigazione è il **gemello onesto** dell'anti-invenzione: l'anti-invenzione vieta di aggiungere ciò che non ho; la mitigazione mi lascia *valorizzare* ciò che ho di affine, ma a una condizione ferrea — **non nascondere mai l'assenza** del requisito. "Non ho X, ma ho Y" è onesto; "ho X" sarebbe una bugia.
+- **Tacere è una risposta valida.** Se per un gap non c'è nel profilo nulla di davvero affine, il componente non produce niente: meglio nessun argomento che uno forzato. L'ho codificato come comportamento atteso (lista vuota ammessa), non come fallimento.
+
+**Dove ho faticato / cosa non era ovvio**
+- La **tensione con una regola esistente**: il 🎯 CV-2 e la lettera "tacciono sui gap". La mitigazione invece il gap lo *nomina*. L'ho sciolta separando i due documenti — il bridging ha senso retorico nella **lettera**, non nel CV: così la lettera consuma le mitigazioni, il CV-2 resta sobrio (decisione A).
+- La **sincronizzazione prompt↔codice** (regola di progetto #1): cambiando il prompt della lettera ho creato una divergenza con `server.js`. Cablarla subito avrebbe **rotto** l'anello 4 funzionante (le mitigazioni non esistono finché non c'è il loro cablaggio). Ho scelto di non toccare il codice e di **documentare** la divergenza come differita alla Fase C, invece di nasconderla.
+
+**Cosa ho deciso e perché**
+- **Le mitigazioni le consuma la sola lettera** (CV-2 sobrio): il CV resta un documento di fatti; la lettera è il luogo dove un argomento "non ho X, ma ho Y" suona naturale e onesto.
+- **Incluso anche `altri_requisiti`** (patente, automunito, domicilio…), ma con l'onestà come paletto: se non ho un requisito lo dico, e porto un dato affine solo se è davvero nel profilo. Niente affinità spacciata per possesso.
+- **Materia prima, non prosa pronta**: il componente fornisce il *nesso logico*, non la frase finita — la prosa resta compito dell'anello 4 (principio del compito ristretto).
+- **Progettazione prima del codice**: coerente con la Fase A, ho fissato prompt e schema; il cablaggio (endpoint + lettera a 5 blocchi) sarà la Fase C.
+
+💡 *Mia intuizione / scelta ragionata* — La mitigazione mi ha mostrato che l'onestà non è solo "non aggiungere": è anche **non sottrarre**. Il sistema sa già non inventare ciò che non ho; ora sa anche dichiarare apertamente ciò che mi manca e, accanto, ciò che ho di vicino. È più difficile da scrivere di una bugia — e vale esattamente per questo.
+
+### Step 1.29 — La mitigazione al lavoro: cablaggio, prova sul campo e tre fix di onestà
+
+*Avevo progettato la mitigazione (Step 1.28) lasciando il cablaggio "a dopo". Ho deciso invece di chiuderlo subito: scrivere il codice, farlo girare davvero e vedere cosa produce. È andata come dovrebbe andare — il primo test ha mostrato difetti che a tavolino non avevo visto, e li ho corretti.*
+
+**Cosa ho fatto**
+- **Cablaggio (Fase C)**: nuovo endpoint dedicato **`/mitiga`** in `server.js` (input profilo + giudizi → `mitigazioni`, su Sonnet), lettera portata a **cinque blocchi** col blocco `<mitigazioni>`, e `index.html` che chiama `/mitiga` prima della lettera. Prompt **identici** fra `prompt_design.md` e `server.js`, verificato char-by-char con uno script che neutralizza i segnaposto `${JSON.stringify}`.
+- **Prova sul campo** (test prima, valutazione dopo): profilo magazziniere contro un annuncio di logistica con gap voluti (SAP, diploma di ragioneria, patentino muletto, patente). Pipeline reale `/confronta → /mitiga → /genera-lettera`.
+- **Tre fix dopo il test**: (1) **tace** quando l'affinità è debole invece di produrre una voce che si auto-confuta; (2) **niente speculazione** sul possesso ("forse il patentino ce l'ha ma non l'ha scritto"); (3) **esclude il `contesto`** (mansioni, sede…), che non è una lacuna del candidato.
+
+**Cosa ho imparato**
+- **Il sistema vero insegna più del ragionamento a tavolino.** Avevo scritto "tacere è corretto", ma alla prova il modello riempiva *ogni* gap, usando il campo `ponte` per spiegare che il ponte non c'era. Il difetto non si vedeva sulla carta: si è visto solo facendolo girare. Dopo il fix, le mitigazioni sono scese da 5 a 3 e l'unico appiglio debole (Excel) è giustamente sparito.
+- **Un LLM tende a riempire.** "Non produrre niente" è un comportamento che va **insegnato esplicitamente** e con una soglia alta ("regge a un colloquio o mi arrampico sugli specchi?"), altrimenti il modello preferisce sempre dire qualcosa.
+
+**Dove ho faticato / cosa non era ovvio**
+- La **sincronizzazione char-by-char** prompt↔codice: i due testi sono identici tranne i punti d'inserimento dei JSON. Ho scritto una verifica che li normalizza, così "identico" è controllabile a macchina e non a occhio.
+- Il **confine fra ponte onesto e ponte forzato**: è un giudizio di grado, non una regola secca. La soglia alta + il divieto di voci auto-confutanti lo rendono governabile, ma il caso limite (il diploma di ragioneria "coperto" dal rigore numerico del magazzino) resta un giudizio fine.
+
+**Cosa ho deciso e perché**
+- **Endpoint dedicato `/mitiga`** (non estendere `/confronta`): un confine per compito, testabile da solo, e `/confronta` non paga la mitigazione quando non serve.
+- **Mitigazione pigra nel front-end**: si calcola solo se l'utente vuole la lettera, e se fallisce la lettera si fa comunque (tace sui gap). Non blocco mai la generazione per un componente accessorio.
+- **Soglia alta e onestà cablata nel prompt**: meglio una lista vuota che un argomento che non regge; e mai trasformare un'assenza in un "forse ce l'ha".
+
+💡 *Mia intuizione / scelta ragionata* — La parte di valore non è stata scrivere il prompt, ma **guardarlo sbagliare e correggerlo sui dati**. La prima versione sembrava perfetta finché non l'ho vista all'opera: lì ho capito che "tacere" non era stato insegnato abbastanza forte. Il test non ha confermato il mio lavoro — l'ha migliorato. È la differenza tra "credo che funzioni" e "ho visto cosa fa".

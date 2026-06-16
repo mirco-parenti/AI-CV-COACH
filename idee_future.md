@@ -15,9 +15,14 @@ Tre componenti previsti dall'architettura ma **non ancora costruiti**, identific
 formalmente nel disegno top-down. Il dettaglio (cosa entra → esce, complessità, dove si
 innesta) è in `architettura.md` §8: qui resta solo il puntatore, per tenere il backlog
 completo senza duplicare.
-- **Mitigazione e sintesi (2.2.4)** — bridging argomentativo fra anello 3 e anello 4: dai
-  gap del match → argomenti di equivalenza funzionale ancorati al profilo. Complessità
-  media. *(2026-06-15 — formalizzato nel disegno top-down; diario Step 1.27; architettura.md §8.)*
+- ✅ **Mitigazione e sintesi (2.2.4)** — **completata** (progettata, cablata, provata):
+  bridging argomentativo fra anello 3 e anello 4 (dai gap del match → argomenti di
+  equivalenza funzionale ancorati al profilo, sempre onesti). Prompt + schema in
+  `prompt_design.md`, cablata in `server.js` (endpoint dedicato `/mitiga`) e `index.html`; la
+  consuma la **sola ✉️ lettera** (il 🎯 CV-2 resta sobrio). Provata end-to-end e raffinata
+  (tace sui ponti deboli, niente speculazione sul possesso, esclude il `contesto`).
+  *(2026-06-15 — formalizzata nel disegno top-down; 2026-06-16 — progettata + cablata +
+  testata, diario Step 1.28-1.29; architettura.md §2.2.4/§6.)*
 - **Estrazione da CV preesistente (2.1.2)** — parsing di un CV (PDF/testo) → stesso profilo
   JSON. Complessità alta. *(2026-06-15 — formalizzato nel disegno top-down; architettura.md §8.)*
 - **Estrazione da LinkedIn / sito web (2.1.3)** — fetch di un link pubblico → stesso profilo

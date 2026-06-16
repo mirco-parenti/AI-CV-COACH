@@ -1,6 +1,6 @@
 # AI-CV-COACH
 
-**Stato:** 🚧 In sviluppo attivo — MVP completo end-to-end: i 4 anelli sono integrati in un unico flusso utente nel browser (`index.html`). ✅ profilo guidato · ✅ analisi annuncio · ✅ confronto + punteggio (match in stelle 0–5) · ✅ generazione (📄 CV-1 base + 🎯 CV-2 mirato + ✉️ lettera di presentazione) — flusso testato end-to-end nel browser
+**Stato:** 🚧 In sviluppo attivo — MVP completo end-to-end: i 4 anelli sono integrati in un unico flusso utente nel browser (`index.html`). ✅ profilo guidato · ✅ analisi annuncio · ✅ confronto + punteggio (match in stelle 0–5) · ✅ generazione (📄 CV-1 base + 🎯 CV-2 mirato + ✉️ lettera di presentazione) — flusso testato end-to-end nel browser. Post-MVP: avviata la **Fase B** (chiusura dei gap del disegno top-down) con la **mitigazione 2.2.4** completa — progettata, cablata (endpoint `/mitiga`, lettera a 5 blocchi) e provata end-to-end.
 
 AI-CV-COACH è una web app sperimentale sviluppata come progetto di stage presso Aviolab AI.
 

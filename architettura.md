@@ -104,14 +104,14 @@ pipeline indipendente da *come* il profilo è stato raccolto (vedi sezione 4).
 ### 2.2 Valutazione del match con l'annuncio
 
 Confrontare il profilo con un annuncio e produrre un giudizio strutturato, un punteggio
-orientativo e — gap aperto — gli argomenti che colmano i divari.
+orientativo e gli argomenti che colmano i divari (la mitigazione 2.2.4).
 
 | Voce | Cosa fa | Entra → Esce | Dove vive oggi | Stato |
 |---|---|---|---|---|
 | **2.2.1** Estrazione da annuncio | Struttura il testo dell'annuncio in requisiti + contesto | testo annuncio → **annuncio JSON** | Anello 2 (`/struttura`, "Analisi annuncio" in `prompt_design.md`) | ✅ Completo |
 | **2.2.2** Estrazione dal profilo | *(vedi nota sotto)* | — | il profilo JSON dell'anello 1 | ✅ (già disponibile) |
 | **2.2.3** Comparazione + forza/debolezza | Giudica voce per voce il match e calcola il punteggio in stelle | profilo JSON + annuncio JSON → **giudizi JSON + punteggio** | Anello 3 (`/confronta`) | ✅ Completo |
-| **2.2.4** Mitigazione e sintesi | Per ogni gap, cerca nel profilo un elemento funzionalmente affine e ne costruisce l'argomento | profilo + giudizi (focus su gap) → **mitigazioni JSON** | — | ❌ Gap (vedi §8) |
+| **2.2.4** Mitigazione e sintesi | Per ogni gap, cerca nel profilo un elemento funzionalmente affine e ne costruisce l'argomento | profilo + giudizi (focus su gap) → **mitigazioni JSON** | `/mitiga` (`promptMitigazione` in `server.js`) | ✅ Completo |
 
 **Nota su 2.2.2 ("estrazione dal profilo").** Non è un'estrazione a sé: il confronto
 (2.2.3) riceve **direttamente il profilo JSON già strutturato** dall'anello 1, non un testo
@@ -119,13 +119,15 @@ da ri-estrarre. Nella traccia del tutor la voce segna il fatto che il match ha *
 ingressi già strutturati** (profilo + annuncio): l'"estrazione del profilo" è avvenuta a
 monte, nell'anello 1. Nessun componente nuovo da costruire qui.
 
-**Sulla 2.2.4 (mitigazione).** È un componente **mancante e distinto**, da non confondere
+**Sulla 2.2.4 (mitigazione).** È un componente **distinto**, da non confondere
 con il clamp del punteggio (anello 3). La mitigazione è **bridging argomentativo**: dati i
 gap (esiti `non soddisfatto` / `in parte`), l'AI cerca nel profilo un elemento reale
 funzionalmente vicino al requisito mancante e costruisce l'argomento esplicito (es. *"non
 sono laureato, ma ho una lunga esperienza di programmazione sul campo"*). Resta dentro
 l'anti-invenzione: **se l'equivalenza funzionale non esiste nel profilo, tace**. Il suo
-output alimenterebbe l'anello 4 (oggi CV-2 e lettera ricevono solo i giudizi grezzi).
+output alimenta la generazione: per **scelta di design** lo consuma la **sola ✉️ lettera**
+(il bridging ha senso retorico nella lettera, non nel CV); il 🎯 CV-2 resta sobrio e tace
+sui gap.
 
 ### 2.3 Emissione di documenti per il contatto con l'offerente
 
@@ -167,12 +169,12 @@ Il ponte fra i due vocabolari, e l'ordine in cui i componenti si compongono.
                                         │
                           [2.2.4 NUOVO] mitigazione (profilo + gap → argomenti)
                                         │
-   profilo + annuncio + giudizi (+ mitigazioni) ─→ [2.3.2] 🎯 CV-2 ─→ [2.3.3] ✉️ lettera
+   profilo + annuncio + giudizi ─→ [2.3.2] 🎯 CV-2 ─→ [2.3.3] ✉️ lettera (+ mitigazioni)
 ```
 
 Il 📄 CV-1 si dirama già dopo il profilo (non richiede l'annuncio); 🎯 CV-2 e ✉️ lettera
 stanno a valle del confronto. La mitigazione si colloca **tra anello 3 e anello 4**: nasce
-dai giudizi e arricchisce la generazione.
+dai giudizi e arricchisce la **sola ✉️ lettera** (il 🎯 CV-2 resta sobrio).
 
 ---
 
@@ -188,7 +190,7 @@ definiti.
 | **Profilo JSON** | 2.1.x (oggi: anello 1) | 2.2.3, 2.2.4, 2.3.1, 2.3.2, 2.3.3 | "Struttura dati del profilo utente" |
 | **Annuncio JSON** | 2.2.1 (anello 2) | 2.2.3, 2.3.2, 2.3.3 | "Analisi annuncio di lavoro" |
 | **Giudizi + punteggio** | 2.2.3 (anello 3) | 2.2.4, 2.3.2, 2.3.3 | "Confronto profilo-annuncio" |
-| **Mitigazioni JSON** | 2.2.4 *(futuro)* | 2.3.2, 2.3.3 | — (da progettare in Fase B) |
+| **Mitigazioni JSON** | 2.2.4 | 2.3.3 (✉️ lettera) | "Mitigazione e sintesi (2.2.4)" |
 | **CV JSON** (base / mirato) | 2.3.1 / 2.3.2 | front-end (impaginazione); CV-2 → 2.3.3 | "Generazione del CV" |
 | **Lettera JSON** | 2.3.3 | front-end (impaginazione) | "Generazione lettera di presentazione" |
 
@@ -268,9 +270,9 @@ I componenti fisici e i confini fra loro (chi parla con chi, dove passano i dati
   che il front-end conserva e ripassa).
 
 I **confini** del sistema sono gli **endpoint**: `/struttura` (anelli 1 e 2),
-`/confronta` (anello 3), `/genera-cv` e `/genera-lettera` (anello 4). La 2.2.4
-(mitigazione) introdurrà un nuovo confine — endpoint dedicato o estensione di `/confronta`:
-decisione di Fase C.
+`/confronta` (anello 3), `/mitiga` (mitigazione 2.2.4), `/genera-cv` e `/genera-lettera`
+(anello 4). Per la 2.2.4 si è scelto un **endpoint dedicato** `/mitiga` (input profilo +
+giudizi), non l'estensione di `/confronta`: un confine per compito.
 
 ---
 
@@ -298,9 +300,11 @@ I componenti previsti dal disegno ma non ancora costruiti. Qui se ne fissa solo
 **identità e stato**: la **progettazione** (prompt + schema) è la Fase B; l'**adattamento
 del codice** la Fase C.
 
+La **2.2.4 (mitigazione)** — primo gap — è ora **chiusa**: progettata, cablata (endpoint
+`/mitiga`, lettera a 5 blocchi) e provata end-to-end (vedi §2.2.4). Restano aperti:
+
 | Voce | Cosa manca | Complessità | Note / puntatori |
 |---|---|---|---|
-| **2.2.4** Mitigazione e sintesi | Nuovo componente fra anello 3 e 4: dai gap → argomenti di equivalenza funzionale; nuovo schema `mitigazioni` consumato dall'anello 4 | **Media** | Modifica minore all'anello 4 per consumarlo. Affine all'idea di *hard-gate*/limiti del punteggio (`idee_future.md`, Match & punteggio) |
 | **2.1.2** Estrazione da CV preesistente | Parsing di un CV (PDF/testo) → stesso profilo JSON | **Alta** | Si innesta sull'hub-profilo (sezione 4): a valle nulla cambia |
 | **2.1.3** Estrazione da LinkedIn / web | Fetch di un link pubblico → stesso profilo JSON | **Alta** | Come sopra; attenzione a robustezza del fetch e dati personali |
 

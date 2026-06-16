@@ -52,7 +52,7 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
 
 - **Come far girare il progetto**: Node ≥ 20.12, **niente dipendenze npm**, chiave in
   `.env` (`ANTHROPIC_API_KEY`, gitignored). Avvio: `npm start` → `http://localhost:3000`.
-  Endpoint: `POST /struttura`, `POST /confronta`, `POST /genera-cv` e `POST /genera-lettera`. Stop del server: `fuser -k 3000/tcp`.
+  Endpoint: `POST /struttura`, `POST /confronta`, `POST /mitiga`, `POST /genera-cv` e `POST /genera-lettera`. Stop del server: `fuser -k 3000/tcp`.
 - **Stato e pipeline (fonte viva)**: per pipeline e stato aggiornati vedi
   `README.md` (sezione *Stato*) e l'ultimo `### Step` del `diario_di_bordo.md`.
   **Non duplicare qui lo stato** (così questo file non va mai stantio).

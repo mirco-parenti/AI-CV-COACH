@@ -942,9 +942,17 @@
 
       // Anello 4 — lettera di presentazione (lettera_mirata).
       async function generaLettera() {
+        // Prima la mitigazione (2.2.4): dai gap del confronto, i ponti onesti per la
+        // lettera. Se fallisce non blocchiamo: la lettera tace sui gap (mitigazioni []).
+        const mit = await postConAttesa(
+          "/mitiga",
+          { profilo, giudizi },
+          "Cerco argomenti per colmare i punti deboli…"
+        );
+        const mitigazioni = (mit && mit.mitigazioni) || [];
         const lettera = await postConAttesa(
           "/genera-lettera",
-          { profilo, annuncio, giudizi, cv: cvMirato },
+          { profilo, annuncio, giudizi, cv: cvMirato, mitigazioni },
           "Scrivo la lettera…"
         );
         if (!lettera) {
