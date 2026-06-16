@@ -114,6 +114,8 @@
       // --- Stato: il profilo, unica fonte di verità (ricalca lo schema). ---
       const profilo = {
         nome: "",
+        contatti: { email: "", telefono: "", citta: "", link: "" },
+        patente: { ha: "", categorie: [] },
         esperienze_formali: [],
         esperienze_informali: [],
         competenze: [],
@@ -397,6 +399,49 @@
           },
           unisci(fr) {
             profilo.nome = fr.nome || "";
+          },
+        },
+        {
+          chiave: "contatti",
+          tipo: "singolo",
+          apertura:
+            "Bene! Ora qualche dato pratico, che useremo così com'è per l'intestazione del CV.\n" +
+            "Scrivimeli pure anche tutti insieme: email, telefono, città, e un eventuale link (LinkedIn o un tuo sito).\n\n" +
+            "E un'ultima cosa, importante: hai la patente di guida? Se sì, di che categoria (es. B)?",
+          mostraScheda(fr) {
+            const c = fr.contatti || {};
+            const p = fr.patente || {};
+            const righe = [];
+            if (c.email) righe.push("Email: " + c.email);
+            if (c.telefono) righe.push("Telefono: " + c.telefono);
+            if (c.citta) righe.push("Città: " + c.citta);
+            if (c.link) righe.push("Link: " + c.link);
+            const pat =
+              p.ha === "sì"
+                ? "sì" +
+                  (Array.isArray(p.categorie) && p.categorie.length
+                    ? " (" + p.categorie.join(", ") + ")"
+                    : "")
+                : p.ha === "no"
+                ? "no"
+                : "non indicata";
+            righe.push("Patente: " + pat);
+            aiDice("Ecco cosa ho capito:\n" + righe.join("\n"));
+          },
+          unisci(fr) {
+            const c = fr.contatti || {};
+            profilo.contatti = {
+              email: c.email || "",
+              telefono: c.telefono || "",
+              citta: c.citta || "",
+              link: c.link || "",
+            };
+            const p = fr.patente || {};
+            profilo.patente = {
+              ha: p.ha || "",
+              categorie: Array.isArray(p.categorie) ? p.categorie : [],
+            };
+            raccogliAltrove(fr, "contatti");
           },
         },
         {
