@@ -27,6 +27,11 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    tabella **«Modalità di aggiornamento per file»** in fondo). È
    **severamente vietato confondere i contenuti di un file con quelli di un altro —
    idem per la forma e il mood** di compilazione. **Sempre doppio controllo.**
+   È un **rito di verifica completo**: si ri-verifica **ogni** file, uno alla volta,
+   **anche quelli già modificati nella stessa sessione**. Per ciascuno: **rilettura
+   integrale** → modalità specifica → aggiornamento se serve (o conferma «non serve»
+   **solo dopo** la verifica, mai prima) → doppio controllo. **Mai saltare un file** con
+   la motivazione «già allineato».
    **Esclusi sempre**: `.env`, `.claude/`, `node_modules/` e tutto ciò che è gitignored;
    i file di config (`.gitignore`, `.gitattributes`, `package.json`) si toccano solo se
    serve. È **repo-scoped**: non tocca `~/.claude/CLAUDE.md` (regole_globali) né l'auto-memoria.

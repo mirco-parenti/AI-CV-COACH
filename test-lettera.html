@@ -171,7 +171,13 @@
       if (lettera.apertura) html += '<div class="apertura">' + escapeHtml(lettera.apertura) + "</div>";
       if (lettera.corpo) html += '<div class="corpo">' + escapeHtml(lettera.corpo) + "</div>";
       if (lettera.chiusura) html += '<div class="chiusura">' + escapeHtml(lettera.chiusura) + "</div>";
-      if (lettera.firma) html += '<div class="firma">' + escapeHtml(lettera.firma) + "</div>";
+      const firma = lettera.firma || {};
+      const nomeFirma = typeof firma === "string" ? firma : firma.nome || "";
+      if (nomeFirma) {
+        html += '<div class="firma">' + escapeHtml(nomeFirma) + "</div>";
+        const recFirma = typeof firma === "string" ? [] : [firma.email, firma.telefono].filter((x) => (x || "").trim());
+        if (recFirma.length) html += '<div class="recapiti">' + escapeHtml(recFirma.join(" · ")) + "</div>";
+      }
       html += "</div>";
 
       html += '<pre class="grezzo">' + escapeHtml(JSON.stringify(lettera, null, 2)) + "</pre>";

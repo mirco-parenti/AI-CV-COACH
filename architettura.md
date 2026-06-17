@@ -311,7 +311,10 @@ La **2.2.4 (mitigazione)** — primo gap — è ora **chiusa**: progettata, cabl
 **Fuori perimetro ora:** il **multi-annuncio** (un profilo confrontato con più annunci in
 una volta) — prospettiva futura, non gap dell'MVP.
 
-Altri raffinamenti già annotati (estensione del profilo a specchio di `altri_requisiti`,
-turno contatti, pending_questions, riordino/omissione nel CV-2, soglia di match,
-robustezza dell'estrazione JSON, ecc.) sono nel **backlog ragionato** `idee_future.md`: non
-si duplicano qui.
+Il **turno contatti** e il **turno patente** dell'anello 1 (con la patente resa
+**confrontabile** nell'anello 3 — primo mattone del profilo "a specchio" degli
+`altri_requisiti`) sono ora **realizzati** (vedi `idee_future.md`, «Realizzate»; diario Step
+1.30-1.31). Altri raffinamenti già annotati (estensione del profilo a specchio agli altri
+`altri_requisiti` — domicilio, disponibilità… —, pending_questions, riordino/omissione nel
+CV-2, soglia di match, robustezza dell'estrazione JSON, ecc.) restano nel **backlog
+ragionato** `idee_future.md`: non si duplicano qui.

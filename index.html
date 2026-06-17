@@ -58,6 +58,7 @@
       .scheda .sommario { font-style: italic; margin: 0.2rem 0 0.4rem; }
       .scheda .blocco { white-space: pre-wrap; margin: 0.3rem 0; }
       .scheda .firma { font-weight: 600; margin-top: 0.4rem; }
+      .scheda .recapiti { color: #555; font-size: 0.9em; }
 
       /* Area di interazione: ospita o la casella di testo o i bottoni. */
       #azione { margin-top: 0.9rem; }
@@ -406,27 +407,19 @@
           tipo: "singolo",
           apertura:
             "Bene! Ora qualche dato pratico, che useremo così com'è per l'intestazione del CV.\n" +
-            "Scrivimeli pure anche tutti insieme: email, telefono, città, e un eventuale link (LinkedIn o un tuo sito).\n\n" +
-            "E un'ultima cosa, importante: hai la patente di guida? Se sì, di che categoria (es. B)?",
+            "Scrivimeli pure anche tutti insieme: email, telefono, domicilio, e un eventuale link (LinkedIn o un tuo sito).",
           mostraScheda(fr) {
             const c = fr.contatti || {};
-            const p = fr.patente || {};
             const righe = [];
             if (c.email) righe.push("Email: " + c.email);
             if (c.telefono) righe.push("Telefono: " + c.telefono);
-            if (c.citta) righe.push("Città: " + c.citta);
+            if (c.citta) righe.push("Domicilio: " + c.citta);
             if (c.link) righe.push("Link: " + c.link);
-            const pat =
-              p.ha === "sì"
-                ? "sì" +
-                  (Array.isArray(p.categorie) && p.categorie.length
-                    ? " (" + p.categorie.join(", ") + ")"
-                    : "")
-                : p.ha === "no"
-                ? "no"
-                : "non indicata";
-            righe.push("Patente: " + pat);
-            aiDice("Ecco cosa ho capito:\n" + righe.join("\n"));
+            aiDice(
+              righe.length
+                ? "Ecco cosa ho capito:\n" + righe.join("\n")
+                : "Non ho colto nessun recapito nella tua risposta."
+            );
           },
           unisci(fr) {
             const c = fr.contatti || {};
@@ -436,12 +429,43 @@
               citta: c.citta || "",
               link: c.link || "",
             };
+            raccogliAltrove(fr, "contatti");
+          },
+        },
+        {
+          chiave: "patente",
+          tipo: "singolo",
+          apertura:
+            "Un'ultima cosa importante per il confronto con gli annunci: hai la patente di guida? " +
+            "Se sì, di che categoria (es. B)? Se ne hai più di una, indicale tutte.",
+          mostraScheda(fr) {
+            const p = fr.patente || {};
+            const pat =
+              p.ha === "sì"
+                ? "sì" +
+                  (Array.isArray(p.categorie) && p.categorie.length
+                    ? " (" + p.categorie.join(", ") + ")"
+                    : "")
+                : p.ha === "no"
+                ? "no"
+                : "non indicata";
+            aiDice("Ecco cosa ho capito:\nPatente: " + pat);
+          },
+          unisci(fr) {
             const p = fr.patente || {};
             profilo.patente = {
-              ha: p.ha || "",
+              // Se l'utente conferma senza essersi pronunciato (scheda "non
+              // indicata" → procede), la patente vale come NON posseduta: "no".
+              ha: p.ha || "no",
               categorie: Array.isArray(p.categorie) ? p.categorie : [],
             };
-            raccogliAltrove(fr, "contatti");
+            raccogliAltrove(fr, "patente");
+          },
+          // Se la patente è dichiarata ma senza categoria, la richiediamo una
+          // seconda volta (può averne più d'una: le raccogliamo tutte). Se
+          // nemmeno così la specifica, si prosegue senza.
+          dopoConferma(prosegui) {
+            chiediCategoriaPatente(prosegui);
           },
         },
         {
@@ -546,7 +570,8 @@
               primario: true,
               onClick: () => {
                 turno.unisci(fr);
-                passaAlProssimo();
+                if (turno.dopoConferma) turno.dopoConferma(passaAlProssimo);
+                else passaAlProssimo();
               },
             },
             {
@@ -557,6 +582,36 @@
               },
             },
           ]);
+        });
+      }
+
+      // Ri-domanda dedicata della categoria patente: parte solo se l'utente ha
+      // dichiarato di averla ("sì") ma non ha detto quale. Riusa l'estrazione
+      // del turno "patente" (restituisce patente.categorie come lista) e si
+      // ferma a una sola ri-domanda: se neanche stavolta la specifica, prosegue.
+      function chiediCategoriaPatente(prosegui) {
+        const p = profilo.patente;
+        if (p.ha !== "sì" || p.categorie.length) return prosegui();
+        aiDice(
+          "Una cosa sola: di che categoria è la tua patente? (es. B) " +
+            "Se ne hai più di una, indicale tutte."
+        );
+        chiediTesto("La tua risposta…", async (risposta) => {
+          utenteDice(risposta);
+          const fr = await chiamaConAttesa("patente", risposta);
+          if (!fr) return chiediCategoriaPatente(prosegui);
+          const cats =
+            fr.patente && Array.isArray(fr.patente.categorie)
+              ? fr.patente.categorie
+              : [];
+          if (cats.length) {
+            profilo.patente.categorie = cats;
+            aiDice("Perfetto: patente " + cats.join(", ") + ".");
+          } else {
+            aiDice("Va bene, proseguiamo senza specificarla.");
+          }
+          raccogliAltrove(fr, "patente");
+          prosegui();
         });
       }
 
@@ -1019,6 +1074,22 @@
         const h = document.createElement("h4");
         h.textContent = (cv.intestazione && cv.intestazione.nome) || "CV";
         testa.appendChild(h);
+        const intest = cv.intestazione || {};
+        const recapiti = [intest.email, intest.telefono, intest.citta, intest.link].filter(
+          (x) => (x || "").trim()
+        );
+        if (recapiti.length) {
+          const r = document.createElement("div");
+          r.className = "recapiti";
+          r.textContent = recapiti.join(" · ");
+          testa.appendChild(r);
+        }
+        if ((intest.patente || "").trim()) {
+          const pt = document.createElement("div");
+          pt.className = "recapiti";
+          pt.textContent = "Patente: " + intest.patente;
+          testa.appendChild(pt);
+        }
         if (cv.sommario) {
           const s = document.createElement("div");
           s.className = "sommario";
@@ -1094,11 +1165,23 @@
             div.appendChild(p);
           }
         }
-        if (lettera.firma) {
+        const firma = lettera.firma || {};
+        const nomeFirma = typeof firma === "string" ? firma : firma.nome || "";
+        if (nomeFirma) {
           const f = document.createElement("div");
           f.className = "firma";
-          f.textContent = lettera.firma;
+          f.textContent = nomeFirma;
           div.appendChild(f);
+          const recFirma =
+            typeof firma === "string"
+              ? []
+              : [firma.email, firma.telefono].filter((x) => (x || "").trim());
+          if (recFirma.length) {
+            const rf = document.createElement("div");
+            rf.className = "recapiti";
+            rf.textContent = recFirma.join(" · ");
+            div.appendChild(rf);
+          }
         }
         appendiInChat(div);
       }

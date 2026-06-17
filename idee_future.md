@@ -7,22 +7,16 @@ pipeline sta nel `README.md` (sezione *Stato*) e nell'ultimo `### Step` del
 
 *Come si compila questo file (modalità):* una voce per idea, raggruppata per area; ogni
 voce dice **cos'è · perché è futura · dove se ne parla** (puntatore a diario/prompt_design).
-Le idee nuove si annotano con **data e motivo**. Aggiornato con "aggiorna-tutto".
+Le idee nuove si annotano con **data e motivo**. Le idee **realizzate** si spuntano (✅) e,
+quando si accumulano, migrano nella sezione **«Realizzate»** in fondo: così il backlog
+attivo qui sopra resta **solo-futuro** e non induce in errore. Aggiornato con "aggiorna-tutto".
 
 ## Gap del disegno top-down (Fase B/C)
 
-Tre componenti previsti dall'architettura ma **non ancora costruiti**, identificati
-formalmente nel disegno top-down. Il dettaglio (cosa entra → esce, complessità, dove si
-innesta) è in `architettura.md` §8: qui resta solo il puntatore, per tenere il backlog
-completo senza duplicare.
-- ✅ **Mitigazione e sintesi (2.2.4)** — **completata** (progettata, cablata, provata):
-  bridging argomentativo fra anello 3 e anello 4 (dai gap del match → argomenti di
-  equivalenza funzionale ancorati al profilo, sempre onesti). Prompt + schema in
-  `prompt_design.md`, cablata in `server.js` (endpoint dedicato `/mitiga`) e `index.html`; la
-  consuma la **sola ✉️ lettera** (il 🎯 CV-2 resta sobrio). Provata end-to-end e raffinata
-  (tace sui ponti deboli, niente speculazione sul possesso, esclude il `contesto`).
-  *(2026-06-15 — formalizzata nel disegno top-down; 2026-06-16 — progettata + cablata +
-  testata, diario Step 1.28-1.29; architettura.md §2.2.4/§6.)*
+Componenti previsti dall'architettura ma **non ancora costruiti**, identificati formalmente
+nel disegno top-down. Dei tre individuati, la **2.2.4 (mitigazione)** è realizzata (vedi
+«Realizzate»); restano i due di estrazione. Il dettaglio (cosa entra → esce, complessità,
+dove si innesta) è in `architettura.md` §8: qui resta solo il puntatore.
 - **Estrazione da CV preesistente (2.1.2)** — parsing di un CV (PDF/testo) → stesso profilo
   JSON. Complessità alta. *(2026-06-15 — formalizzato nel disegno top-down; architettura.md §8.)*
 - **Estrazione da LinkedIn / sito web (2.1.3)** — fetch di un link pubblico → stesso profilo
@@ -32,10 +26,6 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
 — prospettiva futura, non gap dell'MVP. *(architettura.md §8.)*
 
 ## Front-end & pipeline
-- ✅ **Integrazione front-end**: **realizzata** — i quattro anelli sono ora un unico flusso
-  in `index.html` (dialogo profilo → bivio 📄 CV-1 / annuncio → confronto in stelle →
-  🎯 CV-2 → ✉️ lettera). Le `test-*.html` restano come banchi di prova per-anello.
-  *(diario Step 1.24.)*
 - **Estrazione JSON robusta al preambolo**: `estraiJson` (lato server, usato da tutti gli
   endpoint) toglie il **recinto** ```` ```json ```` ma non un eventuale **preambolo in
   prosa** prima del JSON; in quel caso `JSON.parse` fallisce e l'endpoint risponde 502.
@@ -48,25 +38,24 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
 ## Profilo, annuncio & schema
 - **Estensione del profilo** a specchio di `altri_requisiti` (domicilio, disponibilità,
   patente, automunito, età, iscrizione albo, idoneità): rende ricavabili nel match dati
-  che oggi escono `non determinabile`. **Non è un prerequisito** (`altri_requisiti` è già
-  confrontabile). Attenzione alla **sensibilità** dei dati personali (domicilio, età);
-  probabile nuovo turno nell'anello 1. *(Diario Step 1.14.)*
-- **Turno contatti nell'anello 1**: aggiungere un turno che raccolga i contatti
-  (e in prospettiva lingue, link) nel profilo. Diventa concreto con l'anello 4: oggi
-  l'**intestazione del CV ha solo il nome**, perché i contatti non sono nello schema MVP.
-  *(2026-06-09 — emerso nel design dell'anello 4; prompt_design.md, note schema profilo.)*
+  che oggi escono `non determinabile`. **Primo mattone realizzato** — la **patente** è
+  raccolta e confrontabile (vedi «Realizzate»). Il **domicilio** è ora raccolto come
+  **recapito** (campo `citta`) ma **non ancora confrontato**; restano da rendere confrontabili
+  domicilio, età, ecc. La **disponibilità** (turni, trasferte) per ora **non si raccoglie**
+  (decisione 2026-06-17). **Non è un prerequisito** (`altri_requisiti` è già confrontabile).
+  Attenzione alla **sensibilità** dei dati personali (domicilio, età); ogni nuovo dato è un
+  possibile turno nell'anello 1. *(Diario Step 1.14 e 1.30-1.32.)*
+- **Domicilio confrontabile / automunito**: il **domicilio** è ora chiesto e raccolto nel
+  turno contatti (campo `citta`), ma resta **solo recapito, non confrontato**; renderlo un
+  dato di match (vicinanza alla sede) e aggiungere l'**automunito** è il passo naturale dopo
+  la patente. Da soppesare con la sensibilità del dato.
+  *(2026-06-17 — domicilio raccolto come recapito, Step 1.30-1.32; la confrontabilità è futura.)*
 - **Campi annuncio aggiuntivi**: `livello` (impiegato/operaio/quadro), `settore` — fuori
   per ora (schema snello). *(prompt_design.md, "Da valutare in futuro".)*
 - **Decomposizione dei prompt**: il prompt unico dell'annuncio è già diviso in 5 sezioni
   numerate, pensate per diventare sotto-prompt separati. *(Diario Step 1.10.)*
 
 ## Dialogo (anello 1)
-- ✅ **Anti-perdita con instradamento (`altrove`) + tirocinio (`tipo`)**: **realizzato** —
-  ciò che accenno nel turno sbagliato non si perde più (frammenti verbatim in `altrove`,
-  riproposti e da confermare nel turno giusto: in avanti, o nella passata finale
-  all'indietro); uno stage/tirocinio è marcato e reso esplicito nel CV senza spacciarlo
-  per impiego. *(diario Step 1.26; prompt_design.md, "Convenzione anti-perdita: il campo
-  `altrove`" e nota schema `tipo`.)*
 - **pending_questions**: accantonare le domande saltate o non strutturabili e riprenderle
   in un secondo giro a fine dialogo. Pianificato, non costruito. È **cugino** dell'anti-perdita
   (Step 1.26) ma caso diverso: lì recupero contenuto dato nel turno sbagliato, qui una
@@ -85,8 +74,9 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
 
 ## Match & punteggio (anello 3)
 - **Hard-gate**: un requisito *davvero* squalificante non azzera il punteggio (tetto del
-  clamp −20). Trattarlo come tetto rigido che cratera il match è rimandato.
-  *(Diario Step 1.16-1.17; prompt_design.md, "Limite noto".)*
+  clamp −20). Trattarlo come tetto rigido che cratera il match è rimandato. La **patente**
+  ora confrontabile è il candidato naturale a un futuro hard-gate (oggi pesa solo come
+  priorità). *(Diario Step 1.16-1.17 e 1.30; prompt_design.md, "Limite noto".)*
 - **Taxonomy mapping (ESCO/O*NET)**: mappare le skill su una tassonomia standard per il
   match. Scartato per l'MVP (il match semantico lo fa l'LLM); utile per analisi su grandi
   volumi, non per il singolo match. Fonti GitHub da riprendere:
@@ -96,11 +86,6 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   *(Diario Step 1.10-1.11-1.15.)*
 
 ## Generazione (anello 4)
-- ✅ **Testo visibile per le esperienze informali** nel CV (come presentarle senza
-  "promuoverle" a formali): **realizzato** nell'anello 4 — sezione `altre_esperienze`
-  (`descrizione` che fonde `cosa_facevo`+`con_chi`, più `quando`; mai `ruolo`/`azienda`)
-  con la regola anti-promozione, validata in 📄 CV-1 e 🎯 CV-2.
-  *(prompt_design.md, schema CV e regole d'uso; diario Step 1.20.)*
 - **Riordino dinamico delle sezioni nel CV mirato**: nell'MVP l'ordine delle sezioni è
   **fisso** in entrambi i CV (base e mirato) e il "mirare" avviene nel **contenuto**
   (sommario, dettaglio delle voci); far variare ordine/enfasi delle sezioni in base al
@@ -119,3 +104,33 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   l'utente** (o sconsigliare la generazione) invece di produrre comunque, lasciando comunque
   a lui la scelta finale. *(2026-06-11 — emerso nel primo collaudo con il CV reale di Mirco
   contro un annuncio lontanissimo, Operatore Subacqueo, match 0,1 stelle; diario Step 1.25.)*
+
+## Realizzate
+
+Idee del backlog ormai costruite. Si tengono qui (con il puntatore a dove sono narrate o
+implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
+- ✅ **Mitigazione e sintesi (2.2.4)** — bridging argomentativo onesto fra anello 3 e anello 4
+  (dai gap del match → argomenti di equivalenza funzionale ancorati al profilo). Prompt +
+  schema in `prompt_design.md`, cablata in `server.js` (endpoint `/mitiga`) e `index.html`; la
+  consuma la **sola ✉️ lettera**. Provata e raffinata (tace sui ponti deboli, niente
+  speculazione sul possesso, esclude il `contesto`). *(2026-06-15/16; diario Step 1.28-1.29;
+  architettura.md §2.2.4/§6.)*
+- ✅ **Integrazione front-end** — i quattro anelli sono un unico flusso in `index.html`
+  (dialogo profilo → bivio 📄 CV-1 / annuncio → confronto in stelle → 🎯 CV-2 → ✉️ lettera).
+  Le `test-*.html` restano come banchi di prova per-anello. *(diario Step 1.24.)*
+- ✅ **Anti-perdita con instradamento (`altrove`) + tirocinio (`tipo`)** — ciò che si accenna
+  nel turno sbagliato non si perde più (frammenti verbatim in `altrove`, riproposti e da
+  confermare nel turno giusto: in avanti, o nella passata finale all'indietro); uno
+  stage/tirocinio è marcato e reso esplicito nel CV senza spacciarlo per impiego.
+  *(diario Step 1.26; prompt_design.md, "Convenzione anti-perdita" e nota schema `tipo`.)*
+- ✅ **Testo visibile per le esperienze informali** nel CV — sezione `altre_esperienze`
+  (`descrizione` che fonde `cosa_facevo`+`con_chi`, più `quando`; mai `ruolo`/`azienda`) con
+  la regola anti-promozione, validata in 📄 CV-1 e 🎯 CV-2. *(prompt_design.md, schema CV e
+  regole d'uso; diario Step 1.20.)*
+- ✅ **Turni contatti + patente (anello 1) + patente confrontabile** — due turni distinti:
+  `contatti` (email, telefono, città, link) e `patente` (domanda dedicata, con ri-domanda
+  della categoria e default «non posseduta» se l'utente conferma senza dichiararla). Il campo
+  `patente: { ha, categorie }` è **confrontabile** nell'anello 3 (esce da `non determinabile`);
+  recapiti e patente nell'intestazione di 📄 CV-1 / 🎯 CV-2 e nella firma della ✉️ lettera.
+  **Primo mattone** del "profilo a specchio di `altri_requisiti`".
+  *(2026-06-17; diario Step 1.30-1.31; prompt_design.md, turni `contatti`/`patente` e schema CV/lettera.)*

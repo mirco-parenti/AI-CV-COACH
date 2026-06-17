@@ -2,7 +2,7 @@
   "name": "ai-cv-coach-server",
   "version": "0.1.0",
   "private": true,
-  "description": "Server locale che fa da tramite tra la pagina web e l'API di Anthropic per strutturare il nome dell'utente.",
+  "description": "Server locale che fa da tramite tra la pagina web e l'API di Anthropic: struttura profilo e annuncio, confronta, mitiga e genera CV e lettera.",
   "type": "commonjs",
   "scripts": {
     "start": "node server.js"

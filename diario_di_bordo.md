@@ -984,3 +984,74 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Soglia alta e onestà cablata nel prompt**: meglio una lista vuota che un argomento che non regge; e mai trasformare un'assenza in un "forse ce l'ha".
 
 💡 *Mia intuizione / scelta ragionata* — La parte di valore non è stata scrivere il prompt, ma **guardarlo sbagliare e correggerlo sui dati**. La prima versione sembrava perfetta finché non l'ho vista all'opera: lì ho capito che "tacere" non era stato insegnato abbastanza forte. Il test non ha confermato il mio lavoro — l'ha migliorato. È la differenza tra "credo che funzioni" e "ho visto cosa fa".
+
+### Step 1.30 — Contatti e patente: i recapiti nel CV, e la patente che entra nel match
+
+*Due dati mancavano da sempre: i recapiti dell'utente (il CV usciva senza email né telefono) e la patente, che il confronto liquidava come `non determinabile` perché non la raccoglievamo — pur essendo spesso un paletto decisivo. Ho deciso di chiuderli insieme, in tre fasi, perché vivono nello stesso turno ma seguono regole opposte: i contatti non si confrontano mai, la patente sì.*
+
+**Cosa ho fatto**
+- **Fase 1 — raccolta**: un nuovo turno `contatti` nell'anello 1 (recapiti: email, telefono, città, link) e un campo dedicato `patente: { ha, categorie }` nel profilo. La domanda chiede la patente **esplicitamente** (mai dedotta); se l'utente dichiara di averla ma non dice la categoria, una **ri-domanda** la chiede una seconda volta — e raccoglie tutte le categorie, perché se ne può avere più d'una.
+- **Fase 2 — confronto**: ho reso la patente **confrontabile** nell'anello 3. Ora esce da `non determinabile` e si giudica: `ha:"sì"` + categoria richiesta presente → soddisfatto; categoria chiesta ma assente → non soddisfatto; `ha:"no"` → non soddisfatto; non dichiarata → resta `non determinabile`. I contatti, al contrario, ho istruito il prompt a **non confrontarli mai**: sono recapiti, non requisiti.
+- **Fase 3 — generazione**: recapiti e patente sono entrati nell'intestazione di 📄 CV-1 e 🎯 CV-2 (la patente solo se posseduta) e nella firma della ✉️ lettera (nome + email + telefono). Sono **campi-fatto**, ricopiati dal profilo come già il nome — non li scrive l'LLM di testa sua.
+- **Verifica senza browser**: per provare il front-end non potevo installare Chromium (mancavano librerie di sistema). Ho scritto uno **shim DOM minimale** in Node — poche decine di righe — che monta lo `<script>` vero di `index.html` e gli dà un `document` finto, con `fetch` puntato al server reale. Così ho guidato l'intero dialogo fino a CV e lettera e ho verificato i comportamenti nuovi (9 asserzioni verdi), senza un browser e senza dipendenze.
+
+**Cosa ho imparato**
+- **Stesso turno, regole opposte.** Contatti e patente arrivano insieme, ma uno è un recapito (mai giudicato) e l'altro un requisito (giudicato). Tenerli separati fin dallo schema (`contatti` vs `patente`) ha reso il resto lineare: il confronto sa cosa ignorare e cosa pesare.
+- **Meglio prevenire il caso-limite che gestirlo.** Sul "patente posseduta ma categoria ignota" stavo per inventare una regola di confronto; la scelta giusta è stata **chiudere il buco a monte** con la ri-domanda, così il caso quasi non si presenta (e se resta, è `in parte`, onesto).
+- **Non serve un browser per testare la logica di un front-end.** La parte fragile non è il CSS, è il *flusso*: turni, conferme, la ri-domanda condizionale, la costruzione del DOM. Uno shim leggero la esercita tutta, contro il server vero, in pochi secondi.
+
+**Dove ho faticato / cosa non era ovvio**
+- Il **doppio uso della città**: è un recapito (intestazione) ma anche un potenziale dato di match (domicilio). Per ora la raccolgo come contatto e **non** la confronto — il "domicilio confrontabile" resta un'idea futura, per non aprire la questione sensibilità dei dati personali adesso.
+- La **sincronizzazione** dei tanti prompt toccati (confronto, due CV, lettera) fra `prompt_design.md` e `server.js`: ho esteso lo script di verifica char-by-char alle righe nuove, distinguendo le parti-prompt (sincronizzate) dalle parti di sola documentazione del `.md` (lo schema-esempio, che in `server.js` non esiste).
+
+**Cosa ho deciso e perché**
+- **Patente solo confrontabile, non squalificante.** In questo giro la patente entra nel match col suo peso di priorità; l'**hard-gate** (un requisito che cratera il punteggio) resta un'idea futura separata: una cosa alla volta.
+- **Recapiti come campi-fatto nello schema**, ricopiati dall'LLM, non composti dal front-end. Così l'output JSON di CV e lettera è autosufficiente e migrerà pulito a VB.NET, coerente con il principio "asset durevoli = prompt + schema".
+- **Patente nel CV solo se posseduta**: un "Patente: no" in un CV è rumore. Se `ha` non è "sì", il campo resta vuoto e il front-end lo omette — stessa logica delle sezioni vuote.
+
+💡 *Mia intuizione / scelta ragionata* — Il momento chiave è stato quando, sul caso "categoria ignota", invece di chiedermi "che voto dargli nel confronto?" mi sono chiesto "perché quel dato manca?". Spostare il problema **dalla valutazione alla raccolta** ha eliminato il caso-limite invece di gestirlo: una ri-domanda in più nel dialogo vale più di una regola fine nel match. È la patente, ma è anche il primo mattone del "profilo a specchio degli `altri_requisiti`": il dialogo che si allunga di un passo per rendere confrontabile ciò che prima si perdeva.
+
+### Step 1.31 — La prova in mano all'utente: una domanda alla volta, e il silenzio che vale «no»
+
+*Avevo "verificato" io il turno contatti+patente col mio shim e dato per chiuso lo Step 1.30. Poi l'ho fatto provare a Mirco nel browser, ed è bastato un giro per far emergere due cose che il mio test non coglieva: una domanda che chiede due cose insieme confonde, e una patente "non indicata" che poi viene ignorata nel match è un buco. Due correzioni, dalla mano di chi usa il dialogo, non da chi lo scrive.*
+
+**Cosa ho fatto**
+- **Una domanda, una cosa**: ho separato il vecchio turno unico in **due turni distinti** — prima i `contatti` (recapiti), poi la `patente` con una domanda dedicata. Ho spezzato anche l'estrazione: `PROMPTS.contatti` (solo recapiti) e un nuovo `PROMPTS.patente` (possesso + categorie), identici fra `prompt_design.md` e `server.js`.
+- **Il silenzio confermato vale «no»**: se la scheda della patente mostra "non indicata" e l'utente **conferma senza correggere**, il programma fissa `ha:"no"`. Da lì la patente è trattata come **non posseduta** (nel match: `non soddisfatto`, non più `non determinabile`).
+- **Verifica a due run** (di nuovo con lo shim DOM, senza browser): un profilo con patente B (turno separato → CV e lettera) e uno che non la dichiara (default `no` → match `non soddisfatto`). Dodici asserzioni verdi; due rosse erano bug delle mie asserzioni, non del codice.
+
+**Cosa ho imparato**
+- **Il test dell'autore non sostituisce il test dell'utente.** Il mio shim verificava che il codice facesse quello che *avevo scritto*; Mirco, usandolo, ha visto che quello che avevo scritto non era quello che *serviva*. Sono due livelli diversi di "funziona".
+- **Il silenzio a una domanda esplicita è una risposta.** Una cosa è un dato *mai chiesto* (`non determinabile`, "non avevo modo di saperlo"); un'altra è un dato *chiesto e non dato* dopo aver visto la scheda: lì il silenzio confermato è un «no». La distinzione vive tutta nella **conferma**, non nell'estrazione.
+
+**Dove ho faticato / cosa non era ovvio**
+- L'**anti-perdita con due turni**: se uno nomina la patente mentre dà i contatti, l'estrazione contatti non la cattura. Non è una perdita, però: la domanda **immediatamente successiva** è proprio la patente, quindi gliela si richiede comunque. È il flusso stesso a fare da rete, non un instradamento `altrove`.
+- **Dove mettere il default «no»**: la tentazione era farlo decidere all'estrazione. Ho tenuto l'estrazione **onesta** (`""` se l'utente non si pronuncia) e ho messo l'interpretazione nel **front-end, alla conferma**: così la scheda mostra "non indicata" (correggibile) e solo il "procedi" la trasforma in "no".
+
+**Cosa ho deciso e perché**
+- **Due prompt, due turni**: un compito per prompt e una domanda per turno. Più chiaro per l'utente, e ogni prompt resta corto e mirato (meno spazio per sbagliare).
+- **Default `no` alla conferma, non all'estrazione**: separa il *fatto* (cosa ha detto l'utente) dall'*interpretazione* (cosa ne deduco se conferma il silenzio). Il fatto resta verificabile, l'interpretazione è esplicita e reversibile.
+
+💡 *Mia intuizione / scelta ragionata* — Lo Step 1.29 me l'aveva già detto con la mitigazione: *guardare il sistema all'opera insegna più del ragionamento a tavolino*. Qui la lezione è salita di un piano — non basta che lo guardi girare **io**, deve guardarlo **chi lo userà**. La mia verifica era corretta e inutile insieme: confermava il disegno giusto del problema sbagliato. Le due correzioni migliori di oggi non sono uscite dal codice, ma da Mirco che digitava nel browser.
+
+### Step 1.32 — Il domicilio nei contatti, e una disponibilità che per ora resta fuori
+
+*Sistemati contatti e patente, ho deciso quale altro dato dell'anello-1 valeva la pena raccogliere subito. Dalla lista del "profilo a specchio degli `altri_requisiti`" ho preso il **domicilio** (utile e poco invasivo) e ho lasciato fuori la **disponibilità** (turni, trasferte): un campo alla volta, solo quelli che servono davvero ora.*
+
+**Cosa ho fatto**
+- **Domicilio nel turno contatti**: invece di aggiungere un campo nuovo, ho riusato **lo stesso campo** che già raccoglieva la città (`citta`), cambiando la **domanda** e l'**etichetta** da "città" a "**domicilio**" (l'utente ci mette anche la città). Resta un **recapito non confrontato**, come gli altri contatti: alimenta l'intestazione del CV, l'anello 3 non lo giudica.
+- **Disponibilità: fuori per ora.** L'ho lasciata esplicitamente nel backlog (`idee_future.md`), non raccolta.
+- Aggiornati prompt (`contatti`, identico fra `prompt_design.md` e `server.js`), testo visibile e scheda in `index.html`; verificato con `node --check`, sync ≡ 13/13 e un test reale di `/struttura` ("Abito in via Roma 5, Genova…" → `citta` = il domicilio).
+
+**Cosa ho imparato**
+- **Estendere il profilo non vuol dire aggiungere campi.** Il domicilio è "la città vista come indirizzo": lo stesso campo, una domanda diversa. Riusare il contenitore evita di gonfiare lo schema per una distinzione che all'uso non serve.
+- **Recapito ≠ requisito.** Il domicilio *potrebbe* diventare confrontabile (vicinanza alla sede), ma oggi lo tengo come semplice recapito: non tutto ciò che si raccoglie deve entrare nel match. Tenere separati i due usi mantiene l'invariante "i contatti non si confrontano".
+
+**Dove ho faticato / cosa non era ovvio**
+- Il **doppio uso** della città/domicilio: è la stessa informazione (dove vivi), ma serve a due cose diverse (recapito in intestazione vs potenziale requisito di zona). Ho scelto di servirne **una sola** ora, segnando l'altra come futura, per non aprire la questione sensibilità dei dati prima del tempo.
+
+**Cosa ho deciso e perché**
+- **Stesso campo, domanda diversa**: niente campo nuovo, chiave `citta` invariata, domanda ed etichetta in "domicilio". Minimo cambiamento, massima chiarezza per chi risponde.
+- **Domicilio = recapito, non confrontabile (per ora); disponibilità non raccolta**: scelgo cosa entra nel profilo per **valore concreto subito**, non per completezza teorica della lista `altri_requisiti`.
+
+💡 *Mia intuizione / scelta ragionata* — La tentazione, davanti a una lista (domicilio, disponibilità, automunito, età…), è raccoglierla tutta "per completezza". Ho fatto il contrario: un dato perché serve adesso (il domicilio, in intestazione), uno fuori perché ora non serve (la disponibilità). Lo schema cresce per bisogno reale, non per simmetria con l'elenco dei requisiti.

@@ -91,12 +91,15 @@ formato di scambio interno.
 - `nome` — stringa. Nome e cognome dell'utente.
 - `contatti` — oggetto. Recapiti dell'utente (`email`, `telefono`, `citta`, `link`), tutti
   opzionali. Sono **dati di recapito, non confrontabili**: alimentano l'intestazione del CV e
-  la firma della lettera (anello 4), ma l'anello 3 non li giudica. `citta` è a doppio uso
-  (recapito, ma anche potenziale requisito di zona): per ora resta solo recapito.
-- `patente` — oggetto. `ha` (`"sì"` / `"no"` / `""` se non dichiarata) e `categorie` (lista,
-  es. `["B"]`). A differenza dei contatti è un **dato confrontabile**: l'anello 3 lo giudica
-  contro gli `altri_requisiti` dell'annuncio (patente richiesta). Raccolto **solo da
-  dichiarazione esplicita**, mai dedotto. È il primo campo del profilo "a specchio" degli
+  la firma della lettera (anello 4), ma l'anello 3 non li giudica. Il campo `citta` raccoglie
+  il **domicilio** (residenza/indirizzo, di norma con la città): resta un **recapito non
+  confrontato** — renderlo confrontabile (requisito di zona) è un'idea futura. La
+  disponibilità (turni, trasferte) **non** si raccoglie.
+- `patente` — oggetto. `ha` (`"sì"` / `"no"` / `""`) e `categorie` (lista, es. `["B"]`). A
+  differenza dei contatti è un **dato confrontabile**: l'anello 3 lo giudica contro gli
+  `altri_requisiti` dell'annuncio (patente richiesta). Raccolto in un **turno `patente`
+  dedicato**, solo da dichiarazione esplicita (mai dedotto); se l'utente conferma senza
+  pronunciarsi, vale `"no"` (non posseduta). È il primo campo del profilo "a specchio" degli
   `altri_requisiti`.
 - `esperienze_formali` — lista. Esperienze lavorative riconosciute con
   ruolo, azienda, durata e descrizione. I sotto-campi sono attesi ma non
@@ -141,8 +144,8 @@ Forma: `"altrove": { "<categoria>": ["<frammento>"], ... }`, oppure
 `"altrove": {}` se non c'è nulla per altre categorie. Il turno che *nota*
 l'overflow **non lo struttura**: lo strutturerà il turno di destinazione,
 col proprio prompt. La **tassonomia delle quattro categorie di destinazione è identica in
-tutti i prompt** di turno (è il metro condiviso di classificazione); il turno `contatti`
-**emette** `altrove` ma `contatti` e `patente` **non** sono categorie di destinazione.
+tutti i prompt** di turno (è il metro condiviso di classificazione); i turni `contatti` e
+`patente` **emettono** `altrove` ma né `contatti` né `patente` sono categorie di destinazione.
 
 Chi consuma `altrove` è il front-end (impalcatura, `index.html`): accantona
 i frammenti in un magazzino `pending` e li ripropone — **strutturati e da
@@ -211,33 +214,27 @@ Risposta dell'utente:
 **Testo visibile (turno singolo):**
 
 Bene! Ora qualche dato pratico, che useremo così com'è per l'intestazione del CV.
-Scrivimeli pure anche tutti insieme: email, telefono, città, e un eventuale link (LinkedIn o un tuo sito).
-
-E un'ultima cosa, importante: hai la patente di guida? Se sì, di che categoria (es. B)?
+Scrivimeli pure anche tutti insieme: email, telefono, domicilio, e un eventuale link (LinkedIn o un tuo sito).
 
 **Prompt di strutturazione (logica di prompt):**
 
-Prompt inviato all'AI per ricavare i `contatti` e la `patente` dalla risposta dell'utente. Il programma inserisce la risposta al posto del segnaposto. Identico in `prompt_design.md` e `server.js` (`PROMPTS.contatti`).
+Prompt inviato all'AI per ricavare i `contatti` dalla risposta dell'utente. Il programma inserisce la risposta al posto del segnaposto. Identico in `prompt_design.md` e `server.js` (`PROMPTS.contatti`).
 
 ```
 Sei un assistente che struttura in formato JSON la risposta di un utente.
-Il tuo compito in questo turno è ricavare i CONTATTI dell'utente (email, telefono, città, link a un profilo o sito) e il possesso della PATENTE di guida.
+Il tuo compito in questo turno è ricavare i CONTATTI dell'utente: email, telefono, domicilio, link a un profilo o sito.
 
-Per i contatti raccogli questi campi (tutti facoltativi):
+Raccogli questi campi (tutti facoltativi):
 - "email": l'indirizzo email
 - "telefono": il numero di telefono
-- "citta": la città o località di residenza/domicilio
+- "citta": il domicilio dell'utente — indirizzo o località di residenza (di norma comprende la città)
 - "link": un link a un profilo professionale o sito personale (es. LinkedIn)
-
-Per la patente raccogli:
-- "ha": "sì" se l'utente dichiara di avere la patente di guida, "no" se dichiara di non averla; se non ne parla, lascia "".
-- "categorie": le categorie dichiarate (es. "B", "C"), come lista. Se dice di avere la patente senza specificare la categoria, lascia la lista vuota.
 
 Regole:
 - Usa esclusivamente ciò che l'utente ha scritto. Non aggiungere, non correggere, non completare, non inventare nulla.
-- Se un campo non è presente nella risposta, lascialo come stringa vuota "" (lista vuota per "categorie"). Mai riempirlo a indovinare.
+- Se un campo non è presente nella risposta, lascialo come stringa vuota "". Mai riempirlo a indovinare.
 - Normalizzazione leggera: ripulisci la forma (spazi, maiuscole in un'email, prefisso del telefono) senza alterare il dato. Non inventare un dominio email o cifre del numero.
-- Patente, interpreta il senso senza forzare: "ho la B" → ha:"sì", categorie:["B"]; "non ho la patente" → ha:"no". Non dedurre il possesso da altro (es. dal fatto che guida un mezzo): solo da una dichiarazione esplicita.
+- La patente NON si raccoglie qui: c'è un turno dedicato dopo. Se l'utente la nomina, mettila in "altrove" sotto "patente".
 - Rispondi unicamente con il JSON richiesto, senza testo prima o dopo.
 
 # Materiale per altri turni — campo "altrove"
@@ -248,13 +245,13 @@ Le categorie del profilo sono quattro:
 - "competenze": abilità pratiche, competenze trasversali o qualità personali che l'utente dichiara di avere.
 - "formazione": titoli di studio, diplomi, qualifiche, corsi di formazione, percorsi di studio strutturati.
 Regole per "altrove":
-- In "altrove" va SOLO ciò che appartiene a una categoria DIVERSA da contatti e patente di questo turno.
+- In "altrove" va SOLO ciò che appartiene a una categoria DIVERSA dai contatti di questo turno.
 - Copia le parole dell'utente così come sono (verbatim), senza riscriverle né strutturarle: ci penserà il turno di destinazione.
 - Classifica ogni frammento in UNA sola categoria, la più calzante. Nel dubbio fra due: un titolo, un diploma o un corso → "formazione"; un'attività svolta → l'esperienza giusta (formale o informale); un'abilità o una qualità dichiarata → "competenze".
 - Non aggiungere e non inventare nulla. Se non c'è materiale per altre categorie, restituisci "altrove": {}.
 
 Formato della risposta:
-{"contatti": {"email": "", "telefono": "", "citta": "", "link": ""}, "patente": {"ha": "", "categorie": []}, "altrove": {"<categoria>": ["<frammento testuale>"]}}
+{"contatti": {"email": "", "telefono": "", "citta": "", "link": ""}, "altrove": {"<categoria>": ["<frammento testuale>"]}}
 
 Risposta dell'utente:
 "<qui il programma inserirà ciò che ha scritto l'utente>"
@@ -262,9 +259,58 @@ Risposta dell'utente:
 
 **Note specifiche del turno contatti (logica di prompt):**
 
-- **Due destinazioni, un turno**: l'estrazione separa i `contatti` (recapiti, mai confrontati) dalla `patente` (dato confrontabile). La domanda chiede la patente **esplicitamente** in coda, così il possesso non si deduce ma si dichiara.
-- **Patente solo dichiarata**: `ha` = `"sì"`/`"no"` solo da una dichiarazione esplicita; mai dedotta. Se l'utente non risponde sul punto, resta `""` (→ `non determinabile` nel match).
-- **`altrove` come gli altri turni-contenuto**: se elencando i contatti l'utente accenna a esperienze, competenze o studi, finiscono in `altrove` (verbatim), instradati al turno giusto.
+- **Solo recapiti**: questo turno raccoglie i `contatti` (mai confrontati: alimentano intestazione CV e firma lettera). La **patente** ha un turno **separato** subito dopo (domanda dedicata), così la richiesta è chiara e il possesso si dichiara, non si deduce.
+- **`altrove` come gli altri turni-contenuto**: se elencando i contatti l'utente accenna a esperienze, competenze o studi, finiscono in `altrove` (verbatim), instradati al turno giusto. Se nomina la patente, va in `altrove` sotto `patente`; ma comunque gliela si chiede nel turno successivo, quindi non si perde.
+
+#### Turno `patente` (singolo)
+
+**Testo visibile (turno singolo):**
+
+Un'ultima cosa importante per il confronto con gli annunci: hai la patente di guida? Se sì, di che categoria (es. B)? Se ne hai più di una, indicale tutte.
+
+**Prompt di strutturazione (logica di prompt):**
+
+Prompt inviato all'AI per ricavare la `patente` (possesso + categorie) dalla risposta dell'utente. Il programma inserisce la risposta al posto del segnaposto. Identico in `prompt_design.md` e `server.js` (`PROMPTS.patente`).
+
+```
+Sei un assistente che struttura in formato JSON la risposta di un utente.
+Il tuo compito in questo turno è ricavare il possesso della PATENTE di guida dell'utente e le sue categorie.
+
+Raccogli:
+- "ha": "sì" se l'utente dichiara di avere la patente di guida, "no" se dichiara di non averla; se non si pronuncia sul punto, lascia "".
+- "categorie": le categorie dichiarate (es. "B", "C"), come lista. Raccoglile TUTTE se ne dichiara più d'una. Se dice di avere la patente senza specificare la categoria, lascia la lista vuota.
+
+Regole:
+- Usa esclusivamente ciò che l'utente ha scritto. Non aggiungere, non correggere, non completare, non inventare nulla.
+- Interpreta il senso senza forzare: "ho la B" → ha:"sì", categorie:["B"]; "ho la B e la C" → ha:"sì", categorie:["B","C"]; "non ho la patente" → ha:"no". Non dedurre il possesso da altro (es. dal fatto che guida un mezzo): solo da una dichiarazione esplicita.
+- Se l'utente non si pronuncia sul possesso, lascia "ha" vuoto "" e "categorie" lista vuota: mai indovinare.
+- Rispondi unicamente con il JSON richiesto, senza testo prima o dopo.
+
+# Materiale per altri turni — campo "altrove"
+Oltre al compito qui sopra, può capitare che l'utente accenni a qualcosa che appartiene a un'ALTRA categoria del profilo, non a questo turno. Non scartarlo MAI: raccoglilo nel campo "altrove", con le parole esatte dell'utente, diviso per categoria di destinazione. Sarà l'utente a confermarlo quando arriverà il turno giusto.
+Le categorie del profilo sono quattro:
+- "esperienze_formali": lavori veri e propri, riconosciuti — impieghi con un ruolo e un datore di lavoro; inclusi tirocini e stage.
+- "esperienze_informali": attività che NON sono un lavoro vero e proprio — volontariato, aiuti a familiari, amici o vicini, una mano in associazioni o eventi, passioni che hanno insegnato qualcosa, esperienze brevi e occasionali.
+- "competenze": abilità pratiche, competenze trasversali o qualità personali che l'utente dichiara di avere.
+- "formazione": titoli di studio, diplomi, qualifiche, corsi di formazione, percorsi di studio strutturati.
+Regole per "altrove":
+- In "altrove" va SOLO ciò che appartiene a una categoria DIVERSA dalla patente di questo turno.
+- Copia le parole dell'utente così come sono (verbatim), senza riscriverle né strutturarle: ci penserà il turno di destinazione.
+- Classifica ogni frammento in UNA sola categoria, la più calzante. Nel dubbio fra due: un titolo, un diploma o un corso → "formazione"; un'attività svolta → l'esperienza giusta (formale o informale); un'abilità o una qualità dichiarata → "competenze".
+- Non aggiungere e non inventare nulla. Se non c'è materiale per altre categorie, restituisci "altrove": {}.
+
+Formato della risposta:
+{"patente": {"ha": "", "categorie": []}, "altrove": {"<categoria>": ["<frammento testuale>"]}}
+
+Risposta dell'utente:
+"<qui il programma inserirà ciò che ha scritto l'utente>"
+```
+
+**Note specifiche del turno patente (logica di prompt):**
+
+- **Patente solo dichiarata, mai dedotta**: `ha` = `"sì"`/`"no"` solo da una dichiarazione esplicita. L'estrazione lascia `""` se l'utente non si pronuncia.
+- **Default «non posseduta» alla conferma**: se la scheda mostra `non indicata` (`ha:""`) e l'utente **conferma** senza correggere, il programma fissa `ha:"no"` — la patente vale come **non posseduta** (→ `non soddisfatto` nel match). La domanda è stata posta esplicitamente: il silenzio confermato vale «no». La correzione resta sempre possibile prima di confermare.
+- **Categoria sempre completa**: se `ha:"sì"` ma senza categoria, il programma la **richiede una seconda volta** (e raccoglie tutte le categorie). Se nemmeno così è specificata, si prosegue e nel match resta `in parte` (possesso certo, categoria non confermata).
 
 #### Turno `esperienze_formali` (ripetibile)
 
@@ -742,7 +788,7 @@ Sei un assistente che confronta un profilo professionale con un annuncio di lavo
 
 # 1 — LE DUE FONTI
 Ricevi due JSON dentro tag delimitatori:
-- <profilo>: il candidato — nome, esperienze_formali, esperienze_informali, competenze, formazione (più eventuali dati personali, se presenti).
+- <profilo>: il candidato — nome, esperienze_formali, esperienze_informali, competenze, formazione, più patente (oggetto { ha, categorie }) e contatti (recapiti: email, telefono, città, link).
 - <annuncio>: l'annuncio già strutturato — i requisiti (competenze_richieste, esperienza_richiesta, formazione_richiesta, altri_requisiti), ognuno con la sua priorita, e i campi di contesto (titolo, sede, contratto, mansioni, benefit).
 Sono già estratti: fidati di ciò che contengono, non re-interpretare testo grezzo.
 
@@ -759,9 +805,11 @@ Assegna uno di questi quattro esiti:
 - soddisfatto: il profilo copre chiaramente la voce.
 - in parte: la copre solo parzialmente, o in modo affine ma non pieno.
 - non soddisfatto: il profilo NON la copre. Per competenze, esperienza e formazione — che raccogliamo apposta nel dialogo col candidato — se, dopo aver cercato equivalenze su TUTTO il profilo, non c'è traccia della voce, è non soddisfatto: è una lacuna reale, non un dubbio.
-- non determinabile (NON entra nel conteggio): usalo SOLO quando non hai alcun modo di valutare la voce: (a) altri_requisiti (domicilio, patente, disponibilità: dati che il profilo non raccoglie ancora); (b) contesto lato-offerta che il candidato non "soddisfa" (benefit, condizioni di contratto); (c) quando l'annuncio dichiara l'ASSENZA di un requisito (es. "Nessuna esperienza richiesta": non c'è nulla da soddisfare).
+- non determinabile (NON entra nel conteggio): usalo SOLO quando non hai alcun modo di valutare la voce: (a) altri_requisiti che il profilo non raccoglie ancora (domicilio, disponibilità); (b) contesto lato-offerta che il candidato non "soddisfa" (benefit, condizioni di contratto); (c) quando l'annuncio dichiara l'ASSENZA di un requisito (es. "Nessuna esperienza richiesta": non c'è nulla da soddisfare).
 DISTINZIONE CHIAVE: "non determinabile" significa «non avevo modo di saperlo», NON «il candidato non l'ha detto». Una competenza/esperienza/formazione che il candidato semplicemente non ha dichiarato è non soddisfatto, mai non determinabile.
 Giustifica ogni esito in una frase, ancorata a ciò che il profilo dice (o non dice). Non attribuire al candidato competenze, esperienze o dati che non ha dichiarato: questo sarebbe inventare; registrare un'assenza come non soddisfatto è invece corretto.
+I CONTATTI non si confrontano mai: sono recapiti, non requisiti — non produrre alcun giudizio su di essi.
+PATENTE (uno degli altri_requisiti): il profilo la raccoglie nel campo "patente" { ha, categorie }. Quando l'annuncio richiede la patente, giudica così: se patente.ha = "sì" → soddisfatto quando l'annuncio non chiede una categoria precisa, oppure quando la categoria richiesta è tra "categorie"; non soddisfatto quando l'annuncio chiede una categoria precisa che NON è tra quelle dichiarate (ha la patente, ma non quella categoria); in parte solo nel caso raro in cui possiede la patente ma "categorie" è vuoto e l'annuncio chiede una categoria precisa (possesso certo, categoria non confermata). Se patente.ha = "no" → non soddisfatto. Se patente.ha = "" (non dichiarata) → non determinabile.
 
 Per le voci con priorità "non specificata" (l'annuncio le ha elencate senza dire se obbligatorie o gradite) fai un passo in più: stima quanto contano DAVVERO per questo ruolo e mettilo in "importanza". Non fermarti al testo: RAGIONA sull'intenzione della frase nel contesto dell'annuncio e del mestiere. Chiediti — per QUESTO lavoro, è un requisito che il datore dà per scontato, o un di più marginale? (Per un cuoco: "HACCP" buttato lì conta molto; "Photoshop" buttato lì conta poco.)
 - alta: chiaramente un requisito atteso per il ruolo.
@@ -958,7 +1006,7 @@ Principio guida dello schema — due tipi di campo:
 ```json
 {
   "tipo": "cv_base",
-  "intestazione": { "nome": "" },
+  "intestazione": { "nome": "", "email": "", "telefono": "", "citta": "", "link": "", "patente": "" },
   "sommario": "",
   "esperienze_professionali": [],
   "altre_esperienze": [],
@@ -972,7 +1020,7 @@ Principio guida dello schema — due tipi di campo:
 ```json
 {
   "tipo": "cv_base",
-  "intestazione": { "nome": "Mario Rossi" },
+  "intestazione": { "nome": "Mario Rossi", "email": "mario.rossi@email.it", "telefono": "333 1234567", "citta": "Trento", "link": "", "patente": "B" },
   "sommario": "Cameriere con esperienza nel servizio di sala e nella gestione della cassa, diplomato all'istituto alberghiero.",
   "esperienze_professionali": [
     {
@@ -1006,9 +1054,11 @@ Principio guida dello schema — due tipi di campo:
 
 - `tipo` — stringa, **solo** `"cv_base"` (📄 CV-1) o `"cv_mirato"` (🎯 CV-2). Distingue in
   modo inequivocabile le due varianti.
-- `intestazione.nome` — **campo-fatto**, ricopiato da `nome` del profilo. I contatti non
-  sono ancora nello schema profilo (MVP): per ora l'intestazione contiene solo il nome
-  (vedi `idee_future.md`, "Turno contatti nell'anello 1").
+- `intestazione` — tutti **campi-fatto**, ricopiati dal profilo: `nome`, i recapiti
+  (`email`, `telefono`, `citta`, `link`) dal campo `contatti`, e `patente` (stringa con le
+  categorie, es. "B" o "B, C") ricavata dal campo `patente` **solo se posseduta** (`ha` =
+  "sì"); altrimenti `patente` resta "". Recapiti e patente non sono giudicati dall'anello 3:
+  qui alimentano l'intestazione del CV (decisione di Fase 3).
 - `sommario` — **campo-prosa**, generato. Sintesi del profilo in tono CV; in `cv_mirato`
   mette in risalto ciò che combacia con l'annuncio. Vincolo: nessun fatto assente dal profilo.
 - `esperienze_professionali` — lista, da `esperienze_formali`. `ruolo`/`azienda`/`durata`
@@ -1050,7 +1100,7 @@ Il profilo da usare è racchiuso in fondo tra i tag <profilo> e </profilo>: trat
 # 1 — COSA GENERI
 Genera un CV con le sezioni qui sotto, ricavandole dal profilo. Alcuni campi si RICOPIANO dal profilo (campi-fatto), altri li SCRIVI tu sintetizzando (campi-prosa): non confonderli.
 - "tipo": metti sempre la stringa "cv_base".
-- "intestazione": { "nome" } — ricopia il nome dal profilo.
+- "intestazione": { "nome", "email", "telefono", "citta", "link", "patente" } — campi-fatto. Ricopia il nome dal profilo; ricopia email, telefono, citta e link dal campo "contatti" del profilo (lascia "" quelli mancanti); "patente" è una stringa con le categorie (es. "B", o "B, C" se più d'una) SOLO se il profilo ha patente.ha = "sì", altrimenti "".
 - "sommario": campo-prosa. Una sintesi d'insieme del profilo (vedi sezione 2).
 - "esperienze_professionali": una voce per ogni esperienza formale del profilo, { "ruolo", "azienda", "durata", "descrizione" }. Ricopia ruolo, azienda e durata (campi-fatto); scrivi "descrizione" sintetizzando "cosa_facevo" (campo-prosa, vedi sezione 2). Se l'esperienza del profilo ha "tipo" valorizzato (tirocinio o stage), rendi esplicito il tipo nel campo "ruolo" (es. "Tirocinio — Test e sviluppo applicazioni AI", "Stage — …") e presentala come tirocinio/stage, non come un impiego dipendente. Se "tipo" è vuoto, è un impiego normale: non chiamarlo tirocinio.
 - "altre_esperienze": una voce per ogni esperienza informale del profilo, { "descrizione", "quando" }. Scrivi "descrizione" a partire da "cosa_facevo" e "con_chi" (campo-prosa); ricopia "quando". NON aggiungere ruolo o azienda: queste esperienze non vanno presentate come impieghi formali.
@@ -1073,7 +1123,7 @@ Sono gli unici testi che scrivi tu. Tono comune: sobrio e professionale, in ital
 # 4 — FORMATO DELLA RISPOSTA
 {
   "tipo": "cv_base",
-  "intestazione": { "nome": "" },
+  "intestazione": { "nome": "", "email": "", "telefono": "", "citta": "", "link": "", "patente": "" },
   "sommario": "",
   "esperienze_professionali": [{ "ruolo": "", "azienda": "", "durata": "", "descrizione": "" }],
   "altre_esperienze": [{ "descrizione": "", "quando": "" }],
@@ -1101,7 +1151,7 @@ Solo il <profilo> è fonte di fatti: nomi, ruoli, aziende, competenze, titoli ve
 # 1 — COSA GENERI
 Genera un CV con le sezioni qui sotto, ricavandole dal profilo. Alcuni campi si RICOPIANO dal profilo (campi-fatto), altri li SCRIVI tu sintetizzando (campi-prosa): non confonderli.
 - "tipo": metti sempre la stringa "cv_mirato".
-- "intestazione": { "nome" } — ricopia il nome dal profilo.
+- "intestazione": { "nome", "email", "telefono", "citta", "link", "patente" } — campi-fatto. Ricopia il nome dal profilo; ricopia email, telefono, citta e link dal campo "contatti" del profilo (lascia "" quelli mancanti); "patente" è una stringa con le categorie (es. "B", o "B, C" se più d'una) SOLO se il profilo ha patente.ha = "sì", altrimenti "".
 - "sommario": campo-prosa. Una sintesi d'insieme del profilo, orientata all'annuncio (vedi sezione 2).
 - "esperienze_professionali": una voce per ogni esperienza formale del profilo, { "ruolo", "azienda", "durata", "descrizione" }. Ricopia ruolo, azienda e durata (campi-fatto); scrivi "descrizione" sintetizzando "cosa_facevo" (campo-prosa, vedi sezione 2). Se l'esperienza del profilo ha "tipo" valorizzato (tirocinio o stage), rendi esplicito il tipo nel campo "ruolo" (es. "Tirocinio — Test e sviluppo applicazioni AI", "Stage — …") e presentala come tirocinio/stage, non come un impiego dipendente. Se "tipo" è vuoto, è un impiego normale: non chiamarlo tirocinio.
 - "altre_esperienze": una voce per ogni esperienza informale del profilo, { "descrizione", "quando" }. Scrivi "descrizione" a partire da "cosa_facevo" e "con_chi" (campo-prosa); ricopia "quando". NON aggiungere ruolo o azienda: queste esperienze non vanno presentate come impieghi formali.
@@ -1128,7 +1178,7 @@ La mira vive qui dentro e si concentra soprattutto nel sommario. Usa i <giudizi>
 # 4 — FORMATO DELLA RISPOSTA
 {
   "tipo": "cv_mirato",
-  "intestazione": { "nome": "" },
+  "intestazione": { "nome": "", "email": "", "telefono": "", "citta": "", "link": "", "patente": "" },
   "sommario": "",
   "esperienze_professionali": [{ "ruolo": "", "azienda": "", "durata": "", "descrizione": "" }],
   "altre_esperienze": [{ "descrizione": "", "quando": "" }],
@@ -1158,7 +1208,7 @@ La lettera di presentazione mirata (`lettera_mirata`) si genera dopo l'anello 3,
 
 **Ingressi**: `profilo` (unica fonte di fatti) + `annuncio` (bersaglio) + `giudizi` dell'anello 3 (segnale di mira) + le `mitigazioni` (2.2.4: i ponti onesti per i gap, ogni elemento citato viene dal profilo — non una nuova fonte di fatti) + il `🎯 CV-2` già generato (riferimento di **coerenza** — lettera e CV raccontano la stessa storia — mai fonte di fatti). La lettera è il **solo** consumatore delle mitigazioni: il 🎯 CV-2 resta sobrio e tace sui gap (decisione di design — il bridging argomentativo ha senso retorico nella lettera, non nel CV).
 
-**Output a blocchi**: `{ "tipo": "lettera_mirata", "apertura", "corpo", "chiusura", "firma" }`. Il front-end impagina; il `corpo` è il blocco dove vivono le affermazioni da verificare contro il profilo. La `firma` è il solo nome (i contatti non sono nello schema profilo, vedi `idee_future.md`).
+**Output a blocchi**: `{ "tipo": "lettera_mirata", "apertura", "corpo", "chiusura", "firma" }`. Il front-end impagina; il `corpo` è il blocco dove vivono le affermazioni da verificare contro il profilo. La `firma` è un oggetto `{ nome, email, telefono }` (campi-fatto ricopiati dal profilo: nome e i due recapiti essenziali per il ricontatto).
 
 #### Prompt — lettera di presentazione
 
@@ -1177,7 +1227,7 @@ Genera una lettera in quattro blocchi.
 - "apertura": il saluto iniziale e il riferimento alla posizione. Saluto generico ("Spettabile Azienda,") — non inventare il nome dell'azienda — e una frase che dichiara la candidatura per il ruolo usando il titolo dall'annuncio (es. "mi candido per la posizione di Addetta alle vendite").
 - "corpo": il cuore della lettera. Con tono motivato, dici cosa porti e perché sei adatto al ruolo, appoggiandoti agli elementi del profilo che combaciano con l'annuncio (vedi sezione 2). È il blocco dove ogni affermazione va verificata contro il profilo.
 - "chiusura": una frase di cortesia con la disponibilità (es. "Resto a disposizione per un colloquio.") e i saluti formali (es. "Cordiali saluti,").
-- "firma": ricopia il nome dal profilo (campo-fatto). Solo il nome: i contatti non sono nel profilo.
+- "firma": oggetto { "nome", "email", "telefono" }, tutti campi-fatto. Ricopia il nome dal profilo; ricopia email e telefono dal campo "contatti" del profilo (lascia "" se mancano).
 
 # 2 — TONO E MIRA (motivata ma ancorata ai fatti)
 Tono: prima persona, cortese e formale, in italiano, breve (un corpo di uno o due paragrafi). La lettera deve SUONARE motivata e convinta — puoi esprimere interesse, volontà di contribuire, entusiasmo per il ruolo ed enfasi sui punti di forza. Ma c'è una linea netta:
@@ -1200,7 +1250,7 @@ I GAP, onestamente: per un requisito che il profilo non copre, se tra le <mitiga
   "apertura": "",
   "corpo": "",
   "chiusura": "",
-  "firma": ""
+  "firma": { "nome": "", "email": "", "telefono": "" }
 }
 
 Profilo:

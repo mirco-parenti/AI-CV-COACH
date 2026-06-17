@@ -115,6 +115,10 @@
     function mostraCv(cv) {
       let html = '<div class="cv">';
       html += "<h2>" + escapeHtml(cv?.intestazione?.nome) + "</h2>";
+      const it = cv?.intestazione || {};
+      const rec = [it.email, it.telefono, it.citta, it.link].filter((x) => (x || "").trim());
+      if (rec.length) html += '<div class="recapiti">' + escapeHtml(rec.join(" · ")) + "</div>";
+      if ((it.patente || "").trim()) html += '<div class="recapiti">Patente: ' + escapeHtml(it.patente) + "</div>";
       if (cv?.sommario) html += '<div class="sommario">' + escapeHtml(cv.sommario) + "</div>";
 
       if ((cv?.esperienze_professionali || []).length) {
