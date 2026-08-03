@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test import da CV (2.1.2 — PDF → profilo)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    h1 { font-size: 1.4rem; }
+    p.intro { color: #444; }
+    #drop { border: 2px dashed #999; border-radius: 8px; padding: 2rem; text-align: center; color: #666; cursor: pointer; }
+    #drop.hover { border-color: #2a6; background: #f2fbf5; color: #2a6; }
+    textarea { width: 100%; min-height: 6rem; margin-top: .5rem; font-family: inherit; }
+    button { padding: .5rem 1rem; font-size: 1rem; cursor: pointer; margin-top: .5rem; }
+    .box { margin-top: 1.5rem; }
+    .box h2 { font-size: 1.1rem; margin-bottom: .3rem; }
+    pre { background: #f5f5f5; padding: 1rem; border-radius: 6px; overflow-x: auto; white-space: pre-wrap; }
+    .stato { color: #2a6; font-style: italic; }
+    .errore { color: #c33; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Test import da CV (anello 1 — fonte 2.1.2)</h1>
+  <p class="intro">
+    Due passi contro il server: <strong>1)</strong> il PDF va a <code>/leggi-pdf</code> e Claude ne
+    <strong>trascrive il testo</strong>; <strong>2)</strong> il testo va a <code>/struttura</code>
+    (turno <code>importa_cv</code>) che lo struttura nel <strong>profilo JSON</strong> (stesso schema
+    del dialogo). Il JSON grezzo in fondo serve per il <strong>controllo anti-invenzione</strong>:
+    ogni voce deve venire dal CV. Server su <code>localhost:3000</code>.
+  </p>
+
+  <div id="drop">Trascina qui un <strong>PDF</strong>, oppure clicca per sceglierlo</div>
+  <input type="file" id="file" accept="application/pdf" style="display:none" />
+
+  <details style="margin-top:1rem">
+    <summary>Oppure incolla il testo del CV (ripiego per PDF scannerizzati)</summary>
+    <textarea id="testoManuale" placeholder="Incolla qui il testo di un CV…"></textarea>
+    <button id="btnManuale">Struttura questo testo</button>
+  </details>
+
+  <div class="box"><span id="stato" class="stato"></span></div>
+  <div class="box" id="errBox" style="display:none"><h2>Errore</h2><pre class="errore" id="err"></pre></div>
+
+  <div class="box" id="boxTesto" style="display:none">
+    <h2>Passo 1 — testo trascritto dal PDF</h2>
+    <pre id="testo"></pre>
+  </div>
+
+  <div class="box" id="boxProfilo" style="display:none">
+    <h2>Passo 2 — profilo JSON estratto</h2>
+    <pre id="profilo"></pre>
+  </div>
+
+  <script>
+    const BASE = "http://localhost:3000";
+    const drop = document.getElementById("drop");
+    const inputFile = document.getElementById("file");
+    const stato = document.getElementById("stato");
+
+    function mostraStato(t) { stato.textContent = t; }
+    function mostraErrore(t) {
+      document.getElementById("errBox").style.display = "block";
+      document.getElementById("err").textContent = t;
+    }
+    function reset() {
+      document.getElementById("errBox").style.display = "none";
+      document.getElementById("boxTesto").style.display = "none";
+      document.getElementById("boxProfilo").style.display = "none";
+    }
+
+    async function postJson(path, payload) {
+      const res = await fetch(BASE + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const dati = await res.json();
+      if (!res.ok) throw new Error((dati && dati.errore) || ("HTTP " + res.status) + "\n" + JSON.stringify(dati, null, 2));
+      return dati;
+    }
+
+    // Legge un File PDF e ne restituisce il base64 puro (senza il prefisso "data:...;base64,").
+    function fileInBase64(file) {
+      return new Promise((risolvi, rifiuta) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const s = String(reader.result);
+          const virgola = s.indexOf(",");
+          risolvi(virgola >= 0 ? s.slice(virgola + 1) : s);
+        };
+        reader.onerror = () => rifiuta(new Error("Impossibile leggere il file."));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Passo 2: struttura un testo di CV nel profilo.
+    async function strutturaTesto(testo) {
+      mostraStato("Passo 2/2 — strutturo il testo nel profilo…");
+      const profilo = await postJson("/struttura", { turno: "importa_cv", risposta: testo });
+      document.getElementById("profilo").textContent = JSON.stringify(profilo, null, 2);
+      document.getElementById("boxProfilo").style.display = "block";
+      mostraStato("Fatto: profilo estratto. Controlla che ogni voce venga dal CV.");
+    }
+
+    // Flusso completo dal PDF: passo 1 (trascrizione) poi passo 2 (struttura).
+    async function importaPdf(file) {
+      reset();
+      try {
+        mostraStato("Passo 1/2 — leggo il PDF e trascrivo il testo…");
+        const base64 = await fileInBase64(file);
+        const { testo } = await postJson("/leggi-pdf", { pdf_base64: base64 });
+        document.getElementById("testo").textContent = testo;
+        document.getElementById("boxTesto").style.display = "block";
+        await strutturaTesto(testo);
+      } catch (e) {
+        mostraStato("");
+        mostraErrore(String(e.message || e));
+      }
+    }
+
+    drop.addEventListener("click", () => inputFile.click());
+    inputFile.addEventListener("change", () => { if (inputFile.files[0]) importaPdf(inputFile.files[0]); });
+    ["dragenter", "dragover"].forEach((ev) =>
+      drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("hover"); }));
+    ["dragleave", "drop"].forEach((ev) =>
+      drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("hover"); }));
+    drop.addEventListener("drop", (e) => {
+      const file = e.dataTransfer.files[0];
+      if (file) importaPdf(file);
+    });
+
+    document.getElementById("btnManuale").addEventListener("click", async () => {
+      const testo = document.getElementById("testoManuale").value.trim();
+      if (!testo) { mostraErrore("Incolla prima il testo del CV."); return; }
+      reset();
+      try { await strutturaTesto(testo); }
+      catch (e) { mostraStato(""); mostraErrore(String(e.message || e)); }
+    });
+  </script>
+</body>
+</html>

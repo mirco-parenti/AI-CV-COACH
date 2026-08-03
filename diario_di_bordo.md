@@ -1055,3 +1055,28 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Domicilio = recapito, non confrontabile (per ora); disponibilità non raccolta**: scelgo cosa entra nel profilo per **valore concreto subito**, non per completezza teorica della lista `altri_requisiti`.
 
 💡 *Mia intuizione / scelta ragionata* — La tentazione, davanti a una lista (domicilio, disponibilità, automunito, età…), è raccoglierla tutta "per completezza". Ho fatto il contrario: un dato perché serve adesso (il domicilio, in intestazione), uno fuori perché ora non serve (la disponibilità). Lo schema cresce per bisogno reale, non per simmetria con l'elenco dei requisiti.
+
+### Step 1.33 — Importare un CV in PDF: Claude lo legge, il profilo resta lo stesso
+
+*Fin qui il profilo si costruiva in un solo modo: il dialogo. Ma chi ha già un CV in PDF non ha voglia di rifare tutto a voce — gli basterebbe trascinarlo nell'app. È la voce 2.1.2 del disegno top-down (una fonte alternativa dello stesso profilo). L'ho chiusa, ma la scelta vera non è stata "come gestire il PDF": è stata capire che il PDF non deve toccare il cuore del sistema.*
+
+**Cosa ho fatto**
+- **Due passi separati, un compito per prompt.** Passo 1: Claude **legge il PDF** (input `document` dell'API) e ne **trascrive fedelmente** il testo — endpoint dedicato `/leggi-pdf`. Passo 2: un prompt nuovo, `importa_cv`, prende quel **testo** e lo struttura nell'**intero profilo JSON** (stesso schema dell'anello 1) — passa dal solito `/struttura`, con un turno in più. I due prompt vivono identici in `prompt_design.md` e `server.js` (sync char-by-char verificata).
+- **Integrazione nel front-end**: all'avvio ora c'è un **bivio** — «costruiamolo insieme» (il dialogo di sempre) oppure «ho già un CV in PDF». Se importi, il profilo estratto ti viene **mostrato per conferma** prima di procedere; da lì in poi confronto, CV e lettera sono quelli di sempre. Banco di prova a parte (`test-cv-import.html`), come per gli altri anelli.
+- **Verifica**: `node --check`, sync dei due prompt (identici al carattere), e una prova reale di `importa_cv` su un CV di test — nome, contatti, patente B, un tirocinio marcato come tale, competenze e formazione tutti al posto giusto; e "automunito", che nel mio schema non ha un campo, **non** inventato da nessuna parte. Poi il collaudo end-to-end nel browser.
+
+**Cosa ho imparato**
+- **Separare "leggere" da "strutturare" ripaga.** La trascrizione e la strutturazione sono due mestieri diversi: tenerli in due prompt distinti dà due difese anti-invenzione separate e, soprattutto, lascia il passo 2 (`testo → profilo`) **identico** a come sarebbe con un testo incollato a mano. È l'asset durevole, e migra a VB.NET senza sapere nulla del PDF.
+- **Il vincolo "niente dipendenze" riguarda il server, non il problema.** Mi ero bloccato sull'idea che leggere un PDF volesse dire aggiungere una libreria all'aiutante Node. La via d'uscita è stata far leggere il PDF **a Claude** (lo fa nativamente via API): il server resta a zero dipendenze e il confine "PDF → testo" è un pezzo isolato e sostituibile.
+
+**Dove ho faticato / cosa non era ovvio**
+- **Dove mettere la lettura del PDF.** Tre strade — parsing nel server (romperebbe "niente dipendenze"), parsing nel browser (una libreria front-end), o il PDF direttamente a Claude. Ho scelto la terza perché tiene il server pulito e il pezzo durevole invariato; le altre restano possibili domani.
+- **Il profilo intero è più lungo di un frammento.** I turni di dialogo restituiscono un pezzetto; `importa_cv` restituisce **tutto** il profilo in un colpo, e con i 1500 token di default rischiava di troncarsi. Ho dato a questo turno un tetto più alto, lasciando invariati gli altri.
+
+**Cosa ho deciso e perché**
+- **Claude legge il PDF, in due passi** (trascrizione + strutturazione), non un unico prompt "PDF → profilo": un compito per prompt, e il passo durevole resta indipendente dalla fonte.
+- **Haiku per entrambi i passi**: è estrazione, non ragionamento profondo. Se un CV reale multi-colonna dovesse uscire sporco nella trascrizione, salirò il **solo** passo 1 a Sonnet — decisione da prendere sui dati, non a priori.
+- **Conferma umana dopo l'import**: il profilo estratto si mostra e si fa confermare (l'AI propone, l'utente dispone). L'editing campo-per-campo resta un'idea futura.
+- **Ripiego onesto per i PDF-immagine**: una scansione senza testo dà poco o niente; invece di far finta di niente, l'app lo dice e offre l'incolla-testo. OCR e lettura multimodale del PDF restano nel backlog.
+
+💡 *Mia intuizione / scelta ragionata* — Il momento chiave non è stato tecnico. Davanti al PDF la domanda ovvia era «come lo leggo?»; quella giusta era «dove lo faccio entrare, senza che tocchi il resto?». La risposta era già nell'architettura: il profilo è l'**hub disaccoppiante**, e finché una nuova fonte produce *lo stesso* profilo, confronto e generazione non se ne accorgono. Così ho aggiunto un intero modo di costruire il profilo cambiando, a valle, esattamente zero. Ho lavorato sul prompt (che dura), non sul PDF (che è impalcatura).

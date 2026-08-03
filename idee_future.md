@@ -14,11 +14,10 @@ attivo qui sopra resta **solo-futuro** e non induce in errore. Aggiornato con "a
 ## Gap del disegno top-down (Fase B/C)
 
 Componenti previsti dall'architettura ma **non ancora costruiti**, identificati formalmente
-nel disegno top-down. Dei tre individuati, la **2.2.4 (mitigazione)** è realizzata (vedi
-«Realizzate»); restano i due di estrazione. Il dettaglio (cosa entra → esce, complessità,
-dove si innesta) è in `architettura.md` §8: qui resta solo il puntatore.
-- **Estrazione da CV preesistente (2.1.2)** — parsing di un CV (PDF/testo) → stesso profilo
-  JSON. Complessità alta. *(2026-06-15 — formalizzato nel disegno top-down; architettura.md §8.)*
+nel disegno top-down. Dei tre individuati, la **2.2.4 (mitigazione)** e la **2.1.2 (import da
+CV)** sono realizzate (vedi «Realizzate»); resta l'ultima fonte di estrazione. Il dettaglio
+(cosa entra → esce, complessità, dove si innesta) è in `architettura.md` §8: qui resta solo il
+puntatore.
 - **Estrazione da LinkedIn / sito web (2.1.3)** — fetch di un link pubblico → stesso profilo
   JSON. Complessità alta. *(2026-06-15 — formalizzato nel disegno top-down; architettura.md §8.)*
 
@@ -34,6 +33,15 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   Idea: estrarre il blocco JSON anche con prosa attorno (primo `{` … ultimo `}`). Non è un
   prerequisito (con input ben formati gli endpoint partono già con `{`).
   *(2026-06-11 — emerso testando il 📄 CV-1 e introducendo la validazione JSON lato server.)*
+- **Import da CV (2.1.2) — raffinamenti**: l'import è realizzato (vedi «Realizzate»); restano
+  aperti: (a) **PDF scannerizzati / immagine** — oggi danno poco o niente testo, si offre
+  l'incolla-testo come ripiego; OCR o lettura **multimodale** del PDF sono rimandati; (b)
+  **trascrizione su Sonnet** — il passo 1 gira su Haiku, economico; se CV con layout
+  multi-colonna escono sporchi, salire il **solo** passo 1 a Sonnet (decisione sui dati); (c)
+  **editing campo-per-campo** del profilo importato — oggi si conferma o si ricomincia, non si
+  corregge la singola voce (cugino della rifinitura MVP del dialogo); (d) **limite dimensione
+  del PDF** — nessun tetto esplicito lato server (l'API rifiuta comunque oltre ~32 MB).
+  *(2026-08-03 — emersi realizzando 2.1.2, diario Step 1.33.)*
 
 ## Profilo, annuncio & schema
 - **Estensione del profilo** a specchio di `altri_requisiti` (domicilio, disponibilità,
@@ -127,6 +135,12 @@ implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
   (`descrizione` che fonde `cosa_facevo`+`con_chi`, più `quando`; mai `ruolo`/`azienda`) con
   la regola anti-promozione, validata in 📄 CV-1 e 🎯 CV-2. *(prompt_design.md, schema CV e
   regole d'uso; diario Step 1.20.)*
+- ✅ **Import da CV in PDF (2.1.2)** — seconda fonte del profilo, alternativa al dialogo: Claude
+  legge il PDF e ne trascrive il testo (endpoint `/leggi-pdf`, passo 1), poi il turno `importa_cv`
+  lo struttura nello **stesso profilo JSON** dell'anello 1 (passo 2), con conferma dell'utente.
+  Prompt in `prompt_design.md`, cablato in `server.js` e integrato in `index.html` (bivio iniziale
+  dialogo/import); banco `test-cv-import.html`. Entrambi i passi su Haiku.
+  *(2026-08-03; diario Step 1.33; architettura.md §2.1/§6/§8.)*
 - ✅ **Turni contatti + patente (anello 1) + patente confrontabile** — due turni distinti:
   `contatti` (email, telefono, città, link) e `patente` (domanda dedicata, con ri-domanda
   della categoria e default «non posseduta» se l'utente conferma senza dichiararla). Il campo

@@ -94,7 +94,7 @@ Oggi esiste una sola fonte d'ingresso (il dialogo); le altre due sono gap aperti
 | Voce | Cosa fa | Entra → Esce | Dove vive oggi | Stato |
 |---|---|---|---|---|
 | **2.1.1** Dialogo guidato | Raccoglie il profilo conversando, un argomento per turno, con conferma a vista e anti-perdita | risposte libere dell'utente → **profilo JSON** | Anello 1 (`/struttura`, turni in `prompt_design.md`) | ✅ Completo |
-| **2.1.2** Estrazione da CV preesistente | Ricava lo stesso profilo JSON da un CV già pronto (PDF/testo) | file/testo CV → **profilo JSON** | — | ❌ Gap (vedi §8) |
+| **2.1.2** Estrazione da CV preesistente | Legge un CV in PDF, ne trascrive il testo e lo struttura nello stesso profilo JSON | PDF/testo CV → **profilo JSON** | `/leggi-pdf` (trascrizione) + `/struttura` turno `importa_cv` | ✅ Completo |
 | **2.1.3** Estrazione da LinkedIn / sito web | Ricava lo stesso profilo JSON da un link pubblico | URL → **profilo JSON** | — | ❌ Gap (vedi §8) |
 
 Le tre voci sono **fonti alternative dello stesso artefatto**: qualunque sia l'ingresso,
@@ -256,8 +256,8 @@ I componenti fisici e i confini fra loro (chi parla con chi, dove passano i dati
 └─────────────┘                                      │  chiave API      │
    impagina CV/lettera,                              └──────────────────┘
    tiene lo stato del dialogo                          endpoint HTTP:
-   e il magazzino `pending`                            /struttura · /confronta
-   (anti-perdita)                                      /genera-cv · /genera-lettera
+   e il magazzino `pending`                            /struttura · /leggi-pdf · /confronta
+   (anti-perdita)                                      /mitiga · /genera-cv · /genera-lettera
 ```
 
 - **Front-end** (`index.html`, impalcatura usa-e-getta): conduce il dialogo, tiene lo
@@ -269,10 +269,13 @@ I componenti fisici e i confini fra loro (chi parla con chi, dove passano i dati
 - **LLM** (Claude): esegue i prompt; non ha memoria fra le chiamate (la memoria è nei dati
   che il front-end conserva e ripassa).
 
-I **confini** del sistema sono gli **endpoint**: `/struttura` (anelli 1 e 2),
-`/confronta` (anello 3), `/mitiga` (mitigazione 2.2.4), `/genera-cv` e `/genera-lettera`
-(anello 4). Per la 2.2.4 si è scelto un **endpoint dedicato** `/mitiga` (input profilo +
-giudizi), non l'estensione di `/confronta`: un confine per compito.
+I **confini** del sistema sono gli **endpoint**: `/struttura` (anelli 1 e 2, più il turno
+`importa_cv` di 2.1.2), `/leggi-pdf` (trascrizione del PDF, 2.1.2), `/confronta` (anello 3),
+`/mitiga` (mitigazione 2.2.4), `/genera-cv` e `/genera-lettera` (anello 4). Per la 2.2.4 si è
+scelto un **endpoint dedicato** `/mitiga` (input profilo + giudizi), non l'estensione di
+`/confronta`: un confine per compito. Lo stesso criterio vale per 2.1.2: la lettura del PDF è un
+**endpoint a sé** (`/leggi-pdf`), separato dalla strutturazione del testo (`/struttura`
+`importa_cv`) — un compito per confine.
 
 ---
 
@@ -300,13 +303,15 @@ I componenti previsti dal disegno ma non ancora costruiti. Qui se ne fissa solo
 **identità e stato**: la **progettazione** (prompt + schema) è la Fase B; l'**adattamento
 del codice** la Fase C.
 
-La **2.2.4 (mitigazione)** — primo gap — è ora **chiusa**: progettata, cablata (endpoint
-`/mitiga`, lettera a 5 blocchi) e provata end-to-end (vedi §2.2.4). Restano aperti:
+La **2.2.4 (mitigazione)** e la **2.1.2 (import da CV)** sono ora **chiuse** (vedi §2.2.4 e
+§2.1): la 2.2.4 progettata, cablata (`/mitiga`) e provata; la 2.1.2 realizzata come **due
+passi** — trascrizione del PDF (`/leggi-pdf`) e strutturazione del testo nel profilo
+(`/struttura` `importa_cv`), con conferma dell'utente e integrazione nel front-end (bivio
+iniziale dialogo/import). Resta aperto un solo gap:
 
 | Voce | Cosa manca | Complessità | Note / puntatori |
 |---|---|---|---|
-| **2.1.2** Estrazione da CV preesistente | Parsing di un CV (PDF/testo) → stesso profilo JSON | **Alta** | Si innesta sull'hub-profilo (sezione 4): a valle nulla cambia |
-| **2.1.3** Estrazione da LinkedIn / web | Fetch di un link pubblico → stesso profilo JSON | **Alta** | Come sopra; attenzione a robustezza del fetch e dati personali |
+| **2.1.3** Estrazione da LinkedIn / web | Fetch di un link pubblico → stesso profilo JSON | **Alta** | Si innesta sull'hub-profilo (sezione 4): a valle nulla cambia; attenzione a robustezza del fetch e dati personali |
 
 **Fuori perimetro ora:** il **multi-annuncio** (un profilo confrontato con più annunci in
 una volta) — prospettiva futura, non gap dell'MVP.

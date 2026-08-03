@@ -1186,8 +1186,164 @@
         appendiInChat(div);
       }
 
+      // --- Import da CV (2.1.2): fonte alternativa del profilo -------------
+      // Invece del dialogo, l'utente può caricare un CV in PDF: Claude lo legge
+      // (/leggi-pdf, passo 1) e ne struttura il testo nel profilo (/struttura
+      // turno importa_cv, passo 2). L'uscita è lo STESSO profilo del dialogo, poi
+      // confermato dall'utente prima di procedere (l'AI propone, l'utente dispone).
+
+      // Legge un File PDF e ne restituisce il base64 puro (senza il prefisso
+      // "data:...;base64," che readAsDataURL antepone).
+      function fileInBase64(file) {
+        return new Promise((risolvi, rifiuta) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const s = String(reader.result);
+            const virgola = s.indexOf(",");
+            risolvi(virgola >= 0 ? s.slice(virgola + 1) : s);
+          };
+          reader.onerror = () => rifiuta(new Error("Lettura file fallita"));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      // Copia il profilo estratto (dall'import) nello stato `profilo`, con difese
+      // sui campi mancanti: lo stato resta conforme allo schema.
+      function popolaProfiloDaImport(p) {
+        profilo.nome = typeof p.nome === "string" ? p.nome : "";
+        const c = p.contatti || {};
+        profilo.contatti = {
+          email: c.email || "",
+          telefono: c.telefono || "",
+          citta: c.citta || "",
+          link: c.link || "",
+        };
+        const pt = p.patente || {};
+        profilo.patente = {
+          ha: pt.ha || "",
+          categorie: Array.isArray(pt.categorie) ? pt.categorie : [],
+        };
+        profilo.esperienze_formali = Array.isArray(p.esperienze_formali) ? p.esperienze_formali : [];
+        profilo.esperienze_informali = Array.isArray(p.esperienze_informali) ? p.esperienze_informali : [];
+        profilo.competenze = Array.isArray(p.competenze) ? p.competenze : [];
+        profilo.formazione = Array.isArray(p.formazione) ? p.formazione : [];
+      }
+
+      // Riepilogo del profilo importato + conferma. A differenza del riepilogo
+      // del dialogo, qui l'utente deve confermare (o ricominciare): il profilo
+      // viene da un'estrazione, non da conferme turno-per-turno.
+      function mostraRiepilogoImport() {
+        aiDice(
+          "Ecco il profilo che ho ricavato dal tuo CV. Controlla che sia tutto giusto: " +
+            "userò soltanto questo, niente di inventato."
+        );
+        schedaLista("Nome", [profilo.nome || "(non indicato)"]);
+        const c = profilo.contatti;
+        const rec = [c.email, c.telefono, c.citta, c.link].filter((x) => (x || "").trim());
+        schedaLista("Contatti", rec.length ? rec : ["(nessuno indicato)"]);
+        const pt = profilo.patente;
+        const testoPatente =
+          pt.ha === "sì"
+            ? "Sì" + (pt.categorie.length ? " (" + pt.categorie.join(", ") + ")" : "")
+            : pt.ha === "no"
+            ? "No"
+            : "(non indicata)";
+        schedaLista("Patente", [testoPatente]);
+        riepilogoSezione("Esperienze formali", "esperienze_formali");
+        riepilogoSezione("Esperienze informali", "esperienze_informali");
+        schedaLista(
+          "Competenze",
+          profilo.competenze.length ? profilo.competenze : ["(nessuna indicata)"]
+        );
+        riepilogoSezione("Formazione", "formazione");
+
+        console.log("Profilo importato da CV:", profilo);
+
+        chiediScelta([
+          {
+            etichetta: "Sì, è corretto",
+            primario: true,
+            onClick: () => {
+              aiDice("Perfetto. Useremo questo profilo — niente di inventato.");
+              avviaFaseGenerazione();
+            },
+          },
+          { etichetta: "Ricomincia", onClick: avvio },
+        ]);
+      }
+
+      // Passo 2: struttura un testo di CV (trascritto o incollato) nel profilo.
+      async function strutturaImport(testo) {
+        const p = await chiamaConAttesa("importa_cv", testo);
+        if (!p) return avviaImportCv();
+        popolaProfiloDaImport(p);
+        mostraRiepilogoImport();
+      }
+
+      // Passo 1: dal PDF caricato → testo (server) → passo 2.
+      async function importaDaPdf(file) {
+        utenteDice("📄 " + file.name);
+        let base64;
+        try {
+          base64 = await fileInBase64(file);
+        } catch {
+          aiDice("Non sono riuscita a leggere il file. Riprova.");
+          return avviaImportCv();
+        }
+        const risp = await postConAttesa(
+          "/leggi-pdf",
+          { pdf_base64: base64 },
+          "Leggo il PDF e trascrivo il testo…"
+        );
+        if (!risp || typeof risp.testo !== "string" || !risp.testo.trim()) {
+          aiDice(
+            "Non sono riuscita a ricavare testo da questo PDF (potrebbe essere una " +
+              "scansione). Puoi incollarne il testo qui sotto."
+          );
+          return avviaImportCv();
+        }
+        await strutturaImport(risp.testo);
+      }
+
+      // UI dell'import: scegli un PDF, oppure incolla il testo (ripiego).
+      function avviaImportCv() {
+        aiDice(
+          "Bene! Caricami il tuo CV in PDF: lo leggo e ne ricavo il profilo. " +
+            "Se è una scansione senza testo, puoi anche incollarne il testo."
+        );
+        pulisciAzione();
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "application/pdf";
+        input.addEventListener("change", () => {
+          if (input.files[0]) importaDaPdf(input.files[0]);
+        });
+        const btnTesto = document.createElement("button");
+        btnTesto.textContent = "Oppure incolla il testo";
+        btnTesto.addEventListener("click", () => {
+          chiediTesto("Incolla qui il testo del tuo CV…", (testo) => {
+            utenteDice("(testo del CV incollato)");
+            strutturaImport(testo);
+          });
+        });
+        azione.appendChild(input);
+        azione.appendChild(btnTesto);
+      }
+
+      // Bivio iniziale: dialogo guidato oppure import da CV (stesso profilo).
+      function avvio() {
+        aiDice(
+          "Ciao! Per iniziare, vuoi che costruiamo insieme il tuo profilo con qualche " +
+            "domanda, oppure hai già un CV in PDF da cui partire?"
+        );
+        chiediScelta([
+          { etichetta: "💬 Costruiamolo insieme", primario: true, onClick: avviaProssimoTurno },
+          { etichetta: "📄 Ho già un CV (PDF)", onClick: avviaImportCv },
+        ]);
+      }
+
       // --- Avvio -----------------------------------------------------------
-      avviaProssimoTurno();
+      avvio();
     </script>
   </body>
 </html>
