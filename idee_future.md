@@ -96,10 +96,6 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   *(prompt_design.md, turno formazione, "Sospeso".)*
 
 ## Match & punteggio (anello 3)
-- **Hard-gate**: un requisito *davvero* squalificante non azzera il punteggio (tetto del
-  clamp −20). Trattarlo come tetto rigido che cratera il match è rimandato. La **patente**
-  ora confrontabile è il candidato naturale a un futuro hard-gate (oggi pesa solo come
-  priorità). *(Diario Step 1.16-1.17 e 1.30; prompt_design.md, "Limite noto".)*
 - **Taxonomy mapping (ESCO/O*NET)**: mappare le skill su una tassonomia standard per il
   match. Scartato per l'MVP (il match semantico lo fa l'LLM); utile per analisi su grandi
   volumi, non per il singolo match. Fonti GitHub da riprendere:
@@ -166,3 +162,12 @@ implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
   primo `{` all'ultimo `}` (percorso felice invariato; se neanche così è valido, rilancia
   l'errore). Chiude i 502 quando il modello «si mette a spiegare». Resta aperto il gemello
   front-end `estraiFrammento` (vedi backlog «Front-end & pipeline»). *(2026-08-04; diario Step 1.35.)*
+- ✅ **Hard-gate (requisito eliminatorio)** — un requisito *davvero* squalificante non soddisfatto
+  non pesa soltanto: mette un **tetto** al match. Ogni giudizio del confronto porta un flag
+  `eliminatorio` (booleano, deciso dall'LLM: `true` solo per i requisiti tassativi/escludenti, nel
+  dubbio `false`); se almeno uno è `eliminatorio` con esito `non soddisfatto`, il codice cratera il
+  match a **≤ 20/100 (≤ 1 stella)**, `finale = min(finale, 20)`, con nota esplicita. Deterministico,
+  applicato dopo il clamp, in sinergia con la soglia B (≤1 stella → generazione sconsigliata). La
+  **patente** è il primo caso reale (patente C richiesta, candidato senza → gate). Prompt+schema in
+  `prompt_design.md`, `calcolaMatch` in `server.js`, nota+⛔ in `index.html`, colonna "Elim." nel
+  banco `test-confronto.html`. *(2026-08-04; diario Step 1.37.)*

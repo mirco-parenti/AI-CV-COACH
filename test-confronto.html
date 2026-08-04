@@ -146,7 +146,7 @@
       html += "</div>";
 
       html += "<table><thead><tr>" +
-              "<th>Requisito</th><th>Categoria</th><th>Priorità</th><th>Importanza</th><th>Esito</th><th>Spiegazione</th>" +
+              "<th>Requisito</th><th>Categoria</th><th>Priorità</th><th>Importanza</th><th>Esito</th><th>Elim.</th><th>Spiegazione</th>" +
               "</tr></thead><tbody>";
       for (const g of d.giudizi || []) {
         const cl = "esito-" + (g.esito || "").replace(/\s+/g, ".");
@@ -156,6 +156,7 @@
           "<td>" + escapeHtml(g.priorita) + "</td>" +
           "<td>" + escapeHtml(g.importanza) + "</td>" +
           '<td class="' + cl + '">' + escapeHtml(g.esito) + "</td>" +
+          "<td>" + ((g.eliminatorio === true || String(g.eliminatorio).toLowerCase() === "true") ? "⛔ sì" : "") + "</td>" +
           "<td>" + escapeHtml(g.spiegazione) + "</td>" +
           "</tr>";
       }

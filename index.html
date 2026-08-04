@@ -1165,6 +1165,9 @@
       function mostraMatch(conf) {
         const stelle = conf.stelle != null ? conf.stelle : "?";
         aiDice("Ho confrontato profilo e annuncio. Match: " + stelle + " su 5 stelle.");
+        // La nota spiega perché il match è stato corretto (clamp) o craterato
+        // (requisito eliminatorio non soddisfatto): mostrala quando c'è.
+        if (conf.nota) aiDice(conf.nota);
         // Il sentinel "Nessuna esperienza richiesta" non è un requisito da
         // soddisfare: è già escluso dal punteggio e per l'utente è solo rumore,
         // quindi non lo mostriamo (vale anche se il modello lo allucina su una
@@ -1173,7 +1176,8 @@
           .filter((g) => (g.requisito || "").trim().toLowerCase() !== "nessuna esperienza richiesta")
           .map((g) => {
             const peso = g.priorita || g.importanza || "";
-            return "[" + (g.esito || "") + "] " + (peso ? "(" + peso + ") " : "") + g.requisito;
+            const gate = (g.eliminatorio === true || String(g.eliminatorio).toLowerCase() === "true") ? " ⛔ eliminatorio" : "";
+            return "[" + (g.esito || "") + "] " + (peso ? "(" + peso + ") " : "") + g.requisito + gate;
           });
         schedaLista("Requisiti dell'annuncio", righe.length ? righe : ["(nessun requisito)"]);
       }

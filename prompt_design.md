@@ -886,6 +886,7 @@ score_base = 100 × Σ(punti · peso) / Σ(peso)    // escluse: 'non determinabi
 delta      = numero_LLM − score_base             // quanto l'LLM dissente, con segno
 corr       = clamp(delta, −20, +10)              // asimmetrico: anti-invenzione (in dubbio non gonfiare)
 finale     = round(score_base + corr)            // bloccato in [0, 100]
+finale     = min(finale, 20)  SE almeno un requisito eliminatorio è non soddisfatto   // hard-gate: ≤ 1 stella
 stelle     = round(finale / 20, 1 decimale)      // PASSO FINALE: il match definitivo, 0–5 stelle
 ```
 
@@ -895,7 +896,7 @@ stelle     = round(finale / 20, 1 decimale)      // PASSO FINALE: il match defin
 
 - **Asimmetria −20 / +10:** l'LLM può *abbassare* fino a 20 punti (cogliere un deal-breaker) ma *alzare* solo fino a 10 (non gonfiare il match).
 - **Nota di scarto legata al clamp:** quando il clamp taglia (l'LLM voleva spostare più del consentito) c'è un dissenso forte → si mostra la nota, es. *"il conteggio darebbe 75, ma manca un requisito potenzialmente decisivo (patente C): match 55."*
-- **Limite noto (raffinamento futuro):** un requisito *davvero* squalificante non azzera il punteggio (il tetto è −20): scende ma resta orientativo, e la nota avvisa. Gestire i veri paletti come tetto rigido che cratera il match è rimandato.
+- **Hard-gate (requisito eliminatorio):** un requisito *davvero* squalificante non soddisfatto non si limita a pesare — mette un **tetto** al match. Ogni giudizio porta un flag `eliminatorio` (booleano, deciso dall'LLM del confronto: `true` solo per i requisiti tassativi/escludenti, nel dubbio `false`); se **almeno uno** è `eliminatorio` con `esito = non soddisfatto`, il codice cratera il `finale` a **≤ 20/100 (≤ 1 stella)**: `finale = min(finale, 20)`, con nota esplicita. Si applica **dopo** il clamp, è deterministico, e si sposa con la soglia B (sotto 1,5 stelle la generazione è già sconsigliata). Restano fuori dal gate gli esiti `in parte` e `non determinabile` (prudenza: non si cratera ciò che non è una lacuna piena).
 
 **Prompt del Giro 1 (confronto).** Identico in `prompt_design.md` e `server.js` (`promptConfronto`). Il programma inserisce i due JSON dentro i tag `<profilo>` e `<annuncio>`.
 
@@ -926,6 +927,7 @@ DISTINZIONE CHIAVE: "non determinabile" significa «non avevo modo di saperlo»,
 Giustifica ogni esito in una frase, ancorata a ciò che il profilo dice (o non dice). Non attribuire al candidato competenze, esperienze o dati che non ha dichiarato: questo sarebbe inventare; registrare un'assenza come non soddisfatto è invece corretto.
 I CONTATTI non si confrontano mai: sono recapiti, non requisiti — non produrre alcun giudizio su di essi.
 PATENTE (uno degli altri_requisiti): il profilo la raccoglie nel campo "patente" { ha, categorie }. Quando l'annuncio richiede la patente, giudica così: se patente.ha = "sì" → soddisfatto quando l'annuncio non chiede una categoria precisa, oppure quando la categoria richiesta è tra "categorie"; non soddisfatto quando l'annuncio chiede una categoria precisa che NON è tra quelle dichiarate (ha la patente, ma non quella categoria); in parte solo nel caso raro in cui possiede la patente ma "categorie" è vuoto e l'annuncio chiede una categoria precisa (possesso certo, categoria non confermata). Se patente.ha = "no" → non soddisfatto. Se patente.ha = "" (non dichiarata) → non determinabile.
+REQUISITO ELIMINATORIO (campo "eliminatorio"): oltre all'esito, segna se la voce è un requisito TASSATIVO, senza il quale la candidatura non è nemmeno proponibile (es. "patente C indispensabile", "iscrizione all'albo obbligatoria", "abilitazione richiesta per legge", "requisito essenziale/imprescindibile"). Mettilo a true SOLO quando l'annuncio lo rende chiaramente escludente nel senso, non solo importante: un requisito può essere "richiesto" senza essere eliminatorio — l'eliminatorietà è un gradino oltre. Nel dubbio, false. Riguarda soprattutto gli altri_requisiti (patente, iscrizione a un albo, idoneità) e i titoli/abilitazioni indispensabili per legge; il contesto non è mai eliminatorio.
 
 Per le voci con priorità "non specificata" (l'annuncio le ha elencate senza dire se obbligatorie o gradite) fai un passo in più: stima quanto contano DAVVERO per questo ruolo e mettilo in "importanza". Non fermarti al testo: RAGIONA sull'intenzione della frase nel contesto dell'annuncio e del mestiere. Chiediti — per QUESTO lavoro, è un requisito che il datore dà per scontato, o un di più marginale? (Per un cuoco: "HACCP" buttato lì conta molto; "Photoshop" buttato lì conta poco.)
 - alta: chiaramente un requisito atteso per il ruolo.
@@ -948,6 +950,7 @@ Rispondi solo con un oggetto JSON, senza testo prima o dopo e senza virgolette d
       "priorita": "richiesto | preferenziale | non specificata",
       "importanza": "<solo per le voci 'non specificata': alta | media | bassa>",
       "esito": "soddisfatto | in parte | non soddisfatto | non determinabile",
+      "eliminatorio": <true o false, booleano: true solo se il requisito è tassativo/escludente>,
       "spiegazione": "<perché, ancorata al profilo>"
     }
   ],
@@ -958,6 +961,7 @@ Regole sul formato:
 - priorita: ricopiala dall'annuncio così com'è; per i campi di contesto (che non hanno priorità) metti "non specificata".
 - categoria: per le voci di contesto usa sempre "contesto".
 - importanza: compilala SOLO per le voci con priorità "non specificata"; per tutte le altre lasciala vuota ("").
+- eliminatorio: booleano (true/false), mai stringa. true solo per i requisiti davvero tassativi/escludenti (nel dubbio false); mai true per il contesto.
 
 <profilo>
 qui il programma inserirà il profilo strutturato (JSON)

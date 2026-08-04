@@ -453,6 +453,7 @@ DISTINZIONE CHIAVE: "non determinabile" significa «non avevo modo di saperlo»,
 Giustifica ogni esito in una frase, ancorata a ciò che il profilo dice (o non dice). Non attribuire al candidato competenze, esperienze o dati che non ha dichiarato: questo sarebbe inventare; registrare un'assenza come non soddisfatto è invece corretto.
 I CONTATTI non si confrontano mai: sono recapiti, non requisiti — non produrre alcun giudizio su di essi.
 PATENTE (uno degli altri_requisiti): il profilo la raccoglie nel campo "patente" { ha, categorie }. Quando l'annuncio richiede la patente, giudica così: se patente.ha = "sì" → soddisfatto quando l'annuncio non chiede una categoria precisa, oppure quando la categoria richiesta è tra "categorie"; non soddisfatto quando l'annuncio chiede una categoria precisa che NON è tra quelle dichiarate (ha la patente, ma non quella categoria); in parte solo nel caso raro in cui possiede la patente ma "categorie" è vuoto e l'annuncio chiede una categoria precisa (possesso certo, categoria non confermata). Se patente.ha = "no" → non soddisfatto. Se patente.ha = "" (non dichiarata) → non determinabile.
+REQUISITO ELIMINATORIO (campo "eliminatorio"): oltre all'esito, segna se la voce è un requisito TASSATIVO, senza il quale la candidatura non è nemmeno proponibile (es. "patente C indispensabile", "iscrizione all'albo obbligatoria", "abilitazione richiesta per legge", "requisito essenziale/imprescindibile"). Mettilo a true SOLO quando l'annuncio lo rende chiaramente escludente nel senso, non solo importante: un requisito può essere "richiesto" senza essere eliminatorio — l'eliminatorietà è un gradino oltre. Nel dubbio, false. Riguarda soprattutto gli altri_requisiti (patente, iscrizione a un albo, idoneità) e i titoli/abilitazioni indispensabili per legge; il contesto non è mai eliminatorio.
 
 Per le voci con priorità "non specificata" (l'annuncio le ha elencate senza dire se obbligatorie o gradite) fai un passo in più: stima quanto contano DAVVERO per questo ruolo e mettilo in "importanza". Non fermarti al testo: RAGIONA sull'intenzione della frase nel contesto dell'annuncio e del mestiere. Chiediti — per QUESTO lavoro, è un requisito che il datore dà per scontato, o un di più marginale? (Per un cuoco: "HACCP" buttato lì conta molto; "Photoshop" buttato lì conta poco.)
 - alta: chiaramente un requisito atteso per il ruolo.
@@ -475,6 +476,7 @@ Rispondi solo con un oggetto JSON, senza testo prima o dopo e senza virgolette d
       "priorita": "richiesto | preferenziale | non specificata",
       "importanza": "<solo per le voci 'non specificata': alta | media | bassa>",
       "esito": "soddisfatto | in parte | non soddisfatto | non determinabile",
+      "eliminatorio": <true o false, booleano: true solo se il requisito è tassativo/escludente>,
       "spiegazione": "<perché, ancorata al profilo>"
     }
   ],
@@ -485,6 +487,7 @@ Regole sul formato:
 - priorita: ricopiala dall'annuncio così com'è; per i campi di contesto (che non hanno priorità) metti "non specificata".
 - categoria: per le voci di contesto usa sempre "contesto".
 - importanza: compilala SOLO per le voci con priorità "non specificata"; per tutte le altre lasciala vuota ("").
+- eliminatorio: booleano (true/false), mai stringa. true solo per i requisiti davvero tassativi/escludenti (nel dubbio false); mai true per il contesto.
 
 <profilo>
 ${JSON.stringify(profilo, null, 2)}
@@ -506,6 +509,9 @@ const PESO_FALLBACK = 3; // 'non specificata' senza importanza chiara -> neutro
 // più margine per abbassare che per alzare). Tarati sui dati di simulazione.
 const CLAMP_GIU = -20;
 const CLAMP_SU = 10;
+// Hard-gate: un requisito ELIMINATORIO non soddisfatto tiene il match sotto questo tetto
+// (20/100 = ≤ 1 stella), a prescindere dal resto del profilo. Vedi prompt_design.md.
+const TETTO_ELIMINATORIO = 20;
 
 function norm(x) {
   return typeof x === "string" ? x.trim().toLowerCase() : "";
@@ -553,6 +559,7 @@ function estraiJson(testo) {
 function calcolaMatch(giudizi, numeroComplessivo) {
   let numeratore = 0;
   let denominatore = 0;
+  const gateFalliti = []; // requisiti ELIMINATORI non soddisfatti (hard-gate)
   for (const g of giudizi) {
     // Le voci che dichiarano l'ASSENZA di un requisito (es. "Nessuna esperienza
     // richiesta", sentinel della pipeline 2) non sono requisiti da soddisfare:
@@ -565,6 +572,10 @@ function calcolaMatch(giudizi, numeroComplessivo) {
     const peso = pesoVoce(g);
     numeratore += punti * peso;
     denominatore += peso;
+    // Hard-gate: un requisito eliminatorio non soddisfatto craterà il match (sotto).
+    if (esito === "non soddisfatto" && (g.eliminatorio === true || norm(g.eliminatorio) === "true")) {
+      gateFalliti.push(g.requisito);
+    }
   }
 
   const numLLM = Number(numeroComplessivo);
@@ -587,10 +598,25 @@ function calcolaMatch(giudizi, numeroComplessivo) {
       const corr = clamp(delta, CLAMP_GIU, CLAMP_SU); // asimmetrico: anti-invenzione
       finale = clamp(Math.round(scoreBase + corr), 0, 100);
       tagliato = delta < CLAMP_GIU || delta > CLAMP_SU;
-      if (tagliato) {
-        nota = `Il conteggio dei requisiti darebbe ${scoreBase}, ma la valutazione d'insieme dell'AI lo porta verso ${numLLM}: match finale ${finale}.`;
-      }
     }
+  }
+
+  // Hard-gate: se c'è almeno un requisito ELIMINATORIO non soddisfatto, il match non
+  // può superare il tetto (≤ 1 stella), a prescindere dal resto del profilo. Applicato
+  // dopo il clamp; le note si compongono coi valori definitivi per restare coerenti.
+  const finaleAnteGate = finale;
+  let gateEliminatorio = false;
+  if (finale !== null && gateFalliti.length > 0) {
+    finale = Math.min(finale, TETTO_ELIMINATORIO);
+    gateEliminatorio = true;
+  }
+
+  if (tagliato) {
+    nota = `Il conteggio dei requisiti darebbe ${scoreBase}, ma la valutazione d'insieme dell'AI lo porta verso ${numLLM}: match finale ${finaleAnteGate}.`;
+  }
+  if (gateEliminatorio) {
+    const notaGate = `Requisito eliminatorio non soddisfatto (${gateFalliti.join("; ")}): il match non può superare ${TETTO_ELIMINATORIO}/100, cioè ≤ 1 stella, a prescindere dal resto del profilo.`;
+    nota = nota ? `${nota} ${notaGate}` : notaGate;
   }
 
   // Passo finale: il match vero, convertito in stelle 0-5 con un decimale.
@@ -602,6 +628,7 @@ function calcolaMatch(giudizi, numeroComplessivo) {
     match_finale: finale,
     stelle,
     scarto_tagliato: tagliato,
+    gate_eliminatorio: gateEliminatorio,
     nota,
   };
 }
