@@ -188,6 +188,12 @@
       let giudizi = [];
       let cvMirato = null;
 
+      // Soglia B: sotto 1,5 stelle su 5 il match è così basso che 🎯 CV-2 e
+      // ✉️ lettera escono onesti ma poco spendibili come candidatura. Non
+      // impediamo la generazione: la sconsigliamo, lasciando la scelta finale
+      // all'utente. (Deciso sui dati: collaudo reale a 0,1 stelle, Step 1.25.)
+      const SOGLIA_STELLE_GENERAZIONE = 1.5;
+
       // --- Riferimenti UI ---
       const chat = document.getElementById("chat");
       const azione = document.getElementById("azione");
@@ -1012,6 +1018,25 @@
         }
         giudizi = conf.giudizi || [];
         mostraMatch(conf);
+        // Soglia B: se il match è sotto soglia, sconsigliamo (senza impedire) la
+        // generazione, lasciando la scelta all'utente.
+        if (conf.stelle != null && conf.stelle < SOGLIA_STELLE_GENERAZIONE) {
+          aiDice(
+            "Attenzione: con un match così basso (" + conf.stelle + " su 5), il " +
+            "🎯 CV mirato e la ✉️ lettera verrebbero comunque onesti, ma poco " +
+            "spendibili come candidatura per questo annuncio. Puoi generarli lo " +
+            "stesso oppure fermarti qui: decidi tu."
+          );
+          chiediScelta([
+            { etichetta: "Genera comunque il CV mirato", onClick: generaCvMirato },
+            {
+              etichetta: "Mi fermo qui",
+              onClick: () =>
+                aiDice("Va bene, mi fermo. Se vuoi, puoi riprovare con un altro annuncio."),
+            },
+          ]);
+          return;
+        }
         aiDice("Da qui preparo il CV mirato e la lettera, su misura per questo annuncio.");
         chiediScelta([{ etichetta: "🎯 Genera CV mirato", primario: true, onClick: generaCvMirato }]);
       }

@@ -1103,3 +1103,26 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **La fonte-link si fa bene in VB.NET, con WebView2.** Un browser Edge/Chromium nativo in cui navigo e mi loggo **come me**; l'app legge il **DOM già renderizzato** — JS risolto (è un browser vero), muro anti-bot aggirato (sessione mia), e a valle `analisi_annuncio` **invariato** (stessa architettura). Abilita anche la 2.1.3 (profilo da LinkedIn). Annotata in `idee_future.md`.
 
 💡 *Mia intuizione / scelta ragionata* — Come per il PDF, la domanda non era «come leggo il link?» ma «dove faccio entrare questa fonte, e con quale lettore?». Stavolta la risposta è stata anche un **no**: `web_fetch` non è il lettore giusto perché non vede il JavaScript. Il lettore giusto è il **browser dell'utente** — e quello arriva in VB.NET. Aver lavorato sul disegno (fonte → stesso testo → `analisi_annuncio` invariato) fa sì che il «no» di oggi non butti via nulla: il giorno del WebView2, a valle, cambia zero.
+
+### Step 1.35 — Due buchi chiusi: la soglia che sconsiglia, e il JSON che sopravvive alla prosa
+
+*Dopo l'annuncio-da-link (scartato) avevo voglia di rientrare in carreggiata chiudendo due debolezze che avevo già visto sul campo, non idee nuove. La prima l'avevo incontrata al collaudo con il mio CV contro un annuncio lontanissimo (Operatore Subacqueo, 0,1 stelle): il 🎯 CV-2 e la ✉️ lettera uscivano onesti ma inutili come candidatura. La seconda l'avevo vista quando il modello, su un annuncio fuori-schema, «si metteva a spiegare» prima del JSON e l'endpoint crollava con un 502. Due buchi piccoli, ma di quelli che sporcano l'esperienza vera.*
+
+**Cosa ho fatto**
+- **Soglia di match prima di generare (B).** Nel front-end, subito dopo il confronto (anello 3), se il match è **sotto 1,5 stelle su 5** non spingo più la generazione: la **sconsiglio con onestà** («verrebbero comunque onesti, ma poco spendibili come candidatura») e lascio a me la scelta finale con due bottoni — «Genera comunque il CV mirato» e «Mi fermo qui». Sopra soglia, tutto come prima. Un solo gate, all'ingresso del ramo mirato. La soglia è una costante dichiarata (`SOGLIA_STELLE_GENERAZIONE`).
+- **`estraiJson` robusto al preambolo (C).** Lato server, la funzione che tutti gli endpoint usano toglieva solo il recinto ```` ```json ```` e faceva `JSON.parse`: un preambolo in prosa prima del `{` la mandava in 502. Ora provo il parse come prima e, **solo se fallisce**, ripiego ritagliando dal primo `{` all'ultimo `}` e riprovo; se neanche così è JSON valido, rilancio l'errore originale.
+- **Verificato prima di cantare vittoria**: `node --check` su `server.js` e sul JS estratto da `index.html`; test funzionale di `estraiJson` su sei casi (JSON pulito, con recinto, preambolo, coda, recinto+preambolo, spazzatura); rilettura della logica del gate. Doppio controllo, esiti concordi.
+
+**Cosa ho imparato**
+- **Il percorso felice non si tocca.** Per il JSON robusto la scelta giusta è stata mettere il ripiego **dentro il `catch`**: gli input ben formati (che partono già con `{`) fanno esattamente ciò che facevano prima, e il recupero scatta solo quando serve. Robustezza aggiunta senza rischiare regressioni.
+- **Sconsigliare non è impedire.** La soglia non blocca nulla: rende visibile una verità (match basso → candidatura debole) e lascia la decisione a me. È la stessa onestà dell'anti-invenzione, applicata all'esperienza d'uso invece che ai contenuti.
+
+**Dove ho faticato / cosa non era ovvio**
+- **Che soglia?** Il valore non è un dettaglio tecnico ma una scelta di prodotto: troppo alta intralcia match legittimi-ma-modesti, troppo bassa avvisa solo i casi-limite. Ho scelto **1,5 stelle** come compromesso — più largo del solo 0,1 del collaudo, ma non invadente.
+- **Fin dove arriva C.** Il gemello front-end (`estraiFrammento`) ha lo stesso limite di preambolo, ma il buco del backlog era quello **server** (`estraiJson`, usata da tutti gli endpoint): l'ho chiuso lì e ho annotato l'altro in `idee_future.md`, senza allargare lo scope di mia iniziativa.
+
+**Cosa ho deciso e perché**
+- **Un solo gate, all'ingresso del ramo mirato.** Se scelgo «Genera comunque», il ramo prosegue intero (CV-2 → lettera) senza altri avvisi: basta una volta e non intralcio.
+- **Chiudere i buchi già visti prima di aprire fronti nuovi.** B e C erano cose «quasi finite»; le idee più corpose (domicilio confrontabile, passo 1 dell'import su Sonnet) restano nel backlog, da soppesare dopo.
+
+💡 *Mia intuizione / scelta ragionata* — Nessuna delle due è una feature che si vede: sono due modi di **non mentire per omissione**. La soglia non nasconde che un match è debole; il parser non finge un 502 quando il JSON c'era, solo avvolto di parole. Piccole, ma nella direzione giusta: un MVP che dice la verità anche quando è scomoda.

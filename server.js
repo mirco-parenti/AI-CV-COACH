@@ -533,7 +533,20 @@ function estraiJson(testo) {
     .trim()
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/\s*```$/i, "");
-  return JSON.parse(pulito);
+  try {
+    return JSON.parse(pulito);
+  } catch (e) {
+    // Ripiego: il modello può aver premesso (o aggiunto) prosa attorno al JSON
+    // ("si mette a spiegare"). Ritaglio dal primo '{' all'ultimo '}' e riprovo;
+    // se neanche così è valido, rilancio l'errore originale. Sugli input ben
+    // formati (che partono già con '{') il comportamento resta invariato.
+    const inizio = pulito.indexOf("{");
+    const fine = pulito.lastIndexOf("}");
+    if (inizio !== -1 && fine > inizio) {
+      return JSON.parse(pulito.slice(inizio, fine + 1));
+    }
+    throw e;
+  }
 }
 
 // Dai giudizi (Giro 1) e dal numero dell'LLM calcola il match finale (Giro 2).

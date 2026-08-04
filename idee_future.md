@@ -25,14 +25,13 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
 — prospettiva futura, non gap dell'MVP. *(architettura.md §8.)*
 
 ## Front-end & pipeline
-- **Estrazione JSON robusta al preambolo**: `estraiJson` (lato server, usato da tutti gli
-  endpoint) toglie il **recinto** ```` ```json ```` ma non un eventuale **preambolo in
-  prosa** prima del JSON; in quel caso `JSON.parse` fallisce e l'endpoint risponde 502.
-  Sui prompt rigidi (`/struttura`, `/genera-cv`) non capita in pratica; può capitare quando
-  il modello "si mette a spiegare" (visto su `/confronta` con un annuncio fuori-schema).
-  Idea: estrarre il blocco JSON anche con prosa attorno (primo `{` … ultimo `}`). Non è un
-  prerequisito (con input ben formati gli endpoint partono già con `{`).
-  *(2026-06-11 — emerso testando il 📄 CV-1 e introducendo la validazione JSON lato server.)*
+- **`estraiFrammento` (front-end) robusto al preambolo**: il gemello front-end di
+  `estraiJson` — in `index.html`, per leggere i frammenti — ha ancora il limite che lato
+  server è stato chiuso (Step 1.35): toglie il **recinto** ```` ```json ```` ma non un
+  eventuale **preambolo in prosa** prima del JSON. Stesso ripiego possibile (primo `{` …
+  ultimo `}`). Impalcatura usa-e-getta, bassa priorità (i frammenti del front-end partono
+  in pratica già con `{`). *(2026-08-04 — il buco lato server è chiuso, Step 1.35; resta il
+  gemello front-end.)*
 - **Import da CV (2.1.2) — raffinamenti**: l'import è realizzato (vedi «Realizzate»); restano
   aperti: (a) **PDF scannerizzati / immagine** — oggi danno poco o niente testo, si offre
   l'incolla-testo come ripiego; OCR o lettura **multimodale** del PDF sono rimandati; (b)
@@ -118,12 +117,6 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   l'omissione è già una *scelta* che complica la verifica 1:1 e apre una porta
   all'anti-invenzione "per sottrazione". Rimandato. *(2026-06-11 — deciso nel design del
   CV-2, bivio 3: tenere tutto, ri-pesare l'enfasi.)*
-- **Soglia di match prima di generare**: per un match molto basso (es. ~0 stelle) il
-  🎯 CV-2 e la ✉️ lettera escono *onesti ma inutili come candidatura* — la lettera diventa
-  una "non-candidatura" che dichiara solo ciò che manca. Idea: sotto una soglia, **avvisare
-  l'utente** (o sconsigliare la generazione) invece di produrre comunque, lasciando comunque
-  a lui la scelta finale. *(2026-06-11 — emerso nel primo collaudo con il CV reale di Mirco
-  contro un annuncio lontanissimo, Operatore Subacqueo, match 0,1 stelle; diario Step 1.25.)*
 
 ## Realizzate
 
@@ -160,3 +153,12 @@ implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
   recapiti e patente nell'intestazione di 📄 CV-1 / 🎯 CV-2 e nella firma della ✉️ lettera.
   **Primo mattone** del "profilo a specchio di `altri_requisiti`".
   *(2026-06-17; diario Step 1.30-1.31; prompt_design.md, turni `contatti`/`patente` e schema CV/lettera.)*
+- ✅ **Soglia di match prima di generare** — dopo il confronto (anello 3), sotto **1,5 stelle**
+  su 5 il front-end **sconsiglia** (senza impedire) la generazione di 🎯 CV-2 e ✉️ lettera:
+  avviso onesto + due scelte («Genera comunque» / «Mi fermo qui»), scelta finale all'utente.
+  Costante `SOGLIA_STELLE_GENERAZIONE` in `index.html`. *(2026-08-04; diario Step 1.35.)*
+- ✅ **`estraiJson` robusto al preambolo (lato server)** — la funzione usata da tutti gli
+  endpoint ora, se il `JSON.parse` fallisce per prosa attorno al JSON, ripiega ritagliando dal
+  primo `{` all'ultimo `}` (percorso felice invariato; se neanche così è valido, rilancia
+  l'errore). Chiude i 502 quando il modello «si mette a spiegare». Resta aperto il gemello
+  front-end `estraiFrammento` (vedi backlog «Front-end & pipeline»). *(2026-08-04; diario Step 1.35.)*
