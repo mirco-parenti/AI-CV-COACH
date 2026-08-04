@@ -35,12 +35,16 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
 - **Import da CV (2.1.2) — raffinamenti**: l'import è realizzato (vedi «Realizzate»); restano
   aperti: (a) **PDF scannerizzati / immagine** — oggi danno poco o niente testo, si offre
   l'incolla-testo come ripiego; OCR o lettura **multimodale** del PDF sono rimandati; (b)
-  **trascrizione su Sonnet** — il passo 1 gira su Haiku, economico; se CV con layout
-  multi-colonna escono sporchi, salire il **solo** passo 1 a Sonnet (decisione sui dati); (c)
-  **editing campo-per-campo** del profilo importato — oggi si conferma o si ricomincia, non si
-  corregge la singola voce (cugino della rifinitura MVP del dialogo); (d) **limite dimensione
-  del PDF** — nessun tetto esplicito lato server (l'API rifiuta comunque oltre ~32 MB).
-  *(2026-08-03 — emersi realizzando 2.1.2, diario Step 1.33.)*
+  ~~**trascrizione su Sonnet**~~ **valutata sui dati e archiviata (2026-08-04)**: il passo 1
+  su Haiku legge il PDF come blocco `document` (comprensione visiva, non estrazione lineare);
+  provato su due CV **a due colonne** (uno con colonne allineate riga per riga, il caso-trappola)
+  → trascrizione **pulita**, ordine per colonna, nessun interlacciamento né perdita. Haiku basta:
+  **non** si sale a Sonnet (sarebbe costo senza beneficio). Se un domani un layout estremo esce
+  sporco, il test si rifà in pochi minuti; resta comunque fuori il caso **PDF scannerizzati/immagine**
+  del punto (a). (c) **editing campo-per-campo** del profilo importato — oggi si conferma o si
+  ricomincia, non si corregge la singola voce (cugino della rifinitura MVP del dialogo); (d)
+  **limite dimensione del PDF** — nessun tetto esplicito lato server (l'API rifiuta comunque oltre
+  ~32 MB). *(2026-08-03 — emersi realizzando 2.1.2, diario Step 1.33; (b) valutata 2026-08-04.)*
 - **Fonte-link per l'annuncio → browser incorporato (WebView2)**: leggere l'annuncio da un **link**
   invece di incollarne il testo (anello 2, fonte alternativa gemella dell'import da CV). Il
   meccanismo `web_fetch` dell'API è stato **provato e accantonato**: apre solo le pagine a **HTML

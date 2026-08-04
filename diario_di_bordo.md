@@ -1126,3 +1126,23 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Chiudere i buchi già visti prima di aprire fronti nuovi.** B e C erano cose «quasi finite»; le idee più corpose (domicilio confrontabile, passo 1 dell'import su Sonnet) restano nel backlog, da soppesare dopo.
 
 💡 *Mia intuizione / scelta ragionata* — Nessuna delle due è una feature che si vede: sono due modi di **non mentire per omissione**. La soglia non nasconde che un match è debole; il parser non finge un 502 quando il JSON c'era, solo avvolto di parole. Piccole, ma nella direzione giusta: un MVP che dice la verità anche quando è scomoda.
+
+### Step 1.36 — Il CV a due colonne su Haiku: un test che finisce con «va già bene»
+
+*Avevo in backlog un dubbio sull'import da CV (2.1.2, punto b): il passo 1 — la trascrizione del PDF — gira su Haiku, economico; ma se un CV con layout a due colonne uscisse mescolato, avrei dovuto salire a Sonnet. Invece di deciderlo a tavolino, ho fatto quello che mi viene naturale: prima far girare il sistema com'è, poi valutare sui dati. Questo Step non produce codice: produce una decisione motivata.*
+
+**Cosa ho fatto**
+- **Ho costruito il banco da zero.** Nessun CV a due colonne a portata di mano e nessuno strumento PDF installato: ho scritto due CV in HTML con layout a due colonne (uno "a blocchi", uno a **tabella con le due colonne allineate riga per riga** — il caso-trappola che spinge a leggere in orizzontale), li ho convertiti in PDF con Chrome headless e li ho dati al passo 1 (`/leggi-pdf`) **su Haiku**, così com'è oggi. Il testo lo avevo scritto io: quindi conoscevo già la verità da confrontare, senza bisogno di estrarla dal PDF.
+- **Ho confrontato output e verità.** In **entrambi** i casi Haiku ha trascritto tutto, nell'ordine logico per colonna (prima la sinistra intera, poi la destra), **senza interlacciare** e senza perdere nulla — nomi, date e cifre esatti. Doppio controllo con due layout indipendenti, incluso il caso-trappola: esiti concordi.
+
+**Cosa ho imparato**
+- **Haiku non "estrae testo", legge il documento.** Il PDF gli arriva come blocco `document`: usa comprensione visiva, non un estrattore lineare che seguirebbe l'ordine dei byte. È per questo che le colonne non si mescolano — il modello *vede* la pagina.
+- **Conoscere la verità a monte semplifica il test.** Creando io il CV, il ground truth era il mio sorgente: mi sono risparmiato di installare strumenti PDF per ri-estrarlo. La strada più corta era anche la più pulita.
+
+**Dove ho faticato / cosa non era ovvio**
+- **L'ambiente non collaborava.** Niente `poppler`, niente moduli PDF, `sudo` che chiede la password: la tentazione era installare mezza toolchain. Il giro giusto è stato spostare il problema — generare il PDF con un browser che c'era già (Chrome su Windows) e usare il mio HTML come verità.
+
+**Cosa ho deciso e perché**
+- **Non salgo a Sonnet: Haiku basta.** I dati dicono che per i CV a due colonne a testo nativo la trascrizione è pulita; salire a Sonnet sarebbe **costo senza beneficio**. Ho archiviato il punto (b) del backlog come *valutato*, tenendo onestamente fuori ciò che **non** ho testato: i **PDF scannerizzati/immagine** (già limite noto, punto a) e i layout estremi. Se un domani ne salta fuori uno sporco, il banco si rifà in pochi minuti.
+
+💡 *Mia intuizione / scelta ragionata* — La cosa più difficile qui non è stata tecnica: è stata resistere alla voglia di "migliorare" qualcosa che già funziona. Il mio metodo dice di credere ai dati anche quando dicono *non toccare niente* — e un test che si chiude con «va bene così» vale quanto uno che scopre un bug: mi ha risparmiato una spesa inutile e mi ha lasciato una prova, non un'impressione.

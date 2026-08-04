@@ -321,5 +321,4 @@ Il **turno contatti** e il **turno patente** dell'anello 1 (con la patente resa
 `altri_requisiti`) sono ora **realizzati** (vedi `idee_future.md`, «Realizzate»; diario Step
 1.30-1.31). Altri raffinamenti già annotati (estensione del profilo a specchio agli altri
 `altri_requisiti` — domicilio, disponibilità… —, pending_questions, riordino/omissione nel
-CV-2, soglia di match, robustezza dell'estrazione JSON, ecc.) restano nel **backlog
-ragionato** `idee_future.md`: non si duplicano qui.
+CV-2, ecc.) restano nel **backlog ragionato** `idee_future.md`: non si duplicano qui.
