@@ -42,6 +42,18 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   corregge la singola voce (cugino della rifinitura MVP del dialogo); (d) **limite dimensione
   del PDF** — nessun tetto esplicito lato server (l'API rifiuta comunque oltre ~32 MB).
   *(2026-08-03 — emersi realizzando 2.1.2, diario Step 1.33.)*
+- **Fonte-link per l'annuncio → browser incorporato (WebView2)**: leggere l'annuncio da un **link**
+  invece di incollarne il testo (anello 2, fonte alternativa gemella dell'import da CV). Il
+  meccanismo `web_fetch` dell'API è stato **provato e accantonato**: apre solo le pagine a **HTML
+  statico** (career/ATS), ma **non** i portali renderizzati in **JavaScript** o dietro login/anti-bot
+  (LinkedIn, Indeed, Infojobs), cioè quasi tutti quelli reali — nell'MVP risultava inutile, quindi
+  rimosso. Pista pulita per la **Fase VB.NET**: un **WebView2** (browser Edge/Chromium nativo di
+  Windows 11) in cui l'utente naviga e si logga **come sé**; l'app legge il **DOM già renderizzato**
+  della pagina — JS risolto (è un vero browser) e muro anti-bot aggirato (sessione reale dell'utente:
+  nessuno scraping, nessun ToS violato). A valle nulla cambia: il testo estratto va ad
+  `analisi_annuncio` (invariato), come per l'incolla-testo. Lo stesso meccanismo abiliterebbe anche
+  la **2.1.3** (profilo da LinkedIn). *(2026-08-04 — provato `web_fetch` sull'annuncio-da-link:
+  limite JS, reso alla Fase VB.NET.)*
 
 ## Profilo, annuncio & schema
 - **Estensione del profilo** a specchio di `altri_requisiti` (domicilio, disponibilità,
