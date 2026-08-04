@@ -1080,3 +1080,26 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Ripiego onesto per i PDF-immagine**: una scansione senza testo dà poco o niente; invece di far finta di niente, l'app lo dice e offre l'incolla-testo. OCR e lettura multimodale del PDF restano nel backlog.
 
 💡 *Mia intuizione / scelta ragionata* — Il momento chiave non è stato tecnico. Davanti al PDF la domanda ovvia era «come lo leggo?»; quella giusta era «dove lo faccio entrare, senza che tocchi il resto?». La risposta era già nell'architettura: il profilo è l'**hub disaccoppiante**, e finché una nuova fonte produce *lo stesso* profilo, confronto e generazione non se ne accorgono. Così ho aggiunto un intero modo di costruire il profilo cambiando, a valle, esattamente zero. Ho lavorato sul prompt (che dura), non sul PDF (che è impalcatura).
+
+### Step 1.34 — L'annuncio da un link: web_fetch prova e scarta, la strada è WebView2
+
+*Dopo l'import da CV mi è venuta la voglia gemella: invece di incollare il testo dell'annuncio, incollarne il link. Sembrava una feature gratis — e invece è stata una lezione su cosa `web_fetch` può e non può fare. L'ho costruita, provata sul campo, e poi rimossa: la casa giusta è un'altra, ed è nel futuro VB.NET.*
+
+**Cosa ho fatto**
+- **Stesso ragionamento del PDF (2.1.2), applicato all'annuncio.** Il link è solo una fonte diversa dello *stesso* testo dell'annuncio: due passi (`/leggi-link` → `analisi_annuncio` **invariato**), con lo strumento **`web_fetch`** dell'API a fare da lettore — così l'aiutante Node resta a zero dipendenze e non tocca URL arbitrari. Bivio nel front-end (📋 testo / 🔗 link), banco dedicato, ripiego onesto (`NESSUN_ANNUNCIO` → incolla-testo).
+- **Verificato prima di cantare vittoria**: `node --check`, sync char-by-char del prompt nuovo, smoke test di routing/validazione a costo zero, poi la prova vera nel browser.
+- **La prova ha parlato**: nella pratica gli annunci veri stanno su portali in JavaScript (LinkedIn, Indeed, Infojobs), dove `web_fetch` **non arriva** (prende l'HTML grezzo, che lì è quasi vuoto); le pagine a HTML statico che funzionano sono rare. Feature **del tutto inutile** nell'MVP.
+- **Rimosso tutto** (ripristino pulito di `server.js`, `index.html`, `prompt_design.md`; banco eliminato); tenuta **solo** la pista **WebView2** in `idee_future.md`.
+
+**Cosa ho imparato**
+- **Il muro vero non è il login: è il JavaScript.** `web_fetch` legge l'HTML grezzo, che sui portali moderni è quasi vuoto — il contenuto lo costruisce il browser. Anche superando login e anti-bot, senza JS-rendering non c'è nulla da leggere.
+- **La domanda giusta è "chi accede".** Un bot che scarica una pagina → muro (tecnico e ToS). Io, loggato, che guardo l'annuncio nel mio browser → nessun muro: sto solo leggendo ciò che ho già davanti. È la stessa idea dell'incolla-testo, portata un passo più in là.
+
+**Dove ho faticato / cosa non era ovvio**
+- **Sembrava "gratis".** L'istinto diceva: basta incollare un link. Solo provandola ho visto che senza JS-rendering è inutile sui siti che contano. Meglio scoperto sul campo che a tavolino — i dati battono l'ipotesi.
+
+**Cosa ho deciso e perché**
+- **Non spedire ciò che i dati dicono inutile.** Rimossa dall'MVP invece di lasciarla come bottone che quasi sempre fallisce: onestà verso l'utente e MVP snello.
+- **La fonte-link si fa bene in VB.NET, con WebView2.** Un browser Edge/Chromium nativo in cui navigo e mi loggo **come me**; l'app legge il **DOM già renderizzato** — JS risolto (è un browser vero), muro anti-bot aggirato (sessione mia), e a valle `analisi_annuncio` **invariato** (stessa architettura). Abilita anche la 2.1.3 (profilo da LinkedIn). Annotata in `idee_future.md`.
+
+💡 *Mia intuizione / scelta ragionata* — Come per il PDF, la domanda non era «come leggo il link?» ma «dove faccio entrare questa fonte, e con quale lettore?». Stavolta la risposta è stata anche un **no**: `web_fetch` non è il lettore giusto perché non vede il JavaScript. Il lettore giusto è il **browser dell'utente** — e quello arriva in VB.NET. Aver lavorato sul disegno (fonte → stesso testo → `analisi_annuncio` invariato) fa sì che il «no» di oggi non butti via nulla: il giorno del WebView2, a valle, cambia zero.
