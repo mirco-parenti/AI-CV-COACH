@@ -59,12 +59,6 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    (`VB.NET/progetto/03_interfaccia_grafica.md`). Eventuali strumenti della suite si
    includono **solo come eseguibili binari**, solo se veramente utili. *(Ratificata
    2026-08-05.)*
-12. 🔖 **REGOLA NUOVA/regole_di_progetto — Attribuzione dei commit**: ogni messaggio di
-   commit (e ogni corpo di PR) si chiude con la sola riga `(c) 2026 Aviolab AI`.
-   **Nessuna menzione dell'assistente o dello strumento usato** — niente
-   `Co-Authored-By: Claude`, niente «Generated with Claude Code». L'identità git resta
-   quella della postazione (regola 11). *(Istruzione data il 2026-08-05; in attesa di
-   ratifica formale.)*
 11. **Due postazioni, un proprietario**: il repo vive sotto `mirco-parenti` (unico
    proprietario); `rpsnoopy` è collaborator. Ogni macchina committa con la **propria
    identità git** (aviolab03 = mirco-parenti; la macchina del tutor = Riccardo
@@ -72,6 +66,11 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    all'inizio, push alla fine. Per le tappe di implementazione (T1–T9) si lavora su
    rami e **il merge su `main` lo fa Mirco**; per documentazione e diario è ammesso
    il push diretto. *(Ratificata 2026-08-05.)*
+12. **Attribuzione dei commit**: ogni messaggio di
+   commit (e ogni corpo di PR) si chiude con la sola riga `(c) 2026 Aviolab AI`.
+   **Nessuna menzione dell'assistente o dello strumento usato** — niente
+   `Co-Authored-By: Claude`, niente «Generated with Claude Code». L'identità git resta
+   quella della postazione (regola 11). *(Ratificata 2026-08-05.)*
 
 ## Contesto del progetto (fatti stabili + puntatori, niente stato copiato)
 

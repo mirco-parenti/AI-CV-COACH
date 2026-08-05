@@ -1194,3 +1194,27 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Le proposte le ho messe per iscritto.** Exe autonomo che ingloba il runtime (copi un file e funziona), `.eml` come uscita email di riferimento, tool MCP di sola lettura/generazione nella prima versione: su ogni bivio il progetto porta una proposta motivata, così la discussione con il tutor parte da qualcosa e non da un foglio bianco.
 
 💡 *Mia intuizione / scelta ragionata* — Scrivere il progetto dettagliato è stato il vero esame del prototipo: ogni funzione che sapevo spiegare a livello di perito era una funzione capita davvero; dove l'inchiostro si inceppava, lì c'era una decisione che credevo presa e non lo era. Il codice verrà dopo, ma il collaudo del pensiero è già cominciato.
+
+### Step 2.2 — Il cancello T0 si chiude: tredici decisioni prese, alcune contro la mia proposta
+
+*Lo Step 2.1 aveva piantato un cancello davanti al codice: finché il capitolo 15 avesse una voce non discussa, non si implementa. Oggi ho ripassato quel capitolo voce per voce alla postazione del tutor, listino e documentazione alla mano. Il capitolo è svuotato: ogni decisione ha un esito definitivo, e otto di esse si discostano dalla proposta che avevo scritto — segno che discutere serviva davvero. Il cancello T0 è chiuso; T1 può partire.*
+
+**Cosa ho fatto**
+- **Ripassato il capitolo 15 una voce alla volta**, riportando l'esito definitivo accanto a ogni proposta. Dove l'esito cambia la proposta, la colonna dice *perché*: niente scelte mute.
+- **Riportato le decisioni che cambiano negli altri capitoli.** Ogni scelta che si discosta dalla proposta è stata propagata dove viveva il disegno: .NET 10 nei capitoli distribuzione e piano; il nome utente nell'interfaccia e nella distribuzione; Sonnet 5 nell'architettura; i portali e il profilo LinkedIn nella ricerca annunci e nel piano; il `.msg` e l'SMTP fuori nelle email; la taratura del match nei dati. Il §15.6 tiene la tabella di questo allineamento, così si controlla che nessun capitolo resti indietro.
+- **Segnato T0 come chiuso** nel piano (cap. 14): «i documenti 01–15 sono confermati, T1 può iniziare».
+
+**Cosa ho imparato**
+- **Verificare batte ricordare.** Non ho preso le date di supporto e i listini a memoria: le ho controllate. .NET 8 esce di supporto il 10/11/2026 (già in sola manutenzione), .NET 10 è LTS fino al 2028 — quindi partire dalla LTS che scade fra pochi mesi sarebbe stato un debito nato vecchio. Stessa cosa per l'invio email: l'autenticazione con password su SMTP è rifiutata al 100% da Microsoft dal 30/04/2026, quindi «uso la mia casella» non era più un'opzione, non un mio timore.
+- **Un nome non è un dettaglio.** «AI-CV-COACH» resta il nome del progetto, del repo, dei documenti — ma ciò che l'utente legge diventa «TrovaLavoro», sul modello di TrovaPrezzi: ricordabile e comprensibile a chi non è tecnico. Ho imparato a tenere separate due identità che credevo una sola: quella per me e quella per chi userà il programma.
+
+**Dove ho faticato / cosa non era ovvio**
+- **Accettare gli otto «⚠️ Cambiata».** Avevo scritto proposte motivate, e vederne otto su dieci ribaltate all'inizio sembrava una bocciatura. Poi ho capito che era il contrario: la proposta secca era servita a far partire la discussione da qualcosa, e ogni cambio portava un fatto verificato che da solo non avevo. Il capitolo 15 non è un elenco di miei errori, è il verbale di una decisione presa in due.
+- **Distinguere «fuori dalla 1.0» da «mai».** L'SMTP diretto e il `.msg` escono dalla prima versione, ma non li ho cancellati: sono migrati nel 15.3 con la porta socchiusa (l'SMTP rientra solo con OAuth 2.0, che è un progetto a sé). E in senso opposto, il profilo da LinkedIn — che era un'idea futura — è stato *promosso dentro* la 1.0, perché il browser incorporato a T5 lo rende quasi solo un pulsante in più. Rimandare e promuovere sono due mosse, non una porta che si chiude.
+
+**Cosa ho deciso e perché**
+- **Il cancello si chiude solo a capitolo svuotato.** Non «quasi tutte» le decisioni: tutte, con le rimandate dichiarate una per una con la loro motivazione. È la regola che mi ero dato nello Step 2.1, e l'ho rispettata invece di aggirarla con un «il resto lo vedo strada facendo».
+- **La taratura del match esce dal codice ma resta invisibile all'utente.** Soglia e pesi vivono in un file di taratura nella cartella dati (ritoccarli durante le prove non costa una build), ma nessun pannello li espone: le stelle devono restare confrontabili fra annunci, e un utente che sposta i pesi romperebbe proprio quella comparabilità.
+- **Attribuzione dei commit messa nero su bianco.** Da qui in avanti ogni commit si chiude con la sola riga `(c) 2026 Aviolab AI`, senza menzione dello strumento: l'ho ratificata come regola di progetto (regola 12), coerente con l'identità git delle due postazioni (regola 11).
+
+💡 *Mia intuizione / scelta ragionata* — Il valore del cancello non era fermare il codice, era costringermi a trasformare ogni «lo deciderò dopo» in una decisione con una data e un motivo. Otto proposte su dieci sono cambiate: se avessi cominciato a scrivere codice sulla prima stesura, avrei costruito otto volte sulla sabbia. Ora la sabbia è diventata pietra, e T1 può appoggiarcisi.
