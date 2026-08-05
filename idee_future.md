@@ -118,6 +118,24 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   all'anti-invenzione "per sottrazione". Rimandato. *(2026-06-11 — deciso nel design del
   CV-2, bivio 3: tenere tutto, ri-pesare l'enfasi.)*
 
+## Fase VB.NET (applicazione desktop)
+
+Idee emerse **scrivendo il progetto dettagliato** della Fase 3 (`VB.NET/progetto/`) e lì
+dichiarate «rimandate» (cap. 15.3-15.4): qui il puntatore, perché il backlog resta uno.
+- **Auto-update dell'applicazione** — per un'app personale è complessità senza guadagno;
+  aggiornamento manuale (si sostituisce l'exe). *(2026-08-05 — progetto VB.NET, cap. 13.8/15.3.)*
+- **Firma del codice** (certificato, per evitare l'avviso SmartScreen) — quando l'app
+  circolerà oltre il portfolio. *(2026-08-05 — cap. 13.6/15.3.)*
+- **MCP: trasporto HTTP locale + tool di scrittura/invio con conferma** — la prima versione
+  espone via stdio solo lettura e generazione; email e modifica del profilo restano
+  nell'app. *(2026-08-05 — cap. 09/15.3.)*
+- **Follow-up assistito delle candidature** — oggi solo promemoria passivo nel registro;
+  la generazione dell'email di sollecito è da valutare. *(2026-08-05 — cap. 15.4.)*
+- **Multi-profilo nella stessa installazione** — il disegno è mono-profilo; da valutare
+  se serve. *(2026-08-05 — cap. 15.4.)*
+- **Terze lingue oltre IT/EN** — il pool le ammette per costruzione (varianti `.fr.md`…);
+  fuori perimetro. *(2026-08-05 — cap. 10.5/15.3.)*
+
 ## Realizzate
 
 Idee del backlog ormai costruite. Si tengono qui (con il puntatore a dove sono narrate o

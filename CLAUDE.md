@@ -6,19 +6,20 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
 
 ## Regole
 
-1. **Sync prompt ↔ codice**: ogni prompt vive **identico** in `prompt_design.md` e
-   `server.js`. Confronta **char-by-char** normalizzando CRLF/LF, e **verifica a ogni
-   modifica** di un prompt.
+1. **Sync prompt ↔ codice**: ogni prompt vive **identico** in `HTML+JS/prompt_design.md` e
+   `HTML+JS/server.js`. Confronta **char-by-char** normalizzando CRLF/LF, e **verifica a ogni
+   modifica** di un prompt. (Nella fase VB.NET la regola migrerà sulla libreria di prompt
+   `.md`: sarà ridefinita quando quella nascerà.)
 2. **Stile del diario** (`diario_di_bordo.md`): `### Step X.Y — titolo`, intro in
    corsivo, sezioni *Cosa ho fatto / Cosa ho imparato / Dove ho faticato / Cosa ho
    deciso e perché*, callout 💡, **prima persona** (io = Mirco), in italiano.
    **Non riscrivere gli step passati** (sono storia): lavoro nuovo = step nuovo.
 3. **Asset durevoli vs usa-e-getta**: investi qualità sui **durevoli = PROMPT + SCHEMA**
-   (`prompt_design.md`), che migrano verso VB.NET. L'infrastruttura — `index.html`,
+   (`HTML+JS/prompt_design.md`), che migrano verso VB.NET. L'infrastruttura — `index.html`,
    l'aiutante Node, i `test-*.html` — è **impalcatura usa-e-getta**, non da studiare
    riga per riga.
 4. **Documentazione senza duplicati**: i prompt **definitivi** stanno in
-   `prompt_design.md`, la **narrazione e le decisioni** nel `diario_di_bordo.md`.
+   `HTML+JS/prompt_design.md`, la **narrazione e le decisioni** nel `diario_di_bordo.md`.
    Non duplicare lo stesso contenuto nei due.
 5. **Comando "aggiorna-tutto"**: quando dico **"aggiorna-tutto"**, aggiorna **tutti i
    file di progetto nel working tree (tracciati o no)** — incluso questo `CLAUDE.md` —
@@ -52,30 +53,42 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    della generazione con marker chiari e distinti — **📄 CV-1** (base, generato dopo
    l'anello 1) e **🎯 CV-2** (mirato, generato dopo l'anello 3). Usali ogni volta che
    parli dei due CV.
+10. **Riservatezza TTR-SUITE**: nessun dettaglio implementativo di TTR-SUITE nei file
+   di questo repo (pubblico) — niente nomi di file/classi, architetture o meccanismi
+   interni. Il family feeling si specifica come design **proprio** di AI-CV-COACH
+   (`VB.NET/progetto/03_interfaccia_grafica.md`). Eventuali strumenti della suite si
+   includono **solo come eseguibili binari**, solo se veramente utili. *(Ratificata
+   2026-08-05.)*
 
 ## Contesto del progetto (fatti stabili + puntatori, niente stato copiato)
 
-- **Come far girare il progetto**: Node ≥ 20.12, **niente dipendenze npm**, chiave in
-  `.env` (`ANTHROPIC_API_KEY`, gitignored). Avvio: `npm start` → `http://localhost:3000`.
+- **Due aree del repo** (dal 2026-08-05): `HTML+JS/` = il prototipo web validato (fase MVP,
+  congelato salvo manutenzione); `VB.NET/` = tutto lo sviluppo da qui in avanti (mandato
+  verbatim in `VB.NET/PROMPT_DI_INCARICO.md`, progetto dettagliato in `VB.NET/progetto/`).
+  I file trasversali (questo `CLAUDE.md`, `README.md`, `diario_di_bordo.md`,
+  `idee_future.md`) restano in radice.
+- **Come far girare il prototipo**: Node ≥ 20.12, **niente dipendenze npm**, chiave in
+  `HTML+JS/.env` (`ANTHROPIC_API_KEY`, gitignored). Avvio: `npm start` **dentro
+  `HTML+JS/`** → `http://localhost:3000`.
   Endpoint: `POST /struttura` (turni del profilo, analisi annuncio e import da CV `importa_cv`), `POST /leggi-pdf` (trascrizione di un CV in PDF), `POST /confronta`, `POST /mitiga`, `POST /genera-cv` e `POST /genera-lettera`. Stop del server: `fuser -k 3000/tcp`.
 - **Stato e pipeline (fonte viva)**: per pipeline e stato aggiornati vedi
   `README.md` (sezione *Stato*) e l'ultimo `### Step` del `diario_di_bordo.md`.
   **Non duplicare qui lo stato** (così questo file non va mai stantio).
 - **Architettura (puntatore)**: il disegno **top-down** del sistema — funzioni (voci 2.x ↔
   anelli 1-4), vista-dati ("un profilo, molti CV"), principi trasversali, runtime e gap
-  aperti — è in `architettura.md`. È la bussola per progettare i componenti mancanti; il
+  aperti — è in `HTML+JS/architettura.md`. È la bussola per progettare i componenti mancanti; il
   file è **statico-strutturale** (si aggiorna solo quando cambia il disegno, non lo stato).
 - **Modelli (puntatore)**: quali modelli si usano e con che criterio (estrazione vs
-  ragionamento) è in `prompt_design.md` ("Modelli usati") e nelle costanti
-  `MODEL_SEMPLICE` / `MODEL_RAGIONAMENTO` di `server.js`.
+  ragionamento) è in `HTML+JS/prompt_design.md` ("Modelli usati") e nelle costanti
+  `MODEL_SEMPLICE` / `MODEL_RAGIONAMENTO` di `HTML+JS/server.js`.
 - **Bussola etica del prodotto (puntatore)**: il vincolo **anti-invenzione** è descritto
   in `README.md` ("Vincolo etico principale") ed è codificato nei prompt di
-  `prompt_design.md` — **rispettalo quando progetti/modifichi i prompt**. È una regola
+  `HTML+JS/prompt_design.md` — **rispettalo quando progetti/modifichi i prompt**. È una regola
   **del prodotto**, non una mia regola di lavoro.
 - **Anti-perdita (puntatore)**: il gemello simmetrico dell'anti-invenzione — nulla di ciò
   che l'utente dichiara va **perso** se detto nel turno sbagliato (campo `altrove`:
   instradamento ad altri turni, conferma dell'utente, e per l'irriducibile un esplicito
-  "lasciato fuori", mai una perdita silenziosa). Descritto in `prompt_design.md`
+  "lasciato fuori", mai una perdita silenziosa). Descritto in `HTML+JS/prompt_design.md`
   ("Convenzione anti-perdita: il campo `altrove`") e narrato nel `diario_di_bordo.md`
   (Step 1.26). Anche questa è una regola **del prodotto**.
 - **Idee/raffinamenti futuri (puntatore)**: il backlog ragionato per le fasi successive
@@ -89,13 +102,15 @@ un file nuovo, aggiungi qui la sua riga.
 | File | Come aggiornarlo con "aggiorna-tutto" |
 |---|---|
 | `README.md` | Aggiorna la sezione **Stato** (riga in cima + "## Stato del progetto") e "Tecnologie previste" se cambiano; non riscrivere il resto della presentazione. |
-| `prompt_design.md` | Prompt **definitivi** + schema; prompt **identici** a `server.js` (sync char-by-char). |
-| `server.js` | Codice del motore; prompt **identici** a `prompt_design.md`. |
+| `HTML+JS/prompt_design.md` | Prompt **definitivi** + schema; prompt **identici** a `server.js` (sync char-by-char). |
+| `HTML+JS/server.js` | Codice del motore; prompt **identici** a `prompt_design.md`. |
 | `diario_di_bordo.md` | **Aggiungi un nuovo `### Step X.Y`** (intro corsivo, sezioni, 💡, prima persona). **Mai** riscrivere gli step passati. |
 | `idee_future.md` | Aggiungi le idee nuove / spunta quelle realizzate con ✅ + puntatore; quando si accumulano, raccoglile in una sezione «Realizzate» in fondo (così il backlog attivo resta solo-futuro e non induce in errore); non copiare lo stato. |
 | `CLAUDE.md` | Ratifica i marker confermati (togli 🔖); riflette regole e contesti aggiornati. |
-| `research_notes.md` | **Statico**: solo se c'è nuova ricerca su progetti simili. |
-| `architettura.md` | **Statico-strutturale**: si tocca solo quando cambia il **disegno** (un gap chiuso, un componente nuovo, un confine spostato), **non** per lo stato corrente (che rimanda a README/diario). Mai riscrivere l'impianto concordato col tutor senza richiesta esplicita. |
-| `index.html`, `test-annuncio.html`, `test-confronto.html`, `test-cv.html`, `test-cv-mirato.html`, `test-lettera.html`, `test-cv-import.html` (e ogni `test-*.html`) | Impalcatura usa-e-getta: solo se è cambiato il front-end/test (qualità minore). |
-| `.gitignore`, `.gitattributes`, `package.json` | Config: solo se serve un cambiamento concreto. |
+| `HTML+JS/research_notes.md` | **Statico**: solo se c'è nuova ricerca su progetti simili. |
+| `HTML+JS/architettura.md` | **Statico-strutturale**: si tocca solo quando cambia il **disegno** (un gap chiuso, un componente nuovo, un confine spostato), **non** per lo stato corrente (che rimanda a README/diario). Mai riscrivere l'impianto concordato col tutor senza richiesta esplicita. |
+| `HTML+JS/index.html` e ogni `HTML+JS/test-*.html` | Impalcatura usa-e-getta: solo se è cambiato il front-end/test (qualità minore). |
+| `VB.NET/PROMPT_DI_INCARICO.md` | **Statico**: è il mandato verbatim della fase VB.NET, **mai** riscritto; si estende solo con nuove integrazioni verbatim dell'utente. |
+| `VB.NET/progetto/*.md` | Progetto dettagliato della fase VB.NET: si aggiorna quando una **decisione di progetto** cambia o matura (design-first: finché non si implementa, questi file sono la verità del disegno). Rispetta indice e struttura dei capitoli. |
+| `.gitignore`, `.gitattributes`, `HTML+JS/package.json` | Config: solo se serve un cambiamento concreto. |
 | `.env`, `.claude/`, `node_modules/`, gitignored | **MAI** toccati. |
