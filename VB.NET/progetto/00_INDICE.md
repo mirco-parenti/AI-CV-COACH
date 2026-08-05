@@ -20,7 +20,7 @@ riferimento è quello del perito, non dell'ingegnere: se un capitolo non si capi
 | [04](04_libreria_prompt.md) | Libreria prompt | il pool di file `.md`: formato, manifest, versione, caricatore |
 | [05](05_documenti_io.md) | Documenti I/O | ingresso PDF/TXT/MD/DOCX e cartella; uscita DOCX e PDF |
 | [06](06_ricerca_annunci.md) | Ricerca annunci | il browser integrato: l'utente naviga, il programma legge |
-| [07](07_email_e_candidature.md) | Email e registro | `.eml`/`.msg`/SMTP, allegati, stati delle candidature |
+| [07](07_email_e_candidature.md) | Email e registro | `.eml` pronta da inviare, allegati, stati delle candidature |
 | [08](08_qualita_del_testo.md) | Qualità del testo | la rifinitura anti-slop: naturale sì, errori mai |
 | [09](09_server_mcp.md) | Server MCP | le funzioni esposte ai client AI esterni, stesso motore |
 | [10](10_multilingua.md) | Multilingua | italiano/inglese per CV e lettere, senza tradire il profilo |

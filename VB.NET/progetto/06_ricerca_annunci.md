@@ -51,8 +51,13 @@ flusso A3 del cap. 12) diventano ricerche pronte per i portali supportati. Una r
 salvata è solo un **indirizzo parametrizzato**: il programma compone l'URL di ricerca
 del portale con le parole chiave e la zona, e lo apre nel browser integrato.
 
-- Portali previsti al primo rilascio: **Indeed, LinkedIn Jobs, InfoJobs** più una
-  ricerca generica via motore di ricerca (per le pagine career aziendali).
+- Portali previsti al primo rilascio: **Indeed, InfoJobs, Subito.it** più una
+  ricerca generica via motore di ricerca (per le pagine «lavora con noi» dei siti
+  aziendali). *Scelta rivista il 2026-08-05 (cap. 15, voce 7):* LinkedIn Jobs esce dalla
+  terna iniziale perché è il portale meno adatto ai ruoli operativi che il nostro utente
+  cerca — magazziniere, addetto alle vendite, manutentore — mentre **Subito.it** è quello
+  che quel pubblico riconosce di più. Resta comunque aggiungibile in qualunque momento,
+  come tutti gli altri: è una riga di `ricerche.json`.
 - L'elenco è una **tabella dati** (nome portale + schema di URL), non codice: aggiungere
   un portale non richiede una nuova build. La tabella vive in `ricerche.json` nella
   cartella dati (cap. 11.1), insieme alle preferenze e alle ricerche salvate.
@@ -95,10 +100,19 @@ Non c'è alcun tentativo di scaricare il link «alla cieca»: la lezione dello S
 - Ciò che viene catturato (testo dell'annuncio) resta **sul PC dell'utente**, nella
   cartella dati; l'unico invio all'esterno è quello verso l'API AI per l'analisi.
 
-## 6.7 Estensione futura già prevista dal disegno
+## 6.7 Il profilo da LinkedIn (voce 2.1.3) — **dentro la 1.0**
 
-Lo stesso meccanismo di cattura abilita la voce **2.1.3** del disegno funzionale
-(profilo da LinkedIn): l'utente apre la **propria** pagina profilo nel browser
-integrato, la cattura e la manda alla strutturazione (`importa_cv`), che è già
-indipendente dalla fonte. Non è nel primo rilascio, ma non richiederà nessun
-componente nuovo (il capitolo 14 la colloca).
+Lo stesso meccanismo di cattura abilita la voce **2.1.3** del disegno funzionale:
+l'utente apre la **propria** pagina profilo nel browser integrato, la cattura e la manda
+alla strutturazione (`importa_cv`), che è già indipendente dalla fonte.
+
+*Promossa nel primo rilascio il 2026-08-05 (cap. 15.5):* non richiede nessun componente
+nuovo — il browser incorporato esiste già a T5 e il prompt di strutturazione è lo stesso
+che legge un CV in PDF — quindi è poco più di un pulsante in più, a fronte di un
+risparmio grosso per l'utente, che si trova il profilo quasi compilato invece di
+riscriverlo. Si colloca **subito dopo T5**, quando la cattura è collaudata.
+
+Due avvertenze da rispettare: l'utente deve **accedere a LinkedIn dentro il browser
+integrato** come farebbe altrove (l'app non vede le credenziali, cap. 6.6), e si cattura
+**solo la propria** pagina profilo — non quelle altrui. Vale anche qui la bussola del
+capitolo 01.4: si assiste la lettura di ciò che l'utente sta legittimamente guardando.

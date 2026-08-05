@@ -7,60 +7,88 @@ capitolo svuotato — o con le voci restanti dichiarate «rimandate» esplicitam
 
 ## 15.1 Da decidere prima di T1 (fondamenta)
 
-| # | Decisione | Proposta | Esito (2026-08-05) |
+*Revisione definitiva del 2026-08-05: le voci sono state ripassate una per una alla
+postazione del tutor; dove l'esito si discosta dalla proposta, la colonna dice perché.*
+
+| # | Decisione | Proposta | Esito definitivo (2026-08-05) |
 |---|---|---|---|
-| 1 | **Versione .NET** | **.NET 8 LTS**, già collaudata dalla toolchain di casa; l'eventuale passaggio alla LTS successiva è un cambio di una riga, rivalutabile a T1. | ✔ **Confermata** (.NET 8 LTS) |
-| 2 | **Formato di rilascio** | **Autonomo** (self-contained, ≈150–180 MB): copi un file e funziona, senza «prima installa il runtime». La variante leggera resta per lo sviluppo. | ✔ **Confermata** (autonomo) |
-| 3 | **Nome dell'eseguibile e dell'app** | `AiCvCoach.exe`, nome visuale «AI-CV-COACH». | ✔ **Confermata** |
-| 4 | **Logo del progetto** | serve un'immagine propria (quadrata, leggibile a 101×101 px). Da produrre (anche con Canva); finché non c'è, un segnaposto tipografico. | ✔ **Confermata**: placeholder tipografico ora, logo proprio più avanti |
-| 5 | **Schema di versione** | `1.0.012` (maggiore.minore.build) in `Versione.vb`; pool separato (`Pool 1.03`). | ✔ **Confermata** |
+| 1 | **Versione .NET** | **.NET 8 LTS**, già collaudata dalla toolchain di casa; l'eventuale passaggio alla LTS successiva è un cambio di una riga, rivalutabile a T1. | ⚠️ **Cambiata: .NET 10 LTS**. Verificato sul sito Microsoft: **.NET 8 esce di supporto il 10/11/2026** (ed è già in sola manutenzione), mentre .NET 10 è LTS fino a **novembre 2028**. Comporta installare l'SDK 10 su entrambe le postazioni (oggi assente su quella del tutor, che ha l'SDK 9). |
+| 2 | **Formato di rilascio** | **Autonomo** (self-contained, ≈150–180 MB): copi un file e funziona, senza «prima installa il runtime». La variante leggera resta per lo sviluppo. | ✔ **Confermata**: autonomo **non compresso** (avvio più rapido). La misura reale si prende al publish di prova di T1. Nota: il *trimming* non è supportato su WinForms, quindi la stima regge; e WebView2 (cap. 06) resta una dipendenza di sistema esterna, da dichiarare. |
+| 3 | **Nome dell'eseguibile e dell'app** | `AiCvCoach.exe`, nome visuale «AI-CV-COACH». | ⚠️ **Cambiata: «TrovaLavoro»**, eseguibile `TrovaLavoro.exe`, sottotitolo «e candidati con il CV giusto, senza fatica». Criterio: il nome deve essere ricordabile e comprensibile per un utente non tecnico (modello *TrovaPrezzi*). **Il nome del progetto, del repo e dei documenti resta AI-CV-COACH**: cambia solo ciò che l'utente legge. Proprietà dell'eseguibile: azienda **Aviolab AI**, prodotto **TrovaLavoro**, copyright **© 2026 Aviolab AI**. |
+| 4 | **Logo del progetto** | serve un'immagine propria (quadrata, leggibile a 101×101 px). Da produrre (anche con Canva); finché non c'è, un segnaposto tipografico. | ✔ **Confermata**: segnaposto tipografico **«TL»** generato da codice a T1; logo proprio più avanti, senza bloccare le fondamenta. |
+| 5 | **Schema di versione** | `1.0.012` (maggiore.minore.build) in `Versione.vb`; pool separato (`Pool 1.03`). | ✔ **Confermata** senza modifiche. |
 
 ## 15.2 Da decidere entro la tappa interessata
 
-| # | Decisione | Tappa | Proposta | Esito (2026-08-05) |
+| # | Decisione | Tappa | Proposta | Esito definitivo (2026-08-05) |
 |---|---|---|---|---|
-| 6 | **Modelli AI concreti** | T2 | oggi: Haiku 4.5 (estrazione) e Sonnet 4.6 (ragionamento); si riverifica il listino al momento, i nomi stanno in configurazione. | ⏳ **Rimandata**: si decide in seguito **col tutor del progetto** |
-| 7 | **Portali del primo rilascio** | T5 | Indeed, LinkedIn Jobs, InfoJobs + ricerca generica; schema URL da verificare sul campo in T5. | ⏳ **Alla tappa**: si fissa a **T5** (proposta come base) |
-| 8 | **`.msg` sì/no** | T6 | tenerlo **solo se** su almeno un PC di riferimento c'è Outlook classico; altrimenti si rimanda (l'`.eml` copre il bisogno). | ✔ **Confermata** (condizionata: solo se c'è Outlook classico) |
-| 9 | **Account SMTP di riferimento** | T6 | quale casella userà Mirco per le candidature (Gmail con password per le app? altro provider?). | ⏳ **Alla tappa**: si decide a **T6** |
-| 10 | **Soglia e pesi del match** | T2 | **restano fissi** (scelte di prodotto validate nel prototipo: soglia 1,5 stelle, pesi 5/1, clamp −20/+10, tetto 20). Non configurabili dall'utente. | ✔ **Confermata**: restano fissi, non configurabili |
+| 6 | **Modelli AI concreti** | T2 | oggi: Haiku 4.5 (estrazione) e Sonnet 4.6 (ragionamento); si riverifica il listino al momento, i nomi stanno in configurazione. | ✔ **Decisa** (listino riverificato): **Haiku 4.5** (`claude-haiku-4-5`, $1/$5 per MTok) per l'estrazione, **Sonnet 5** (`claude-sonnet-5`, $3/$15 — promo $2/$10 fino al 31/08/2026) per il ragionamento. **Due avvertenze per T2**: Sonnet 5 attiva il ragionamento esteso *di default* se non lo si disabilita, e il suo nuovo conteggio token dà ~+30% a parità di testo → dimensionare il limite di risposta di conseguenza. I nomi restano in configurazione. |
+| 7 | **Portali del primo rilascio** | T5 | Indeed, LinkedIn Jobs, InfoJobs + ricerca generica; schema URL da verificare sul campo in T5. | ⚠️ **Cambiata: Indeed, InfoJobs, Subito.it** + ricerca generica. LinkedIn esce dal primo rilascio: è il portale meno adatto ai ruoli operativi che cerca il nostro utente, mentre Subito.it è il più riconosciuto da chi non è pratico. Resta aggiungibile in ogni momento come riga di `ricerche.json` (nessuna nuova build). Schemi URL da verificare sul campo a T5. |
+| 8 | **`.msg` sì/no** | T6 | tenerlo **solo se** su almeno un PC di riferimento c'è Outlook classico; altrimenti si rimanda (l'`.eml` copre il bisogno). | ⚠️ **Cambiata: fuori dalla 1.0** (→ 15.3). Motivo: l'`.eml` con intestazione `X-Unsent` apre in Outlook *già* la finestra di composizione pronta all'invio — identico risultato del `.msg` — che in cambio costerebbe l'automazione COM di Outlook, fragile fra versioni di Office e architetture. Outlook classico **è** presente sulla postazione del tutor (verificato), ma la condizione non basta a giustificare la funzione. |
+| 9 | **Account SMTP di riferimento** | T6 | quale casella userà Mirco per le candidature (Gmail con password per le app? altro provider?). | ⚠️ **Cambiata: invio diretto SMTP fuori dalla 1.0** (→ 15.3). Fatto nuovo verificato: Microsoft ha chiuso l'autenticazione con password su SMTP — rifiuto al **100% dal 30/04/2026** — quindi ogni indirizzo `@outlook.it`/`@hotmail.it`/Microsoft 365 è già inutilizzabile; Gmail regge con le password per le app ma Google le sta eliminando. L'unica uscita della 1.0 è il file `.eml`, che non dipende da alcuna autenticazione. |
+| 10 | **Soglia e pesi del match** | T2 | **restano fissi** (scelte di prodotto validate nel prototipo: soglia 1,5 stelle, pesi 5/1, clamp −20/+10, tetto 20). Non configurabili dall'utente. | ✔ **Confermata con una precisazione**: restano **fissi e invisibili all'utente** (nessun pannello: le stelle devono restare confrontabili fra annunci), ma vivono in un **file di taratura** nella cartella dati, non nel codice — così ritoccarli durante le prove non costa una nuova build. Include la regola del requisito eliminatorio (⛔ → massimo 1 stella). |
 
 ## 15.3 Dichiarate rimandate (non bloccano T0)
 
+*Riviste una per una il 2026-08-05. Due voci hanno lasciato l'elenco — l'OCR perché
+risolta, il profilo LinkedIn perché promosso nella 1.0 — e due vi sono entrate,
+dalla 15.2.*
+
 - **Trasporto HTTP locale per MCP** — stdio basta per i client di oggi.
 - **Invio email e scrittura profilo via MCP** — richiedono un meccanismo di conferma;
-  seconda versione.
+  seconda versione (e l'invio email non è più nemmeno nella 1.0: vedi sotto).
 - **Firma del codice** (certificato) — quando l'app circolerà oltre il portfolio.
+  *Nota del 2026-08-05:* finché il programma resta sulle due postazioni di casa non
+  serve; nel momento in cui qualcuno lo **scarica**, Windows mostra il blocco
+  «Windows ha protetto il PC», che un utente non pratico legge come «è un virus».
+  Costo: qualche centinaio di euro l'anno più un dispositivo fisico per la chiave.
 - **Auto-update** — per un'app personale è complessità senza guadagno.
-- **OCR locale per PDF scannerizzati** — ripiego incolla-testo; l'eventuale
-  elaboratore PDF esterno di casa (solo exe binario) si valuta **solo se** i PDF
-  scannerizzati diventano un caso frequente.
-- **Profilo da LinkedIn (voce 2.1.3)** — il meccanismo c'è (cap. 06.7); si colloca
-  dopo la 1.0.
 - **Terze lingue (fr, de…)** — il pool le ammette per costruzione; fuori perimetro.
 - **Generazione assistita dell'email di sollecito (follow-up)** — nella 1.0 resta il
   **promemoria passivo** del registro (07.3): ricorda le candidature ferme, il testo del
   sollecito lo scrive l'utente. L'estensione è già disegnata (un prompt `email_sollecito`
-  che riusa il pannello Email P7, l'anti-slop e le tre uscite del cap. 07); si aggiunge
-  dopo la 1.0 se il bisogno si rivela frequente.
+  che riusa il pannello Email P7 e l'anti-slop); si aggiunge dopo la 1.0 se il bisogno
+  si rivela frequente.
+- **Uscita `.msg`** *(dalla 15.2, voce 8)* — l'`.eml` con `X-Unsent` dà lo stesso
+  risultato in Outlook senza automazione COM. Si riapre solo davanti a un caso d'uso
+  che l'`.eml` non copra.
+- **Invio diretto SMTP** *(dalla 15.2, voce 9)* — l'autenticazione con password su
+  SMTP si sta chiudendo ovunque (Microsoft al 100% dal 30/04/2026; Google sta
+  eliminando le password per le app). Rientrerà solo con OAuth 2.0, che è un progetto
+  a sé: registrazione dell'applicazione presso il provider, finestra di consenso nel
+  browser, rinnovo periodico dei permessi.
+
+**Uscita dall'elenco — voce chiusa perché risolta:** l'**OCR locale per PDF
+scannerizzati** non serve. Verificato sulla documentazione Anthropic: nel blocco
+`document` **ogni pagina del PDF viene convertita in immagine** e letta con le
+capacità visive del modello, che è esattamente il percorso già usato dal prototipo
+(`POST /leggi-pdf`). Un curriculum scannerizzato, privo di strato di testo, viene
+quindi già letto oggi. Resta il limite della **qualità della scansione**: se il testo
+estratto è troppo povero, l'app lo dice e propone l'incolla-testo (cap. 05.1).
 
 ## 15.4 Domande aperte all'utente (senza proposta secca)
 
 1. **Più profili nella stessa installazione** (es. un familiare che usa lo stesso PC):
    oggi il disegno è mono-profilo; il multi-profilo cambierebbe la cartella dati.
-   Serve? → ⏳ **Rimandata post-1.0** (2026-08-05): la 1.0 resta mono-profilo; il
-   multi-profilo è possibile estensione futura.
+   Serve? → ✔ **Chiusa: mono-profilo, struttura dati piatta.** La 1.0 resta a profilo
+   singolo e i dati vivono direttamente nella cartella dell'applicazione, senza livelli
+   intermedi: struttura più leggibile. *Conseguenza accettata:* se un domani arrivasse
+   il multi-profilo, i dati esistenti andranno spostati. Il multi-profilo resta
+   estensione possibile, non pianificata.
 2. **Il brainstorming va conservato per intero** (tutta la conversazione) o bastano
-   gli appunti di mira confermati? Oggi il disegno salva solo gli appunti. → ⏳
-   **Rimandata post-1.0** (2026-08-05): nella 1.0 si salvano solo gli appunti
-   confermati; la conservazione integrale si valuta dopo.
+   gli appunti di mira confermati? → ✔ **Chiusa: solo gli appunti confermati.** La
+   conversazione si chiude con la finestra. Oltre alla sobrietà dei dati, è la scelta
+   più rispettosa: il brainstorming è la parte più personale di tutto il programma
+   (dubbi, insicurezze, ragioni per cui si è lasciato un lavoro) e non deve sedimentare
+   su disco senza che nessuno l'abbia chiesto.
 3. **Pubblicazione dei valori concreti del design** (la palette e le dimensioni del
-   cap. 03): sono l'aspetto visibile del family feeling, non meccanismi interni — ma
-   la conferma che vada bene pubblicarli in questo repo spetta a te. → ⏳ **Decisione
-   rinviata** (2026-08-05): da riprendere più avanti.
+   cap. 03) → ✔ **Chiusa: restano pubblici.** Constatato che lo **erano già**: il
+   repository è pubblico e il cap. 03, con tavolozza esadecimale, corpi dei caratteri e
+   spaziature, è su `origin/main` dal commit `4644331`. La pubblicazione è coerente con
+   la **regola 10** di `CLAUDE.md`, che colloca proprio in quel capitolo la
+   specificazione del family feeling **come design proprio di AI-CV-COACH**.
 
-*(Voci chiuse — 2026-08-05: follow-up assistito rimandato post-1.0, vedi 15.3;
-tutte le decisioni 15.1–15.4 hanno ora un esito registrato.)*
+*(Tutte le voci 15.1–15.4 hanno un esito **definitivo**. Nessuna resta in sospeso.)*
 
 ## 15.5 Sorte del backlog storico (`idee_future.md`)
 
@@ -71,10 +99,29 @@ tutte le decisioni 15.1–15.4 hanno ora un esito registrato.)*
 | Editing campo-per-campo del profilo | **dentro** (cap. 12, A2) |
 | `estraiFrammento` robusto lato client | **assorbita**: nel desktop c'è un solo estrattore, `EstrattoreJson` (cap. 02) |
 | Limite dimensione PDF | **dentro** (cap. 05.1, messaggio chiaro) |
-| Profilo da LinkedIn (2.1.3) | rimandata dopo la 1.0 (15.3) |
-| PDF scannerizzati / OCR | rimandata (15.3) |
+| Profilo da LinkedIn (2.1.3) | **dentro** *(promossa il 2026-08-05)*: il browser incorporato esiste già a T5 e la strutturazione (`importa_cv`) è indipendente dalla fonte — è quasi solo un pulsante in più. Si colloca **dopo T5**. |
+| PDF scannerizzati / OCR | **assorbita** *(2026-08-05)*: già risolta dal blocco `document`, che converte ogni pagina in immagine (vedi 15.3). Nessun componente da scrivere. |
 | Estensione profilo a specchio di `altri_requisiti`; domicilio confrontabile | **fuori**: resta nel backlog |
 | `pending_questions`; collocazione manuale degli esclusi | **fuori**: resta nel backlog |
 | Riordino dinamico / omissione mirata nel CV-2 | **fuori**: resta nel backlog (l'anti-invenzione «per sottrazione» merita una riflessione a sé) |
 | Taxonomy mapping (ESCO/O*NET) | **fuori**: resta nel backlog |
 | Decomposizione del prompt annuncio in sotto-prompt | **fuori** per ora: il pool la renderà naturale quando servirà |
+
+## 15.6 Esito del cancello T0
+
+Il capitolo è **svuotato**: le voci 1–13 hanno un esito definitivo, le restanti sono
+dichiarate rimandate una per una in 15.3 con la loro motivazione. Secondo la regola del
+capitolo 14, **il cancello T0 è chiuso e T1 può iniziare**.
+
+Le decisioni che cambiano la proposta originale e vanno riportate negli altri capitoli:
+
+| # | Cosa cambia | Capitoli da allineare |
+|---|---|---|
+| 1 | .NET 8 → **.NET 10 LTS** | 13, 14 |
+| 3 | Nome per l'utente: **TrovaLavoro** (`TrovaLavoro.exe`); progetto e repo restano AI-CV-COACH; proprietà dell'eseguibile a **Aviolab AI** | 03, 13 |
+| 6 | Sonnet 4.6 → **Sonnet 5** (con le due avvertenze su ragionamento e conteggio token) | 02, 04 |
+| 7 | LinkedIn → **Subito.it** fra i portali del primo rilascio | 06, 14 |
+| 8 | **`.msg` fuori** dalla 1.0 | 07, 14 |
+| 9 | **Invio diretto SMTP fuori** dalla 1.0: cadono pannello server, password di posta cifrata e traduzione degli errori di invio (la protezione dati di Windows resta per la chiave API) | 02, 07, 11, 14 |
+| 10 | Soglia e pesi in **file di taratura**, non nel codice | 02, 11 |
+| — | **Profilo da LinkedIn dentro la 1.0**, dopo T5 | 06, 14 |

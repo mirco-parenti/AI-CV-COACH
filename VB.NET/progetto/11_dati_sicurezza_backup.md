@@ -6,13 +6,14 @@ prodotto.*
 
 ## 11.1 La cartella dati
 
-Default: `%APPDATA%\AI-CV-COACH` (modificabile al primo avvio o nelle Impostazioni).
+Default: `%APPDATA%\TrovaLavoro` (modificabile al primo avvio o nelle Impostazioni).
 
 ```
-AI-CV-COACH\
-├── config.json            impostazioni (modelli AI, cartelle, account SMTP senza password)
+TrovaLavoro\
+├── config.json            impostazioni (modelli AI, cartelle)
 ├── ricerche.json          preferenze di ricerca, ricerche salvate e tabella dei portali
-├── segreti.bin            chiave API + password SMTP, cifrate (v. 11.3)
+├── taratura.json          soglia, pesi e limiti del match (v. 11.6)
+├── segreti.bin            chiave API Anthropic, cifrata (v. 11.3)
 ├── profilo\
 │   ├── profilo.json       il profilo corrente (fonte di verità unica)
 │   └── storico\           una copia datata per ogni versione confermata
@@ -44,18 +45,24 @@ AI-CV-COACH\
 | Dato | Esce? | Verso dove |
 |---|---|---|
 | Testi per l'elaborazione (profilo, annuncio, PDF da trascrivere) | sì | solo API Anthropic, via HTTPS |
-| Email di candidatura | solo su comando esplicito | il server SMTP dell'utente |
-| Tutto il resto (registro, documenti, configurazione, log) | **no** | — |
+| Pagine dei portali visitate nel browser incorporato | sì, come in un browser qualunque | i portali stessi; le credenziali le digita l'utente e l'app non le vede (cap. 06.6) |
+| Tutto il resto (registro, documenti, email, configurazione, log) | **no** | — |
+
+L'email di candidatura **non esce dal programma**: viene scritta come file `.eml` nella
+cartella dell'opportunità, e a spedirla è il programma di posta dell'utente
+(cap. 15, voce 9).
 
 Niente telemetria, niente servizi del produttore, niente aggiornamenti automatici
 silenziosi.
 
 ## 11.3 I segreti
 
-- **Chiave API Anthropic** e **password SMTP** sono cifrate con la protezione dati di
-  Windows (DPAPI) **legata all'utente che le ha salvate**: il file `segreti.bin` copiato
-  su un altro PC o letto da un altro account non si decifra. È il compromesso giusto
-  per un'app personale: robusto, senza inventare crittografia in proprio.
+- La **chiave API Anthropic** è cifrata con la protezione dati di Windows (DPAPI)
+  **legata all'utente che l'ha salvata**: il file `segreti.bin` copiato su un altro PC o
+  letto da un altro account non si decifra. È il compromesso giusto per un'app
+  personale: robusto, senza inventare crittografia in proprio. *(È rimasta l'unica
+  credenziale del programma: senza invio SMTP non c'è più alcuna password di posta da
+  custodire — cap. 15, voce 9.)*
 - Nell'interfaccia la chiave è sempre mascherata (`sk-ant-…ultime 4 cifre`).
 - Il **log** non contiene mai segreti né testi integrali dei documenti: registra
   eventi, esiti e codici di errore (una funzione di redazione maschera qualunque campo
@@ -76,7 +83,7 @@ silenziosi.
 ```json
 {
   "formato_backup": 1,
-  "app": "AI-CV-COACH",
+  "app": "TrovaLavoro",
   "data": "2026-08-05T18:30:00",
   "contenuto": ["profilo", "storico", "registro", "opportunita"],
   "profilo": { … },
@@ -104,3 +111,20 @@ un'opportunità» (la sua cartella, con conferma di livello 5), «Elimina tutti 
 (l'intera cartella dati, conferma di livello 6 con nome dell'app da ridigitare).
 L'app non lascia nulla in giro fuori dalla cartella dati, quindi la disinstallazione
 è: cancellare l'exe e, se si vuole, la cartella dati.
+
+## 11.6 Il file di taratura del match
+
+`taratura.json` contiene i numeri del calcolo delle stelle: soglia 1,5, pesi 5 e 1,
+correzione della mitigazione limitata fra −20 e +10, tetto a 20 punti, e la regola del
+requisito eliminatorio (⛔ → massimo una stella). Sono valori **di prodotto, non
+preferenze**: l'interfaccia non li mostra e non li lascia toccare (cap. 15, voce 10).
+
+Il motivo di tenerli fuori dall'interfaccia è che le stelle devono restare confrontabili
+fra un annuncio e l'altro: se l'utente potesse spostare la soglia, il punteggio
+smetterebbe di misurare quanto è adatto a quel posto e comincerebbe a misurare quanto è
+ottimista quel giorno. Il motivo di tenerli fuori dal **codice** è opposto e pratico:
+durante la messa a punto ritoccare un valore deve costare una riga, non una nuova
+versione da ricompilare e reinstallare su due macchine.
+
+Se il file manca o è illeggibile, il programma usa i valori predefiniti che porta
+dentro di sé e lo annota nel log: una taratura corrotta non deve impedire l'avvio.

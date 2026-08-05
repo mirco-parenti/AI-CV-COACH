@@ -15,7 +15,7 @@ annuncio e dimmi se vale la pena candidarmi» — e Claude userà **la nostra pi
 
 ## 9.2 Come si avvia
 
-- **Stesso exe, modalità dedicata**: `AiCvCoach.exe --mcp`. Nessun secondo programma:
+- **Stesso exe, modalità dedicata**: `TrovaLavoro.exe --mcp`. Nessun secondo programma:
   il vincolo «un solo file» resta intatto.
 - In questa modalità l'app non apre finestre: parla con il client via **stdio**
   (standard input/output), il trasporto MCP più semplice e senza rete. È il client
@@ -24,8 +24,8 @@ annuncio e dimmi se vale la pena candidarmi» — e Claude userà **la nostra pi
 ```json
 {
   "mcpServers": {
-    "ai-cv-coach": {
-      "command": "C:\\AI-CV-COACH\\AiCvCoach.exe",
+    "trovalavoro": {
+      "command": "C:\\TrovaLavoro\\TrovaLavoro.exe",
       "args": ["--mcp"]
     }
   }
@@ -59,10 +59,11 @@ Prima versione — tutti i tool leggono/scrivono la **stessa cartella dati** del
 | `salva_opportunita` | inserisce un annuncio analizzato nella coda | sì |
 | `esporta_backup` | scrive il backup JSON del profilo | sì (nuovo file) |
 
-**Fuori dalla prima versione, di proposito**: l'invio di email e la modifica del
-profilo via MCP. Sono le due azioni a conseguenza esterna o irreversibile: restano
-nell'app, dove c'è la conferma visiva dell'utente (livello 6 del cap. 03). Potranno
-entrare in seguito, con un meccanismo di conferma esplicita.
+**Fuori dalla prima versione, di proposito**: la modifica del profilo via MCP, azione
+irreversibile che resta nell'app dove c'è la conferma visiva dell'utente (livello 6 del
+cap. 03). Potrà entrare in seguito, con un meccanismo di conferma esplicita.
+Quanto all'**invio di email**, la questione non si pone più nemmeno nell'app: nella 1.0
+il programma non spedisce, prepara un file `.eml` (cap. 07 e cap. 15, voce 9).
 
 **Non sono tool, e il perché**: il **brainstorming** non serve come tool — il client
 MCP è già un assistente conversazionale; gli bastano gli artefatti (`leggi_*`) e il

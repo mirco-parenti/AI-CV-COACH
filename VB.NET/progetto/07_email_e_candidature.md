@@ -20,21 +20,41 @@ Email (P7) prepara la bozza:
 - Tutto è modificabile a mano prima di procedere; l'anteprima mostra esattamente ciò
   che partirà.
 
-## 7.2 Le tre uscite
+## 7.2 L'uscita: il file `.eml`
 
-| Uscita | Come funziona | Quando usarla |
-|---|---|---|
-| **File `.eml`** | il programma scrive un file email standard (formato MIME, con allegati incorporati), marcato come **bozza da inviare** (intestazione `X-Unsent`): i client che la riconoscono — Outlook in testa — lo aprono pronto per «Invia», non come messaggio ricevuto | il **percorso di riferimento**: l'utente rilegge nel suo client e invia da lì; se il client tratta il file come sola lettura, restano il copia-incolla o l'invio SMTP |
-| **File `.msg`** | se sul PC è installato Outlook classico, il programma glielo fa generare (automazione COM) | per chi lavora in ambienti dove circola il formato Outlook |
-| **Invio diretto SMTP** | l'app invia con l'account configurato nelle Impostazioni (server, porta, utente, password cifrata; connessione protetta STARTTLS/SSL) | quando l'utente si fida del giro completo e vuole fare tutto da qui |
+*Il capitolo prevedeva tre uscite. La revisione del 2026-08-05 (cap. 15, voci 8 e 9) ne
+ha lasciata **una sola**; le ragioni sono qui sotto, perché sono istruttive.*
 
-- Il formato `.eml` è la scelta di default perché è **aperto e verificabile**: niente
-  dipendenze, funziona con qualsiasi client. Il `.msg` è un formato proprietario: si
-  ottiene in modo affidabile solo tramite Outlook, per questo è offerto **solo se
-  Outlook c'è** (altrimenti il bottone spiega il perché e propone l'`.eml`).
-- L'**invio diretto** è un'azione di livello 6 (cap. 03): bottone rosso, riepilogo
-  finale («a chi, con che oggetto, con quali allegati») e conferma esplicita. Nessun
-  invio parte mai in automatico.
+| Uscita | Come funziona |
+|---|---|
+| **File `.eml`** | il programma scrive un file email standard (formato MIME, con allegati incorporati) nella cartella dell'opportunità, marcato come **bozza da inviare** (intestazione `X-Unsent`): i client che la riconoscono — Outlook in testa — lo aprono pronto per «Invia», non come messaggio ricevuto. L'utente rilegge nel proprio programma di posta, dove è già autenticato, e spedisce da lì. |
+
+Il formato `.eml` è **aperto e verificabile**: niente dipendenze, funziona con qualsiasi
+client, e — questo è il punto che ha deciso il resto — **non chiede una password a
+nessuno**.
+
+**Perché il `.msg` è uscito.** Avrebbe prodotto esattamente lo stesso risultato:
+l'`.eml` con `X-Unsent`, aperto in Outlook classico, mostra già la finestra di
+composizione pronta con destinatario e allegati. In cambio sarebbe costato
+l'automazione COM di Outlook, cioè la parte di Windows che si rompe più facilmente fra
+versioni di Office, licenze e architetture a 32 o 64 bit. Il `.msg` avrebbe senso se il
+file dovesse circolare o essere archiviato in un sistema che parla solo Outlook: qui è
+una bozza privata che l'utente apre e spedisce in dieci secondi.
+
+**Perché l'invio diretto SMTP è uscito.** Non è una scelta di gusto: l'invio con utente
+e password si sta chiudendo ovunque. Microsoft ha portato al **100% dal 30 aprile 2026**
+il rifiuto dell'autenticazione di base su SMTP — le «password per le app» hanno smesso
+di funzionare e non si possono rigenerare — quindi ogni indirizzo `@outlook.it`,
+`@hotmail.it`, `@live.it` o Microsoft 365 è già oggi inutilizzabile per questa strada.
+Gmail regge ancora con le password per le app (a patto di avere la verifica in due
+passaggi), ma Google ha annunciato di volerle eliminare a sua volta. Rientrare vorrebbe
+dire adottare OAuth 2.0, che è un progetto a sé: registrazione dell'applicazione presso
+ciascun provider, finestra di consenso nel browser, rinnovo periodico dei permessi.
+
+Il risultato è che **nella 1.0 il programma non spedisce nulla**: prepara e consegna al
+programma di posta dell'utente. Cadono con l'invio anche il pannello di configurazione
+del server, la password di posta cifrata su disco, la traduzione degli errori SMTP e la
+conferma rossa di livello 6 — che nella 1.0 non serve più qui.
 
 ## 7.3 Il registro delle candidature (F6)
 
@@ -51,7 +71,10 @@ nuova ──► interessante ──► generata ──► inviata ──► esit
 
 **Cosa registra** (per ogni opportunità): azienda, titolo, fonte e link, lingua,
 stelle del match (con l'eventuale ⛔), date di ogni passaggio di stato, i file
-generati, il mezzo di invio usato e il destinatario, l'esito.
+generati, il destinatario e l'esito. Poiché a spedire è il programma di posta
+dell'utente, il passaggio allo stato «inviata» è una **conferma dell'utente**, non un
+esito tecnico: dopo aver generato l'`.eml` l'app chiede «l'hai spedita?» e registra
+data e ora della risposta.
 
 **Cosa mostra il pannello Registro (in P1 Home):** l'elenco ordinabile e filtrabile
 per stato e stelle, i contatori (inviate / in attesa / da completare / scartate) e le
@@ -65,10 +88,11 @@ dal primo rilascio.
 
 ## 7.4 Sicurezza e buon senso
 
-- La password SMTP è cifrata su disco con la protezione dati di Windows legata
-  all'utente (cap. 11); non compare mai in chiaro né nei log.
-- Il programma non manda **mai** email senza il passaggio di conferma; non esiste un
-  «invia a tutti».
-- Ogni invio riuscito o fallito viene annotato nel registro con data e ora; un errore
-  SMTP mostra il messaggio del server tradotto in indicazioni pratiche («il server ha
-  rifiutato la password: ricontrolla l'account nelle Impostazioni»).
+- Il programma **non spedisce**: scrive un file e lo consegna al programma di posta
+  dell'utente. Non esiste alcun «invia a tutti», e nemmeno un «invia».
+- Di conseguenza il programma **non custodisce credenziali di posta**: l'unica
+  credenziale che tocca resta la chiave dell'API (cap. 11.3).
+- L'ultima parola è sempre di chi si candida: l'email parte quando lui preme «Invia»
+  nel proprio programma di posta, dopo averla riletta.
+- Nel registro finiscono data e destinatario di ogni candidatura confermata come
+  spedita; il log tecnico non contiene mai il testo integrale dei documenti.

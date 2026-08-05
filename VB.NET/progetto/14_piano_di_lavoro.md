@@ -7,24 +7,33 @@ Step nel diario di bordo.*
 
 ## Le tappe
 
-### T0 — Ratifica del progetto *(cancello d'ingresso)*
-Il capitolo 15 viene discusso e svuotato (o le voci restanti vengono dichiarate
-esplicitamente «rimandate»). Nessuna riga di codice prima di questo punto.
-**Fatto quando:** i documenti 01–15 sono confermati dall'utente.
+### T0 — Ratifica del progetto *(cancello d'ingresso)* — ✔ **CHIUSO il 2026-08-05**
+Il capitolo 15 è stato discusso voce per voce e **svuotato**: tutte le decisioni hanno
+un esito definitivo, le voci restanti sono dichiarate rimandate con la loro motivazione
+(cap. 15.6). Otto decisioni si discostano dalla proposta originale e sono già state
+riportate nei capitoli interessati.
+**Fatto:** i documenti 01–15 sono confermati. **T1 può iniziare.**
 
 ### T1 — Lo scheletro che parte
-Soluzione Visual Studio in `VB.NET/src/`; `FormPrincipale` con barra superiore, area
-centrale vuota e **pannello logo** (versione + pool); modulo `StileApp` (token del
-cap. 03); `Versione.vb`; **prova immediata della pubblicazione single-file** (il
-vincolo più rigido si verifica subito, non alla fine).
+Installazione dell'**SDK .NET 10** su entrambe le postazioni (oggi assente: è il primo
+passo materiale). Soluzione Visual Studio in `VB.NET/src/` (`TrovaLavoro.sln`);
+`FormPrincipale` con barra superiore, area centrale vuota e **pannello logo** (segnaposto
+tipografico «TL», versione + pool); modulo `StileApp` (token del cap. 03); `Versione.vb`;
+**proprietà dell'eseguibile** (prodotto TrovaLavoro, società Aviolab AI, © 2026 Aviolab
+AI); **prova immediata della pubblicazione single-file** autonoma e non compressa (il
+vincolo più rigido si verifica subito, non alla fine), con **misura di dimensione e
+tempo di avvio**.
 **Collaudo:** l'exe pubblicato parte su un PC pulito e mostra la finestra con il logo
-e «Ver. 0.1.001 · Pool —».
+e «Ver. 0.1.001 · Pool —»; la scheda «Dettagli» del file riporta Aviolab AI.
 
 ### T2 — Il motore e il pool
 `Ai/LibreriaPrompt` (pool esterno + integrato, manifest, segnaposto);
-`Ai/ClientClaude` (chiamate sincrone + streaming, retry, timeout);
-`Motore/EstrattoreJson`; `Motore/CalcoloMatch`; migrazione dei 15 prompt del
-prototipo nel pool (`Pool 1.00`).
+`Ai/ClientClaude` (chiamate sincrone + streaming, retry, timeout) verso **Haiku 4.5**
+(estrazione) e **Sonnet 5** (ragionamento) — attenzione ai due comportamenti nuovi di
+Sonnet 5: ragionamento esteso attivo di default e conteggio token più alto di circa il
+30%, entrambi da considerare nel dimensionare il limite di risposta;
+`Motore/EstrattoreJson`; `Motore/CalcoloMatch` che legge i valori da `taratura.json`
+(cap. 11.6); migrazione dei 15 prompt del prototipo nel pool (`Pool 1.00`).
 **Collaudo:** batteria di **non-regressione contro il prototipo** — stessi input degli
 step 1.35–1.37 (i 6 casi / 16 verifiche dell'hard-gate, i 6 casi di `estraiJson`, un
 confronto reale) → stessi numeri, stesse stelle, stesse note.
@@ -46,15 +55,27 @@ aperti in Word/LibreOffice, con verifica campo-per-campo del contenuto.
 ### T5 — La ricerca annunci (F2) e il registro (F6)
 Pannello P3 con WebView2, ricerche salvate, cattura dell'annuncio, coda delle
 opportunità; cartelle-opportunità su disco; pannello P1 Home con registro e stati.
-**Collaudo:** su Indeed/LinkedIn/InfoJobs reali: login manuale, cattura di annunci
-veri, rifiuto garbato delle pagine-elenco; riapertura dell'app con stato intatto.
+Verifica sul campo degli schemi di indirizzo dei portali del primo rilascio.
+**Collaudo:** su **Indeed / InfoJobs / Subito.it** reali: login manuale dove serve,
+cattura di annunci veri, rifiuto garbato delle pagine-elenco; riapertura dell'app con
+stato intatto.
+
+### T5b — Il profilo da LinkedIn (voce 2.1.3)
+Piccola coda di T5: cattura della **propria** pagina profilo LinkedIn dal browser
+integrato e invio alla strutturazione `importa_cv` già esistente (cap. 06.7). Nessun
+componente nuovo — riusa cattura e prompt di T5 e T3.
+**Collaudo:** dalla pagina profilo reale di Mirco esce un profilo JSON coerente con
+quello ottenuto dal suo CV in PDF.
 
 ### T6 — Le email (F5 completo)
 Composizione con allegati suggeriti (inclusa la scansione della cartella documenti,
-cap. 05.2); salvataggio `.eml`; `.msg` se c'è Outlook; invio SMTP con conferma;
-aggiornamento del registro.
-**Collaudo:** un'`.eml` aperta e spedita da un client vero; un invio SMTP reale verso
-una casella di prova; verifica che i segreti non compaiano né su disco in chiaro né
+cap. 05.2); scrittura del file `.eml` con intestazione `X-Unsent`; conferma dell'avvenuto
+invio da parte dell'utente e aggiornamento del registro.
+*Tappa alleggerita dalle decisioni del 2026-08-05:* niente `.msg`, niente invio SMTP,
+quindi niente pannello di configurazione del server né password di posta da custodire
+(cap. 15, voci 8 e 9).
+**Collaudo:** un'`.eml` generata, aperta in un programma di posta vero e spedita da lì,
+con allegati integri; verifica che la chiave API non compaia né su disco in chiaro né
 nei log.
 
 ### T7 — Multilingua e qualità (F4 completo)
@@ -79,7 +100,7 @@ aggiornamento del diario e del README; demo (video) per il portfolio; tag `v1.0`
 ## Ordine e dipendenze
 
 ```
-T0 ─► T1 ─► T2 ─► T3 ─► T4 ─► T5 ─► T6 ─► T9
+T0 ─► T1 ─► T2 ─► T3 ─► T4 ─► T5 ─► T5b ─► T6 ─► T9
                         ├────► T7 (dopo T4)
                         └────► T8 (dopo T4, in parallelo a T6-T7)
 ```

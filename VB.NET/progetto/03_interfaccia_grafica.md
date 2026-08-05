@@ -130,13 +130,18 @@ sinistra della finestra principale:
 
 ```
 ┌──────────────────────────┐
-│        [immagine]        │   PictureBox 101×101, logo del progetto
-│                          │
-│       AI-CV-COACH        │   Segoe UI 16 Bold, TestoPrimario, centrato
+│        [immagine]        │   PictureBox 101×101, logo del prodotto
+│                          │   (fino al logo definitivo: segnaposto «TL»)
+│       TrovaLavoro        │   Segoe UI 16 Bold, TestoPrimario, centrato
 │  Ver. 1.0.012 · Pool 1.03│   Segoe UI 8, TestoSecondario, centrato
-│  © 2026 Mirco Parenti    │   Segoe UI 8, TestoSecondario, centrato
+│  © 2026 Aviolab AI       │   Segoe UI 8, TestoSecondario, centrato
 └──────────────────────────┘
 ```
+
+> **Il nome mostrato all'utente è «TrovaLavoro»** (cap. 15, voce 3), qui e nella barra
+> del titolo; il sottotitolo «e candidati con il CV giusto, senza fatica» compare nella
+> finestra «Informazioni su…» e nel primo avvio. *AI-CV-COACH* resta il nome del
+> progetto e del repository, non del prodotto.
 
 - `Panel` di circa **261×216 px**, sfondo `SfondoBase`, ancorato **Bottom+Left**,
   aggiunto al form come elemento flottante sopra la struttura (così sopravvive ai
@@ -164,8 +169,8 @@ sinistra della finestra principale:
 | **P4 Opportunità** | dettaglio candidatura | annuncio estratto, **stelle 0–5 grandi**, elenco giudizi (✓ ~ ✗ ?) con ⛔ sugli eliminatori, note di clamp/gate, lettura d'insieme; bottoni: «Brainstorm» (L2), «Genera CV+lettera» (L3), «Scarta» (L5) |
 | **P5 Dialogo** | conversazione | pannello chat riusato per tre scopi: dialogo guidato del profilo, sessione di aggiornamento, brainstorming sull'opportunità; schede di conferma inline per i turni del profilo |
 | **P6 Documenti** | anteprima e rifinitura | anteprima del CV e della lettera affiancate all'annuncio (per il 📄 CV-1 base, generato senza annuncio, la colonna annuncio resta vuota); scelta lingua IT/EN; prima/dopo della rifinitura anti-slop; bottoni: «Esporta DOCX» «Esporta PDF» (L2), «Prepara email» (L3) |
-| **P7 Email** | composizione | destinatario, oggetto, corpo, elenco allegati (con quelli suggeriti dalla cartella documenti), bottoni: «Salva .eml/.msg» (L2), **«Invia»** (L6, con conferma) |
-| **P8 Impostazioni** | finestra separata | chiave API (mascherata), account SMTP, cartella dati, cartella documenti, modelli AI, lingua predefinita output, interruttore della rifinitura anti-slop (cap. 08.4), gestione del pool («Sigilla pool», dettaglio dei file modificati — cap. 04.5), export/import backup (cap. 11.4), pulizia dati («Svuota dati di navigazione», eliminazioni — cap. 11.5) |
+| **P7 Email** | composizione | destinatario, oggetto, corpo, elenco allegati (con quelli suggeriti dalla cartella documenti), bottone **«Prepara l'email»** (L3): scrive il file `.eml` e lo apre nel programma di posta predefinito. Al ritorno, la domanda «l'hai spedita?» per aggiornare il registro. *Nella 1.0 non esiste un bottone «Invia»: a spedire è il programma di posta dell'utente (cap. 07).* |
+| **P8 Impostazioni** | finestra separata | chiave API (mascherata), cartella dati, cartella documenti, modelli AI, lingua predefinita output, interruttore della rifinitura anti-slop (cap. 08.4), gestione del pool («Sigilla pool», dettaglio dei file modificati — cap. 04.5), export/import backup (cap. 11.4), pulizia dati («Svuota dati di navigazione», eliminazioni — cap. 11.5). *Niente sezione «account di posta»: l'app non spedisce.* |
 
 Ogni pannello ha in alto il **titolo in `RossoTitoli`** e un sottotitolo grigio che dice
 a che punto del flusso siamo («Passo 2 di 4 — Confronto»).

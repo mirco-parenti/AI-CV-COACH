@@ -20,9 +20,9 @@ Un solo processo, un solo exe. Dentro, sei blocchi principali:
 │  Stati delle opportunità · Regole (soglia, hard-gate)         │
 ├──────────────┬────────────────────┬───────────────────────────┤
 │  AI          │  DOCUMENTI         │  POSTA                    │
-│  ClientClaude│  lettura PDF/DOCX/ │  .eml · .msg (Outlook)    │
-│  Libreria-   │  TXT/MD; scrittura │  invio SMTP               │
-│  Prompt      │  DOCX/PDF; scans.  │                           │
+│  ClientClaude│  lettura PDF/DOCX/ │  composizione email       │
+│  Libreria-   │  TXT/MD; scrittura │  scrittura .eml           │
+│  Prompt      │  DOCX/PDF; scans.  │  (bozza da inviare)       │
 │  (pool .md)  │  cartella doc.     │                           │
 ├──────────────┴────────────────────┴───────────────────────────┤
 │  DATI (cartella dati su disco)                                │
@@ -90,8 +90,9 @@ ogni modulo abbia **un compito solo**:
 - **`Documenti/`** — lettura (PDF via API con blocco `document`, DOCX/TXT/MD in
   locale), scrittura (DOCX e PDF), scansione e classificazione della cartella
   documenti (cap. 05).
-- **`Posta/`** — composizione email, salvataggio `.eml`, salvataggio `.msg` via
-  Outlook quando presente, invio SMTP (cap. 07).
+- **`Posta/`** — composizione dell'email e scrittura del file `.eml` marcato come bozza
+  da inviare (cap. 07). *Nella 1.0 non spedisce:* né `.msg` né SMTP (cap. 15, voci 8 e 9),
+  quindi questo componente non tocca alcuna credenziale.
 - **`Dati/`** — cartella dati, profilo e sue versioni, opportunità, registro,
   configurazione, chiave API cifrata, backup (cap. 11).
 - **`Mcp/`** — il server MCP: traduce le richieste del protocollo in chiamate al
@@ -119,12 +120,18 @@ i tool MCP).
   `HttpClient` di .NET — niente SDK, come il prototipo (header `x-api-key` +
   `anthropic-version`). Il corpo è lo stesso del prototipo: un solo messaggio `user`
   con il prompt già riempito; per i PDF, il blocco `document` in base64.
-- **Modelli**: due livelli come nel prototipo — `MODELLO_SEMPLICE` (estrazioni; oggi
-  Claude Haiku 4.5) e `MODELLO_RAGIONAMENTO` (confronto, mitigazione, generazione,
-  brainstorming; oggi Claude Sonnet 4.6). I nomi modello **non sono cablati nel
-  codice**: stanno nei metadati dei prompt e in configurazione, così un cambio di
-  modello non richiede una nuova build. All'avvio dell'implementazione si riverifica
-  quali siano i modelli correnti più adatti.
+- **Modelli**: due livelli come nel prototipo — `MODELLO_SEMPLICE` (estrazioni:
+  **Claude Haiku 4.5**, `claude-haiku-4-5`) e `MODELLO_RAGIONAMENTO` (confronto,
+  mitigazione, generazione, brainstorming: **Claude Sonnet 5**, `claude-sonnet-5`).
+  Scelta fatta il 2026-08-05 riverificando il listino (cap. 15, voce 6): Sonnet 5
+  succede a Sonnet 4.6 allo stesso prezzo di listino. I nomi modello **non sono cablati
+  nel codice**: stanno nei metadati dei prompt e in configurazione, così un cambio di
+  modello non richiede una nuova build.
+- **Due comportamenti nuovi di Sonnet 5 da tenere presenti scrivendo `ClientClaude`**:
+  attiva il ragionamento esteso *di default* se non lo si disabilita esplicitamente, e
+  adotta un conteggio dei token che a parità di testo dà circa il 30% in più. Entrambi
+  incidono sul limite di risposta da richiedere: sottodimensionarlo produce risposte
+  troncate a metà.
 - **Sincrono o streaming**: le **estrazioni** restano sincrone (risposta breve, attesa
   accettabile con indicatore). Il **brainstorming** e la **generazione** usano lo
   streaming (`stream: true`, eventi SSE): il testo compare man mano, l'attesa percepita

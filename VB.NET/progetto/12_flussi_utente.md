@@ -11,9 +11,9 @@ percorso senza uscire dal programma.*
 opportunità sono esaurite.
 
 **A1. Primo avvio e setup**
-1. L'utente avvia l'exe. Al primo avvio l'app chiede: cartella dati (proposta:
-   `%APPDATA%\AI-CV-COACH`), chiave API Anthropic (salvata cifrata, cap. 11),
-   eventuale account email per l'invio (rimandabile).
+1. L'utente avvia l'exe. Al primo avvio l'app chiede due sole cose: cartella dati
+   (proposta: `%APPDATA%\TrovaLavoro`) e chiave API Anthropic (salvata cifrata,
+   cap. 11). *Nessun account di posta da configurare:* l'app non spedisce (cap. 07).
 2. L'app carica la libreria prompt — quella integrata nell'exe o, se presente, la
    cartella `prompt-pool/` accanto all'exe (cap. 04.2) — e ne mostra versione e
    sorgente nel riquadro del logo, in basso a sinistra.
@@ -83,11 +83,12 @@ opportunità sono esaurite.
 1. L'app compone l'email: destinatario (se noto dall'annuncio), oggetto, corpo
    (lettera o suo adattamento breve), allegati scelti (CV generato + eventuali
    attestati dalla cartella documenti).
-2. L'utente sceglie: **salva `.eml`/`.msg`** (per inviarla dal proprio client) oppure
-   **invia direttamente via SMTP** con l'account configurato. Prima dell'invio c'è
-   sempre un'anteprima con conferma esplicita.
-3. L'opportunità passa allo stato **«inviata»** con data; il registro delle
-   candidature si aggiorna da solo.
+2. L'utente rilegge l'anteprima e preme **«Prepara l'email»**: l'app scrive il file
+   `.eml` nella cartella dell'opportunità e lo apre nel programma di posta predefinito,
+   che lo mostra come bozza già compilata, allegati compresi. L'ultima parola — il
+   pulsante «Invia» — è nel suo programma di posta.
+3. Al ritorno nell'app, una domanda sola: «l'hai spedita?». Alla conferma l'opportunità
+   passa allo stato **«inviata»** con data e ora, e il registro si aggiorna.
 
 **A9. Fino a esaurimento**
 1. Si torna ad A5 per la prossima opportunità in coda; quando la coda è vuota, si
@@ -150,9 +151,8 @@ Per l'utente evoluto che lavora con Claude Desktop / Claude Code:
 2. Il client AI esterno può così orchestrare i flussi («confronta il mio profilo con
    questi 3 annunci e dimmi dove candidarmi prima») usando **la stessa logica e gli
    stessi prompt** dell'app, con i dati che restano sul PC dell'utente.
-3. Le azioni che escono dal PC (invio email) o modificano il profilo **non sono
-   esposte** nella prima versione del server MCP: restano nell'app, dove c'è la
-   conferma visiva dell'utente (cap. 09.3).
+3. Le azioni che modificano il profilo **non sono esposte** nella prima versione del
+   server MCP: restano nell'app, dove c'è la conferma visiva dell'utente (cap. 09.3).
 
 ## 12.7 Regole trasversali dei flussi
 

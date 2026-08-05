@@ -6,20 +6,21 @@ contraddice questo, vince questo.*
 
 ## 1.1 Cos'è
 
-**AI-CV-COACH per Windows** è un'applicazione desktop per Windows 11, distribuita come
-**un solo file `.exe`**, che accompagna una persona lungo **tutto** il percorso di
-candidatura:
+**AI-CV-COACH per Windows** — nome mostrato all'utente: **TrovaLavoro** (cap. 15,
+voce 3) — è un'applicazione desktop per Windows 11, distribuita come **un solo file
+`.exe`**, che accompagna una persona lungo **tutto** il percorso di candidatura:
 
 1. costruire (o importare) il proprio **profilo professionale**;
-2. **trovare** annunci di lavoro adatti, anche sui grandi portali (LinkedIn, Indeed,
-   InfoJobs…) o partendo da un link;
+2. **trovare** annunci di lavoro adatti, anche sui grandi portali (Indeed, InfoJobs,
+   Subito.it…) o partendo da un link;
 3. **valutare** ogni annuncio con un punteggio di match onesto (stelle 0–5, con
    requisiti eliminatori che fanno da cancello);
 4. **ragionare** sull'annuncio insieme all'utente (brainstorming, punti deboli, come
    presentarsi al meglio senza mentire);
 5. **generare** un CV mirato e una lettera di presentazione, in italiano o in inglese;
-6. **produrre le uscite**: CV in DOCX o PDF, email di candidatura pronte da inviare
-   (file `.eml`/`.msg` o invio diretto via SMTP), con gli allegati giusti;
+6. **produrre le uscite**: CV in DOCX o PDF ed email di candidatura pronta da inviare
+   (file `.eml`), con gli allegati giusti — a spedirla è il programma di posta
+   dell'utente;
 7. **tenere il registro** delle candidature, fino a esaurire le opportunità;
 8. **mantenere aggiornato** il profilo base nel tempo, man mano che l'utente matura
    nuove esperienze e competenze.
@@ -89,7 +90,7 @@ Le funzioni sono numerate **F1–F8** e mappate sui capitoli di questo progetto:
 | **F2** | Ricerca annunci | ricerche salvate sui portali, cattura dell'annuncio dal browser integrato, annuncio da link, coda di opportunità | 06 |
 | **F3** | Valutazione e ragionamento | analisi annuncio, confronto, stelle + hard-gate, mitigazione, brainstorming con l'utente | 02, 12 |
 | **F4** | Generazione | 📄 CV-1 base, 🎯 CV-2 mirato, ✉️ lettera; multilingua IT/EN; rifinitura anti-slop | 04, 08, 10 |
-| **F5** | Uscite | export DOCX e PDF, email `.eml`/`.msg`, invio SMTP con allegati | 05, 07 |
+| **F5** | Uscite | export DOCX e PDF, email `.eml` pronta da inviare con gli allegati | 05, 07 |
 | **F6** | Registro candidature | stati per opportunità (nuova → interessante → generata → inviata → chiusa), storico | 07, 11 |
 | **F7** | Dati e backup | cartella dati, export/import del profilo in JSON, chiave API protetta | 11 |
 | **F8** | Server MCP integrato | le funzioni di lettura, analisi e generazione esposte come tool MCP a client esterni (Claude Desktop, Claude Code…); le azioni a conseguenza esterna restano nell'app | 09 |
