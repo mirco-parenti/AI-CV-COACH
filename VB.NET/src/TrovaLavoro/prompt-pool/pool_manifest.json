@@ -1,0 +1,67 @@
+{
+  "formato": 1,
+  "versione_pool": "1.00",
+  "data": "2026-08-06",
+  "file": [
+    {
+      "percorso": "annuncio/analisi_annuncio.md",
+      "sha256": "073e930b137048494dfef8b92233c2555aaccfb9f805b4b9516fdd3a57a98eac"
+    },
+    {
+      "percorso": "confronto/confronto.md",
+      "sha256": "7ee2f0e1735ce9b2c654e5d753353be3b83a377772df8222e5d0e4757cd37a31"
+    },
+    {
+      "percorso": "confronto/mitigazione.md",
+      "sha256": "9efdaecde45de6979d117e121ce1caf6349e7747a40cfb6273274e0c5b801379"
+    },
+    {
+      "percorso": "generazione/cv_base.it.md",
+      "sha256": "629d034b9e56dd55f1c0266d8fef8632d4f9fd05ef4d273373d198d551511df1"
+    },
+    {
+      "percorso": "generazione/cv_mirato.it.md",
+      "sha256": "e43bbc4a80d7a3327935ae823babd081dc2161cd10a43a377019cfeaf36e6497"
+    },
+    {
+      "percorso": "generazione/lettera.it.md",
+      "sha256": "c1e75e56285d9eeccb097b4bc44e278d0e0d53b5f77eed4a47a2c8e32167a830"
+    },
+    {
+      "percorso": "profilo/competenze.md",
+      "sha256": "060a20b4e5bd44fd056c49facf0e20f3c6ae2cbe3b420edec6f402a43d393ed2"
+    },
+    {
+      "percorso": "profilo/contatti.md",
+      "sha256": "f89085f75240be65fe153e32cc01a1e4c2db5d9f4ee348f1b2204d1c9f04acba"
+    },
+    {
+      "percorso": "profilo/esperienze_formali.md",
+      "sha256": "7720e410c7f361b015dbd3be9e65742a5b8b712537d5e76eb5e76db8194e6631"
+    },
+    {
+      "percorso": "profilo/esperienze_informali.md",
+      "sha256": "31b2de3b0082d423a237502688f1b88276b586f002008c445f6d7e7de8a3c2af"
+    },
+    {
+      "percorso": "profilo/formazione.md",
+      "sha256": "cc077a9b0dc8dfc0c15c4882aa622e0606a2f488ae4d521d0fff114f5b0ca9bf"
+    },
+    {
+      "percorso": "profilo/importa_cv.md",
+      "sha256": "a000f6c517c0902a6ca4f85d83f3c625d7f5d490655fe88bfb59207605e72a7f"
+    },
+    {
+      "percorso": "profilo/nome.md",
+      "sha256": "998c78a95cf7dcb8b8f6a70b5ceac8c2346b23e77074a8451e95a0e7db0cb1d6"
+    },
+    {
+      "percorso": "profilo/patente.md",
+      "sha256": "511b1bf31d44905e926f0c256177cd3b94ddb53c1644445b022ccc81a35848e5"
+    },
+    {
+      "percorso": "profilo/trascrizione_pdf.md",
+      "sha256": "9604cba4d94f291fa86a3e19538c948ad6c0f11ab0e50ca67f6d97a27e773aa9"
+    }
+  ]
+}

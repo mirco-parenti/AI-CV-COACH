@@ -48,4 +48,24 @@
     </Compile>
   </ItemGroup>
 
+  <!-- Il pool integrato (cap. 4.2): i prompt entrano nell'eseguibile come risorse,
+       così l'app copiata su un PC nudo funziona senza file a fianco. Restano file
+       .md veri nel repo, e la stessa cartella serve da pool esterno di prova.
+
+       LogicalName fissa il percorso con cui il caricatore li ritrova: senza, il
+       nome della risorsa impasterebbe cartelle ed estensione in un'unica stringa
+       di punti, indistinguibile per nomi come «cv_base.it.md».
+
+       WithCulture=false non è facoltativo: la nomenclatura del cap. 4.3 mette la
+       lingua nel nome del file, e MSBuild legge quel «.it» come codice di lingua.
+       Senza questo, i tre prompt di generazione finiscono in un assembly satellite
+       dentro una cartella «it» accanto all'eseguibile — una DLL a fianco, cioè
+       esattamente ciò che il cap. 13 vieta, e per giunta in silenzio. -->
+  <ItemGroup>
+    <EmbeddedResource Include="prompt-pool\**\*.md;prompt-pool\pool_manifest.json"
+                      WithCulture="false">
+      <LogicalName>pool/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>
