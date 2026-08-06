@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Le impostazioni dell'altra batteria: SOLO i collaudi della categoria «Reale»
+  (cap. 14, T2), quelli che chiamano l'API vera con il prototipo acceso come giudice.
+
+  Si lanciano da VB.NET/src, su aviolab03, con il prototipo avviato («npm start»
+  dentro HTML+JS/) e la chiave nell'ambiente:
+
+      dotnet test  (con l'opzione «settings» puntata su questo file)
+
+  Serve un file a parte perché il filtro passato a riga di comando si somma a quello
+  del file di impostazioni invece di sostituirlo: chiedere la categoria «Reale» per
+  filtro, con l'altro file in vigore, darebbe un insieme vuoto.
+-->
+<RunSettings>
+  <RunConfiguration>
+    <TestCaseFilter>TestCategory=Reale</TestCaseFilter>
+  </RunConfiguration>
+</RunSettings>

@@ -365,7 +365,13 @@ Namespace Ai
             End If
 
             Dim intestazione As String = testo.Substring(0, separatore)
-            Dim corpo As String = testo.Substring(separatore + 5)
+
+            ' L'a capo finale è di chi ha salvato il file, non di chi ha scritto il
+            ' prompt: qualunque editor lo aggiunge o lo toglie da sé. Toglierlo qui fa
+            ' sì che il testo consegnato all'AI dipenda solo dal contenuto — ed è anche
+            ' ciò che lo rende identico a quello del prototipo, dove i prompt erano
+            ' stringhe dentro il codice e finivano senza a capo (cap. 14, T2).
+            Dim corpo As String = testo.Substring(separatore + 5).TrimEnd(ChrW(10), ChrW(13))
 
             Dim metadati As New Dictionary(Of String, String)(StringComparer.OrdinalIgnoreCase)
             For Each riga As String In intestazione.Split(vbLf)
@@ -431,6 +437,29 @@ Namespace Ai
             Next
 
             Return testo
+
+        End Function
+
+        ''' <summary>
+        ''' Serializza un artefatto JSON (profilo, annuncio, giudizi…) come va scritto
+        ''' <i>dentro</i> un prompt: indentato di due spazi, con gli accenti in chiaro.
+        ''' </summary>
+        ''' <remarks>
+        ''' Sta qui, e non nel punto in cui serve, perché deve produrre esattamente ciò
+        ''' che produce <c>JSON.stringify(x, null, 2)</c> del prototipo: è la condizione
+        ''' perché la richiesta che parte sia identica alla sua (cap. 14, T2). L'encoder
+        ''' predefinito di .NET, invece, sostituirebbe ogni lettera accentata con la sua
+        ''' sequenza di escape — «Forlì» scritto a codici — e con lei anche apostrofi e
+        ''' segni come &amp; o &lt;: per una macchina è lo stesso JSON, per il modello è
+        ''' un prompt diverso da quello con cui il prototipo è stato validato.
+        ''' </remarks>
+        Public Shared Function ComeNelPrompt(artefatto As JsonNode) As String
+
+            If artefatto Is Nothing Then Throw New ArgumentNullException(NameOf(artefatto))
+
+            Return artefatto.ToJsonString(New JsonSerializerOptions With {
+                .WriteIndented = True,
+                .Encoder = Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping})
 
         End Function
 

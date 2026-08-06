@@ -14,6 +14,9 @@
          senza questo verrebbe letto con la codepage di sistema. -->
     <CodePage>65001</CodePage>
     <IsPackable>false</IsPackable>
+    <!-- Tiene fuori dalla batteria normale i collaudi che vogliono l'API vera e il
+         prototipo acceso; il file dice come lanciarli. -->
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\collaudi.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,0 +1,33 @@
+{
+  "competenze_richieste": [
+    { "testo": "Uso del carrello elevatore", "priorita": "richiesto" },
+    { "testo": "Lettura di bolle e documenti di trasporto", "priorita": "richiesto" },
+    { "testo": "Conoscenza di un gestionale di magazzino", "priorita": "preferenziale" },
+    { "testo": "Lavoro in squadra", "priorita": "non specificata" }
+  ],
+  "esperienza_richiesta": [
+    { "testo": "Esperienza come addetto al magazzino", "priorita": "richiesto", "anni": "1" }
+  ],
+  "formazione_richiesta": [
+    { "testo": "Diploma di scuola superiore", "priorita": "preferenziale" },
+    { "testo": "Patentino per il carrello elevatore", "priorita": "richiesto" }
+  ],
+  "altri_requisiti": [
+    { "testo": "Patente B", "priorita": "richiesto" },
+    { "testo": "Disponibilità a lavorare su due turni", "priorita": "richiesto" }
+  ],
+  "titolo": "Addetto al magazzino",
+  "sede": ["Forlì"],
+  "contratto": {
+    "tipo": "Tempo determinato con possibilità di inserimento",
+    "durata": "6 mesi",
+    "orario": "Full time su due turni",
+    "retribuzione": ""
+  },
+  "mansioni": [
+    "Carico e scarico della merce in arrivo",
+    "Preparazione degli ordini e picking",
+    "Controllo delle giacenze e riordino delle scaffalature"
+  ],
+  "benefit": ["Mensa aziendale", "Buoni pasto"]
+}

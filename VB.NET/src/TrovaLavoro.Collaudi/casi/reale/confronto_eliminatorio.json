@@ -1,0 +1,265 @@
+{
+  "caso": "eliminatorio",
+  "quando": "2026-08-06 18:01",
+  "parita_deterministica": {
+    "che_cosa": "I giudizi del prototipo, ricalcolati da CalcoloMatch della nuova app.",
+    "match_finale": 17,
+    "stelle": 0.9,
+    "gate_eliminatorio": true,
+    "nota": "Il conteggio dei requisiti darebbe 37, ma la valutazione d'insieme dell'AI lo porta verso 12: match finale 17. Requisito eliminatorio non soddisfatto (Patente C indispensabile; CQC merci in corso di validità obbligatoria): il match non può superare 20/100, cioè ≤ 1 stella, a prescindere dal resto del profilo."
+  },
+  "prototipo": {
+    "giudizi": [
+      {
+        "requisito": "Carico e scarico della merce",
+        "categoria": "competenze",
+        "priorita": "richiesto",
+        "importanza": "",
+        "esito": "soddisfatto",
+        "eliminatorio": false,
+        "spiegazione": "Il profilo dichiara esplicitamente 'carico e scarico merci col muletto' nell'esperienza presso Romagna Logistica, confermato anche dall'esperienza informale nei traslochi e consegne."
+      },
+      {
+        "requisito": "Uso del carrello elevatore",
+        "categoria": "competenze",
+        "priorita": "preferenziale",
+        "importanza": "",
+        "esito": "soddisfatto",
+        "eliminatorio": false,
+        "spiegazione": "Il candidato dichiara il patentino per carrello elevatore conseguito nel 2021 e tre anni di utilizzo pratico in magazzino presso Romagna Logistica."
+      },
+      {
+        "requisito": "Rapporto con il cliente durante le consegne",
+        "categoria": "competenze",
+        "priorita": "non specificata",
+        "importanza": "alta",
+        "esito": "in parte",
+        "eliminatorio": false,
+        "spiegazione": "Per un ruolo di autista con consegne ai clienti il contatto diretto col cliente è un elemento atteso e non marginale. Il profilo riporta 'assistenza ai clienti in reparto' come commesso e consegne di mobili con contatto implicito col destinatario, ma non dichiara esplicitamente esperienza di rapporto col cliente nel contesto delle consegne con mezzo; la copertura è parziale."
+      },
+      {
+        "requisito": "Esperienza come autista di mezzi pesanti (2 anni)",
+        "categoria": "esperienza",
+        "priorita": "richiesto",
+        "importanza": "",
+        "esito": "non soddisfatto",
+        "eliminatorio": false,
+        "spiegazione": "Il profilo non riporta alcuna esperienza come autista di mezzi pesanti. L'attività informale di consegne con furgone riguarda un mezzo leggero e non costituisce esperienza su mezzi pesanti; la lacuna è reale."
+      },
+      {
+        "requisito": "Licenza media",
+        "categoria": "formazione",
+        "priorita": "non specificata",
+        "importanza": "bassa",
+        "esito": "soddisfatto",
+        "eliminatorio": false,
+        "spiegazione": "Il candidato possiede un diploma di istituto tecnico (ITIS), titolo superiore alla licenza media; il requisito è ampiamente superato. È classificato a importanza bassa perché si tratta del titolo minimo di accesso, un requisito puramente formale che nel contesto dell'annuncio non discrimina candidati con istruzione superiore."
+      },
+      {
+        "requisito": "Patente C indispensabile",
+        "categoria": "altri_requisiti",
+        "priorita": "richiesto",
+        "importanza": "",
+        "esito": "non soddisfatto",
+        "eliminatorio": true,
+        "spiegazione": "Il profilo dichiara solo patente B. La categoria C non è presente tra le categorie dichiarate; l'annuncio la definisce esplicitamente indispensabile, rendendola un requisito eliminatorio non soddisfatto."
+      },
+      {
+        "requisito": "CQC merci in corso di validità obbligatoria",
+        "categoria": "altri_requisiti",
+        "priorita": "richiesto",
+        "importanza": "",
+        "esito": "non soddisfatto",
+        "eliminatorio": true,
+        "spiegazione": "Il profilo non menziona alcuna CQC (Carta di Qualificazione del Conducente). L'annuncio la definisce obbligatoria: è un requisito legale per la guida professionale di mezzi pesanti, quindi eliminatorio e non soddisfatto."
+      },
+      {
+        "requisito": "Automunito per raggiungere la sede",
+        "categoria": "altri_requisiti",
+        "priorita": "preferenziale",
+        "importanza": "",
+        "esito": "soddisfatto",
+        "eliminatorio": false,
+        "spiegazione": "Il candidato possiede la patente B e abita a Forlì (sede a Cesena, distanza ragionevole); si può ragionevolmente concludere che sia automunito, anche se non dichiarato esplicitamente. La patente B è tuttavia un dato certo nel profilo."
+      },
+      {
+        "requisito": "Titolo: Autista patente C per consegne regionali",
+        "categoria": "contesto",
+        "priorita": "non specificata",
+        "importanza": "alta",
+        "esito": "non soddisfatto",
+        "eliminatorio": false,
+        "spiegazione": "Il ruolo è specificamente quello di autista con patente C per consegne regionali. Il profilo del candidato è quello di un addetto al magazzino/commesso, privo della patente richiesta e dell'esperienza di guida professionale su mezzi pesanti."
+      },
+      {
+        "requisito": "Sede: Cesena",
+        "categoria": "contesto",
+        "priorita": "non specificata",
+        "importanza": "media",
+        "esito": "non determinabile",
+        "eliminatorio": false,
+        "spiegazione": "Il candidato risiede a Forlì, città vicina a Cesena (circa 20 km); la sede è raggiungibile, ma la disponibilità effettiva al pendolarismo non è dichiarata nel profilo."
+      },
+      {
+        "requisito": "Contratto: Tempo indeterminato, full time lun-ven, retribuzione da definire",
+        "categoria": "contesto",
+        "priorita": "non specificata",
+        "importanza": "bassa",
+        "esito": "non determinabile",
+        "eliminatorio": false,
+        "spiegazione": "Si tratta di condizioni offerte dal datore di lavoro; il profilo non esprime preferenze o vincoli contrattuali dichiarati, quindi non è valutabile."
+      },
+      {
+        "requisito": "Mansioni: consegne regionali, carico mezzo, ritiro documenti",
+        "categoria": "contesto",
+        "priorita": "non specificata",
+        "importanza": "alta",
+        "esito": "in parte",
+        "eliminatorio": false,
+        "spiegazione": "Il candidato ha competenze su carico/scarico e gestione documenti di trasporto, ma le mansioni principali richiedono la guida di un mezzo pesante su percorsi regionali, attività che il profilo non copre per assenza di patente C e CQC."
+      },
+      {
+        "requisito": "Benefit: buoni pasto, mezzo aziendale in comodato",
+        "categoria": "contesto",
+        "priorita": "non specificata",
+        "importanza": "bassa",
+        "esito": "non determinabile",
+        "eliminatorio": false,
+        "spiegazione": "Sono benefit offerti dall'azienda; non costituiscono un requisito da soddisfare e non sono confrontabili col profilo del candidato."
+      }
+    ],
+    "lettura_insieme": "Luca Ferrari ha un profilo solido per ruoli di magazzino e logistica interna: carico/scarico, uso del muletto con patentino, lettura di documenti di trasporto e una discreta abitudine al lavoro fisico anche in contesti di consegna. Tuttavia il ruolo richiede specificamente la guida professionale di mezzi pesanti, e su questo punto il candidato presenta due lacune eliminatorie: la patente C (dichiarata indispensabile) è assente — il profilo riporta solo la categoria B — e la CQC merci (obbligatoria per legge per la guida professionale di veicoli sopra 3,5 t) non è mai menzionata. Manca inoltre l'esperienza biennale come autista di mezzi pesanti richiesta come requisito. Questi tre elementi non sono dettagli marginali: definiscono l'idoneità legale e professionale al ruolo. La candidatura, pur provenendo da un profilo coerente con l'ambiente logistico, non è proponibile per questa posizione così com'è descritta.",
+    "score_base": 37,
+    "numero_llm": 12,
+    "match_finale": 17,
+    "stelle": 0.9,
+    "scarto_tagliato": true,
+    "gate_eliminatorio": true,
+    "nota": "Il conteggio dei requisiti darebbe 37, ma la valutazione d'insieme dell'AI lo porta verso 12: match finale 17. Requisito eliminatorio non soddisfatto (Patente C indispensabile; CQC merci in corso di validità obbligatoria): il match non può superare 20/100, cioè ≤ 1 stella, a prescindere dal resto del profilo."
+  },
+  "app": {
+    "giudizi": [
+      {
+        "requisito": "Carico e scarico della merce",
+        "categoria": "competenze",
+        "priorita": "richiesto",
+        "importanza": "",
+        "esito": "soddisfatto",
+        "eliminatorio": false,
+        "spiegazione": "Luca ha svolto carico e scarico merci per 3 anni come addetto al magazzino presso Romagna Logistica, e lo dichiara esplicitamente tra le sue attività."
+      },
+      {
+        "requisito": "Uso del carrello elevatore",
+        "categoria": "competenze",
+        "priorita": "preferenziale",
+        "importanza": "",
+        "esito": "soddisfatto",
+        "eliminatorio": false,
+        "spiegazione": "Luca dichiara esplicitamente l'uso del carrello elevatore tra le competenze, con patentino conseguito nel 2021, e lo ha esercitato nel ruolo di addetto al magazzino."
+      },
+      {
+        "requisito": "Rapporto con il cliente durante le consegne",
+        "categoria": "competenze",
+        "priorita": "non specificata",
+        "importanza": "alta",
+        "esito": "in parte",
+        "eliminatorio": false,
+        "spiegazione": "Il ruolo di autista per consegne regionali implica un contatto diretto col cliente come attività centrale; Luca ha esperienza di assistenza al cliente (al supermercato Bertozzi) e di consegne informali con furgone, ma non ha dichiarato esperienza specifica di rapporto col cliente durante consegne professionali con mezzo pesante. La copertura è parziale. Importanza alta perché per un autista di consegne è un requisito atteso, non un di più."
+      },
+      {
+        "requisito": "Esperienza come autista di mezzi pesanti (2 anni)",
+        "categoria": "esperienza",
+        "priorita": "richiesto",
+        "importanza": "",
+        "esito": "non soddisfatto",
+        "eliminatorio": false,
+        "spiegazione": "Luca non dichiara alcuna esperienza come autista di mezzi pesanti. L'esperienza informale con il furgone di un amico per traslochi riguarda un veicolo leggero, non un mezzo pesante, e non è assimilabile al requisito richiesto."
+      },
+      {
+        "requisito": "Licenza media",
+        "categoria": "formazione",
+        "priorita": "non specificata",
+        "importanza": "bassa",
+        "esito": "soddisfatto",
+        "eliminatorio": false,
+        "spiegazione": "Luca ha conseguito il diploma di istituto tecnico nel 2018, titolo superiore alla licenza media; il requisito è ampiamente soddisfatto. Importanza bassa perché è un requisito minimo di base, abbondantemente superato dal profilo."
+      },
+      {
+        "requisito": "Patente C indispensabile",
+        "categoria": "altri_requisiti",
+        "priorita": "richiesto",
+        "importanza": "",
+        "esito": "non soddisfatto",
+        "eliminatorio": true,
+        "spiegazione": "Il profilo dichiara patente B soltanto; la categoria C non è tra quelle possedute. L'annuncio la definisce esplicitamente indispensabile, rendendola un requisito eliminatorio."
+      },
+      {
+        "requisito": "CQC merci in corso di validità obbligatoria",
+        "categoria": "altri_requisiti",
+        "priorita": "richiesto",
+        "importanza": "",
+        "esito": "non soddisfatto",
+        "eliminatorio": true,
+        "spiegazione": "Il profilo non menziona in alcun modo la CQC merci. L'annuncio la dichiara obbligatoria, rendendola un requisito eliminatorio e una lacuna concreta del candidato."
+      },
+      {
+        "requisito": "Automunito per raggiungere la sede",
+        "categoria": "altri_requisiti",
+        "priorita": "preferenziale",
+        "importanza": "",
+        "esito": "soddisfatto",
+        "eliminatorio": false,
+        "spiegazione": "Luca possiede la patente B e si può ragionevolmente dedurre che disponga di un veicolo proprio; il profilo non lo esclude in alcun modo, e avere la patente è condizione sufficiente per questo requisito preferenziale."
+      },
+      {
+        "requisito": "Titolo: Autista patente C per consegne regionali — sede: Cesena",
+        "categoria": "contesto",
+        "priorita": "non specificata",
+        "importanza": "alta",
+        "esito": "in parte",
+        "eliminatorio": false,
+        "spiegazione": "Luca risiede a Forlì, distante pochi chilometri da Cesena, quindi la sede è raggiungibile. Tuttavia il titolo del ruolo è autista con patente C, abilitazione che Luca non possiede: il contesto del ruolo è solo parzialmente compatibile con il suo profilo attuale."
+      },
+      {
+        "requisito": "Contratto: Tempo indeterminato, full time lunedì–venerdì",
+        "categoria": "contesto",
+        "priorita": "non specificata",
+        "importanza": "bassa",
+        "esito": "non determinabile",
+        "eliminatorio": false,
+        "spiegazione": "Il profilo non dichiara preferenze o disponibilità contrattuali; non è possibile valutare se il candidato sia interessato o disponibile a questa formula. Importanza bassa perché è un dato lato-offerta che il candidato non fornisce."
+      },
+      {
+        "requisito": "Mansioni: consegne giornaliere, carico mezzo, ritiro documenti firmati",
+        "categoria": "contesto",
+        "priorita": "non specificata",
+        "importanza": "media",
+        "esito": "in parte",
+        "eliminatorio": false,
+        "spiegazione": "Luca ha esperienza di carico merci e lettura di documenti di trasporto, ma le consegne giornaliere con mezzo pesante — attività centrale del ruolo — non rientrano nel suo percorso dichiarato. La copertura è parziale. Importanza media perché le mansioni descrivono il cuore del lavoro ma il loro peso nel giudizio di contesto è già incluso nei requisiti."
+      },
+      {
+        "requisito": "Benefit: buoni pasto, mezzo aziendale in comodato",
+        "categoria": "contesto",
+        "priorita": "non specificata",
+        "importanza": "bassa",
+        "esito": "non determinabile",
+        "eliminatorio": false,
+        "spiegazione": "I benefit sono condizioni offerte dal datore di lavoro; non c'è nulla nel profilo da confrontare. Importanza bassa: sono vantaggi accessori, non requisiti."
+      }
+    ],
+    "lettura_insieme": "Il profilo di Luca Ferrari presenta alcune competenze utili per un ruolo logistico — carico/scarico merci, uso del carrello elevatore, lettura di documenti di trasporto — e una formazione adeguata, ma il suo profilo è costruito attorno al magazzino, non alla guida professionale. I due requisiti eliminatori dell'annuncio (patente C e CQC merci) non sono soddisfatti: Luca possiede solo la patente B e non menziona la CQC in nessuna parte del suo profilo. Anche l'esperienza biennale come autista di mezzi pesanti è assente. Queste lacune rendono la candidatura non proponibile per questo specifico ruolo, indipendentemente dai punti di forza pur reali. Il match complessivo è molto basso.",
+    "score_base": 38,
+    "numero_llm": 10,
+    "match_finale": 18,
+    "stelle": 0.9,
+    "scarto_tagliato": true,
+    "gate_eliminatorio": true,
+    "nota": "Il conteggio dei requisiti darebbe 38, ma la valutazione d'insieme dell'AI lo porta verso 10: match finale 18. Requisito eliminatorio non soddisfatto (Patente C indispensabile; CQC merci in corso di validità obbligatoria): il match non può superare 20/100, cioè ≤ 1 stella, a prescindere dal resto del profilo.",
+    "modello": "claude-sonnet-4-6",
+    "token": {
+      "ingresso": 3581,
+      "uscita": 2069
+    }
+  }
+}

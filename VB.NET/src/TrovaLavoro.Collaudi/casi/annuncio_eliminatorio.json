@@ -1,0 +1,32 @@
+{
+  "competenze_richieste": [
+    { "testo": "Carico e scarico della merce", "priorita": "richiesto" },
+    { "testo": "Uso del carrello elevatore", "priorita": "preferenziale" },
+    { "testo": "Rapporto con il cliente durante le consegne", "priorita": "non specificata" }
+  ],
+  "esperienza_richiesta": [
+    { "testo": "Esperienza come autista di mezzi pesanti", "priorita": "richiesto", "anni": "2" }
+  ],
+  "formazione_richiesta": [
+    { "testo": "Licenza media", "priorita": "non specificata" }
+  ],
+  "altri_requisiti": [
+    { "testo": "Patente C indispensabile", "priorita": "richiesto" },
+    { "testo": "CQC merci in corso di validità obbligatoria", "priorita": "richiesto" },
+    { "testo": "Automunito per raggiungere la sede", "priorita": "preferenziale" }
+  ],
+  "titolo": "Autista patente C per consegne regionali",
+  "sede": ["Cesena"],
+  "contratto": {
+    "tipo": "Tempo indeterminato",
+    "durata": "",
+    "orario": "Full time dal lunedì al venerdì",
+    "retribuzione": "Da definire in sede di colloquio"
+  },
+  "mansioni": [
+    "Consegne giornaliere presso i clienti della regione",
+    "Carico del mezzo in partenza dal magazzino",
+    "Ritiro dei documenti di consegna firmati"
+  ],
+  "benefit": ["Buoni pasto", "Mezzo aziendale in comodato"]
+}

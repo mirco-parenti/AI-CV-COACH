@@ -1,0 +1,54 @@
+{
+  "nome": "Luca Ferrari",
+  "contatti": {
+    "email": "luca.ferrari@example.it",
+    "telefono": "333 0000000",
+    "citta": "Forlì",
+    "link": ""
+  },
+  "patente": {
+    "ha": "sì",
+    "categorie": ["B"]
+  },
+  "esperienze_formali": [
+    {
+      "ruolo": "Addetto al magazzino",
+      "azienda": "Romagna Logistica S.r.l.",
+      "durata": "3 anni",
+      "cosa_facevo": "Carico e scarico merci col muletto, controllo delle bolle di consegna, preparazione degli ordini e riordino delle scaffalature.",
+      "tipo": ""
+    },
+    {
+      "ruolo": "Commesso di reparto",
+      "azienda": "Supermercati Bertozzi",
+      "durata": "1 anno",
+      "cosa_facevo": "Rifornimento degli scaffali, gestione delle scadenze e assistenza ai clienti in reparto.",
+      "tipo": ""
+    }
+  ],
+  "esperienze_informali": [
+    {
+      "cosa_facevo": "Davo una mano nei traslochi e nelle consegne di mobili, anche con il furgone dell'azienda di un amico.",
+      "quando": "Nei fine settimana, per un paio d'anni",
+      "con_chi": "Un amico che ha una ditta di traslochi"
+    }
+  ],
+  "competenze": [
+    "Uso del carrello elevatore (patentino conseguito nel 2021)",
+    "Lettura di documenti di trasporto e bolle",
+    "Uso del terminale di magazzino per il picking",
+    "Lavoro in squadra e su turni"
+  ],
+  "formazione": [
+    {
+      "titolo": "Diploma di istituto tecnico, indirizzo meccanica",
+      "istituto": "ITIS di Forlì",
+      "anno": "2018"
+    },
+    {
+      "titolo": "Corso per l'uso del carrello elevatore",
+      "istituto": "Ente di formazione Romagna Sicura",
+      "anno": "2021"
+    }
+  ]
+}

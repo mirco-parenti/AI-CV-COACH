@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Configurazione del banco di collaudo.
+
+  I collaudi della categoria «Reale» (cap. 14, T2) chiamano l'API vera e vogliono il
+  prototipo acceso come giudice: non possono far parte della batteria di tutti i
+  giorni, che deve restare veloce e girare su qualunque postazione. Sono perciò
+  esclusi di qui, e si lanciano a mano su aviolab03 passando a «dotnet test» il
+  filtro di categoria «TestCategory=Reale» (vedi il commento della classe
+  CollaudiConfrontoReale, che riporta il comando per esteso).
+-->
+<RunSettings>
+  <RunConfiguration>
+    <TestCaseFilter>TestCategory!=Reale</TestCaseFilter>
+  </RunConfiguration>
+</RunSettings>
