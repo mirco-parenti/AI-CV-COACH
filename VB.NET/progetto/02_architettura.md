@@ -122,25 +122,49 @@ i tool MCP).
   con il prompt già riempito; per i PDF, il blocco `document` in base64.
 - **Modelli**: due livelli come nel prototipo — `MODELLO_SEMPLICE` (estrazioni:
   **Claude Haiku 4.5**, `claude-haiku-4-5`) e `MODELLO_RAGIONAMENTO` (confronto,
-  mitigazione, generazione, brainstorming: **Claude Sonnet 5**, `claude-sonnet-5`).
-  Scelta fatta il 2026-08-05 riverificando il listino (cap. 15, voce 6): Sonnet 5
-  succede a Sonnet 4.6 allo stesso prezzo di listino. I nomi modello **non sono cablati
-  nel codice**: stanno nei metadati dei prompt e in configurazione, così un cambio di
-  modello non richiede una nuova build.
-- **Due comportamenti nuovi di Sonnet 5 da tenere presenti scrivendo `ClientClaude`**:
-  attiva il ragionamento esteso *di default* se non lo si disabilita esplicitamente, e
-  adotta un conteggio dei token che a parità di testo dà circa il 30% in più. Entrambi
-  incidono sul limite di risposta da richiedere: sottodimensionarlo produce risposte
-  troncate a metà.
-- **Sincrono o streaming**: le **estrazioni** restano sincrone (risposta breve, attesa
-  accettabile con indicatore). Il **brainstorming** e la **generazione** usano lo
-  streaming (`stream: true`, eventi SSE): il testo compare man mano, l'attesa percepita
-  crolla. È l'unica vera novità di trasporto rispetto al prototipo.
+  mitigazione, generazione, brainstorming). Il modello di prodotto per il ragionamento è
+  **Claude Sonnet 5** (`claude-sonnet-5`), scelto il 2026-08-05 riverificando il listino
+  (cap. 15, voce 6): succede a Sonnet 4.6 allo stesso prezzo. Ci si arriva però **in due
+  tempi**. La batteria di non-regressione di T2 gira su **Sonnet 4.6**
+  (`claude-sonnet-4-6`), lo stesso del prototipo: **a parità di modello** una differenza
+  nei risultati è una differenza di *codice*, che è esattamente ciò che quel collaudo
+  deve misurare. Il salto a Sonnet 5 è il **secondo esperimento** e si misura da solo,
+  dopo; quando l'avrà superato diventerà lui il predefinito.
+- **I nomi dei modelli non sono cablati nel codice**: i prompt dichiarano un *livello*
+  ("semplice" o "ragionamento", cap. 04) e la mappa livello → modello vive in
+  `modelli.json` nella cartella dati, gemello di `taratura.json` — predefiniti dentro il
+  programma, file che li scavalca, ripiego dichiarato se il file è illeggibile. Cambiare
+  modello, o fare il secondo esperimento, costa **una riga**, non una nuova build.
+- **L'interruttore del ragionamento esteso.** Sonnet 4.6 lo tiene spento di suo e il
+  prototipo non ne parla affatto: finché si resta lì la richiesta **non dichiara nulla**,
+  e così resta identica a quella del prototipo. Su Sonnet 5 il valore predefinito è
+  opposto, e lì l'interruttore va acceso (`thinking: {"type": "disabled"}`), perché
+  **`max_tokens` limita ragionamento e risposta insieme**: i nostri limiti (1500–4000)
+  sono cuciti addosso alla sola risposta, quindi passare a Sonnet 5 senza spegnerlo
+  tronca le risposte **senza errore** — e un confronto troncato produce JSON invalido.
+  Perciò in `modelli.json` l'interruttore ha **tre** stati e non due: *non dichiarato*
+  (richiesta identica al prototipo), *spento*, *acceso*. Vale anche la seconda
+  avvertenza del cap. 15: Sonnet 5 conta i token in modo diverso e a parità di testo ne
+  usa circa il 30% in più — è un cambio di tokenizzatore, quindi pesa **anche
+  sull'input**, non solo sul limite di risposta.
+- **La chiave API**: `ClientClaude` la riceve già pronta, non va a cercarsela. Alla tappa
+  T2 arriva dalla variabile d'ambiente `ANTHROPIC_API_KEY` — non tocca il disco e non
+  entra nel repo; dalla 1.0 arriverà cifrata dalla cartella dati (cap. 11).
+- **Sincrono, per ora**: tutte le chiamate sono **sincrone**. Le risposte stanno fra i
+  1500 e i 4000 token e si aspettano bene con un indicatore, quindi lo streaming a T2
+  non pagherebbe la sua complessità. Lo **streaming** (`stream: true`, eventi SSE) arriva
+  con **T4/T7**, dove serve davvero — generazione e brainstorming, cioè i punti in cui il
+  testo lungo compare man mano e l'attesa percepita crolla — e si aggiunge quando c'è un
+  pannello che lo mostra. È l'unica vera novità di trasporto rispetto al prototipo.
 - **Robustezza**: timeout esplicito per chiamata; un solo retry automatico su errore di
-  rete o HTTP 429/5xx (con pausa); ogni errore arriva all'utente in italiano, con la
-  possibilità di riprovare. Le risposte JSON passano da `EstrattoreJson`; se il JSON
-  resta invalido si mostra il testo grezzo in un riquadro «cosa ha risposto il
-  modello», mai un crash.
+  rete o HTTP 429/5xx (con pausa, rispettando l'attesa che l'API suggerisce quando la
+  suggerisce); nessun retry sugli errori nostri — una richiesta malformata o una chiave
+  sbagliata, riprovata, dà lo stesso errore. Ogni errore arriva all'utente in italiano,
+  con la possibilità di riprovare. Si guarda anche **perché il modello ha smesso di
+  scrivere**: se si è fermato contro il limite di token la risposta è monca e lo si dice
+  subito, invece di lasciarlo scoprire a valle sotto forma di JSON invalido senza sapere
+  perché. Le risposte JSON passano da `EstrattoreJson`; se il JSON resta invalido si
+  mostra il testo grezzo in un riquadro «cosa ha risposto il modello», mai un crash.
 - **Nessuna memoria lato modello**: come nel prototipo, ogni chiamata è autonoma; la
   memoria (profilo, conversazione di brainstorming) vive nel programma, che a ogni
   turno manda il contesto necessario.

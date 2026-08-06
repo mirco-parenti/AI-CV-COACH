@@ -32,15 +32,20 @@ e «Ver. 0.1.001 · Pool —»; la scheda «Dettagli» del file riporta Aviolab 
 
 ### T2 — Il motore e il pool
 `Ai/LibreriaPrompt` (pool esterno + integrato, manifest, segnaposto);
-`Ai/ClientClaude` (chiamate sincrone + streaming, retry, timeout) verso **Haiku 4.5**
-(estrazione) e **Sonnet 5** (ragionamento) — attenzione ai due comportamenti nuovi di
-Sonnet 5: ragionamento esteso attivo di default e conteggio token più alto di circa il
-30%, entrambi da considerare nel dimensionare il limite di risposta;
+`Ai/ClientClaude` (**chiamate sincrone**, retry, timeout) verso **Haiku 4.5**
+(estrazione) e **Sonnet 4.6** (ragionamento), cioè gli **stessi modelli del prototipo**:
+il confronto si fa a parità di modello, così una differenza nei risultati è una
+differenza di codice e non del modello sotto. Il salto a **Sonnet 5** (cap. 15, voce 6)
+è il **secondo esperimento**: si fa da `modelli.json` senza ricompilare e porta con sé
+l'interruttore del ragionamento esteso, che lì va acceso (cap. 02.5). Lo **streaming non
+è di questa tappa**: arriva con T4/T7, quando ci sarà un pannello che lo mostra.
 `Motore/EstrattoreJson`; `Motore/CalcoloMatch` che legge i valori da `taratura.json`
 (cap. 11.6); migrazione dei 15 prompt del prototipo nel pool (`Pool 1.00`).
 **Collaudo:** batteria di **non-regressione contro il prototipo** — stessi input degli
 step 1.35–1.37 (i 6 casi / 16 verifiche dell'hard-gate, i 6 casi di `estraiJson`, un
-confronto reale) → stessi numeri, stesse stelle, stesse note.
+confronto reale) → stessi numeri, stesse stelle, stesse note. Il confronto reale vuole
+la chiave API **e** il prototipo che gira come giudice: si esegue perciò **solo su
+aviolab03**, dove la chiave c'è.
 
 ### T3 — Il profilo (F1)
 Pannello P2 (scheda campo-per-campo) e P5 (dialogo); import da file PDF/TXT/MD/DOCX;
