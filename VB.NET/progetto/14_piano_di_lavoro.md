@@ -15,14 +15,18 @@ riportate nei capitoli interessati.
 **Fatto:** i documenti 01–15 sono confermati. **T1 può iniziare.**
 
 ### T1 — Lo scheletro che parte
-Installazione dell'**SDK .NET 10** su entrambe le postazioni (oggi assente: è il primo
-passo materiale). Soluzione Visual Studio in `VB.NET/src/` (`TrovaLavoro.sln`);
+Installazione dell'**SDK .NET 10** su entrambe le postazioni: **fatta su aviolab03 il
+2026-08-06** (SDK 10.0.302 + runtime 10.0.10, con Visual Studio 2026 Community 18.5 e il
+workload desktop già presenti); resta la postazione del tutor. Soluzione Visual Studio
+in `VB.NET/src/` (`TrovaLavoro.sln`);
 `FormPrincipale` con barra superiore, area centrale vuota e **pannello logo** (segnaposto
 tipografico «TL», versione + pool); modulo `StileApp` (token del cap. 03); `Versione.vb`;
 **proprietà dell'eseguibile** (prodotto TrovaLavoro, società Aviolab AI, © 2026 Aviolab
 AI); **prova immediata della pubblicazione single-file** autonoma e non compressa (il
 vincolo più rigido si verifica subito, non alla fine), con **misura di dimensione e
-tempo di avvio**.
+tempo di avvio**. La catena è già stata provata **a vuoto** il 2026-08-06 su un WinForms
+VB appena creato — un solo file da 116 MB, avviato e chiuso — quindi a T1 resta da
+ripeterla sull'app vera.
 **Collaudo:** l'exe pubblicato parte su un PC pulito e mostra la finestra con il logo
 e «Ver. 0.1.001 · Pool —»; la scheda «Dettagli» del file riporta Aviolab AI.
 

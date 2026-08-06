@@ -1218,3 +1218,27 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Attribuzione dei commit messa nero su bianco.** Da qui in avanti ogni commit si chiude con la sola riga `(c) 2026 Aviolab AI`, senza menzione dello strumento: l'ho ratificata come regola di progetto (regola 12), coerente con l'identità git delle due postazioni (regola 11).
 
 💡 *Mia intuizione / scelta ragionata* — Il valore del cancello non era fermare il codice, era costringermi a trasformare ogni «lo deciderò dopo» in una decisione con una data e un motivo. Otto proposte su dieci sono cambiate: se avessi cominciato a scrivere codice sulla prima stesura, avrei costruito otto volte sulla sabbia. Ora la sabbia è diventata pietra, e T1 può appoggiarcisi.
+
+### Step 2.3 — L'ambiente di T1: l'SDK c'era già, ma volevo la prova (e la misura)
+
+*Il piano diceva che il primo passo materiale di T1 era installare l'SDK .NET 10, «oggi assente». Sono partito per installarlo e ho fatto la cosa che il mio metodo mi impone prima di ogni lavoro: guardare com'è la macchina adesso, invece di fidarmi di quello che avevo scritto ieri. L'SDK c'era. Ma la scoperta interessante non è stata quella: è stato ciò che ho trovato provando davvero a produrre l'exe unico, il vincolo più rigido di tutto il progetto.*
+
+**Cosa ho fatto**
+- **Prima ho guardato, poi ho installato.** Sulla mia postazione (aviolab03) c'erano già l'**SDK 10.0.204** e i runtime 10.0.8, arrivati insieme a **Visual Studio 2026 Community 18.5** con il workload desktop: il documento diceva «assente» perché era stato scritto prima. Ho verificato la cosa da tre parti indipendenti — `dotnet --list-sdks`, la cartella `C:\Program Files\dotnet\sdk` e l'inventario dei componenti di Visual Studio — e i tre esiti concordavano.
+- **Ho comunque installato l'SDK «mio».** `winget` non vedeva alcun pacchetto .NET 10 registrato (quello di Visual Studio non lo è), quindi ho fatto l'installazione pulita della **10.0.302**, che porta anche i runtime **10.0.10**. Le due bande (10.0.2xx e 10.0.3xx) convivono senza sovrascriversi: non ho perso nulla di ciò che Visual Studio si era portato dietro.
+- **Ho collaudato la catena da zero**, non l'inventario: progetto WinForms VB appena creato → `dotnet build -c Release` (0 errori, 0 avvisi) → pubblicazione **single-file, autonoma e non compressa** → **116 MB in un file solo** → e poi l'ho **avviato davvero**, controllando che il processo girasse, prima di chiuderlo. Verificato di passaggio anche che il runtime **WebView2** sia già nel sistema: due capitoli del progetto (ricerca annunci e stampa PDF) lo danno per scontato, ed è giusto saperlo prima e non a T5.
+
+**Cosa ho imparato**
+- **Un solo file non è gratis: te lo devi chiedere.** Alla prima pubblicazione, accanto all'exe è comparso il file dei simboli `.pdb`. Nessun errore, tutto «riuscito» — ma il vincolo che mi ero dato («un exe, nessuna DLL a fianco») era già violato al primo tentativo, in silenzio. Serve `DebugType = none` nei parametri: l'ho aggiunto al capitolo 13, dove vivono i comandi di pubblicazione, così non dipenderà dalla memoria di nessuno.
+- **La stima regge, e ora ha un pavimento.** Una finestra **vuota** pesa già 116 MB, perché dentro c'è tutto il runtime .NET. I 150–180 MB stimati per l'app completa non erano pessimismo: erano realismo.
+
+**Dove ho faticato / cosa non era ovvio**
+- **L'installazione ferma senza dire perché.** Il comando è rimasto appeso dieci minuti senza scrivere una riga. Non era lento e non era rotto: c'era una finestra di **Controllo dell'account utente** che aspettava un clic e che dal terminale non si vedeva. L'ho capita guardando i processi attivi — c'era `consent.exe` — e da lì è bastato approvare. Mi ha insegnato che «bloccato» non è una diagnosi: è l'inizio di una.
+- **Provare che parte è un'altra cosa che compilare.** Il primo tentativo di avviare l'exe da riga di comando è finito con un «Accesso negato» che non c'entrava con il programma. Invece di accontentarmi del «ha compilato», ho cambiato strada finché non ho visto il processo vivo nell'elenco: la differenza tra un file prodotto e un programma che parte è tutta lì.
+
+**Cosa ho deciso e perché**
+- **Verificare la macchina prima di eseguire il piano.** Il documento diceva «assente» ed era invecchiato di un giorno. Non ho corretto il piano a memoria: ho misurato, poi ho scritto nei capitoli 13 e 14 cosa c'è davvero, con le versioni precise.
+- **Provare il vincolo più rigido subito, anche a vuoto.** T1 prevede il publish di prova sull'app vera; farlo **prima** su un progetto vuoto è costato dieci minuti e ha già fruttato un parametro mancante nel progetto. Il vincolo che può far saltare tutto va toccato all'inizio, quando correggere costa una riga.
+- **La postazione del tutor resta da fare.** Lì c'è ancora l'SDK 9: l'ho lasciato scritto nei capitoli invece di dare l'ambiente per «sistemato» dopo aver sistemato solo il mio.
+
+💡 *Mia intuizione / scelta ragionata* — Sarei potuto uscire da qui con un «ambiente installato ✔» in due minuti, e sarebbe stato vero. Invece la mezz'ora spesa a costruire un programma finto, pubblicarlo e aprirlo mi ha dato tre cose che l'installazione da sola non dava: un parametro mancante nel progetto, un numero vero al posto di una stima, e la certezza che il pezzo più rischioso della distribuzione funziona **oggi**, non «quando ci arriveremo». È lo stesso metodo dello Step 1.36 — prima far girare il sistema, poi valutare — applicato a un ambiente invece che a un prompt.

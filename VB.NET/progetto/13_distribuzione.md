@@ -11,7 +11,9 @@ installazione, senza DLL a fianco.*
 - **Runtime**: **.NET 10 LTS** *(deciso in cap. 15, voce 1)*. La proposta iniziale era
   .NET 8, scartata perché **esce di supporto il 10/11/2026** ed è già in sola
   manutenzione; .NET 10 è in supporto attivo fino a **novembre 2028**. Richiede l'SDK 10
-  su entrambe le postazioni — installazione da fare a T1, quando costa meno.
+  su entrambe le postazioni: **installato su aviolab03 il 2026-08-06** (SDK 10.0.302,
+  runtime 10.0.10, accanto al 10.0.204 arrivato con Visual Studio 2026 Community 18.5);
+  sulla postazione del tutor resta da fare.
 - **Architettura**: 64 bit (`win-x64`), solo Windows 11.
 - **Librerie esterne**: le minime indispensabili, e tutte «inglobabili» —
   `Microsoft.Web.WebView2` (browser integrato) e `FontAwesome.Sharp` (icone).
@@ -29,6 +31,7 @@ dotnet publish -c Release -r win-x64
   PublishSingleFile = true
   SelfContained     = true
   IncludeNativeLibrariesForSelfExtract = true
+  DebugType         = none
 ```
 
 - **Autonomo (`SelfContained = true`)** — **scelta confermata** (cap. 15, voce 2):
@@ -37,8 +40,15 @@ dotnet publish -c Release -r win-x64
   nessun «prima installa il runtime».
 - **Senza compressione.** `EnableCompressionInSingleFile` dimezzerebbe grosso modo il
   file, al prezzo di un primo avvio più lento (il contenuto va decompresso in una cache
-  locale): non conviene per un programma che vive su due PC. La misura vera —
-  dimensione e tempo di avvio — si prende al **publish di prova di T1**.
+  locale): non conviene per un programma che vive su due PC. Prima misura di
+  riferimento (2026-08-06, WinForms VB **vuoto** su .NET 10, autonomo e non compresso):
+  **116 MB in un unico file**, avviato e verificato — la stima dei 150–180 MB per l'app
+  completa regge. La misura vera — dimensione e tempo di avvio dell'app vera — si prende
+  al **publish di prova di T1**.
+- **`DebugType = none` non è un dettaglio**: senza quel parametro accanto all'exe resta
+  il file dei simboli `.pdb`, e il vincolo «nessuna DLL, un file solo» decade nella
+  forma. Con esso, al collaudo del 2026-08-06 la cartella di pubblicazione conteneva
+  **un solo file**.
 - **Il trimming non è un'opzione**: Microsoft non lo supporta su Windows Forms, quindi
   la stima di dimensione non è riducibile per quella via.
 - La variante leggera (framework-dependent, pochi MB ma richiede il runtime .NET
