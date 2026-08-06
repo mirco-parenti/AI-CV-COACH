@@ -6,24 +6,41 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
 
 ## Regole
 
-1. **Sync prompt ↔ codice**: ogni prompt vive **identico** in `HTML+JS/prompt_design.md` e
-   `HTML+JS/server.js`. Confronta **char-by-char** normalizzando CRLF/LF, e **verifica a ogni
-   modifica** di un prompt. (Nella fase VB.NET la regola migrerà sulla libreria di prompt
-   `.md`: sarà ridefinita quando quella nascerà.)
+1. **Il pool è la casa dei prompt**: ogni prompt vive in **un posto solo**, il suo file
+   `.md` nel pool (`VB.NET/src/TrovaLavoro/prompt-pool/`), e da lì entra nell'eseguibile
+   come risorsa. Non ci sono più due copie da tenere identiche: al loro posto c'è il
+   **manifest**, che porta l'impronta SHA-256 di ogni file, calcolata sul testo
+   normalizzato a LF. Perciò **ogni modifica a un prompt si chiude col rito del bump**
+   (cap. 04.5): si aggiorna `versione_pool`, si rigenerano le impronte (`Sigilla`), si
+   annota il cambiamento. Un file fuori impronta **non blocca niente** — il caricatore è
+   trasparente, non poliziesco — ma la versione si mostra con l'asterisco: chi sperimenta
+   lo fa alla luce del sole, chi distribuisce fa il bump. *(Riscritta il 2026-08-06: fino
+   a Pool 1.00 la regola valeva sulla doppia copia `prompt_design.md` ↔ `server.js` del
+   prototipo, che non esiste più.)*
 2. **Stile del diario** (`diario_di_bordo.md`): `### Step X.Y — titolo`, intro in
    corsivo, sezioni *Cosa ho fatto / Cosa ho imparato / Dove ho faticato / Cosa ho
    deciso e perché*, callout 💡, **prima persona** (io = Mirco), in italiano.
    **Non riscrivere gli step passati** (sono storia): lavoro nuovo = step nuovo.
-3. **Asset durevoli vs usa-e-getta**: investi qualità sui **durevoli = PROMPT + SCHEMA**
-   (`HTML+JS/prompt_design.md`), che migrano verso VB.NET. L'infrastruttura — `index.html`,
-   l'aiutante Node, i `test-*.html` — è **impalcatura usa-e-getta**, non da studiare
-   riga per riga.
-4. **Documentazione senza duplicati**: i prompt **definitivi** stanno in
-   `HTML+JS/prompt_design.md`, la **narrazione e le decisioni** nel `diario_di_bordo.md`.
-   Non duplicare lo stesso contenuto nei due.
+3. **Asset durevoli vs usa-e-getta**: investi qualità sui **durevoli = PROMPT + SCHEMA**,
+   che ora vivono nel **pool** (cap. 04). Sono l'unica cosa migrata pari pari dal
+   prototipo, e sopravvivranno anche a questa fase. L'impalcatura del prototipo —
+   `index.html`, l'aiutante Node, i `test-*.html` — è **usa-e-getta e ormai congelata**:
+   non si studia riga per riga. Nella fase VB.NET quella distinzione non si applica più
+   allo stesso modo: il codice di `VB.NET/src/` non è impalcatura, è il prodotto.
+4. **Documentazione senza duplicati**: i prompt **definitivi** stanno nel **pool**, il
+   **disegno** in `VB.NET/progetto/`, la **narrazione e le decisioni** nel
+   `diario_di_bordo.md`. Non duplicare lo stesso contenuto in due posti: quando poi
+   divergono, chi legge non sa quale dei due sia quello vero.
 5. **Comando "aggiorna-tutto"**: quando dico **"aggiorna-tutto"**, aggiorna **tutti i
    file di progetto nel working tree (tracciati o no)** — incluso questo `CLAUDE.md` —
-   al livello a cui siamo arrivati. Procedi **un file alla volta**, seguendo
+   al livello a cui siamo arrivati. Il perimetro è la **fase viva**: tutto `VB.NET/`
+   (progetto *e* codice), `README.md`, `diario_di_bordo.md`, `idee_future.md`, questo
+   `CLAUDE.md` e ogni altra regola o documentazione di progetto che nascerà.
+   **`HTML+JS/` è fuori dal rito** *(dal 2026-08-06)*: il prototipo è congelato, non è
+   più la fase in cui lavoro, e riverificarlo a ogni giro costerebbe senza rendere. Si
+   tocca **solo** per manutenzione esplicitamente richiesta — e in quel caso valgono
+   ancora le sue regole di sempre (regola 1 sul sync prompt ↔ codice, regola 3 sugli
+   asset durevoli). Procedi **un file alla volta**, seguendo
    **scrupolosamente la modalità di compilazione specifica di ciascun file** (vedi la
    tabella **«Modalità di aggiornamento per file»** in fondo). È
    **severamente vietato confondere i contenuti di un file con quelli di un altro —
@@ -33,9 +50,10 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    integrale** → modalità specifica → aggiornamento se serve (o conferma «non serve»
    **solo dopo** la verifica, mai prima) → doppio controllo. **Mai saltare un file** con
    la motivazione «già allineato».
-   **Esclusi sempre**: `.env`, `.claude/`, `node_modules/` e tutto ciò che è gitignored;
-   i file di config (`.gitignore`, `.gitattributes`, `package.json`) si toccano solo se
-   serve. È **repo-scoped**: non tocca `~/.claude/CLAUDE.md` (regole_globali) né l'auto-memoria.
+   **Esclusi sempre**: `HTML+JS/` (prototipo congelato, vedi sopra), `.env`, `.claude/`,
+   `node_modules/` e tutto ciò che è gitignored; i file di config (`.gitignore`,
+   `.gitattributes`, `package.json`) si toccano solo se serve. È **repo-scoped**: non
+   tocca `~/.claude/CLAUDE.md` (regole_globali) né l'auto-memoria.
 6. **Marker regole nuove**: quando emerge una possibile nuova `regola_di_progetto`,
    **proponimela in chat marcata con `🔖 REGOLA NUOVA/regole_di_progetto` e chiedimi conferma**; aggiungila
    a questo file **solo dopo il mio ok** (niente aggiunte autonome). Il marker resta
@@ -79,30 +97,40 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   verbatim in `VB.NET/PROMPT_DI_INCARICO.md`, progetto dettagliato in `VB.NET/progetto/`).
   I file trasversali (questo `CLAUDE.md`, `README.md`, `diario_di_bordo.md`,
   `idee_future.md`) restano in radice.
-- **Come far girare il prototipo**: Node ≥ 20.12, **niente dipendenze npm**, chiave in
-  `HTML+JS/.env` (`ANTHROPIC_API_KEY`, gitignored). Avvio: `npm start` **dentro
+- **Come far girare il prototipo** (serve ancora: è il **giudice** della non-regressione
+  di T2, cap. 14): Node ≥ 20.12, **niente dipendenze npm**, chiave in
+  `HTML+JS/.env` (`ANTHROPIC_API_KEY`, gitignored — il file va lì, perché il server
+  cerca il `.env` nella cartella da cui parte). Avvio: `npm start` **dentro
   `HTML+JS/`** → `http://localhost:3000`.
   Endpoint: `POST /struttura` (turni del profilo, analisi annuncio e import da CV `importa_cv`), `POST /leggi-pdf` (trascrizione di un CV in PDF), `POST /confronta`, `POST /mitiga`, `POST /genera-cv` e `POST /genera-lettera`. Stop del server: `fuser -k 3000/tcp`.
 - **Stato e pipeline (fonte viva)**: per pipeline e stato aggiornati vedi
   `README.md` (sezione *Stato*) e l'ultimo `### Step` del `diario_di_bordo.md`.
   **Non duplicare qui lo stato** (così questo file non va mai stantio).
-- **Architettura (puntatore)**: il disegno **top-down** del sistema — funzioni (voci 2.x ↔
-  anelli 1-4), vista-dati ("un profilo, molti CV"), principi trasversali, runtime e gap
-  aperti — è in `HTML+JS/architettura.md`. È la bussola per progettare i componenti mancanti; il
-  file è **statico-strutturale** (si aggiorna solo quando cambia il disegno, non lo stato).
-- **Modelli (puntatore)**: quali modelli si usano e con che criterio (estrazione vs
-  ragionamento) è in `HTML+JS/prompt_design.md` ("Modelli usati") e nelle costanti
-  `MODEL_SEMPLICE` / `MODEL_RAGIONAMENTO` di `HTML+JS/server.js`.
+- **Architettura (puntatore)**: la bussola viva è `VB.NET/progetto/02_architettura.md` —
+  componenti, chiamate all'AI (§2.5), concorrenza, dove vive lo stato. Il disegno
+  **top-down** originale — funzioni (voci 2.x ↔ anelli 1-4), vista-dati ("un profilo,
+  molti CV"), principi trasversali — resta in `HTML+JS/architettura.md`: è la radice da
+  cui nasce il progetto VB.NET e si legge ancora per capire il *perché*, ma il *come* di
+  oggi sta nei capitoli di `VB.NET/progetto/`. Entrambi sono **statico-strutturali**: si
+  toccano quando cambia il disegno, non per lo stato corrente.
+- **Modelli (puntatore)**: il criterio dei due livelli (estrazione vs ragionamento) e i
+  modelli concreti stanno in `VB.NET/progetto/02_architettura.md` §2.5. I prompt del pool
+  dichiarano solo il **livello** (`modello: semplice|ragionamento`); i modelli veri sono i
+  predefiniti di `VB.NET/src/TrovaLavoro/Ai/Modelli.vb`, scavalcabili da `modelli.json`
+  nella cartella dati. Nel prototipo erano le costanti `MODEL_SEMPLICE` /
+  `MODEL_RAGIONAMENTO` di `HTML+JS/server.js`, che restano il termine di paragone del
+  collaudo di non-regressione.
 - **Bussola etica del prodotto (puntatore)**: il vincolo **anti-invenzione** è descritto
-  in `README.md` ("Vincolo etico principale") ed è codificato nei prompt di
-  `HTML+JS/prompt_design.md` — **rispettalo quando progetti/modifichi i prompt**. È una regola
-  **del prodotto**, non una mia regola di lavoro.
+  in `README.md` ("Vincolo etico principale") ed è **codificato dentro i prompt del pool**
+  — **rispettalo quando progetti/modifichi un prompt**. È una regola **del prodotto**, non
+  una mia regola di lavoro.
 - **Anti-perdita (puntatore)**: il gemello simmetrico dell'anti-invenzione — nulla di ciò
   che l'utente dichiara va **perso** se detto nel turno sbagliato (campo `altrove`:
   instradamento ad altri turni, conferma dell'utente, e per l'irriducibile un esplicito
-  "lasciato fuori", mai una perdita silenziosa). Descritto in `HTML+JS/prompt_design.md`
-  ("Convenzione anti-perdita: il campo `altrove`") e narrato nel `diario_di_bordo.md`
-  (Step 1.26). Anche questa è una regola **del prodotto**.
+  "lasciato fuori", mai una perdita silenziosa). Vive nei prompt del pool, è narrato nel
+  `diario_di_bordo.md` (Step 1.26) e la sua origine è documentata in
+  `HTML+JS/prompt_design.md` ("Convenzione anti-perdita: il campo `altrove`"). Anche
+  questa è una regola **del prodotto**.
 - **Idee/raffinamenti futuri (puntatore)**: il backlog ragionato per le fasi successive
   è in `idee_future.md`.
 
@@ -114,15 +142,12 @@ un file nuovo, aggiungi qui la sua riga.
 | File | Come aggiornarlo con "aggiorna-tutto" |
 |---|---|
 | `README.md` | Aggiorna la sezione **Stato** (riga in cima + "## Stato del progetto") e "Tecnologie previste" se cambiano; non riscrivere il resto della presentazione. |
-| `HTML+JS/prompt_design.md` | Prompt **definitivi** + schema; prompt **identici** a `server.js` (sync char-by-char). |
-| `HTML+JS/server.js` | Codice del motore; prompt **identici** a `prompt_design.md`. |
 | `diario_di_bordo.md` | **Aggiungi un nuovo `### Step X.Y`** (intro corsivo, sezioni, 💡, prima persona). **Mai** riscrivere gli step passati. |
 | `idee_future.md` | Aggiungi le idee nuove / spunta quelle realizzate con ✅ + puntatore; quando si accumulano, raccoglile in una sezione «Realizzate» in fondo (così il backlog attivo resta solo-futuro e non induce in errore); non copiare lo stato. |
 | `CLAUDE.md` | Ratifica i marker confermati (togli 🔖); riflette regole e contesti aggiornati. |
-| `HTML+JS/research_notes.md` | **Statico**: solo se c'è nuova ricerca su progetti simili. |
-| `HTML+JS/architettura.md` | **Statico-strutturale**: si tocca solo quando cambia il **disegno** (un gap chiuso, un componente nuovo, un confine spostato), **non** per lo stato corrente (che rimanda a README/diario). Mai riscrivere l'impianto concordato col tutor senza richiesta esplicita. |
-| `HTML+JS/index.html` e ogni `HTML+JS/test-*.html` | Impalcatura usa-e-getta: solo se è cambiato il front-end/test (qualità minore). |
 | `VB.NET/PROMPT_DI_INCARICO.md` | **Statico**: è il mandato verbatim della fase VB.NET, **mai** riscritto; si estende solo con nuove integrazioni verbatim dell'utente. |
 | `VB.NET/progetto/*.md` | Progetto dettagliato della fase VB.NET: si aggiorna quando una **decisione di progetto** cambia o matura (design-first: finché non si implementa, questi file sono la verità del disegno). Rispetta indice e struttura dei capitoli. |
-| `.gitignore`, `.gitattributes`, `HTML+JS/package.json` | Config: solo se serve un cambiamento concreto. |
+| `VB.NET/src/**` | Codice e collaudi. **Non si riscrive per allineamento**: si tocca quando una decisione di progetto o una tappa lo richiede. Commenti e nomi in italiano come il codice già presente; ogni modifica passa da `dotnet test` **prima** di dirsi fatta. Le cartelle `obj/` e `bin/` non si toccano mai. |
+| `HTML+JS/**` | **Fuori dal rito** *(dal 2026-08-06)*: prototipo congelato. Si tocca solo per manutenzione che chiedo esplicitamente; in quel caso valgono le regole 1 e 3. |
+| `.gitignore`, `.gitattributes` | Config: solo se serve un cambiamento concreto. |
 | `.env`, `.claude/`, `node_modules/`, gitignored | **MAI** toccati. |

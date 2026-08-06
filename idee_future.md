@@ -6,7 +6,9 @@ pipeline sta nel `README.md` (sezione *Stato*) e nell'ultimo `### Step` del
 `diario_di_bordo.md`.
 
 *Come si compila questo file (modalità):* una voce per idea, raggruppata per area; ogni
-voce dice **cos'è · perché è futura · dove se ne parla** (puntatore a diario/prompt_design).
+voce dice **cos'è · perché è futura · dove se ne parla** (puntatore al `diario_di_bordo.md`,
+ai capitoli di `VB.NET/progetto/` o al prompt del pool interessato; le voci più vecchie
+puntano a `prompt_design.md`, che è la stessa cosa detta quando la casa dei prompt era lì).
 Le idee nuove si annotano con **data e motivo**. Le idee **realizzate** si spuntano (✅) e,
 quando si accumulano, migrano nella sezione **«Realizzate»** in fondo: così il backlog
 attivo qui sopra resta **solo-futuro** e non induce in errore. Aggiornato con "aggiorna-tutto".
