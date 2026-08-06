@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>TrovaLavoro</RootNamespace>
+    <AssemblyName>TrovaLavoro</AssemblyName>
+    <!-- Avvio da Programma.Main: il DPI SystemAware va impostato prima di ogni finestra. -->
+    <MyType>WindowsFormsWithCustomSubMain</MyType>
+    <StartupObject>TrovaLavoro.Programma</StartupObject>
+    <!-- Solo 64 bit (cap. 13.1); il runtime win-x64 lo fissa publish.bat. -->
+    <PlatformTarget>x64</PlatformTarget>
+    <OptionStrict>On</OptionStrict>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionInfer>On</OptionInfer>
+    <!-- I sorgenti sono UTF-8: senza questo le lettere accentate e il « · » del
+         pannello logo verrebbero letti con la codepage di sistema. -->
+    <CodePage>65001</CodePage>
+  </PropertyGroup>
+
+  <!-- Proprietà dell'eseguibile, scheda «Dettagli» di Windows (cap. 13.5). -->
+  <PropertyGroup>
+    <Product>TrovaLavoro</Product>
+    <Company>Aviolab AI</Company>
+    <Copyright>© 2026 Aviolab AI</Copyright>
+    <AssemblyTitle>Trova annunci, prepara CV e lettera su misura</AssemblyTitle>
+    <Description>Trova annunci, prepara CV e lettera su misura</Description>
+  </PropertyGroup>
+
+  <!-- La versione non si scrive qui: si legge dalla costante di Versione.vb, che
+       resta l'unica fonte (cap. 13.5). Da lì derivano versione di file, di assembly
+       e informativa dell'eseguibile. -->
+  <PropertyGroup>
+    <_SorgenteVersione>$([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)\Versione.vb'))</_SorgenteVersione>
+    <Version>$([System.Text.RegularExpressions.Regex]::Replace($(_SorgenteVersione), '(?s)^.*?Numero\s+As\s+String\s*=\s*"([0-9]+\.[0-9]+\.[0-9]+)".*$', '$1'))</Version>
+    <!-- Senza questo la versione di prodotto mostrata da Windows si porta dietro
+         il codice del commit Git. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Update="FormPrincipale.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FormPrincipale.Designer.vb">
+      <DependentUpon>FormPrincipale.vb</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>

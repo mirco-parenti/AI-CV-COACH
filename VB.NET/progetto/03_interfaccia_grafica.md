@@ -130,18 +130,21 @@ sinistra della finestra principale:
 
 ```
 ┌──────────────────────────┐
-│        [immagine]        │   PictureBox 101×101, logo del prodotto
-│                          │   (fino al logo definitivo: segnaposto «TL»)
-│       TrovaLavoro        │   Segoe UI 16 Bold, TestoPrimario, centrato
+│        [immagine]        │   PictureBox 101×101, scudo Aviolab AI
+│                          │   (in forma binaria nel sorgente)
+│       AVIOLAB AI         │   Segoe UI 16 Bold, TestoPrimario, centrato
 │  Ver. 1.0.012 · Pool 1.03│   Segoe UI 8, TestoSecondario, centrato
-│  © 2026 Aviolab AI       │   Segoe UI 8, TestoSecondario, centrato
+│ ©2026 Aviolab AI - Tutti │   Segoe UI 8, TestoSecondario, centrato
+│   i diritti riservati    │
 └──────────────────────────┘
 ```
 
-> **Il nome mostrato all'utente è «TrovaLavoro»** (cap. 15, voce 3), qui e nella barra
-> del titolo; il sottotitolo «e candidati con il CV giusto, senza fatica» compare nella
-> finestra «Informazioni su…» e nel primo avvio. *AI-CV-COACH* resta il nome del
-> progetto e del repository, non del prodotto.
+> Il pannello in basso a sinistra è il **marchio aziendale**: sotto lo scudo compare
+> **sempre e solo «AVIOLAB AI»** *(precisato 2026-08-06)*. **Il nome mostrato
+> all'utente resta «TrovaLavoro»** (cap. 15, voce 3) nella barra del titolo; il
+> sottotitolo «e candidati con il CV giusto, senza fatica» compare nella finestra
+> «Informazioni su…» e nel primo avvio. *AI-CV-COACH* resta il nome del progetto e
+> del repository, non del prodotto.
 
 - `Panel` di circa **261×216 px**, sfondo `SfondoBase`, ancorato **Bottom+Left**,
   aggiunto al form come elemento flottante sopra la struttura (così sopravvive ai
@@ -154,8 +157,9 @@ sinistra della finestra principale:
   totale, e l'app la spiega.
 - **Modalità compatta**: sotto ~1350 px di larghezza restano solo l'immagine (ridotta) e
   la versione, per liberare spazio.
-- Il logo è **risorsa incorporata** nell'exe (niente file immagine esterni). Il disegno
-  del logo è una decisione aperta (cap. 15): serve un'immagine propria del progetto.
+- Il logo è lo **scudo di Aviolab AI** e vive **in forma binaria dentro il sorgente**
+  (PNG 256×256 codificato Base64 in `LogoAviolab.vb`): nel repository e accanto all'exe
+  non esiste nessun file immagine. *(Deciso 2026-08-06 in T1 — cap. 15, voce 4.)*
 - Il numero di versione dell'app vive in **un solo file sorgente** (`Versione.vb`, una
   costante), mai duplicato altrove; ogni modifica al codice lo incrementa.
 

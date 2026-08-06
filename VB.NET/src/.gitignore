@@ -1,0 +1,8 @@
+# Artefatti di compilazione e pubblicazione della soluzione VB.NET
+bin/
+obj/
+pubblicazione/
+
+# File locali di Visual Studio
+.vs/
+*.user

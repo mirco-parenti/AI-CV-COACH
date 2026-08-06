@@ -101,8 +101,11 @@ insieme al resto:
   del pool (`Ver. 1.0.012 · Pool 1.03`) — schema confermato in cap. 15, voce 5.
 - Ogni modifica al codice incrementa il numero di build; la storia delle release sta
   nei tag Git del repo.
-- L'icona dell'exe e il logo sono risorse incorporate. Fino al logo definitivo si usa
-  il **segnaposto tipografico «TL»** generato da codice (cap. 15, voce 4).
+- Il logo è lo **scudo di Aviolab AI**, incorporato **in forma binaria nel sorgente**
+  (PNG codificato Base64 in `LogoAviolab.vb`): nessun file immagine nel repo né accanto
+  all'exe *(deciso 2026-08-06 in T1 — cap. 15, voce 4)*. Nel pannello logo, sotto lo
+  scudo, compare sempre e solo «AVIOLAB AI» (cap. 03.5). L'icona dell'exe resta da
+  produrre, idealmente dallo stesso scudo.
 
 ## 13.6 Avvisi di Windows (SmartScreen)
 
