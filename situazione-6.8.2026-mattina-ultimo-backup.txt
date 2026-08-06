@@ -1,0 +1,91 @@
+❯ Riassumi la situazione in breve rispetto al deploy finale della applicazione completa: cosa c'è e cosa manca
+
+● Rispetto al rilascio 1.0 di TrovaLavoro
+
+  Cosa c'è già:
+  - T0 chiusa: progetto ratificato per intero, nessuna decisione aperta (il cap. 15 è svuotato; anche il logo, deciso ieri, è a posto).
+  - T1 fatta (sul ramo t1-scheletro, in attesa del merge di Mirco): lo scheletro parte, e soprattutto il vincolo più rigido è già collaudato — publish
+  single-file autonomo da 116 MB che si avvia in ~0,3 s su PC senza runtime. Identità visiva e infrastruttura di base ci sono: StileApp, pannello marchio
+  Aviolab, versione a fonte unica, publish.bat.
+  - Gli asset durevoli del prototipo: i 15 prompt con schemi, calcolaMatch, estraiJson e la logica del dialogo sono validati in HTML+JS/ e pronti a migrare — il
+  lavoro "intelligente" è già fatto e collaudato lì.
+  - Ambiente: SDK .NET 10 operativo su questa postazione (anche a sistema).
+
+  Cosa manca (tappe T2–T9 del cap. 14):
+  - T2 — il motore: ClientClaude (chiamate, streaming, retry), libreria prompt con pool, EstrattoreJson e CalcoloMatch, migrazione dei 15 prompt, con collaudo
+  di non-regressione contro il prototipo. È la prossima tappa e la più delicata: "prima uguale, poi meglio".
+  - T3 — il profilo: pannelli P2/P5, import da CV, dialogo guidato completo.
+  - T4 — la pipeline di candidatura: analisi annuncio, confronto con stelle, generazione CV/lettera, export DOCX/PDF. Da qui in poi l'app fa davvero il suo
+  mestiere.
+     … +4 lines (ctrl+o to expand)
+  ⎿  Allowed by auto mode classifier
+
+  Wrote 1 memory (ctrl+o to expand)
+
+❯ NOTA IMPORTANTE: ORA ABBIAMO INSTALLATO .NET 10 SDK e RISORSE su questa macchina
+
+● Bash(/mnt/c/WINDOWS/system32/cmd.exe /c "dotnet --list-sdks & dotnet --list-runtimes | findstr /c:\"10.\"" 2>&1 | head -12)
+  ⎿  9.0.316 [C:\Program Files\dotnet\sdk]
+     10.0.302 [C:\Program Files\dotnet\sdk]
+  ⎿  Allowed by auto mode classifier
+
+  Wrote 2 memories (ctrl+o to expand)
+
+● T1 completata e pushata sul ramo t1-scheletro (commit 4581289) — lo scheletro di TrovaLavoro compila, parte e supera il collaudo previsto dal piano.
+
+  Com'è andata, in sintesi:
+
+  - Interop e SDK: il riavvio di WSL ha ripristinato l'interop senza bisogno di fix manuali. Ho installato l'SDK .NET 10 in user-scope come da piano; nel frattempo tu l'hai messo anche a sistema (C:\Program Files\dotnet, 10.0.302 accanto al 9), quindi ora build, doppio clic e publish.bat funzionano dal PATH senza alcun workaround. Ne ho preso nota in memoria.
+  - Scheletro (scritto da un agente Opus sotto supervisione, poi rivisto file per file da me): TrovaLavoro.sln + progetto WinForms net10.0-windows, FormPrincipale (barra superiore, area centrale vuota, barra di stato), StileApp con tutti i token del cap. 03, Versione.vb come unica fonte della versione (il .vbproj la deriva con una regex MSBuild, niente numeri duplicati), proprietà dell'eseguibile Aviolab AI, publish.bat
+  con fallback sull'SDK del profilo utente.
+  - Logo, come da tue correzioni in corsa: scudo Aviolab (il PNG del sito, identico a quello della suite) ridotto a 256×256 e incorporato in forma binaria nel sorgente (LogoAviolab.vb, Base64) — nessun file di risorse nel repo né accanto all'exe. Sotto lo scudo sempre e solo «AVIOLAB AI», poi «Ver. 0.1.001 · Pool —» e «©2026 Aviolab AI - Tutti i diritti riservati», verificato a schermo: replica lo stile dell'esempio che
+  mi hai mostrato. Il nome «TrovaLavoro» resta nella barra del titolo.
+  - Collaudo: build pulita (0 warning, 0 errori); publish single-file autonomo non compresso da 116 MB (sotto la stima 150–180 MB); avvio ~0,26 s a freddo; scheda Dettagli con Aviolab AI, © verificato al byte (il «c 2026» era solo la resa della console). Screenshot di verifica in C:\Windows\Temp\trovalavoro-t1-logo-aviolab.png.
+  - Documenti allineati: cap. 03.5 e 13.5 aggiornati alla decisione sul logo, voce 4 del cap. 15 chiusa come superata; .gitattributes ora fissa CRLF per i .bat. Commit firmato solo (c) 2026 Aviolab AI.
+
+  Restano a Mirco (regola 11): il merge del ramo su main, lo Step del diario (voce sua), il collaudo dell'exe su un PC pulito. Rimane inoltre da produrre l'icona dell'exe (idealmente dallo stesso scudo — annotata nel cap. 15). La cartella VB.NET/src/pubblicazione/ (111 MB, gitignored) è rimasta su disco per ispezione e si può cancellare quando vuoi.
+
+
+● Teammate @t1-scheletro finished
+
+● È solo la notifica di chiusura dell'agente che ha scritto lo scheletro — il suo rapporto l'avevo già ricevuto e verificato, e il lavoro è già committato e pushato su t1-scheletro. Nessuna azione nuova necessaria: lo stato resta quello del riepilogo precedente (a Mirco il merge, il diario e il collaudo su PC pulito).
+
+※ recap: T1 dello scheletro VB.NET di TrovaLavoro è completata: build, publish single-file da 116 MB e pannello logo Aviolab verificati, tutto committato e pushato sul ramo t1-scheletro. Prossimo passo: merge su main da parte di Mirco, poi diario e collaudo. (disable recaps in /config)
+
+❯ Riassumi la situazione in breve rispetto al deploy finale della applicazione completa: cosa c'è e cosa manca
+
+● Rispetto al rilascio 1.0 di TrovaLavoro
+
+  Cosa c'è già:
+  - T0 chiusa: progetto ratificato per intero, nessuna decisione aperta (il cap. 15 è svuotato; anche il logo, deciso ieri, è a posto).
+  - T1 fatta (sul ramo t1-scheletro, in attesa del merge di Mirco): lo scheletro parte, e soprattutto il vincolo più rigido è già collaudato — publish single-file autonomo da 116 MB che si avvia in ~0,3 s su PC senza runtime. Identità visiva e infrastruttura di base ci sono: StileApp, pannello marchio Aviolab, versione a fonte unica, publish.bat.
+  - Gli asset durevoli del prototipo: i 15 prompt con schemi, calcolaMatch, estraiJson e la logica del dialogo sono validati in HTML+JS/ e pronti a migrare — il lavoro "intelligente" è già fatto e collaudato lì.
+  - Ambiente: SDK .NET 10 operativo su questa postazione (anche a sistema).
+
+  Cosa manca (tappe T2–T9 del cap. 14):
+  - T2 — il motore: ClientClaude (chiamate, streaming, retry), libreria prompt con pool, EstrattoreJson e CalcoloMatch, migrazione dei 15 prompt, con collaudo di non-regressione contro il prototipo. È la prossima tappa e la più delicata: "prima uguale, poi meglio".
+  - T3 — il profilo: pannelli P2/P5, import da CV, dialogo guidato completo.
+  - T4 — la pipeline di candidatura: analisi annuncio, confronto con stelle, generazione CV/lettera, export DOCX/PDF. Da qui in poi l'app fa davvero il suo mestiere.
+  - T5/T5b — ricerca e registro: WebView2 con i tre portali, cattura annunci, stati, profilo da LinkedIn.
+  - T6 — email: composizione e file .eml (niente invio diretto, per scelta).
+  - T7/T8 (parallelizzabili dopo T4): inglese + rifinitura anti-slop; server MCP.
+  - T9 — rilascio: backup, impostazioni complete, collaudo generale di Mirco su candidature reali, tag v1.0.
+
+  Piccole cose trasversali ancora aperte: icona dell'exe (da produrre dallo scudo), SDK 10 su aviolab03, e a ogni tappa il suo Step di diario. In sintesi: fondamenta e distribuzione sono dimostrate; tutto il valore funzionale (T2–T6) è davanti a noi, con T2 come cancello tecnico vero.
+
+❯ spiegami perchè non fai tutto tu
+
+● Domanda giusta — e la risposta ha tre pezzi distinti.
+
+  1. Potrei fare molto più di quanto faccio, e T1 lo dimostra. Tecnicamente, implementare T2–T8 in autonomia (con agenti supervisionati, come stanotte) è alla mia portata: è codice, migrazione di prompt già validati, collaudi automatizzabili. Se il mandato fosse «procedi con T2», procederei. La barriera non è la capacità.
+
+  2. Ma il progetto è costruito apposta perché non faccia tutto io. AI-CV-COACH è il progetto-portfolio e il percorso di apprendimento di Mirco: il diario è la sua voce in prima persona, il repo è suo, la regola 11 gli riserva il merge di ogni tappa, e T9 prevede il suo collaudo su candidature reali. Se consegnassi l'app finita, il manufatto esisterebbe ma il valore del progetto — quello che Mirco può raccontare e
+  dimostrare — evaporerebbe. Le tappe con cancelli umani non sono lentezza: sono il prodotto.
+
+  3. E alcune cose non posso proprio farle, o non dovrei deciderle io. La serata di ieri ne è l'esempio perfetto: avrei consegnato il segnaposto «TL» da specifica, e ci sono voluti tre tuoi interventi per arrivare allo scudo Aviolab in forma binaria con la scritta giusta — decisioni di prodotto che stanno a voi. Della stessa famiglia: il collaudo su PC pulito (serve una macchina vera), le candidature reali con i dati
+  personali di Mirco, il login manuale ai portali in T5, la spedizione di email vere in T6, il giudizio finale sulla qualità dei testi. E un limite concreto immediato: su questa postazione manca la chiave API (HTML+JS/.env assente), quindi il collaudo di non-regressione di T2 — chiamate reali ai modelli — qui non lo potrei nemmeno eseguire.
+
+  In sintesi: faccio tutto ciò che è delegabile senza svuotare il progetto, e mi fermo dove serve una decisione vostra, un dato vostro, o una macchina che non ho. Se voleste spostare il confine — per esempio «T2 in autonomia stanotte, collaudo quando c'è la chiave» — si può fare: basta dirlo.
+
+※ recap: T1 della fase VB.NET è completata: scheletro TrovaLavoro collaudato e pushato sul ramo t1-scheletro, con logo Aviolab e documenti allineati. Prossimo passo: merge su main da parte di Mirco, poi si parte con T2 (motore e pool prompt).02/08/2026 13:00
+utente rpsno - esito ok
