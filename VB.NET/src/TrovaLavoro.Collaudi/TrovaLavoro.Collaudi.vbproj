@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Banco di collaudo di TrovaLavoro. Non fa parte del rilascio: non viene mai
+       pubblicato nell'eseguibile (cap. 13), serve solo a far girare le batterie di
+       non-regressione contro il prototipo HTML+JS (cap. 14). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>TrovaLavoro.Collaudi</RootNamespace>
+    <AssemblyName>TrovaLavoro.Collaudi</AssemblyName>
+    <OptionStrict>On</OptionStrict>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionInfer>On</OptionInfer>
+    <!-- I casi di collaudo contengono testo italiano accentato preso dal prototipo:
+         senza questo verrebbe letto con la codepage di sistema. -->
+    <CodePage>65001</CodePage>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MSTest" Version="4.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Import Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TrovaLavoro\TrovaLavoro.vbproj" />
+  </ItemGroup>
+
+</Project>

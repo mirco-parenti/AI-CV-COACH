@@ -26,6 +26,7 @@ if errorlevel 1 (
   -p:PublishSingleFile=true ^
   -p:SelfContained=true ^
   -p:IncludeNativeLibrariesForSelfExtract=true ^
+  -p:DebugType=none ^
   -o pubblicazione
 
 if errorlevel 1 (
