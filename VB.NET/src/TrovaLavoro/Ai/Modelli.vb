@@ -92,12 +92,13 @@ Namespace Ai
             }
         End Function
 
-        ''' <summary>Il percorso del file dei modelli nella cartella dati (cap. 11.1).</summary>
+        ''' <summary>
+        ''' Il percorso del file dei modelli nella cartella dati predefinita. Dov'è la
+        ''' cartella lo sa <see cref="Dati.CartellaDati"/>, non questa classe (cap. 11.1).
+        ''' </summary>
         Public Shared ReadOnly Property PercorsoPredefinito As String
             Get
-                Return Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "TrovaLavoro", "modelli.json")
+                Return Dati.CartellaDati.Predefinita().FileModelli
             End Get
         End Property
 

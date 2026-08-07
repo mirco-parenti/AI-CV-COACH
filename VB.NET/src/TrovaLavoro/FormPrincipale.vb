@@ -32,7 +32,7 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
-    ''' Riempie la riga «Ver. 0.2.001 · Pool 1.00 (integrato)» del pannello logo
+    ''' Riempie la riga «Ver. 0.3.001 · Pool 1.00 (integrato)» del pannello logo
     ''' (cap. 03.5). Il pool si apre proprio qui perché la sua etichetta dichiara da
     ''' sé sorgente e stato — esterno, integrato, o con l'asterisco dei file
     ''' modificati — e quel che ha da dire in più (un ripiego, dei file fuori

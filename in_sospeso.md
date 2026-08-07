@@ -41,6 +41,23 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   l'interruttore del ragionamento esteso, che lì va acceso, e un conteggio dei token
   diverso (~+30% a parità di testo). *(cap. 02.5; cap. 15, voce 6.)*
 
+## Da T3 — il profilo (2026-08-07)
+
+- **`taratura.json` e `modelli.json` non li legge ancora nessuno all'avvio.** I due file
+  della cartella dati esistono nel codice — `Taratura.Carica` e `Modelli.Carica` sanno
+  leggerli e ripiegare sui predefiniti — ma l'applicazione all'avvio apre solo la
+  libreria prompt: `CalcoloMatch` e `ClientClaude` usano i valori interni, e i `Carica`
+  oggi li chiamano solo i collaudi. Non è una regressione (è così da T2) e non è un
+  errore: manca il punto in cui il motore si monta all'avvio, che nascerà con i pannelli
+  (T3c) o con la pipeline (T4). Finché non c'è, ritoccare un numero nella cartella dati
+  non ha effetto sull'app. *(cap. 11.6; cap. 02.5.)*
+- **La chiave API cifrata (DPAPI) è assegnata a T6.** Oggi arriva dalla variabile
+  d'ambiente `ANTHROPIC_API_KEY`, come a T2, e a T3 resta così: il passaggio a
+  `segreti.bin` cifrato vuole un posto dove l'utente la digita — primo avvio o
+  Impostazioni — che a T3 non esiste ancora. Il cap. 14 non lo assegnava a nessuna
+  tappa; deciso il 2026-08-07 di metterlo in **T6**, il cui collaudo già verifica che la
+  chiave non compaia in chiaro su disco né nei log. *(cap. 02.5; cap. 11.3; cap. 14, T6.)*
+
 ## Chiuse
 
 *(Ancora nessuna: questo file nasce il 2026-08-07, alla chiusura di T2.)*

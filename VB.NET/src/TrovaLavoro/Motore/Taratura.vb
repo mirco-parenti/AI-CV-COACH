@@ -84,13 +84,12 @@ Namespace Motore
         End Function
 
         ''' <summary>
-        ''' Il percorso del file di taratura nella cartella dati (cap. 11.1).
+        ''' Il percorso del file di taratura nella cartella dati predefinita. Dov'è la
+        ''' cartella lo sa <see cref="Dati.CartellaDati"/>, non questa classe (cap. 11.1).
         ''' </summary>
         Public Shared ReadOnly Property PercorsoPredefinito As String
             Get
-                Return Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "TrovaLavoro", "taratura.json")
+                Return Dati.CartellaDati.Predefinita().FileTaratura
             End Get
         End Property
 
