@@ -105,6 +105,25 @@ Namespace Dati
         End Sub
 
         <TestMethod>
+        Public Sub LArchivioSaQuandoEStatoSalvato()
+            ' «Aggiornato quando?» è la domanda che il cruscotto e la scheda del profilo
+            ' fanno all'archivio: il pannello non deve andare a guardare il disco da sé.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Assert.IsFalse(archivio.UltimoSalvataggio.HasValue, "senza profilo non c'è data")
+
+                    Dim prima As Date = Date.Now.AddSeconds(-1)
+                    archivio.Salva(ProfiloDiProva())
+                    Dim dopo As Date = Date.Now.AddSeconds(1)
+
+                    Assert.IsTrue(archivio.UltimoSalvataggio.HasValue, "dopo il salvataggio sì")
+                    Assert.IsTrue(archivio.UltimoSalvataggio.Value >= prima AndAlso
+                                  archivio.UltimoSalvataggio.Value <= dopo,
+                                  $"ed è l'istante del salvataggio, ottenuto «{archivio.UltimoSalvataggio}»")
+                End Sub)
+        End Sub
+
+        <TestMethod>
         Public Sub IlSalvataggioNonLasciaFileATerra()
             ' La scrittura passa da un temporaneo: quando ha finito non ne deve restare
             ' traccia, se no la cartella dell'utente si riempie di scarti.

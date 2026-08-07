@@ -1,4 +1,27 @@
 Imports System.Drawing
+Imports System.Windows.Forms
+
+''' <summary>
+''' Quanto pesa la conseguenza di un bottone (cap. 03.3). La saturazione del colore
+''' cresce con il peso: chi guarda deve capire cosa succede <i>prima</i> di leggere
+''' l'etichetta. Nel dubbio fra due livelli si sceglie il più alto.
+''' </summary>
+Public Enum LivelloBottone
+    ''' <summary>Navigazione, annulla, chiudi.</summary>
+    Neutro = 0
+    ''' <summary>Conferme senza rischio: «Salva profilo», «Cattura annuncio».</summary>
+    SicuroPositivo = 1
+    ''' <summary>Aprire, sfogliare, vedere anteprime.</summary>
+    Esplorativo = 2
+    ''' <summary>Il bottone «avanti» del flusso: «Genera CV», «Confronta».</summary>
+    AzionePrincipale = 3
+    ''' <summary>Modifica di dati esistenti: «Sovrascrivi profilo», «Rigenera».</summary>
+    Attenzione = 4
+    ''' <summary>Eliminare, scartare.</summary>
+    Distruttivo = 5
+    ''' <summary>Inviare un'email, cancellazioni definitive: sempre dopo una conferma.</summary>
+    Critico = 6
+End Enum
 
 ''' <summary>
 ''' Token di design dell'applicazione (cap. 03.2): colori, font, spaziature.
@@ -74,6 +97,13 @@ Public Module StileApp
     ''' <summary>Testo di lavoro e bottoni neutri.</summary>
     Public ReadOnly FontTesto As New Font(NomeFont, 9.0F)
 
+    ''' <summary>
+    ''' Il grassetto dei bottoni che pesano (livelli 1, 4, 5 e 6 della tabella 03.3).
+    ''' Non è un ruolo nuovo: è il «bold» che quella tabella chiede, nel corpo del
+    ''' testo di lavoro.
+    ''' </summary>
+    Public ReadOnly FontBottoneForte As New Font(NomeFont, 9.0F, FontStyle.Bold)
+
     ''' <summary>Didascalie e suggerimenti (con TestoSecondario).</summary>
     Public ReadOnly FontDidascalia As New Font(NomeFont, 8.0F)
 
@@ -99,5 +129,108 @@ Public Module StileApp
 
     ''' <summary>Bottone della barra superiore di navigazione.</summary>
     Public ReadOnly BottoneBarraSuperiore As New Size(110, 34)
+
+    ' --- I livelli di conseguenza (cap. 03.3) ---
+
+    ''' <summary>
+    ''' Veste un bottone secondo il peso della sua conseguenza. Esiste per la regola
+    ''' più esigente del capitolo 03: <i>due bottoni con la stessa funzione, in due
+    ''' pannelli diversi, sono identici</i>. Ripetuto a mano in ogni designer, quel
+    ''' «identici» sarebbe durato fino al terzo pannello.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><c>FlatStyle.Flat</c> e <c>UseVisualStyleBackColor = False</c> valgono per
+    ''' tutti i livelli: senza il secondo, Windows ridipinge il fondo di suo e il colore
+    ''' scelto qui non si vede.</para>
+    ''' <para>Proprio per questo il bottone si ridipinge anche quando viene <b>spento</b>:
+    ''' un bottone piatto con un colore suo resta acceso all'occhio anche da disabilitato,
+    ''' e sembrerebbe premibile quando non lo è. Il livello resta scritto nel
+    ''' <c>Tag</c>, così quando torna abilitato ritrova il colore che gli spetta.</para>
+    ''' </remarks>
+    Public Sub VestiBottone(bottone As Button, livello As LivelloBottone)
+
+        If bottone Is Nothing Then Throw New ArgumentNullException(NameOf(bottone))
+
+        bottone.Tag = livello
+
+        ' Rimuovere prima di aggiungere rende la vestizione ripetibile senza accumulare
+        ' gestori sullo stesso bottone.
+        RemoveHandler bottone.EnabledChanged, AddressOf BottoneAccesoOSpento
+        AddHandler bottone.EnabledChanged, AddressOf BottoneAccesoOSpento
+
+        Dipingi(bottone, livello)
+
+    End Sub
+
+    Private Sub BottoneAccesoOSpento(mittente As Object, e As EventArgs)
+
+        Dim bottone As Button = TryCast(mittente, Button)
+        If bottone Is Nothing OrElse Not TypeOf bottone.Tag Is LivelloBottone Then Return
+
+        Dipingi(bottone, DirectCast(bottone.Tag, LivelloBottone))
+
+    End Sub
+
+    ''' <summary>Dà al bottone l'aspetto del suo livello, o quello spento se è disabilitato.</summary>
+    Private Sub Dipingi(bottone As Button, livello As LivelloBottone)
+
+        bottone.FlatStyle = FlatStyle.Flat
+        bottone.UseVisualStyleBackColor = False
+        bottone.Font = FontTesto
+        bottone.ForeColor = TestoPrimario
+        bottone.FlatAppearance.BorderSize = 1
+        bottone.FlatAppearance.BorderColor = BordoLeggero
+
+        ' Il font del livello si applica comunque: spento o acceso, un bottone che pesa
+        ' resta scritto in grassetto e non cambia ingombro quando si riaccende.
+        Select Case livello
+            Case LivelloBottone.SicuroPositivo, LivelloBottone.Attenzione,
+                 LivelloBottone.Distruttivo, LivelloBottone.Critico
+                bottone.Font = FontBottoneForte
+            Case LivelloBottone.AzionePrincipale
+                bottone.Font = FontAzionePrincipale
+        End Select
+
+        If Not bottone.Enabled Then
+            bottone.BackColor = SfondoBase
+            bottone.ForeColor = TestoSecondario
+            Return
+        End If
+
+        Select Case livello
+
+            Case LivelloBottone.Neutro
+                bottone.BackColor = SfondoContenuto
+
+            Case LivelloBottone.SicuroPositivo
+                bottone.BackColor = Successo
+                bottone.ForeColor = SfondoContenuto
+                bottone.FlatAppearance.BorderColor = Successo
+
+            Case LivelloBottone.Esplorativo
+                bottone.BackColor = AccentoTenue
+                bottone.FlatAppearance.BorderColor = BordoForte
+
+            Case LivelloBottone.AzionePrincipale
+                bottone.BackColor = FondoAzione
+                bottone.FlatAppearance.BorderColor = Accento
+
+            Case LivelloBottone.Attenzione
+                bottone.BackColor = Avviso
+                bottone.FlatAppearance.BorderColor = Avviso
+
+            Case LivelloBottone.Distruttivo
+                bottone.BackColor = Pericolo
+                bottone.ForeColor = SfondoContenuto
+                bottone.FlatAppearance.BorderColor = Pericolo
+
+            Case Else ' Critico
+                bottone.BackColor = RossoTitoli
+                bottone.ForeColor = SfondoContenuto
+                bottone.FlatAppearance.BorderColor = RossoTitoli
+
+        End Select
+
+    End Sub
 
 End Module

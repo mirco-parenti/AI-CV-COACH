@@ -22,6 +22,8 @@ Partial Class FormPrincipale
     'Non modificarla mediante l'editor del codice.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
+        Me.ttSuggerimenti = New System.Windows.Forms.ToolTip(Me.components)
         Me.tlpStruttura = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlBarraSuperiore = New System.Windows.Forms.Panel()
         Me.btnHome = New System.Windows.Forms.Button()
@@ -33,6 +35,7 @@ Partial Class FormPrincipale
         Me.pnlFasciaInferiore = New System.Windows.Forms.Panel()
         Me.lblStato = New System.Windows.Forms.Label()
         Me.pnlBordoFasciaInferiore = New System.Windows.Forms.Panel()
+        Me.pnlProfilo = New PannelloProfilo()
         Me.pnlLogo = New System.Windows.Forms.Panel()
         Me.picLogo = New System.Windows.Forms.PictureBox()
         Me.lblMarchio = New System.Windows.Forms.Label()
@@ -40,6 +43,7 @@ Partial Class FormPrincipale
         Me.lblCopyright = New System.Windows.Forms.Label()
         Me.tlpStruttura.SuspendLayout()
         Me.pnlBarraSuperiore.SuspendLayout()
+        Me.pnlAreaCentrale.SuspendLayout()
         Me.pnlFasciaInferiore.SuspendLayout()
         Me.pnlLogo.SuspendLayout()
         CType(Me.picLogo, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -146,12 +150,22 @@ Partial Class FormPrincipale
         'pnlAreaCentrale
         '
         Me.pnlAreaCentrale.BackColor = StileApp.SfondoBase
+        Me.pnlAreaCentrale.Controls.Add(Me.pnlProfilo)
         Me.pnlAreaCentrale.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlAreaCentrale.Location = New System.Drawing.Point(0, 48)
         Me.pnlAreaCentrale.Margin = New System.Windows.Forms.Padding(0)
         Me.pnlAreaCentrale.Name = "pnlAreaCentrale"
         Me.pnlAreaCentrale.Size = New System.Drawing.Size(1134, 485)
         Me.pnlAreaCentrale.TabIndex = 1
+        '
+        'pnlProfilo
+        '
+        Me.pnlProfilo.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlProfilo.Location = New System.Drawing.Point(0, 0)
+        Me.pnlProfilo.Name = "pnlProfilo"
+        Me.pnlProfilo.Size = New System.Drawing.Size(1134, 485)
+        Me.pnlProfilo.TabIndex = 0
+        Me.pnlProfilo.Visible = False
         '
         'pnlFasciaInferiore
         '
@@ -258,6 +272,7 @@ Partial Class FormPrincipale
         Me.WindowState = System.Windows.Forms.FormWindowState.Maximized
         Me.tlpStruttura.ResumeLayout(False)
         Me.pnlBarraSuperiore.ResumeLayout(False)
+        Me.pnlAreaCentrale.ResumeLayout(False)
         Me.pnlFasciaInferiore.ResumeLayout(False)
         Me.pnlLogo.ResumeLayout(False)
         CType(Me.picLogo, System.ComponentModel.ISupportInitialize).EndInit()
@@ -272,6 +287,8 @@ Partial Class FormPrincipale
     Friend WithEvents btnImpostazioni As System.Windows.Forms.Button
     Friend WithEvents pnlBordoBarraSuperiore As System.Windows.Forms.Panel
     Friend WithEvents pnlAreaCentrale As System.Windows.Forms.Panel
+    Friend WithEvents pnlProfilo As PannelloProfilo
+    Friend WithEvents ttSuggerimenti As System.Windows.Forms.ToolTip
     Friend WithEvents pnlFasciaInferiore As System.Windows.Forms.Panel
     Friend WithEvents lblStato As System.Windows.Forms.Label
     Friend WithEvents pnlBordoFasciaInferiore As System.Windows.Forms.Panel

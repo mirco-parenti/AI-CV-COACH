@@ -39,12 +39,20 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
+  <!-- L'interfaccia sta tutta in Ui\ (cap. 02.3). In VB le cartelle non toccano i
+       namespace: i form e i pannelli restano in TrovaLavoro, come i loro designer. -->
   <ItemGroup>
-    <Compile Update="FormPrincipale.vb">
+    <Compile Update="Ui\FormPrincipale.vb">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="FormPrincipale.Designer.vb">
+    <Compile Update="Ui\FormPrincipale.Designer.vb">
       <DependentUpon>FormPrincipale.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Ui\PannelloProfilo.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Ui\PannelloProfilo.Designer.vb">
+      <DependentUpon>PannelloProfilo.vb</DependentUpon>
     </Compile>
   </ItemGroup>
 

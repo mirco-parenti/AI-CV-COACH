@@ -52,6 +52,19 @@ Namespace Dati
         End Property
 
         ''' <summary>
+        ''' Quando il profilo corrente è stato scritto l'ultima volta; <c>Nothing</c> se
+        ''' un profilo non c'è ancora. È la domanda «aggiornato quando?» che il cruscotto
+        ''' e la scheda del profilo fanno all'archivio (cap. 03.6): il pannello non va a
+        ''' guardare il disco per conto suo.
+        ''' </summary>
+        Public ReadOnly Property UltimoSalvataggio As Date?
+            Get
+                If Not Esiste Then Return Nothing
+                Return File.GetLastWriteTime(_cartella.FileProfilo)
+            End Get
+        End Property
+
+        ''' <summary>
         ''' Il profilo corrente. Se il file non c'è solleva <see cref="FileNotFoundException"/>
         ''' e se è illeggibile una <see cref="Text.Json.JsonException"/>: chi chiama deve
         ''' distinguere «non l'ho ancora fatto» da «c'è ma è rotto», che sono due
