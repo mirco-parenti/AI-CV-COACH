@@ -6,3 +6,8 @@ pubblicazione/
 # File locali di Visual Studio
 .vs/
 *.user
+
+# Gli artefatti dell'esecutore dei collaudi. Non è solo pulizia: i collaudi della
+# categoria «Reale» girano su un CV vero, e ciò che l'esecutore scrive qui non deve
+# poter finire nel repo, che è pubblico.
+TestResults/
