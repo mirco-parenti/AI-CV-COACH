@@ -292,11 +292,20 @@ Namespace Ai
                           OrderBy(Function(percorso) percorso, StringComparer.Ordinal)
 
             For Each relativo As String In file
+
                 Dim contenuto As String = IO.File.ReadAllText(
                     Path.Combine(cartella, relativo.Replace("/"c, Path.DirectorySeparatorChar)), Encoding.UTF8)
+
+                ' Nel pool vive anche il CHANGELOG, che è un documento e non un prompt.
+                ' Sigillarlo renderebbe il rito del bump contraddittorio: si sigilla, si
+                ' annota il changelog, e il pool risulta subito modificato. Si riconosce
+                ' un prompt dalla riga che separa i metadati dal testo (cap. 4.4).
+                If Not contenuto.Replace(vbCrLf, vbLf).Contains(vbLf & "---" & vbLf) Then Continue For
+
                 elenco.Add(New JsonObject From {
                     {"percorso", relativo},
                     {"sha256", Impronta(contenuto)}})
+
             Next
 
             Dim manifest As New JsonObject From {

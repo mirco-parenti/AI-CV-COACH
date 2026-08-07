@@ -33,7 +33,9 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   eventuale **preambolo in prosa** prima del JSON. Stesso ripiego possibile (primo `{` …
   ultimo `}`). Impalcatura usa-e-getta, bassa priorità (i frammenti del front-end partono
   in pratica già con `{`). *(2026-08-04 — il buco lato server è chiuso, Step 1.35; resta il
-  gemello front-end.)*
+  gemello front-end.)* **Non si farà più**: dal 2026-08-06 il prototipo è congelato, e nella
+  fase desktop di estrattori ce n'è **uno solo** — `EstrattoreJson`, portato a T2 con i sei
+  casi dello Step 1.35 (cap. 15.5 la dà per assorbita). Resta qui come storia.
 - **Import da CV (2.1.2) — raffinamenti**: l'import è realizzato (vedi «Realizzate»); restano
   aperti: (a) **PDF scannerizzati / immagine** — oggi danno poco o niente testo, si offre
   l'incolla-testo come ripiego; OCR o lettura **multimodale** del PDF sono rimandati; (b)
@@ -137,6 +139,23 @@ dichiarate «rimandate» (cap. 15.3-15.4): qui il puntatore, perché il backlog 
   se serve. *(2026-08-05 — cap. 15.4.)*
 - **Terze lingue oltre IT/EN** — il pool le ammette per costruzione (varianti `.fr.md`…);
   fuori perimetro. *(2026-08-05 — cap. 10.5/15.3.)*
+
+## Collaudi e non-regressione (Fase VB.NET)
+
+Idee emerse **costruendo la batteria di T2** (cap. 14), quando il prototipo ha fatto da
+giudice per la prima volta.
+- **Parità del prompt estesa a tutto il pool** — oggi il banco verifica carattere per
+  carattere un prompt solo, quello del **confronto**: è il più esigente (due artefatti
+  iniettati, accenti, JSON annidato) e quello su cui una differenza si vedrebbe. Degli
+  altri quattordici il banco controlla che si carichino e che i metadati siano quelli
+  giusti, **non** che il testo sia ancora parola per parola quello del prototipo.
+  Estendere il generatore degli attesi a tutti sarebbe meccanico — i turni del profilo
+  hanno un segnaposto solo — e chiuderebbe l'ultimo pezzo affidato alla rilettura.
+  *(2026-08-07 — emersa chiudendo la non-regressione di T2.)*
+- **Un confronto reale fra lingue diverse** — profilo in italiano, annuncio in inglese: il
+  cap. 10.2 lo dà come caso di collaudo del multilingua, ma i due casi reali di T2 sono
+  entrambi in italiano. Da aggiungere quando arriverà T7, dove serve davvero.
+  *(2026-08-07 — emersa a T2, rimandata alla tappa che la riguarda.)*
 
 ## Realizzate
 

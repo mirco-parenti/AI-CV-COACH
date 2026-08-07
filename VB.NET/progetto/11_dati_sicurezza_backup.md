@@ -13,6 +13,7 @@ TrovaLavoro\
 ├── config.json            impostazioni (modelli AI, cartelle)
 ├── ricerche.json          preferenze di ricerca, ricerche salvate e tabella dei portali
 ├── taratura.json          soglia, pesi e limiti del match (v. 11.6)
+├── modelli.json           mappa livello → modello AI (v. 11.6, cap. 02.5)
 ├── segreti.bin            chiave API Anthropic, cifrata (v. 11.3)
 ├── profilo\
 │   ├── profilo.json       il profilo corrente (fonte di verità unica)
@@ -112,7 +113,7 @@ un'opportunità» (la sua cartella, con conferma di livello 5), «Elimina tutti 
 L'app non lascia nulla in giro fuori dalla cartella dati, quindi la disinstallazione
 è: cancellare l'exe e, se si vuole, la cartella dati.
 
-## 11.6 Il file di taratura del match
+## 11.6 I due file dei numeri: taratura e modelli
 
 `taratura.json` contiene i numeri del calcolo delle stelle: soglia 1,5, pesi 5 e 1,
 correzione della mitigazione limitata fra −20 e +10, tetto a 20 punti, e la regola del
@@ -128,3 +129,11 @@ versione da ricompilare e reinstallare su due macchine.
 
 Se il file manca o è illeggibile, il programma usa i valori predefiniti che porta
 dentro di sé e lo annota nel log: una taratura corrotta non deve impedire l'avvio.
+
+**`modelli.json` è il suo gemello** (cap. 02.5): tiene la mappa livello → modello, e
+per ciascun livello anche l'interruttore del ragionamento esteso, che ha **tre** stati
+— non dichiarato, spento, acceso. Vale la stessa regola dei predefiniti: un file
+assente, parziale o illeggibile non impedisce l'avvio, si ricade sui valori interni e
+lo si annota. Anche qui il motivo è pratico: cambiare modello — o fare il secondo
+esperimento su Sonnet 5 — deve costare una riga, non una nuova build da reinstallare
+su due macchine. *(Realizzato a T2 in `Ai/Modelli.vb`.)*

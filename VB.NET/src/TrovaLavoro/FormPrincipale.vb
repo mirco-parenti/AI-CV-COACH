@@ -1,5 +1,6 @@
 Imports System.Drawing
 Imports System.Windows.Forms
+Imports TrovaLavoro.Ai
 
 ''' <summary>
 ''' Finestra principale dell'applicazione (cap. 03.4). A T1 c'è il solo scheletro:
@@ -25,10 +26,29 @@ Public Class FormPrincipale
     Private compattaAttiva As Boolean?
 
     Private Sub FormPrincipale_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        ' La versione mostrata viene solo da Versione.vb; il pool di prompt non esiste ancora.
-        lblVersione.Text = $"Ver. {Versione.Numero} · Pool —"
+        MostraLeDueVersioni()
         pnlLogo.BringToFront()
         AggiornaPannelloLogo()
+    End Sub
+
+    ''' <summary>
+    ''' Riempie la riga «Ver. 0.2.001 · Pool 1.00 (integrato)» del pannello logo
+    ''' (cap. 03.5). Il pool si apre proprio qui perché la sua etichetta dichiara da
+    ''' sé sorgente e stato — esterno, integrato, o con l'asterisco dei file
+    ''' modificati — e quel che ha da dire in più (un ripiego, dei file fuori
+    ''' impronta) finisce nella barra di stato, in attesa delle Impostazioni.
+    ''' </summary>
+    Private Sub MostraLeDueVersioni()
+        Try
+            Dim libreria As LibreriaPrompt = LibreriaPrompt.Apri()
+            lblVersione.Text = $"Ver. {Versione.Numero} · {libreria.Etichetta}"
+            If libreria.Avviso IsNot Nothing Then lblStato.Text = libreria.Avviso
+        Catch ex As Exception
+            ' L'anomalia totale del cap. 03.5: la finestra deve comparire lo stesso e
+            ' dire cosa non va, invece di morire prima di mostrarsi.
+            lblVersione.Text = $"Ver. {Versione.Numero} · Pool —"
+            lblStato.Text = $"Libreria dei prompt non disponibile: {ex.Message}"
+        End Try
     End Sub
 
     Private Sub FormPrincipale_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize

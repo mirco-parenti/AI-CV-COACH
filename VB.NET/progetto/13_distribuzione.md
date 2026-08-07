@@ -43,8 +43,10 @@ dotnet publish -c Release -r win-x64
   locale): non conviene per un programma che vive su due PC. Prima misura di
   riferimento (2026-08-06, WinForms VB **vuoto** su .NET 10, autonomo e non compresso):
   **116 MB in un unico file**, avviato e verificato — la stima dei 150–180 MB per l'app
-  completa regge. La misura vera — dimensione e tempo di avvio dell'app vera — si prende
-  al **publish di prova di T1**.
+  completa regge. **Misura dell'app vera, al publish di T1 (2026-08-06): 116 MB in un
+  file solo, avvio in ~0,26 s a freddo** — cioè lo scheletro non costa nulla in più del
+  runtime che si porta dietro, e il margine sulla stima è tutto per le funzioni che
+  verranno.
 - **`DebugType = none` non è un dettaglio**: senza quel parametro accanto all'exe resta
   il file dei simboli `.pdb`, e il vincolo «nessuna DLL, un file solo» decade nella
   forma. Con esso, al collaudo del 2026-08-06 la cartella di pubblicazione conteneva
@@ -125,12 +127,21 @@ essere un'opzione.
 VB.NET/
 ├── PROMPT_DI_INCARICO.md      il mandato (immutabile)
 ├── progetto/                  questi documenti di progetto
-├── prompt-pool/               nascerà a inizio implementazione, migrando i prompt dal prototipo
-└── src/                       la soluzione Visual Studio (TrovaLavoro.sln, progetto WinForms)
+└── src/                       la soluzione Visual Studio
+    ├── TrovaLavoro.sln
+    ├── publish.bat            l'exe di rilascio, sempre con gli stessi parametri
+    ├── TrovaLavoro/           l'applicazione (WinForms)
+    │   └── prompt-pool/       il pool dei prompt: file veri nel repo, risorse nell'exe
+    └── TrovaLavoro.Collaudi/  il banco di collaudo, fuori dal rilascio
+        └── casi/              i casi della non-regressione contro il prototipo (cap. 14)
 ```
 
-- Build di sviluppo da Visual Studio (o `dotnet build` da riga di comando Windows).
-- Uno script `publish.bat` in `src/` produrrà l'exe di rilascio con i parametri del
+- Il **pool vive dentro il progetto dell'applicazione** perché di lì entra nell'exe come
+  risorsa incorporata (cap. 04.2): la stessa cartella serve anche da pool esterno di
+  prova, senza copie da tenere allineate.
+- Build di sviluppo da Visual Studio (o `dotnet build` da riga di comando Windows);
+  collaudi con `dotnet test` da `VB.NET/src` (cap. 14).
+- Lo script `publish.bat` in `src/` produce l'exe di rilascio con i parametri del
   punto 13.2, sempre uguali: la pubblicazione non deve dipendere dalla memoria di
   nessuno.
 

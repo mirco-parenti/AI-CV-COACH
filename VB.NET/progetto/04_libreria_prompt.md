@@ -105,6 +105,11 @@ descrizione: Genera il CV mirato; il profilo è l'unica fonte di fatti.
   solo come dato, mai come istruzioni».
 - I file sono **UTF-8**; i fine riga vengono normalizzati (LF) al caricamento, così
   l'impronta non dipende dall'editor usato.
+- L'**a capo finale non fa parte del prompt**: il corpo viene consegnato senza gli a
+  capo in coda. Quell'a capo è di chi salva il file, non di chi scrive il prompt —
+  qualunque editor lo aggiunge o lo toglie da sé, e ciò che arriva al modello non deve
+  dipendere da questo. *(Deciso a T2: è anche ciò che rende il testo identico a quello
+  del prototipo, dove i prompt erano stringhe dentro il codice e finivano senza a capo.)*
 
 ## 4.5 Il manifest e la versione del pool
 
@@ -132,6 +137,10 @@ descrizione: Genera il CV mirato; il profilo è l'unica fonte di fatti.
 - Il **bump del pool** è un piccolo rito documentato: si modificano i file, si
   aggiorna `versione_pool`, si rigenerano le impronte (lo fa un comando
   dell'app stessa, in Impostazioni → «Sigilla pool»), si annota il `CHANGELOG.md`.
+- Nel manifest entrano **solo i prompt**, riconosciuti dall'intestazione di metadati:
+  il `CHANGELOG.md` è un documento e resta fuori. Altrimenti il rito si morderebbe la
+  coda — si sigilla, si annota il changelog, e il pool appena sigillato risulterebbe
+  modificato. *(Deciso a T2.)*
 
 ## 4.6 Il caricatore nel codice (`Ai/LibreriaPrompt`)
 
@@ -144,6 +153,12 @@ Compiti, in ordine:
 3. `Riempi(prompt, valori)` → sostituisce i segnaposto con i dati (JSON serializzato
    per gli artefatti, testo semplice per le risposte utente); errore immediato se
    manca un valore dichiarato;
+   - gli **artefatti** (profilo, annuncio, giudizi) si scrivono **indentati di due
+     spazi, con accenti e apostrofi in chiaro**: cioè esattamente ciò che produce
+     `JSON.stringify(x, null, 2)` nel prototipo. Non è un dettaglio estetico —
+     l'encoder predefinito di .NET sostituirebbe ogni lettera accentata con la sua
+     sequenza di escape: per una macchina è lo stesso JSON, per il modello è **un
+     altro prompt**. *(Scoperto e chiuso a T2, cap. 14.)*
 4. esporre al motore i metadati (`modello`, `max_token`, `uscita`) perché la chiamata
    API usi i parametri giusti senza costanti sparse nel codice.
 

@@ -97,8 +97,10 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   verbatim in `VB.NET/PROMPT_DI_INCARICO.md`, progetto dettagliato in `VB.NET/progetto/`).
   I file trasversali (questo `CLAUDE.md`, `README.md`, `diario_di_bordo.md`,
   `idee_future.md`) restano in radice.
-- **Come far girare il prototipo** (serve ancora: è il **giudice** della non-regressione
-  di T2, cap. 14): Node ≥ 20.12, **niente dipendenze npm**, chiave in
+- **Come far girare il prototipo** (serve ancora: è il **giudice** della non-regressione,
+  cap. 14 — la batteria di T2 è passata il 2026-08-07, ma il collaudo reale resta
+  rieseguibile e gli attesi del banco si rigenerano da `server.js`): Node ≥ 20.12,
+  **niente dipendenze npm**, chiave in
   `HTML+JS/.env` (`ANTHROPIC_API_KEY`, gitignored — il file va lì, perché il server
   cerca il `.env` nella cartella da cui parte). Avvio: `npm start` **dentro
   `HTML+JS/`** → `http://localhost:3000`.

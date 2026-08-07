@@ -129,3 +129,7 @@ decisa.
 **Criterio di «pronto per implementare»**: il capitolo 15 è vuoto (o contiene solo
 rimandi a fasi successive dichiarate), e ogni capitolo ha superato una rilettura fatta
 insieme all'utente.
+
+*Il criterio è stato soddisfatto il 2026-08-05 e l'implementazione è in corso (cap. 14):
+da allora questi capitoli non si riscrivono per raccontare lo stato — restano il disegno,
+e si aggiornano quando una decisione cambia o matura sul campo.*

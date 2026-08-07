@@ -119,7 +119,9 @@ i tool MCP).
 - **Trasporto**: HTTPS dirette a `https://api.anthropic.com/v1/messages` con
   `HttpClient` di .NET — niente SDK, come il prototipo (header `x-api-key` +
   `anthropic-version`). Il corpo è lo stesso del prototipo: un solo messaggio `user`
-  con il prompt già riempito; per i PDF, il blocco `document` in base64.
+  con il prompt già riempito; per i PDF, il blocco `document` in base64. *«Lo stesso»
+  è stato preso alla lettera e verificato a T2: sugli stessi artefatti il prompt che
+  parte è identico carattere per carattere al suo (cap. 14).*
 - **Modelli**: due livelli come nel prototipo — `MODELLO_SEMPLICE` (estrazioni:
   **Claude Haiku 4.5**, `claude-haiku-4-5`) e `MODELLO_RAGIONAMENTO` (confronto,
   mitigazione, generazione, brainstorming). Il modello di prodotto per il ragionamento è
@@ -128,8 +130,10 @@ i tool MCP).
   tempi**. La batteria di non-regressione di T2 gira su **Sonnet 4.6**
   (`claude-sonnet-4-6`), lo stesso del prototipo: **a parità di modello** una differenza
   nei risultati è una differenza di *codice*, che è esattamente ciò che quel collaudo
-  deve misurare. Il salto a Sonnet 5 è il **secondo esperimento** e si misura da solo,
-  dopo; quando l'avrà superato diventerà lui il predefinito.
+  deve misurare — ed è **passata il 2026-08-07**, con i due confronti reali che danno le
+  stesse stelle da una parte e dall'altra. Il salto a Sonnet 5 è il **secondo
+  esperimento** e si misura da solo, dopo; quando l'avrà superato diventerà lui il
+  predefinito.
 - **I nomi dei modelli non sono cablati nel codice**: i prompt dichiarano un *livello*
   ("semplice" o "ragionamento", cap. 04) e la mappa livello → modello vive in
   `modelli.json` nella cartella dati, gemello di `taratura.json` — predefiniti dentro il

@@ -219,6 +219,33 @@ Namespace Ai
             End Try
         End Sub
 
+        <TestMethod>
+        Public Sub SigillaLasciaFuoriIDocumentiCheNonSonoPrompt()
+            ' Nel pool vive anche il CHANGELOG (cap. 4.3), che è un documento. Se
+            ' finisse nel manifest, il rito del bump si morderebbe la coda: si sigilla,
+            ' si annota il changelog, e il pool appena sigillato risulta modificato.
+            Dim cartella = CreaPoolFinto("1.99", corpoDiverso:=False)
+            Try
+                File.WriteAllText(Path.Combine(cartella, "CHANGELOG.md"),
+                    "# Storia del pool" & vbLf & vbLf & "## Pool 1.99 — 2026-08-07" & vbLf)
+
+                LibreriaPrompt.Sigilla(cartella, "2.00", "2026-08-07")
+
+                Dim manifest = File.ReadAllText(Path.Combine(cartella, "pool_manifest.json"))
+                Assert.DoesNotContain("CHANGELOG.md", manifest, "il changelog non è un prompt")
+                Assert.Contains("profilo/nome.md", manifest, "i prompt veri devono restare nel manifest")
+
+                ' La prova del nove: annotare il changelog non deve sporcare il pool.
+                File.AppendAllText(Path.Combine(cartella, "CHANGELOG.md"), vbLf & "Annotazione." & vbLf)
+
+                Dim dopo = LibreriaPrompt.Apri(cartella)
+                Assert.IsNull(dopo.Avviso, "annotare il changelog non è modificare un prompt")
+                Assert.AreEqual("2.00", dopo.Versione, "e la versione resta senza asterisco")
+            Finally
+                Directory.Delete(cartella, recursive:=True)
+            End Try
+        End Sub
+
         ''' <summary>Un pool esterno minimo, con un solo prompt e il suo manifest.</summary>
         Private Shared Function CreaPoolFinto(versione As String, corpoDiverso As Boolean) As String
 

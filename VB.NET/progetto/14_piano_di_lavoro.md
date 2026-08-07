@@ -14,7 +14,7 @@ un esito definitivo, le voci restanti sono dichiarate rimandate con la loro moti
 riportate nei capitoli interessati.
 **Fatto:** i documenti 01–15 sono confermati. **T1 può iniziare.**
 
-### T1 — Lo scheletro che parte
+### T1 — Lo scheletro che parte — ✔ **CHIUSO il 2026-08-06**
 Installazione dell'**SDK .NET 10** su entrambe le postazioni: **fatta su aviolab03 il
 2026-08-06** (SDK 10.0.302 + runtime 10.0.10, con Visual Studio 2026 Community 18.5 e il
 workload desktop già presenti); resta la postazione del tutor. Soluzione Visual Studio
@@ -29,8 +29,14 @@ VB appena creato — un solo file da 116 MB, avviato e chiuso — quindi a T1 re
 ripeterla sull'app vera.
 **Collaudo:** l'exe pubblicato parte su un PC pulito e mostra la finestra con il logo
 e «Ver. 0.1.001 · Pool —»; la scheda «Dettagli» del file riporta Aviolab AI.
+**Fatto:** build pulita, **publish single-file autonomo non compresso da 116 MB** (sotto
+la stima di 150–180 MB), **avvio in ~0,26 s a freddo**, proprietà dell'eseguibile
+verificate. Il logo è lo scudo Aviolab incorporato in forma binaria nel sorgente, non
+il segnaposto tipografico previsto (cap. 15, voce 4). **Restano in coda a Mirco**: la
+prova dell'exe su un PC davvero pulito, l'icona dell'eseguibile e l'SDK sulla postazione
+del tutor.
 
-### T2 — Il motore e il pool
+### T2 — Il motore e il pool — ✔ **CHIUSO il 2026-08-07**
 `Ai/LibreriaPrompt` (pool esterno + integrato, manifest, segnaposto);
 `Ai/ClientClaude` (**chiamate sincrone**, retry, timeout) verso **Haiku 4.5**
 (estrazione) e **Sonnet 4.6** (ragionamento), cioè gli **stessi modelli del prototipo**:
@@ -46,6 +52,17 @@ step 1.35–1.37 (i 6 casi / 16 verifiche dell'hard-gate, i 6 casi di `estraiJso
 confronto reale) → stessi numeri, stesse stelle, stesse note. Il confronto reale vuole
 la chiave API **e** il prototipo che gira come giudice: si esegue perciò **solo su
 aviolab03**, dove la chiave c'è.
+**Fatto:** **65 collaudi verdi** senza rete più i **2 reali** su aviolab03. La batteria
+è cresciuta di una gamba che il piano non aveva previsto — la **parità della richiesta**:
+sugli stessi artefatti il prompt costruito dal pool è identico *carattere per carattere*
+a quello che il prototipo costruisce nel codice (10 596 e 10 568 caratteri). È ciò che dà
+valore all'altra gamba: se la richiesta è la stessa **a parità di modello**, una
+differenza negli esiti è del modello e non del codice. Il confronto reale, su
+`claude-sonnet-4-6` da entrambe le parti, ha dato 4,6 stelle in entrambi sull'annuncio
+compatibile e 0,9 con il ⛔ in entrambi su quello con la patente C; e i giudizi del
+prototipo, ricalcolati da `CalcoloMatch`, restituiscono i suoi numeri identici, nota
+doppia del gate compresa. Casi, attesi ed esiti stanno in
+`VB.NET/src/TrovaLavoro.Collaudi/casi/`. **T3 può iniziare.**
 
 ### T3 — Il profilo (F1)
 Pannello P2 (scheda campo-per-campo) e P5 (dialogo); import da file PDF/TXT/MD/DOCX;
@@ -125,7 +142,9 @@ scalare senza toccare il percorso principale T5–T6.
   è un bump di pool annotato, anche in sviluppo.
 - **Il prototipo resta il giudice**: finché la nuova app non supera i collaudi di
   non-regressione (T2), nessuna «miglioria» ai prompt o ai pesi — prima uguale, poi
-  meglio.
+  meglio. *Cancello passato il 2026-08-07*: da qui una miglioria è ammessa, ma resta
+  una scelta da motivare e da far passare dal rito del bump (cap. 04.5) — e chi la fa
+  sappia che allontana i prompt dagli attesi del banco, che vanno rigenerati.
 - Le voci del backlog storico (`idee_future.md`) **entrate nel perimetro** sono
   segnate nel cap. 15.5; le altre restano lì e non si infilano di soppiatto nelle
   tappe.

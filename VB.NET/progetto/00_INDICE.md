@@ -36,7 +36,12 @@ riferimento è quello del perito, non dell'ingegnere: se un capitolo non si capi
 - **Per decidere**: 15 (con le proposte già pronte), poi 14 per il percorso.
 - **Regola dei rimandi**: se due capitoli sembrano dirsi cose diverse, vince il più
   specifico; se il dubbio resta, vince il 01. Le contraddizioni scoperte si segnalano
-  e si correggono: questo progetto è vivo finché non parte T0.
+  e si correggono.
+- **Dopo il cancello T0** *(chiuso il 2026-08-05)* questi capitoli non sono più in
+  scrittura libera: restano la verità del disegno e si toccano quando una decisione
+  cambia o matura in implementazione — con la data della decisione accanto, così si
+  vede sempre quando una cosa è stata scelta e quando invece è stata scoperta sul
+  campo.
 
 ## Nota di riservatezza
 
