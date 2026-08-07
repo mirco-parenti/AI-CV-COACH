@@ -25,8 +25,11 @@ Namespace NonRegressione
     ''' tolleranza dichiarata e si legge nel rapporto salvato in <c>casi/reale/</c>.</para>
     ''' <para>Questi collaudi sono nella categoria <b>Reale</b> e non girano con la
     ''' batteria normale: vogliono la chiave API e il prototipo in ascolto, quindi si
-    ''' eseguono a mano su aviolab03 con
-    ''' <c>dotnet test --filter TestCategory=Reale</c>.</para>
+    ''' eseguono a mano su aviolab03, da <c>VB.NET/src</c>, con
+    ''' <c>dotnet test --settings TrovaLavoro.Collaudi/collaudi-reali.runsettings</c>.
+    ''' Il filtro a riga di comando non basta: si somma a quello del file di
+    ''' impostazioni in vigore (<c>TestCategory!=Reale</c>) e l'insieme resta vuoto —
+    ''' per questo la batteria reale ha un file tutto suo.</para>
     ''' </remarks>
     <TestClass>
     Public Class CollaudiConfrontoReale

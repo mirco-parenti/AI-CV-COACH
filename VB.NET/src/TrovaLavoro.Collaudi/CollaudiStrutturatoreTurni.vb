@@ -114,8 +114,10 @@ Namespace Ai
         ''' catena pool → client → estrattore funziona davvero, e soprattutto che
         ''' l'<b>anti-perdita</b> arriva fin qui — a un turno si racconta anche altro, e
         ''' il campo <c>altrove</c> deve tornare pieno, con le parole dell'utente.
-        ''' Categoria <b>Reale</b>: fuori dalla batteria di tutti i giorni, si lancia con
-        ''' <c>dotnet test --filter TestCategory=Reale</c> dove c'è la chiave.
+        ''' Categoria <b>Reale</b>: fuori dalla batteria di tutti i giorni, si lancia
+        ''' dove c'è la chiave, da <c>VB.NET/src</c>, con
+        ''' <c>dotnet test --settings TrovaLavoro.Collaudi/collaudi-reali.runsettings</c>
+        ''' (a differenza di quelli del confronto, a questo il prototipo non serve).
         ''' </summary>
         <TestMethod, TestCategory("Reale")>
         Public Async Function IlTurnoRealeRestituisceAncheLAltrove() As Task

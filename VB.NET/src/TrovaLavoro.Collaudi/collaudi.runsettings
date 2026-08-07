@@ -2,12 +2,14 @@
 <!--
   Configurazione del banco di collaudo.
 
-  I collaudi della categoria «Reale» (cap. 14, T2) chiamano l'API vera e vogliono il
-  prototipo acceso come giudice: non possono far parte della batteria di tutti i
-  giorni, che deve restare veloce e girare su qualunque postazione. Sono perciò
-  esclusi di qui, e si lanciano a mano su aviolab03 passando a «dotnet test» il
-  filtro di categoria «TestCategory=Reale» (vedi il commento della classe
-  CollaudiConfrontoReale, che riporta il comando per esteso).
+  I collaudi della categoria «Reale» (cap. 14, T2) chiamano l'API vera — e quelli del
+  confronto vogliono anche il prototipo acceso come giudice: non possono far parte
+  della batteria di tutti i giorni, che deve restare veloce e girare su qualunque
+  postazione. Sono perciò esclusi di qui, e si lanciano a mano su aviolab03 da
+  VB.NET/src, con «dotnet test» e l'opzione «settings» puntata sull'ALTRO file di
+  impostazioni, TrovaLavoro.Collaudi/collaudi-reali.runsettings. Non con un filtro di
+  categoria a riga di comando: quello, invece di sostituire il filtro di qui, si
+  somma a lui, e l'insieme resta vuoto (il file gemello lo spiega per esteso).
 -->
 <RunSettings>
   <RunConfiguration>
