@@ -89,6 +89,13 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    **Nessuna menzione dell'assistente o dello strumento usato** — niente
    `Co-Authored-By: Claude`, niente «Generated with Claude Code». L'identità git resta
    quella della postazione (regola 11). *(Ratificata 2026-08-05.)*
+13. **Cose in sospeso**: tieni `in_sospeso.md` come **unica raccolta** di ciò che è
+   **già dentro il perimetro** ma è rimasto indietro. Alla **chiusura di ogni tappa**
+   annota lì cosa resta e perché, invece di lasciarlo solo dentro i capitoli;
+   **consultalo a inizio di ogni tappa nuova** per vedere se qualcosa si può chiudere
+   adesso. È aggiornato da "aggiorna-tutto"; in questo file ne resta solo il puntatore.
+   Gemella della regola 7 e da tenere distinta: in `idee_future.md` un'idea può non
+   farsi mai, qui una voce **va fatta**. *(Ratificata 2026-08-07.)*
 
 ## Contesto del progetto (fatti stabili + puntatori, niente stato copiato)
 
@@ -135,6 +142,10 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   questa è una regola **del prodotto**.
 - **Idee/raffinamenti futuri (puntatore)**: il backlog ragionato per le fasi successive
   è in `idee_future.md`.
+- **Cose rimaste indietro (puntatore)**: ciò che è **già nel perimetro** ma aspetta il
+  momento, una macchina o una mano — collaudi su un PC pulito, l'icona dell'exe, il
+  salto di modello — sta in `in_sospeso.md`. Da non confondere con `idee_future.md`:
+  lì un'idea può non farsi mai, qui una voce **va fatta**.
 
 ## Modalità di aggiornamento per file (per «aggiorna-tutto»)
 
@@ -146,6 +157,7 @@ un file nuovo, aggiungi qui la sua riga.
 | `README.md` | Aggiorna la sezione **Stato** (riga in cima + "## Stato del progetto") e "Tecnologie previste" se cambiano; non riscrivere il resto della presentazione. |
 | `diario_di_bordo.md` | **Aggiungi un nuovo `### Step X.Y`** (intro corsivo, sezioni, 💡, prima persona). **Mai** riscrivere gli step passati. |
 | `idee_future.md` | Aggiungi le idee nuove / spunta quelle realizzate con ✅ + puntatore; quando si accumulano, raccoglile in una sezione «Realizzate» in fondo (così il backlog attivo resta solo-futuro e non induce in errore); non copiare lo stato. |
+| `in_sospeso.md` | Aggiungi le voci rimaste indietro nella tappa appena chiusa (cosa manca · perché · dove ne parla il progetto, con la data); sposta in «Chiuse» quelle risolte, dicendo come. Solo cose **già dentro il perimetro**: le idee da valutare restano in `idee_future.md`. Non copiare lo stato. |
 | `CLAUDE.md` | Ratifica i marker confermati (togli 🔖); riflette regole e contesti aggiornati. |
 | `VB.NET/PROMPT_DI_INCARICO.md` | **Statico**: è il mandato verbatim della fase VB.NET, **mai** riscritto; si estende solo con nuove integrazioni verbatim dell'utente. |
 | `VB.NET/progetto/*.md` | Progetto dettagliato della fase VB.NET: si aggiorna quando una **decisione di progetto** cambia o matura (design-first: finché non si implementa, questi file sono la verità del disegno). Rispetta indice e struttura dei capitoli. |
