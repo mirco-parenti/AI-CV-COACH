@@ -63,6 +63,13 @@ Public Class PannelloProfilo
     ''' <summary>Il filo per annullare la lettura di un CV; <c>Nothing</c> se non è in corso.</summary>
     Private _annullaImport As CancellationTokenSource
 
+    ''' <summary>
+    ''' Chiede alla finestra di portare in vista il dialogo guidato (P5). Il pannello non
+    ''' conosce né la finestra né gli altri pannelli: dice cosa vuole, e chi sa navigare
+    ''' se ne occupa.
+    ''' </summary>
+    Public Event DialogoRichiesto As EventHandler
+
     Public Sub New()
 
         InitializeComponent()
@@ -658,7 +665,7 @@ Public Class PannelloProfilo
             Return
         End If
 
-        If Not PossoSostituireIlProfilo() Then Return
+        If Not PossoSostituireIlProfilo("Importare un CV") Then Return
 
         Dim percorso As String = ChiediIlFileDelCv()
         If percorso Is Nothing Then Return
@@ -721,16 +728,18 @@ Public Class PannelloProfilo
     End Function
 
     ''' <summary>
-    ''' Se c'è del lavoro non salvato, chiede prima di sostituirlo: un import riscrive
-    ''' tutti i campi, e ciò che l'utente aveva corretto sparirebbe senza preavviso.
+    ''' Se c'è del lavoro non salvato, chiede prima di sostituirlo: un profilo che arriva
+    ''' da fuori riscrive tutti i campi, e ciò che l'utente aveva corretto sparirebbe
+    ''' senza preavviso.
     ''' </summary>
-    Private Function PossoSostituireIlProfilo() As Boolean
+    ''' <param name="cosaLoSostituisce">Come si chiama, per l'utente, ciò che sta per prendere il posto.</param>
+    Private Function PossoSostituireIlProfilo(cosaLoSostituisce As String) As Boolean
 
         If Not _modificato Then Return True
 
         Return MessageBox.Show(
             "Hai correzioni al profilo che non hai ancora salvato." & vbLf &
-            "Importare un CV le sostituisce tutte. Vuoi procedere?",
+            $"{cosaLoSostituisce} le sostituisce tutte. Vuoi procedere?",
             NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
             MessageBoxDefaultButton.Button2) = DialogResult.Yes
 
@@ -760,6 +769,43 @@ Public Class PannelloProfilo
         AggiornaComandi()
 
     End Sub
+
+    ' ==================================================================
+    ' Il dialogo guidato
+    ' ==================================================================
+
+    Private Sub btnDialogo_Click(sender As Object, e As EventArgs) Handles btnDialogo.Click
+        RaiseEvent DialogoRichiesto(Me, EventArgs.Empty)
+    End Sub
+
+    ''' <summary>
+    ''' Mette nella scheda un profilo che arriva da fuori — oggi il dialogo guidato (P5).
+    ''' È una <b>proposta</b>: entra nei campi e accende il «Salva», ma su disco non si
+    ''' muove niente finché l'utente non lo conferma (cap. 12.7).
+    ''' </summary>
+    ''' <param name="provenienza">Da dove arriva, per dirlo nella riga di stato.</param>
+    ''' <returns>
+    ''' <c>False</c> se l'utente ha preferito tenersi le correzioni che aveva in sospeso:
+    ''' in quel caso nella scheda non è cambiato nulla.
+    ''' </returns>
+    Public Function ProponiProfilo(profilo As Profilo, provenienza As String) As Boolean
+
+        If profilo Is Nothing Then Throw New ArgumentNullException(NameOf(profilo))
+
+        If Not PossoSostituireIlProfilo($"Il profilo che arriva {provenienza}") Then Return False
+
+        Mostra(profilo)
+
+        _modificato = True
+        AggiornaComandi()
+        RaccontaLoStato(
+            $"Profilo proposto {provenienza}." & vbLf &
+            "Controllalo campo per campo, poi salvalo: su disco non c'è ancora.",
+            StileApp.TestoSecondario)
+
+        Return True
+
+    End Function
 
     ' ==================================================================
     ' Aspetto e stato dei comandi
@@ -831,8 +877,13 @@ Public Class PannelloProfilo
                 $"Per leggere un CV serve la chiave API ({ClientClaude.NomeVariabileChiave}).")
         End If
 
-        ' Il dialogo guidato si accende quando il suo pannello esiste.
-        btnDialogo.Enabled = False
+        ' Anche il dialogo guidato passa dall'AI a ogni turno: senza chiave non si apre.
+        btnDialogo.Enabled = Not occupato AndAlso conMotore AndAlso _contesto.AiDisponibile
+        If Not occupato AndAlso conMotore AndAlso Not _contesto.AiDisponibile Then
+            _suggerimenti.SetToolTip(btnDialogo,
+                $"Per costruire il profilo parlando serve la chiave API ({ClientClaude.NomeVariabileChiave}).")
+        End If
+
         btnAggiornamento.Enabled = False
         btnGeneraCv1.Enabled = False
         btnEsportaBackup.Enabled = False

@@ -36,6 +36,7 @@ Partial Class FormPrincipale
         Me.lblStato = New System.Windows.Forms.Label()
         Me.pnlBordoFasciaInferiore = New System.Windows.Forms.Panel()
         Me.pnlProfilo = New PannelloProfilo()
+        Me.pnlDialogo = New PannelloDialogo()
         Me.pnlLogo = New System.Windows.Forms.Panel()
         Me.picLogo = New System.Windows.Forms.PictureBox()
         Me.lblMarchio = New System.Windows.Forms.Label()
@@ -151,6 +152,7 @@ Partial Class FormPrincipale
         '
         Me.pnlAreaCentrale.BackColor = StileApp.SfondoBase
         Me.pnlAreaCentrale.Controls.Add(Me.pnlProfilo)
+        Me.pnlAreaCentrale.Controls.Add(Me.pnlDialogo)
         Me.pnlAreaCentrale.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlAreaCentrale.Location = New System.Drawing.Point(0, 48)
         Me.pnlAreaCentrale.Margin = New System.Windows.Forms.Padding(0)
@@ -166,6 +168,15 @@ Partial Class FormPrincipale
         Me.pnlProfilo.Size = New System.Drawing.Size(1134, 485)
         Me.pnlProfilo.TabIndex = 0
         Me.pnlProfilo.Visible = False
+        '
+        'pnlDialogo
+        '
+        Me.pnlDialogo.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlDialogo.Location = New System.Drawing.Point(0, 0)
+        Me.pnlDialogo.Name = "pnlDialogo"
+        Me.pnlDialogo.Size = New System.Drawing.Size(1134, 485)
+        Me.pnlDialogo.TabIndex = 1
+        Me.pnlDialogo.Visible = False
         '
         'pnlFasciaInferiore
         '
@@ -288,6 +299,7 @@ Partial Class FormPrincipale
     Friend WithEvents pnlBordoBarraSuperiore As System.Windows.Forms.Panel
     Friend WithEvents pnlAreaCentrale As System.Windows.Forms.Panel
     Friend WithEvents pnlProfilo As PannelloProfilo
+    Friend WithEvents pnlDialogo As PannelloDialogo
     Friend WithEvents ttSuggerimenti As System.Windows.Forms.ToolTip
     Friend WithEvents pnlFasciaInferiore As System.Windows.Forms.Panel
     Friend WithEvents lblStato As System.Windows.Forms.Label

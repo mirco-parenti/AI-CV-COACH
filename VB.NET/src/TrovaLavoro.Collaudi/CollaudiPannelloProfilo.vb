@@ -342,6 +342,40 @@ Namespace Ui
                 End Sub)
         End Sub
 
+        <TestMethod>
+        Public Sub SenzaChiaveNemmenoIlDialogoSiPuoAprire()
+            ' Il dialogo guidato struttura ogni risposta con l'AI: senza chiave il
+            ' bottone non deve promettere una conversazione che si fermerebbe subito.
+            ConProfiloSalvato(
+                Sub(pannello, archivio)
+                    Assert.IsFalse(Bottone(pannello, "btnDialogo").Enabled, "il dialogo è spento")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub IlProfiloCostruitoParlandoEntraNellaSchedaMaNonSuDisco()
+            ' Il patto del passaggio P5 → P2 (cap. 12.7): il dialogo propone, la scheda
+            ' mostra, e a scrivere su disco è solo l'utente con «Salva profilo».
+            ConProfiloSalvato(
+                Sub(pannello, archivio)
+                    Dim primaDi As String = archivio.Carica().ComeTesto()
+
+                    Dim raccolto As New TrovaLavoro.Dati.Profilo With {.Nome = "Anna Rossi"}
+                    raccolto.Competenze.Add("Uso del muletto")
+
+                    Assert.IsTrue(pannello.ProponiProfilo(raccolto, "dal dialogo guidato"),
+                                  "senza correzioni in sospeso la scheda lo accetta senza chiedere")
+
+                    Assert.AreEqual("Anna Rossi", Casella(pannello, "txtNome").Text, "è nei campi")
+                    Assert.HasCount(1, Elenco(pannello, "lstCompetenze").Items, "con quello che ha raccolto")
+                    Assert.IsTrue(pannello.HaModificheNonSalvate, "resta da salvare")
+                    Assert.IsTrue(Bottone(pannello, "btnSalva").Enabled, "e il bottone è acceso")
+
+                    Assert.AreEqual(primaDi, archivio.Carica().ComeTesto(), "ma su disco non si è mosso niente")
+                    Assert.HasCount(1, archivio.Versioni(), "e nello storico non è comparso nulla")
+                End Sub)
+        End Sub
+
         ''' <summary>
         ''' Prepara una cartella dati con dentro il profilo del banco e un pannello già
         ''' collegato al motore: è lo stato in cui l'utente trova la scheda quando apre

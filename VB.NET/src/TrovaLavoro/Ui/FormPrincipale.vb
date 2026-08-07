@@ -41,6 +41,7 @@ Public Class FormPrincipale
 
         DichiaraLeTappeCheMancano()
         pnlProfilo.Collega(_contesto)
+        pnlDialogo.Collega(_contesto)
 
         pnlLogo.BringToFront()
         AggiornaPannelloLogo()
@@ -98,17 +99,57 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
+    ''' Dalla scheda del profilo al dialogo guidato. Il bottone della barra resta quello
+    ''' del profilo: P5 non è un'altra destinazione, è un altro modo di riempire P2.
+    ''' </summary>
+    Private Async Sub pnlProfilo_DialogoRichiesto(sender As Object, e As EventArgs) _
+        Handles pnlProfilo.DialogoRichiesto
+
+        MostraPannello(pnlDialogo, btnProfilo)
+        Await pnlDialogo.ApriIlDialogoAsync()
+
+    End Sub
+
+    Private Sub pnlDialogo_TornaAlProfilo(sender As Object, e As EventArgs) Handles pnlDialogo.TornaAlProfilo
+        MostraPannello(pnlProfilo, btnProfilo)
+    End Sub
+
+    ''' <summary>
+    ''' Il profilo costruito parlando arriva nella scheda, dove l'utente lo controlla e
+    ''' lo salva. Se preferisce tenersi le correzioni che aveva in sospeso, la scheda
+    ''' rifiuta la proposta e si resta nel dialogo, che è ancora tutto lì.
+    ''' </summary>
+    Private Sub pnlDialogo_ProfiloPronto(sender As Object, e As EventArgs) Handles pnlDialogo.ProfiloPronto
+
+        If Not pnlProfilo.ProponiProfilo(pnlDialogo.ProfiloCostruito, "dal dialogo guidato") Then Return
+
+        MostraPannello(pnlProfilo, btnProfilo)
+
+    End Sub
+
+    ''' <summary>
     ''' Prima di chiudere, l'unica domanda che vale la pena fare: il profilo è la sola
     ''' cosa che l'utente non può rigenerare (cap. 11.1), e chiuderlo con delle
-    ''' correzioni ancora in memoria le butterebbe via in silenzio.
+    ''' correzioni ancora in memoria — o con un racconto lasciato a metà — le butterebbe
+    ''' via in silenzio.
     ''' </summary>
     Private Sub FormPrincipale_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
 
-        If Not pnlProfilo.HaModificheNonSalvate Then Return
+        Dim inSospeso As New List(Of String)
+
+        If pnlProfilo.HaModificheNonSalvate Then
+            inSospeso.Add("correzioni al profilo che non hai ancora salvato")
+        End If
+
+        If pnlDialogo.HaUnDialogoInCorso Then
+            inSospeso.Add("un dialogo cominciato e non finito")
+        End If
+
+        If inSospeso.Count = 0 Then Return
 
         Dim risposta As DialogResult = MessageBox.Show(
-            "Hai correzioni al profilo che non hai ancora salvato." & vbLf &
-            "Se chiudi adesso le perdi. Vuoi chiudere lo stesso?",
+            $"Hai {String.Join(" e ", inSospeso)}." & vbLf &
+            "Se chiudi adesso, quel lavoro va perso. Vuoi chiudere lo stesso?",
             Me.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2)
 
         e.Cancel = (risposta <> DialogResult.Yes)
