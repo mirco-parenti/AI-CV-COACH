@@ -53,7 +53,9 @@ Namespace Motore
             Catch primoErrore As JsonException
                 ' Ripiego: il modello può aver premesso (o aggiunto) prosa attorno al
                 ' JSON ("si mette a spiegare"). Ritaglio dal primo '{' all'ultimo '}'
-                ' e riprovo; se neanche così è valido, rilancio l'errore originale.
+                ' e riprovo; se un ritaglio non c'è proprio, rilancio l'errore
+                ' originale (se invece c'è ma non è JSON valido, esce l'errore del
+                ' secondo parse: è il comportamento del prototipo, e si conserva).
                 Dim inizio As Integer = pulito.IndexOf("{"c)
                 Dim fine As Integer = pulito.LastIndexOf("}"c)
 

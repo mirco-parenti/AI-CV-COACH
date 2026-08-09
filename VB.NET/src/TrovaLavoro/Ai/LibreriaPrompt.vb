@@ -218,11 +218,11 @@ Namespace Ai
                 Try
                     contenuto = leggi(percorso)
                 Catch ex As Exception When TypeOf ex Is IOException OrElse
-                                           TypeOf ex Is FileNotFoundException OrElse
-                                           TypeOf ex Is DirectoryNotFoundException
-                    ' Un file dichiarato che non c'è rende il pool inutilizzabile:
-                    ' un prompt mancante si scoprirebbe a metà di un flusso.
-                    motivo = $"manca il file «{percorso}»"
+                                           TypeOf ex Is UnauthorizedAccessException
+                    ' Un file dichiarato che non c'è — o non si lascia leggere — rende
+                    ' il pool inutilizzabile: un prompt mancante si scoprirebbe a metà
+                    ' di un flusso. Con questo ritorno scatta il ripiego sull'integrato.
+                    motivo = $"manca o non si legge il file «{percorso}»"
                     Return Nothing
                 End Try
 
@@ -328,9 +328,14 @@ Namespace Ai
         ''' <param name="lingua">La lingua desiderata; si ripiega sulla versione senza lingua.</param>
         Public Function Carica(id As String, Optional lingua As String = "it") As Prompt
 
+            ' La cache va protetta: le continuazioni con ConfigureAwait(False) possono
+            ' arrivare qui dal thread pool mentre il thread dell'interfaccia carica un
+            ' altro prompt, e un Dictionary conteso si corrompe senza dare segni.
             Dim chiave As String = $"{id}|{lingua}"
-            Dim inCache As Prompt = Nothing
-            If _cache.TryGetValue(chiave, inCache) Then Return inCache
+            SyncLock _cache
+                Dim inCache As Prompt = Nothing
+                If _cache.TryGetValue(chiave, inCache) Then Return inCache
+            End SyncLock
 
             Dim percorso As String = TrovaPercorso(id, lingua)
             If percorso Is Nothing Then
@@ -338,7 +343,9 @@ Namespace Ai
             End If
 
             Dim p As Prompt = Interpreta(_leggi(percorso), percorso)
-            _cache(chiave) = p
+            SyncLock _cache
+                _cache(chiave) = p
+            End SyncLock
             Return p
 
         End Function
@@ -434,18 +441,25 @@ Namespace Ai
         Public Shared Function Riempi(prompt As Prompt, valori As IDictionary(Of String, String)) As String
 
             If prompt Is Nothing Then Throw New ArgumentNullException(NameOf(prompt))
+            If valori Is Nothing Then valori = New Dictionary(Of String, String)
 
-            Dim testo As String = prompt.Corpo
-
+            ' Prima si controlla che ogni segnaposto abbia il suo valore, poi si
+            ' sostituisce in un passaggio solo: sostituire in sequenza riaprirebbe il
+            ' testo già riempito — se un dato dell'utente contenesse la stringa
+            ' «{{NOME}}» di un segnaposto successivo, verrebbe rimpiazzato pure lui.
             For Each nome As String In prompt.Segnaposto
                 Dim valore As String = Nothing
                 If valori Is Nothing OrElse Not valori.TryGetValue(nome, valore) OrElse valore Is Nothing Then
                     Throw New ArgumentException($"Manca il valore per il segnaposto {{{{{nome}}}}} del prompt «{prompt.Id}».")
                 End If
-                testo = testo.Replace("{{" & nome & "}}", valore)
             Next
 
-            Return testo
+            Return Regex.Replace(prompt.Corpo, "\{\{([A-Z_][A-Z0-9_]*)\}\}",
+                Function(trovato)
+                    Dim valore As String = Nothing
+                    Return If(valori.TryGetValue(trovato.Groups(1).Value, valore),
+                              valore, trovato.Value)
+                End Function)
 
         End Function
 

@@ -73,11 +73,13 @@ Namespace Ai
                 Throw New ArgumentException("Manca il percorso del PDF.", NameOf(percorsoPdf))
             End If
 
-            Dim prompt As Prompt = _libreria.Carica(IdPrompt)
+            Dim prompt As Prompt = CaricaPrompt()
 
             ' Il PDF viaggia codificato in base64 dentro la richiesta: va letto tutto in
             ' memoria, ed è il motivo per cui il limite di dimensione si controlla prima.
-            Dim dati As Byte() = File.ReadAllBytes(percorsoPdf)
+            ' La lettura è asincrona e da qui in poi si sta sul thread pool: la codifica
+            ' base64 di decine di MB non deve congelare l'interfaccia.
+            Dim dati As Byte() = Await File.ReadAllBytesAsync(percorsoPdf, annulla).ConfigureAwait(False)
 
             Dim contenuto As New JsonArray(
                 New JsonObject From {
@@ -96,6 +98,25 @@ Namespace Ai
             ' Il prompt dichiara «uscita: testo»: qui non c'è JSON da estrarre, quello
             ' che torna è già il testo del CV.
             Return If(uscita.Testo, String.Empty)
+
+        End Function
+
+        ''' <summary>
+        ''' Carica il prompt traducendo gli inciampi del pool in <see cref="ErroreAi"/>:
+        ''' un pool esterno ritoccato male deve produrre il messaggio in italiano dei
+        ''' pannelli, non un'eccezione grezza a metà import (il pool è modificabile per
+        ''' design, cap. 04.2).
+        ''' </summary>
+        Private Function CaricaPrompt() As Prompt
+
+            Try
+                Return _libreria.Carica(IdPrompt)
+            Catch ex As Exception When TypeOf ex Is InvalidDataException OrElse
+                                       TypeOf ex Is FileNotFoundException OrElse
+                                       TypeOf ex Is IOException
+                Throw New ErroreAi(CausaErroreAi.Richiesta,
+                    $"Il prompt «{IdPrompt}» del pool non è utilizzabile: {ex.Message}", ex)
+            End Try
 
         End Function
 

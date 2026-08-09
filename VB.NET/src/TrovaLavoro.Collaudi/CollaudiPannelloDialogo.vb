@@ -229,6 +229,49 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function AllaFineLaZonaDellaRispostaSiRitira() As Task
+
+            ' A dialogo concluso casella e bottoni spariscono, e con loro tutta la loro
+            ' fascia: lasciarla lì vuota apriva una banda morta fra l'ultima bolla e i
+            ' bottoni, proprio sotto il riepilogo.
+            Await ConDialogoApertoAsync(
+                TuttiISetteTurni(),
+                Async Function(pannello)
+                    Dim zona As Panel = DirectCast(
+                        pannello.Controls.Find("pnlRisposta", searchAllChildren:=True).Single(), Panel)
+
+                    Assert.IsTrue(zona.Visible, "a dialogo aperto la zona c'è")
+
+                    Await FinoInFondoAsync(pannello)
+
+                    Assert.IsFalse(zona.Visible, "alla fine si ritira e lascia il posto alle bolle")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlRaccontoFinitoMaNonConsegnatoSiDichiara() As Task
+
+            ' Il caso peggiore della chiusura: il dialogo è «finito», quindi non risulta
+            ' in corso, ma il profilo vive solo in memoria. Il pannello lo deve dire, e
+            ' deve smettere di dirlo quando la scheda l'ha accettato.
+            Await ConDialogoApertoAsync(
+                TuttiISetteTurni(),
+                Async Function(pannello)
+                    Assert.IsFalse(pannello.HaUnRaccontoNonConsegnato, "a metà dialogo non è questo il caso")
+
+                    Await FinoInFondoAsync(pannello)
+
+                    Assert.IsFalse(pannello.HaUnDialogoInCorso, "il dialogo non risulta in corso")
+                    Assert.IsTrue(pannello.HaUnRaccontoNonConsegnato, "ma il raccolto non è al sicuro")
+
+                    pannello.SegnaConsegnato()
+                    Assert.IsFalse(pannello.HaUnRaccontoNonConsegnato, "consegnato: niente più da dichiarare")
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Async Function IlProfiloConsegnatoEUnaCopia() As Task
 
             ' Consegnato alla scheda, il profilo è suo: quello che l'utente corregge lì

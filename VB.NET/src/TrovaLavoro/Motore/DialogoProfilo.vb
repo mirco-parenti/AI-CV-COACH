@@ -60,6 +60,8 @@ Namespace Motore
 
         ''' <summary>Cosa sta aspettando la macchina.</summary>
         Private Enum Attesa
+            ''' <summary>Niente: il dialogo non è ancora stato avviato.</summary>
+            NonCominciato
             RispostaTurno
             ConfermaSingolo
             CategoriaPatente
@@ -92,12 +94,22 @@ Namespace Motore
         Private Shared ReadOnly Categorie As String() =
             {EsperienzeFormali, EsperienzeInformali, Competenze, Formazione}
 
+        ''' <summary>
+        ''' Le destinazioni che il magazzino accetta: le quattro categorie più la
+        ''' patente, che il prompt dei contatti instrada esplicitamente («ho la patente
+        ''' B» detta col domicilio). Prima il magazzino conosceva solo le categorie, e
+        ''' quella promessa del prompt cadeva nel vuoto: perdita silenziosa.
+        ''' </summary>
+        Private Shared ReadOnly DestinazioniPending As String() =
+            {EsperienzeFormali, EsperienzeInformali, Competenze, Formazione, Patente}
+
         ''' <summary>L'etichetta leggibile di una categoria, per i messaggi.</summary>
         Private Shared ReadOnly EtichetteCategoria As New Dictionary(Of String, String) From {
             {EsperienzeFormali, "esperienze di lavoro"},
             {EsperienzeInformali, "esperienze informali"},
             {Competenze, "competenze"},
-            {Formazione, "studi e formazione"}}
+            {Formazione, "studi e formazione"},
+            {Patente, "patente"}}
 
         ''' <summary>
         ''' I sette turni, nell'ordine del prototipo. I testi sono i suoi, parola per
@@ -211,8 +223,8 @@ Namespace Motore
             If strutturatore Is Nothing Then Throw New ArgumentNullException(NameOf(strutturatore))
             _strutturatore = strutturatore
 
-            For Each categoria As String In Categorie
-                _pending(categoria) = New List(Of String)
+            For Each destinazione As String In DestinazioniPending
+                _pending(destinazione) = New List(Of String)
             Next
 
         End Sub
@@ -227,8 +239,18 @@ Namespace Motore
             End Get
         End Property
 
-        ''' <summary>Apre il dialogo dal primo turno.</summary>
+        ''' <summary>
+        ''' Apre il dialogo dal primo turno. Si avvia una volta sola: un dialogo è una
+        ''' conversazione con la sua storia, e riavviarlo sulla stessa istanza
+        ''' accumulerebbe nel profilo i dati del giro precedente. Per ricominciare se ne
+        ''' crea uno nuovo (è ciò che fa il pannello).
+        ''' </summary>
         Public Function AvviaAsync(Optional annulla As CancellationToken = Nothing) As Task(Of Mossa)
+
+            If _attesa <> Attesa.NonCominciato Then
+                Throw New InvalidOperationException(
+                    "Questo dialogo è già stato avviato: per ricominciare creane uno nuovo.")
+            End If
 
             _indice = 0
             Return ApriTurnoAsync(New Mossa, annulla)
@@ -292,8 +314,12 @@ Namespace Motore
             mossa.Detto.Add(turno.Apertura)
 
             ' All'ingresso di un turno si smaltisce prima ciò che era stato messo da
-            ' parte per lui: è l'instradamento in avanti.
+            ' parte per lui: è l'instradamento in avanti. La patente ha la sua strada:
+            ' è un turno singolo, e il parcheggiato passa dalla conferma del singolo.
             If _pending.ContainsKey(turno.Chiave) AndAlso _pending(turno.Chiave).Count > 0 Then
+                If turno.Chiave = Patente Then
+                    Return Await ApriPatenteDaPendingAsync(turno, mossa, annulla).ConfigureAwait(False)
+                End If
                 _dopoPending = DopoPending.ChiediIlTurno
                 Return Await SmaltisciPendingAsync(turno.Chiave, mossa, annulla).ConfigureAwait(False)
             End If
@@ -313,10 +339,13 @@ Namespace Motore
         ''' <summary>
         ''' Prima del riepilogo recupera, uno alla volta, i frammenti ancora parcheggiati
         ''' la cui destinazione è un turno già passato: è l'instradamento all'indietro.
+        ''' Si scandiscono <b>tutte</b> le destinazioni del magazzino, patente compresa:
+        ''' un residuo lì (un modello che disobbedisce alle categorie del prompt) esce
+        ''' come «lasciato fuori» dichiarato, mai come perdita muta.
         ''' </summary>
         Private Async Function PassataFinaleAsync(mossa As Mossa, annulla As CancellationToken) As Task(Of Mossa)
 
-            Dim dest As String = Categorie.FirstOrDefault(Function(c) _pending(c).Count > 0)
+            Dim dest As String = DestinazioniPending.FirstOrDefault(Function(c) _pending(c).Count > 0)
             If dest Is Nothing Then Return Riepilogo(mossa)
 
             mossa.Detto.Add(
@@ -536,6 +565,10 @@ Namespace Motore
 
                 Case Nome
                     Profilo.Nome = letto.Nome
+                    ' Alla prima domanda capita di rispondere raccontando tutto insieme
+                    ' («mi chiamo Anna e facevo la commessa»): dal Pool 1.02 anche il
+                    ' prompt del nome instrada quel materiale, e qui lo si parcheggia.
+                    RaccogliAltrove(frammento, Nome)
 
                 Case Contatti
                     Profilo.Contatti = letto.Contatti
@@ -553,6 +586,39 @@ Namespace Motore
             End Select
 
         End Sub
+
+        ''' <summary>
+        ''' Il turno della patente quando c'è materiale parcheggiato per lui — il prompt
+        ''' dei contatti instrada qui «ho la patente B» detta insieme al domicilio. Si
+        ''' struttura subito ciò che l'utente aveva detto, glielo si rimette in bocca, e
+        ''' si passa dalla stessa conferma del turno singolo: nulla entra senza il suo
+        ''' sì. Se l'AI non ce la fa, la domanda del turno è appena stata posta — si
+        ''' ascolta la risposta come in un turno normale, e nulla è andato perso.
+        ''' </summary>
+        Private Async Function ApriPatenteDaPendingAsync(turno As Turno, mossa As Mossa,
+                                                         annulla As CancellationToken) As Task(Of Mossa)
+
+            Dim frammenti As List(Of String) = _pending(Patente).ToList()
+            _pending(Patente).Clear()
+
+            mossa.Detto.Add("Me ne avevi già accennato, e l'avevo tenuto da parte:")
+            mossa.AggiungiEco(String.Join(" / ", frammenti))
+
+            Dim frammento As JsonObject = Nothing
+            Try
+                frammento = TryCast(Await _strutturatore.StrutturaAsync(
+                    Patente, String.Join(vbLf, frammenti), annulla).ConfigureAwait(False), JsonObject)
+            Catch ex As ErroreAi
+                mossa.Detto.Add("Non sono riuscita a rileggerlo (problema con l'AI): dimmelo tu direttamente.")
+                Return ChiediRisposta(mossa, Attesa.RispostaTurno)
+            End Try
+
+            _frammento = If(frammento, New JsonObject())
+            DiciCosaHoCapito(mossa, turno, _frammento)
+            _attesa = Attesa.ConfermaSingolo
+            Return DueScelte(mossa, "Sì, è giusto", Scelte.Conferma, "Correggi", Scelte.Correggi)
+
+        End Function
 
         ''' <summary>La ri-domanda della categoria: una sola, poi si prosegue comunque.</summary>
         Private Async Function RispostaCategoriaPatenteAsync(testo As String,
@@ -686,7 +752,7 @@ Namespace Motore
             Dim altrove As JsonObject = TryCast(frammento?("altrove"), JsonObject)
             If altrove Is Nothing Then Return
 
-            For Each dest As String In Categorie
+            For Each dest As String In DestinazioniPending
                 If dest = escludi Then Continue For
                 For Each frase As String In Frasi(altrove, dest)
                     _pending(dest).Add(frase)
@@ -706,7 +772,7 @@ Namespace Motore
             Dim altrove As JsonObject = TryCast(frammento?("altrove"), JsonObject)
             If altrove Is Nothing Then Return fuori
 
-            For Each dest As String In Categorie
+            For Each dest As String In DestinazioniPending
                 If dest = escludi Then Continue For
                 fuori.AddRange(Frasi(altrove, dest))
             Next
@@ -729,7 +795,11 @@ Namespace Motore
             mossa.Detto.Add(
                 $"Prima avevi accennato a qualcosa che riguarda «{EtichetteCategoria(dest)}», " &
                 "e l'avevo tenuto da parte. Vediamolo ora:")
-            mossa.EcoUtente = String.Join(" / ", frammenti)
+
+            ' L'eco si ancora qui, subito dopo l'annuncio: così anche quando il
+            ' ripescaggio fallisce l'utente rivede le proprie parole prima del
+            ' verdetto, non dopo.
+            mossa.AggiungiEco(String.Join(" / ", frammenti))
 
             ' L'esito della chiamata si raccoglie in una variabile invece di proseguire
             ' dentro il Catch: in VB dentro un Catch non si può aspettare.
@@ -830,6 +900,16 @@ Namespace Motore
                 mossa.Detto.Add("Aggiornato e aggiunto.")
             Else
                 mossa.Detto.Add("Non ho colto una voce da aggiungere. Proseguiamo.")
+            End If
+
+            ' Anche la correzione può contenere materiale d'altre categorie: per la
+            ' guardia anti-rimbalzo non torna nel magazzino, ma non sparisce in
+            ' silenzio — si dichiara, come in ogni altro punto del ripescaggio.
+            Dim fuori As List(Of String) = AltroveLasciatoFuori(frammento, dest)
+            If fuori.Count > 0 Then
+                mossa.Detto.Add(
+                    "Una parte non l'ho saputa collocare, la lascio fuori: " &
+                    $"«{String.Join(" / ", fuori)}».")
             End If
 
             Return Await ProseguiDopoPendingAsync(mossa, annulla).ConfigureAwait(False)

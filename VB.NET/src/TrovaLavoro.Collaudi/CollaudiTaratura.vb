@@ -71,6 +71,20 @@ Namespace Motore
         End Sub
 
         <TestMethod>
+        Public Sub UnValoreNonNumericoInUnaMappaNonImpedisceLAvvio()
+            ' Il refuso più facile da fare a mano: il numero fra virgolette. Prima
+            ' faceva cadere l'applicazione all'avvio («il montaggio non solleva mai»);
+            ' ora la mappa storta si scarta per intero e resta la predefinita — tenere
+            ' solo le voci buone escluderebbe in silenzio gli esiti delle altre.
+            Dim t As Taratura = Taratura.DaJson(
+                "{ ""punti"": { ""soddisfatto"": ""1"", ""in parte"": 0.4 }, ""clamp_su"": 12 }")
+
+            Assert.AreEqual(1.0, t.Punti("soddisfatto"), "la mappa storta resta la predefinita")
+            Assert.AreEqual(0.5, t.Punti("in parte"), "tutta intera")
+            Assert.AreEqual(12.0, t.ClampSu, "i valori buoni fuori dalla mappa entrano lo stesso")
+        End Sub
+
+        <TestMethod>
         Public Sub LaTaraturaGovernaDavveroIlCalcolo()
             ' Il collaudo che conta: cambiando il tetto cambia il risultato. Stesso
             ' caso 2 della batteria dell'hard-gate, ma con tetto portato a 35.

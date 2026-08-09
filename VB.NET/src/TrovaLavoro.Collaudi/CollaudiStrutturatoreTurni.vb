@@ -98,13 +98,16 @@ Namespace Ai
 
         <TestMethod>
         Public Async Function UnTurnoCheNelPoolNonCESiFermaSubito() As Task
-            ' Meglio fermarsi che mandare all'AI il prompt sbagliato: l'errore nomina il
-            ' turno mancante (cap. 04.4).
+            ' Meglio fermarsi che mandare all'AI il prompt sbagliato. L'errore esce come
+            ' ErroreAi e non come eccezione grezza: il pool esterno è modificabile per
+            ' design (cap. 04.2), e chi sperimenta deve ricevere il messaggio in
+            ' italiano dei pannelli, non un crash a metà dialogo.
             Dim finta As New ApiFinta(New Passo With {.Corpo = RispostaCon("{}")})
 
-            Dim errore As FileNotFoundException = Await Assert.ThrowsAsync(Of FileNotFoundException)(
+            Dim errore As ErroreAi = Await Assert.ThrowsAsync(Of ErroreAi)(
                 Function() StrutturatoreDiProva(finta).StrutturaAsync("hobby", "Vado in bicicletta"))
 
+            Assert.AreEqual(CausaErroreAi.Richiesta, errore.Causa, "è un errore nostro, non dell'API")
             Assert.Contains("hobby", errore.Message, "deve nominare il turno che non c'è")
             Assert.AreEqual(0, finta.Chiamate, "e non deve aver chiamato l'AI")
         End Function

@@ -62,6 +62,9 @@ Public Class PannelloDialogo
     ''' <summary>Se in questo momento si sta aspettando l'AI.</summary>
     Private _occupato As Boolean
 
+    ''' <summary>Se il profilo di questo dialogo è già stato consegnato alla scheda P2.</summary>
+    Private _consegnato As Boolean
+
     ''' <summary>Chiede alla finestra di riportare in vista la scheda del profilo.</summary>
     Public Event TornaAlProfilo As EventHandler
 
@@ -70,6 +73,13 @@ Public Class PannelloDialogo
     ''' profilo si legge da <see cref="ProfiloCostruito"/>.
     ''' </summary>
     Public Event ProfiloPronto As EventHandler
+
+    ''' <summary>
+    ''' L'AI del dialogo ha cominciato o finito di lavorare. Serve alla finestra:
+    ''' «mentre l'AI lavora non si esce» vale anche per la barra di navigazione, che
+    ''' questo pannello non può spegnere da sé.
+    ''' </summary>
+    Public Event LavoroAiCambiato As EventHandler
 
     Public Sub New()
 
@@ -116,6 +126,34 @@ Public Class PannelloDialogo
         End Get
     End Property
 
+    ''' <summary>
+    ''' Se c'è un racconto arrivato in fondo ma mai portato nella scheda P2. È il caso
+    ''' peggiore della chiusura: il dialogo è «finito», quindi non risulta in corso, ma
+    ''' il profilo costruito vive solo in memoria — chiudere adesso lo perderebbe tutto,
+    ''' in silenzio.
+    ''' </summary>
+    Public ReadOnly Property HaUnRaccontoNonConsegnato As Boolean
+        Get
+            Return _dialogo IsNot Nothing AndAlso _dialogo.Finito AndAlso Not _consegnato
+        End Get
+    End Property
+
+    ''' <summary>Se in questo momento una chiamata all'AI del dialogo è in volo.</summary>
+    Public ReadOnly Property AiAlLavoro As Boolean
+        Get
+            Return _occupato
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' La finestra segna qui che la scheda P2 ha accettato il profilo consegnato: da
+    ''' questo momento il racconto è al sicuro, e chiudere o ricominciare non minaccia
+    ''' più niente.
+    ''' </summary>
+    Public Sub SegnaConsegnato()
+        _consegnato = True
+    End Sub
+
     ' ==================================================================
     ' Aprire, riprendere, ricominciare
     ' ==================================================================
@@ -143,6 +181,7 @@ Public Class PannelloDialogo
 
         _strutturatore = chiStruttura
         _dialogo = New DialogoProfilo(chiStruttura)
+        _consegnato = False
 
         SvuotaLaConversazione()
         Await EseguiAsync(Function() _dialogo.AvviaAsync()).ConfigureAwait(True)
@@ -162,8 +201,10 @@ Public Class PannelloDialogo
 
     Private Async Sub btnRicomincia_Click(sender As Object, e As EventArgs) Handles btnRicomincia.Click
 
-        ' Quello che si butta è il racconto dell'utente: si chiede sempre.
-        If _dialogo IsNot Nothing Then
+        ' Quello che si butta è il racconto dell'utente: si chiede sempre — tranne
+        ' quando il racconto è finito e già consegnato alla scheda: lì è al sicuro, e
+        ' minacciare una perdita che non esiste insegnerebbe a ignorare gli avvisi.
+        If _dialogo IsNot Nothing AndAlso Not (_dialogo.Finito AndAlso _consegnato) Then
             Dim risposta As DialogResult = MessageBox.Show(
                 "Vuoi ricominciare il dialogo da capo?" & vbLf &
                 "Quello che mi hai raccontato finora va perso.",
@@ -251,12 +292,15 @@ Public Class PannelloDialogo
         If inCorso Then RaccontaLoStato("Sto leggendo la tua risposta…", StileApp.TestoSecondario)
 
         AggiornaComandi()
+        RaiseEvent LavoroAiCambiato(Me, EventArgs.Empty)
 
     End Sub
 
     ''' <summary>
-    ''' Disegna una mossa: prima quello che l'assistente dice, poi le parole dell'utente
-    ''' che si stanno recuperando, poi le schede, e infine si prepara a ricevere.
+    ''' Disegna una mossa: le bolle dell'assistente nell'ordine in cui le ha dette, con
+    ''' ogni eco dell'utente al punto in cui la mossa l'ha ancorata (anti-perdita: le
+    ''' parole ripescate si rivedono <i>prima</i> del loro esito, non dopo), poi le
+    ''' schede, e infine si prepara a ricevere.
     ''' </summary>
     Private Sub Mostra(mossa As Mossa)
 
@@ -265,14 +309,18 @@ Public Class PannelloDialogo
 
         flpConversazione.SuspendLayout()
 
-        For Each detto As String In mossa.Detto
-            AggiungiBollaAssistente(detto)
+        Dim disegnate As Integer = 0
+        For Each eco As EcoMossa In mossa.Echi
+            While disegnate < Math.Min(eco.DopoDetti, mossa.Detto.Count)
+                AggiungiBollaAssistente(mossa.Detto(disegnate))
+                disegnate += 1
+            End While
+            If Not String.IsNullOrWhiteSpace(eco.Testo) Then AggiungiBollaUtente(eco.Testo)
         Next
-
-        ' L'eco viene dopo tutto ciò che l'assistente ha detto e prima delle schede: è la
-        ' frase dell'utente che il dialogo ha appena annunciato di voler recuperare, e le
-        ' schede sono quello che ne ha ricavato.
-        RimettiInBoccaLEco(mossa)
+        While disegnate < mossa.Detto.Count
+            AggiungiBollaAssistente(mossa.Detto(disegnate))
+            disegnate += 1
+        End While
 
         For Each scheda As Scheda In mossa.Schede
             AggiungiScheda(scheda)
@@ -282,14 +330,6 @@ Public Class PannelloDialogo
         ScorriInFondo()
 
         PreparaLaRisposta(mossa)
-
-    End Sub
-
-    ''' <summary>Le parole dell'utente che il dialogo sta ripescando da un turno passato.</summary>
-    Private Sub RimettiInBoccaLEco(mossa As Mossa)
-
-        If String.IsNullOrWhiteSpace(mossa.EcoUtente) Then Return
-        AggiungiBollaUtente(mossa.EcoUtente)
 
     End Sub
 
@@ -722,6 +762,12 @@ Public Class PannelloDialogo
         ' sbagliata.
         txtRisposta.Visible = chiedeUnaRisposta
         btnInvia.Visible = chiedeUnaRisposta
+
+        ' A dialogo concluso (o mai cominciato) la zona della risposta si ritira del
+        ' tutto: lasciarla lì vuota apriva una fascia morta fra l'ultima bolla e i
+        ' bottoni, proprio nel momento del riepilogo.
+        pnlRisposta.Visible = conDialogo AndAlso _mossa IsNot Nothing AndAlso
+                              _mossa.Tipo <> TipoMossa.Fine
         txtRisposta.ReadOnly = _occupato
         txtRisposta.BackColor = If(_occupato, StileApp.SfondoBase, StileApp.SfondoContenuto)
         btnInvia.Enabled = Not _occupato

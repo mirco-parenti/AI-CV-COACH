@@ -295,6 +295,163 @@ Namespace Motore
 
         End Function
 
+        <TestMethod>
+        Public Async Function LaPatenteDettaAiContattiSiRipescaAlSuoTurno() As Task
+
+            ' Il prompt dei contatti promette: la patente nominata lì finisce in
+            ' «altrove.patente» e la si conferma al turno giusto. Prima il magazzino
+            ' conosceva solo le quattro categorie e quella promessa cadeva nel vuoto.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).
+                  Dara(FrContatti("{""patente"": [""ho la patente B""]}")).
+                  Dara(FrPatente("sì", "B"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await dialogo.AvviaAsync()
+            Await ConfermaAsync(dialogo, "Luca Ferrari")
+            Dim mossa As Mossa = Await ConfermaAsync(dialogo, "luca@example.it, e ho la patente B")
+
+            Assert.AreEqual(TipoMossa.ChiediScelta, mossa.Tipo, "il turno patente ripesca e chiede conferma")
+            Assert.Contains("ho la patente B", mossa.EcoUtente, "con le parole dell'utente")
+            Assert.Contains("Patente: sì (B)", String.Join(" ", mossa.Detto), "e con cosa ha capito")
+            Assert.AreEqual("patente", finto.Chiamate.Last().Turno, "strutturato col prompt della patente")
+            Assert.IsEmpty(dialogo.Profilo.Patente.Ha, "ma non è ancora entrato niente")
+
+            Await dialogo.ScegliAsync(Scelte.Conferma)
+            Assert.AreEqual("sì", dialogo.Profilo.Patente.Ha, "entra solo col sì")
+            Assert.AreEqual("B", dialogo.Profilo.Patente.Categorie(0), "con la sua categoria")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LAltroveDellaCorrezioneDiUnPendingSiDichiara() As Task
+
+            ' Anche la correzione di un frammento ripescato può contenere materiale di
+            ' altre categorie: per la guardia anti-rimbalzo non torna nel magazzino, ma
+            ' prima spariva in silenzio — ora si dichiara «lasciato fuori».
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).
+                  Dara(FrContatti("{""formazione"": [""ho il diploma""]}")).
+                  Dara(FrPatente("no")).
+                  Dara(FrVuoto("esperienze_formali")).
+                  Dara(FrVuoto("esperienze_informali")).
+                  Dara(FrCompetenze("{}")).
+                  Dara(FrFormazione("Diploma")).
+                  Dara(FrFormazione("Diploma serale", "{""esperienze_formali"": [""e facevo il magazziniere""]}"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await dialogo.AvviaAsync()
+            Await ConfermaAsync(dialogo, "Luca Ferrari")
+            Await ConfermaAsync(dialogo, "luca@example.it, e ho il diploma")
+            Await ConfermaAsync(dialogo, "No")
+            Await dialogo.RispondiAsync("Nessuna")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+            Await dialogo.RispondiAsync("Nessuna")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+            Await dialogo.RispondiAsync("Niente")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+
+            ' Ingresso della formazione: il diploma parcheggiato si ripesca, ma
+            ' l'utente preferisce riscriverlo — e nella correzione dice anche altro.
+            Await dialogo.ScegliAsync(Scelte.Correggi)
+            Dim mossa As Mossa = Await dialogo.RispondiAsync("Il diploma serale, e facevo il magazziniere")
+
+            Assert.Contains("Aggiornato e aggiunto", String.Join(" ", mossa.Detto), "la correzione entra")
+            Assert.Contains("lascio fuori", String.Join(" ", mossa.Detto), "e l'altrove si dichiara")
+            Assert.Contains("facevo il magazziniere", String.Join(" ", mossa.Detto), "con le parole dell'utente")
+            Assert.AreEqual("Diploma serale", dialogo.Profilo.Formazione(0).Titolo, "il titolo corretto")
+            Assert.IsEmpty(dialogo.Profilo.EsperienzeFormali, "niente rimbalzi nel magazzino")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LEcoVienePrimaDelVerdetto() As Task
+
+            ' Quando il ripescaggio non colloca nulla, l'utente deve rivedere le
+            ' proprie parole PRIMA di leggere «lo lascio fuori», non dopo: l'eco è
+            ' ancorata al punto giusto della mossa.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).
+                  Dara(FrContatti("{""competenze"": [""boh, sono uno che si arrangia""]}")).
+                  Dara(FrPatente("no")).
+                  Dara(FrVuoto("esperienze_formali")).
+                  Dara(FrVuoto("esperienze_informali")).
+                  Dara(FrVuoto("competenze"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+            Await dialogo.RispondiAsync("Nessuna")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+            Await dialogo.RispondiAsync("Nessuna")
+            Dim mossa As Mossa = Await dialogo.ScegliAsync(Scelte.Oltre)
+
+            Assert.HasCount(1, mossa.Echi, "un'eco sola")
+            Assert.Contains("si arrangia", mossa.Echi(0).Testo, "con le parole dell'utente")
+
+            Dim dopo As Integer = mossa.Echi(0).DopoDetti
+            Assert.IsLessThan(mossa.Detto.Count, dopo, "ancorata prima dell'ultima bolla")
+            Assert.Contains("avevi accennato", mossa.Detto(dopo - 1), "dopo l'annuncio del recupero")
+            Assert.Contains("lascio fuori", mossa.Detto(dopo), "e prima del verdetto")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function NellaPassataFinaleOgniRecuperoHaLaSuaEco() As Task
+
+            ' Due categorie parcheggiate alla passata finale, e la prima non si
+            ' colloca: la mossa prosegue sulla seconda. Prima l'eco era un campo
+            ' singolo e la seconda cancellava la prima: le parole dell'utente del
+            ' primo gruppo non comparivano mai.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrVuoto("esperienze_formali")).
+                  Dara(FrVuoto("esperienze_informali")).
+                  Dara(FrCompetenze("{}")).
+                  Dara(FrFormazione("Diploma",
+                       "{""esperienze_formali"": [""tre anni in magazzino""], ""competenze"": [""so arrangiarmi""]}")).
+                  Dara(FrVuoto("esperienze_formali")).
+                  Dara(FrCompetenze("{}", "Sapersi arrangiare"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+            Await dialogo.RispondiAsync("Nessuna")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+            Await dialogo.RispondiAsync("Nessuna")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+            Await dialogo.RispondiAsync("Niente")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+            Await ConfermaAsync(dialogo, "Il diploma; tre anni in magazzino, so arrangiarmi")
+            Dim mossa As Mossa = Await dialogo.ScegliAsync(Scelte.Procedi)
+
+            Assert.HasCount(2, mossa.Echi, "un'eco per ciascun recupero")
+            Assert.Contains("tre anni in magazzino", mossa.Echi(0).Testo, "le parole del primo gruppo")
+            Assert.Contains("so arrangiarmi", mossa.Echi(1).Testo, "e quelle del secondo")
+            Assert.IsLessThan(mossa.Echi(1).DopoDetti, mossa.Echi(0).DopoDetti,
+                              "ciascuna ancorata al suo punto")
+            Assert.AreEqual(TipoMossa.ChiediScelta, mossa.Tipo, "e il secondo recupero chiede conferma")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlDialogoSiAvviaUnaVoltaSola() As Task
+
+            ' Riavviare la stessa istanza accumulerebbe i dati del giro precedente:
+            ' per ricominciare se ne crea uno nuovo (è ciò che fa il pannello).
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome)
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await dialogo.AvviaAsync()
+
+            Await Assert.ThrowsAsync(Of InvalidOperationException)(
+                Function() dialogo.AvviaAsync())
+
+            Dim vergine As New DialogoProfilo(New StrutturatoreFinto())
+            Await Assert.ThrowsAsync(Of InvalidOperationException)(
+                Function() vergine.RispondiAsync("una risposta prima dell'avvio"))
+
+        End Function
+
         ' ------------------------------------------------------------------
         ' I comportamenti particolari dei turni
         ' ------------------------------------------------------------------

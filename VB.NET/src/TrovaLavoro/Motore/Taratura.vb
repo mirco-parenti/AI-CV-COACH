@@ -158,10 +158,14 @@ Namespace Motore
 
             Dim mappa As New Dictionary(Of String, Double)
             For Each voce As KeyValuePair(Of String, JsonNode) In nodo
+                ' Un valore non numerico («"1"» fra virgolette, un true) scarta la
+                ' mappa intera e lascia la predefinita: prima faceva cadere l'avvio
+                ' (contro il cap. 11.6), e tenere solo le voci buone falserebbe il
+                ' punteggio in silenzio — una chiave assente esclude quegli esiti.
                 Dim valore As JsonValue = TryCast(voce.Value, JsonValue)
-                If valore IsNot Nothing Then
-                    mappa(voce.Key.Trim().ToLowerInvariant()) = valore.GetValue(Of Double)()
-                End If
+                Dim numero As Double
+                If valore Is Nothing OrElse Not valore.TryGetValue(Of Double)(numero) Then Return
+                mappa(voce.Key.Trim().ToLowerInvariant()) = numero
             Next
 
             If mappa.Count > 0 Then destinazione = mappa

@@ -101,6 +101,40 @@ Namespace Dati
         End Function
 
         ''' <summary>
+        ''' Mette da parte una copia del profilo corrente che non si lascia leggere,
+        ''' col nome <c>profilo.rotto-…</c> accanto all'originale, e ne restituisce il
+        ''' percorso (<c>Nothing</c> se non c'è niente da copiare o la copia fallisce).
+        ''' </summary>
+        ''' <remarks>
+        ''' È il complemento della promessa «il file resta lì da recuperare a mano»:
+        ''' senza questa copia, il primo «Salva» dopo l'errore sovrascriverebbe il file
+        ''' corrotto — che magari era recuperabile — con il profilo quasi vuoto mostrato
+        ''' al suo posto. La copia non si fa mai due volte per lo stesso contenuto: se
+        ''' un salvataggio con lo stesso nome c'è già, va bene quello.
+        ''' </remarks>
+        Public Function MettiInSalvoIlCorrotto() As String
+
+            If Not Esiste Then Return Nothing
+
+            Dim destinazione As String = Path.Combine(
+                _cartella.CartellaProfilo,
+                "profilo.rotto-" & Date.Now.ToString("yyyy-MM-dd_HHmmss", CultureInfo.InvariantCulture) & ".json")
+
+            Try
+                If Not File.Exists(destinazione) Then
+                    File.Copy(_cartella.FileProfilo, destinazione)
+                End If
+                Return destinazione
+            Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                       TypeOf ex Is UnauthorizedAccessException
+                ' Se nemmeno la copia riesce, il chiamante lo dice: meglio un avviso
+                ' in più che una promessa di recupero non mantenuta.
+                Return Nothing
+            End Try
+
+        End Function
+
+        ''' <summary>
         ''' Le versioni conservate, dalla più vecchia alla più recente. Il nome è fatto
         ''' apposta perché l'ordine alfabetico sia già l'ordine del tempo.
         ''' </summary>

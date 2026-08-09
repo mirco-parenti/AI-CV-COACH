@@ -379,8 +379,12 @@ Namespace Ai
             End If
 
             If stato >= 500 Then
+                ' Anche sui guasti temporanei (529 «overloaded» compreso) l'API può
+                ' suggerire quanto aspettare: ignorarlo farebbe ritentare contro lo
+                ' stesso muro dopo la pausa fissa.
                 Return New ErroreAi(CausaErroreAi.Servizio,
-                    $"L'AI ha un problema temporaneo (HTTP {stato}).{dettaglio}")
+                    $"L'AI ha un problema temporaneo (HTTP {stato}).{dettaglio}",
+                    Nothing, AttesaConsigliata(risposta))
             End If
 
             Return New ErroreAi(CausaErroreAi.Richiesta,

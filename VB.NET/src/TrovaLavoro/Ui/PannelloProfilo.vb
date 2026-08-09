@@ -74,6 +74,10 @@ Public Class PannelloProfilo
 
         InitializeComponent()
 
+        ' Il ToolTip nasce qui e non nel Designer: lo si smaltisce col pannello,
+        ' altrimenti resterebbe un componente orfano.
+        AddHandler Me.Disposed, Sub() _suggerimenti.Dispose()
+
         VestiIBottoni()
         PreparaLaPatente()
 
@@ -108,6 +112,22 @@ Public Class PannelloProfilo
             Return _modificato
         End Get
     End Property
+
+    ''' <summary>
+    ''' Se in questo momento un CV sta passando dall'AI. La finestra lo chiede prima di
+    ''' chiudersi: una lettura in corso non compare fra le «modifiche non salvate», ma
+    ''' chiudere adesso ne butterebbe l'esito.
+    ''' </summary>
+    Public ReadOnly Property HaUnaLetturaInCorso As Boolean
+        Get
+            Return _annullaImport IsNot Nothing
+        End Get
+    End Property
+
+    ''' <summary>Annulla la lettura in corso, se c'è: è la via pulita della chiusura.</summary>
+    Public Sub AnnullaLaLettura()
+        _annullaImport?.Cancel()
+    End Sub
 
     ''' <inheritdoc/>
     Public Sub ImpostaIngombroLogo(ingombro As Size) Implements IPannelloArea.ImpostaIngombroLogo
@@ -177,11 +197,17 @@ Public Class PannelloProfilo
 
         Catch ex As Exception When TypeOf ex Is JsonException OrElse TypeOf ex Is IOException _
                                    OrElse TypeOf ex Is UnauthorizedAccessException
-            ' Il file resta dov'è, intatto: si dice cosa non va e dove guardare.
+            ' Prima di ogni altra cosa, il file illeggibile si mette in salvo: da qui
+            ' in poi basta un tasto per armare «Salva», che lo sovrascriverebbe — e
+            ' la promessa «resta lì da recuperare» diventerebbe una bugia.
+            Dim copia As String = _contesto.Archivio.MettiInSalvoIlCorrotto()
+
             Mostra(New Profilo())
             RaccontaLoStato(
                 $"Il profilo c'è ma non si lascia leggere: {ex.Message}" & vbLf &
-                $"Il file è {_contesto.Cartella.FileProfilo}: correggilo a mano, oppure reimporta il CV.",
+                If(copia IsNot Nothing,
+                   $"Ne ho messo una copia di sicurezza in {copia}: correggila a mano, oppure reimporta il CV.",
+                   $"Il file è {_contesto.Cartella.FileProfilo}: correggilo a mano, oppure reimporta il CV."),
                 StileApp.Pericolo)
         End Try
 
@@ -430,7 +456,13 @@ Public Class PannelloProfilo
 
         Dim risposta As String = If(TryCast(cmbPatente.SelectedItem, String), PatenteNonIndicata)
         _profilo.Patente.Ha = If(risposta = PatenteNonIndicata, "", risposta)
-        _profilo.Patente.Categorie = Categorie(txtCategorie.Text)
+
+        ' Le categorie hanno senso solo con la patente dichiarata: un «no» con
+        ' accanto ["B"] è una contraddizione che poi finirebbe dritta nei prompt del
+        ' confronto. Il testo della casella non si tocca: se l'utente torna su «sì»,
+        ' le sue categorie ricompaiono nel profilo da sole.
+        _profilo.Patente.Categorie = If(risposta = PatenteSi,
+                                        Categorie(txtCategorie.Text), New List(Of String))
 
         SegnaModificato()
 
@@ -634,6 +666,10 @@ Public Class PannelloProfilo
 
     Private Sub btnSalva_Click(sender As Object, e As EventArgs) Handles btnSalva.Click
 
+        ' Un «Aggiungi» premuto e mai riempito non deve finire su disco: una voce
+        ' tutta vuota passerebbe poi nei prompt come un'esperienza fantasma.
+        If PotaLeVociVuote() Then Mostra(_profilo)
+
         Try
             _contesto.Archivio.Salva(_profilo)
 
@@ -652,6 +688,27 @@ Public Class PannelloProfilo
         End Try
 
     End Sub
+
+    ''' <summary>
+    ''' Toglie dal profilo le voci completamente vuote (e le competenze bianche);
+    ''' <c>True</c> se ha tolto qualcosa. Le voci riempite a metà restano: quelle sono
+    ''' dati dell'utente, non residui di un bottone premuto per sbaglio.
+    ''' </summary>
+    Private Function PotaLeVociVuote() As Boolean
+
+        Dim tolte As Integer = 0
+
+        tolte += _profilo.EsperienzeFormali.RemoveAll(
+            Function(v) $"{v.Ruolo}{v.Azienda}{v.Durata}{v.CosaFacevo}{v.Tipo}".Trim() = "")
+        tolte += _profilo.EsperienzeInformali.RemoveAll(
+            Function(v) $"{v.CosaFacevo}{v.Quando}{v.ConChi}".Trim() = "")
+        tolte += _profilo.Formazione.RemoveAll(
+            Function(v) $"{v.Titolo}{v.Istituto}{v.Anno}".Trim() = "")
+        tolte += _profilo.Competenze.RemoveAll(AddressOf String.IsNullOrWhiteSpace)
+
+        Return tolte > 0
+
+    End Function
 
     ' ==================================================================
     ' Importare da un CV
@@ -794,6 +851,12 @@ Public Class PannelloProfilo
 
         If Not PossoSostituireIlProfilo($"Il profilo che arriva {provenienza}") Then Return False
 
+        ' La scheda «Testo letto» apparteneva a un CV importato: questo profilo non ne
+        ' deriva più, e lasciarla lì mentirebbe sul controllo campo-per-campo.
+        If tabSezioni.TabPages.Contains(tabTestoLetto) Then
+            tabSezioni.TabPages.Remove(tabTestoLetto)
+        End If
+
         Mostra(profilo)
 
         _modificato = True
@@ -911,6 +974,11 @@ Public Class PannelloProfilo
         Next
 
         cmbPatente.Enabled = Not occupato
+
+        ' Le categorie si scrivono solo con la patente dichiarata: una casella accesa
+        ' accanto a un «no» inviterebbe a scrivere qualcosa che il profilo non terrà.
+        txtCategorie.Enabled = Not occupato AndAlso
+                               String.Equals(TryCast(cmbPatente.SelectedItem, String), PatenteSi)
 
     End Sub
 

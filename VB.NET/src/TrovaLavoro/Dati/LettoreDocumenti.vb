@@ -40,6 +40,14 @@ Namespace Dati
         Private Const ParteDocumento As String = "word/document.xml"
 
         ''' <summary>
+        ''' Quanto può pesare <c>word/document.xml</c> una volta estratto. Un corpo di
+        ''' documento oltre questa misura non è un CV: è un file sbagliato o un archivio
+        ''' costruito apposta per gonfiarsi in memoria (zip bomb), e va fermato prima di
+        ''' materializzarlo.
+        ''' </summary>
+        Private Const DimensioneMassimaCorpoDocx As Long = 64L * 1024L * 1024L
+
+        ''' <summary>
         ''' UTF-8 che <b>protesta</b> invece di sostituire i byte che non capisce: è così
         ''' che si distingue un file davvero UTF-8 da uno salvato con la codifica di
         ''' sistema, senza doverlo indovinare.
@@ -120,9 +128,42 @@ Namespace Dati
             Try
                 Return Utf8Severo.GetString(byteFile)
             Catch ex As DecoderFallbackException
-                ' 3. Non erano UTF-8: allora è un file nella codifica ANSI di Windows.
+                ' 3. Non erano UTF-8. Un testo pieno di byte zero non è ANSI: è quasi
+                ' certamente UTF-16 senza BOM (capita a file salvati da strumenti
+                ' Windows), e decodificarlo come ANSI darebbe parole crivellate di
+                ' caratteri nulli che passerebbero avanti senza avviso.
+                Dim versoUtf16 As Encoding = ProbabileUtf16(byteFile)
+                If versoUtf16 IsNot Nothing Then Return versoUtf16.GetString(byteFile)
+
+                ' 4. Allora è un file nella codifica ANSI di Windows.
                 Return DaAnsi(byteFile)
             End Try
+
+        End Function
+
+        ''' <summary>
+        ''' Riconosce l'UTF-16 senza BOM dai byte zero: in un testo latino UTF-16 metà
+        ''' dei byte è zero, e la loro posizione (pari o dispari) dice il verso.
+        ''' Restituisce la codifica da usare, o <c>Nothing</c> se non sembra UTF-16.
+        ''' </summary>
+        Private Shared Function ProbabileUtf16(byteFile As Byte()) As Encoding
+
+            Dim zeriPari As Integer = 0
+            Dim zeriDispari As Integer = 0
+
+            For posizione As Integer = 0 To byteFile.Length - 1
+                If byteFile(posizione) = 0 Then
+                    If posizione Mod 2 = 0 Then zeriPari += 1 Else zeriDispari += 1
+                End If
+            Next
+
+            ' In un testo latino UTF-16 gli zeri sono circa metà dei byte, tutti dallo
+            ' stesso lato; un terzo abbondante è già una firma inequivocabile.
+            Dim soglia As Integer = byteFile.Length \ 3
+            If zeriDispari > soglia AndAlso zeriPari < byteFile.Length \ 20 Then Return Encoding.Unicode
+            If zeriPari > soglia AndAlso zeriDispari < byteFile.Length \ 20 Then Return Encoding.BigEndianUnicode
+
+            Return Nothing
 
         End Function
 
@@ -179,12 +220,18 @@ Namespace Dati
             Dim nome As String = Path.GetFileName(percorso)
             Dim documento As XDocument = Nothing
 
+            ' Il lancio per il corpo enorme sta fuori dal Try: dentro verrebbe
+            ' ri-avvolto dal Catch qui sotto col messaggio dell'archivio corrotto.
+            Dim corpoEnorme As Long = 0
+
             Try
                 Using archivio As ZipArchive = ZipFile.OpenRead(percorso)
 
                     Dim parte As ZipArchiveEntry = archivio.GetEntry(ParteDocumento)
 
-                    If parte IsNot Nothing Then
+                    If parte IsNot Nothing AndAlso parte.Length > DimensioneMassimaCorpoDocx Then
+                        corpoEnorme = parte.Length
+                    ElseIf parte IsNot Nothing Then
                         Using flusso As Stream = parte.Open()
                             documento = XDocument.Load(flusso)
                         End Using
@@ -203,6 +250,12 @@ Namespace Dati
                 Throw New InvalidDataException(
                     $"«{nome}»: il corpo del documento di Word è illeggibile.", ex)
             End Try
+
+            If corpoEnorme > 0 Then
+                Throw New InvalidDataException(
+                    $"«{nome}»: il corpo del documento di Word è enorme " &
+                    $"({corpoEnorme \ (1024L * 1024L)} MB estratti): non sembra un CV.")
+            End If
 
             If documento Is Nothing Then
                 Throw New InvalidDataException(

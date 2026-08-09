@@ -1,4 +1,17 @@
+Imports System.Linq
+
 Namespace Motore
+
+    ''' <summary>Un'eco: le parole dell'utente da rimettere in bocca, e dove.</summary>
+    Public Class EcoMossa
+
+        ''' <summary>Le parole dell'utente, così come le aveva dette.</summary>
+        Public Property Testo As String = ""
+
+        ''' <summary>Dopo quante bolle di <see cref="Mossa.Detto"/> va mostrata.</summary>
+        Public Property DopoDetti As Integer
+
+    End Class
 
     ''' <summary>Cosa il dialogo si aspetta adesso dall'utente.</summary>
     Public Enum TipoMossa
@@ -83,10 +96,33 @@ Namespace Motore
         Public Property Detto As New List(Of String)
 
         ''' <summary>
-        ''' Ciò che si rimette in bocca all'utente: le parole che aveva detto in un altro
-        ''' turno e che il dialogo sta recuperando adesso (anti-perdita). Vuoto di norma.
+        ''' Le parole rimesse in bocca all'utente (anti-perdita), <b>ancorate al punto
+        ''' della conversazione</b> in cui vanno dette: ogni eco sa dopo quale bolla
+        ''' dell'assistente comparire. Senza l'ancora, l'eco finiva dopo tutto il detto
+        ''' — e quando il ripescaggio falliva l'utente leggeva «lo lascio fuori: X»
+        ''' <i>prima</i> di rivedere le proprie parole; e nella passata finale con più
+        ''' categorie un campo singolo ne conservava una sola.
         ''' </summary>
-        Public Property EcoUtente As String
+        Public Property Echi As New List(Of EcoMossa)
+
+        ''' <summary>
+        ''' Aggiunge un'eco ancorata a questo punto: comparirà dopo le bolle di
+        ''' <see cref="Detto"/> già presenti adesso.
+        ''' </summary>
+        Public Sub AggiungiEco(testo As String)
+            Echi.Add(New EcoMossa With {.Testo = testo, .DopoDetti = Detto.Count})
+        End Sub
+
+        ''' <summary>
+        ''' Tutte le parole ripescate della mossa, in una riga: è la vista d'insieme che
+        ''' usano i collaudi e i rapporti; per disegnare vale <see cref="Echi"/>.
+        ''' </summary>
+        Public ReadOnly Property EcoUtente As String
+            Get
+                If Echi.Count = 0 Then Return Nothing
+                Return String.Join(" / ", Echi.Select(Function(e) e.Testo))
+            End Get
+        End Property
 
         ''' <summary>Le schede da mostrare sotto il testo.</summary>
         Public Property Schede As New List(Of Scheda)

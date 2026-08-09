@@ -69,12 +69,25 @@ Namespace Ai
                                              Optional annulla As CancellationToken = Nothing) _
                                              As Task(Of JsonNode) Implements IStrutturatoreTurni.StrutturaAsync
 
-            Dim prompt As Prompt = _libreria.Carica(turno)
+            ' Gli inciampi del pool — un frontmatter rotto, un segnaposto in più, un
+            ' livello di modello scritto male — diventano ErroreAi: il pool esterno è
+            ' modificabile per design (cap. 04.2), e chi sperimenta deve ricevere il
+            ' messaggio in italiano dei pannelli, non un crash a metà dialogo.
+            Dim uscita As RispostaAi
+            Try
+                Dim prompt As Prompt = _libreria.Carica(turno)
 
-            Dim testo As String = LibreriaPrompt.Riempi(prompt, New Dictionary(Of String, String) From {
-                {SegnapostoRisposta, If(risposta, String.Empty)}})
+                Dim testo As String = LibreriaPrompt.Riempi(prompt, New Dictionary(Of String, String) From {
+                    {SegnapostoRisposta, If(risposta, String.Empty)}})
 
-            Dim uscita As RispostaAi = Await _client.ChiediAsync(prompt, testo, annulla).ConfigureAwait(False)
+                uscita = Await _client.ChiediAsync(prompt, testo, annulla).ConfigureAwait(False)
+
+            Catch ex As Exception When TypeOf ex Is IO.InvalidDataException OrElse
+                                       TypeOf ex Is IO.IOException OrElse
+                                       TypeOf ex Is ArgumentException
+                Throw New ErroreAi(CausaErroreAi.Richiesta,
+                    $"Il prompt «{turno}» del pool non è utilizzabile: {ex.Message}", ex)
+            End Try
 
             Try
                 Return EstrattoreJson.Estrai(uscita.Testo)

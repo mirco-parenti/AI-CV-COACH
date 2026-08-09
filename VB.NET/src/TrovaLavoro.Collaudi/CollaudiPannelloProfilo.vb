@@ -158,8 +158,10 @@ Namespace Ui
 
         <TestMethod>
         Public Sub UnProfiloRottoSiDiceSenzaSvuotareNiente()
-            ' Cap. 11.1: un profilo illeggibile non ripiega su un profilo vuoto. Il file
-            ' resta dov'è e il pannello dice cosa non va e dove guardare, in rosso.
+            ' Cap. 11.1: un profilo illeggibile non ripiega su un profilo vuoto. Prima
+            ' di ogni altra cosa se ne mette in salvo una copia — da qui in poi basta
+            ' un tasto per armare «Salva», che sovrascriverebbe il file da recuperare —
+            ' e il pannello dice cosa non va e dove sta la copia, in rosso.
             ConCartellaTemporanea(
                 Sub(radice)
                     Dim cartella As New CartellaDati(radice)
@@ -173,11 +175,17 @@ Namespace Ui
 
                         Dim stato As Label = Etichetta(pannello, "lblStatoProfilo")
                         Assert.Contains("non si lascia leggere", stato.Text, "lo dice")
-                        Assert.Contains(cartella.FileProfilo, stato.Text, "e dice dove")
+                        Assert.Contains("copia di sicurezza", stato.Text, "e dice della copia")
                         Assert.AreEqual(StileApp.Pericolo, stato.ForeColor, "con il colore dell'errore")
 
                         Assert.IsEmpty(Casella(pannello, "txtNome").Text, "niente dati inventati al posto suoi")
                         Assert.IsTrue(File.Exists(cartella.FileProfilo), "e il file rotto resta lì da recuperare")
+
+                        Dim copie As String() = Directory.GetFiles(cartella.CartellaProfilo, "profilo.rotto-*.json")
+                        Assert.HasCount(1, copie, "la copia di sicurezza c'è, una sola")
+                        Assert.AreEqual("{ questo non è JSON", File.ReadAllText(copie(0)),
+                                        "ed è il contenuto rotto, intatto")
+                        Assert.Contains(copie(0), stato.Text, "il messaggio la nomina per esteso")
                     End Using
                 End Sub)
         End Sub
@@ -301,6 +309,53 @@ Namespace Ui
                     Assert.AreEqual("sì", patente.Ha, "la risposta resta quella del profilo di partenza")
                     CollectionAssert.AreEqual(New List(Of String) From {"B", "C"}, patente.Categorie,
                                               "e le due categorie sono distinte")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub LeVociVuoteNonFinisconoSuDisco()
+            ' Un «Aggiungi» premuto e mai riempito non deve arrivare nei prompt come
+            ' un'esperienza fantasma: al salvataggio le voci tutte vuote si potano,
+            ' dal profilo e dalla lista.
+            ConProfiloSalvato(
+                Sub(pannello, archivio)
+                    Bottone(pannello, "btnAggiungiLavoro").PerformClick()
+                    Bottone(pannello, "btnSalva").PerformClick()
+
+                    Assert.HasCount(2, archivio.Carica().EsperienzeFormali,
+                                    "la voce mai riempita non è entrata")
+                    Assert.HasCount(2, Elenco(pannello, "lstLavoro").Items,
+                                    "e la lista si è ripulita")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub UnNoAllaPatenteNonSiPortaDietroLeCategorie()
+            ' «no» con accanto ["B"] è una contraddizione che finirebbe nei prompt del
+            ' confronto: le categorie valgono solo con la patente dichiarata, e la
+            ' casella si spegne per non invitare a scrivere ciò che non verrà tenuto.
+            ConProfiloSalvato(
+                Sub(pannello, archivio)
+                    Dim scelta As ComboBox =
+                        DirectCast(pannello.Controls.Find("cmbPatente", searchAllChildren:=True).Single(), ComboBox)
+
+                    Assert.IsTrue(Casella(pannello, "txtCategorie").Enabled, "con «sì» si scrivono")
+
+                    scelta.SelectedItem = "no"
+                    Assert.IsFalse(Casella(pannello, "txtCategorie").Enabled, "con «no» la casella si spegne")
+
+                    Bottone(pannello, "btnSalva").PerformClick()
+                    Dim patente As PatenteProfilo = archivio.Carica().Patente
+                    Assert.AreEqual("no", patente.Ha, "il no è salvato")
+                    Assert.IsEmpty(patente.Categorie, "senza categorie residue")
+
+                    ' Tornando su «sì» le categorie scritte prima ricompaiono da sole:
+                    ' il testo della casella non era stato buttato.
+                    scelta.SelectedItem = "sì"
+                    Assert.IsTrue(Casella(pannello, "txtCategorie").Enabled, "la casella si riaccende")
+
+                    Bottone(pannello, "btnSalva").PerformClick()
+                    Assert.HasCount(1, archivio.Carica().Patente.Categorie, "e la categoria è tornata")
                 End Sub)
         End Sub
 

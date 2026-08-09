@@ -123,7 +123,23 @@ Public Class FormPrincipale
 
         If Not pnlProfilo.ProponiProfilo(pnlDialogo.ProfiloCostruito, "dal dialogo guidato") Then Return
 
+        ' Da qui il racconto è al sicuro nella scheda: il dialogo lo sa, così la
+        ' chiusura non avvisa più per un profilo già consegnato.
+        pnlDialogo.SegnaConsegnato()
+
         MostraPannello(pnlProfilo, btnProfilo)
+
+    End Sub
+
+    ''' <summary>
+    ''' «Mentre l'AI lavora non si esce» vale anche per la barra: senza questo blocco,
+    ''' da qui si aggirava la guardia del pannello e si poteva lanciare un import
+    ''' concorrente mentre un turno era in volo.
+    ''' </summary>
+    Private Sub pnlDialogo_LavoroAiCambiato(sender As Object, e As EventArgs) _
+        Handles pnlDialogo.LavoroAiCambiato
+
+        btnProfilo.Enabled = Not pnlDialogo.AiAlLavoro
 
     End Sub
 
@@ -145,6 +161,17 @@ Public Class FormPrincipale
             inSospeso.Add("un dialogo cominciato e non finito")
         End If
 
+        ' Il caso peggiore: il dialogo è arrivato in fondo ma il profilo non è mai
+        ' stato portato nella scheda — non risulta «in corso», eppure vive solo in
+        ' memoria e chiudere adesso lo perderebbe tutto.
+        If pnlDialogo.HaUnRaccontoNonConsegnato Then
+            inSospeso.Add("un profilo costruito col dialogo e non ancora portato nella scheda")
+        End If
+
+        If pnlProfilo.HaUnaLetturaInCorso Then
+            inSospeso.Add("una lettura del CV ancora in corso")
+        End If
+
         If inSospeso.Count = 0 Then Return
 
         Dim risposta As DialogResult = MessageBox.Show(
@@ -157,6 +184,9 @@ Public Class FormPrincipale
     End Sub
 
     Private Sub FormPrincipale_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
+        ' Una lettura ancora in volo si annulla prima di smaltire il client: la
+        ' chiamata muore per la via pulita dell'annullo, non su un HttpClient disposto.
+        pnlProfilo.AnnullaLaLettura()
         _contesto?.Dispose()
     End Sub
 

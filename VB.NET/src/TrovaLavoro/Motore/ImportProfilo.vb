@@ -99,6 +99,22 @@ Namespace Motore
         ''' </summary>
         Public Const CaratteriMinimi As Integer = 200
 
+        ''' <summary>
+        ''' Sopra quanti caratteri il testo ricavato non è un CV. È il gemello del
+        ''' minimo, con lo stesso mestiere: fermarsi con una spiegazione invece di
+        ''' spedire all'AI un file sbagliato — un log rinominato, un'esportazione — che
+        ''' fallirebbe comunque, dopo, con un errore che non spiega niente. Il numero è
+        ''' volutamente enorme: un CV vero non ci arriva mai neanche lontanamente.
+        ''' </summary>
+        Public Const CaratteriMassimi As Integer = 200_000
+
+        ''' <summary>
+        ''' Quanto può pesare un documento da leggere dal disco (TXT, MD, DOCX). Serve a
+        ''' non caricare in memoria qualcosa che un CV non è: il limite è largo apposta,
+        ''' perché un DOCX con una foto pesa legittimamente parecchi MB.
+        ''' </summary>
+        Public Const DimensioneMassimaDocumento As Long = 100L * 1024L * 1024L
+
         Private ReadOnly _strutturatore As IStrutturatoreTurni
         Private ReadOnly _trascrittore As ITrascrittorePdf
 
@@ -150,6 +166,12 @@ Namespace Motore
                 Throw New ErroreImport(CausaImport.TestoTroppoCorto, MotivoTestoCorto(nome, formato))
             End If
 
+            If testo.Length > CaratteriMassimi Then
+                Throw New ErroreImport(CausaImport.FileTroppoGrande,
+                    $"Da «{nome}» sono usciti {testo.Length \ 1000} mila caratteri: troppi per essere " &
+                    "un CV. Controlla di aver indicato il file giusto.")
+            End If
+
             Dim esito As EsitoImport = Await DaTestoAsync(testo, percorso, annulla).ConfigureAwait(False)
             esito.Formato = formato
 
@@ -192,35 +214,55 @@ Namespace Motore
         End Function
 
         ''' <summary>Passo 1: il testo del documento, per la via che il formato richiede.</summary>
+        ''' <remarks>
+        ''' Tutto il metodo sta sotto lo stesso ombrello: qualunque inciampo di lettura
+        ''' — file sparito dopo la scelta, chiavetta smontata, permessi negati — esce da
+        ''' qui come <see cref="ErroreImport"/>, mai come eccezione grezza. Il ramo PDF
+        ''' ne ha bisogno quanto quello del disco: <c>FileInfo</c> e la lettura del
+        ''' trascrittore toccano il file esattamente come <c>LeggiTesto</c>.
+        ''' </remarks>
         Private Async Function TestoDelDocumentoAsync(percorso As String, nome As String,
                                                       formato As FormatoDocumento,
                                                       annulla As CancellationToken) As Task(Of String)
 
-            If formato = FormatoDocumento.Pdf Then
-
-                If _trascrittore Is Nothing Then
-                    Throw New ErroreImport(CausaImport.FormatoNonSupportato,
-                        "Per leggere un PDF serve l'AI, e qui non è disponibile. " &
-                        "Puoi importare il CV in DOCX, TXT o MD, oppure incollarne il testo.")
-                End If
-
-                Dim quantoPesa As Long = New FileInfo(percorso).Length
-                If quantoPesa > TrascrittorePdf.DimensioneMassima Then
-                    Throw New ErroreImport(CausaImport.FileTroppoGrande,
-                        $"«{nome}» pesa {quantoPesa \ (1024L * 1024L)} MB e supera il limite di " &
-                        $"{TrascrittorePdf.DimensioneMassima \ (1024L * 1024L)} MB per un PDF. " &
-                        "Esporta un PDF più leggero, oppure incolla il testo del CV a mano.")
-                End If
-
-                Return Await _trascrittore.TrascriviAsync(percorso, annulla).ConfigureAwait(False)
-
-            End If
-
             Try
-                Return LettoreDocumenti.LeggiTesto(percorso)
+
+                If formato = FormatoDocumento.Pdf Then
+
+                    If _trascrittore Is Nothing Then
+                        Throw New ErroreImport(CausaImport.FormatoNonSupportato,
+                            "Per leggere un PDF serve l'AI, e qui non è disponibile. " &
+                            "Puoi importare il CV in DOCX, TXT o MD, oppure incollarne il testo.")
+                    End If
+
+                    Dim quantoPesa As Long = New FileInfo(percorso).Length
+                    If quantoPesa > TrascrittorePdf.DimensioneMassima Then
+                        Throw New ErroreImport(CausaImport.FileTroppoGrande,
+                            $"«{nome}» pesa {quantoPesa \ (1024L * 1024L)} MB e supera il limite di " &
+                            $"{TrascrittorePdf.DimensioneMassima \ (1024L * 1024L)} MB per un PDF. " &
+                            "Esporta un PDF più leggero, oppure incolla il testo del CV a mano.")
+                    End If
+
+                    Return Await _trascrittore.TrascriviAsync(percorso, annulla).ConfigureAwait(False)
+
+                End If
+
+                Dim pesoDocumento As Long = New FileInfo(percorso).Length
+                If pesoDocumento > DimensioneMassimaDocumento Then
+                    Throw New ErroreImport(CausaImport.FileTroppoGrande,
+                        $"«{nome}» pesa {pesoDocumento \ (1024L * 1024L)} MB: troppo per essere un CV. " &
+                        "Controlla di aver indicato il file giusto.")
+                End If
+
+                ' La lettura passa dal thread pool: un file grande o un disco lento non
+                ' devono congelare l'interfaccia, che qui sta mostrando «Sto leggendo…».
+                Return Await Task.Run(Function() LettoreDocumenti.LeggiTesto(percorso), annulla).
+                    ConfigureAwait(False)
+
             Catch ex As InvalidDataException
                 Throw New ErroreImport(CausaImport.DocumentoIllegibile, ex.Message, ex)
-            Catch ex As IOException
+            Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                       TypeOf ex Is UnauthorizedAccessException
                 Throw New ErroreImport(CausaImport.DocumentoIllegibile,
                     $"Non riesco a leggere «{nome}»: {ex.Message}", ex)
             End Try
