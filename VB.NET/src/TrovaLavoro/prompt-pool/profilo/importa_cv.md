@@ -27,7 +27,10 @@ Ricava questi campi del profilo dal testo del CV:
 - Campo mancante: stringa vuota "" o lista vuota []. Mai riempirlo a indovinare.
 - Normalizzazione leggera: riordina e ripulisci mettendo il dato nel campo giusto, ma resta aderente alle parole del CV. Niente sinonimi "professionali" aggiunti, niente significati tolti.
 - Distingui per natura: un lavoro con un ruolo e un datore va in "esperienze_formali"; volontariato, aiuti e passioni in "esperienze_informali". Non promuovere un'attività informale a impiego formale, né viceversa.
+- Ogni attività va in UNA sola sezione: se l'hai messa fra le formali non rimetterla fra le informali, e viceversa.
+- Decide la NATURA dell'attività, non la sezione del CV in cui è stampata: molti CV mettono il volontariato sotto "esperienza lavorativa". Se il ruolo o la descrizione dicono che l'attività è volontaria (per esempio "volontario", "volontaria", "volontariato"), va in "esperienze_informali" anche quando ha un ruolo, un'organizzazione e un periodo, e anche quando il CV la stampa fra i lavori.
 - Se una stessa parte del CV contiene più esperienze o più titoli, separale in voci distinte (una per voce).
+- Abilitazioni, corsi e riconoscimenti citati DENTRO la descrizione di un'esperienza restano lì, in "cosa_facevo": non diventano esperienze a sé. Un corso o un titolo elencato fra i percorsi di studio va invece in "formazione".
 - "tipo" (tirocinio/stage) solo se dichiarato apertamente; mai dedotto.
 - Rispondi unicamente con il JSON richiesto, senza testo prima o dopo.
 

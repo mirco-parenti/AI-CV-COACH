@@ -1,7 +1,7 @@
 {
   "formato": 1,
-  "versione_pool": "1.00",
-  "data": "2026-08-06",
+  "versione_pool": "1.01",
+  "data": "2026-08-09",
   "file": [
     {
       "percorso": "annuncio/analisi_annuncio.md",
@@ -49,7 +49,7 @@
     },
     {
       "percorso": "profilo/importa_cv.md",
-      "sha256": "a000f6c517c0902a6ca4f85d83f3c625d7f5d490655fe88bfb59207605e72a7f"
+      "sha256": "5f7a4bec0c14d1dd676bc2010d780f2a3a45579badf0954c8b54b725fa41e9d9"
     },
     {
       "percorso": "profilo/nome.md",

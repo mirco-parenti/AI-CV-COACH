@@ -18,9 +18,12 @@ Imports TrovaLavoro.Dati
 ''' (<c>ruolo</c>, <c>cosa_facevo</c>) vengono riscritti ogni volta con parole diverse e
 ''' appaiarli darebbe falsi negativi a ripetizione. Il limite dichiarato: un doppione in
 ''' cui nessuna delle due voci nomina l'organizzazione, qui non si vede.</para>
-''' <para>Sta nel progetto dei collaudi e non nel prodotto perché per ora <b>osserva</b>:
-''' l'app non potrebbe rimediare da sé (il doppione lo produce il modello), e la cura è
-''' nel prompt. Quando il prompt dirà dove va il volontariato, questo diventa un Assert.</para>
+''' <para>Sta nel progetto dei collaudi e non nel prodotto perché la cura è nel prompt:
+''' l'app non potrebbe rimediare da sé, il doppione lo produce il modello. Nato come
+''' osservatore, dal <b>pool 1.01</b> è un Assert: <c>importa_cv</c> adesso dice che
+''' un'attività va in una sezione sola, quindi un doppione dell'app è un difetto e non
+''' più un caso di confine. Resta un'osservazione per il <b>prototipo</b>, che quella
+''' regola non ce l'ha: lì il doppione si segnala e basta.</para>
 ''' </remarks>
 Friend Module ControlloDoppioni
 
