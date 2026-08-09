@@ -120,7 +120,7 @@ ogni modulo abbia **un compito solo**:
 | `calcolaMatch` + costanti (server.js) | `Motore/CalcoloMatch`, trascrizione 1:1 verificata con casi di collaudo identici |
 | `estraiJson` (server.js) | `Motore/EstrattoreJson`, stessa strategia (percorso felice intatto, ripiego solo nel catch) |
 | Criterio due modelli (Haiku estrazione / Sonnet ragionamento) | metadato `modello:` di ogni prompt del pool (cap. 04) |
-| Macchina a stati del dialogo + magazzino `pending` (index.html) | rinasce nel motore (`Motore/DialogoProfilo`) — stessa logica e **stessi testi**: schede di conferma, instradamento `altrove`, guardia anti-rimbalzo, «lasciato fuori» esplicito. Là ogni passo disegnava da sé la pagina; qui produce una **`Mossa`** (cosa dire, cosa mostrare, cosa aspettarsi) e chi la mostra torna con una risposta o una scelta. La conseguenza è doppia: il pannello si limita a disegnare, e il dialogo intero si collauda senza interfaccia (cap. 14, T3) |
+| Macchina a stati del dialogo + magazzino `pending` (index.html) | rinasce nel motore (`Motore/DialogoProfilo`) — stessa logica e **stessi testi**: schede di conferma, instradamento `altrove`, guardia anti-rimbalzo, «lasciato fuori» esplicito. Là ogni passo disegnava da sé la pagina; qui produce una **`Mossa`** (cosa dire, cosa mostrare, cosa aspettarsi) e chi la mostra torna con una risposta o una scelta. La conseguenza è doppia: il pannello si limita a disegnare, e il dialogo intero si collauda senza interfaccia (cap. 14, T3). *Dal 2026-08-09 (revisione adversariale) la `Mossa` porta anche le **eco ancorate**: le parole dell'utente riproposte nel punto giusto della sequenza — prima del verdetto, non dopo — così il pannello disegna nell'ordine in cui il dialogo pensa, e nella passata finale ogni recupero ha la sua eco* |
 | Soglia 1,5 stelle (index.html) | costante del motore, stesso comportamento (sconsiglia, non impedisce) |
 | Banchi `test-*.html` | rinascono come collaudi del cap. 14 (per-anello, sugli stessi casi) |
 
@@ -199,6 +199,14 @@ consegnata ma la mossa mai ricevuta — e per un'attesa di un paio di secondi no
 prezzo. L'import di un CV, che dura molto di più, l'Annulla ce l'ha.
 Un'operazione per volta per opportunità: niente code parallele nascoste, il flusso
 resta comprensibile.
+
+*Aggiornamento del 2026-08-09 (revisione adversariale)*: l'eccezione regge nel caso
+normale ma ha un caso brutto — su rete degradata un turno può trattenere P5 fino a
+~4 minuti (timeout 120 s × 2 tentativi) senza via d'uscita; l'annullabilità del turno è
+annotata in `idee_future.md`. Intanto la regola «mentre l'AI lavora non si esce» è
+diventata davvero globale: durante una chiamata si blocca anche la **barra di
+navigazione**, dalla quale si poteva uscire dal pannello e lanciare un import
+concorrente.
 
 ## 2.7 Dove vive lo stato
 

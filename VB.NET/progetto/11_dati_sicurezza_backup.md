@@ -38,6 +38,11 @@ TrovaLavoro\
   aggiornamento) salva una copia datata nello storico; `stato.json` di ogni
   opportunità annota **con quale versione** del profilo furono generati i documenti.
   Così un CV inviato resta sempre spiegabile, anche a profilo evoluto.
+- **Un profilo corrotto si mette in salvo, mai in pericolo** *(2026-08-09, revisione
+  adversariale)*: se `profilo.json` non si legge, l'app ne copia **subito** una fotografia
+  (`profilo.rotto-<data>.json`) prima che qualunque «Salva» possa sovrascriverlo, e il
+  messaggio dice dove sta la copia. La promessa «il file resta lì da recuperare» ora è
+  mantenuta anche se l'utente preme un tasto qualsiasi.
 - Formati **JSON con rientri**, leggibili in qualsiasi editor: l'utente è padrone dei
   suoi dati anche senza l'app.
 
@@ -129,6 +134,11 @@ versione da ricompilare e reinstallare su due macchine.
 
 Se il file manca o è illeggibile, il programma usa i valori predefiniti che porta
 dentro di sé e lo annota nel log: una taratura corrotta non deve impedire l'avvio.
+*Precisato il 2026-08-09 (revisione adversariale), quando un valore non numerico
+dentro una mappa dei pesi faceva cadere l'app all'avvio*: una mappa storta **si scarta
+intera** e valgono i predefiniti — tenere solo le voci buone avrebbe falsato il
+punteggio in silenzio, che è peggio di un ripiego dichiarato. La **validazione di
+range dei valori** (un numero assurdo ma ben formato) resta un'idea futura.
 
 **`modelli.json` è il suo gemello** (cap. 02.5): tiene la mappa livello → modello, e
 per ciascun livello anche l'interruttore del ragionamento esteso, che ha **tre** stati

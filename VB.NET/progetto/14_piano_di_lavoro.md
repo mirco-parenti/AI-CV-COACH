@@ -106,6 +106,14 @@ diverse:
 
 **T4 può iniziare.**
 
+*Fra T3 e T4 (2026-08-09) è passata una **revisione adversariale** fuori piano, su
+mandato di Mirco: una ventina di difetti chiusi nel motore e nei pannelli (crash,
+perdite di dati alle cuciture, buchi dell'anti-perdita), il **Pool 1.02** sugli otto
+prompt del profilo (lingue, domicilio, patentini, guardia anti-injection), e la
+validazione sul modello vero. La batteria è salita a **205 collaudi verdi**. Non è una
+tappa: è manutenzione straordinaria fatta prima di aprire T4, narrata nel diario
+(Step 2.8) e nel `CHANGELOG.md` del pool.*
+
 ### T4 — La pipeline di candidatura (F3 + F4 + F5 in italiano)
 Analisi annuncio da testo incollato; confronto con stelle, note e ⛔; pannello P4;
 generazione CV-1/CV-2/lettera in italiano; mitigazione; export **DOCX e PDF**

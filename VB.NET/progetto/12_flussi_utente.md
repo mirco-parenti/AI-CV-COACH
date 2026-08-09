@@ -113,7 +113,11 @@ portato su desktop:
 4. Alla fine: riepilogo leggibile e conferma. Il dialogo **non scrive su disco**: porta
    il profilo raccolto nella scheda P2, dove l'utente lo rivede campo per campo e lo
    salva lui (decisione di T3c, 2026-08-07 — a salvare è sempre la stessa mano, e la
-   scheda resta l'unico posto da cui il profilo entra nell'archivio).
+   scheda resta l'unico posto da cui il profilo entra nell'archivio). *Dal 2026-08-09
+   (revisione adversariale) questa porta unica ha anche la sua rete: un dialogo finito
+   ma **non ancora consegnato** a P2 viene dichiarato se si prova a chiudere l'app —
+   prima si perdeva in silenzio, ed era il paradosso peggiore: a metà racconto l'avviso
+   c'era, a racconto completo no.*
 5. Da lì si può già generare il 📄 CV-1 base (senza alcun annuncio) o proseguire con il
    Flusso A dal punto A3.
 
@@ -164,7 +168,12 @@ Per l'utente evoluto che lavora con Claude Desktop / Claude Code:
 ## 12.7 Regole trasversali dei flussi
 
 - **Mai un vicolo cieco**: da ogni pannello si torna indietro senza perdere ciò che è
-  stato fatto; le operazioni lunghe (chiamate AI) mostrano attesa e sono annullabili.
+  stato fatto; le operazioni lunghe (chiamate AI) mostrano attesa e sono annullabili
+  (con l'eccezione dichiarata del turno di dialogo, cap. 02.6).
+- **La chiusura dichiara ciò che perderebbe** *(2026-08-09, revisione adversariale)*:
+  chiudere l'app con un lavoro a metà — un dialogo non consegnato, un import in volo —
+  non è vietato, ma non è mai silenzioso: l'app lo dice, e l'import in corso viene
+  annullato in modo pulito.
 - **Conferma prima di scrivere**: nessun dato entra nel profilo, nessun file viene
   scritto, nessuna email parte senza un passaggio esplicito di conferma.
 - **Tutto riapribile**: ogni opportunità conserva annuncio, giudizi, documenti

@@ -108,7 +108,9 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   cap. 14 — le batterie di T2 e T3 sono passate, ma i collaudi reali restano rieseguibili
   e gli attesi del banco si rigenerano da `server.js`; a T3 ha fatto da giudice
   sull'import di un CV e su un turno del dialogo. Attenzione: da **Pool 1.01** su
-  `importa_cv` non è più il metro — è il termine di paragone, cap. 04.7): Node ≥ 20.12,
+  `importa_cv`, e dal **Pool 1.02** anche sui sette turni del profilo, non è più il metro
+  — è il termine di paragone, cap. 04.7; il metro carattere-per-carattere resta su
+  `confronto` e `mitigazione`): Node ≥ 20.12,
   **niente dipendenze npm**, chiave in
   `HTML+JS/.env` (`ANTHROPIC_API_KEY`, gitignored — il file va lì, perché il server
   cerca il `.env` nella cartella da cui parte). Avvio: `npm start` **dentro

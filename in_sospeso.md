@@ -48,41 +48,27 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   trascritto dal PDF: provano le *strade di lettura*, non l'impaginazione di Word, che su
   questa postazione non c'è. Serve una macchina che ce l'abbia. *(cap. 05.1; cap. 14, T3,
   gamba A — il limite è dichiarato anche nel collaudo.)*
-- **La città quando il CV ne porta due.** Il CV di prova ha residenza *e* domicilio, e
-  nessun prompt dice quale finisca in `contatti.citta`: a trascrizione identica bit per bit,
-  tre esecuzioni hanno dato tre risposte diverse. Il collaudo perciò **segnala e non boccia**
-  quel campo (⚠️). Da decidere: dichiarare nei prompt che la città è quella del **domicilio**
-  — dove uno è raggiungibile per lavorare — e una sola; poi il campo può tornare un pass/fail.
-  *(2026-08-08; cap. 04; `CollaudoReale.PerchePerLaCitta`.)*
-- **Le lingue non hanno un posto.** Nessun prompt del pool le nomina: «Inglese B2» finisce
-  fra le competenze o svanisce a seconda del giro (misurato: 3, 0, 2, 2, 2 lingue su cinque
-  letture dello stesso CV). Rimedio già concordato, da fare col rito del bump: dire in **due**
-  prompt — `importa_cv` e `competenze`, altrimenti profilo-da-CV e profilo-da-dialogo
-  divergono — che le lingue sono competenze, riportate **come le scrive il CV**, e **mai con
-  un livello non dichiarato** (senza quest'ultima clausola il modello promuove «un po' di
-  inglese» a «Inglese B1», saltando l'anti-invenzione). *(2026-08-08; il campo `lingue` vero e
-  proprio è invece un'idea futura, `idee_future.md`.)*
-- **Il patentino del muletto si perde, dichiarandolo.** Nel dialogo il turno della patente lo
-  instrada alle competenze, il turno delle competenze lo rimanda alla formazione, e la guardia
-  anti-rimbalzo lo scarta con un «lo lascio fuori» — tre giri su tre. Il meccanismo fa
-  esattamente il suo mestiere: è **dove** quel genere di qualifica debba andare che nessun
-  prompt dice. *(2026-08-09; cap. 12.2; il rimedio alternativo — far scegliere all'utente —
-  sta in `idee_future.md`.)*
-- **P5: a dialogo finito resta un buco.** Quando la conversazione chiude, casella e «Invia»
-  spariscono (giusto) ma lo spazio che occupavano resta vuoto, e fra l'ultima bolla e la
-  fascia dei bottoni si apre una fascia morta. Visto solo a video. *(2026-08-09; cap. 03.6.)*
-- **P5: l'eco arriva dopo il verdetto.** Quando un frammento ripescato non si riesce a
-  collocare, l'utente legge «lo lascio fuori: X» *prima* di rivedere le proprie parole: il
-  pannello disegna tutto ciò che l'assistente dice e poi l'eco. Nel caso riuscito l'ordine è
-  giusto (annuncio → eco → schede), in questo no. Sistemarlo tocca il disegno di `Mossa`
-  — oggi le bolle e l'eco viaggiano separate — quindi è una decisione, non una toppa.
-  *(2026-08-09; cap. 02.4; cap. 03.6.)*
 - **La chiave API cifrata (DPAPI) è assegnata a T6.** Oggi arriva dalla variabile
   d'ambiente `ANTHROPIC_API_KEY`, come a T2, e a T3 resta così: il passaggio a
   `segreti.bin` cifrato vuole un posto dove l'utente la digita — primo avvio o
   Impostazioni — che a T3 non esiste ancora. Il cap. 14 non lo assegnava a nessuna
   tappa; deciso il 2026-08-07 di metterlo in **T6**, il cui collaudo già verifica che la
   chiave non compaia in chiaro su disco né nei log. *(cap. 02.5; cap. 11.3; cap. 14, T6.)*
+
+## Da revisione adversariale (2026-08-09)
+
+- **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:
+  a 125/150% di scala — l'impostazione di fabbrica di quasi tutti i portatili recenti — il
+  disegno è fuori misura. Difetto vero, ma correggerlo alla cieca rischiava di rompere il
+  layout **validato a video** in T3: serve uno schermo su cui verificare a 150%.
+  *(cap. 03.5; segnalato dalla revisione, rimandato con motivo.)*
+- **Il «corso senza nome» che una volta su tre sparisce.** Al turno contatti della traccia
+  reale, un corso citato di sfuggita non viene sempre ripescato: varianza del modello, non
+  regressione — l'istruzione nel prompt c'è già, e insistere con altre regole rischia di
+  peggiorare altro. Ma l'anti-perdita promette che nulla si perde in silenzio, quindi non è
+  archiviabile: va ripreso quando si rimetterà mano ai prompt del dialogo (o col salto di
+  modello, v. voce T2). *(casi/reale/dialogo_guidato.md; ricomparso una volta nel giro di
+  validazione del Pool 1.02.)*
 
 ## Chiuse
 
@@ -92,3 +78,30 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   avvisa quando ripiega sui predefiniti. Da allora un numero ritoccato nella cartella dati
   ha effetto sull'applicazione, che era esattamente ciò che non succedeva.
   *(cap. 11.6; cap. 02.3.)*
+- ✅ **La città quando il CV ne porta due** *(aperta il 2026-08-08 da T3, chiusa il
+  2026-08-09 dalla revisione adversariale)*. Il **Pool 1.02** dichiara nei prompt che la
+  città è quella del **domicilio** — dove uno è raggiungibile per lavorare — e una sola;
+  il campo è **tornato un pass/fail** nel collaudo reale, e morde: la residenza oggi
+  boccerebbe. *(cap. 04; pool CHANGELOG 1.02; `CollaudoReale`.)*
+- ✅ **Le lingue non hanno un posto** *(aperta il 2026-08-08 da T3, chiusa il 2026-08-09
+  dalla revisione adversariale)*. Il rimedio concordato è nel **Pool 1.02**, esteso a tutti
+  i prompt che toccano le competenze: le lingue **sono** competenze, riportate come dette,
+  **mai con un livello non dichiarato**. Validato sul CV vero: 3 lingue su 3 ricopiate alla
+  lettera, contro le 0 del prototipo. Il campo `lingue` vero e proprio resta un'idea futura.
+  *(pool CHANGELOG 1.02; diario Step 2.8.)*
+- ✅ **Il patentino del muletto si perde, dichiarandolo** *(aperta il 2026-08-09 da T3,
+  chiusa il 2026-08-09 dalla revisione adversariale)*. Il **Pool 1.02** dà a quel genere di
+  qualifica la sua casa: i **patentini professionali stanno in formazione**, e lo dicono
+  tutti i prompt coinvolti (i blocchi `altrove`, `competenze` che separa l'abilità dal
+  certificato, `patente` che chiarisce che non sono patenti di guida). Nel dialogo reale il
+  muletto atterra in formazione **al primo colpo**. *(pool CHANGELOG 1.02; diario Step 2.8.)*
+- ✅ **P5: a dialogo finito resta un buco** *(aperta il 2026-08-09 da T3, chiusa il
+  2026-08-09 dalla revisione adversariale)*. La fascia della risposta ora **si ritira**
+  quando il dialogo chiude: niente più zona morta fra l'ultima bolla e i bottoni.
+  *(cap. 03.6; commit `a813253`.)*
+- ✅ **P5: l'eco arriva dopo il verdetto** *(aperta il 2026-08-09 da T3, chiusa il
+  2026-08-09 dalla revisione adversariale)*. Era davvero una decisione sul disegno di
+  `Mossa`, ed è stata presa: la mossa ora porta **eco ancorate** al punto giusto della
+  sequenza, così l'utente rivede le proprie parole *prima* del «lo lascio fuori» — e nella
+  passata finale ogni recupero ha la sua eco, dove prima un campo singolo le sovrascriveva.
+  *(cap. 02.4; commit `a813253`.)*

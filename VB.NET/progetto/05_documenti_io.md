@@ -11,7 +11,7 @@ L'utente può fornire un **file singolo** o una **cartella**. Formati accettati:
 | Formato | Come viene letto |
 |---|---|
 | **PDF** | come nel prototipo: il file va all'API in blocco `document` e il modello di estrazione lo **trascrive fedelmente** (metodo validato anche su CV a due colonne). Il testo trascritto passa poi alla strutturazione (`importa_cv`). |
-| **TXT / MD** | lettura diretta dal disco (UTF-8, con riconoscimento del BOM e ripiego sulla codifica ANSI se serve). Il Markdown si usa così com'è: le intestazioni aiutano il modello. |
+| **TXT / MD** | lettura diretta dal disco (UTF-8, con riconoscimento del BOM; UTF-16 anche **senza** BOM; ripiego sulla codifica ANSI se serve). Il Markdown si usa così com'è: le intestazioni aiutano il modello. |
 | **DOCX** | un `.docx` è un archivio ZIP: il programma estrae `word/document.xml` e ne ricava il testo (paragrafi e tabelle, nell'ordine del documento) con gli strumenti standard di .NET — nessuna libreria esterna. |
 
 Casi limite dichiarati:
@@ -23,6 +23,12 @@ Casi limite dichiarati:
   (l'app funziona comunque senza).
 - **PDF oltre i limiti dell'API** (~32 MB / 100 pagine) o protetti da password:
   messaggio chiaro e ripiego incolla-testo.
+- **File enormi, rotti o maligni** *(2026-08-09, revisione adversariale)*: ogni lettura
+  ha un **tetto dichiarato** — dimensione massima del PDF prima di mandarlo all'API,
+  dei documenti letti dal disco e del testo estratto, con una guardia **anti zip-bomb**
+  sul DOCX. E ogni inciampo di lettura — file sparito, chiavetta smontata, permesso
+  negato — esce come `ErroreImport` in italiano, mai come finestra di crash; la lettura
+  gira **fuori dal thread dell'interfaccia**, così la finestra non si congela.
 
 ## 5.2 La cartella documenti
 

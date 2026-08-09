@@ -76,7 +76,9 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
 - **Domicilio confrontabile / automunito**: il **domicilio** è ora chiesto e raccolto nel
   turno contatti (campo `citta`), ma resta **solo recapito, non confrontato**; renderlo un
   dato di match (vicinanza alla sede) e aggiungere l'**automunito** è il passo naturale dopo
-  la patente. Da soppesare con la sensibilità del dato.
+  la patente. Da soppesare con la sensibilità del dato. Dal **Pool 1.02** *(2026-08-09)*
+  «la città» è senza ambiguità il **domicilio, una sola**: il giorno in cui si confronterà,
+  il dato raccolto è già quello giusto.
   *(2026-06-17 — domicilio raccolto come recapito, Step 1.30-1.32; la confrontabilità è futura.)*
 - **Le lingue come campo proprio del profilo** (`lingue: [{lingua, livello}]`), confrontabile
   come la patente. Oggi **non hanno un posto**: nessun prompt del pool le nomina, così
@@ -84,10 +86,12 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   cinque letture dello stesso CV: 3, 0, 2, 2, 2 lingue. È lo stesso mattone della patente
   applicato a un dato che gli annunci chiedono di continuo, ed è il seguito naturale
   dell'«estensione a specchio di `altri_requisiti`» qui sopra. Il **rimedio immediato** —
-  dare alle lingue un posto nei prompt, come competenze — è invece già deciso e aspetta solo
-  di essere fatto: sta in `in_sospeso.md`. Quando arriverà il campo proprio, le stringhe
+  dare alle lingue un posto nei prompt, come competenze — è stato **fatto col Pool 1.02**:
+  le lingue si riportano come dette, mai con un livello inventato, e sul CV reale arrivano
+  3 su 3 dove il prototipo ne perdeva 3 su 3. Quando arriverà il campo proprio, le stringhe
   messe fra le competenze diventeranno un tappabuchi da rimuovere a mano.
-  *(2026-08-09 — emersa dal collaudo di tappa di T3.)*
+  *(2026-08-09 — emersa dal collaudo di tappa di T3; rimedio immediato realizzato lo stesso
+  giorno con la revisione adversariale, Pool 1.02.)*
 - **Campi annuncio aggiuntivi**: `livello` (impiegato/operaio/quadro), `settore` — fuori
   per ora (schema snello). *(prompt_design.md, "Da valutare in futuro".)*
 - **Decomposizione dei prompt**: il prompt unico dell'annuncio è già diviso in 5 sezioni
@@ -112,6 +116,10 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   sbagliato. Una domanda sola all'utente — «questo dove lo metto?» — lo salverebbe. Da
   soppesare con il rimedio più economico, che è dare a quel genere di qualifica un posto
   nei prompt (v. `in_sospeso.md`): il primo costa un turno in più, il secondo tre righe.
+  **Il rimedio economico è stato fatto** *(2026-08-09, Pool 1.02)*: i patentini
+  professionali hanno ora una casa dichiarata (formazione) in tutti i prompt, e nel
+  collaudo reale il muletto atterra al primo colpo. L'idea della collocazione manuale
+  resta per i contenuti di confine veri, quelli che nessuna casa dichiarata può prevedere.
 - **Rifiniture MVP rimandate**: rimozione di singole competenze, routing a linguaggio
   naturale (oggi bottoni). L'**editing campo-per-campo** è realizzato (vedi «Realizzate»).
   *(Diario Step 1.8.)*
@@ -159,6 +167,32 @@ dichiarate «rimandate» (cap. 15.3-15.4): qui il puntatore, perché il backlog 
 - **Terze lingue oltre IT/EN** — il pool le ammette per costruzione (varianti `.fr.md`…);
   fuori perimetro. *(2026-08-05 — cap. 10.5/15.3.)*
 
+Idee emerse dalla **revisione adversariale** *(2026-08-09)*: difetti veri ma rimandati con
+motivo, o rifiniture che farebbero salire l'app di classe.
+- **Annullabilità del turno di dialogo** — a T3 deciso «non annullabile: due secondi non
+  valgono il prezzo» (Step 2.6); la revisione ha mostrato il caso brutto: su rete degradata
+  un turno può tenere P5 bloccato fino a ~4 minuti (timeout 120 s × 2 tentativi) senza via
+  d'uscita. Serve il gettone d'annullo come l'import. *(2026-08-09 — revisione adversariale;
+  è la prima voce «per un'app di classe superiore» del resoconto.)*
+- **Validazione di range della taratura** — la revisione ha reso robusto il *formato*
+  (mappa storta → si scarta intera, valgono i predefiniti), ma i *valori* restano non
+  validati: un `"clamp_su": -50` entra zitto e falsa le stelle. *(2026-08-09 — revisione
+  adversariale.)*
+- **Guardia anti-injection su `confronto`, `mitigazione` e `trascrizione_pdf`** — il Pool
+  1.02 la mette nei sette turni del dialogo; su `confronto` e `mitigazione` romperebbe la
+  parità carattere per carattere col prototipo, che è il metro della non-regressione: è una
+  **decisione**, non una toppa, e per ora la parità vale di più. *(2026-08-09 — revisione
+  adversariale.)*
+- **Rifiniture UX di P2 e import** — Ctrl+S per salvare il profilo dalla tastiera; un
+  indicatore visivo di avanzamento durante l'import (oggi solo testo). *(2026-08-09 —
+  revisione adversariale.)*
+- **«Madrelingua» perso sull'italiano nell'import** — il CV vero dichiara l'italiano
+  madrelingua e la voce non entra fra le competenze; filo minore del caso lingue.
+  *(2026-08-09 — revisione adversariale.)*
+- **La trappola latente di `Sigilla`** — se un domani il CHANGELOG del pool contenesse una
+  riga `---`, il sigillo la scambierebbe per una chiusura di frontmatter; oggi non succede,
+  ma è il genere di trappola che scatta fra un anno. *(2026-08-09 — revisione adversariale.)*
+
 ## Collaudi e non-regressione (Fase VB.NET)
 
 Idee emerse **costruendo la batteria di T2** (cap. 14), quando il prototipo ha fatto da
@@ -184,6 +218,10 @@ giudice per la prima volta.
   *asserisce*, visto che il giudizio su come una schermata appare resta di chi guarda. Da
   valutare quando i pannelli saranno più d'uno o due. *(2026-08-09 — emersa dalla gamba C del
   collaudo di tappa di T3.)*
+- **Città pass/fail anche in `CollaudiFormatiReale`** — con il Pool 1.02 la città è tornata
+  un verdetto secco nel collaudo reale dell'import (`CollaudoReale`); il banco gemello dei
+  quattro formati usa ancora il criterio vecchio. Allineamento meccanico. *(2026-08-09 —
+  revisione adversariale.)*
 
 ## Realizzate
 
