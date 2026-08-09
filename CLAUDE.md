@@ -105,8 +105,10 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   I file trasversali (questo `CLAUDE.md`, `README.md`, `diario_di_bordo.md`,
   `idee_future.md`) restano in radice.
 - **Come far girare il prototipo** (serve ancora: è il **giudice** della non-regressione,
-  cap. 14 — la batteria di T2 è passata il 2026-08-07, ma il collaudo reale resta
-  rieseguibile e gli attesi del banco si rigenerano da `server.js`): Node ≥ 20.12,
+  cap. 14 — le batterie di T2 e T3 sono passate, ma i collaudi reali restano rieseguibili
+  e gli attesi del banco si rigenerano da `server.js`; a T3 ha fatto da giudice
+  sull'import di un CV e su un turno del dialogo. Attenzione: da **Pool 1.01** su
+  `importa_cv` non è più il metro — è il termine di paragone, cap. 04.7): Node ≥ 20.12,
   **niente dipendenze npm**, chiave in
   `HTML+JS/.env` (`ANTHROPIC_API_KEY`, gitignored — il file va lì, perché il server
   cerca il `.env` nella cartella da cui parte). Avvio: `npm start` **dentro

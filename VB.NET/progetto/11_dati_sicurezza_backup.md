@@ -137,3 +137,8 @@ assente, parziale o illeggibile non impedisce l'avvio, si ricade sui valori inte
 lo si annota. Anche qui il motivo è pratico: cambiare modello — o fare il secondo
 esperimento su Sonnet 5 — deve costare una riga, non una nuova build da reinstallare
 su due macchine. *(Realizzato a T2 in `Ai/Modelli.vb`.)*
+
+A leggerli all'avvio è `Motore/ContestoApp` *(da T3c, 2026-08-07)*: entrambi i file, con
+l'avviso di ripiego quando si cade sui predefiniti. Prima esistevano i lettori ma non
+li chiamava nessuno, e un file di taratura messo nella cartella dati non avrebbe avuto
+alcun effetto — senza che niente lo dicesse.

@@ -74,6 +74,11 @@ ogni modulo abbia **un compito solo**:
 - **`Ui/`** — i Form e i pannelli (cap. 03). Nessuna logica: raccolgono input, mostrano
   risultati, chiamano il motore.
 - **`Motore/`** —
+  - `ContestoApp`: monta il motore all'avvio — cartella dati, pool, numeri, client AI,
+    archivio — e **non solleva mai**: ciò che non si può montare resta spento e *detto*
+    (cap. 03.8). È il punto in cui i pannelli trovano tutto già pronto;
+  - `DialogoProfilo` + `Mossa`: la macchina a mosse del dialogo guidato (v. 2.4);
+  - `ImportProfilo`: i due passi dell'import di un CV, dal file al profilo;
   - `Orchestratore`: conduce i flussi del cap. 12 (quale passo viene dopo quale);
   - `CalcoloMatch`: la trascrizione **fedele** di `calcolaMatch` del prototipo — stessi
     pesi (richiesto=5, preferenziale=1, importanza alta/media/bassa=5/3/1, contesto=0,2,
@@ -86,10 +91,19 @@ ogni modulo abbia **un compito solo**:
 - **`Ai/`** —
   - `LibreriaPrompt`: carica i `.md` dal pool, ne legge i metadati, riempie i
     segnaposto (cap. 04);
-  - `ClientClaude`: le chiamate HTTPS a `api.anthropic.com` (v. 2.5).
+  - `ClientClaude`: le chiamate HTTPS a `api.anthropic.com` (v. 2.5);
+  - `StrutturatoreTurni`, `TrascrittorePdf`: i due mestieri che mettono in fila pool,
+    client ed estrattore. Ognuno ha la **sua interfaccia** (`IStrutturatoreTurni`,
+    `ITrascrittorePdf`), e non per gusto di astrazione: è la porta da cui il motore si
+    stacca dall'AI, e senza quella porta il dialogo e l'import non si potrebbero
+    collaudare tutti interi senza rete (cap. 14, T3).
 - **`Documenti/`** — lettura (PDF via API con blocco `document`, DOCX/TXT/MD in
   locale), scrittura (DOCX e PDF), scansione e classificazione della cartella
   documenti (cap. 05).
+  *In implementazione la lettura è nata altrove, e la divisione ha una ragione*: quella
+  che tocca il disco sta in `Dati/LettoreDocumenti` (DOCX/TXT/MD), quella che passa
+  dall'API in `Ai/TrascrittorePdf`. Questa cartella resta il posto della **scrittura**
+  (DOCX/PDF, T4) e della scansione della cartella documenti (T6).
 - **`Posta/`** — composizione dell'email e scrittura del file `.eml` marcato come bozza
   da inviare (cap. 07). *Nella 1.0 non spedisce:* né `.msg` né SMTP (cap. 15, voci 8 e 9),
   quindi questo componente non tocca alcuna credenziale.
@@ -106,7 +120,7 @@ ogni modulo abbia **un compito solo**:
 | `calcolaMatch` + costanti (server.js) | `Motore/CalcoloMatch`, trascrizione 1:1 verificata con casi di collaudo identici |
 | `estraiJson` (server.js) | `Motore/EstrattoreJson`, stessa strategia (percorso felice intatto, ripiego solo nel catch) |
 | Criterio due modelli (Haiku estrazione / Sonnet ragionamento) | metadato `modello:` di ogni prompt del pool (cap. 04) |
-| Macchina a stati del dialogo + magazzino `pending` (index.html) | rinasce nel motore (`Orchestratore`) — stessa logica: schede di conferma, instradamento `altrove`, guard anti-rimbalzo, «lasciato fuori» esplicito |
+| Macchina a stati del dialogo + magazzino `pending` (index.html) | rinasce nel motore (`Motore/DialogoProfilo`) — stessa logica e **stessi testi**: schede di conferma, instradamento `altrove`, guardia anti-rimbalzo, «lasciato fuori» esplicito. Là ogni passo disegnava da sé la pagina; qui produce una **`Mossa`** (cosa dire, cosa mostrare, cosa aspettarsi) e chi la mostra torna con una risposta o una scelta. La conseguenza è doppia: il pannello si limita a disegnare, e il dialogo intero si collauda senza interfaccia (cap. 14, T3) |
 | Soglia 1,5 stelle (index.html) | costante del motore, stesso comportamento (sconsiglia, non impedisce) |
 | Banchi `test-*.html` | rinascono come collaudi del cap. 14 (per-anello, sugli stessi casi) |
 
@@ -178,6 +192,11 @@ i tool MCP).
 Tutte le chiamate AI, di rete e su file girano **fuori dal thread dell'interfaccia**
 (`Async/Await`): la finestra non si congela mai. Ogni operazione lunga ha indicatore di
 attesa e pulsante Annulla (che annulla la richiesta, non lo stato già salvato).
+
+**Un'eccezione dichiarata, decisa in T3c**: il turno del dialogo (P5) si aspetta e basta.
+Annullare a metà lascerebbe la macchina a mosse in uno stato che non esiste — la risposta
+consegnata ma la mossa mai ricevuta — e per un'attesa di un paio di secondi non vale il
+prezzo. L'import di un CV, che dura molto di più, l'Annulla ce l'ha.
 Un'operazione per volta per opportunità: niente code parallele nascoste, il flusso
 resta comprensibile.
 

@@ -134,6 +134,7 @@ VB.NET/
     │   └── prompt-pool/       il pool dei prompt: file veri nel repo, risorse nell'exe
     └── TrovaLavoro.Collaudi/  il banco di collaudo, fuori dal rilascio
         └── casi/              i casi della non-regressione contro il prototipo (cap. 14)
+            └── reale/         gli esiti dei collaudi con l'API vera, quando i dati sono inventati
 ```
 
 - Il **pool vive dentro il progetto dell'applicazione** perché di lì entra nell'exe come

@@ -64,12 +64,47 @@ prototipo, ricalcolati da `CalcoloMatch`, restituiscono i suoi numeri identici, 
 doppia del gate compresa. Casi, attesi ed esiti stanno in
 `VB.NET/src/TrovaLavoro.Collaudi/casi/`. **T3 può iniziare.**
 
-### T3 — Il profilo (F1)
+### T3 — Il profilo (F1) — ✔ **CHIUSO il 2026-08-09**
 Pannello P2 (scheda campo-per-campo) e P5 (dialogo); import da file PDF/TXT/MD/DOCX;
 dialogo guidato completo (turni, conferme, anti-perdita, «lasciato fuori»);
 salvataggio versionato del profilo.
 **Collaudo:** import del CV reale di Mirco nei formati disponibili + dialogo completo
 da zero; il profilo JSON risultante regge il confronto con quello del prototipo.
+
+La tappa è stata **spezzata in tre** il 2026-08-07, motore prima dell'interfaccia:
+**T3a** il profilo nel motore (`Dati/CartellaDati`, `Dati/Profilo`,
+`Dati/ArchivioProfilo`, `Ai/StrutturatoreTurni`, `Motore/Mossa` e
+`Motore/DialogoProfilo`, la macchina a mosse); **T3b** l'import
+(`Dati/LettoreDocumenti`, `Ai/TrascrittorePdf`, `Motore/ImportProfilo`); **T3c** i
+pannelli (`Motore/ContestoApp`, `Ui/PannelloProfilo`, `Ui/PannelloDialogo`,
+`Ui/IPannelloArea`). La ragione è quella del cap. 02: il dialogo passa da `Mossa` invece
+di disegnare da sé la pagina, e questo permette di collaudarlo tutto **prima** che esista
+un pannello che lo mostri.
+
+**Fatto:** **190 collaudi verdi** senza rete e **8 reali** su aviolab03. Il **collaudo di
+tappa** è stato condotto in tre gambe, disegnate con Mirco perché le tre domande sono
+diverse:
+
+- **A — le quattro porte** (`CollaudiFormatiReale`): lo stesso CV entra da PDF, DOCX, TXT
+  e MD e ne deve uscire lo stesso profilo. Tre giri: campi copiati identici fra le quattro
+  strade tutte le volte, anti-invenzione pulita ovunque, testo in comune col PDF 100%
+  (TXT e MD) e 83,9% (DOCX). *Limite dichiarato*: i tre compagni del PDF sono fabbricati
+  dalla sua trascrizione, quindi provano le **strade di lettura**, non l'impaginazione di
+  Word (`in_sospeso.md`).
+- **B — il prototipo come giudice** (`CollaudiImportReale`): trascrizioni di 3228 caratteri
+  e 60 righe da entrambe le parti, **100% di righe in comune** in tutti i giri; campi
+  copiati sempre uguali. Qui è nato il **primo distacco voluto** dal prototipo: il
+  **Pool 1.01** ha detto a `importa_cv` che un'attività sta in una sezione sola e che a
+  decidere è la sua natura, non la sezione del CV in cui è stampata. Su quel prompt il
+  prototipo non è più il metro, è il termine di paragone di ciò che l'app fa meglio.
+- **C — il dialogo da zero** (`CollaudiDialogoReale`): i sette turni condotti con l'AI vera
+  su una traccia inventata, costruita perché **anti-perdita** e **«lasciato fuori»**
+  scattino di proposito. Tre giri: ordine dei turni sempre rispettato, **zero** frammenti
+  instradati altrove e mai più ricomparsi, zero invenzioni, profilo pieno, salvato e
+  riletto identico. E poi la prova che il banco non può fare: l'applicazione **avviata
+  davvero**, il dialogo condotto dentro P5 e il profilo salvato dalla sua scheda.
+
+**T4 può iniziare.**
 
 ### T4 — La pipeline di candidatura (F3 + F4 + F5 in italiano)
 Analisi annuncio da testo incollato; confronto con stelle, note e ⛔; pannello P4;

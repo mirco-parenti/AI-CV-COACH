@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!-- Banco di collaudo di TrovaLavoro. Non fa parte del rilascio: non viene mai
-       pubblicato nell'eseguibile (cap. 13), serve solo a far girare le batterie di
-       non-regressione contro il prototipo HTML+JS (cap. 14). -->
+       pubblicato nell'eseguibile (cap. 13). Ci girano la batteria di tutti i giorni,
+       le non-regressioni contro il prototipo HTML+JS e i collaudi di tappa con l'API
+       vera (cap. 14). -->
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
     <RootNamespace>TrovaLavoro.Collaudi</RootNamespace>

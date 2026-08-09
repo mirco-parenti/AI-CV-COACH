@@ -103,7 +103,10 @@ Le funzioni sono numerate **F1–F8** e mappate sui capitoli di questo progetto:
    nell'exe — cap. 04.2) e gli eventuali **strumenti esterni** del punto 6.
 2. **Pannelli statici, editabili nel designer**: tutte le schermate sono Form/Panel
    WinForms disegnati staticamente nel designer di Visual Studio; niente UI generata a
-   runtime (fuori dai contenuti: liste, testi, anteprime).
+   runtime (fuori dai contenuti: liste, testi, anteprime). *Una sola eccezione, decisa
+   in T3c e dichiarata nel cap. 03.1: le **bolle della conversazione**, che sono
+   contenuto di lunghezza ignota e non hanno un controllo di sistema che le sappia
+   mostrare. Il resto di quel pannello è disegnato come tutti gli altri.*
 3. **Family feeling** con la suite di casa (logo in basso a sinistra con **versione
    dell'app e versione del pool di prompt**, stessa impostazione visiva). Il design è
    specificato come design **proprio** di AI-CV-COACH nel capitolo 03.

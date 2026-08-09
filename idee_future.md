@@ -45,8 +45,9 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   → trascrizione **pulita**, ordine per colonna, nessun interlacciamento né perdita. Haiku basta:
   **non** si sale a Sonnet (sarebbe costo senza beneficio). Se un domani un layout estremo esce
   sporco, il test si rifà in pochi minuti; resta comunque fuori il caso **PDF scannerizzati/immagine**
-  del punto (a). (c) **editing campo-per-campo** del profilo importato — oggi si conferma o si
-  ricomincia, non si corregge la singola voce (cugino della rifinitura MVP del dialogo); (d)
+  del punto (a). (c) ~~**editing campo-per-campo** del profilo importato~~ — **realizzato a
+  T3c** nella scheda P2 (vedi «Realizzate»): la singola voce ora si corregge, senza
+  ricominciare; (d)
   **limite dimensione del PDF** — nessun tetto esplicito lato server (l'API rifiuta comunque oltre
   ~32 MB). *(2026-08-03 — emersi realizzando 2.1.2, diario Step 1.33; (b) valutata 2026-08-04.)*
 - **Fonte-link per l'annuncio → browser incorporato (WebView2)**: leggere l'annuncio da un **link**
@@ -77,6 +78,16 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   dato di match (vicinanza alla sede) e aggiungere l'**automunito** è il passo naturale dopo
   la patente. Da soppesare con la sensibilità del dato.
   *(2026-06-17 — domicilio raccolto come recapito, Step 1.30-1.32; la confrontabilità è futura.)*
+- **Le lingue come campo proprio del profilo** (`lingue: [{lingua, livello}]`), confrontabile
+  come la patente. Oggi **non hanno un posto**: nessun prompt del pool le nomina, così
+  «Inglese B2» finisce fra le competenze o svanisce a seconda del giro — misurato a T3 su
+  cinque letture dello stesso CV: 3, 0, 2, 2, 2 lingue. È lo stesso mattone della patente
+  applicato a un dato che gli annunci chiedono di continuo, ed è il seguito naturale
+  dell'«estensione a specchio di `altri_requisiti`» qui sopra. Il **rimedio immediato** —
+  dare alle lingue un posto nei prompt, come competenze — è invece già deciso e aspetta solo
+  di essere fatto: sta in `in_sospeso.md`. Quando arriverà il campo proprio, le stringhe
+  messe fra le competenze diventeranno un tappabuchi da rimuovere a mano.
+  *(2026-08-09 — emersa dal collaudo di tappa di T3.)*
 - **Campi annuncio aggiuntivi**: `livello` (impiegato/operaio/quadro), `settore` — fuori
   per ora (schema snello). *(prompt_design.md, "Da valutare in futuro".)*
 - **Decomposizione dei prompt**: il prompt unico dell'annuncio è già diviso in 5 sezioni
@@ -94,8 +105,16 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   Step 1.26). Idea futura: invece di lasciarlo fuori, far **scegliere all'utente** in quale
   sezione collocarlo (o crearne una voce a mano). *(2026-06-12 — emersa nel collaudo
   headless dell'anti-perdita, Step 1.26.)*
+  **Il caso reale è arrivato a T3** *(2026-08-09)*: nel dialogo con l'AI vera il «patentino
+  per il muletto» finisce fuori tutte le volte — il turno della patente lo instrada alle
+  competenze, quello delle competenze lo rimanda alla formazione, e la guardia lo scarta
+  dichiarandolo. Il meccanismo fa esattamente il suo mestiere e il risultato è comunque
+  sbagliato. Una domanda sola all'utente — «questo dove lo metto?» — lo salverebbe. Da
+  soppesare con il rimedio più economico, che è dare a quel genere di qualifica un posto
+  nei prompt (v. `in_sospeso.md`): il primo costa un turno in più, il secondo tre righe.
 - **Rifiniture MVP rimandate**: rimozione di singole competenze, routing a linguaggio
-  naturale (oggi bottoni), editing campo-per-campo. *(Diario Step 1.8.)*
+  naturale (oggi bottoni). L'**editing campo-per-campo** è realizzato (vedi «Realizzate»).
+  *(Diario Step 1.8.)*
 - **Formato del riepilogo leggibile** del profilo: da decidere insieme all'interfaccia.
   *(prompt_design.md, turno formazione, "Sospeso".)*
 
@@ -156,6 +175,15 @@ giudice per la prima volta.
   cap. 10.2 lo dà come caso di collaudo del multilingua, ma i due casi reali di T2 sono
   entrambi in italiano. Da aggiungere quando arriverà T7, dove serve davvero.
   *(2026-08-07 — emersa a T2, rimandata alla tappa che la riguarda.)*
+- **Un banco che pilota l'interfaccia vera** — la prova a video di T3 è stata fatta guidando
+  l'applicazione dall'esterno con gli appigli di accessibilità di Windows (gli stessi che usa
+  un lettore di schermo): l'app si avvia, il dialogo si conduce nel pannello, il profilo si
+  salva, e lungo la strada si catturano le schermate. Ha funzionato, e ha trovato cose che il
+  banco non vede. Oggi però è uno **script usa-e-getta fuori dal repo**: farlo diventare un
+  collaudo vero vorrebbe dire decidere dove vive, come si lancia e — soprattutto — che cosa
+  *asserisce*, visto che il giudizio su come una schermata appare resta di chi guarda. Da
+  valutare quando i pannelli saranno più d'uno o due. *(2026-08-09 — emersa dalla gamba C del
+  collaudo di tappa di T3.)*
 
 ## Realizzate
 
@@ -201,6 +229,13 @@ implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
   primo `{` all'ultimo `}` (percorso felice invariato; se neanche così è valido, rilancia
   l'errore). Chiude i 502 quando il modello «si mette a spiegare». Resta aperto il gemello
   front-end `estraiFrammento` (vedi backlog «Front-end & pipeline»). *(2026-08-04; diario Step 1.35.)*
+- ✅ **Editing campo-per-campo del profilo** — la scheda P2 dell'applicazione desktop mostra
+  tutte le sezioni del profilo **campo per campo, modificabili**: si corregge la singola voce
+  invece di riconfermare o ricominciare. Chiude insieme il punto (c) dell'import da CV e una
+  delle «rifiniture MVP rimandate» del dialogo, e vale per il profilo qualunque sia la porta
+  da cui è entrato — dialogo o CV. Il salvataggio resta un gesto esplicito dell'utente e
+  **versiona**: ogni conferma lascia la sua copia datata nello storico.
+  *(2026-08-07, T3c; diario Step 2.6; `VB.NET/progetto/03` P2 e `11.1`.)*
 - ✅ **Hard-gate (requisito eliminatorio)** — un requisito *davvero* squalificante non soddisfatto
   non pesa soltanto: mette un **tetto** al match. Ogni giudizio del confronto porta un flag
   `eliminatorio` (booleano, deciso dall'LLM: `true` solo per i requisiti tassativi/escludenti, nel

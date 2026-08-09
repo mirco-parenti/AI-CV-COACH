@@ -1,14 +1,20 @@
-# I casi della non-regressione contro il prototipo
+# I casi dei collaudi con l'API vera
 
-Questa cartella contiene i dati della batteria di tappa T2 (cap. 14): gli stessi
-input dati al prototipo e alla nuova app, ciò che il prototipo ne ha fatto, e ciò
-che ne è uscito dal confronto fra i due.
+Questa cartella è nata con la batteria di tappa T2 (cap. 14) — gli stessi input dati al
+prototipo e alla nuova app, ciò che il prototipo ne ha fatto, e ciò che ne è uscito dal
+confronto fra i due — e da T3 ospita anche gli **esiti dei collaudi reali** che si
+possono pubblicare.
 
 **I dati sono inventati.** Il repo è pubblico e un collaudo non vale di più perché
 contiene dati veri: il candidato «Luca Ferrari» non esiste, e le aziende nemmeno.
 Sono però scritti come li scriverebbe l'app — stessi campi degli schemi del pool — e
 portano accenti e apostrofi di proposito, perché è lì che una differenza di codifica
 si vede.
+
+**È anche il criterio per decidere dove va un rapporto**: quello che nasce da dati
+inventati sta qui, nel repo; quello che nasce dal **CV vero di Mirco** (le gambe A e B
+del collaudo di tappa di T3) si scrive accanto al CV, fuori dal repo, e qui non ne
+resta traccia.
 
 | File | Cos'è |
 |---|---|
@@ -17,7 +23,9 @@ si vede.
 | `annuncio_eliminatorio.json` | «Patente C indispensabile»: il candidato ha solo la B, e il match deve craterare (⛔). |
 | `atteso/prompt_confronto_*.txt` | Il prompt che **il prototipo** costruisce per quel caso: è il termine di paragone della parità. |
 | `genera_attesi.mjs` | Rigenera i due file qui sopra facendoli produrre al prototipo. |
-| `reale/confronto_*.json` | L'esito del collaudo reale: risposta del prototipo, risposta dell'app, e il ricalcolo. |
+| `reale/confronto_*.json` | L'esito del collaudo reale di T2: risposta del prototipo, risposta dell'app, e il ricalcolo. |
+| `reale/dialogo_guidato.md` | Il collaudo di tappa di T3, gamba C: il dialogo guidato condotto per intero con l'AI vera sulla traccia di **Anna Ricci**, che non esiste. Si legge come una conversazione, e dice dove è finito ogni frammento detto nel turno sbagliato. |
+| `reale/dialogo_turno_formali.json` | Lo stesso turno «esperienze formali» chiesto all'app e al prototipo con la **stessa identica risposta**: la prova di parità della gamba C. |
 
 ## Le due batterie
 
@@ -26,13 +34,23 @@ pool sia carattere per carattere quello del prototipo. Gira con la batteria norm
 (`dotnet test` da `VB.NET/src`) e resterà verde anche quando il prototipo non sarà
 più avviabile.
 
-**Con l'API vera** — `CollaudiConfrontoReale` manda gli stessi casi al prototipo
-(`POST /confronta`) e alla pipeline dell'app, poi confronta. Vuole la chiave e il
-prototipo acceso, quindi gira **solo su aviolab03** e resta fuori dalla batteria di
-tutti i giorni: si lancia da `VB.NET/src` passando a `dotnet test` l'opzione
-`settings` con il file `TrovaLavoro.Collaudi/collaudi-reali.runsettings`, dopo aver
-avviato il prototipo (`npm start` dentro `HTML+JS/`) e definito `ANTHROPIC_API_KEY`
-nell'ambiente.
+**Con l'API vera** — la categoria `Reale`, fuori dalla batteria di tutti i giorni: si
+lancia da `VB.NET/src` passando a `dotnet test` l'opzione `settings` con il file
+`TrovaLavoro.Collaudi/collaudi-reali.runsettings`. Ognuno ha i suoi prerequisiti, e
+quando ne manca uno **si dichiara inconcludente invece di fallire**: sull'altra
+postazione non c'è né la chiave né il CV.
+
+| Classe | Cosa chiede | Chiave | CV vero | Prototipo |
+|---|---|---|---|---|
+| `CollaudiConfrontoReale` | gli stessi due casi al prototipo (`POST /confronta`) e alla pipeline dell'app | sì | — | sì |
+| `CollaudiImportReale` | lo stesso CV importato dalle due parti | sì | sì | sì |
+| `CollaudiFormatiReale` | lo stesso CV dalle quattro porte (PDF, DOCX, TXT, MD) | sì | sì | — |
+| `CollaudiDialogoReale` | il dialogo guidato da zero; e un turno solo chiesto anche al prototipo | sì | — | solo per il turno di parità |
+
+Il **CV vero** si indica con la variabile `CV_DI_PROVA` (la cartella che lo contiene);
+il **prototipo** si accende con `npm start` dentro `HTML+JS/`; la **chiave** sta in
+`ANTHROPIC_API_KEY`. Da WSL le variabili arrivano all'eseguibile Windows solo se
+elencate in `WSLENV` (`WSLENV=ANTHROPIC_API_KEY:CV_DI_PROVA/p`).
 
 ## Se un prompt del pool cambia
 

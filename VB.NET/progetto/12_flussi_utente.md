@@ -24,6 +24,9 @@ opportunità sono esaurite.
    cartella**. Se è una cartella, l'app la scandisce, riconosce da sola i documenti
    utili (cap. 05) e propone: «ho trovato questi: questo sembra il CV più recente,
    questi sembrano attestati». L'utente conferma.
+   *Dal 2026-08-07 la scelta della cartella è rimandata a **T6***, dove la scansione
+   della cartella documenti serve comunque agli allegati dell'email (cap. 05.2): T3 ha
+   chiuso la strada del file singolo, che è quella che porta al profilo.
 3. Il CV scelto viene trascritto e strutturato nel **profilo JSON** (stessi due passi
    del prototipo: trascrizione fedele + strutturazione anti-invenzione).
 4. Il profilo viene mostrato **campo per campo, modificabile** (novità rispetto al
@@ -107,8 +110,12 @@ portato su desktop:
 3. Ciò che l'utente dice «nel turno sbagliato» non si perde: viene parcheggiato e
    riproposto al turno giusto (convenzione anti-perdita, campo `altrove`); ciò che non
    trova posto viene dichiarato «lasciato fuori», mai perso in silenzio.
-4. Alla fine: riepilogo leggibile, conferma, e da lì si può già generare il
-   📄 CV-1 base (senza alcun annuncio) o proseguire con il Flusso A dal punto A3.
+4. Alla fine: riepilogo leggibile e conferma. Il dialogo **non scrive su disco**: porta
+   il profilo raccolto nella scheda P2, dove l'utente lo rivede campo per campo e lo
+   salva lui (decisione di T3c, 2026-08-07 — a salvare è sempre la stessa mano, e la
+   scheda resta l'unico posto da cui il profilo entra nell'archivio).
+5. Da lì si può già generare il 📄 CV-1 base (senza alcun annuncio) o proseguire con il
+   Flusso A dal punto A3.
 
 ## 12.3 Flusso C — Annuncio da link (F2)
 

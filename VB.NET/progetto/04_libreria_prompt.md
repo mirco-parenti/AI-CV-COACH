@@ -20,6 +20,10 @@ esterni, versionata come un tutto — il «pool» la cui versione compare accant
 5. **Contenuto invariato nella migrazione**: i 15 prompt del prototipo entrano nel pool
    con lo stesso testo validato (adattando solo i segnaposto); ogni modifica di
    sostanza è una decisione da diario, non un effetto collaterale.
+   *Il primo a staccarsi è stato `importa_cv`, con il **Pool 1.01** del 2026-08-09 (T3):
+   una decisione presa, motivata e annotata — non un effetto collaterale. Da lì in poi
+   «invariato» non è più una proprietà del pool: è il punto di partenza da cui ci si
+   allontana **dichiarandolo**.*
 
 ## 4.2 Dove sta il pool
 
@@ -169,9 +173,11 @@ Compiti, in ordine:
 | Dove vive un prompt | duplicato in `prompt_design.md` + `server.js` | **solo** nel pool |
 | Regola di allineamento | sync char-by-char tra i due doppioni | non serve più; al suo posto: validazione manifest + segnaposto |
 | Scelta del modello | costanti nel server | metadato `modello` + configurazione |
-| Testo dei prompt | 15 prompt validati | **identici**, salvo adattamento segnaposto; nuovi prompt ✚ progettati con lo stesso metodo |
+| Testo dei prompt | 15 prompt validati | **identici** alla migrazione (Pool 1.00), salvo adattamento segnaposto; nuovi prompt ✚ progettati con lo stesso metodo. Dal **Pool 1.01** `importa_cv` diverge di proposito (v. `CHANGELOG.md`): su quel prompt il prototipo non è più il metro, è il termine di paragone |
 | Documentazione | `prompt_design.md` (prompt + note di design) | il pool **è** la documentazione dei prompt; le note di design restano nel diario e nei capitoli di questo progetto |
 
 `HTML+JS/prompt_design.md` resta com'è: è la storia validata da cui il pool nasce, e
 il riferimento per il collaudo di non-regressione (cap. 14: stessi input → stessi
-comportamenti).
+comportamenti). Dove un prompt del pool si è staccato, il confronto con lui smette di
+essere un pass/fail e diventa una **misura di quanto l'app fa meglio**: il collaudo lo
+dice, invece di bocciare una differenza voluta.

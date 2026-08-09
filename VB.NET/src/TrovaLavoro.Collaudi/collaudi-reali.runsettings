@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Le impostazioni dell'altra batteria: SOLO i collaudi della categoria «Reale»
-  (cap. 14, T2), quelli che chiamano l'API vera con il prototipo acceso come giudice.
+  (cap. 14: T2 e T3), quelli che chiamano l'API vera.
 
-  Si lanciano da VB.NET/src, su aviolab03, con il prototipo avviato («npm start»
-  dentro HTML+JS/) e la chiave nell'ambiente:
+  Si lanciano da VB.NET/src, su aviolab03, con la chiave nell'ambiente; a seconda del
+  collaudo servono anche il prototipo avviato («npm start» dentro HTML+JS/) e il CV
+  vero indicato da CV_DI_PROVA. Quello che manca non fa fallire: il collaudo che lo
+  richiede si dichiara inconcludente (l'elenco di chi vuole cosa è in casi/LEGGIMI.md):
 
       dotnet test  (con l'opzione «settings» puntata su questo file)
 
