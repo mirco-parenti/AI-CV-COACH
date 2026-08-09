@@ -1,5 +1,4 @@
 Imports System.IO
-Imports System.Net.Http
 Imports System.Text
 Imports System.Text.Json.Nodes
 Imports System.Threading.Tasks
@@ -64,10 +63,12 @@ Namespace NonRegressione
     Public Class CollaudiImportReale
 
         ''' <summary>Passo 1 del prototipo: il PDF in base64, torna il testo trascritto.</summary>
+        ''' <remarks>
+        ''' Il passo 2 non ha una costante qui: la sua porta è quella condivisa di
+        ''' <see cref="CollaudoReale.StrutturaDalPrototipoAsync"/>, perché a chiedere al
+        ''' prototipo di strutturare un turno non è più solo questo collaudo.
+        ''' </remarks>
         Private Const PrototipoLeggiPdf As String = "http://localhost:3000/leggi-pdf"
-
-        ''' <summary>Passo 2 del prototipo: un turno del profilo, torna il frammento JSON.</summary>
-        Private Const PrototipoStruttura As String = "http://localhost:3000/struttura"
 
         ''' <summary>Il rapporto, scritto accanto al CV perché contiene dati personali.</summary>
         Private Const NomeRapporto As String = "rapporto-collaudo-T3-import.md"
@@ -131,7 +132,7 @@ Namespace NonRegressione
                     (Await New ImportProfilo(strutturatore).DaTestoAsync(
                         testoApp, Path.GetFileName(pdf))).Profilo
 
-                Dim frammento As JsonObject = Await StrutturaDalPrototipoAsync(
+                Dim frammento As JsonObject = Await CollaudoReale.StrutturaDalPrototipoAsync(
                     ImportProfilo.TurnoImport, testoApp)
 
                 ' Il nome «Profilo» va qualificato per intero: nel contesto di un metodo
@@ -466,7 +467,10 @@ Namespace NonRegressione
 
         End Sub
 
-        ' --- Le due porte del prototipo --------------------------------------------
+        ' --- La porta del prototipo per il passo 1 ----------------------------------
+        ' Quella del passo 2 sta negli attrezzi condivisi (CollaudoReale): strutturare un
+        ' turno lo chiede anche il collaudo del dialogo, e la rinuncia col prototipo
+        ' spento dev'essere la stessa per tutti.
 
         ''' <summary>Il passo 1 come lo fa il prototipo: <c>POST /leggi-pdf</c>.</summary>
         Private Shared Async Function TrascriviDalPrototipoAsync(pdf As String) As Task(Of String)
@@ -474,64 +478,10 @@ Namespace NonRegressione
             Dim richiesta As New JsonObject From {
                 {"pdf_base64", Convert.ToBase64String(File.ReadAllBytes(pdf))}}
 
-            Dim risposta As JsonObject = Await ChiediAlPrototipoAsync(
+            Dim risposta As JsonObject = Await CollaudoReale.ChiediAlPrototipoAsync(
                 PrototipoLeggiPdf, richiesta, "la trascrizione del PDF")
 
             Return If(TryCast(risposta("testo"), JsonValue)?.ToString(), String.Empty)
-
-        End Function
-
-        ''' <summary>Il passo 2 come lo fa il prototipo: <c>POST /struttura</c>.</summary>
-        Private Shared Async Function StrutturaDalPrototipoAsync(turno As String,
-                                                                 testo As String) As Task(Of JsonObject)
-
-            Dim richiesta As New JsonObject From {
-                {"turno", turno},
-                {"risposta", testo}}
-
-            Return Await ChiediAlPrototipoAsync(
-                PrototipoStruttura, richiesta, $"la strutturazione del turno «{turno}»")
-
-        End Function
-
-        ''' <summary>
-        ''' Una domanda al prototipo. Se non risponde non è un difetto della nuova app:
-        ''' il collaudo rinuncia dicendo come si accende.
-        ''' </summary>
-        Private Shared Async Function ChiediAlPrototipoAsync(indirizzo As String, richiesta As JsonObject,
-                                                             cosa As String) As Task(Of JsonObject)
-
-            Using http As New HttpClient()
-
-                ' La trascrizione di un PDF è la chiamata più lenta di tutto il progetto:
-                ' il PDF viaggia intero e il modello lo legge pagina per pagina.
-                http.Timeout = TimeSpan.FromMinutes(3)
-
-                Dim risposta As HttpResponseMessage
-                Try
-                    risposta = Await http.PostAsync(indirizzo,
-                        New StringContent(richiesta.ToJsonString(), New UTF8Encoding(False), "application/json"))
-                Catch ex As HttpRequestException
-                    Assert.Inconclusive(
-                        $"Il prototipo non risponde su {indirizzo}: avvialo con «npm start» dentro " &
-                        $"HTML+JS/ (la chiave sta nel suo .env). {ex.Message}")
-                    Return Nothing
-                End Try
-
-                Using risposta
-
-                    Dim corpo As String = Await risposta.Content.ReadAsStringAsync()
-
-                    Assert.IsTrue(risposta.IsSuccessStatusCode,
-                        $"il prototipo ha risposto HTTP {CInt(risposta.StatusCode)} per {cosa}: {corpo}")
-
-                    Dim oggetto As JsonObject = TryCast(JsonNode.Parse(corpo), JsonObject)
-                    Assert.IsNotNull(oggetto, $"il prototipo non ha restituito un oggetto JSON per {cosa}")
-
-                    Return oggetto
-
-                End Using
-            End Using
 
         End Function
 

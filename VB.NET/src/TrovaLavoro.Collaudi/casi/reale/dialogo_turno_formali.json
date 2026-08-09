@@ -1,0 +1,30 @@
+{
+  "turno": "esperienze_formali",
+  "quando": "2026-08-09 05:17",
+  "che_cosa": "La stessa identica risposta strutturata dall'app e dal prototipo: è la prova di parità della gamba C del collaudo di tappa T3.",
+  "risposta": "Per cinque anni ho fatto le pulizie al supermercato Il Gabbiano di Forlì, dal 2016 al 2021: pulivo i reparti e gli uffici la mattina presto, prima dell'apertura.",
+  "app": {
+    "esperienze_formali": [
+      {
+        "ruolo": "addetto pulizie",
+        "azienda": "supermercato Il Gabbiano di Forlì",
+        "durata": "5 anni, 2016-2021",
+        "cosa_facevo": "pulivo i reparti e gli uffici la mattina presto, prima dell'apertura",
+        "tipo": ""
+      }
+    ],
+    "altrove": {}
+  },
+  "prototipo": {
+    "esperienze_formali": [
+      {
+        "ruolo": "pulizie",
+        "azienda": "supermercato Il Gabbiano di Forlì",
+        "durata": "dal 2016 al 2021",
+        "cosa_facevo": "pulivo i reparti e gli uffici la mattina presto, prima dell'apertura",
+        "tipo": ""
+      }
+    ],
+    "altrove": {}
+  }
+}

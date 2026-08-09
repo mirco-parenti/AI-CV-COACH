@@ -1,6 +1,9 @@
 Imports System.IO
 Imports System.Linq
+Imports System.Net.Http
 Imports System.Text
+Imports System.Text.Json.Nodes
+Imports System.Threading.Tasks
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro.Ai
 Imports TrovaLavoro.Dati
@@ -8,19 +11,24 @@ Imports TrovaLavoro.Dati
 Namespace NonRegressione
 
     ''' <summary>
-    ''' Gli attrezzi che i collaudi reali dell'import si dividono: i prerequisiti (il CV
-    ''' vero, la chiave), il modo di mettere a confronto due elenchi, la caccia ai valori
-    ''' che nel CV non c'erano, e i pezzi di rapporto che si scrivono uguali.
+    ''' Gli attrezzi che i collaudi reali si dividono: i prerequisiti (il CV vero, la
+    ''' chiave), la porta verso il prototipo, il modo di mettere a confronto due elenchi,
+    ''' la caccia ai valori che nel CV non c'erano, e i pezzi di rapporto che si scrivono
+    ''' uguali.
     ''' </summary>
     ''' <remarks>
-    ''' <para>Sta qui e non dentro un collaudo perché i collaudi reali dell'import sono
-    ''' due e fanno due domande diverse sulla stessa materia:
+    ''' <para>Sta qui e non dentro un collaudo perché i collaudi reali sono più d'uno e
+    ''' fanno domande diverse sulla stessa materia:
     ''' <see cref="CollaudiImportReale"/> chiede se la nuova app legge il CV come lo
     ''' leggeva il prototipo, <see cref="CollaudiFormatiReale"/> se le quattro strade di
-    ''' lettura portano allo stesso profilo. L'anti-invenzione, in particolare, deve
-    ''' essere <b>una sola</b>: due copie che divergono darebbero due verdetti diversi
-    ''' sullo stesso difetto.</para>
-    ''' <para>Nessuno di questi attrezzi tocca la rete: qui si confrontano stringhe.</para>
+    ''' lettura portano allo stesso profilo, <see cref="CollaudiDialogoReale"/> se il
+    ''' dialogo guidato costruisce un profilo senza perdere niente per strada.
+    ''' L'anti-invenzione, in particolare, deve essere <b>una sola</b>: due copie che
+    ''' divergono darebbero due verdetti diversi sullo stesso difetto. E la porta verso il
+    ''' prototipo pure: chi lo interroga deve rinunciare sempre allo stesso modo quando
+    ''' non risponde.</para>
+    ''' <para>A parte quella porta, nessuno di questi attrezzi tocca la rete: si
+    ''' confrontano stringhe.</para>
     ''' </remarks>
     Friend Class CollaudoReale
 
@@ -138,6 +146,71 @@ Namespace NonRegressione
         Friend Shared Function PoolIntegrato() As LibreriaPrompt
 
             Return LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
+
+        End Function
+
+        ' --- La porta del prototipo --------------------------------------------------
+
+        ''' <summary>Il passo 2 del prototipo: un turno del profilo, torna il frammento JSON.</summary>
+        Friend Const PrototipoStruttura As String = "http://localhost:3000/struttura"
+
+        ''' <summary>
+        ''' Chiede al prototipo di strutturare una risposta per un turno, come fa la sua
+        ''' pagina: <c>POST /struttura</c>. È la stessa domanda che l'app gira al pool e
+        ''' all'API, ed è per questo che serve a due collaudi — l'import di un CV
+        ''' (<see cref="CollaudiImportReale"/>) e un turno del dialogo
+        ''' (<see cref="CollaudiDialogoReale"/>).
+        ''' </summary>
+        Friend Shared Function StrutturaDalPrototipoAsync(turno As String,
+                                                          risposta As String) As Task(Of JsonObject)
+
+            Dim richiesta As New JsonObject From {
+                {"turno", turno},
+                {"risposta", risposta}}
+
+            Return ChiediAlPrototipoAsync(
+                PrototipoStruttura, richiesta, $"la strutturazione del turno «{turno}»")
+
+        End Function
+
+        ''' <summary>
+        ''' Una domanda al prototipo. Se non risponde non è un difetto della nuova app:
+        ''' il collaudo rinuncia dicendo come si accende.
+        ''' </summary>
+        Friend Shared Async Function ChiediAlPrototipoAsync(indirizzo As String, richiesta As JsonObject,
+                                                            cosa As String) As Task(Of JsonObject)
+
+            Using http As New HttpClient()
+
+                ' La trascrizione di un PDF è la chiamata più lenta di tutto il progetto:
+                ' il PDF viaggia intero e il modello lo legge pagina per pagina.
+                http.Timeout = TimeSpan.FromMinutes(3)
+
+                Dim risposta As HttpResponseMessage
+                Try
+                    risposta = Await http.PostAsync(indirizzo,
+                        New StringContent(richiesta.ToJsonString(), New UTF8Encoding(False), "application/json"))
+                Catch ex As HttpRequestException
+                    Assert.Inconclusive(
+                        $"Il prototipo non risponde su {indirizzo}: avvialo con «npm start» dentro " &
+                        $"HTML+JS/ (la chiave sta nel suo .env). {ex.Message}")
+                    Return Nothing
+                End Try
+
+                Using risposta
+
+                    Dim corpo As String = Await risposta.Content.ReadAsStringAsync()
+
+                    Assert.IsTrue(risposta.IsSuccessStatusCode,
+                        $"il prototipo ha risposto HTTP {CInt(risposta.StatusCode)} per {cosa}: {corpo}")
+
+                    Dim oggetto As JsonObject = TryCast(JsonNode.Parse(corpo), JsonObject)
+                    Assert.IsNotNull(oggetto, $"il prototipo non ha restituito un oggetto JSON per {cosa}")
+
+                    Return oggetto
+
+                End Using
+            End Using
 
         End Function
 
@@ -430,13 +503,18 @@ Namespace NonRegressione
 
         End Sub
 
-        ''' <summary>Cosa non si è ritrovato nel CV, per un lato.</summary>
-        Friend Shared Sub Invenzione(testo As StringBuilder, lato As String, inventate As Invenzioni)
+        ''' <summary>Cosa non si è ritrovato nel testo di partenza, per un lato.</summary>
+        ''' <param name="dove">
+        ''' Come si chiama il testo in cui si è cercato. Per l'import è il CV; per il
+        ''' dialogo guidato non c'è nessun CV, c'è quello che l'utente ha detto.
+        ''' </param>
+        Friend Shared Sub Invenzione(testo As StringBuilder, lato As String, inventate As Invenzioni,
+                                     Optional dove As String = "nel CV")
 
             testo.Append($"**{lato}** — ")
 
             If inventate.Gravi.Count = 0 AndAlso inventate.DaGuardare.Count = 0 Then
-                testo.Append("ogni valore copiato si ritrova nel CV.").Append(vbLf).Append(vbLf)
+                testo.Append($"ogni valore copiato si ritrova {dove}.").Append(vbLf).Append(vbLf)
                 Return
             End If
 
