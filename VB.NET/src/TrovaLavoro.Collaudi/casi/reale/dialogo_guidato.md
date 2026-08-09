@@ -2,8 +2,8 @@
 
 *Rapporto generato da `CollaudiDialogoReale`. Sta nel repo perché la persona è inventata: Anna Ricci non esiste, e la sua storia è scritta apposta perché l'anti-perdita e il «lasciato fuori» abbiano occasione di scattare.*
 
-- **Quando**: 2026-08-09 05:17
-- **Mosse del dialogo**: 24
+- **Quando**: 2026-08-09 20:37
+- **Mosse del dialogo**: 25
 - **Chiamate all'AI**: 12
 - **Turni, in ordine di prima chiamata**: nome → contatti → patente → esperienze_formali → esperienze_informali → competenze → formazione
 
@@ -14,7 +14,7 @@
 | trappola | detta nel turno | attesa in | instradata a | reso conto |
 |---|---|---|---|---|
 | il corso senza nome | `contatti` | `formazione` | *(non instradata)* | — |
-| il patentino del muletto | `patente` | `formazione` | `competenze` | = |
+| il patentino del muletto | `patente` | `formazione` | `formazione` | = |
 | il posto fisso rifiutato | `competenze` | `esperienze_formali` | `esperienze_formali` | = |
 | il chiosco della sorella | `formazione` | `esperienze_informali` | `esperienze_informali` | = |
 
@@ -24,8 +24,7 @@
 
 | dal turno | verso | le parole dell'utente | reso conto |
 |---|---|---|---|
-| `patente` | `competenze` | patentino per il muletto | = |
-| `competenze` | `formazione` | patentino per il muletto | = |
+| `patente` | `formazione` | patentino per il muletto | = |
 | `competenze` | `esperienze_formali` | mi hanno anche offerto un posto fisso in trattoria | = |
 | `formazione` | `esperienze_informali` | per due estati ho aiutato mia sorella nel suo chiosco di piadine in spiaggia | = |
 
@@ -33,7 +32,6 @@
 
 *Il gemello dell'anti-perdita: ciò che nessuna sezione sa accogliere si dichiara. Qui è una **segnalazione** e non un pass/fail — che scatti dipende da come il modello legge una frase, e pretenderlo darebbe un collaudo che lampeggia. Il suo pass/fail sta nel banco senza rete, dove il frammento che nessuno sa collocare è preparato a mano.*
 
-- Questo non sono riuscita a collocarlo in nessuna sezione, quindi lo lascio fuori: «patentino per il muletto».
 - Questo non sono riuscita a collocarlo in nessuna sezione, quindi lo lascio fuori: «mi hanno anche offerto un posto fisso in trattoria».
 
 ## Il conduttore ha risposto alle domande giuste?
@@ -59,7 +57,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 | esperienze formali | 2 |
 | esperienze informali | 2 |
 | competenze | 5 |
-| formazione | 1 |
+| formazione | 2 |
 
 ```json
 {
@@ -67,7 +65,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
   "contatti": {
     "email": "anna.ricci@example.it",
     "telefono": "340 1122334",
-    "citta": "Forlì, via del Mulino 12",
+    "citta": "Forlì",
     "link": ""
   },
   "patente": {
@@ -80,7 +78,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
     {
       "ruolo": "pulizie",
       "azienda": "supermercato Il Gabbiano di Forlì",
-      "durata": "5 anni, dal 2016 al 2021",
+      "durata": "5 anni, 2016-2021",
       "cosa_facevo": "pulivo i reparti e gli uffici la mattina presto, prima dell'apertura",
       "tipo": ""
     },
@@ -96,22 +94,27 @@ Niente: il dialogo è andato come la traccia si aspettava.
     {
       "cosa_facevo": "cucino per duecento persone",
       "quando": "da tre anni",
-      "con_chi": "altre volontarie alla sagra del paese"
+      "con_chi": "volontarie della sagra del paese"
     },
     {
-      "cosa_facevo": "aiutato nel chiosco di piadine",
+      "cosa_facevo": "aiutato nel chiosco di piadine in spiaggia",
       "quando": "due estati",
-      "con_chi": "mia sorella in spiaggia"
+      "con_chi": "mia sorella"
     }
   ],
   "competenze": [
-    "Cucina per grandi quantità",
+    "Cucinare per tanta gente",
     "Velocità",
     "Precisione",
-    "Disponibilità ad alzarsi presto",
+    "Alzarsi presto",
     "Uso delle lavapavimenti industriali"
   ],
   "formazione": [
+    {
+      "titolo": "patentino per il muletto",
+      "istituto": "",
+      "anno": ""
+    },
     {
       "titolo": "licenza media",
       "istituto": "",
@@ -148,7 +151,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 > Ecco cosa ho capito:
 > Email: anna.ricci@example.it
 > Telefono: 340 1122334
-> Domicilio: Forlì, via del Mulino 12
+> Domicilio: Forlì
 >
 
 **Anna:** *[Sì, è giusto]*
@@ -176,7 +179,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > - Ruolo: pulizie
 > - Azienda: supermercato Il Gabbiano di Forlì
-> - Durata: 5 anni, dal 2016 al 2021
+> - Durata: 5 anni, 2016-2021
 > - Cosa facevo: pulivo i reparti e gli uffici la mattina presto, prima dell'apertura
 >
 
@@ -222,7 +225,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > - Cosa facevo: cucino per duecento persone
 > - Quando: da tre anni
-> - Con chi: altre volontarie alla sagra del paese
+> - Con chi: volontarie della sagra del paese
 >
 
 **Anna:** *[Sì, è giusto]*
@@ -239,21 +242,15 @@ Niente: il dialogo è andato come la traccia si aspettava.
 > 
 > * Cosa ti riesce bene?
 >
-> Prima avevi accennato a qualcosa che riguarda «competenze», e l'avevo tenuto da parte. Vediamolo ora:
->
-> Questo non sono riuscita a collocarlo in nessuna sezione, quindi lo lascio fuori: «patentino per il muletto».
->
-> *(le tue parole)* «patentino per il muletto»
->
 
 **Anna:** So cucinare per tanta gente, sono veloce e precisa, e non mi pesa alzarmi presto. So usare le lavapavimenti industriali.
 
 > Ecco cosa ho capito — le cose che sai fare:
 >
-> - Cucina per grandi quantità
+> - Cucinare per tanta gente
 > - Velocità
 > - Precisione
-> - Disponibilità ad alzarsi presto
+> - Alzarsi presto
 > - Uso delle lavapavimenti industriali
 >
 
@@ -266,10 +263,10 @@ Niente: il dialogo è andato come la traccia si aspettava.
 
 > Ecco cosa ho capito — le cose che sai fare:
 >
-> - Cucina per grandi quantità
+> - Cucinare per tanta gente
 > - Velocità
 > - Precisione
-> - Disponibilità ad alzarsi presto
+> - Alzarsi presto
 > - Uso delle lavapavimenti industriali
 >
 
@@ -279,6 +276,19 @@ Niente: il dialogo è andato come la traccia si aspettava.
 > Procediamo come prima, uno alla volta.
 > 
 > * Qual è il primo che ti viene in mente?
+>
+> Prima avevi accennato a qualcosa che riguarda «studi e formazione», e l'avevo tenuto da parte. Vediamolo ora:
+>
+> *(le tue parole)* «patentino per il muletto»
+>
+> - Titolo: patentino per il muletto
+> - Istituto: (non specificata)
+> - Anno: (non specificata)
+>
+
+**Anna:** *[Sì, aggiungilo]*
+
+> Fatto, l'ho aggiunto.
 >
 
 **Anna:** Ho la licenza media e basta. Ah, e per due estati ho aiutato mia sorella nel suo chiosco di piadine in spiaggia.
@@ -309,11 +319,11 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > Prima avevi accennato a qualcosa che riguarda «esperienze informali», e l'avevo tenuto da parte. Vediamolo ora:
 >
-> *(le tue parole)* «per due estati ho aiutato mia sorella nel suo chiosco di piadine in spiaggia»
+> *(le tue parole)* «mi hanno anche offerto un posto fisso in trattoria / per due estati ho aiutato mia sorella nel suo chiosco di piadine in spiaggia»
 >
-> - Cosa facevo: aiutato nel chiosco di piadine
+> - Cosa facevo: aiutato nel chiosco di piadine in spiaggia
 > - Quando: due estati
-> - Con chi: mia sorella in spiaggia
+> - Con chi: mia sorella
 >
 
 **Anna:** *[Sì, aggiungilo]*
@@ -331,7 +341,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 > **Esperienze formali 1**
 > - Ruolo: pulizie
 > - Azienda: supermercato Il Gabbiano di Forlì
-> - Durata: 5 anni, dal 2016 al 2021
+> - Durata: 5 anni, 2016-2021
 > - Cosa facevo: pulivo i reparti e gli uffici la mattina presto, prima dell'apertura
 >
 > **Esperienze formali 2**
@@ -343,21 +353,26 @@ Niente: il dialogo è andato come la traccia si aspettava.
 > **Esperienze informali 1**
 > - Cosa facevo: cucino per duecento persone
 > - Quando: da tre anni
-> - Con chi: altre volontarie alla sagra del paese
+> - Con chi: volontarie della sagra del paese
 >
 > **Esperienze informali 2**
-> - Cosa facevo: aiutato nel chiosco di piadine
+> - Cosa facevo: aiutato nel chiosco di piadine in spiaggia
 > - Quando: due estati
-> - Con chi: mia sorella in spiaggia
+> - Con chi: mia sorella
 >
 > **Competenze**
-> - Cucina per grandi quantità
+> - Cucinare per tanta gente
 > - Velocità
 > - Precisione
-> - Disponibilità ad alzarsi presto
+> - Alzarsi presto
 > - Uso delle lavapavimenti industriali
 >
 > **Formazione 1**
+> - Titolo: patentino per il muletto
+> - Istituto: (non specificata)
+> - Anno: (non specificata)
+>
+> **Formazione 2**
 > - Titolo: licenza media
 > - Istituto: (non specificata)
 > - Anno: (non specificata)

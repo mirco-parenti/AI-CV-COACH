@@ -26,10 +26,11 @@ Namespace NonRegressione
     ''' della parità della richiesta di T2, applicato a due passi in fila.</para>
     ''' <para>Il pass/fail netto sta sui campi che il CV scrive nero su bianco e che il
     ''' prompt ordina di copiare — nome, email, telefono, link, patente: lì una differenza
-    ''' fra i due non è varianza dell'AI, è un difetto da guardare. Fa eccezione la
-    ''' <b>città</b>, che si guarda e non si boccia finché il prompt non deciderà fra
-    ''' residenza e domicilio (<see cref="CollaudoReale.PerchePerLaCitta"/>): tenerci un
-    ''' Assert dava un collaudo che lampeggiava. Sui conteggi delle sezioni vale
+    ''' fra i due non è varianza dell'AI, è un difetto da guardare. La <b>città</b> ha un
+    ''' pass/fail suo, e di forma diversa: dal <b>pool 1.02</b> il prompt decide che è il
+    ''' domicilio e che è una sola, quindi si giudica contro il <b>CV</b> e non contro il
+    ''' prototipo, che essendo fermo al pool 1.00 continua a dare la residenza
+    ''' (<see cref="CollaudoReale.PerchePerLaCitta"/>). Sui conteggi delle sezioni vale
     ''' una tolleranza dichiarata (<see cref="TolleranzaVoci"/>), perché dividere o unire
     ''' una voce è un giudizio; sul resto — <c>cosa_facevo</c>, le competenze, il numero
     ''' delle esperienze informali — non si pretende nulla, e a leggere è Mirco nel
@@ -163,6 +164,12 @@ Namespace NonRegressione
                 Dim malCollocatePrototipo As List(Of String) =
                     ControlloCollocazione.VolontariatoFraLeFormali(daPrototipo)
 
+                ' --- E la città, giudicata sul CV (vedi CittaFuoriDalDomicilio). -------
+                ' Per la sola app: dal pool 1.02 il prompt le dice quale dei due indirizzi
+                ' tenere, al prototipo no.
+                Dim cittaFuoriPosto As String =
+                    CollaudoReale.CittaFuoriDalDomicilio(daApp.Contatti.Citta, testoApp)
+
                 ' Il rapporto si scrive PRIMA di giudicare: se un Assert ferma tutto, la
                 ' prova di com'era andata resta su disco comunque.
                 Dim dove As String = Scrivi(pdf, testoApp, testoPrototipo, trascrizioni, competenze,
@@ -196,10 +203,19 @@ Namespace NonRegressione
                 VerificaStessoValore("contatti.link", daPrototipo.Contatti.Link, daApp.Contatti.Link)
 
                 ' contatti.citta manca da questo elenco di proposito, ed è l'unico dei
-                ' campi copiati a mancarne: vedi CollaudoReale.PerchePerLaCitta.
+                ' campi copiati a mancarne: qui i due lati non devono più coincidere. Il
+                ' suo pass/fail c'è, ed è poco più sotto.
                 VerificaStessoValore("patente.ha", daPrototipo.Patente.Ha, daApp.Patente.Ha)
                 VerificaStessoValore("patente.categorie",
                                      CollaudoReale.Categorie(daPrototipo), CollaudoReale.Categorie(daApp))
+
+                ' --- Passo 2: la città è il domicilio, e una sola. --------------------
+                ' Il campo è tornato un pass/fail perché dal pool 1.02 il prompt decide
+                ' quale dei due indirizzi tenere (CollaudoReale.PerchePerLaCitta). Si
+                ' giudica la sola app e contro il CV: il prototipo, fermo al pool 1.00,
+                ' continua a dare la residenza, e pretendere che coincidano boccerebbe
+                ' l'app proprio dove ha imparato a fare meglio.
+                Assert.IsEmpty(cittaFuoriPosto, "contatti.citta: " & cittaFuoriPosto)
 
                 ' --- Passo 2: quante voci per sezione, entro la tolleranza. -----------
                 ' Le competenze restano fuori di proposito: vedi TolleranzaVoci. Le
@@ -402,11 +418,88 @@ Namespace NonRegressione
 
         End Sub
 
+        ' --- La città presa dal domicilio, provata senza rete -----------------------
+        ' Il rilevatore che ha rimesso il campo fra i pass/fail (pool 1.02: la città è il
+        ' domicilio, una sola). Il testo è inventato come tutto il resto della batteria,
+        ' ma ha la forma del CV vero da cui la regola è nata: due indirizzi, uno per riga,
+        ' ognuno chiamato col suo nome.
+
+        ''' <summary>Un CV finto che dichiara residenza e domicilio in due città diverse.</summary>
+        Private Const DueIndirizzi As String =
+            "MARIA ROSSI" & vbLf &
+            "Residenza: Via dei Mille 3, 16031 Vallemare (XX)" & vbLf &
+            "Domicilio (zona bassa valle): Via del Porto 12, 16042 Portoraro (XX)" & vbLf &
+            "Tel: 333 1234567 | Email: maria.rossi@example.com"
+
+        <TestMethod>
+        Public Sub IlDomicilioEQuelloCheSiVuole()
+
+            Assert.IsEmpty(CollaudoReale.CittaFuoriDalDomicilio("Portoraro (XX)", DueIndirizzi),
+                           "la città del domicilio è la risposta giusta")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LaResidenzaAlPostoDelDomicilioSiVede()
+
+            ' La lettura del prototipo, e quella che l'app dava prima del pool 1.02.
+            Dim motivo As String = CollaudoReale.CittaFuoriDalDomicilio("Vallemare (XX)", DueIndirizzi)
+
+            Assert.IsNotEmpty(motivo, "la residenza non è il domicilio")
+            Assert.Contains("Vallemare", motivo, "chi legge deve vedere che città è arrivata")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub DueCittaInsiemeNonSonoUnaCittaSola()
+
+            ' L'altra metà della regola: il campo ne vuole una, non l'elenco delle due.
+            ' Si vede dallo stesso confronto — le parole della residenza nel domicilio non
+            ' ci sono — e non serve un rilevatore a parte.
+            Assert.IsNotEmpty(CollaudoReale.CittaFuoriDalDomicilio(
+                                  "Vallemare (XX), Portoraro (XX)", DueIndirizzi),
+                              "due città in un campo che ne vuole una")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LaResidenzaScrittaDopoIlDomicilioNonInganna()
+
+            ' I due indirizzi sulla stessa riga, in ordine inverso: senza il taglio alla
+            ' parola «residenza» il pezzo di riga guardato se li mangerebbe tutt'e due, e
+            ' la residenza passerebbe per domicilio.
+            Dim riga As String = "Domicilio: Portoraro (XX) — Residenza: Vallemare (XX)"
+
+            Assert.IsEmpty(CollaudoReale.CittaFuoriDalDomicilio("Portoraro (XX)", riga),
+                           "il domicilio resta quello giusto")
+            Assert.IsNotEmpty(CollaudoReale.CittaFuoriDalDomicilio("Vallemare (XX)", riga),
+                              "la residenza no, anche se è scritta dopo")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaDomicilioNonCeNienteDaGiudicare()
+
+            ' Il limite dichiarato del rilevatore, scritto qui perché non si scopra un
+            ' giorno per caso: se il CV nomina un indirizzo solo, o manda il domicilio a
+            ' capo, non c'è niente da confrontare e il controllo tace invece di bocciare.
+            Assert.IsEmpty(CollaudoReale.CittaFuoriDalDomicilio(
+                               "Vallemare (XX)", "MARIA ROSSI" & vbLf & "Vallemare (XX) — 333 1234567"),
+                           "un CV con un indirizzo solo non deve far cadere il collaudo")
+
+            Assert.IsEmpty(CollaudoReale.CittaFuoriDalDomicilio(
+                               "Portoraro (XX)", "Domicilio:" & vbLf & "Via del Porto 12, Portoraro (XX)"),
+                           "e nemmeno un domicilio mandato a capo")
+
+        End Sub
+
         ' --- Il segno delle righe di rapporto, provato senza rete -------------------
         ' Il caso interessante — la differenza che si guarda invece di bocciare — dipende
-        ' da come il modello legge un CV con due indirizzi, e nelle tre esecuzioni del
-        ' collaudo di tappa non si è presentato nemmeno una volta. Provarlo qui costa
-        ' nulla ed è l'unico modo di sapere che quando servirà sarà giusto.
+        ' da come le due parti leggono un CV con due indirizzi: nelle tre esecuzioni del
+        ' collaudo di tappa non si era presentato nemmeno una volta, e dal pool 1.02 su un
+        ' CV così si presenta invece per costruzione, perché l'app tiene il domicilio e il
+        ' prototipo la residenza. Provarlo qui costa nulla ed è l'unico modo di sapere che
+        ' quando servirà sarà giusto.
 
         <TestMethod>
         Public Sub ILValoriUgualiPortanoIlSegnoDiUguaglianza()
@@ -640,13 +733,11 @@ Namespace NonRegressione
                              $"competenze {daPrototipo.Competenze.Count} → {daApp.Competenze.Count} " &
                              $"({competenze.InComune} in comune), " &
                              $"formazione {daPrototipo.Formazione.Count} → {daApp.Formazione.Count}.")
-            If CollaudoReale.Ripulito(daPrototipo.Contatti.Citta) <>
-               CollaudoReale.Ripulito(daApp.Contatti.Citta) Then
-                testo.AppendLine(
-                    $"Città diversa (segnalata, non bocciata: il prompt non decide fra " &
-                    $"residenza e domicilio): prototipo «{CollaudoReale.Ripulito(daPrototipo.Contatti.Citta)}», " &
-                    $"app «{CollaudoReale.Ripulito(daApp.Contatti.Citta)}».")
-            End If
+            testo.AppendLine(
+                $"Città: prototipo «{CollaudoReale.Ripulito(daPrototipo.Contatti.Citta)}», " &
+                $"app «{CollaudoReale.Ripulito(daApp.Contatti.Citta)}» — che i due valori " &
+                "differiscano non boccia: il pass/fail è sul CV, e chiede all'app il " &
+                "domicilio (pool 1.02).")
 
             testo.AppendLine($"Valori non ritrovati nel CV: app {inventateApp.Gravi.Count} gravi " &
                              $"e {inventateApp.DaGuardare.Count} da guardare, " &

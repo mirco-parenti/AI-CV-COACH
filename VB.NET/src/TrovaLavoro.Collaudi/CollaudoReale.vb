@@ -36,27 +36,32 @@ Namespace NonRegressione
         Friend Const RigheDaMostrare As Integer = 12
 
         ''' <summary>
-        ''' Perché <c>contatti.citta</c> è <b>segnalata e non bocciata</b>, unica fra i
-        ''' campi che il prompt ordina di copiare.
+        ''' Perché <c>contatti.citta</c>, pur essendo tornata un <b>pass/fail</b>, in
+        ''' tabella porta un ⚠️ e non un ≠.
         ''' </summary>
         ''' <remarks>
-        ''' <para>Un CV può portare due indirizzi — residenza e domicilio — e nessun
-        ''' prompt del pool dice quale dei due sia «la città». Misurato il 2026-08-08 sul
-        ''' CV vero, che ne ha due: a <b>trascrizione identica bit per bit</b>, tre
-        ''' strutturazioni di fila hanno risposto «Pieve Ligure (GE)», «Pieve Ligure (GE)
-        ''' / Carasco (GE)» e «Pieve Ligure (GE), Carasco (GE)». Non è una regressione
-        ''' dell'app — è un caso di confine che il prompt non decide, e lo stesso vale per
-        ''' il prototipo, che quel prompt lo condivide carattere per carattere.</para>
-        ''' <para>Tenerci un <c>Assert</c> darebbe un collaudo che lampeggia a caso: è
-        ''' esattamente la lezione di T2 sul pass/fail (cap. 14). La differenza quindi si
-        ''' scrive nel rapporto con un ⚠️ e si legge; l'<c>Assert</c> torna quando il
-        ''' prompt avrà deciso quale città sia quella buona.</para>
+        ''' <para>Un CV può portare due indirizzi — residenza e domicilio — e fino al pool
+        ''' 1.01 nessun prompt diceva quale dei due fosse «la città». Misurato il
+        ''' 2026-08-08 sul CV vero, che ne ha due: a <b>trascrizione identica bit per
+        ''' bit</b>, tre strutturazioni di fila hanno risposto «Pieve Ligure (GE)», «Pieve
+        ''' Ligure (GE) / Carasco (GE)» e «Pieve Ligure (GE), Carasco (GE)». Tenerci un
+        ''' <c>Assert</c> sarebbe stato un collaudo che lampeggia a caso: è esattamente la
+        ''' lezione di T2 sul pass/fail (cap. 14).</para>
+        ''' <para>Dal <b>pool 1.02</b> il prompt decide: la città è il <b>domicilio</b>,
+        ''' una sola — il posto dove si è raggiungibili per lavorare. Il caso di confine
+        ''' non è più tale, e il pass/fail è tornato: lo dà
+        ''' <see cref="CittaFuoriDalDomicilio"/>. Ma il metro è il <b>CV</b>, non l'altra
+        ''' colonna: il prototipo è fermo al pool 1.00 e la residenza continua a darla,
+        ''' quindi pretendere che i due valori coincidano boccerebbe l'app proprio dove ha
+        ''' imparato a fare meglio. In tabella la differenza resta perciò un ⚠️ da
+        ''' leggere.</para>
         ''' </remarks>
         Friend Const PerchePerLaCitta As String =
-            "*La **città** è segnalata e non bocciata: un CV può portare due indirizzi — " &
-            "residenza e domicilio — e nessun prompt dice quale sia «la città». A " &
-            "trascrizione identica, tre strutturazioni di fila hanno dato tre risposte " &
-            "diverse. Tornerà un pass/fail quando il prompt avrà deciso.*"
+            "*La **città** è segnalata e non bocciata **in questa tabella**, ma un " &
+            "pass/fail adesso ce l'ha: dal **Pool 1.02** il prompt decide — la città è il " &
+            "**domicilio**, una sola — e il metro è il **CV**, non l'altra colonna. Chi " &
+            "legge lo stesso CV con un prompt precedente tiene ancora la residenza: due " &
+            "valori diversi qui non sono di per sé un difetto della lettura.*"
 
         ''' <summary>
         ''' Perché il <b>numero</b> delle esperienze informali è segnalato e non bocciato,
@@ -446,6 +451,82 @@ Namespace NonRegressione
 
         End Function
 
+        ' --- La città: il domicilio, una sola ----------------------------------------
+
+        ''' <summary>La parola con cui un CV nomina il domicilio.</summary>
+        Private Const ParolaDomicilio As String = "domicilio"
+
+        ''' <summary>
+        ''' La parola con cui nomina la residenza, troncata al pezzo che le due forme —
+        ''' «residenza», «residente» — hanno in comune.
+        ''' </summary>
+        Private Const ParolaResidenza As String = "residen"
+
+        ''' <summary>
+        ''' Che cosa non torna nella <c>citta</c> di un profilo letto da un CV, o la
+        ''' stringa vuota se torna. È il pass/fail che il <b>pool 1.02</b> ha reso
+        ''' possibile (<see cref="PerchePerLaCitta"/>): quel prompt dice che la città è il
+        ''' <b>domicilio</b> e che dev'essere una sola, quindi ora c'è una risposta giusta
+        ''' da pretendere.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Il metro è il <b>CV</b> e non l'altra lettura: si guarda dove il CV
+        ''' dichiara il domicilio e ci si cerca dentro la città del profilo, con lo stesso
+        ''' appaiamento per parole dell'anti-invenzione (<see cref="NelTesto"/>). Chi
+        ''' scrive la residenza non ritrova lì le sue parole; chi le scrive tutt'e due —
+        ''' «A / B», «A, B» — nemmeno, ed è il modo in cui questo controllo vede anche la
+        ''' seconda metà della regola, «una sola».</para>
+        ''' <para>Il limite dichiarato, perché non si scopra un giorno per caso: se il CV
+        ''' non nomina il domicilio, o lo nomina e manda l'indirizzo a capo, non c'è niente
+        ''' da confrontare e il controllo <b>rinuncia</b> invece di bocciare — un CV con un
+        ''' indirizzo solo non deve far cadere il collaudo. Preferisce cioè tacere che
+        ''' sbagliare: la sezione «da leggere a mano» del rapporto resta il posto dove un
+        ''' caso storto si vede comunque.</para>
+        ''' </remarks>
+        Friend Shared Function CittaFuoriDalDomicilio(citta As String, testo As String) As String
+
+            Dim dichiarato As String = DomicilioDichiarato(testo)
+            If dichiarato.Length = 0 Then Return String.Empty
+
+            Dim scritta As String = Ripulito(citta)
+            If scritta.Length = 0 Then Return "il CV dichiara un domicilio e la città è vuota"
+
+            If NelTesto(scritta, dichiarato, dichiarato.Replace(" ", "")) Then Return String.Empty
+
+            Return $"«{scritta}» non è il domicilio che il CV dichiara"
+
+        End Function
+
+        ''' <summary>
+        ''' Il pezzo di CV che dichiara il domicilio, già pronto per cercarci dentro: la
+        ''' riga che lo nomina, da quella parola in poi. Se dopo il domicilio la stessa
+        ''' riga torna a parlare di residenza, lì il pezzo si chiude — altrimenti un CV che
+        ''' scrive i due indirizzi in quest'ordine farebbe passare per domicilio anche la
+        ''' residenza.
+        ''' </summary>
+        Private Shared Function DomicilioDichiarato(testo As String) As String
+
+            For Each riga As String In If(testo, String.Empty).
+                Split({vbCr, vbLf}, StringSplitOptions.RemoveEmptyEntries)
+
+                Dim normalizzata As String = PerCercare(riga)
+
+                Dim dove As Integer = normalizzata.IndexOf(ParolaDomicilio, StringComparison.Ordinal)
+                If dove < 0 Then Continue For
+
+                Dim dopo As String = normalizzata.Substring(dove + ParolaDomicilio.Length)
+
+                Dim residenza As Integer = dopo.IndexOf(ParolaResidenza, StringComparison.Ordinal)
+                If residenza >= 0 Then dopo = dopo.Substring(0, residenza)
+
+                Return dopo.Trim()
+
+            Next
+
+            Return String.Empty
+
+        End Function
+
         ' --- Valori e pezzi di rapporto ----------------------------------------------
 
         ''' <summary>Un valore senza gli spazi di troppo: quelli sono impaginazione.</summary>
@@ -471,8 +552,8 @@ Namespace NonRegressione
         ''' numero delle esperienze informali, <see cref="PerchePerLeInformali"/>). Sta
         ''' qui, e non dentro i due rapporti, perché i due rapporti devono usare lo stesso
         ''' alfabeto — e perché così il banco lo prova senza rete: il caso ⚠️ dipende da
-        ''' come il modello legge un CV con due indirizzi, e può non presentarsi per tre
-        ''' esecuzioni di fila.
+        ''' come le due parti leggono un CV con due indirizzi, e su un CV che ne ha uno
+        ''' solo può non presentarsi mai.
         ''' </summary>
         Friend Shared Function Marcatore(uguali As Boolean, segnalato As Boolean) As String
 
