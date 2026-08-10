@@ -124,6 +124,15 @@ Namespace Motore
         ''' Costruisce la taratura da un testo JSON. Ogni valore assente ricade sul
         ''' predefinito corrispondente, così un file parziale resta utilizzabile.
         ''' </summary>
+        ''' <remarks>
+        ''' <b>Ogni numero ha un intervallo di senso, e fuori da quello non entra.</b> Un
+        ''' <c>"clamp_su": -50</c> non è una messa a punto aggressiva: è un valore che
+        ''' capovolge il calcolo, e prima entrava zitto — le stelle sarebbero uscite
+        ''' sbagliate senza che niente lo dicesse. Un valore fuori intervallo viene
+        ''' scartato, si tiene il predefinito e lo si annota in <see cref="Avviso"/>:
+        ''' stessa cautela del file illeggibile (cap. 11.6), perché il rischio è lo
+        ''' stesso — un punteggio falso è peggio di un punteggio predefinito.
+        ''' </remarks>
         Public Shared Function DaJson(testo As String) As Taratura
 
             Dim radice As JsonObject = TryCast(JsonNode.Parse(testo), JsonObject)
@@ -134,37 +143,69 @@ Namespace Motore
             Dim t As Taratura = Predefinita()
             t.Origine = OrigineTaratura.File
 
-            LeggiMappa(radice, "punti", t.Punti)
-            LeggiMappa(radice, "peso_priorita", t.PesoPriorita)
-            LeggiMappa(radice, "peso_importanza", t.PesoImportanza)
+            Dim scartati As New List(Of String)
 
-            t.PesoContesto = LeggiNumero(radice, "peso_contesto", t.PesoContesto)
-            t.PesoFallback = LeggiNumero(radice, "peso_fallback", t.PesoFallback)
-            t.ClampGiu = LeggiNumero(radice, "clamp_giu", t.ClampGiu)
-            t.ClampSu = LeggiNumero(radice, "clamp_su", t.ClampSu)
-            t.TettoEliminatorio = LeggiNumero(radice, "tetto_eliminatorio", t.TettoEliminatorio)
+            ' I punti sono frazioni di soddisfazione: fuori da 0..1 non vogliono dire
+            ' niente. I pesi sono moltiplicatori: a zero una voce sparisce dal conteggio,
+            ' sotto zero la ribalta.
+            LeggiMappa(radice, "punti", t.Punti, 0, 1, scartati)
+            LeggiMappa(radice, "peso_priorita", t.PesoPriorita, PesoMinimo, PesoMassimo, scartati)
+            LeggiMappa(radice, "peso_importanza", t.PesoImportanza, PesoMinimo, PesoMassimo, scartati)
+
+            t.PesoContesto = LeggiNumero(radice, "peso_contesto", t.PesoContesto,
+                                         PesoMinimo, PesoMassimo, scartati)
+            t.PesoFallback = LeggiNumero(radice, "peso_fallback", t.PesoFallback,
+                                         PesoMinimo, PesoMassimo, scartati)
+
+            ' Il clamp ha due versi, e il segno è la sua natura: «giù» abbassa, «su»
+            ' alza. Scambiarli di segno significherebbe fare l'opposto di ciò che dicono.
+            t.ClampGiu = LeggiNumero(radice, "clamp_giu", t.ClampGiu, -100, 0, scartati)
+            t.ClampSu = LeggiNumero(radice, "clamp_su", t.ClampSu, 0, 100, scartati)
+
+            t.TettoEliminatorio = LeggiNumero(radice, "tetto_eliminatorio", t.TettoEliminatorio,
+                                              0, 100, scartati)
             t.SogliaStelleGenerazione = LeggiNumero(radice, "soglia_stelle_generazione",
-                                                   t.SogliaStelleGenerazione)
+                                                    t.SogliaStelleGenerazione, 0, 5, scartati)
+
+            If scartati.Count > 0 Then
+                t.Avviso = "Taratura: " & String.Join("; ", scartati) &
+                           ". Per questi uso i valori predefiniti."
+            End If
+
             Return t
 
         End Function
 
+        ''' <summary>Un peso a zero cancella la voce dal conteggio; sotto zero la ribalta.</summary>
+        Private Const PesoMinimo As Double = 0.001
+        Private Const PesoMassimo As Double = 1000
+
         ''' <summary>Sostituisce una mappa di pesi solo se il JSON la dichiara.</summary>
         Private Shared Sub LeggiMappa(radice As JsonObject, chiave As String,
-                                      ByRef destinazione As Dictionary(Of String, Double))
+                                      ByRef destinazione As Dictionary(Of String, Double),
+                                      minimo As Double, massimo As Double,
+                                      scartati As List(Of String))
 
             Dim nodo As JsonObject = TryCast(radice(chiave), JsonObject)
             If nodo Is Nothing Then Return
 
             Dim mappa As New Dictionary(Of String, Double)
             For Each voce As KeyValuePair(Of String, JsonNode) In nodo
-                ' Un valore non numerico («"1"» fra virgolette, un true) scarta la
-                ' mappa intera e lascia la predefinita: prima faceva cadere l'avvio
-                ' (contro il cap. 11.6), e tenere solo le voci buone falserebbe il
-                ' punteggio in silenzio — una chiave assente esclude quegli esiti.
+                ' Un valore non numerico («"1"» fra virgolette, un true) o fuori
+                ' intervallo scarta la mappa intera e lascia la predefinita: prima
+                ' faceva cadere l'avvio (contro il cap. 11.6), e tenere solo le voci
+                ' buone falserebbe il punteggio in silenzio — una chiave assente esclude
+                ' quegli esiti.
                 Dim valore As JsonValue = TryCast(voce.Value, JsonValue)
                 Dim numero As Double
-                If valore Is Nothing OrElse Not valore.TryGetValue(Of Double)(numero) Then Return
+                If valore Is Nothing OrElse Not valore.TryGetValue(Of Double)(numero) Then
+                    scartati.Add($"«{chiave}» ha un valore non numerico in «{voce.Key}»")
+                    Return
+                End If
+                If Not Accettabile(numero, minimo, massimo) Then
+                    scartati.Add($"«{chiave}.{voce.Key}» = {Scritto(numero)} è fuori da {Scritto(minimo)}..{Scritto(massimo)}")
+                    Return
+                End If
                 mappa(voce.Key.Trim().ToLowerInvariant()) = numero
             Next
 
@@ -172,16 +213,45 @@ Namespace Motore
 
         End Sub
 
-        ''' <summary>Legge un numero, lasciando il predefinito se assente o non numerico.</summary>
+        ''' <summary>
+        ''' Legge un numero, lasciando il predefinito se assente, non numerico o fuori
+        ''' dall'intervallo che ha senso per quel valore.
+        ''' </summary>
         Private Shared Function LeggiNumero(radice As JsonObject, chiave As String,
-                                            predefinito As Double) As Double
+                                            predefinito As Double,
+                                            minimo As Double, massimo As Double,
+                                            scartati As List(Of String)) As Double
 
             Dim valore As JsonValue = TryCast(radice(chiave), JsonValue)
             If valore Is Nothing Then Return predefinito
 
             Dim numero As Double
-            Return If(valore.TryGetValue(Of Double)(numero), numero, predefinito)
+            If Not valore.TryGetValue(Of Double)(numero) Then
+                scartati.Add($"«{chiave}» non è un numero")
+                Return predefinito
+            End If
 
+            If Not Accettabile(numero, minimo, massimo) Then
+                scartati.Add($"«{chiave}» = {Scritto(numero)} è fuori da {Scritto(minimo)}..{Scritto(massimo)}")
+                Return predefinito
+            End If
+
+            Return numero
+
+        End Function
+
+        ''' <summary>
+        ''' Dentro l'intervallo, e un numero vero: <c>NaN</c> e gli infiniti passerebbero
+        ''' ogni confronto senza mai essere maggiori o minori di niente.
+        ''' </summary>
+        Private Shared Function Accettabile(numero As Double, minimo As Double, massimo As Double) As Boolean
+            Return Not Double.IsNaN(numero) AndAlso Not Double.IsInfinity(numero) AndAlso
+                   numero >= minimo AndAlso numero <= massimo
+        End Function
+
+        ''' <summary>Un numero come va scritto in un avviso, senza virgole di lingua.</summary>
+        Private Shared Function Scritto(numero As Double) As String
+            Return numero.ToString(Globalization.CultureInfo.InvariantCulture)
         End Function
 
     End Class

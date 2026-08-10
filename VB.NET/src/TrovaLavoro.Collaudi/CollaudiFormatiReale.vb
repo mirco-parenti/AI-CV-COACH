@@ -22,18 +22,24 @@ Namespace NonRegressione
     ''' consegnano al passo 2 la stessa sostanza. Il PDF fa da riferimento perché è la
     ''' via principale, quella per cui il prompt è stato scritto.</para>
     ''' <para>Il pass/fail sta dove sta sempre: sui campi che il CV scrive nero su bianco
-    ''' e che il prompt ordina di <i>copiare</i> — nome, email, telefono, link, patente.
-    ''' Lì una differenza fra due formati non è varianza del modello: vuol dire che una
-    ''' delle strade ha consegnato un testo mutilo. Fa eccezione la <b>città</b>, che si
-    ''' guarda e non si boccia finché il prompt non deciderà fra residenza e domicilio
-    ''' (<see cref="CollaudoReale.PerchePerLaCitta"/>). Sui conteggi vale la tolleranza
-    ''' già dichiarata in <see cref="CollaudiImportReale.TolleranzaVoci"/>, sulle
-    ''' competenze e sul numero delle esperienze informali non si pretende un numero
+    ''' e che il prompt ordina di <i>copiare</i> — nome, email, telefono, <b>città</b>,
+    ''' link, patente. Lì una differenza fra due formati non è varianza del modello: vuol
+    ''' dire che una delle strade ha consegnato un testo mutilo. Sui conteggi vale la
+    ''' tolleranza già dichiarata in <see cref="CollaudiImportReale.TolleranzaVoci"/>,
+    ''' sulle competenze e sul numero delle esperienze informali non si pretende un numero
     ''' (<see cref="CollaudoReale.PerchePerLeInformali"/>), e il resto si legge nel
     ''' rapporto.</para>
-    ''' <para>Un pass/fail vale invece su <b>ogni</b> strada, PDF compreso, perché non
-    ''' dipende da come il file è fatto: la stessa attività non può stare sia fra le
-    ''' esperienze formali sia fra le informali. Dal <b>pool 1.01</b> il prompt lo dice, e
+    ''' <para><b>La città è tornata fra i pass/fail</b> — qui per ultima, ed è un
+    ''' allineamento rimasto indietro dal <b>Pool 1.02</b>. La ragione per cui era solo
+    ''' segnalata vale fra l'app e il prototipo, che leggono lo stesso CV con prompt
+    ''' diversi (<see cref="CollaudoReale.PerchePerLaCitta"/>); qui le quattro strade
+    ''' usano tutte lo stesso prompt, quello che decide — la città è il <b>domicilio</b>,
+    ''' una sola. Due città diverse fra le strade vogliono dire che una lettura ha perso
+    ''' l'indirizzo, e in più ogni strada risponde del proprio: la città che consegna
+    ''' dev'essere quella del domicilio dichiarato nel testo che ha letto.</para>
+    ''' <para>Un pass/fail vale su <b>ogni</b> strada, PDF compreso, perché non dipende da
+    ''' come il file è fatto: la stessa attività non può stare sia fra le esperienze
+    ''' formali sia fra le informali. Dal <b>pool 1.01</b> il prompt lo dice, e
     ''' <see cref="ControlloDoppioni"/> lo verifica.</para>
     ''' <para><b>Quello che questo collaudo non prova.</b> I file DOCX, TXT e MD non sono
     ''' quattro stesure indipendenti dello stesso curriculum: nascono dal testo che l'AI
@@ -170,6 +176,15 @@ Namespace NonRegressione
                         $"[{lettura.Formato}] un'attività che si dichiara volontaria è finita fra " &
                         $"i lavori: {String.Join(" · ", lettura.MalCollocate)}")
 
+                    ' La città, giudicata sul testo di quella strada. Dal pool 1.02 il
+                    ' prompt decide — è il domicilio, una sola — e qui tutte e quattro le
+                    ' strade passano da quel prompt: nessuna ha la scusa di leggere con
+                    ' un prompt precedente.
+                    Dim cittaFuoriPosto As String = CollaudoReale.CittaFuoriDalDomicilio(
+                        lettura.Profilo.Contatti.Citta, lettura.Testo)
+
+                    Assert.IsEmpty(cittaFuoriPosto, $"[{lettura.Formato}] contatti.citta: {cittaFuoriPosto}")
+
                 Next
 
                 For Each lettura As Lettura In altre
@@ -189,8 +204,14 @@ Namespace NonRegressione
                     StessoValore(lettura, "contatti.telefono",
                                  riferimento.Profilo.Contatti.Telefono, lettura.Profilo.Contatti.Telefono)
 
-                    ' contatti.citta no: è l'unico dei campi copiati che si guarda invece
-                    ' di bocciare, e per una ragione misurata — CollaudoReale.PerchePerLaCitta.
+                    ' La città sta qui insieme agli altri campi copiati, e non più fra le
+                    ' cose solo segnalate: la ragione per cui era segnalata vale <b>fra
+                    ' l'app e il prototipo</b>, che leggono con prompt diversi
+                    ' (CollaudoReale.PerchePerLaCitta), non fra quattro strade dell'app che
+                    ' usano tutte lo stesso. Qui due città diverse vogliono dire che una
+                    ' delle letture ha perso l'indirizzo, ed è un difetto.
+                    StessoValore(lettura, "contatti.citta",
+                                 riferimento.Profilo.Contatti.Citta, lettura.Profilo.Contatti.Citta)
                     StessoValore(lettura, "contatti.link",
                                  riferimento.Profilo.Contatti.Link, lettura.Profilo.Contatti.Link)
                     StessoValore(lettura, "patente.ha",
@@ -363,7 +384,7 @@ Namespace NonRegressione
             RigaCampo(testo, letture, "nome", Function(p) p.Nome)
             RigaCampo(testo, letture, "email", Function(p) p.Contatti.Email)
             RigaCampo(testo, letture, "telefono", Function(p) p.Contatti.Telefono)
-            RigaCampo(testo, letture, "città", Function(p) p.Contatti.Citta, segnalato:=True)
+            RigaCampo(testo, letture, "città", Function(p) p.Contatti.Citta)
             RigaCampo(testo, letture, "link", Function(p) p.Contatti.Link)
             RigaCampo(testo, letture, "patente", Function(p) p.Patente.Ha)
             RigaCampo(testo, letture, "categorie", AddressOf CollaudoReale.Categorie)
@@ -374,7 +395,6 @@ Namespace NonRegressione
             RigaCampo(testo, letture, "competenze", Function(p) p.Competenze.Count.ToString())
             RigaCampo(testo, letture, "formazione", Function(p) p.Formazione.Count.ToString())
             testo.Append(vbLf)
-            testo.Append(CollaudoReale.PerchePerLaCitta).Append(vbLf).Append(vbLf)
             testo.Append(CollaudoReale.PerchePerLeInformali).Append(vbLf).Append(vbLf)
 
             testo.Append("### Le competenze, rispetto al PDF").Append(vbLf).Append(vbLf)
@@ -464,9 +484,9 @@ Namespace NonRegressione
         ''' </summary>
         ''' <param name="segnalato">
         ''' Il campo si guarda e non si boccia: la differenza prende il ⚠️ invece del ≠.
-        ''' È il caso della città (<see cref="CollaudoReale.PerchePerLaCitta"/>) e del
-        ''' numero delle esperienze informali
-        ''' (<see cref="CollaudoReale.PerchePerLeInformali"/>).
+        ''' Resta il caso del numero delle esperienze informali
+        ''' (<see cref="CollaudoReale.PerchePerLeInformali"/>); la città lo era fino al
+        ''' Pool 1.02 e ora è un pass/fail come gli altri campi copiati.
         ''' </param>
         Private Shared Sub RigaCampo(testo As StringBuilder, letture As List(Of Lettura),
                                      campo As String, valore As Func(Of Profilo, String),
@@ -514,15 +534,15 @@ Namespace NonRegressione
 
             Next
 
+            ' La città ora è un pass/fail e la boccia l'Assert; qui resta il riepilogo a
+            ' console, che serve a leggere subito *quali* valori sono usciti quando salta.
             Dim citta As List(Of String) = letture.
                 Select(Function(l) $"{l.Formato} «{CollaudoReale.Ripulito(l.Profilo.Contatti.Citta)}»").
                 ToList()
 
             If letture.Select(Function(l) CollaudoReale.Ripulito(l.Profilo.Contatti.Citta)).
                        Distinct().Count() > 1 Then
-                testo.AppendLine(
-                    "Città diversa fra le strade (segnalata, non bocciata: il prompt non decide " &
-                    $"fra residenza e domicilio): {String.Join(", ", citta)}.")
+                testo.AppendLine($"Città diversa fra le strade: {String.Join(", ", citta)}.")
             End If
 
             testo.AppendLine($"Rapporto completo (contiene dati personali, fuori dal repo): {dove}")

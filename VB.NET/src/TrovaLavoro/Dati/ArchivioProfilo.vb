@@ -2,8 +2,28 @@ Imports System.Globalization
 Imports System.IO
 Imports System.Linq
 Imports System.Text
+Imports System.Text.Json
+Imports System.Text.Json.Nodes
 
 Namespace Dati
+
+    ''' <summary>
+    ''' Il 📄 CV base ritrovato su disco, con l'etichetta di dove viene: da quale versione
+    ''' di profilo è nato e quando. Serve a poter dire «questo CV è di una versione
+    ''' precedente» invece di rigenerarlo di soppiatto (cap. 11.1).
+    ''' </summary>
+    Public Class CvBase
+
+        ''' <summary>Il CV vero e proprio, come l'ha prodotto la generazione.</summary>
+        Public Property Cv As JsonNode
+
+        ''' <summary>La versione di profilo da cui è nato.</summary>
+        Public Property VersioneProfilo As String
+
+        ''' <summary>Quando è stato generato.</summary>
+        Public Property Generato As Date
+
+    End Class
 
     ''' <summary>
     ''' Il profilo su disco: lo legge, lo salva e a ogni salvataggio ne conserva una
@@ -30,6 +50,11 @@ Namespace Dati
 
         ''' <summary>UTF-8 <b>senza BOM</b>, come il manifest del pool: un JSON con il BOM davanti dà noia agli altri strumenti.</summary>
         Private Shared ReadOnly Codifica As New UTF8Encoding(encoderShouldEmitUTF8Identifier:=False)
+
+        ''' <summary>Rientri e accenti in chiaro: l'utente deve poter leggere i suoi dati senza l'app (cap. 11.1).</summary>
+        Private Shared ReadOnly FormatoLeggibile As New JsonSerializerOptions With {
+            .WriteIndented = True,
+            .Encoder = Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping}
 
         Private ReadOnly _cartella As CartellaDati
 
@@ -131,6 +156,77 @@ Namespace Dati
                 ' in più che una promessa di recupero non mantenuta.
                 Return Nothing
             End Try
+
+        End Function
+
+        ''' <summary>
+        ''' Salva il 📄 CV base accanto al profilo, annotando da quale versione è nato.
+        ''' </summary>
+        ''' <remarks>
+        ''' Sta qui e non in un archivio nuovo perché è <b>del profilo</b>, non di una
+        ''' candidatura: nasce senza alcun annuncio ed è il ritratto del profilo in forma
+        ''' di CV (cap. 11.1). È la vista-dati «un profilo, molti CV» presa alla lettera —
+        ''' il CV base è del profilo, i CV mirati sono delle opportunità.
+        ''' </remarks>
+        ''' <param name="cv">Il CV generato.</param>
+        ''' <param name="versioneProfilo">Il nome della versione da cui è nato.</param>
+        ''' <returns>Il percorso del file scritto.</returns>
+        Public Function SalvaCvBase(cv As JsonNode, versioneProfilo As String) As String
+
+            If cv Is Nothing Then Throw New ArgumentNullException(NameOf(cv))
+
+            _cartella.Assicura()
+
+            Dim involucro As New JsonObject From {
+                {"versione_profilo", versioneProfilo},
+                {"generato", Date.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)},
+                {"cv", cv.DeepClone()}}
+
+            ScriviInModoAtomico(_cartella.FileCvBase, involucro.ToJsonString(FormatoLeggibile))
+
+            Return _cartella.FileCvBase
+
+        End Function
+
+        ''' <summary>
+        ''' Il 📄 CV base salvato, o <c>Nothing</c> se non ne è mai stato generato uno.
+        ''' Solleva se il file c'è ma non si lascia leggere: come per il profilo, un
+        ''' ripiego silenzioso nasconderebbe una perdita.
+        ''' </summary>
+        Public Function CaricaCvBase() As CvBase
+
+            If Not File.Exists(_cartella.FileCvBase) Then Return Nothing
+
+            Dim involucro As JsonObject = TryCast(
+                JsonNode.Parse(File.ReadAllText(_cartella.FileCvBase, Encoding.UTF8)), JsonObject)
+
+            If involucro Is Nothing Then
+                Throw New JsonException("Il CV base non ha la forma attesa.")
+            End If
+
+            Dim generato As Date
+            Date.TryParseExact(Campo(involucro, "generato"), "yyyy-MM-dd HH:mm:ss",
+                               CultureInfo.InvariantCulture, DateTimeStyles.None, generato)
+
+            Dim cv As JsonNode = Nothing
+            involucro.TryGetPropertyValue("cv", cv)
+
+            Return New CvBase With {
+                .Cv = cv,
+                .VersioneProfilo = Campo(involucro, "versione_profilo"),
+                .Generato = generato}
+
+        End Function
+
+        ''' <summary>Un campo di testo dell'involucro, <c>Nothing</c> se manca.</summary>
+        Private Shared Function Campo(involucro As JsonObject, nome As String) As String
+
+            Dim valore As JsonNode = Nothing
+            If Not involucro.TryGetPropertyValue(nome, valore) OrElse valore Is Nothing Then
+                Return Nothing
+            End If
+
+            Return If(valore.GetValueKind() = JsonValueKind.String, valore.GetValue(Of String)(), Nothing)
 
         End Function
 

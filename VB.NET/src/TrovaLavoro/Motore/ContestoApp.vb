@@ -63,6 +63,18 @@ Namespace Motore
         Public ReadOnly Property ImportCv As ImportProfilo
 
         ''' <summary>
+        ''' La fila dei passi di una candidatura (T4); <c>Nothing</c> senza AI o senza
+        ''' pool, come gli altri servizi che passano dai prompt.
+        ''' </summary>
+        Public ReadOnly Property Pipeline As PipelineCandidatura
+
+        ''' <summary>
+        ''' Le candidature su disco: c'è sempre, anche senza AI — le opportunità già
+        ''' generate si riaprono comunque (cap. 12.7).
+        ''' </summary>
+        Public ReadOnly Property Opportunita As ArchivioOpportunita
+
+        ''' <summary>
         ''' Se c'è tutto ciò che serve per una chiamata all'AI: la chiave <b>e</b> i
         ''' prompt. È la domanda che i pannelli fanno prima di accendere un bottone.
         ''' </summary>
@@ -232,6 +244,14 @@ Namespace Motore
             _Strutturatore = New StrutturatoreTurni(Libreria, Client)
             _Trascrittore = New TrascrittorePdf(Libreria, Client)
 
+            ' I tre mestieri di T4 e la fila che li ordina. La taratura le serve per il
+            ' punteggio, ed è già montata a questo punto (MontaNumeri viene prima).
+            _Pipeline = New PipelineCandidatura(
+                New AnalizzatoreAnnuncio(Libreria, Client),
+                New Confrontatore(Libreria, Client),
+                New Generatore(Libreria, Client),
+                Taratura)
+
         End Sub
 
         ''' <summary>La chiave da usare, o <c>Nothing</c> se non ce n'è una.</summary>
@@ -253,6 +273,7 @@ Namespace Motore
         Private Sub MontaDati()
 
             _Archivio = New ArchivioProfilo(Cartella)
+            _Opportunita = New ArchivioOpportunita(Cartella)
             Nota(If(Archivio.Esiste,
                     $"Profilo presente in «{Cartella.FileProfilo}».",
                     "Nessun profilo salvato: si parte dal bivio «ho già un CV» / «costruiamolo insieme»."))

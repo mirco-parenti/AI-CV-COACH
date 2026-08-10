@@ -32,6 +32,38 @@ Namespace Dati
         End Sub
 
         <TestMethod>
+        Public Sub IlCvBaseStaColProfiloEDiceDaQualeVersioneViene()
+            ' Il 📄 CV-1 nasce senza alcun annuncio: è il ritratto del profilo in forma di
+            ' CV, e vive accanto a lui (cap. 11.1). L'etichetta della versione serve a
+            ' poter dire «è di una versione precedente» invece di rigenerarlo di soppiatto.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim versione As String = archivio.Salva(ProfiloDiProva())
+
+                    archivio.SalvaCvBase(
+                        Text.Json.Nodes.JsonNode.Parse("{""intestazione"": {""nome"": ""Luca Ferrari""}}"),
+                        versione)
+
+                    Assert.IsTrue(File.Exists(cartella.FileCvBase), "il file sta nella cartella del profilo")
+
+                    Dim riletto As CvBase = archivio.CaricaCvBase()
+                    Assert.AreEqual("Luca Ferrari",
+                                    riletto.Cv("intestazione")("nome").ToString(), "il CV riletto")
+                    Assert.AreEqual(versione, riletto.VersioneProfilo, "e la versione da cui è nato")
+                    Assert.IsGreaterThan(New Date(2026, 1, 1), riletto.Generato,
+                                         "con la data di generazione, non quella vuota")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaGenerazioneNonCECvBase()
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Assert.IsNull(archivio.CaricaCvBase(), "mai generato, niente da mostrare")
+                End Sub)
+        End Sub
+
+        <TestMethod>
         Public Sub SenzaSalvataggioNonCEProfilo()
             ' La domanda del primo avvio (cap. 12, A2): «ce l'ho già» o «costruiamolo».
             ConArchivioTemporaneo(

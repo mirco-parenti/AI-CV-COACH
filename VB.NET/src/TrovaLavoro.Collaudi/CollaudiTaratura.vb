@@ -85,6 +85,52 @@ Namespace Motore
         End Sub
 
         <TestMethod>
+        Public Sub UnClampCapovoltoNonEntraZitto()
+            ' Il caso che ha fatto nascere il controllo: «clamp_su» è quanto la stima
+            ' dell'AI può ALZARE il conteggio, e un valore negativo gli farebbe fare
+            ' l'opposto di ciò che il suo nome dice. Prima entrava senza un fiato, e le
+            ' stelle uscivano sbagliate.
+            Dim t As Taratura = Taratura.DaJson("{ ""clamp_su"": -50, ""clamp_giu"": 30 }")
+
+            Assert.AreEqual(10, t.ClampSu, "resta il predefinito")
+            Assert.AreEqual(-20, t.ClampGiu, "e anche l'altro, capovolto pure lui")
+            Assert.IsNotNull(t.Avviso, "e si dice")
+            Assert.Contains("clamp_su", t.Avviso, "l'avviso nomina il valore rifiutato")
+            Assert.Contains("clamp_giu", t.Avviso, "tutti e due, non solo il primo")
+        End Sub
+
+        <TestMethod>
+        Public Sub UnPesoAZeroNonCancellaLaVoceDalConteggio()
+            ' Un peso è un moltiplicatore: a zero la voce sparisce dal calcolo senza che
+            ' nessuno se ne accorga, ed è il modo più silenzioso di falsare un punteggio.
+            Dim t As Taratura = Taratura.DaJson("{ ""peso_priorita"": { ""richiesto"": 0, ""preferenziale"": 1 } }")
+
+            Assert.AreEqual(5, t.PesoPriorita("richiesto"), "la mappa intera torna predefinita")
+            Assert.Contains("peso_priorita", t.Avviso, "dicendo quale voce l'ha fatta scartare")
+        End Sub
+
+        <TestMethod>
+        Public Sub UnPuntoFuoriScalaNonEntra()
+            ' I punti sono frazioni di soddisfazione: «2» varrebbe il doppio del massimo.
+            Dim t As Taratura = Taratura.DaJson("{ ""punti"": { ""soddisfatto"": 2, ""in parte"": 0.5 } }")
+
+            Assert.AreEqual(1, t.Punti("soddisfatto"), "resta la scala di prodotto")
+            Assert.Contains("0..1", t.Avviso, "l'avviso dice qual era l'intervallo")
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaTaraturaSensataNonProduceAvvisi()
+            ' Il controllo non deve dare fastidio a chi mette a punto sul serio: ritoccare
+            ' un valore dentro il suo intervallo resta una riga, e nessun avviso.
+            Dim t As Taratura = Taratura.DaJson(
+                "{ ""tetto_eliminatorio"": 35, ""clamp_su"": 15, ""soglia_stelle_generazione"": 2 }")
+
+            Assert.AreEqual(35, t.TettoEliminatorio, "il tetto ritoccato")
+            Assert.AreEqual(15, t.ClampSu, "il clamp ritoccato")
+            Assert.IsNull(t.Avviso, "e nessun avviso")
+        End Sub
+
+        <TestMethod>
         Public Sub LaTaraturaGovernaDavveroIlCalcolo()
             ' Il collaudo che conta: cambiando il tetto cambia il risultato. Stesso
             ' caso 2 della batteria dell'hard-gate, ma con tetto portato a 35.

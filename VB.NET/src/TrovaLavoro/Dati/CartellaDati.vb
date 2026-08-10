@@ -99,6 +99,27 @@ Namespace Dati
         End Property
 
         ''' <summary>
+        ''' Il 📄 CV base: sta <b>col profilo</b> e non con le opportunità, perché nasce
+        ''' senza alcun annuncio ed è il ritratto del profilo in forma di CV (cap. 11.1).
+        ''' </summary>
+        Public ReadOnly Property FileCvBase As String
+            Get
+                Return Path.Combine(CartellaProfilo, "cv_base.json")
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' La casa delle candidature: una cartella per opportunità, col nome parlante
+        ''' (data, azienda, ruolo). Nasce a T4, la vista d'insieme arriva a T5 — i
+        ''' documenti però atterrano subito nella loro casa definitiva (cap. 11.1).
+        ''' </summary>
+        Public ReadOnly Property CartellaOpportunita As String
+            Get
+                Return Path.Combine(Radice, "opportunita")
+            End Get
+        End Property
+
+        ''' <summary>
         ''' Crea le cartelle nominate qui sopra se non ci sono già. È l'unico punto che
         ''' le crea: chi scrive un file la chiama prima e non si preoccupa d'altro.
         ''' </summary>
@@ -109,6 +130,7 @@ Namespace Dati
             Directory.CreateDirectory(Radice)
             Directory.CreateDirectory(CartellaProfilo)
             Directory.CreateDirectory(CartellaStorico)
+            Directory.CreateDirectory(CartellaOpportunita)
 
         End Sub
 
