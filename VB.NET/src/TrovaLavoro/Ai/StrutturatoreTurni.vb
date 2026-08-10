@@ -1,8 +1,6 @@
-Imports System.Text.Json
 Imports System.Text.Json.Nodes
 Imports System.Threading
 Imports System.Threading.Tasks
-Imports TrovaLavoro.Motore
 
 Namespace Ai
 
@@ -33,72 +31,35 @@ Namespace Ai
 
     ''' <summary>
     ''' Lo strutturatore vero: prende il prompt del turno dal pool, ci mette dentro la
-    ''' risposta dell'utente, chiede all'AI ed estrae il JSON dal testo che torna. Sono
-    ''' i tre pezzi già collaudati a T2 — <see cref="LibreriaPrompt"/>,
-    ''' <see cref="ClientClaude"/>, <see cref="EstrattoreJson"/> — messi in fila; qui
-    ''' non c'è logica nuova, e non deve essercene.
+    ''' risposta dell'utente, chiede all'AI ed estrae il JSON dal testo che torna. È la
+    ''' fila comune a tutti i mestieri (<see cref="MestiereAi"/>) con addosso l'unica
+    ''' cosa che è sua: il turno, che qui fa da identificativo del prompt <b>e</b> da
+    ''' nome del lavoro nei messaggi all'utente.
     ''' </summary>
-    ''' <remarks>
-    ''' Livello di modello e limite di token non si ripetono qui: li dichiara il prompt
-    ''' nei suoi metadati (cap. 04), e <c>ChiediAsync</c> li legge da lì. È anche il
-    ''' motivo per cui il turno non deve sapere nulla dei modelli.
-    ''' </remarks>
     Public Class StrutturatoreTurni
+        Inherits MestiereAi
         Implements IStrutturatoreTurni
 
         ''' <summary>Il segnaposto che tutti i prompt di turno dichiarano (cap. 04.3).</summary>
         Public Const SegnapostoRisposta As String = "RISPOSTA_UTENTE"
 
-        Private ReadOnly _libreria As LibreriaPrompt
-        Private ReadOnly _client As ClientClaude
-
         ''' <param name="libreria">Il pool da cui vengono i prompt dei turni.</param>
         ''' <param name="client">Il client dell'AI, già con la sua chiave.</param>
         Public Sub New(libreria As LibreriaPrompt, client As ClientClaude)
-
-            If libreria Is Nothing Then Throw New ArgumentNullException(NameOf(libreria))
-            If client Is Nothing Then Throw New ArgumentNullException(NameOf(client))
-
-            _libreria = libreria
-            _client = client
-
+            MyBase.New(libreria, client)
         End Sub
 
         ''' <inheritdoc/>
-        Public Async Function StrutturaAsync(turno As String, risposta As String,
-                                             Optional annulla As CancellationToken = Nothing) _
-                                             As Task(Of JsonNode) Implements IStrutturatoreTurni.StrutturaAsync
+        Public Function StrutturaAsync(turno As String, risposta As String,
+                                       Optional annulla As CancellationToken = Nothing) _
+                                       As Task(Of JsonNode) Implements IStrutturatoreTurni.StrutturaAsync
 
-            ' Gli inciampi del pool — un frontmatter rotto, un segnaposto in più, un
-            ' livello di modello scritto male — diventano ErroreAi: il pool esterno è
-            ' modificabile per design (cap. 04.2), e chi sperimenta deve ricevere il
-            ' messaggio in italiano dei pannelli, non un crash a metà dialogo.
-            Dim uscita As RispostaAi
-            Try
-                Dim prompt As Prompt = _libreria.Carica(turno)
-
-                Dim testo As String = LibreriaPrompt.Riempi(prompt, New Dictionary(Of String, String) From {
-                    {SegnapostoRisposta, If(risposta, String.Empty)}})
-
-                uscita = Await _client.ChiediAsync(prompt, testo, annulla).ConfigureAwait(False)
-
-            Catch ex As Exception When TypeOf ex Is IO.InvalidDataException OrElse
-                                       TypeOf ex Is IO.IOException OrElse
-                                       TypeOf ex Is ArgumentException
-                Throw New ErroreAi(CausaErroreAi.Richiesta,
-                    $"Il prompt «{turno}» del pool non è utilizzabile: {ex.Message}", ex)
-            End Try
-
-            Try
-                Return EstrattoreJson.Estrai(uscita.Testo)
-            Catch ex As JsonException
-                ' Cap. 02.5: mai un crash davanti a una risposta illeggibile. Il testo
-                ' grezzo viaggia nel messaggio perché l'utente possa vedere «cosa ha
-                ' risposto il modello» invece di un errore muto.
-                Throw New ErroreAi(CausaErroreAi.RispostaInattesa,
-                    $"L'AI ha risposto in una forma che non riesco a leggere per il turno «{turno}». " &
-                    $"Ecco cosa ha risposto: {uscita.Testo}", ex)
-            End Try
+            ' L'etichetta è il modo in cui questo lavoro si chiama nelle parole
+            ' dell'utente: se qualcosa va storto, la bolla del dialogo dirà «il turno
+            ' «nome»» e non un identificativo di file.
+            Return EseguiAsync(turno, $"il turno «{turno}»",
+                New Dictionary(Of String, String) From {
+                    {SegnapostoRisposta, If(risposta, String.Empty)}}, annulla)
 
         End Function
 

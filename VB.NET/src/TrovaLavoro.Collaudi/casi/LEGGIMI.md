@@ -21,8 +21,10 @@ resta traccia.
 | `profilo.json` | Il candidato: magazziniere, patente B, patentino per il muletto. |
 | `annuncio_compatibile.json` | Un annuncio in linea col profilo: nessun requisito eliminatorio. |
 | `annuncio_eliminatorio.json` | «Patente C indispensabile»: il candidato ha solo la B, e il match deve craterare (⛔). |
+| `giudizi_*.json` | I giudizi dell'anello 3 per quel caso — la lista che il confronto produce e che la **mitigazione** riceve. Li ha prodotti il prototipo nel collaudo reale di T2: sono un artefatto a sé perché la parità della mitigazione resti verificabile senza rete. |
 | `atteso/prompt_confronto_*.txt` | Il prompt che **il prototipo** costruisce per quel caso: è il termine di paragone della parità. |
-| `genera_attesi.mjs` | Rigenera i due file qui sopra facendoli produrre al prototipo. |
+| `atteso/prompt_mitigazione_*.txt` | Lo stesso, per il secondo prompt del confrontatore (aggiunto a T4). |
+| `genera_attesi.mjs` | Rigenera i quattro file qui sopra facendoli produrre al prototipo. |
 | `reale/confronto_*.json` | L'esito del collaudo reale di T2: risposta del prototipo, risposta dell'app, e il ricalcolo. |
 | `reale/dialogo_guidato.md` | Il collaudo di tappa di T3, gamba C: il dialogo guidato condotto per intero con l'AI vera sulla traccia di **Anna Ricci**, che non esiste. Si legge come una conversazione, e dice dove è finito ogni frammento detto nel turno sbagliato. |
 | `reale/dialogo_turno_formali.json` | Lo stesso turno «esperienze formali» chiesto all'app e al prototipo con la **stessa identica risposta**: la prova di parità della gamba C. |
@@ -60,3 +62,8 @@ non è una regressione: prima il rito del bump del pool (cap. 04.5), poi
 Vale finché il prototipo resta il giudice: dal momento in cui i prompt del pool
 prenderanno una strada loro, questi attesi diventeranno la fotografia del punto di
 partenza, non più un vincolo.
+
+Riguarda **`confronto` e `mitigazione`, e solo quelli**: sugli altri quattro prompt che
+la pipeline usa il distacco è già avvenuto ed è voluto (cap. 04.7) — `analisi_annuncio`
+estrae anche il nome dell'azienda dal Pool 1.03, e i tre della generazione seguiranno la
+loro strada. Per quelli il prototipo resta un termine di paragone, non un metro.

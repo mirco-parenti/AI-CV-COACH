@@ -1,0 +1,110 @@
+[
+  {
+    "requisito": "Carico e scarico della merce",
+    "categoria": "competenze",
+    "priorita": "richiesto",
+    "importanza": "",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Luca dichiara esplicitamente 'carico e scarico merci col muletto' nella sua esperienza presso Romagna Logistica, e l'attività di consegna mobili conferma ulteriormente la familiarità con questa mansione."
+  },
+  {
+    "requisito": "Uso del carrello elevatore",
+    "categoria": "competenze",
+    "priorita": "preferenziale",
+    "importanza": "",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Il profilo dichiara esplicitamente 'Uso del carrello elevatore (patentino conseguito nel 2021)' tra le competenze, confermato anche dal corso certificato in formazione e dall'uso operativo presso Romagna Logistica."
+  },
+  {
+    "requisito": "Rapporto con il cliente durante le consegne",
+    "categoria": "competenze",
+    "priorita": "non specificata",
+    "importanza": "alta",
+    "esito": "in parte",
+    "eliminatorio": false,
+    "spiegazione": "Per un ruolo di autista con consegne regionali il contatto diretto col cliente è una componente centrale del mestiere, quindi l'importanza è alta. Luca ha gestito l'assistenza ai clienti in reparto (Supermercati Bertozzi) e ha effettuato consegne di mobili aiutando un amico, ma non dichiara esplicitamente un'esperienza di rapporto col cliente nel contesto specifico delle consegne su strada; la copertura è parziale."
+  },
+  {
+    "requisito": "Esperienza come autista di mezzi pesanti (2 anni)",
+    "categoria": "esperienza",
+    "priorita": "richiesto",
+    "importanza": "",
+    "esito": "non soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Nessuna esperienza formale come autista di mezzi pesanti è dichiarata nel profilo. L'attività informale di consegna mobili con il furgone di un amico è generica e non equiparabile a due anni di guida professionale di mezzi pesanti."
+  },
+  {
+    "requisito": "Licenza media",
+    "categoria": "formazione",
+    "priorita": "non specificata",
+    "importanza": "bassa",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Requisito minimo di istruzione di base; Luca ha conseguito un diploma di istituto tecnico, titolo ampiamente superiore alla licenza media. Importanza bassa perché è solo un prerequisito di base superato ampiamente dal diploma posseduto."
+  },
+  {
+    "requisito": "Patente C indispensabile",
+    "categoria": "altri_requisiti",
+    "priorita": "richiesto",
+    "importanza": "",
+    "esito": "non soddisfatto",
+    "eliminatorio": true,
+    "spiegazione": "Il profilo dichiara patente.ha = 'sì' ma con sole categorie ['B']. La patente C è richiesta esplicitamente come indispensabile e non è tra le categorie dichiarate da Luca: requisito eliminatorio non soddisfatto."
+  },
+  {
+    "requisito": "CQC merci in corso di validità obbligatoria",
+    "categoria": "altri_requisiti",
+    "priorita": "richiesto",
+    "importanza": "",
+    "esito": "non soddisfatto",
+    "eliminatorio": true,
+    "spiegazione": "La Carta di Qualificazione del Conducente per le merci non è menzionata in nessuna sezione del profilo (né competenze, né formazione, né esperienze). Si tratta di un requisito obbligatorio per legge per la guida professionale di mezzi pesanti: lacuna reale ed eliminatoria."
+  },
+  {
+    "requisito": "Automunito per raggiungere la sede",
+    "categoria": "altri_requisiti",
+    "priorita": "preferenziale",
+    "importanza": "",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Luca possiede la patente B e risiede a Forlì, città vicina a Cesena (sede di lavoro), rendendo plausibile l'essere automunito; in ogni caso il possesso della patente B è condizione sufficiente per soddisfare questo requisito preferenziale."
+  },
+  {
+    "requisito": "Titolo e sede: Autista patente C per consegne regionali – Cesena",
+    "categoria": "contesto",
+    "priorita": "non specificata",
+    "importanza": "alta",
+    "esito": "in parte",
+    "eliminatorio": false,
+    "spiegazione": "Il ruolo è dichiaratamente quello di autista con patente C per consegne regionali: Luca abita a Forlì, quindi la sede di Cesena è raggiungibile, ma il profilo professionale non corrisponde al titolo (nessuna esperienza da autista con mezzi pesanti, nessuna patente C)."
+  },
+  {
+    "requisito": "Contratto: Tempo indeterminato, full time lun-ven",
+    "categoria": "contesto",
+    "priorita": "non specificata",
+    "importanza": "bassa",
+    "esito": "non determinabile",
+    "eliminatorio": false,
+    "spiegazione": "Le condizioni contrattuali offerte (tipo e orario) sono lato-offerta: il profilo non dichiara preferenze o vincoli di disponibilità, quindi non è possibile esprimere un giudizio."
+  },
+  {
+    "requisito": "Mansioni: consegne giornaliere ai clienti, carico del mezzo, ritiro documenti firmati",
+    "categoria": "contesto",
+    "priorita": "non specificata",
+    "importanza": "alta",
+    "esito": "in parte",
+    "eliminatorio": false,
+    "spiegazione": "Luca ha esperienza di carico/scarico e lettura di documenti di trasporto, ma le mansioni core riguardano la guida di mezzi pesanti per consegne regionali, attività per cui non ha né la patente né l'esperienza dichiarata."
+  },
+  {
+    "requisito": "Benefit: buoni pasto, mezzo aziendale in comodato",
+    "categoria": "contesto",
+    "priorita": "non specificata",
+    "importanza": "bassa",
+    "esito": "non determinabile",
+    "eliminatorio": false,
+    "spiegazione": "I benefit sono lato-offerta e non confrontabili con il profilo del candidato."
+  }
+]

@@ -371,16 +371,23 @@ Namespace Ai
                     Try
                         risposta = Await _http.SendAsync(richiesta, scadenza.Token).ConfigureAwait(False)
                     Catch ex As OperationCanceledException When Not annulla.IsCancellationRequested
-                        ' Il gettone dell'utente non è stato tirato: allora è scaduta l'attesa.
-                        Throw New ErroreAi(CausaErroreAi.Timeout,
-                            $"L'AI non ha risposto entro {CInt(attesa.TotalSeconds)} secondi.", ex)
+                        Throw ErroreDiAttesa(attesa, ex)
                     Catch ex As HttpRequestException
-                        Throw New ErroreAi(CausaErroreAi.Rete,
-                            "Non riesco a raggiungere l'AI: controlla la connessione a Internet.", ex)
+                        Throw ErroreDiRete(ex)
                     End Try
 
                     Using risposta
 
+                        ' Qui non serve una seconda protezione: <see cref="HttpClient"/>
+                        ' lavora con l'impostazione predefinita (ResponseContentRead) e
+                        ' scarica tutto il corpo dentro SendAsync, dove il Catch qui
+                        ' sopra copre già la connessione che cade a metà. Questa lettura
+                        ' attinge a un buffer in memoria. Se un giorno si passasse a
+                        ' ResponseHeadersRead — è la strada dello streaming, previsto per
+                        ' T4/T7 — il collegamento potrebbe spezzarsi proprio qui, e la
+                        ' protezione andrà aggiunta: a ricordarlo c'è
+                        ' UnaRispostaCheSiSpezzaInLetturaEUnaCadutaDiRete, che diventa
+                        ' rosso appena quella riga cambia.
                         Dim testo As String = Await risposta.Content.
                             ReadAsStringAsync(scadenza.Token).ConfigureAwait(False)
 
@@ -394,6 +401,27 @@ Namespace Ai
 
                 End Using
             End Using
+
+        End Function
+
+        ''' <summary>
+        ''' L'attesa è scaduta: il gettone dell'utente non è stato tirato, quindi non è
+        ''' un annullamento ma un timeout. Le parole stanno in un posto solo perché
+        ''' l'attesa può scadere in due momenti — mandando la richiesta e leggendo la
+        ''' risposta — e chi legge deve vedere sempre la stessa frase.
+        ''' </summary>
+        Private Shared Function ErroreDiAttesa(attesa As TimeSpan, ex As Exception) As ErroreAi
+
+            Return New ErroreAi(CausaErroreAi.Timeout,
+                $"L'AI non ha risposto entro {CInt(attesa.TotalSeconds)} secondi.", ex)
+
+        End Function
+
+        ''' <summary>Il collegamento non ha retto, in andata o in ritorno.</summary>
+        Private Shared Function ErroreDiRete(ex As Exception) As ErroreAi
+
+            Return New ErroreAi(CausaErroreAi.Rete,
+                "Non riesco a raggiungere l'AI: controlla la connessione a Internet.", ex)
 
         End Function
 

@@ -30,7 +30,7 @@ Namespace Ai
         Public Sub IlPromptDelConfrontoECaratterePerCarattereQuelloDelPrototipo_Compatibile()
 
             Dim differenza As String = CasiDiCollaudo.PrimaDifferenza(
-                CasiDiCollaudo.PromptAtteso(CasiDiCollaudo.Compatibile),
+                CasiDiCollaudo.PromptAtteso("confronto", CasiDiCollaudo.Compatibile),
                 CasiDiCollaudo.PromptConfronto(PoolIntegrato(), CasiDiCollaudo.Compatibile))
 
             Assert.IsNull(differenza, $"Caso «compatibile»: il prompt {differenza}")
@@ -41,8 +41,33 @@ Namespace Ai
         Public Sub IlPromptDelConfrontoECaratterePerCarattereQuelloDelPrototipo_Eliminatorio()
 
             Dim differenza As String = CasiDiCollaudo.PrimaDifferenza(
-                CasiDiCollaudo.PromptAtteso(CasiDiCollaudo.Eliminatorio),
+                CasiDiCollaudo.PromptAtteso("confronto", CasiDiCollaudo.Eliminatorio),
                 CasiDiCollaudo.PromptConfronto(PoolIntegrato(), CasiDiCollaudo.Eliminatorio))
+
+            Assert.IsNull(differenza, $"Caso «eliminatorio»: il prompt {differenza}")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IlPromptDellaMitigazioneECaratterePerCarattereQuelloDelPrototipo_Compatibile()
+
+            ' La seconda metà del mestiere del confronto: fino a T4 la parità copriva un
+            ' prompt solo dei due, e la mitigazione entrava in produzione senza rete di
+            ' protezione (voce presa dentro T4, cap. 14).
+            Dim differenza As String = CasiDiCollaudo.PrimaDifferenza(
+                CasiDiCollaudo.PromptAtteso("mitigazione", CasiDiCollaudo.Compatibile),
+                CasiDiCollaudo.PromptMitigazione(PoolIntegrato(), CasiDiCollaudo.Compatibile))
+
+            Assert.IsNull(differenza, $"Caso «compatibile»: il prompt {differenza}")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IlPromptDellaMitigazioneECaratterePerCarattereQuelloDelPrototipo_Eliminatorio()
+
+            Dim differenza As String = CasiDiCollaudo.PrimaDifferenza(
+                CasiDiCollaudo.PromptAtteso("mitigazione", CasiDiCollaudo.Eliminatorio),
+                CasiDiCollaudo.PromptMitigazione(PoolIntegrato(), CasiDiCollaudo.Eliminatorio))
 
             Assert.IsNull(differenza, $"Caso «eliminatorio»: il prompt {differenza}")
 
@@ -108,6 +133,22 @@ Namespace Ai
 
             Assert.IsFalse(corpo.ContainsKey("thinking"), "niente thinking, come il prototipo")
             Assert.AreEqual(3, corpo.Count, "solo model, max_tokens e messages")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LaMitigazioneUsaIlModelloDelPrototipoEUnLimiteNonInferiore()
+
+            ' Il prototipo: MODEL_RAGIONAMENTO = claude-sonnet-4-6, MAX_TOKENS_MITIGAZIONE = 2000.
+            ' Stesso ragionamento del confronto sul limite: 2000 token bastavano per una
+            ' lista corta di ponti, ma è il tetto sotto cui una risposta ricca verrebbe
+            ' troncata — perciò si verifica che non scenda, non che coincida.
+            Dim mitigazione As Prompt = PoolIntegrato().Carica("mitigazione")
+            Dim modello As ModelloConcreto = Modelli.Predefiniti().PerLivello(mitigazione.Modello)
+
+            Assert.AreEqual("claude-sonnet-4-6", modello.Id, "il modello della mitigazione")
+            Assert.IsGreaterThanOrEqualTo(2000, mitigazione.MaxToken,
+                                          "il limite di token della mitigazione non deve scendere sotto il suo")
 
         End Sub
 

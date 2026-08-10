@@ -36,6 +36,7 @@ Namespace Ai
     ''' nell'ordine giusto, cosa che un estrattore meccanico su due colonne sbaglia.</para>
     ''' </remarks>
     Public Class TrascrittorePdf
+        Inherits MestiereAi
         Implements ITrascrittorePdf
 
         ''' <summary>L'identificativo del prompt nel pool.</summary>
@@ -49,19 +50,10 @@ Namespace Ai
         ''' </summary>
         Public Const DimensioneMassima As Long = 32L * 1024L * 1024L
 
-        Private ReadOnly _libreria As LibreriaPrompt
-        Private ReadOnly _client As ClientClaude
-
         ''' <param name="libreria">Il pool da cui viene il prompt di trascrizione.</param>
         ''' <param name="client">Il client dell'AI, già con la sua chiave.</param>
         Public Sub New(libreria As LibreriaPrompt, client As ClientClaude)
-
-            If libreria Is Nothing Then Throw New ArgumentNullException(NameOf(libreria))
-            If client Is Nothing Then Throw New ArgumentNullException(NameOf(client))
-
-            _libreria = libreria
-            _client = client
-
+            MyBase.New(libreria, client)
         End Sub
 
         ''' <inheritdoc/>
@@ -73,7 +65,7 @@ Namespace Ai
                 Throw New ArgumentException("Manca il percorso del PDF.", NameOf(percorsoPdf))
             End If
 
-            Dim prompt As Prompt = CaricaPrompt()
+            Dim prompt As Prompt = CaricaPrompt(IdPrompt)
 
             ' Il PDF viaggia codificato in base64 dentro la richiesta: va letto tutto in
             ' memoria, ed è il motivo per cui il limite di dimensione si controlla prima.
@@ -92,31 +84,12 @@ Namespace Ai
                     {"type", "text"},
                     {"text", prompt.Corpo}})
 
-            Dim uscita As RispostaAi = Await _client.ChiediAsync(
-                prompt.Modello, contenuto, prompt.MaxToken, annulla).ConfigureAwait(False)
+            Dim uscita As RispostaAi = Await ChiediAsync(prompt, contenuto, annulla).ConfigureAwait(False)
 
             ' Il prompt dichiara «uscita: testo»: qui non c'è JSON da estrarre, quello
-            ' che torna è già il testo del CV.
+            ' che torna è già il testo del CV. È l'unico mestiere che si ferma prima
+            ' dell'ultimo passo comune, e per questo non usa EseguiAsync.
             Return If(uscita.Testo, String.Empty)
-
-        End Function
-
-        ''' <summary>
-        ''' Carica il prompt traducendo gli inciampi del pool in <see cref="ErroreAi"/>:
-        ''' un pool esterno ritoccato male deve produrre il messaggio in italiano dei
-        ''' pannelli, non un'eccezione grezza a metà import (il pool è modificabile per
-        ''' design, cap. 04.2).
-        ''' </summary>
-        Private Function CaricaPrompt() As Prompt
-
-            Try
-                Return _libreria.Carica(IdPrompt)
-            Catch ex As Exception When TypeOf ex Is InvalidDataException OrElse
-                                       TypeOf ex Is FileNotFoundException OrElse
-                                       TypeOf ex Is IOException
-                Throw New ErroreAi(CausaErroreAi.Richiesta,
-                    $"Il prompt «{IdPrompt}» del pool non è utilizzabile: {ex.Message}", ex)
-            End Try
 
         End Function
 

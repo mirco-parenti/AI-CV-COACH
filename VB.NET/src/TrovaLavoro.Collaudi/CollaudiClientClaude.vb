@@ -294,6 +294,35 @@ Namespace Ai
         End Function
 
         <TestMethod>
+        Public Async Function UnaRispostaCheSiSpezzaInLetturaEUnaCadutaDiRete() As Task
+            ' Una connessione che si spezza mentre il corpo scende deve diventare un
+            ' errore di rete come gli altri — stesse parole, ritentabile — e non
+            ' un'eccezione grezza in faccia all'utente (cap. 02.5). Oggi lo è già, e non
+            ' per merito di un Catch scritto apposta: HttpClient scarica tutto il corpo
+            ' dentro SendAsync (ResponseContentRead, l'impostazione predefinita), dove la
+            ' rete è protetta. Questo collaudo sta qui come sentinella: il giorno in cui
+            ' si passerà a ResponseHeadersRead per lo streaming (T4/T7), la lettura del
+            ' corpo uscirà scoperta e questo diventerà rosso.
+            Dim finta As New ApiCheSiSpezza()
+
+            Using client As New ClientClaude("chiave-di-prova", Nothing, finta)
+
+                client.Pausa = TimeSpan.Zero
+
+                Try
+                    Await client.ChiediAsync(Modelli.Semplice, JsonValue.Create("ciao"), 1500)
+                    Assert.Fail("il corpo interrotto doveva sollevare")
+                Catch ex As ErroreAi
+                    Assert.AreEqual(CausaErroreAi.Rete, ex.Causa, "causa")
+                    Assert.Contains("connessione", ex.Message, "il messaggio è per l'utente")
+                End Try
+
+                Assert.AreEqual(2, finta.Chiamate, "ed è ritentabile, come ogni caduta di rete")
+
+            End Using
+        End Function
+
+        <TestMethod>
         Public Async Function LAttesaScadutaDiventaUnTimeout() As Task
             Dim finta As New ApiFinta(
                 New Passo With {.Ritardo = TimeSpan.FromSeconds(30), .Stato = 200, .Corpo = Buona()},
@@ -447,6 +476,87 @@ Namespace Ai
             Return risposta
 
         End Function
+
+    End Class
+
+    ''' <summary>
+    ''' Un'API che risponde 200 e poi si spezza mentre il corpo si legge: è la caduta di
+    ''' connessione che arriva dopo le intestazioni, quella che <see cref="ApiFinta"/>
+    ''' non sa simulare perché consegna il corpo tutto insieme.
+    ''' </summary>
+    Friend Class ApiCheSiSpezza
+        Inherits HttpMessageHandler
+
+        ''' <summary>Quante volte è stata chiamata: è il conto dei tentativi.</summary>
+        Public Property Chiamate As Integer
+
+        Protected Overrides Function SendAsync(richiesta As HttpRequestMessage,
+                                               annulla As CancellationToken) As Task(Of HttpResponseMessage)
+
+            Chiamate += 1
+
+            Return Task.FromResult(New HttpResponseMessage(HttpStatusCode.OK) With {
+                .Content = New StreamContent(New FlussoCheSiSpezza())})
+
+        End Function
+
+    End Class
+
+    ''' <summary>Un flusso che al primo tentativo di lettura non c'è più.</summary>
+    Friend Class FlussoCheSiSpezza
+        Inherits IO.Stream
+
+        Public Overrides Function Read(buffer As Byte(), offset As Integer, count As Integer) As Integer
+            Throw New IO.IOException("La connessione si è chiusa a metà risposta.")
+        End Function
+
+        Public Overrides ReadOnly Property CanRead As Boolean
+            Get
+                Return True
+            End Get
+        End Property
+
+        Public Overrides ReadOnly Property CanSeek As Boolean
+            Get
+                Return False
+            End Get
+        End Property
+
+        Public Overrides ReadOnly Property CanWrite As Boolean
+            Get
+                Return False
+            End Get
+        End Property
+
+        Public Overrides ReadOnly Property Length As Long
+            Get
+                Throw New NotSupportedException()
+            End Get
+        End Property
+
+        Public Overrides Property Position As Long
+            Get
+                Throw New NotSupportedException()
+            End Get
+            Set(value As Long)
+                Throw New NotSupportedException()
+            End Set
+        End Property
+
+        Public Overrides Sub Flush()
+        End Sub
+
+        Public Overrides Function Seek(offset As Long, origin As IO.SeekOrigin) As Long
+            Throw New NotSupportedException()
+        End Function
+
+        Public Overrides Sub SetLength(value As Long)
+            Throw New NotSupportedException()
+        End Sub
+
+        Public Overrides Sub Write(buffer As Byte(), offset As Integer, count As Integer)
+            Throw New NotSupportedException()
+        End Sub
 
     End Class
 

@@ -1,0 +1,128 @@
+[
+  {
+    "requisito": "Uso del carrello elevatore",
+    "categoria": "competenze",
+    "priorita": "richiesto",
+    "importanza": "",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Il profilo dichiara esplicitamente 'Uso del carrello elevatore (patentino conseguito nel 2021)' tra le competenze, confermato anche dall'esperienza triennale in magazzino con uso del muletto."
+  },
+  {
+    "requisito": "Lettura di bolle e documenti di trasporto",
+    "categoria": "competenze",
+    "priorita": "richiesto",
+    "importanza": "",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Il profilo dichiara 'Lettura di documenti di trasporto e bolle' tra le competenze, corroborata dall'esperienza in Romagna Logistica dove il controllo delle bolle di consegna era parte del lavoro quotidiano."
+  },
+  {
+    "requisito": "Conoscenza di un gestionale di magazzino",
+    "categoria": "competenze",
+    "priorita": "preferenziale",
+    "importanza": "",
+    "esito": "in parte",
+    "eliminatorio": false,
+    "spiegazione": "Il profilo dichiara 'Uso del terminale di magazzino per il picking', che è affine ma non equivale necessariamente a un gestionale strutturato (WMS); la copertura è parziale poiché non specifica quale software o sistema usa."
+  },
+  {
+    "requisito": "Lavoro in squadra",
+    "categoria": "competenze",
+    "priorita": "non specificata",
+    "importanza": "alta",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Per un magazzino su turni il lavoro in squadra è una competenza attesa e non marginale; il profilo la dichiara esplicitamente tra le competenze ed è confermata da entrambe le esperienze formali."
+  },
+  {
+    "requisito": "Esperienza come addetto al magazzino (1 anno)",
+    "categoria": "esperienza",
+    "priorita": "richiesto",
+    "importanza": "",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Il profilo riporta 3 anni come Addetto al magazzino presso Romagna Logistica S.r.l., ampiamente superiori all'anno richiesto."
+  },
+  {
+    "requisito": "Diploma di scuola superiore",
+    "categoria": "formazione",
+    "priorita": "preferenziale",
+    "importanza": "",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Il profilo dichiara il diploma di istituto tecnico (ITIS di Forlì, 2018), che soddisfa pienamente il requisito di diploma di scuola superiore."
+  },
+  {
+    "requisito": "Patentino per il carrello elevatore",
+    "categoria": "formazione",
+    "priorita": "richiesto",
+    "importanza": "",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Il profilo riporta il 'Corso per l'uso del carrello elevatore' (Romagna Sicura, 2021) e la competenza conferma il conseguimento del patentino."
+  },
+  {
+    "requisito": "Patente B",
+    "categoria": "altri_requisiti",
+    "priorita": "richiesto",
+    "importanza": "",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Il profilo dichiara patente.ha = 'sì' e categorie = ['B'], che corrisponde esattamente alla categoria richiesta dall'annuncio."
+  },
+  {
+    "requisito": "Disponibilità a lavorare su due turni",
+    "categoria": "altri_requisiti",
+    "priorita": "richiesto",
+    "importanza": "",
+    "esito": "non determinabile",
+    "eliminatorio": false,
+    "spiegazione": "La disponibilità a lavorare su turni è un dato non raccolto nel profilo; non è possibile determinare se il candidato accetta questa condizione senza una dichiarazione esplicita."
+  },
+  {
+    "requisito": "Titolo: Addetto al magazzino",
+    "categoria": "contesto",
+    "priorita": "non specificata",
+    "importanza": "alta",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Il ruolo cercato corrisponde perfettamente all'esperienza principale del candidato (3 anni come Addetto al magazzino)."
+  },
+  {
+    "requisito": "Sede: Forlì",
+    "categoria": "contesto",
+    "priorita": "non specificata",
+    "importanza": "alta",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Il candidato risiede a Forlì, la stessa città indicata come sede di lavoro nell'annuncio."
+  },
+  {
+    "requisito": "Contratto: tempo determinato 6 mesi, full time su due turni",
+    "categoria": "contesto",
+    "priorita": "non specificata",
+    "importanza": "media",
+    "esito": "non determinabile",
+    "eliminatorio": false,
+    "spiegazione": "Le condizioni contrattuali riguardano l'offerta del datore di lavoro; la disponibilità del candidato ad accettarle non è dichiarata nel profilo."
+  },
+  {
+    "requisito": "Mansioni: carico/scarico, picking, controllo giacenze e riordino scaffalature",
+    "categoria": "contesto",
+    "priorita": "non specificata",
+    "importanza": "alta",
+    "esito": "soddisfatto",
+    "eliminatorio": false,
+    "spiegazione": "Le mansioni elencate nell'annuncio corrispondono puntualmente a quanto dichiarato nell'esperienza in Romagna Logistica (carico/scarico col muletto, preparazione ordini, riordino scaffalature)."
+  },
+  {
+    "requisito": "Benefit: mensa aziendale, buoni pasto",
+    "categoria": "contesto",
+    "priorita": "non specificata",
+    "importanza": "bassa",
+    "esito": "non determinabile",
+    "eliminatorio": false,
+    "spiegazione": "I benefit sono condizioni offerte dal datore di lavoro, non requisiti del candidato: non c'è nulla da valutare sul profilo."
+  }
+]

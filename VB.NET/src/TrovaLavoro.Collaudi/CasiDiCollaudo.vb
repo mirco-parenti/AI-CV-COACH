@@ -62,6 +62,20 @@ Friend Module CasiDiCollaudo
     End Function
 
     ''' <summary>
+    ''' I giudizi dell'anello 3 per uno dei due casi: la <b>lista</b> che il confronto
+    ''' produce e che la mitigazione riceve.
+    ''' </summary>
+    ''' <remarks>
+    ''' Sono un artefatto a sé, e non l'uscita di una chiamata: così la parità del
+    ''' prompt di mitigazione resta verificabile senza rete, come quella del confronto.
+    ''' Vengono dal collaudo reale di T2 — li ha prodotti il prototipo sul profilo e
+    ''' sull'annuncio inventati di questa cartella — quindi hanno la forma vera.
+    ''' </remarks>
+    Public Function Giudizi(caso As String) As JsonNode
+        Return Artefatto($"giudizi_{caso}.json")
+    End Function
+
+    ''' <summary>
     ''' Il prompt del confronto già riempito, esattamente come lo manderebbe l'app:
     ''' prompt del pool, artefatti serializzati come nel prototipo.
     ''' </summary>
@@ -76,12 +90,29 @@ Friend Module CasiDiCollaudo
     End Function
 
     ''' <summary>
-    ''' Il prompt che il prototipo costruisce per lo stesso caso, generato eseguendo
-    ''' <c>promptConfronto</c> di <c>HTML+JS/server.js</c> su questi stessi artefatti.
+    ''' Il prompt della mitigazione già riempito, come sopra: profilo e giudizi dello
+    ''' stesso caso.
     ''' </summary>
-    Public Function PromptAtteso(caso As String) As String
+    Public Function PromptMitigazione(libreria As LibreriaPrompt, caso As String) As String
+
+        Dim mitigazione As Prompt = libreria.Carica("mitigazione")
+
+        Return LibreriaPrompt.Riempi(mitigazione, New Dictionary(Of String, String) From {
+            {"PROFILO", LibreriaPrompt.ComeNelPrompt(Profilo())},
+            {"GIUDIZI", LibreriaPrompt.ComeNelPrompt(Giudizi(caso))}})
+
+    End Function
+
+    ''' <summary>
+    ''' Il prompt che il prototipo costruisce per lo stesso caso, generato eseguendo la
+    ''' funzione corrispondente di <c>HTML+JS/server.js</c> su questi stessi artefatti
+    ''' (v. <c>genera_attesi.mjs</c>).
+    ''' </summary>
+    ''' <param name="idPrompt">"confronto" o "mitigazione": i due su cui la parità vale
+    ''' ancora carattere per carattere (cap. 04.7).</param>
+    Public Function PromptAtteso(idPrompt As String, caso As String) As String
         Return File.ReadAllText(
-            Path.Combine(Cartella, "atteso", $"prompt_confronto_{caso}.txt"), Text.Encoding.UTF8)
+            Path.Combine(Cartella, "atteso", $"prompt_{idPrompt}_{caso}.txt"), Text.Encoding.UTF8)
     End Function
 
     ''' <summary>
