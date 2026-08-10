@@ -1,8 +1,8 @@
 id: cv_mirato
-versione: 1.0
+versione: 1.1
 lingua: it
 modello: ragionamento
-max_token: 2000
+max_token: 16000
 uscita: json
 segnaposto: PROFILO, ANNUNCIO, GIUDIZI
 descrizione: Genera il CV mirato su un annuncio; il profilo resta l'unica fonte di fatti.

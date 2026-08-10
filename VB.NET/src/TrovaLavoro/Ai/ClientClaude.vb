@@ -109,6 +109,14 @@ Namespace Ai
         Public Const NomeVariabileChiave As String = "ANTHROPIC_API_KEY"
 
         Private Shared ReadOnly AttesaPredefinita As TimeSpan = TimeSpan.FromSeconds(120)
+
+        ''' <summary>
+        ''' Il limite di token di una risposta «normale»: fin qui basta
+        ''' <see cref="TempoMassimo"/>, oltre l'attesa cresce in proporzione. È il
+        ''' limite dei turni del dialogo, cioè della chiamata che non si può annullare
+        ''' (cap. 02.6): la loro attesa resta quella di sempre.
+        ''' </summary>
+        Public Const TokenDiRiferimento As Integer = 4000
         Private Shared ReadOnly PausaPredefinita As TimeSpan = TimeSpan.FromSeconds(2)
         Private Shared ReadOnly PausaMassima As TimeSpan = TimeSpan.FromSeconds(30)
 
@@ -119,7 +127,11 @@ Namespace Ai
         ''' <summary>La mappa livello → modello con cui questo client sta lavorando.</summary>
         Public ReadOnly Property ModelliInUso As Modelli
 
-        ''' <summary>Quanto si aspetta una risposta prima di dichiarare scaduta l'attesa.</summary>
+        ''' <summary>
+        ''' Quanto si aspetta una risposta <b>normale</b> prima di dichiarare scaduta
+        ''' l'attesa. I prompt che possono produrre molto più testo aspettano in
+        ''' proporzione: v. <see cref="AttesaPer"/>.
+        ''' </summary>
         Public Property TempoMassimo As TimeSpan
 
         ''' <summary>Quanto si aspetta prima dell'unico ritentativo.</summary>
@@ -267,6 +279,28 @@ Namespace Ai
         End Function
 
         ''' <summary>
+        ''' Quanto aspettare una risposta che può arrivare a <paramref name="maxToken"/>
+        ''' token: <see cref="TempoMassimo"/> fino a <see cref="TokenDiRiferimento"/>, e
+        ''' in proporzione oltre.
+        ''' </summary>
+        ''' <remarks>
+        ''' Finché le chiamate sono sincrone (lo streaming è di T7, cap. 02.5) il tempo
+        ''' di risposta cresce col testo che l'AI scrive: un'attesa fissa trasformerebbe
+        ''' un limite generoso in un timeout, cioè un troncamento <i>dichiarato</i> — che
+        ''' <see cref="InterpretaRisposta"/> sa riconoscere — in nessuna risposta affatto.
+        ''' La proporzione non è una stima della velocità del modello, che varia: è
+        ''' semplicemente un'attesa che segue il limite invece di ignorarlo.
+        ''' </remarks>
+        Public Function AttesaPer(maxToken As Integer) As TimeSpan
+
+            If maxToken <= TokenDiRiferimento Then Return TempoMassimo
+
+            Return TimeSpan.FromTicks(
+                CLng(TempoMassimo.Ticks * (maxToken / CDbl(TokenDiRiferimento))))
+
+        End Function
+
+        ''' <summary>
         ''' Chiede all'AI e restituisce la risposta. Un solo ritentativo automatico
         ''' sugli inciampi di passaggio (cap. 02.5), rispettando l'attesa suggerita
         ''' dall'API quando c'è.
@@ -280,6 +314,7 @@ Namespace Ai
 
             Dim modello As ModelloConcreto = ModelliInUso.PerLivello(livello)
             Dim testoCorpo As String = CorpoRichiesta(modello, maxToken, contenuto).ToJsonString()
+            Dim attesa As TimeSpan = AttesaPer(maxToken)
 
             Dim primoErrore As ErroreAi = Nothing
 
@@ -291,7 +326,7 @@ Namespace Ai
                 End If
 
                 Try
-                    Return Await UnTentativoAsync(testoCorpo, annulla).ConfigureAwait(False)
+                    Return Await UnTentativoAsync(testoCorpo, attesa, annulla).ConfigureAwait(False)
                 Catch ex As ErroreAi When ex.Ritentabile AndAlso tentativo = 1
                     primoErrore = ex
                 End Try
@@ -318,7 +353,8 @@ Namespace Ai
         End Function
 
         ''' <summary>Un singolo tentativo: prepara, manda, classifica.</summary>
-        Private Async Function UnTentativoAsync(testoCorpo As String,
+        ''' <param name="attesa">Il tempo concesso a questa chiamata (v. <see cref="AttesaPer"/>).</param>
+        Private Async Function UnTentativoAsync(testoCorpo As String, attesa As TimeSpan,
                                                 annulla As CancellationToken) As Task(Of RispostaAi)
 
             Using richiesta As New HttpRequestMessage(HttpMethod.Post, Indirizzo)
@@ -329,7 +365,7 @@ Namespace Ai
 
                 Using scadenza As CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(annulla)
 
-                    scadenza.CancelAfter(TempoMassimo)
+                    scadenza.CancelAfter(attesa)
 
                     Dim risposta As HttpResponseMessage
                     Try
@@ -337,7 +373,7 @@ Namespace Ai
                     Catch ex As OperationCanceledException When Not annulla.IsCancellationRequested
                         ' Il gettone dell'utente non è stato tirato: allora è scaduta l'attesa.
                         Throw New ErroreAi(CausaErroreAi.Timeout,
-                            $"L'AI non ha risposto entro {CInt(TempoMassimo.TotalSeconds)} secondi.", ex)
+                            $"L'AI non ha risposto entro {CInt(attesa.TotalSeconds)} secondi.", ex)
                     Catch ex As HttpRequestException
                         Throw New ErroreAi(CausaErroreAi.Rete,
                             "Non riesco a raggiungere l'AI: controlla la connessione a Internet.", ex)

@@ -1,8 +1,8 @@
 id: mitigazione
-versione: 1.0
+versione: 1.1
 lingua: it
 modello: ragionamento
-max_token: 2000
+max_token: 8000
 uscita: json
 segnaposto: PROFILO, GIUDIZI
 descrizione: Costruisce ponti onesti sui gap del confronto; può non dire nulla.

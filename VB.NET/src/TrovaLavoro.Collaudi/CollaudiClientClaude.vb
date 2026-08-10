@@ -311,6 +311,28 @@ Namespace Ai
         End Function
 
         <TestMethod>
+        Public Sub LAttesaCresceConIlLimiteDiTokenDelPrompt()
+            ' Dal Pool 1.03 i limiti sono alti perché un CV grande non venga troncato
+            ' (CHANGELOG del pool). Senza streaming, un'attesa fissa trasformerebbe quel
+            ' limite in un timeout: nessuna risposta invece di una troncata e dichiarata.
+            Using client As ClientClaude = ClientDiProva(New ApiFinta())
+
+                client.TempoMassimo = TimeSpan.FromSeconds(120)
+
+                ' Fino al limite di una risposta normale l'attesa non cambia: è la
+                ' promessa fatta ai turni del dialogo, che non si possono annullare.
+                Assert.AreEqual(TimeSpan.FromSeconds(120), client.AttesaPer(1500), "un turno breve")
+                Assert.AreEqual(TimeSpan.FromSeconds(120),
+                                client.AttesaPer(ClientClaude.TokenDiRiferimento), "al limite esatto")
+
+                ' Oltre, cresce in proporzione.
+                Assert.AreEqual(TimeSpan.FromSeconds(480), client.AttesaPer(16000), "un CV mirato")
+                Assert.AreEqual(TimeSpan.FromSeconds(960), client.AttesaPer(32000), "un PDF da trascrivere")
+
+            End Using
+        End Sub
+
+        <TestMethod>
         Public Async Function LAnnullamentoDellUtenteNonEUnErrore() As Task
             ' Il pulsante Annulla (cap. 02.6) non deve travestirsi da guasto.
             Dim finta As New ApiFinta(

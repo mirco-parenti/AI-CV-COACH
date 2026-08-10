@@ -1,8 +1,8 @@
 id: cv_base
-versione: 1.0
+versione: 1.1
 lingua: it
 modello: ragionamento
-max_token: 2000
+max_token: 16000
 uscita: json
 segnaposto: PROFILO
 descrizione: Genera il CV base dal solo profilo, senza un annuncio di riferimento.

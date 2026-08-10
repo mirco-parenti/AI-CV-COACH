@@ -27,6 +27,42 @@ La non-regressione contro il prototipo (cap. 14, T2) è passata su questa versio
 prompt del confronto costruito dal pool è identico carattere per carattere a quello che
 il prototipo costruisce nel codice.
 
+## Pool 1.03 — 2026-08-10
+
+**Il primo bump di T4, e non riguarda cosa i prompt dicono ma quanto possono scrivere** —
+più un campo nuovo nell'analisi dell'annuncio. Toccati **tutti e quindici** i file: i
+quattordici solo nel frontmatter, `analisi_annuncio` anche nel testo.
+
+- **I limiti di token, alzati tutti.** Il tetto di `trascrizione_pdf` era 4000 token: il
+  CV di venti pagine si troncava, e con lui il profilo che ne discende. Un limite non si
+  può togliere — l'API lo pretende in ogni richiesta, non esiste «nessun limite» — ma
+  alzarlo non costa nulla, perché è un tetto e non una prenotazione: si paga l'output che
+  il modello scrive davvero. I nuovi valori sono dimensionati sul contenuto:
+  `trascrizione_pdf` 32000, `importa_cv` · `cv_base` · `cv_mirato` · `confronto` 16000,
+  `analisi_annuncio` · `mitigazione` 8000, i sette turni del profilo e `lettera` 4000.
+  Restiamo lontanissimi dai tetti dei modelli (64000 token di uscita per Haiku 4.5,
+  128000 per Sonnet). *Il limite alto ha però un prezzo che si paga altrove*: finché le
+  chiamate sono sincrone, un'attesa fissa lo trasformerebbe in un timeout — cioè in
+  nessuna risposta invece di una troncata e dichiarata. Per questo l'attesa ora cresce col
+  limite del prompt (`ClientClaude.AttesaPer`), e resta quella di sempre per i turni del
+  dialogo, che sono la chiamata che non si può annullare.
+- **`analisi_annuncio` impara il nome dell'azienda.** Lo schema non lo estraeva, e la
+  cartella dell'opportunità (cap. 11.1) lo vuole nel nome: senza, una candidatura si
+  ritrova per data e ruolo e non per chi la offre. Vale la regola anti-invenzione di
+  sempre — un annuncio anonimo, o che si descrive senza nominarsi, lascia il campo vuoto,
+  e il nome non si deduce dal testo. Una cosa in più il prompt la dice, perché altrimenti
+  la sceglierebbe da sé: quando pubblica un'agenzia per conto di un'azienda non nominata,
+  il nome è quello dell'agenzia. È l'unico **cambiamento di schema** del bump; chi legge
+  l'annuncio ignora i campi che non conosce, quindi la forma resta compatibile
+  all'indietro.
+
+È il **secondo distacco voluto** dal prototipo, dopo quello del Pool 1.01 su
+`importa_cv`: su `analisi_annuncio` il testo non è più il suo, quindi lì la parità
+carattere-per-carattere non è più il metro. Su `confronto` e `mitigazione`, che quel metro
+lo sono ancora (cap. 04.7), il **testo resta intoccato**: cambia solo il limite di token,
+che è un metadato e non entra nella richiesta come parola — l'unica asserzione del banco
+che se ne accorge è quella che confrontava il limite del confronto col suo.
+
 ## Pool 1.02 — 2026-08-09
 
 **I buchi che il collaudo di T3 aveva messo a verbale, chiusi tutti insieme** — più le

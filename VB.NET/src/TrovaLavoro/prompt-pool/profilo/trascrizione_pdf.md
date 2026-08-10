@@ -1,8 +1,8 @@
 id: trascrizione_pdf
-versione: 1.0
+versione: 1.1
 lingua: it
 modello: semplice
-max_token: 4000
+max_token: 32000
 uscita: testo
 segnaposto: 
 descrizione: Trascrive fedelmente il testo di un CV fornito come PDF.

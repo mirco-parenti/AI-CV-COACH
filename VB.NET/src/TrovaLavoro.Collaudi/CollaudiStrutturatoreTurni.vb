@@ -56,7 +56,7 @@ Namespace Ai
             Assert.Contains("ricavare SOLO il nome e cognome", mandato, "il prompt del turno «nome»")
             Assert.DoesNotContain("{{RISPOSTA_UTENTE}}", mandato, "nessun segnaposto rimasto")
             Assert.AreEqual("claude-haiku-4-5", corpo("model").ToString(), "il livello semplice del prompt")
-            Assert.AreEqual(1500, CInt(corpo("max_tokens").GetValue(Of Integer)()), "il limite del prompt")
+            Assert.AreEqual(4000, CInt(corpo("max_tokens").GetValue(Of Integer)()), "il limite del prompt")
         End Function
 
         <TestMethod>

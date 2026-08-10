@@ -298,9 +298,8 @@ Namespace Ai
 
                 ' Nel pool vive anche il CHANGELOG, che è un documento e non un prompt.
                 ' Sigillarlo renderebbe il rito del bump contraddittorio: si sigilla, si
-                ' annota il changelog, e il pool risulta subito modificato. Si riconosce
-                ' un prompt dalla riga che separa i metadati dal testo (cap. 4.4).
-                If Not contenuto.Replace(vbCrLf, vbLf).Contains(vbLf & "---" & vbLf) Then Continue For
+                ' annota il changelog, e il pool risulta subito modificato.
+                If Not SembraUnPrompt(contenuto) Then Continue For
 
                 elenco.Add(New JsonObject From {
                     {"percorso", relativo},
@@ -319,6 +318,40 @@ Namespace Ai
                                  New UTF8Encoding(encoderShouldEmitUTF8Identifier:=False))
 
         End Sub
+
+        ''' <summary>
+        ''' Se un file del pool è un <b>prompt</b> e non un documento. Si riconosce dal
+        ''' frontmatter (cap. 4.4): una riga <c>---</c> che chiude un'intestazione fatta
+        ''' <i>tutta</i> di righe «chiave: valore».
+        ''' </summary>
+        ''' <remarks>
+        ''' Cercare la sola riga <c>---</c> non basta, ed era una trappola pronta a
+        ''' scattare: un documento come il <c>CHANGELOG</c> può contenerne una in mezzo
+        ''' alla prosa — una linea orizzontale in Markdown si scrive proprio così — e
+        ''' finirebbe nel manifest. Da lì il rito del bump si morderebbe la coda: si
+        ''' sigilla, si annota il changelog, e il pool appena sigillato risulta modificato.
+        ''' </remarks>
+        Private Shared Function SembraUnPrompt(contenuto As String) As Boolean
+
+            Dim testo As String = contenuto.Replace(vbCrLf, vbLf)
+
+            Dim separatore As Integer = testo.IndexOf(vbLf & "---" & vbLf, StringComparison.Ordinal)
+            If separatore <= 0 Then Return False
+
+            For Each riga As String In testo.Substring(0, separatore).Split(vbLf)
+
+                ' Nell'intestazione ogni riga porta un metadato: niente righe vuote,
+                ' niente prosa. La chiave sta prima dei due punti ed è una parola sola,
+                ' così una frase che i due punti li ha in mezzo non passa per metadato.
+                Dim duePunti As Integer = riga.IndexOf(":"c)
+                If duePunti <= 0 Then Return False
+                If riga.Substring(0, duePunti).Contains(" "c) Then Return False
+
+            Next
+
+            Return True
+
+        End Function
 
         ''' <summary>
         ''' Carica un prompt per identificativo, scegliendo la variante di lingua

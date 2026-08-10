@@ -176,9 +176,12 @@ i tool MCP).
   prototipo non ne parla affatto: finché si resta lì la richiesta **non dichiara nulla**,
   e così resta identica a quella del prototipo. Su Sonnet 5 il valore predefinito è
   opposto, e lì l'interruttore va acceso (`thinking: {"type": "disabled"}`), perché
-  **`max_tokens` limita ragionamento e risposta insieme**: i nostri limiti (1500–4000)
-  sono cuciti addosso alla sola risposta, quindi passare a Sonnet 5 senza spegnerlo
-  tronca le risposte **senza errore** — e un confronto troncato produce JSON invalido.
+  **`max_tokens` limita ragionamento e risposta insieme**: i nostri limiti — 1500–4000
+  fino al Pool 1.02, **4000–32000 dal Pool 1.03** (cap. 04.4) — sono cuciti addosso alla
+  sola risposta, quindi passare a Sonnet 5 senza spegnerlo tronca le risposte **senza
+  errore** dell'API — e un confronto troncato produce JSON invalido. I tetti più larghi
+  lasciano margine anche a un ragionamento acceso, ma non cambiano la scelta: il margine
+  è per il contenuto dell'utente, non per il pensiero del modello.
   Perciò in `modelli.json` l'interruttore ha **tre** stati e non due: *non dichiarato*
   (richiesta identica al prototipo), *spento*, *acceso*. Vale anche la seconda
   avvertenza del cap. 15: Sonnet 5 conta i token in modo diverso e a parità di testo ne
@@ -203,9 +206,15 @@ i tool MCP).
   si copre invece con un avanzamento che dice **a che punto siamo** («genero la lettera —
   3 di 3»): l'informazione utile lì non è quali caratteri stanno arrivando, è quante
   chiamate mancano.
-- **Robustezza**: timeout esplicito per chiamata; un solo retry automatico su errore di
-  rete o HTTP 429/5xx (con pausa, rispettando l'attesa che l'API suggerisce quando la
-  suggerisce); nessun retry sugli errori nostri — una richiesta malformata o una chiave
+- **Robustezza**: timeout esplicito per chiamata — e **proporzionato al `max_token` del
+  prompt** *(deciso col Pool 1.03, 2026-08-10)*: fino al limite di una risposta normale
+  l'attesa è quella di sempre, oltre cresce insieme al tetto. Senza streaming il tempo di
+  risposta cresce col testo che l'AI scrive, e un'attesa fissa trasformerebbe un limite
+  generoso in un timeout: nessuna risposta invece di una troncata e dichiarata. La soglia
+  è tarata sul limite dei turni del dialogo, cioè sull'unica chiamata che non si può
+  annullare (v. 2.6): la loro attesa non è cambiata di un secondo. Poi un solo retry
+  automatico su errore di rete o HTTP 429/5xx (con pausa, rispettando l'attesa che l'API
+  suggerisce quando la suggerisce); nessun retry sugli errori nostri — una richiesta malformata o una chiave
   sbagliata, riprovata, dà lo stesso errore. Ogni errore arriva all'utente in italiano,
   con la possibilità di riprovare. Si guarda anche **perché il modello ha smesso di
   scrivere**: se si è fermato contro il limite di token la risposta è monca e lo si dice

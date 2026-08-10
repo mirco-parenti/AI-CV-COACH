@@ -84,14 +84,21 @@ Namespace Ai
         End Sub
 
         <TestMethod>
-        Public Sub IlConfrontoUsaIlModelloEIlLimiteDelPrototipo()
+        Public Sub IlConfrontoUsaIlModelloDelPrototipoEUnLimiteNonInferiore()
 
             ' Il prototipo: MODEL_RAGIONAMENTO = claude-sonnet-4-6, MAX_TOKENS_CONFRONTO = 4000.
             Dim confronto As Prompt = PoolIntegrato().Carica("confronto")
             Dim modello As ModelloConcreto = Modelli.Predefiniti().PerLivello(confronto.Modello)
 
             Assert.AreEqual("claude-sonnet-4-6", modello.Id, "il modello del confronto")
-            Assert.AreEqual(4000, confronto.MaxToken, "il limite di token del confronto")
+
+            ' Il limite invece non è più il suo, e il distacco è voluto (Pool 1.03): il
+            ' prototipo si fermava a 4000 e su un annuncio ricco di requisiti troncava.
+            ' Un tetto più alto non cambia la richiesta né la risposta a parità di
+            ' contenuto: sposta solo il punto in cui il modello verrebbe interrotto —
+            ' perciò qui si verifica che non scenda, non che coincida.
+            Assert.IsGreaterThanOrEqualTo(4000, confronto.MaxToken,
+                                          "il limite di token del confronto non deve scendere sotto il suo")
 
             ' E il corpo della richiesta non deve dichiarare nulla sul ragionamento:
             ' su Sonnet 4.6 è già spento, e tacere tiene la richiesta identica.

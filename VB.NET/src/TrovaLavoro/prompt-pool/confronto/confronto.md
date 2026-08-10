@@ -1,8 +1,8 @@
 id: confronto
-versione: 1.0
+versione: 1.1
 lingua: it
 modello: ragionamento
-max_token: 4000
+max_token: 16000
 uscita: json
 segnaposto: PROFILO, ANNUNCIO
 descrizione: Giudica voce per voce il profilo contro l'annuncio e stima il match complessivo.

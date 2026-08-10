@@ -67,8 +67,10 @@ Namespace Ai
                             "che è il prompt trascrizione_pdf del pool")
 
             Assert.AreEqual("claude-haiku-4-5", corpo("model").ToString(), "il livello semplice del prompt")
-            Assert.AreEqual(4000, CInt(corpo("max_tokens").GetValue(Of Integer)()),
-                            "il limite del prompt, lo stesso del prototipo")
+            ' Il limite è quello del prompt, e dal Pool 1.03 non è più quello del
+            ' prototipo: a 4000 token un CV di venti pagine si troncava a metà.
+            Assert.AreEqual(32000, CInt(corpo("max_tokens").GetValue(Of Integer)()),
+                            "il limite del prompt")
         End Function
 
         <TestMethod>

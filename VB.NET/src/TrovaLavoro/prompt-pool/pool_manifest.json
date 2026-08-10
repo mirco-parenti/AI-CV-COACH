@@ -1,67 +1,67 @@
 {
   "formato": 1,
-  "versione_pool": "1.02",
-  "data": "2026-08-09",
+  "versione_pool": "1.03",
+  "data": "2026-08-10",
   "file": [
     {
       "percorso": "annuncio/analisi_annuncio.md",
-      "sha256": "073e930b137048494dfef8b92233c2555aaccfb9f805b4b9516fdd3a57a98eac"
+      "sha256": "ea4457c7733cb5aefc44e9a09149cb2a2959646ddd4a2ca4b91547985a501ebd"
     },
     {
       "percorso": "confronto/confronto.md",
-      "sha256": "7ee2f0e1735ce9b2c654e5d753353be3b83a377772df8222e5d0e4757cd37a31"
+      "sha256": "488328efb7072aaba1814463e5d6387a30265c3fe30c8f7eadd828c0c0fddc1a"
     },
     {
       "percorso": "confronto/mitigazione.md",
-      "sha256": "9efdaecde45de6979d117e121ce1caf6349e7747a40cfb6273274e0c5b801379"
+      "sha256": "5883092b99fdc41e41ee3355c059643adda6bbd121e8ff5919e5f1a17a69eccf"
     },
     {
       "percorso": "generazione/cv_base.it.md",
-      "sha256": "629d034b9e56dd55f1c0266d8fef8632d4f9fd05ef4d273373d198d551511df1"
+      "sha256": "adfe02c00afde2b70e97403a998ff0910712872e2cbbbca785c5314301f5b5ae"
     },
     {
       "percorso": "generazione/cv_mirato.it.md",
-      "sha256": "e43bbc4a80d7a3327935ae823babd081dc2161cd10a43a377019cfeaf36e6497"
+      "sha256": "68b83ee3b901734cf0fe53f6afbaedd11bde0207e403a238f67afc88b18eff7d"
     },
     {
       "percorso": "generazione/lettera.it.md",
-      "sha256": "c1e75e56285d9eeccb097b4bc44e278d0e0d53b5f77eed4a47a2c8e32167a830"
+      "sha256": "f9b2d25569b8668710b17c3124937808d528d2ca0e930832ca2191e0da8617f7"
     },
     {
       "percorso": "profilo/competenze.md",
-      "sha256": "adba2a979291182b0a12d6ed4fb07ec6ead4c29579bafa05ee7362e3332ba559"
+      "sha256": "83963c4d57d624a570984af60f54b9cfa8e0de8abd1853c36ab224012f65884e"
     },
     {
       "percorso": "profilo/contatti.md",
-      "sha256": "fc4e89bcb2f39587650c754be783d58502206afa7d88a5edc51f0988b8d8f6ee"
+      "sha256": "fdb0dca3dbdf80fa0f049274152e1e0da72b928b16d5886625a1b2f921dbb172"
     },
     {
       "percorso": "profilo/esperienze_formali.md",
-      "sha256": "706179644f8241b8cd926345fe14f07f9f9f0108ef0979ce974ebf4fe9a18985"
+      "sha256": "2fd4ed7a8487b0f296ceb654c4be3efd1b93982c5320dcda8b7e9fb8f1e84aa1"
     },
     {
       "percorso": "profilo/esperienze_informali.md",
-      "sha256": "6ad2352b612b4f801d5335dc9adf19de71b4b84b91fd0793ca3c8b4265526151"
+      "sha256": "10690e37bf9371853c849d23d88690dc6300dd9bbf2be7fb6afd3bea1dc25a71"
     },
     {
       "percorso": "profilo/formazione.md",
-      "sha256": "9d205d1996e0cfed058acfc2e4c4185c4fa638057135287b4d3a7724fee47fa5"
+      "sha256": "187bc99d67f0d459d960a4f31e3f422338add71e78a3415c37a084505b2b4133"
     },
     {
       "percorso": "profilo/importa_cv.md",
-      "sha256": "0939ce8d245f6f184ab0b91ecaadb188cf3c4bfd4cfed016a059de9ed1aadee6"
+      "sha256": "7abd095af4e623f3a5707838918035db710329f378a76706870245b05d9f5be9"
     },
     {
       "percorso": "profilo/nome.md",
-      "sha256": "1f668fd4c5c02a8e60412a601ddef99e97e133cf42a83bc37befa6d015e18b5c"
+      "sha256": "98566f96ba0dc6cbd90edb2699f83b56b9552c015f3c9e3527cd73865aed000f"
     },
     {
       "percorso": "profilo/patente.md",
-      "sha256": "6844867e5ec8cd2e932e78a2200a208cd9e50e287410eb76e629c538a48b0252"
+      "sha256": "cea78ca63be92537c7159a96e980e61c4de99b63045f38255211d717afb8ab28"
     },
     {
       "percorso": "profilo/trascrizione_pdf.md",
-      "sha256": "9604cba4d94f291fa86a3e19538c948ad6c0f11ab0e50ca67f6d97a27e773aa9"
+      "sha256": "c1ecf94ea59c4ecec73b5895ddbf944402d0a3e99b79b96db960d8dacbf699ec"
     }
   ]
 }

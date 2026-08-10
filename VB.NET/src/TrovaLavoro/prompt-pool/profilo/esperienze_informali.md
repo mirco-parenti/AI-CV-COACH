@@ -1,8 +1,8 @@
 id: esperienze_informali
-versione: 1.1
+versione: 1.2
 lingua: it
 modello: semplice
-max_token: 1500
+max_token: 4000
 uscita: json
 segnaposto: RISPOSTA_UTENTE
 descrizione: Struttura in JSON la risposta dell'utente per il turno «esperienze_informali» del profilo.

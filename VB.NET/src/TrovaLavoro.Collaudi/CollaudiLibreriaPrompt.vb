@@ -26,8 +26,8 @@ Namespace Ai
             Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
 
             Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "origine")
-            Assert.AreEqual("1.02", libreria.Versione, "versione del pool")
-            Assert.AreEqual("Pool 1.02 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
+            Assert.AreEqual("1.03", libreria.Versione, "versione del pool")
+            Assert.AreEqual("Pool 1.03 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
         End Sub
 
         <TestMethod>
@@ -45,13 +45,15 @@ Namespace Ai
         End Sub
 
         <TestMethod>
-        Public Sub IMetadatiSonoQuelliDelPrototipo()
+        Public Sub IMetadatiSonoQuelliAttesi()
             Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
 
-            ' Il confronto: il più esigente, gira sul modello di ragionamento.
+            ' Livello, uscita e segnaposto restano quelli del prototipo. I limiti di
+            ' token no, e di proposito: dal Pool 1.03 sono alzati perché un CV grande
+            ' non venga troncato (CHANGELOG del pool).
             Dim confronto = libreria.Carica("confronto")
             Assert.AreEqual("ragionamento", confronto.Modello, "confronto: modello")
-            Assert.AreEqual(4000, confronto.MaxToken, "confronto: max_token")
+            Assert.AreEqual(16000, confronto.MaxToken, "confronto: max_token")
             Assert.AreEqual("json", confronto.Uscita, "confronto: uscita")
             CollectionAssert.AreEqual({"PROFILO", "ANNUNCIO"}, confronto.Segnaposto.ToArray(),
                                       "confronto: segnaposto")
@@ -59,7 +61,7 @@ Namespace Ai
             ' Un turno del profilo: estrazione semplice.
             Dim nome = libreria.Carica("nome")
             Assert.AreEqual("semplice", nome.Modello, "nome: modello")
-            Assert.AreEqual(1500, nome.MaxToken, "nome: max_token")
+            Assert.AreEqual(4000, nome.MaxToken, "nome: max_token")
 
             ' La trascrizione del PDF è l'unica che risponde in testo, non in JSON,
             ' e l'unica senza segnaposto.
@@ -68,7 +70,7 @@ Namespace Ai
             Assert.IsEmpty(pdf.Segnaposto, "trascrizione_pdf: nessun segnaposto")
 
             ' L'import da CV chiede più spazio: produce il profilo intero.
-            Assert.AreEqual(3000, libreria.Carica("importa_cv").MaxToken, "importa_cv: max_token")
+            Assert.AreEqual(16000, libreria.Carica("importa_cv").MaxToken, "importa_cv: max_token")
 
             ' La lettera è quella con più dati iniettati.
             Assert.HasCount(5, libreria.Carica("lettera").Segnaposto, "lettera: segnaposto")
@@ -154,7 +156,7 @@ Namespace Ai
                 Dim libreria = LibreriaPrompt.Apri(cartella)
 
                 Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "deve ripiegare sull'integrato")
-                Assert.AreEqual("1.02", libreria.Versione, "con la versione dell'integrato")
+                Assert.AreEqual("1.03", libreria.Versione, "con la versione dell'integrato")
                 Assert.IsNotNull(libreria.Avviso, "e deve dire perché")
                 Assert.Contains("manca.md", libreria.Avviso, "l'avviso deve nominare il file mancante")
             Finally
@@ -241,6 +243,32 @@ Namespace Ai
                 Dim dopo = LibreriaPrompt.Apri(cartella)
                 Assert.IsNull(dopo.Avviso, "annotare il changelog non è modificare un prompt")
                 Assert.AreEqual("2.00", dopo.Versione, "e la versione resta senza asterisco")
+            Finally
+                Directory.Delete(cartella, recursive:=True)
+            End Try
+        End Sub
+
+        <TestMethod>
+        Public Sub SigillaNonSiFaIngannareDaUnaRigaDiSeparazione()
+            ' La trappola che il Pool 1.03 ha disinnescato: in Markdown una linea
+            ' orizzontale si scrive «---», e un documento che ne contenga una passava per
+            ' prompt — con lo stesso effetto del caso qui sopra, il pool che risulta
+            ' modificato appena sigillato. A distinguerli è il frontmatter, non la riga.
+            Dim cartella = CreaPoolFinto("1.99", corpoDiverso:=False)
+            Try
+                File.WriteAllText(Path.Combine(cartella, "CHANGELOG.md"),
+                    "# Storia del pool" & vbLf & vbLf & "## Pool 1.99 — 2026-08-10" & vbLf & vbLf &
+                    "---" & vbLf & vbLf & "Una linea di separazione, non un frontmatter." & vbLf)
+
+                LibreriaPrompt.Sigilla(cartella, "2.00", "2026-08-10")
+
+                Dim manifest = File.ReadAllText(Path.Combine(cartella, "pool_manifest.json"))
+                Assert.DoesNotContain("CHANGELOG.md", manifest,
+                                      "una riga --- non fa di un documento un prompt")
+
+                File.AppendAllText(Path.Combine(cartella, "CHANGELOG.md"), vbLf & "Annotazione." & vbLf)
+                Assert.IsNull(LibreriaPrompt.Apri(cartella).Avviso,
+                              "e annotarlo non deve sporcare il pool")
             Finally
                 Directory.Delete(cartella, recursive:=True)
             End Try

@@ -1,8 +1,8 @@
 id: lettera
-versione: 1.0
+versione: 1.1
 lingua: it
 modello: ragionamento
-max_token: 1500
+max_token: 4000
 uscita: json
 segnaposto: PROFILO, ANNUNCIO, GIUDIZI, CV, MITIGAZIONI
 descrizione: Genera la lettera di presentazione, coerente col CV e con le mitigazioni.

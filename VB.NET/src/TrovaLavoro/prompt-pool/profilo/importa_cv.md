@@ -1,8 +1,8 @@
 id: importa_cv
-versione: 1.2
+versione: 1.3
 lingua: it
 modello: semplice
-max_token: 3000
+max_token: 16000
 uscita: json
 segnaposto: RISPOSTA_UTENTE
 descrizione: Struttura nel profilo il testo di un CV già trascritto.

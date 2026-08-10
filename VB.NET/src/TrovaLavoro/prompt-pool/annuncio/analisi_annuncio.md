@@ -1,8 +1,8 @@
 id: analisi_annuncio
-versione: 1.0
+versione: 1.1
 lingua: it
 modello: semplice
-max_token: 1500
+max_token: 8000
 uscita: json
 segnaposto: RISPOSTA_UTENTE
 descrizione: Estrae da un annuncio i requisiti con le loro priorità e il contesto.
@@ -24,6 +24,7 @@ Se l'annuncio dichiara che non serve esperienza, metti in "esperienza_richiesta"
 
 # 2 — CAMPI DI CONTESTO
 - "titolo": il ruolo dell'annuncio.
+- "azienda": il nome di chi offre il posto, riportato come lo scrive l'annuncio. Se a pubblicare è un'agenzia per il lavoro per conto di un'azienda che non viene nominata, metti il nome dell'agenzia. Resta vuoto quando un nome non c'è: un annuncio anonimo, o che si descrive senza nominarsi ("azienda leader del settore", "importante realtà del territorio"), non ha un nome da riportare — non dedurlo dal testo e non inventarlo.
 - "sede": i luoghi di lavoro, come lista di stringhe (una voce per sede distinta; "da remoto" è una voce valida).
 - "contratto": oggetto { "tipo", "durata", "orario", "retribuzione" }; riempi solo i campi che l'annuncio dichiara.
 - "mansioni": cosa si farà concretamente nel ruolo, come lista di stringhe.
@@ -54,6 +55,7 @@ Esempi: "con esperienza" generico → "richiesto" (palese); "con esperienza di b
   "formazione_richiesta": [{ "testo": "", "priorita": "" }],
   "altri_requisiti": [{ "testo": "", "priorita": "" }],
   "titolo": "",
+  "azienda": "",
   "sede": [],
   "contratto": { "tipo": "", "durata": "", "orario": "", "retribuzione": "" },
   "mansioni": [],
