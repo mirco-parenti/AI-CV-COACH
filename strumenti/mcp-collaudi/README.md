@@ -37,6 +37,18 @@ curl -s -X POST http://127.0.0.1:3300/mcp -H 'content-type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
+**Dopo aver toccato `server.mjs` o gli script il server va riacceso**, altrimenti
+continua a rispondere col codice di prima — e si finisce per diagnosticare una modifica
+che non è mai entrata in servizio. Si spegne **dalla porta**, non dal nome:
+
+```bash
+fuser -k 3300/tcp && node strumenti/mcp-collaudi/server.mjs &
+```
+
+Cercarlo per nome (`pkill -f mcp-collaudi/server.mjs`) sembra più naturale e invece è una
+trappola: il pattern compare anche nella riga di comando che lo sta cercando, così il
+comando **uccide sé stesso** prima di arrivare al server.
+
 ## Gli attrezzi
 
 | Attrezzo | Cosa fa |

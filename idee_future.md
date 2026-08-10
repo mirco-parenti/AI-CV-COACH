@@ -174,10 +174,6 @@ motivo, o rifiniture che farebbero salire l'app di classe.
   un turno può tenere P5 bloccato fino a ~4 minuti (timeout 120 s × 2 tentativi) senza via
   d'uscita. Serve il gettone d'annullo come l'import. *(2026-08-09 — revisione adversariale;
   è la prima voce «per un'app di classe superiore» del resoconto.)*
-- **Validazione di range della taratura** — la revisione ha reso robusto il *formato*
-  (mappa storta → si scarta intera, valgono i predefiniti), ma i *valori* restano non
-  validati: un `"clamp_su": -50` entra zitto e falsa le stelle. *(2026-08-09 — revisione
-  adversariale.)*
 - **Guardia anti-injection su `confronto`, `mitigazione` e `trascrizione_pdf`** — il Pool
   1.02 la mette nei sette turni del dialogo; su `confronto` e `mitigazione` romperebbe la
   parità carattere per carattere col prototipo, che è il metro della non-regressione: è una
@@ -189,39 +185,37 @@ motivo, o rifiniture che farebbero salire l'app di classe.
 - **«Madrelingua» perso sull'italiano nell'import** — il CV vero dichiara l'italiano
   madrelingua e la voce non entra fra le competenze; filo minore del caso lingue.
   *(2026-08-09 — revisione adversariale.)*
-- **La trappola latente di `Sigilla`** — se un domani il CHANGELOG del pool contenesse una
-  riga `---`, il sigillo la scambierebbe per una chiusura di frontmatter; oggi non succede,
-  ma è il genere di trappola che scatta fra un anno. *(2026-08-09 — revisione adversariale.)*
+- **Il bottone spento che non si distingue da uno acceso** — in `StileApp` un controllo
+  spento resta su fondo chiaro sopra uno sfondo quasi bianco: la differenza c'è, ma a
+  colpo d'occhio si legge male, e il cap. 03.8 promette che chi guarda capisca **subito**
+  cosa può premere. Non è una toppa locale: tocca ogni bottone dell'applicazione, quindi
+  è una scelta di design da prendere una volta sola (un grigio più netto? il testo più
+  tenue? il bordo che sparisce?). Segnalata a Mirco, in attesa di decisione.
+  *(2026-08-10 — emersa a T4c, guardando i pannelli nuovi nella prova a video.)*
 
 ## Collaudi e non-regressione (Fase VB.NET)
 
 Idee emerse **costruendo la batteria di T2** (cap. 14), quando il prototipo ha fatto da
 giudice per la prima volta.
-- **Parità del prompt estesa a tutto il pool** — oggi il banco verifica carattere per
-  carattere un prompt solo, quello del **confronto**: è il più esigente (due artefatti
-  iniettati, accenti, JSON annidato) e quello su cui una differenza si vedrebbe. Degli
-  altri quattordici il banco controlla che si carichino e che i metadati siano quelli
-  giusti, **non** che il testo sia ancora parola per parola quello del prototipo.
-  Estendere il generatore degli attesi a tutti sarebbe meccanico — i turni del profilo
-  hanno un segnaposto solo — e chiuderebbe l'ultimo pezzo affidato alla rilettura.
-  *(2026-08-07 — emersa chiudendo la non-regressione di T2.)*
+- **Parità del prompt estesa a tutto il pool** — ~~oggi il banco verifica carattere per
+  carattere un prompt solo, quello del **confronto**~~ … *idea **rivista dai fatti** e
+  chiusa così com'è (2026-08-10, T4)*. La parità è stata estesa a **`mitigazione`**, e lì
+  si ferma: **due** prompt, non tutti e quindici. Il motivo è che «estendere a tutti» era
+  meccanico ma sbagliato di premessa — un collaudo di parità ha senso solo dove il
+  prototipo è ancora il **metro**, e restano solo `confronto` e `mitigazione` (cap. 04.7).
+  Su `importa_cv` (Pool 1.01), sugli otto del profilo (Pool 1.02) e su `analisi_annuncio`
+  (Pool 1.03) il distacco è **voluto**, e sui tre della generazione arriverà: inchiodarli
+  al testo del prototipo avrebbe trasformato il collaudo in una gabbia, bocciando proprio
+  i miglioramenti che vogliamo poter fare. *(2026-08-07 — emersa chiudendo la
+  non-regressione di T2; rivista il 2026-08-10 aprendo T4a.)*
 - **Un confronto reale fra lingue diverse** — profilo in italiano, annuncio in inglese: il
   cap. 10.2 lo dà come caso di collaudo del multilingua, ma i due casi reali di T2 sono
   entrambi in italiano. Da aggiungere quando arriverà T7, dove serve davvero.
   *(2026-08-07 — emersa a T2, rimandata alla tappa che la riguarda.)*
-- **Un banco che pilota l'interfaccia vera** — la prova a video di T3 è stata fatta guidando
-  l'applicazione dall'esterno con gli appigli di accessibilità di Windows (gli stessi che usa
-  un lettore di schermo): l'app si avvia, il dialogo si conduce nel pannello, il profilo si
-  salva, e lungo la strada si catturano le schermate. Ha funzionato, e ha trovato cose che il
-  banco non vede. Oggi però è uno **script usa-e-getta fuori dal repo**: farlo diventare un
-  collaudo vero vorrebbe dire decidere dove vive, come si lancia e — soprattutto — che cosa
-  *asserisce*, visto che il giudizio su come una schermata appare resta di chi guarda. Da
-  valutare quando i pannelli saranno più d'uno o due. *(2026-08-09 — emersa dalla gamba C del
-  collaudo di tappa di T3.)*
-- **Città pass/fail anche in `CollaudiFormatiReale`** — con il Pool 1.02 la città è tornata
-  un verdetto secco nel collaudo reale dell'import (`CollaudoReale`); il banco gemello dei
-  quattro formati usa ancora il criterio vecchio. Allineamento meccanico. *(2026-08-09 —
-  revisione adversariale.)*
+- **Un `aspetta_che` per lo strumento di collaudo** — oggi, per sapere se una chiamata all'AI
+  è finita, si alternano `clic` e `controlli` a mano. Un attrezzo che aspetti una condizione
+  («finché quel bottone non si riaccende», con un tetto di tempo) renderebbe i giri lunghi
+  scrivibili in una riga sola. *(2026-08-10 — emersa percorrendo il giro completo di T4c.)*
 
 ## Realizzate
 
@@ -274,6 +268,32 @@ implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
   da cui è entrato — dialogo o CV. Il salvataggio resta un gesto esplicito dell'utente e
   **versiona**: ogni conferma lascia la sua copia datata nello storico.
   *(2026-08-07, T3c; diario Step 2.6; `VB.NET/progetto/03` P2 e `11.1`.)*
+- ✅ **Un banco che pilota l'interfaccia vera** — è diventato il **server MCP di collaudo**
+  (`strumenti/mcp-collaudi/`, cap. 09.1), nato a T4c dal giorno in cui «i bottoni non fanno
+  nulla» non si poteva diagnosticare dal banco. Le tre domande aperte hanno avuto risposta:
+  **dove vive** — nel repo, fuori da `VB.NET/`, perché non è parte del prodotto; **come si
+  lancia** — un server locale con attrezzi scritti uno per uno, nessun comando arbitrario;
+  **cosa asserisce** — niente, di proposito. Non è un collaudo: è uno strumento che *guarda*
+  (compila, avvia, fotografa, elenca i controlli dicendo se sono accesi, preme, scrive,
+  risponde alla finestra di scelta file) e lascia il giudizio a chi guarda, che era proprio
+  il nodo per cui l'idea era rimasta ferma. Col suo aiuto il giro completo di T4 è stato
+  percorso dall'interfaccia, senza mani. *(2026-08-10, T4c; cap. 09.1 e 13.7.)*
+- ✅ **Validazione di range della taratura** — ogni numero letto da `taratura.json` dichiara
+  ora l'intervallo in cui ha senso, e un valore fuori scala viene **scartato e annotato**
+  invece di entrare zitto: un `"clamp_su": -50` non falsa più le stelle. Fatta a T4 perché è
+  la prima tappa che usa `CalcoloMatch` davvero dentro l'applicazione. *(2026-08-10, T4;
+  cap. 11.6, con tre collaudi.)*
+- ✅ **Città pass/fail anche in `CollaudiFormatiReale`** — chiusa, ma **non come previsto**:
+  non era un allineamento meccanico. Il collaudo di tappa di T4 ha mostrato che la stessa
+  riga «Carasco (GE)», identica in tutti e quattro i file, torna a volte con la provincia e a
+  volte senza — due letture **entrambe fedeli**, perché il prompt dice quale indirizzo
+  prendere, non come scriverlo. Fra le quattro strade si chiede quindi che sia la **stessa
+  città** (ammessa la sola sigla di provincia); il pass/fail vero resta quello contro il CV.
+  È nato lì il primo banco degli **attrezzi di misura**, che ha subito bocciato la prima
+  versione della regola. *(2026-08-11; `CollaudoReale.StessaCitta`, `CollaudiMetroReale`.)*
+- ✅ **La trappola latente di `Sigilla`** — chiusa col suo collaudo: nel manifest entrano solo
+  i file che hanno l'intestazione di metadati, quindi un `---` dentro il CHANGELOG non viene
+  più scambiato per una chiusura di frontmatter. *(2026-08-10, T4; cap. 04.5.)*
 - ✅ **Hard-gate (requisito eliminatorio)** — un requisito *davvero* squalificante non soddisfatto
   non pesa soltanto: mette un **tetto** al match. Ogni giudizio del confronto porta un flag
   `eliminatorio` (booleano, deciso dall'LLM: `true` solo per i requisiti tassativi/escludenti, nel

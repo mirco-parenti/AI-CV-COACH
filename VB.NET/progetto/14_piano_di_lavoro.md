@@ -114,7 +114,7 @@ validazione sul modello vero. La batteria è salita a **205 collaudi verdi**. No
 tappa: è manutenzione straordinaria fatta prima di aprire T4, narrata nel diario
 (Step 2.8) e nel `CHANGELOG.md` del pool.*
 
-### T4 — La pipeline di candidatura (F3 + F4 + F5 in italiano) — **APERTA il 2026-08-10**
+### T4 — La pipeline di candidatura (F3 + F4 + F5 in italiano) — ✔ **CHIUSA il 2026-08-11**
 Analisi annuncio da testo incollato; confronto con stelle, note e ⛔; pannello P4;
 generazione CV-1/CV-2/lettera in italiano; mitigazione; export **DOCX e PDF**
 (scrittore OOXML + stampa via WebView2); pannello P6.
@@ -157,27 +157,72 @@ intatti, il **PDF** ha testo selezionabile (`/ToUnicode`) e font incorporati
 dov'era già la voce gemella di T3.
 **T4c — i pannelli**: P4 con la sua fascia d'ingresso (cap. 03.6) e P6, più il filo che
 li lega a P2 e al 📄 CV-1 base.
+*Chiusa il 2026-08-10.* «Analizza» fa **due passi in fila** — analisi e confronto — perché
+in mezzo l'utente non decide niente (cap. 12, A5→A7), e a confronto fatto la fascia si
+richiude. Sono nate le due **viste di sola lettura** promesse a T4a (`VistaConfronto`,
+`VistaAnnuncio`) e la terza stampante, `ScrittoreTesto`, per l'anteprima a video
+(cap. 05.3). In barra è comparso il quinto bottone, **📋 Candidatura**: senza, il pannello
+di questa tappa non era raggiungibile (cap. 03.4). Banco: **301 → 350 collaudi** verdi.
+
+Qui è anche nato lo **strumento di collaudo** (`strumenti/mcp-collaudi/`, cap. 09.1): un
+server MCP locale che compila, fa girare il banco, avvia l'applicazione vera, la fotografa
+e le preme i bottoni. Non è parte del prodotto. È nato il giorno in cui «i bottoni non
+fanno nulla» non si poteva diagnosticare dal banco — il banco vede lo *stato* dei
+controlli, non come si *vedono* — ed è lo strumento con cui il collaudo di tappa qui sotto
+è stato percorso dall'interfaccia, senza mani.
 
 Il **collaudo di tappa** è in tre gambe, come a T3, perché le domande sono di nuovo
-diverse fra loro:
+diverse fra loro. **Condotto il 2026-08-10** con l'AI vera e il CV vero di Mirco; il
+rapporto sta accanto al CV, fuori dal repo, perché contiene dati personali.
+
 - **A — il prototipo come giudice, sull'intera pipeline.** Ha tutti gli endpoint che
   servono (`/struttura`, `/confronta`, `/mitiga`, `/genera-cv`, `/genera-lettera`), e su
   `confronto` e `mitigazione` è ancora il **metro carattere-per-carattere** (cap. 04.7).
+  *Fatto:* 9 collaudi di parità verdi sul metro; batteria «Reale» **10 su 10**; e sulla
+  **generazione**, dove nessun collaudo automatico arriva, gli stessi input dati alle due
+  parti — forma dello schema identica, **gli stessi quattro gap** mitigati, stessi
+  conteggi nel CV-2, **nessuna invenzione** da nessuna delle due parti, e le due lettere
+  che nominano gli stessi tre gap. Le differenze sono di lunghezza, non di sostanza.
 - **B — la pipeline reale end-to-end**, dal testo di un annuncio vero fino ai tre
-  documenti, col profilo vero.
+  documenti, col profilo vero. *Fatto*, e percorso **dall'interfaccia**: import del CV in
+  PDF → profilo salvato → annuncio incollato in P4 → «Analizza» → **1,4 su 5** su 14 voci
+  → mitigazioni → 🎯 CV-2 e lettera in P6 → export; più il 📄 CV-1 base generato da P2.
+  *Limite dichiarato*: l'annuncio era verosimile ma scritto per il collaudo, non pescato
+  da un portale (`in_sospeso.md`).
 - **C — i file**: DOCX e PDF aperti in Word e LibreOffice, testo estratto e confrontato
-  **campo per campo** col JSON di partenza (cap. 05.7).
+  **campo per campo** col JSON di partenza (cap. 05.7). *Fatto:* **114 campi su 114**
+  ritrovati nei sei file, e i due formati identici carattere per carattere una volta tolti
+  spazi e segni. Il confronto è stato **messo alla prova**: cambiando una lettera al nome
+  di un'azienda diventa subito rosso. **Word manca su questa postazione** e la sua metà
+  resta in `in_sospeso.md`, dov'era già la gemella di T3 e T4b.
 
 **Voci di backlog prese dentro questa tappa** *(decise con Mirco il 2026-08-10)*, perché
 T4 le tocca comunque e chiuderle altrove costerebbe di più:
 - la **parità del prompt estesa** dagli attuali uno a tutti i sei prompt che T4 usa —
   oggi il banco verifica carattere per carattere solo `confronto`, e proprio a T4 gli
-  altri cinque entrano in produzione (`idee_future.md`);
+  altri cinque entrano in produzione (`idee_future.md`).
+  ✔ *Fatta, ma su **due** prompt invece di sei, e la revisione è la parte che conta*: la
+  parità carattere-per-carattere ha senso solo dove il prototipo è ancora il **metro**, e
+  sono `confronto` e `mitigazione` (cap. 04.7). Su `analisi_annuncio` il distacco c'è già
+  (Pool 1.03) e sui tre della generazione arriverà: inchiodare quei prompt a un testo che
+  vogliamo poter cambiare avrebbe trasformato un collaudo in una gabbia.
 - la **validazione di range della taratura**: T4 è la prima tappa che usa `CalcoloMatch`
-  sul serio dentro l'app, e oggi un `"clamp_su": -50` entrerebbe zitto;
+  sul serio dentro l'app, e oggi un `"clamp_su": -50` entrerebbe zitto. ✔ *Fatta*
+  (cap. 11.6), con tre collaudi che la provano.
 - la **città pass/fail in `CollaudiFormatiReale`**, allineamento meccanico rimasto
-  indietro dal Pool 1.02;
-- la **trappola latente di `Sigilla`** sul `CHANGELOG` con una riga `---`.
+  indietro dal Pool 1.02. ✔ *Chiusa il 2026-08-11, e non come previsto*: il collaudo di
+  tappa ha mostrato che la stessa riga «Carasco (GE)», identica in tutti e quattro i file,
+  torna a volte con la provincia e a volte senza — due letture **entrambe fedeli**, perché
+  il prompt dice quale indirizzo prendere, non come scriverlo. Fra le strade si chiede
+  quindi che sia la **stessa città**, ammettendo la sola sigla di provincia; il pass/fail
+  vero resta quello contro il CV. È nato lì anche il primo banco degli **attrezzi di
+  misura** (`CollaudiMetroReale`), che prima non ne avevano — ed è servito subito, perché
+  ha bocciato la prima versione della regola.
+- la **trappola latente di `Sigilla`** sul `CHANGELOG` con una riga `---`. ✔ *Chiusa*, col
+  suo collaudo.
+
+**Fatto:** **355 collaudi verdi** senza rete e **10 reali** su aviolab03. **T5 può
+iniziare.**
 
 ### T5 — La ricerca annunci (F2) e il registro (F6)
 Pannello P3 con WebView2, ricerche salvate, cattura dell'annuncio, coda delle

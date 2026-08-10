@@ -1,4 +1,4 @@
-Imports System.IO
+﻿Imports System.IO
 Imports System.Linq
 Imports System.Net.Http
 Imports System.Text
@@ -496,6 +496,56 @@ Namespace NonRegressione
             Return $"«{scritta}» non è il domicilio che il CV dichiara"
 
         End Function
+
+        ''' <summary>
+        ''' Se due letture nominano la <b>stessa</b> città, anche quando una si porta
+        ''' dietro la provincia e l'altra no.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È l'altra metà della questione città, e va letta insieme a
+        ''' <see cref="CittaFuoriDalDomicilio"/>: quello è il <b>pass/fail</b> e ha per
+        ''' metro il CV; questo serve solo a confrontare due letture fra loro, e per farlo
+        ''' bene deve sapere che cosa il prompt ordina davvero. Il pool 1.02 dice
+        ''' <i>quale</i> indirizzo prendere — il domicilio, uno solo — non <i>come</i>
+        ''' scriverlo.</para>
+        ''' <para>Misurato il <b>2026-08-10</b> sul CV vero, durante il collaudo di tappa
+        ''' di T4: la stessa riga di domicilio, che sta identica in tutti e quattro i file,
+        ''' è tornata tre volte **senza** la sigla della provincia e una volta con. Nessuna
+        ''' delle due letture ha perso l'indirizzo e nessuna ha inventato niente: è il
+        ''' modello che a volte lascia cadere la provincia. Pretendere l'uguaglianza esatta
+        ''' faceva cadere il collaudo per una differenza che non è un difetto.</para>
+        ''' <para>Si confronta perciò <b>per parole</b>, e l'unica differenza ammessa è la
+        ''' <b>sigla della provincia</b> — due lettere, in Italia sempre: «Forlì» dentro
+        ''' «Forlì (FC)» passa. Non basta invece il semplice contenimento, e lo ha detto
+        ''' il collaudo di questo attrezzo appena scritto: con quello, «Forlì Rimini»
+        ''' sarebbe passato per la stessa città di «Forlì», mentre due città insieme
+        ''' violano la seconda metà della regola del pool 1.02, «una sola».</para>
+        ''' </remarks>
+        Friend Shared Function StessaCitta(una As String, altra As String) As Boolean
+
+            Dim parole As Func(Of String, HashSet(Of String)) =
+                Function(v) New HashSet(Of String)(
+                    PerCercare(Ripulito(v)).Split({" "c}, StringSplitOptions.RemoveEmptyEntries),
+                    StringComparer.Ordinal)
+
+            Dim prima As HashSet(Of String) = parole(una)
+            Dim seconda As HashSet(Of String) = parole(altra)
+
+            ' Una città vuota non è «la stessa» di una scritta: è una lettura che non ha
+            ' trovato l'indirizzo, e va vista.
+            If prima.Count = 0 OrElse seconda.Count = 0 Then Return prima.Count = seconda.Count
+
+            Dim piuRicca As HashSet(Of String) = If(prima.Count >= seconda.Count, prima, seconda)
+            Dim piuScarna As HashSet(Of String) = If(prima.Count >= seconda.Count, seconda, prima)
+
+            If Not piuScarna.IsSubsetOf(piuRicca) Then Return False
+
+            Return piuRicca.Except(piuScarna).All(Function(inPiu) inPiu.Length <= SigleDiProvincia)
+
+        End Function
+
+        ''' <summary>Quanto è lunga la sigla di una provincia italiana: «GE», «RE», «TO».</summary>
+        Private Const SigleDiProvincia As Integer = 2
 
         ''' <summary>
         ''' Il pezzo di CV che dichiara il domicilio, già pronto per cercarci dentro: la

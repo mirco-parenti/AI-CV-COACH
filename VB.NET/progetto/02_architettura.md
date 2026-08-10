@@ -76,7 +76,13 @@ ogni modulo abbia **un compito solo**:
 - **`Motore/`** —
   - `ContestoApp`: monta il motore all'avvio — cartella dati, pool, numeri, client AI,
     archivio — e **non solleva mai**: ciò che non si può montare resta spento e *detto*
-    (cap. 03.8). È il punto in cui i pannelli trovano tutto già pronto;
+    (cap. 03.8). È il punto in cui i pannelli trovano tutto già pronto.
+    *Un'eccezione, trovata implementando T4c (2026-08-10): la **stampante PDF** e
+    l'archivio dei documenti che la usa li costruisce la **finestra principale**, non il
+    contesto. La stampa passa da una WebView2, che vuole il thread dell'interfaccia, e il
+    contesto lo montano anche i collaudi — fuori da qualunque finestra. Metterla lì
+    avrebbe legato il motore all'interfaccia proprio nel punto in cui il motore serve
+    senza;*
   - `DialogoProfilo` + `Mossa`: la macchina a mosse del dialogo guidato (v. 2.4);
   - `ImportProfilo`: i due passi dell'import di un CV, dal file al profilo;
   - `Orchestratore`: conduce i flussi del cap. 12 (quale passo viene dopo quale).
@@ -87,6 +93,12 @@ ogni modulo abbia **un compito solo**:
   - `Opportunita` *(T4)*: l'artefatto che tiene insieme una candidatura — annuncio,
     giudizi, punteggio, mitigazioni, i due documenti, e da quale versione di profilo
     sono nati. È ciò che `Dati/ArchivioOpportunita` scrive nella cartella del cap. 11.1;
+  - `VistaConfronto`, `VistaAnnuncio` *(T4c)*: le due **viste di sola lettura** promesse
+    a T4a. Gli artefatti nuovi restano JSON grezzo — il profilo è tipizzato perché P2 lo
+    edita campo per campo, un annuncio e dei giudizi si mostrano e basta — ma un pannello
+    che li disegna non deve mettersi a rovistare fra i campi: la vista traduce una volta
+    sola, e chi disegna riceve righe già pronte. Sono di sola lettura anche nel senso che
+    non decidono niente: le stelle le calcola `CalcoloMatch`, i giudizi sono dell'AI;
   - `CalcoloMatch`: la trascrizione **fedele** di `calcolaMatch` del prototipo — stessi
     pesi (richiesto=5, preferenziale=1, importanza alta/media/bassa=5/3/1, contesto=0,2,
     fallback=3), stesso clamp asimmetrico −20/+10, stesso tetto eliminatorio a 20/100,

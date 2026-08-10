@@ -34,9 +34,16 @@ Namespace NonRegressione
     ''' segnalata vale fra l'app e il prototipo, che leggono lo stesso CV con prompt
     ''' diversi (<see cref="CollaudoReale.PerchePerLaCitta"/>); qui le quattro strade
     ''' usano tutte lo stesso prompt, quello che decide — la città è il <b>domicilio</b>,
-    ''' una sola. Due città diverse fra le strade vogliono dire che una lettura ha perso
-    ''' l'indirizzo, e in più ogni strada risponde del proprio: la città che consegna
-    ''' dev'essere quella del domicilio dichiarato nel testo che ha letto.</para>
+    ''' una sola. Ogni strada risponde del proprio: la città che consegna dev'essere
+    ''' quella del domicilio dichiarato nel testo che ha letto.</para>
+    ''' <para><b>Fra le strade, però, la città non si confronta alla lettera</b>, ed è
+    ''' l'unica eccezione fra i campi copiati. Il collaudo di tappa di T4 lo ha insegnato
+    ''' il <b>2026-08-10</b>: la stessa riga di domicilio, identica in tutti e quattro i
+    ''' file, è tornata tre volte senza la sigla della provincia e una volta con. Il prompt dice
+    ''' quale indirizzo prendere, non come scriverlo, e nessuna delle due letture ha perso
+    ''' niente. Si chiede perciò che sia la <b>stessa</b> città, per parole
+    ''' (<see cref="CollaudoReale.StessaCitta"/>): una più ricca dell'altra passa, due
+    ''' città diverse no.</para>
     ''' <para>Un pass/fail vale su <b>ogni</b> strada, PDF compreso, perché non dipende da
     ''' come il file è fatto: la stessa attività non può stare sia fra le esperienze
     ''' formali sia fra le informali. Dal <b>pool 1.01</b> il prompt lo dice, e
@@ -204,14 +211,19 @@ Namespace NonRegressione
                     StessoValore(lettura, "contatti.telefono",
                                  riferimento.Profilo.Contatti.Telefono, lettura.Profilo.Contatti.Telefono)
 
-                    ' La città sta qui insieme agli altri campi copiati, e non più fra le
-                    ' cose solo segnalate: la ragione per cui era segnalata vale <b>fra
-                    ' l'app e il prototipo</b>, che leggono con prompt diversi
-                    ' (CollaudoReale.PerchePerLaCitta), non fra quattro strade dell'app che
-                    ' usano tutte lo stesso. Qui due città diverse vogliono dire che una
-                    ' delle letture ha perso l'indirizzo, ed è un difetto.
-                    StessoValore(lettura, "contatti.citta",
-                                 riferimento.Profilo.Contatti.Citta, lettura.Profilo.Contatti.Citta)
+                    ' La città è l'unico campo copiato che non si confronta alla lettera,
+                    ' e il perché sta in CollaudoReale.StessaCitta: il pass/fail vero
+                    ' l'ha già dato il controllo contro il CV, qui sopra, mentre fra due
+                    ' strade una può portarsi dietro la provincia e l'altra no senza che
+                    ' nessuna delle due abbia sbagliato. Resta da chiedere che sia la
+                    ' stessa città, e quello si chiede.
+                    Assert.IsTrue(
+                        CollaudoReale.StessaCitta(riferimento.Profilo.Contatti.Citta,
+                                                  lettura.Profilo.Contatti.Citta),
+                        $"[{lettura.Formato}] contatti.citta: dal PDF esce " &
+                        $"«{CollaudoReale.Ripulito(riferimento.Profilo.Contatti.Citta)}», da " &
+                        $"«{lettura.Nome}» «{CollaudoReale.Ripulito(lettura.Profilo.Contatti.Citta)}»: " &
+                        "non sono la stessa città")
                     StessoValore(lettura, "contatti.link",
                                  riferimento.Profilo.Contatti.Link, lettura.Profilo.Contatti.Link)
                     StessoValore(lettura, "patente.ha",
@@ -384,7 +396,8 @@ Namespace NonRegressione
             RigaCampo(testo, letture, "nome", Function(p) p.Nome)
             RigaCampo(testo, letture, "email", Function(p) p.Contatti.Email)
             RigaCampo(testo, letture, "telefono", Function(p) p.Contatti.Telefono)
-            RigaCampo(testo, letture, "città", Function(p) p.Contatti.Citta)
+            RigaCampo(testo, letture, "città", Function(p) p.Contatti.Citta,
+                      bastaCheSia:=AddressOf CollaudoReale.StessaCitta)
             RigaCampo(testo, letture, "link", Function(p) p.Contatti.Link)
             RigaCampo(testo, letture, "patente", Function(p) p.Patente.Ha)
             RigaCampo(testo, letture, "categorie", AddressOf CollaudoReale.Categorie)
@@ -485,21 +498,31 @@ Namespace NonRegressione
         ''' <param name="segnalato">
         ''' Il campo si guarda e non si boccia: la differenza prende il ⚠️ invece del ≠.
         ''' Resta il caso del numero delle esperienze informali
-        ''' (<see cref="CollaudoReale.PerchePerLeInformali"/>); la città lo era fino al
-        ''' Pool 1.02 e ora è un pass/fail come gli altri campi copiati.
+        ''' (<see cref="CollaudoReale.PerchePerLeInformali"/>).
+        ''' </param>
+        ''' <param name="bastaCheSia">
+        ''' Il giudizio vero su questo campo, quando non è l'uguaglianza alla lettera: la
+        ''' città, dove una lettura può portarsi dietro la provincia
+        ''' (<see cref="CollaudoReale.StessaCitta"/>). Serve perché la tabella dica quel
+        ''' che il collaudo fa davvero: una differenza che non boccia non può prendersi il
+        ''' ≠, o il rapporto racconta un difetto che non c'è.
         ''' </param>
         Private Shared Sub RigaCampo(testo As StringBuilder, letture As List(Of Lettura),
                                      campo As String, valore As Func(Of Profilo, String),
-                                     Optional segnalato As Boolean = False)
+                                     Optional segnalato As Boolean = False,
+                                     Optional bastaCheSia As Func(Of String, String, Boolean) = Nothing)
 
             Dim valori As List(Of String) =
                 letture.Select(Function(l) CollaudoReale.Ripulito(valore(l.Profilo))).ToList()
 
             Dim tutti As Boolean = valori.All(Function(v) v = valori(0))
 
+            Dim daGuardare As Boolean = segnalato OrElse
+                (bastaCheSia IsNot Nothing AndAlso valori.All(Function(v) bastaCheSia(valori(0), v)))
+
             testo.Append($"| {campo} | ").
                   Append(String.Join(" | ", valori.Select(AddressOf CollaudoReale.PerTabella))).
-                  Append(" | ").Append(CollaudoReale.Marcatore(tutti, segnalato)).
+                  Append(" | ").Append(CollaudoReale.Marcatore(tutti, daGuardare)).
                   Append(" |").Append(vbLf)
 
         End Sub

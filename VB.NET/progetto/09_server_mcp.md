@@ -13,6 +13,14 @@ l'utente può stare in Claude Desktop e dire «confronta il mio profilo con ques
 annuncio e dimmi se vale la pena candidarmi» — e Claude userà **la nostra pipeline**
 (prompt del pool, punteggio deterministico, hard-gate) invece di improvvisare.
 
+> **Da non confondere con il server MCP di collaudo** *(nato a T4c, 2026-08-10)*. In
+> `strumenti/mcp-collaudi/` vive un secondo server MCP che **non è parte del prodotto**:
+> non entra nell'eseguibile, non si distribuisce e non tocca la pipeline. Quello espone
+> gli attrezzi per **provare** l'applicazione — compilare, far girare il banco, avviarla,
+> fotografarla, premerle i bottoni, risponderle quando chiede un file. Questo capitolo
+> parla invece dei tool che l'applicazione **offre** ai client AI dell'utente (tappa T9).
+> Uno serve a chi costruisce il programma, l'altro a chi lo usa.
+
 ## 9.2 Come si avvia
 
 - **Stesso exe, modalità dedicata**: `TrovaLavoro.exe --mcp`. Nessun secondo programma:

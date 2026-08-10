@@ -224,3 +224,14 @@ Prefissi standard, nome semantico in PascalCase: `pnl` (Panel), `btn` (Button),
   uno spento che si spiega. Stessa regola per ciò che manca all'avvio: senza chiave API il
   bottone del dialogo è spento e il motivo è scritto, non lasciato indovinare (cap. 02.5).
   *(Deciso in T3c, 2026-08-07.)*
+- **Il motivo per cui un bottone è spento si scrive sotto quel bottone**, non altrove
+  nella schermata. *(Imparato in T4c, 2026-08-10.)* Il motivo per cui «Analizza» non si
+  poteva premere c'era, ed era corretto — ma stava nell'angolo opposto dello schermo,
+  dove nessuno guardava: chi voleva premere il bottone stava guardando il bottone, e
+  l'applicazione sembrava rotta. Una spiegazione che non si trova non è una spiegazione.
+- **Un pannello che torna in vista rilegge le proprie condizioni.** *(Imparato in T4c,
+  2026-08-10.)* I pannelli dell'area centrale nascono all'avvio e restano vivi, nascosti,
+  per tutta la sessione: ciò che hanno chiesto al motore la prima volta può non essere più
+  vero. È successo con P4, che continuava a dire «prima serve il tuo profilo» a un
+  profilo appena importato e salvato — proprio sul percorso del primo avvio, dove quel
+  messaggio è l'unica cosa che l'utente legge.

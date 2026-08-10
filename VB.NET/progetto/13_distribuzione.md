@@ -182,6 +182,11 @@ VB.NET/
 - Il **pool vive dentro il progetto dell'applicazione** perché di lì entra nell'exe come
   risorsa incorporata (cap. 04.2): la stessa cartella serve anche da pool esterno di
   prova, senza copie da tenere allineate.
+- Fuori da `VB.NET/`, in radice, c'è **`strumenti/`** *(da T4c, 2026-08-10)*: attrezzi di
+  sviluppo che **non fanno parte del prodotto** e non entrano in nessuna pubblicazione —
+  oggi il server MCP di collaudo (cap. 09.1), che compila, fa girare il banco e prova
+  l'applicazione vera. Stanno nel repo perché sono ripetibili e servono su tutt'e due le
+  postazioni, non perché si distribuiscano.
 - Build di sviluppo da Visual Studio (o `dotnet build` da riga di comando Windows);
   collaudi con `dotnet test` da `VB.NET/src` (cap. 14).
 - Lo script `publish.bat` in `src/` produce l'exe di rilascio con i parametri del

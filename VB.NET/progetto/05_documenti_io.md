@@ -156,3 +156,11 @@ due uscite una accanto all'altra a verificarlo (cap. 14).
 - PDF: testo selezionabile e ricercabile; resa identica al DOCX a vista.
 - Ingresso: batteria di CV veri nei quattro formati + i due CV «trappola» a due
   colonne già usati nel prototipo.
+
+*Che cosa vuol dire «identica», misurato nel collaudo di tappa di T4 (2026-08-10):* il
+**contenuto** è identico e si pretende tale — 114 campi su 114 ritrovati nei sei file, e
+i due formati coincidono carattere per carattere una volta tolti spazi e segni.
+L'**impaginazione** no, e non può esserlo: il DOCX lo impagina il programma che lo apre,
+il PDF l'ha già impaginato Chromium, e la stessa pagina esce un po' più compatta di là.
+È la stessa differenza che si vede aprendo un DOCX in Word e in LibreOffice. Si guarda
+perciò che siano identiche la **struttura** e la gerarchia tipografica, non l'interlinea.

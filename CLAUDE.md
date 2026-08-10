@@ -34,7 +34,8 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
 5. **Comando "aggiorna-tutto"**: quando dico **"aggiorna-tutto"**, aggiorna **tutti i
    file di progetto nel working tree (tracciati o no)** — incluso questo `CLAUDE.md` —
    al livello a cui siamo arrivati. Il perimetro è la **fase viva**: tutto `VB.NET/`
-   (progetto *e* codice), `README.md`, `diario_di_bordo.md`, `idee_future.md`, questo
+   (progetto *e* codice), `strumenti/` (gli attrezzi di sviluppo, dal 2026-08-10),
+   `README.md`, `diario_di_bordo.md`, `idee_future.md`, `in_sospeso.md`, questo
    `CLAUDE.md` e ogni altra regola o documentazione di progetto che nascerà.
    **`HTML+JS/` è fuori dal rito** *(dal 2026-08-06)*: il prototipo è congelato, non è
    più la fase in cui lavoro, e riverificarlo a ogni giro costerebbe senza rendere. Si
@@ -150,6 +151,13 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   momento, una macchina o una mano — collaudi su un PC pulito, l'icona dell'exe, il
   salto di modello — sta in `in_sospeso.md`. Da non confondere con `idee_future.md`:
   lì un'idea può non farsi mai, qui una voce **va fatta**.
+- **Lo strumento di collaudo (puntatore)** *(dal 2026-08-10)*: in `strumenti/mcp-collaudi/`
+  c'è un server MCP locale con cui **provare l'applicazione vera** — compilarla, far girare
+  il banco, avviarla, fotografarla, elencare i controlli dicendo se sono accesi, premerli,
+  scrivere in una casella, rispondere alla finestra di scelta file. Non parte da solo
+  (`node strumenti/mcp-collaudi/server.mjs`) e **non** è il server MCP del prodotto, che è
+  il cap. 09 ed è di T9. Come si accende, cosa sa fare e le trappole già pagate stanno nel
+  suo `README.md`: **leggilo prima di usarlo**, sono ore risparmiate.
 
 ## Modalità di aggiornamento per file (per «aggiorna-tutto»)
 
@@ -166,6 +174,7 @@ un file nuovo, aggiungi qui la sua riga.
 | `VB.NET/PROMPT_DI_INCARICO.md` | **Statico**: è il mandato verbatim della fase VB.NET, **mai** riscritto; si estende solo con nuove integrazioni verbatim dell'utente. |
 | `VB.NET/progetto/*.md` | Progetto dettagliato della fase VB.NET: si aggiorna quando una **decisione di progetto** cambia o matura (design-first: finché non si implementa, questi file sono la verità del disegno). Rispetta indice e struttura dei capitoli. |
 | `VB.NET/src/**` | Codice e collaudi. **Non si riscrive per allineamento**: si tocca quando una decisione di progetto o una tappa lo richiede. Commenti e nomi in italiano come il codice già presente; ogni modifica passa da `dotnet test` **prima** di dirsi fatta. Le cartelle `obj/` e `bin/` non si toccano mai. |
+| `strumenti/**` | Attrezzi di sviluppo, **fuori dal prodotto** (non entrano nell'exe, non si distribuiscono). Stessa regola del codice: non si riscrivono per allineamento, si toccano quando servono. Il loro `README.md` però sì: ogni trappola nuova pagata sul campo va scritta lì, perché è il solo posto in cui quel sapere sopravvive. |
 | `HTML+JS/**` | **Fuori dal rito** *(dal 2026-08-06)*: prototipo congelato. Si tocca solo per manutenzione che chiedo esplicitamente; in quel caso valgono le regole 1 e 3. |
 | `.gitignore`, `.gitattributes` | Config: solo se serve un cambiamento concreto. |
 | `.env`, `.claude/`, `node_modules/`, gitignored | **MAI** toccati. |

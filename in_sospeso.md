@@ -55,14 +55,30 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   tappa; deciso il 2026-08-07 di metterlo in **T6**, il cui collaudo già verifica che la
   chiave non compaia in chiaro su disco né nei log. *(cap. 02.5; cap. 11.3; cap. 14, T6.)*
 
-## Da T4b — le stampanti (2026-08-10)
+## Da T4 — la pipeline di candidatura (2026-08-10 · integrata alla chiusura, 2026-08-11)
 
 - **I documenti prodotti aperti in Word.** La gamba C del collaudo di tappa (cap. 14)
   chiede DOCX e PDF aperti **in Word e in LibreOffice**: LibreOffice c'è su questa
   postazione e ha detto la sua — apre entrambi, li riconverte, accenti e simboli intatti —
   ma Word qui non è installato. È il gemello in **scrittura** della voce di T3 qui sopra,
   che riguarda la **lettura** di un `.docx` salvato da Word: serve la stessa macchina, e
-  conviene chiuderle insieme. *(cap. 05.7; cap. 14, T4 gamba C.)*
+  conviene chiuderle insieme. *(cap. 05.7; cap. 14, T4 gamba C.)* **Riconfermata alla
+  chiusura di T4** *(2026-08-11)*: il collaudo di tappa ha ripercorso la gamba per intero —
+  114 campi su 114 ritrovati, DOCX e PDF identici — ma la metà di Word è di nuovo rimasta
+  fuori, per la stessa ragione.
+- **Un annuncio davvero pescato da un portale.** La gamba B è stata percorsa con un
+  annuncio **verosimile ma scritto per il collaudo**. Un annuncio vero porta cose che
+  nessuno inventa — sigle, sezioni fuori posto, boilerplate legale, testo copiato male da
+  una pagina — ed è lì che l'analisi si mette alla prova davvero. Non serve una macchina
+  diversa: serve **T5**, quando la cattura dal browser esisterà e un annuncio vero si
+  prenderà con un clic. *(cap. 14, T4 gamba B — limite dichiarato nel piano.)*
+- **La coda dell'opportunità non si riapre.** T4 scrive ogni candidatura nella sua cartella
+  definitiva (cap. 11.1), ma riaprendo l'applicazione non c'è ancora modo di **tornarci**:
+  la coda e il registro sono di T5, e a T4 si arriva a un'opportunità solo incollando di
+  nuovo l'annuncio. È previsto dal piano — la cartella nasce a T4 apposta perché T5 ci
+  costruisca sopra una vista — ma finché quella vista non c'è, la promessa «tutto
+  riapribile» del cap. 12.7 è mantenuta **sul disco e non nell'interfaccia**.
+  *(cap. 11.1; cap. 12.7; cap. 14, T5.)*
 
 ## Da revisione adversariale (2026-08-09)
 

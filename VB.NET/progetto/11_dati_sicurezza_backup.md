@@ -161,8 +161,15 @@ dentro di sé e lo annota nel log: una taratura corrotta non deve impedire l'avv
 *Precisato il 2026-08-09 (revisione adversariale), quando un valore non numerico
 dentro una mappa dei pesi faceva cadere l'app all'avvio*: una mappa storta **si scarta
 intera** e valgono i predefiniti — tenere solo le voci buone avrebbe falsato il
-punteggio in silenzio, che è peggio di un ripiego dichiarato. La **validazione di
-range dei valori** (un numero assurdo ma ben formato) resta un'idea futura.
+punteggio in silenzio, che è peggio di un ripiego dichiarato.
+
+*E dal 2026-08-10 (T4) c'è anche la **validazione di range**, che fino a lì era un'idea
+futura*: ogni numero letto dichiara l'intervallo in cui ha senso — il clamp verso il
+basso fra −100 e 0, quello verso l'alto fra 0 e 100 — e un valore fuori scala, per quanto
+ben formato, **viene scartato e annotato** invece di entrare zitto. Era il momento
+giusto: T4 è la prima tappa che usa `CalcoloMatch` sul serio dentro l'applicazione, e da
+qui in avanti un `"clamp_su": -50` non sposterebbe un numero in un collaudo, sposterebbe
+le stelle che l'utente legge prima di decidere se candidarsi.
 
 **`modelli.json` è il suo gemello** (cap. 02.5): tiene la mappa livello → modello, e
 per ciascun livello anche l'interruttore del ragionamento esteso, che ha **tre** stati
