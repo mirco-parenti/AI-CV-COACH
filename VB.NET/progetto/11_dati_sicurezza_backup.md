@@ -17,6 +17,8 @@ TrovaLavoro\
 ├── segreti.bin            chiave API Anthropic, cifrata (v. 11.3)
 ├── profilo\
 │   ├── profilo.json       il profilo corrente (fonte di verità unica)
+│   ├── cv_base.json       il 📄 CV-1 base: è del profilo, non di un annuncio
+│   ├── out\               i file del CV base (.docx .pdf)
 │   └── storico\           una copia datata per ogni versione confermata
 ├── opportunita\
 │   └── 2026-08-05_rossi-spa_tecnico-manutenzione\
@@ -34,10 +36,32 @@ TrovaLavoro\
 - **Un'opportunità = una cartella**: tutto ciò che riguarda una candidatura sta
   insieme, apribile anche a mano con Esplora file. Il nome della cartella è parlante
   (data + azienda + ruolo).
+- **La cartella nasce a T4, la vista d'insieme a T5** *(deciso il 2026-08-10, aprendo
+  T4)*. La coda delle opportunità, il `registro.json` e la macchina a stati sono di T5,
+  ma T4 produce già annuncio, giudizi, mitigazioni, CV e lettera: quella roba deve
+  atterrare da qualche parte. La scelta è di **scriverla subito nella sua casa
+  definitiva** — la cartella qui sopra, con i nomi qui sopra — e non in un ripiego
+  temporaneo. A T4 la cartella nasce dunque completa di tutto tranne ciò che la tappa
+  non ha ancora: nessun `registro.json`, e uno `stato.json` che porta le date, la lingua
+  e la versione di profilo usata ma non ancora lo stato del ciclo di vita. Così T5
+  aggiunge una vista sopra dati che ci sono già, invece di dover migrare quelli
+  prodotti nel frattempo. È lo stesso principio dell'app che «riapre dov'era»
+  (cap. 12.7): un documento generato e non ritrovabile domani sarebbe un documento
+  perso, e T4 genera i primi documenti veri del progetto.
 - **Il profilo è versionato**: ogni modifica confermata (editing, sessione di
   aggiornamento) salva una copia datata nello storico; `stato.json` di ogni
   opportunità annota **con quale versione** del profilo furono generati i documenti.
   Così un CV inviato resta sempre spiegabile, anche a profilo evoluto.
+- **Il 📄 CV-1 base sta col profilo, non con le opportunità** *(deciso il 2026-08-10:
+  il disegno non gli aveva mai dato una casa, e T4 è la tappa che lo genera)*. Nasce
+  senza alcun annuncio, da P2, ed è il ritratto del profilo in forma di CV: metterlo in
+  una cartella-opportunità vorrebbe dire legarlo a una candidatura che non ha. Vive
+  quindi accanto al profilo da cui discende — che è poi la vista-dati «un profilo, molti
+  CV» del cap. 02.2 presa alla lettera: il CV base è del profilo, i CV mirati sono delle
+  opportunità. Come `stato.json`, anche `cv_base.json` annota **da quale versione di
+  profilo** è nato: se il profilo poi cambia, il CV base non viene cancellato di
+  nascosto né aggiornato di soppiatto — resta lì e l'app dice che è di una versione
+  precedente, lasciando a chi legge la scelta se rigenerarlo.
 - **Un profilo corrotto si mette in salvo, mai in pericolo** *(2026-08-09, revisione
   adversariale)*: se `profilo.json` non si legge, l'app ne copia **subito** una fotografia
   (`profilo.rotto-<data>.json`) prima che qualunque «Salva» possa sovrascriverlo, e il

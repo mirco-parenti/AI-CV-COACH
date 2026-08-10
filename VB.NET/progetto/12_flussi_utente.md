@@ -130,7 +130,11 @@ altro dispositivo):
    l'utente fa l'eventuale login e arriva a vedere l'annuncio.
 2. **«Cattura annuncio»** e da lì il flusso è identico ad A5 → A8.
 3. In alternativa resta sempre il ripiego del prototipo: incollare direttamente il
-   **testo** dell'annuncio.
+   **testo** dell'annuncio. *«Ripiego» va letto bene, e T4 lo chiarisce (2026-08-10):
+   fino a T5 l'incolla-testo non è un ripiego ma **la** strada — il browser integrato
+   arriva dopo — e anche da T5 in poi resta di prima classe, perché un annuncio arriva
+   spesso da un'email o da uno screenshot letto altrove, dove non c'è pagina da
+   catturare. Il posto in cui si incolla è la fascia in cima a P4 (cap. 03.6).*
 
 ## 12.4 Flusso D — Aggiornamento periodico del profilo (F1)
 

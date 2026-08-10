@@ -51,6 +51,16 @@ dotnet publish -c Release -r win-x64
   il file dei simboli `.pdb`, e il vincolo «nessuna DLL, un file solo» decade nella
   forma. Con esso, al collaudo del 2026-08-06 la cartella di pubblicazione conteneva
   **un solo file**.
+- **`AllowedReferenceRelatedFileExtensions = none`, la seconda trappola dello stesso
+  genere** *(scoperta il 2026-08-10, prova a vuoto di T4)*. Finché le librerie esterne
+  non c'erano, il `.pdb` era l'unico file che si intrufolava. Ma un pacchetto NuGet
+  porta con sé anche la propria **documentazione IntelliSense**, e quella il publish la
+  copia accanto all'eseguibile: con il solo `Microsoft.Web.WebView2` la cartella si è
+  ritrovata **tre `.xml`** da 800 KB complessivi a fianco dell'exe. Non sono DLL, ma la
+  promessa del capitolo è «un file da copiare», e tre file di contorno la rompono
+  ugualmente. Il parametro li esclude tutti in un colpo, per ogni pacchetto presente e
+  futuro — vale anche per `FontAwesome.Sharp`, che non è ancora entrato. Verificato:
+  con esso la cartella di pubblicazione torna a contenere **un solo file**.
 - **Il trimming non è un'opzione**: Microsoft non lo supporta su Windows Forms, quindi
   la stima di dimensione non è riducibile per quella via.
 - La variante leggera (framework-dependent, pochi MB ma richiede il runtime .NET
@@ -66,6 +76,23 @@ WebView2 usa il motore Edge/Chromium **già presente in Windows 11** (runtime
 qualche motivo mancasse (edizioni particolari, PC aziendali bloccati), l'app **non
 muore**: all'avvio lo rileva e mostra una finestra cortese con il link ufficiale di
 Microsoft per installarlo, mentre le funzioni che non lo usano restano disponibili.
+
+*Misurato il 2026-08-10, prima di scrivere una riga di T4.* Il capitolo dava WebView2
+per «inglobabile» sulla fiducia: era la scommessa più grossa rimasta, perché è la sola
+libreria che porta **codice nativo** dentro un exe che deve restare uno solo. La prova
+è stata fatta a vuoto, fuori dal repo, con gli stessi parametri di `publish.bat`:
+
+| Domanda | Risposta misurata |
+|---|---|
+| Il single-file regge il codice nativo? | Sì — **117,2 MB in un file solo**, contro i 116 MB dello scheletro di T1: WebView2 costa **~1,2 MB** |
+| L'exe pubblicato funziona davvero? | Sì — provato con la cartella dei dati di navigazione **cancellata**, cioè come su un PC che non l'ha mai avviato |
+| Servono file a fianco? | No, una volta esclusa la documentazione dei pacchetti (v. 13.2) |
+| La stampa PDF con la WebView **fuori schermo** (cap. 05.5)? | Sì, e il PDF prodotto ha testo **selezionabile e ricercabile**, accenti in chiaro e font incorporati |
+
+Il pacchetto usato è `Microsoft.Web.WebView2` **1.0.4129.50**, contro il runtime
+Evergreen `151.0.4129.72` trovato sulla postazione: il numero di build coincide, che è
+la condizione che conta — l'API del pacchetto non può chiedere al motore cose che il
+motore non sa fare.
 
 ## 13.4 Cosa c'è accanto all'exe
 

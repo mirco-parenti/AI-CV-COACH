@@ -79,7 +79,14 @@ ogni modulo abbia **un compito solo**:
     (cap. 03.8). È il punto in cui i pannelli trovano tutto già pronto;
   - `DialogoProfilo` + `Mossa`: la macchina a mosse del dialogo guidato (v. 2.4);
   - `ImportProfilo`: i due passi dell'import di un CV, dal file al profilo;
-  - `Orchestratore`: conduce i flussi del cap. 12 (quale passo viene dopo quale);
+  - `Orchestratore`: conduce i flussi del cap. 12 (quale passo viene dopo quale).
+    *Nasce a T4 nella sua prima forma concreta, `PipelineCandidatura`: annuncio →
+    confronto → punteggio → mitigazione → i tre documenti. È il posto in cui il codice
+    dice l'ordine dei passi una volta sola, invece di lasciarlo scritto nel pannello che
+    li chiama — la stessa ragione per cui il dialogo passa da `Mossa` (v. 2.4);*
+  - `Opportunita` *(T4)*: l'artefatto che tiene insieme una candidatura — annuncio,
+    giudizi, punteggio, mitigazioni, i due documenti, e da quale versione di profilo
+    sono nati. È ciò che `Dati/ArchivioOpportunita` scrive nella cartella del cap. 11.1;
   - `CalcoloMatch`: la trascrizione **fedele** di `calcolaMatch` del prototipo — stessi
     pesi (richiesto=5, preferenziale=1, importanza alta/media/bassa=5/3/1, contesto=0,2,
     fallback=3), stesso clamp asimmetrico −20/+10, stesso tetto eliminatorio a 20/100,
@@ -97,13 +104,25 @@ ogni modulo abbia **un compito solo**:
     `ITrascrittorePdf`), e non per gusto di astrazione: è la porta da cui il motore si
     stacca dall'AI, e senza quella porta il dialogo e l'import non si potrebbero
     collaudare tutti interi senza rete (cap. 14, T3).
+  - *A T4 la famiglia cresce di tre* — `AnalizzatoreAnnuncio` (da testo a annuncio
+    JSON), `Confrontatore` (giudizi e, quando serve, mitigazioni) e `Generatore` (📄 CV-1,
+    🎯 CV-2, ✉️ lettera) — ognuno con la sua interfaccia, per la stessa ragione di prima:
+    la pipeline intera dev'essere collaudabile senza rete. Sono tre e non uno perché il
+    motore li chiama in **tre momenti diversi** del flusso e i collaudi devono poter
+    sostituire un momento per volta; la meccanica che hanno in comune — carica il prompt,
+    riempi i segnaposto, chiama, estrai il JSON — sta sotto, scritta una volta sola.
 - **`Documenti/`** — lettura (PDF via API con blocco `document`, DOCX/TXT/MD in
   locale), scrittura (DOCX e PDF), scansione e classificazione della cartella
   documenti (cap. 05).
   *In implementazione la lettura è nata altrove, e la divisione ha una ragione*: quella
   che tocca il disco sta in `Dati/LettoreDocumenti` (DOCX/TXT/MD), quella che passa
   dall'API in `Ai/TrascrittorePdf`. Questa cartella resta il posto della **scrittura**
-  (DOCX/PDF, T4) e della scansione della cartella documenti (T6).
+  (DOCX/PDF, T4) e della scansione della cartella documenti (T6). *A T4 ci nascono
+  `ScrittoreDocx` (lo ZIP OOXML del cap. 05.4), `StampantePdf` (la WebView2 fuori
+  schermo del cap. 05.5) e il **modello di impaginazione** che li precede entrambi: un
+  CV JSON diventa prima una pagina, e solo dopo un file. Le due stampanti partono dallo
+  stesso contenuto e non si consultano fra loro — è la regola «un modello di contenuto,
+  più stampanti» del cap. 05.*
 - **`Posta/`** — composizione dell'email e scrittura del file `.eml` marcato come bozza
   da inviare (cap. 07). *Nella 1.0 non spedisce:* né `.msg` né SMTP (cap. 15, voci 8 e 9),
   quindi questo componente non tocca alcuna credenziale.
@@ -174,6 +193,16 @@ i tool MCP).
   con **T4/T7**, dove serve davvero — generazione e brainstorming, cioè i punti in cui il
   testo lungo compare man mano e l'attesa percepita crolla — e si aggiunge quando c'è un
   pannello che lo mostra. È l'unica vera novità di trasporto rispetto al prototipo.
+  *Deciso il 2026-08-10, aprendo T4: lo streaming va **tutto a T7**, e T4 resta sincrona.*
+  La ragione sta in **cosa** scorrerebbe. La generazione di T4 non produce prosa: produce
+  **JSON strutturato**, e un JSON che si srotola a video con le sue graffe e le sue
+  virgolette non dice nulla a chi guarda — non è un CV che si scrive sotto gli occhi, è
+  un tracciato che scorre. Il valore vero dello streaming è sul **brainstorming**, che è
+  conversazione in prosa, e quello è T7. Metterlo a T4 significherebbe pagare gli eventi
+  SSE e la gestione delle risposte parziali nel punto in cui rendono meno. A T4 l'attesa
+  si copre invece con un avanzamento che dice **a che punto siamo** («genero la lettera —
+  3 di 3»): l'informazione utile lì non è quali caratteri stanno arrivando, è quante
+  chiamate mancano.
 - **Robustezza**: timeout esplicito per chiamata; un solo retry automatico su errore di
   rete o HTTP 429/5xx (con pausa, rispettando l'attesa che l'API suggerisce quando la
   suggerisce); nessun retry sugli errori nostri — una richiesta malformata o una chiave

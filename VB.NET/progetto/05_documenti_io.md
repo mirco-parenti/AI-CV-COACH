@@ -84,15 +84,31 @@ CV JSON / Lettera ──┤
   nativa del motore Chromium (`PrintToPdfAsync`). Risultato: PDF fedele, con font
   incorporati, senza librerie PDF esterne e senza bisogno di Word.
 - WebView2 è già nel programma per la ricerca annunci (cap. 06): questa scelta non
-  aggiunge alcun componente nuovo.
+  aggiunge alcun componente nuovo. *Con una precisazione di calendario, emersa aprendo
+  T4 il 2026-08-10:* la ricerca annunci è **T5**, la stampa PDF è **T4**, quindi a
+  introdurre davvero WebView2 nel programma è questa tappa, non quella. Chi legge il
+  capitolo 06 come «il posto da cui WebView2 arriva» ha ragione sul disegno e torto
+  sull'ordine.
+- «Fuori schermo» ha un significato preciso, verificato prima di implementare
+  *(2026-08-10)*: il controllo vuole una finestra vera con il suo handle, quindi la
+  finestra **esiste** ma nasce a coordinate fuori dall'area visibile e non compare nella
+  barra delle applicazioni. Il PDF che ne esce ha `/ToUnicode` e font TrueType
+  incorporati, cioè **testo selezionabile e ricercabile** con gli accenti al posto
+  giusto — che è esattamente ciò che il collaudo di 5.7 chiede. Il dettaglio della prova
+  (dimensioni, single-file, versioni) sta nel cap. 13.3, dov'è il vincolo che rischiava
+  di più.
 
 ## 5.6 Nomi e collocazione dei file generati
 
 - Ogni opportunità ha la sua sottocartella nella cartella dati (cap. 11):
-  i file generati finiscono lì e restano legati alla candidatura.
+  i file generati finiscono lì e restano legati alla candidatura. *Con un'eccezione che
+  il capitolo 11 spiega per esteso (2026-08-10): il 📄 CV-1 base non nasce da un
+  annuncio e non appartiene a nessuna candidatura, quindi i suoi file stanno accanto al
+  profilo da cui discende.*
 - Nomi parlanti e stabili: `CV_Mirco_Parenti_<Azienda>_<AAAA-MM-GG>.docx` (e `.pdf`),
   `Lettera_<Azienda>_<AAAA-MM-GG>.docx`. In inglese se l'output è in inglese
-  (`CV_Mirco_Parenti_EN_…`).
+  (`CV_Mirco_Parenti_EN_…`). Il CV base, che un'azienda non ce l'ha, la lascia fuori dal
+  nome: `CV_Mirco_Parenti_<AAAA-MM-GG>.docx`.
 - Un bottone «Apri cartella» accanto a ogni documento generato: l'utente deve sempre
   poter mettere le mani sui suoi file.
 

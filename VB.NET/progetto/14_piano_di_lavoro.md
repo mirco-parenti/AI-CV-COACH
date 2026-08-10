@@ -114,12 +114,60 @@ validazione sul modello vero. La batteria è salita a **205 collaudi verdi**. No
 tappa: è manutenzione straordinaria fatta prima di aprire T4, narrata nel diario
 (Step 2.8) e nel `CHANGELOG.md` del pool.*
 
-### T4 — La pipeline di candidatura (F3 + F4 + F5 in italiano)
+### T4 — La pipeline di candidatura (F3 + F4 + F5 in italiano) — **APERTA il 2026-08-10**
 Analisi annuncio da testo incollato; confronto con stelle, note e ⛔; pannello P4;
 generazione CV-1/CV-2/lettera in italiano; mitigazione; export **DOCX e PDF**
 (scrittore OOXML + stampa via WebView2); pannello P6.
 **Collaudo:** end-to-end su un annuncio vero: dal testo incollato ai file DOCX/PDF
 aperti in Word/LibreOffice, con verifica campo-per-campo del contenuto.
+
+**Nessun prompt nuovo**: tutti e sei quelli che servono — `analisi_annuncio`,
+`confronto`, `mitigazione`, `cv_base.it`, `cv_mirato.it`, `lettera.it` — sono nel pool
+dal Pool 1.00 e non sono mai stati toccati. I `✚` del cap. 04.3 appartengono a T6 e T7.
+È la prima tappa che *consuma* il pool senza doverlo scrivere.
+
+**Il cancello d'ingresso, passato il 2026-08-10 prima di ogni riga di codice.** T4
+introduce **WebView2**, l'unica libreria del progetto che porta codice nativo dentro un
+exe che deve restare uno solo: se avesse rotto il single-file sarebbe cambiato il
+disegno della stampa PDF (cap. 05.5), e andava saputo il primo giorno, non l'ultimo —
+la stessa logica con cui T1 provò subito la pubblicazione. Provato a vuoto, fuori dal
+repo: **117,2 MB in un file solo** (+1,2 MB sullo scheletro), l'exe funziona anche con
+la cartella dei dati di navigazione cancellata, e la WebView **fuori schermo** stampa un
+PDF con testo selezionabile e accenti in chiaro. Un difetto trovato e chiuso: il
+pacchetto depositava **tre `.xml`** accanto all'exe (cap. 13.2).
+
+La tappa si spezza in tre, **motore prima dell'interfaccia** come T3, perché lì ha
+funzionato e T4 è più grossa:
+**T4a — la pipeline nel motore**: i tre mestieri AI (`AnalizzatoreAnnuncio`,
+`Confrontatore`, `Generatore`), `PipelineCandidatura` che li mette in fila,
+`Motore/Opportunita` e `Dati/ArchivioOpportunita` che la scrive su disco. Tutto
+collaudabile senza rete con i sostituti finti, come il dialogo a T3a.
+**T4b — le stampanti**: `ScrittoreDocx` (ZIP OOXML) e `StampantePdf` (WebView2), col
+modello di impaginazione condiviso. Qui il giudice non è più il prototipo, che i
+documenti non li sa scrivere: sono Word e LibreOffice.
+**T4c — i pannelli**: P4 con la sua fascia d'ingresso (cap. 03.6) e P6, più il filo che
+li lega a P2 e al 📄 CV-1 base.
+
+Il **collaudo di tappa** è in tre gambe, come a T3, perché le domande sono di nuovo
+diverse fra loro:
+- **A — il prototipo come giudice, sull'intera pipeline.** Ha tutti gli endpoint che
+  servono (`/struttura`, `/confronta`, `/mitiga`, `/genera-cv`, `/genera-lettera`), e su
+  `confronto` e `mitigazione` è ancora il **metro carattere-per-carattere** (cap. 04.7).
+- **B — la pipeline reale end-to-end**, dal testo di un annuncio vero fino ai tre
+  documenti, col profilo vero.
+- **C — i file**: DOCX e PDF aperti in Word e LibreOffice, testo estratto e confrontato
+  **campo per campo** col JSON di partenza (cap. 05.7).
+
+**Voci di backlog prese dentro questa tappa** *(decise con Mirco il 2026-08-10)*, perché
+T4 le tocca comunque e chiuderle altrove costerebbe di più:
+- la **parità del prompt estesa** dagli attuali uno a tutti i sei prompt che T4 usa —
+  oggi il banco verifica carattere per carattere solo `confronto`, e proprio a T4 gli
+  altri cinque entrano in produzione (`idee_future.md`);
+- la **validazione di range della taratura**: T4 è la prima tappa che usa `CalcoloMatch`
+  sul serio dentro l'app, e oggi un `"clamp_su": -50` entrerebbe zitto;
+- la **città pass/fail in `CollaudiFormatiReale`**, allineamento meccanico rimasto
+  indietro dal Pool 1.02;
+- la **trappola latente di `Sigilla`** sul `CHANGELOG` con una riga `---`.
 
 ### T5 — La ricerca annunci (F2) e il registro (F6)
 Pannello P3 con WebView2, ricerche salvate, cattura dell'annuncio, coda delle
