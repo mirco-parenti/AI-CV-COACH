@@ -61,6 +61,9 @@ dotnet publish -c Release -r win-x64
   ugualmente. Il parametro li esclude tutti in un colpo, per ogni pacchetto presente e
   futuro — vale anche per `FontAwesome.Sharp`, che non è ancora entrato. Verificato:
   con esso la cartella di pubblicazione torna a contenere **un solo file**.
+  *Dal 2026-08-10 (T4b) il parametro è in `publish.bat`*, insieme al pacchetto vero:
+  finché la prova era a vuoto stava solo scritto qui, e una precauzione che vive in un
+  capitolo non protegge nessuna pubblicazione.
 - **Il trimming non è un'opzione**: Microsoft non lo supporta su Windows Forms, quindi
   la stima di dimensione non è riducibile per quella via.
 - La variante leggera (framework-dependent, pochi MB ma richiede il runtime .NET
@@ -93,6 +96,18 @@ Il pacchetto usato è `Microsoft.Web.WebView2` **1.0.4129.50**, contro il runtim
 Evergreen `151.0.4129.72` trovato sulla postazione: il numero di build coincide, che è
 la condizione che conta — l'API del pacchetto non può chiedere al motore cose che il
 motore non sa fare.
+
+*Il pacchetto è entrato davvero nel progetto il 2026-08-10, con T4b, e il publish è stato
+rifatto sul codice vero:* **117,5 MB in un file solo**, in linea con la prova a vuoto. Due
+cose scoperte mettendolo dentro. La prima è che il pacchetto porta **due involucri**, uno
+per Windows Forms e uno per WPF: il secondo non serve a nessuno qui e si tira dietro una
+versione di `WindowsBase` diversa da quella del framework, che la compilazione segnala
+come conflitto irrisolvibile. Il riferimento si toglie in `VB.NET/src/Directory.Build.targets`,
+che vale per l'applicazione e per il banco: un avviso vero su una dipendenza inutile è
+peggio di nessun avviso, perché insegna a non leggerli. La seconda è che WebView2 chiude
+i suoi processi **dopo** che il controllo è stato smesso, e finché non ha finito tiene il
+proprio `lockfile`: chi cancella la sua cartella subito dopo (un collaudo) deve avere la
+pazienza di riprovare.
 
 ## 13.4 Cosa c'è accanto all'exe
 

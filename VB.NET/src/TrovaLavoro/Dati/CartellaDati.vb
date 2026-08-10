@@ -109,6 +109,17 @@ Namespace Dati
         End Property
 
         ''' <summary>
+        ''' I file del 📄 CV base (<c>.docx</c> e <c>.pdf</c>): stanno accanto al profilo,
+        ''' come il <c>cv_base.json</c> da cui nascono, perché quel CV non appartiene a
+        ''' nessuna candidatura (cap. 11.1).
+        ''' </summary>
+        Public ReadOnly Property CartellaOutProfilo As String
+            Get
+                Return Path.Combine(CartellaProfilo, "out")
+            End Get
+        End Property
+
+        ''' <summary>
         ''' La casa delle candidature: una cartella per opportunità, col nome parlante
         ''' (data, azienda, ruolo). Nasce a T4, la vista d'insieme arriva a T5 — i
         ''' documenti però atterrano subito nella loro casa definitiva (cap. 11.1).
@@ -130,6 +141,7 @@ Namespace Dati
             Directory.CreateDirectory(Radice)
             Directory.CreateDirectory(CartellaProfilo)
             Directory.CreateDirectory(CartellaStorico)
+            Directory.CreateDirectory(CartellaOutProfilo)
             Directory.CreateDirectory(CartellaOpportunita)
 
         End Sub

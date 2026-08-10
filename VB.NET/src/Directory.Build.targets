@@ -1,0 +1,21 @@
+<Project>
+
+  <!--
+    Vale per tutti i progetti sotto VB.NET\src (l'applicazione e il banco di collaudo,
+    che riceve il pacchetto di riflesso).
+
+    Il pacchetto WebView2 porta due involucri: uno per Windows Forms, che è il nostro, e
+    uno per WPF, che qui non serve a nessuno. Quello di WPF si tira dietro una versione
+    di WindowsBase diversa da quella del framework, e la compilazione la segnala come
+    conflitto irrisolvibile (MSB3277) — un avviso vero, su una dipendenza che non usiamo.
+    Si toglie di mezzo il riferimento, e con lui l'avviso.
+  -->
+  <Target Name="EscludiWebView2Wpf" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <InvolucroWpf Include="@(Reference)"
+                    Condition="'%(FileName)' == 'Microsoft.Web.WebView2.Wpf'" />
+      <Reference Remove="@(InvolucroWpf)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

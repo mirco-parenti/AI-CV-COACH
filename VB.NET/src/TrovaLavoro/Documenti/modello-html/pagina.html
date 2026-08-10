@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<!--
+  Lo scheletro della pagina che diventa PDF (cap. 05.5). I tre segnaposto — titolo,
+  stile, corpo — li riempie ScrittoreHtml: il foglio di stile viene dal file qui
+  accanto, il resto dal documento. Il foglio di stile viaggia dentro la pagina perché
+  quella pagina non ha una cartella dove vivere: nasce in memoria, viene mostrata alla
+  WebView e muore appena il PDF è scritto.
+
+  I segnaposto qui sopra sono nominati a parole di proposito: scritti nella loro forma
+  vera verrebbero riempiti anche dentro questo commento, e la pagina si porterebbe
+  dietro una seconda copia dello stile e del documento. È successo, e a dirlo è stato
+  il collaudo che conta le classi dei blocchi.
+-->
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>{{TITOLO}}</title>
+<style>
+{{STILE}}
+</style>
+</head>
+<body>
+{{CORPO}}
+</body>
+</html>

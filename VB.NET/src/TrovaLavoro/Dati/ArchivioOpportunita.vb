@@ -37,6 +37,13 @@ Namespace Dati
             .WriteIndented = True,
             .Encoder = Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping}
 
+        ''' <summary>
+        ''' La sottocartella dei file prodotti — <c>.docx</c>, <c>.pdf</c>, un giorno
+        ''' l'<c>.eml</c> (cap. 11.1). Gli artefatti JSON restano nella cartella sopra:
+        ''' quelli sono i dati della candidatura, questi sono i documenti che si mandano.
+        ''' </summary>
+        Public Const NomeCartellaOut As String = "out"
+
         ''' <summary>I nomi dei file dentro una cartella-opportunità (cap. 11.1).</summary>
         Public Const FileAnnuncio As String = "annuncio.json"
         Public Const FileGiudizi As String = "giudizi.json"
@@ -84,6 +91,27 @@ Namespace Dati
 
             opportunita.Cartella = cartella
             Return cartella
+
+        End Function
+
+        ''' <summary>
+        ''' Dove vanno i documenti prodotti per un'opportunità già salvata.
+        ''' </summary>
+        ''' <remarks>
+        ''' Sta qui e non in <see cref="CartellaDati"/> perché la cartella di
+        ''' un'opportunità non è un percorso fisso: nasce col suo nome parlante quando
+        ''' l'opportunità si salva, e questo archivio è l'unico che lo sa.
+        ''' </remarks>
+        Public Shared Function CartellaOut(opportunita As Opportunita) As String
+
+            If opportunita Is Nothing Then Throw New ArgumentNullException(NameOf(opportunita))
+
+            If String.IsNullOrEmpty(opportunita.Cartella) Then
+                Throw New InvalidOperationException(
+                    "L'opportunità non è ancora stata salvata: non ha una cartella dove mettere i documenti.")
+            End If
+
+            Return Path.Combine(opportunita.Cartella, NomeCartellaOut)
 
         End Function
 

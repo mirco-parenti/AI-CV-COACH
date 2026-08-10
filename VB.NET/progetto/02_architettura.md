@@ -123,6 +123,16 @@ ogni modulo abbia **un compito solo**:
   CV JSON diventa prima una pagina, e solo dopo un file. Le due stampanti partono dallo
   stesso contenuto e non si consultano fra loro — è la regola «un modello di contenuto,
   più stampanti» del cap. 05.*
+  *Implementando (T4b) la famiglia è risultata di cinque*: `Impaginazione` produce la
+  `PaginaDocumento` a blocchi, `ScrittoreDocx` e `ScrittoreHtml` la disegnano nei due
+  formati — l'HTML è la pagina che `StampantePdf` fa stampare alla WebView — e
+  `NomiDocumenti` decide come si chiamano i file (cap. 05.6). Sopra tutti sta
+  `ArchivioDocumenti`, l'unico che sappia **dove** vanno: è quello che i pannelli di T4c
+  chiameranno, e scrive prima tutti i DOCX e poi tutti i PDF, perché la stampa PDF è la
+  sola che dipenda da un pezzo di Windows che potrebbe mancare. *La «vista tipizzata del
+  CV» promessa qui a T4a è la pagina stessa*: una classe intermedia che ricalcasse lo
+  schema del CV, per poi tradurlo comunque in blocchi, sarebbe stata un terzo modello da
+  tenere allineato agli altri due.
 - **`Posta/`** — composizione dell'email e scrittura del file `.eml` marcato come bozza
   da inviare (cap. 07). *Nella 1.0 non spedisce:* né `.msg` né SMTP (cap. 15, voci 8 e 9),
   quindi questo componente non tocca alcuna credenziale.

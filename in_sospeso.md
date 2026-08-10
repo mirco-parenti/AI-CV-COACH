@@ -55,6 +55,15 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   tappa; deciso il 2026-08-07 di metterlo in **T6**, il cui collaudo già verifica che la
   chiave non compaia in chiaro su disco né nei log. *(cap. 02.5; cap. 11.3; cap. 14, T6.)*
 
+## Da T4b — le stampanti (2026-08-10)
+
+- **I documenti prodotti aperti in Word.** La gamba C del collaudo di tappa (cap. 14)
+  chiede DOCX e PDF aperti **in Word e in LibreOffice**: LibreOffice c'è su questa
+  postazione e ha detto la sua — apre entrambi, li riconverte, accenti e simboli intatti —
+  ma Word qui non è installato. È il gemello in **scrittura** della voce di T3 qui sopra,
+  che riguarda la **lettura** di un `.docx` salvato da Word: serve la stessa macchina, e
+  conviene chiuderle insieme. *(cap. 05.7; cap. 14, T4 gamba C.)*
+
 ## Da revisione adversariale (2026-08-09)
 
 - **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  La tipografia del CV e della lettera (cap. 05.4): sobria, una colonna sola, pensata
+  perché la leggano bene sia una persona sia un lettore automatico degli ATS. Chi vuole
+  cambiare font, corpi o margini tocca questo file e basta: il codice di ScrittoreDocx
+  nomina gli stili, non li descrive.
+
+  Le misure di OOXML sono quelle che sono: «sz» è in mezzi punti (21 = 10,5 pt),
+  «spacing» e i rientri in ventesimi di punto (120 = 6 pt).
+
+  Lo stile predefinito si chiama «Normal» e non «Normale»: quel nome è una convenzione
+  del formato che Word e LibreOffice si aspettano di trovare, non un testo che l'utente
+  legga. Gli altri, che sono nostri, portano nomi italiani come il resto del progetto.
+
+  Entra nello ZIP come «word/styles.xml».
+-->
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+
+  <w:docDefaults>
+    <w:rPrDefault>
+      <w:rPr>
+        <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>
+        <w:sz w:val="21"/>
+        <w:szCs w:val="21"/>
+        <w:lang w:val="it-IT"/>
+      </w:rPr>
+    </w:rPrDefault>
+    <w:pPrDefault>
+      <w:pPr>
+        <w:spacing w:after="120" w:line="264" w:lineRule="auto"/>
+      </w:pPr>
+    </w:pPrDefault>
+  </w:docDefaults>
+
+  <w:style w:type="paragraph" w:default="1" w:styleId="Normal">
+    <w:name w:val="Normal"/>
+    <w:qFormat/>
+  </w:style>
+
+  <!-- Il nome della persona, in testa al documento. -->
+  <w:style w:type="paragraph" w:styleId="Nome">
+    <w:name w:val="Nome"/>
+    <w:basedOn w:val="Normal"/>
+    <w:pPr>
+      <w:spacing w:after="40"/>
+      <w:keepNext/>
+    </w:pPr>
+    <w:rPr>
+      <w:b/>
+      <w:sz w:val="44"/>
+      <w:szCs w:val="44"/>
+    </w:rPr>
+  </w:style>
+
+  <!-- La riga dei recapiti, e quella della patente. -->
+  <w:style w:type="paragraph" w:styleId="Recapiti">
+    <w:name w:val="Recapiti"/>
+    <w:basedOn w:val="Normal"/>
+    <w:pPr>
+      <w:spacing w:after="40"/>
+    </w:pPr>
+    <w:rPr>
+      <w:color w:val="595959"/>
+      <w:sz w:val="19"/>
+      <w:szCs w:val="19"/>
+    </w:rPr>
+  </w:style>
+
+  <!-- Il titolo di una sezione, con il suo filo sotto. -->
+  <w:style w:type="paragraph" w:styleId="Sezione">
+    <w:name w:val="Sezione"/>
+    <w:basedOn w:val="Normal"/>
+    <w:pPr>
+      <w:spacing w:before="320" w:after="120"/>
+      <w:pBdr>
+        <w:bottom w:val="single" w:sz="4" w:space="2" w:color="BFBFBF"/>
+      </w:pBdr>
+      <w:keepNext/>
+    </w:pPr>
+    <w:rPr>
+      <w:b/>
+      <w:sz w:val="24"/>
+      <w:szCs w:val="24"/>
+    </w:rPr>
+  </w:style>
+
+  <!-- Il ruolo di un'esperienza, il titolo di studio. -->
+  <w:style w:type="paragraph" w:styleId="VoceTitolo">
+    <w:name w:val="VoceTitolo"/>
+    <w:basedOn w:val="Normal"/>
+    <w:pPr>
+      <w:spacing w:before="160" w:after="0"/>
+      <w:keepNext/>
+    </w:pPr>
+    <w:rPr>
+      <w:b/>
+    </w:rPr>
+  </w:style>
+
+  <!-- Dove e quando: azienda e durata, istituto e anno. -->
+  <w:style w:type="paragraph" w:styleId="VoceDettaglio">
+    <w:name w:val="VoceDettaglio"/>
+    <w:basedOn w:val="Normal"/>
+    <w:pPr>
+      <w:spacing w:after="60"/>
+      <w:keepNext/>
+    </w:pPr>
+    <w:rPr>
+      <w:i/>
+      <w:color w:val="595959"/>
+      <w:sz w:val="20"/>
+      <w:szCs w:val="20"/>
+    </w:rPr>
+  </w:style>
+
+  <!-- Il testo corrente: sommario, descrizioni, i blocchi della lettera. -->
+  <w:style w:type="paragraph" w:styleId="Testo">
+    <w:name w:val="Testo"/>
+    <w:basedOn w:val="Normal"/>
+    <w:pPr>
+      <w:spacing w:after="120"/>
+    </w:pPr>
+  </w:style>
+
+  <!-- Una voce di elenco puntato (le competenze). -->
+  <w:style w:type="paragraph" w:styleId="Punto">
+    <w:name w:val="Punto"/>
+    <w:basedOn w:val="Normal"/>
+    <w:pPr>
+      <w:numPr>
+        <w:ilvl w:val="0"/>
+        <w:numId w:val="1"/>
+      </w:numPr>
+      <w:spacing w:after="40"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+
+  <!-- La firma in calce alla lettera. -->
+  <w:style w:type="paragraph" w:styleId="Firma">
+    <w:name w:val="Firma"/>
+    <w:basedOn w:val="Normal"/>
+    <w:pPr>
+      <w:spacing w:before="320"/>
+    </w:pPr>
+  </w:style>
+
+</w:styles>

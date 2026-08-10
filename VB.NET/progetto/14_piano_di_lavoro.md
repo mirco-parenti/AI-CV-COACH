@@ -145,6 +145,16 @@ collaudabile senza rete con i sostituti finti, come il dialogo a T3a.
 **T4b — le stampanti**: `ScrittoreDocx` (ZIP OOXML) e `StampantePdf` (WebView2), col
 modello di impaginazione condiviso. Qui il giudice non è più il prototipo, che i
 documenti non li sa scrivere: sono Word e LibreOffice.
+*Chiusa il 2026-08-10.* In mezzo alle due stampanti è nata la **pagina di blocchi**
+(cap. 05.3), che è ciò che rende identico il contenuto dei due formati per costruzione —
+e un collaudo mette DOCX e HTML uno accanto all'altro a verificarlo. Poi i **nomi
+parlanti** dei file e `ArchivioDocumenti`, che sa dove vanno (cap. 05.6). Banco:
+**252 → 301 collaudi** verdi, più uno nuovo fra i «Reale» per il PDF vero. I giudici
+esterni hanno parlato: **LibreOffice** apre e riconverte DOCX e PDF con accenti e simboli
+intatti, il **PDF** ha testo selezionabile (`/ToUnicode`) e font incorporati
+(`FontFile2`), e il publish resta **un file solo** (117,5 MB) con WebView2 dentro.
+**Word manca su questa postazione**: la sua metà della gamba C resta in `in_sospeso.md`,
+dov'era già la voce gemella di T3.
 **T4c — i pannelli**: P4 con la sua fascia d'ingresso (cap. 03.6) e P6, più il filo che
 li lega a P2 e al 📄 CV-1 base.
 

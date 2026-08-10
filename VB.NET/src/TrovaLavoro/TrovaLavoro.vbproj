@@ -82,4 +82,26 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <!-- La tipografia dei documenti generati (cap. 05.4 e 05.5): le parti fisse di un
+       .docx — stili, margini, elenchi puntati — e il modello HTML da cui nasce il PDF
+       entrano nell'eseguibile come risorse, allo stesso modo del pool. Restano file
+       veri nel repo, così cambiare font o margini non chiede di toccare il codice
+       delle stampanti. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Documenti\modello-docx\*.xml" WithCulture="false">
+      <LogicalName>modello-docx/%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Documenti\modello-html\*.html;Documenti\modello-html\*.css"
+                      WithCulture="false">
+      <LogicalName>modello-html/%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!-- Il browser integrato (cap. 06, cap. 13.3). Entra a T4 e non a T5, perché la
+       stampa PDF del cap. 05.5 passa da qui: la versione è quella provata al cancello
+       di T4, il cui numero di build combacia col runtime Evergreen di Windows. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
+  </ItemGroup>
+
 </Project>

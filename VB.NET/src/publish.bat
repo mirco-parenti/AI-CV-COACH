@@ -27,6 +27,7 @@ if errorlevel 1 (
   -p:SelfContained=true ^
   -p:IncludeNativeLibrariesForSelfExtract=true ^
   -p:DebugType=none ^
+  -p:AllowedReferenceRelatedFileExtensions=none ^
   -o pubblicazione
 
 if errorlevel 1 (

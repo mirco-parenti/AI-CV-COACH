@@ -58,10 +58,20 @@ il programma «stampa» nei formati richiesti. Il testo è identico su tutti i f
 cambiare stampante non cambia il contenuto.
 
 ```
-                    ┌────────────► DOCX  (scrittore OOXML interno)
-CV JSON / Lettera ──┤
-                    └────────────► PDF   (modello HTML → WebView2 → stampa PDF)
+                     ┌───────────► DOCX  (scrittore OOXML interno)
+CV JSON / Lettera ──►│  pagina     │
+   (impaginazione)   └───────────► PDF   (modello HTML → WebView2 → stampa PDF)
 ```
+
+*In mezzo c'è una pagina, e non è un dettaglio di implementazione (2026-08-10, T4b).*
+Il JSON non arriva alle stampanti: prima diventa una **pagina di blocchi** — un nome,
+una riga di recapiti, un titolo di sezione, un paragrafo, una voce, un elenco — e ogni
+stampante sa soltanto come si disegna un blocco nel suo formato. Senza quel passaggio le
+stampanti sarebbero due, e ognuna dovrebbe sapere per conto suo che cosa entra nel
+documento, in che ordine e con quali etichette: due letture da tenere allineate a mano, e
+il primo giorno in cui divergono il DOCX e il PDF della stessa candidatura direbbero cose
+diverse. Così invece il contenuto è identico **per costruzione**, e un collaudo mette le
+due uscite una accanto all'altra a verificarlo (cap. 14).
 
 ## 5.4 Uscita DOCX
 
@@ -70,6 +80,18 @@ CV JSON / Lettera ──┤
   **modello incorporato** nell'exe: stili (titoli, corpo, elenchi), margini,
   intestazione con i recapiti. Nessuna dipendenza da Word: il file si apre con Word,
   LibreOffice, Google Docs.
+  *Che forma abbia quel modello, deciso implementando (2026-08-10, T4b):* sono le
+  **cinque parti fisse** del pacchetto — l'elenco dei contenuti, le due relazioni, gli
+  stili, la numerazione degli elenchi — incorporate come file `.xml` veri, allo stesso
+  modo del pool dei prompt; cambiare font, corpi o margini si fa lì, senza toccare il
+  codice. Le due parti che dipendono dai dati — il corpo e il titolo — si costruiscono
+  invece con `XDocument`, che è anche il modo di non doversi ricordare a mano che una
+  `&` nel nome di un'azienda va scritta `&amp;`. Due dettagli voluti: l'elenco puntato è
+  un **elenco vero** e non un « • » scritto nel testo, così chi estrae il testo (un ATS,
+  o il collaudo che rilegge quel che ha scritto) ritrova la competenza pulita; e le date
+  interne dell'archivio sono fissate a un istante costante, così **lo stesso contenuto dà
+  sempre lo stesso file** e a cambiare un documento è il contenuto, non l'ora in cui l'hai
+  salvato.
 - **Impaginazione del CV** (modello unico, sobrio, una colonna — pensato per superare
   anche i lettori automatici degli ATS): intestazione con nome, recapiti e patente;
   sommario; esperienze (ruolo, azienda, periodo, descrizione); competenze; formazione.
@@ -89,6 +111,10 @@ CV JSON / Lettera ──┤
   introdurre davvero WebView2 nel programma è questa tappa, non quella. Chi legge il
   capitolo 06 come «il posto da cui WebView2 arriva» ha ragione sul disegno e torto
   sull'ordine.
+- **I margini del foglio li mette la stampa, non il foglio di stile** *(2026-08-10, T4b)*:
+  sono gli stessi 2 cm del DOCX, dichiarati una volta sola nelle impostazioni di stampa.
+  Scriverli anche nel CSS della pagina rischierebbe di sommarli, e un CV con margini
+  doppi si accorge solo chi lo stampa.
 - «Fuori schermo» ha un significato preciso, verificato prima di implementare
   *(2026-08-10)*: il controllo vuole una finestra vera con il suo handle, quindi la
   finestra **esiste** ma nasce a coordinate fuori dall'area visibile e non compare nella

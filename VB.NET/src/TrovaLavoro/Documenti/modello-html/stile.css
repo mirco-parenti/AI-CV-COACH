@@ -1,0 +1,78 @@
+/*
+  La tipografia del PDF: la stessa di modello-docx/styles.xml, detta nell'altra lingua
+  (cap. 05.5 — «stesso disegno del DOCX»). Le misure sono in punti come là, così le due
+  si confrontano riga per riga: dove OOXML dice «spacing after 120» (ventesimi di punto)
+  qui c'è «margin-bottom: 6pt».
+
+  Nessun margine di pagina qui dentro: i margini del foglio li mette la stampa
+  (StampantePdf), e dichiararli anche qui li sommerebbe ai suoi.
+*/
+
+body {
+  font-family: Calibri, Carlito, "Segoe UI", sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.32;
+  color: #000000;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.nome {
+  font-size: 22pt;
+  font-weight: bold;
+  margin-bottom: 2pt;
+}
+
+.recapiti {
+  font-size: 9.5pt;
+  color: #595959;
+  margin-bottom: 2pt;
+}
+
+.sezione {
+  font-size: 12pt;
+  font-weight: bold;
+  margin-top: 16pt;
+  margin-bottom: 6pt;
+  padding-bottom: 1pt;
+  border-bottom: 0.5pt solid #BFBFBF;
+  /* Un titolo di sezione non resta mai da solo in fondo alla pagina. */
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.voce-titolo {
+  font-weight: bold;
+  margin-top: 8pt;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.voce-dettaglio {
+  font-size: 10pt;
+  font-style: italic;
+  color: #595959;
+  margin-bottom: 3pt;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.testo {
+  margin-bottom: 6pt;
+}
+
+ul {
+  margin: 0 0 6pt 0;
+  padding-left: 18pt;
+}
+
+li {
+  margin-bottom: 2pt;
+}
+
+.firma {
+  margin-top: 16pt;
+}
