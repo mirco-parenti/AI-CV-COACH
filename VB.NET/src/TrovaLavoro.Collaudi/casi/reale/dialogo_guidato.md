@@ -2,7 +2,7 @@
 
 *Rapporto generato da `CollaudiDialogoReale`. Sta nel repo perché la persona è inventata: Anna Ricci non esiste, e la sua storia è scritta apposta perché l'anti-perdita e il «lasciato fuori» abbiano occasione di scattare.*
 
-- **Quando**: 2026-08-09 20:37
+- **Quando**: 2026-08-10 20:09
 - **Mosse del dialogo**: 25
 - **Chiamate all'AI**: 12
 - **Turni, in ordine di prima chiamata**: nome → contatti → patente → esperienze_formali → esperienze_informali → competenze → formazione
@@ -24,7 +24,7 @@
 
 | dal turno | verso | le parole dell'utente | reso conto |
 |---|---|---|---|
-| `patente` | `formazione` | patentino per il muletto | = |
+| `patente` | `formazione` | Ho anche il patentino per il muletto | = |
 | `competenze` | `esperienze_formali` | mi hanno anche offerto un posto fisso in trattoria | = |
 | `formazione` | `esperienze_informali` | per due estati ho aiutato mia sorella nel suo chiosco di piadine in spiaggia | = |
 
@@ -78,7 +78,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
     {
       "ruolo": "pulizie",
       "azienda": "supermercato Il Gabbiano di Forlì",
-      "durata": "5 anni, 2016-2021",
+      "durata": "2016-2021",
       "cosa_facevo": "pulivo i reparti e gli uffici la mattina presto, prima dell'apertura",
       "tipo": ""
     },
@@ -94,20 +94,20 @@ Niente: il dialogo è andato come la traccia si aspettava.
     {
       "cosa_facevo": "cucino per duecento persone",
       "quando": "da tre anni",
-      "con_chi": "volontarie della sagra del paese"
+      "con_chi": "altre volontarie alla sagra del mio paese"
     },
     {
-      "cosa_facevo": "aiutato nel chiosco di piadine in spiaggia",
+      "cosa_facevo": "aiutato mia sorella nel suo chiosco di piadine in spiaggia",
       "quando": "due estati",
       "con_chi": "mia sorella"
     }
   ],
   "competenze": [
-    "Cucinare per tanta gente",
+    "Cucina per grandi numeri",
     "Velocità",
     "Precisione",
-    "Alzarsi presto",
-    "Uso delle lavapavimenti industriali"
+    "Disponibilità a svegliarsi presto",
+    "Uso di lavapavimenti industriali"
   ],
   "formazione": [
     {
@@ -179,7 +179,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > - Ruolo: pulizie
 > - Azienda: supermercato Il Gabbiano di Forlì
-> - Durata: 5 anni, 2016-2021
+> - Durata: 2016-2021
 > - Cosa facevo: pulivo i reparti e gli uffici la mattina presto, prima dell'apertura
 >
 
@@ -225,7 +225,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > - Cosa facevo: cucino per duecento persone
 > - Quando: da tre anni
-> - Con chi: volontarie della sagra del paese
+> - Con chi: altre volontarie alla sagra del mio paese
 >
 
 **Anna:** *[Sì, è giusto]*
@@ -247,11 +247,11 @@ Niente: il dialogo è andato come la traccia si aspettava.
 
 > Ecco cosa ho capito — le cose che sai fare:
 >
-> - Cucinare per tanta gente
+> - Cucina per grandi numeri
 > - Velocità
 > - Precisione
-> - Alzarsi presto
-> - Uso delle lavapavimenti industriali
+> - Disponibilità a svegliarsi presto
+> - Uso di lavapavimenti industriali
 >
 
 **Anna:** *[Ne aggiungo altre]*
@@ -263,11 +263,11 @@ Niente: il dialogo è andato come la traccia si aspettava.
 
 > Ecco cosa ho capito — le cose che sai fare:
 >
-> - Cucinare per tanta gente
+> - Cucina per grandi numeri
 > - Velocità
 > - Precisione
-> - Alzarsi presto
-> - Uso delle lavapavimenti industriali
+> - Disponibilità a svegliarsi presto
+> - Uso di lavapavimenti industriali
 >
 
 **Anna:** *[Confermiamo]*
@@ -279,7 +279,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > Prima avevi accennato a qualcosa che riguarda «studi e formazione», e l'avevo tenuto da parte. Vediamolo ora:
 >
-> *(le tue parole)* «patentino per il muletto»
+> *(le tue parole)* «Ho anche il patentino per il muletto»
 >
 > - Titolo: patentino per il muletto
 > - Istituto: (non specificata)
@@ -321,7 +321,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > *(le tue parole)* «mi hanno anche offerto un posto fisso in trattoria / per due estati ho aiutato mia sorella nel suo chiosco di piadine in spiaggia»
 >
-> - Cosa facevo: aiutato nel chiosco di piadine in spiaggia
+> - Cosa facevo: aiutato mia sorella nel suo chiosco di piadine in spiaggia
 > - Quando: due estati
 > - Con chi: mia sorella
 >
@@ -341,7 +341,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 > **Esperienze formali 1**
 > - Ruolo: pulizie
 > - Azienda: supermercato Il Gabbiano di Forlì
-> - Durata: 5 anni, 2016-2021
+> - Durata: 2016-2021
 > - Cosa facevo: pulivo i reparti e gli uffici la mattina presto, prima dell'apertura
 >
 > **Esperienze formali 2**
@@ -353,19 +353,19 @@ Niente: il dialogo è andato come la traccia si aspettava.
 > **Esperienze informali 1**
 > - Cosa facevo: cucino per duecento persone
 > - Quando: da tre anni
-> - Con chi: volontarie della sagra del paese
+> - Con chi: altre volontarie alla sagra del mio paese
 >
 > **Esperienze informali 2**
-> - Cosa facevo: aiutato nel chiosco di piadine in spiaggia
+> - Cosa facevo: aiutato mia sorella nel suo chiosco di piadine in spiaggia
 > - Quando: due estati
 > - Con chi: mia sorella
 >
 > **Competenze**
-> - Cucinare per tanta gente
+> - Cucina per grandi numeri
 > - Velocità
 > - Precisione
-> - Alzarsi presto
-> - Uso delle lavapavimenti industriali
+> - Disponibilità a svegliarsi presto
+> - Uso di lavapavimenti industriali
 >
 > **Formazione 1**
 > - Titolo: patentino per il muletto

@@ -1,5 +1,6 @@
 Imports System.Drawing
 Imports System.Windows.Forms
+Imports TrovaLavoro.Documenti
 Imports TrovaLavoro.Motore
 
 ''' <summary>
@@ -29,6 +30,18 @@ Public Class FormPrincipale
     ''' <summary>Il motore montato all'avvio: da qui in avanti lo usano i pannelli.</summary>
     Private _contesto As ContestoApp
 
+    ''' <summary>
+    ''' La stampante PDF nasce <b>qui</b> e non nel motore: WebView2 è un controllo
+    ''' WinForms e vuole il thread dell'interfaccia con la sua pompa di messaggi
+    ''' (v. <see cref="StampantePdf"/>). Accenderla costa, e resta accesa per tutte le
+    ''' stampe della sessione; si spegne alla chiusura.
+    ''' </summary>
+    Private _stampante As StampantePdf
+
+    ''' <summary>Da quale pannello si è arrivati ai documenti, e con quale bottone della barra.</summary>
+    Private _ritornoDaiDocumenti As Control
+    Private _bottoneDelRitorno As Button
+
     Private Sub FormPrincipale_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         _contesto = ContestoApp.Monta()
         MostraLoStatoDellAvvio()
@@ -40,8 +53,13 @@ Public Class FormPrincipale
         Next
 
         DichiaraLeTappeCheMancano()
+
+        _stampante = New StampantePdf(_contesto.Cartella.CartellaWebView2)
+
         pnlProfilo.Collega(_contesto)
         pnlDialogo.Collega(_contesto)
+        pnlOpportunita.Collega(_contesto)
+        pnlDocumenti.Collega(_contesto, New ArchivioDocumenti(_contesto.Cartella, _stampante))
 
         pnlLogo.BringToFront()
         AggiornaPannelloLogo()
@@ -91,11 +109,81 @@ Public Class FormPrincipale
     End Sub
 
     Private Function BottoniDiNavigazione() As Button()
-        Return {btnHome, btnProfilo, btnRicerca, btnImpostazioni}
+        Return {btnHome, btnProfilo, btnRicerca, btnCandidatura, btnImpostazioni}
     End Function
 
     Private Sub btnProfilo_Click(sender As Object, e As EventArgs) Handles btnProfilo.Click
         MostraPannello(pnlProfilo, btnProfilo)
+    End Sub
+
+    Private Sub btnCandidatura_Click(sender As Object, e As EventArgs) Handles btnCandidatura.Click
+        MostraPannello(pnlOpportunita, btnCandidatura)
+    End Sub
+
+    ''' <summary>
+    ''' Dalla scheda dell'opportunità ai documenti. Il bottone della barra resta quello
+    ''' della candidatura: P6 non è un'altra destinazione, è il passo successivo dello
+    ''' stesso flusso (cap. 12, A7).
+    ''' </summary>
+    Private Async Sub pnlOpportunita_DocumentiRichiesti(sender As Object, e As EventArgs) _
+        Handles pnlOpportunita.DocumentiRichiesti
+
+        Dim candidatura As Opportunita = pnlOpportunita.Candidatura
+        If candidatura Is Nothing Then Return
+
+        VaiAiDocumenti(pnlOpportunita, btnCandidatura)
+        Await pnlDocumenti.MostraLaCandidaturaAsync(candidatura)
+
+    End Sub
+
+    Private Sub pnlDocumenti_TornaIndietro(sender As Object, e As EventArgs) _
+        Handles pnlDocumenti.TornaIndietro
+
+        ' Si torna da dove si è venuti: dai documenti si esce verso l'opportunità o verso
+        ' la scheda del profilo, a seconda di quale delle due ci ha mandati qui.
+        MostraPannello(If(_ritornoDaiDocumenti, pnlOpportunita),
+                       If(_bottoneDelRitorno, btnCandidatura))
+
+    End Sub
+
+    ''' <summary>Porta ai documenti, ricordandosi la strada da cui si è arrivati.</summary>
+    Private Sub VaiAiDocumenti(daDove As Control, conQualeBottone As Button)
+
+        _ritornoDaiDocumenti = daDove
+        _bottoneDelRitorno = conQualeBottone
+
+        MostraPannello(pnlDocumenti, conQualeBottone)
+
+    End Sub
+
+    ''' <summary>
+    ''' Il 📄 CV base si chiede dalla scheda del profilo — è il ritratto del profilo, non
+    ''' di una candidatura — e si guarda dove si guardano tutti i documenti.
+    ''' </summary>
+    Private Async Sub pnlProfilo_CvBaseRichiesto(sender As Object, e As EventArgs) _
+        Handles pnlProfilo.CvBaseRichiesto
+
+        VaiAiDocumenti(pnlProfilo, btnProfilo)
+        Await pnlDocumenti.MostraIlCvBaseAsync()
+
+    End Sub
+
+    Private Sub pnlDocumenti_LavoroAiCambiato(sender As Object, e As EventArgs) _
+        Handles pnlDocumenti.LavoroAiCambiato
+
+        BarraDiNavigazione(libera:=Not pnlDocumenti.AiAlLavoro)
+
+    End Sub
+
+    ''' <summary>
+    ''' Come per il dialogo: mentre l'AI legge un annuncio la barra si blocca, altrimenti
+    ''' da qui si aggirerebbe la guardia del pannello (cap. 02.6).
+    ''' </summary>
+    Private Sub pnlOpportunita_LavoroAiCambiato(sender As Object, e As EventArgs) _
+        Handles pnlOpportunita.LavoroAiCambiato
+
+        BarraDiNavigazione(libera:=Not pnlOpportunita.AiAlLavoro)
+
     End Sub
 
     ''' <summary>
@@ -139,7 +227,18 @@ Public Class FormPrincipale
     Private Sub pnlDialogo_LavoroAiCambiato(sender As Object, e As EventArgs) _
         Handles pnlDialogo.LavoroAiCambiato
 
-        btnProfilo.Enabled = Not pnlDialogo.AiAlLavoro
+        BarraDiNavigazione(libera:=Not pnlDialogo.AiAlLavoro)
+
+    End Sub
+
+    ''' <summary>
+    ''' Apre o chiude le destinazioni raggiungibili. Le altre restano spente comunque: le
+    ''' spegne la tappa che ancora non è arrivata, e non tocca a questa guardia riaprirle.
+    ''' </summary>
+    Private Sub BarraDiNavigazione(libera As Boolean)
+
+        btnProfilo.Enabled = libera
+        btnCandidatura.Enabled = libera
 
     End Sub
 
@@ -172,6 +271,14 @@ Public Class FormPrincipale
             inSospeso.Add("una lettura del CV ancora in corso")
         End If
 
+        If pnlOpportunita.AiAlLavoro Then
+            inSospeso.Add("un annuncio che sto ancora leggendo e confrontando")
+        End If
+
+        If pnlDocumenti.AiAlLavoro Then
+            inSospeso.Add("dei documenti che sto ancora scrivendo")
+        End If
+
         If inSospeso.Count = 0 Then Return
 
         Dim risposta As DialogResult = MessageBox.Show(
@@ -184,9 +291,15 @@ Public Class FormPrincipale
     End Sub
 
     Private Sub FormPrincipale_FormClosed(sender As Object, e As FormClosedEventArgs) Handles MyBase.FormClosed
-        ' Una lettura ancora in volo si annulla prima di smaltire il client: la
-        ' chiamata muore per la via pulita dell'annullo, non su un HttpClient disposto.
+        ' Una chiamata ancora in volo si annulla prima di smaltire il client: muore per
+        ' la via pulita dell'annullo, non su un HttpClient disposto.
         pnlProfilo.AnnullaLaLettura()
+        pnlOpportunita.AnnullaIlLavoro()
+        pnlDocumenti.AnnullaIlLavoro()
+
+        ' Il motore del browser si spegne con la finestra: è l'unica cosa che questa
+        ' finestra possiede oltre al contesto.
+        _stampante?.Dispose()
         _contesto?.Dispose()
     End Sub
 

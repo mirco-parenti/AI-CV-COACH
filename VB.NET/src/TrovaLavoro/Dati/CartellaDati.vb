@@ -131,6 +131,22 @@ Namespace Dati
         End Property
 
         ''' <summary>
+        ''' Dove il motore del browser tiene i suoi dati di navigazione (cap. 11.1). Serve
+        ''' alla stampa PDF, che passa da WebView2, e la useranno il browser integrato
+        ''' (T5) e la «pulizia dati» delle Impostazioni (T9).
+        ''' </summary>
+        ''' <remarks>
+        ''' Non è fra le cartelle che <see cref="Assicura"/> crea, ed è voluto: la crea il
+        ''' motore alla prima stampa. Un'applicazione aperta e richiusa senza stampare
+        ''' niente non deve lasciarsi dietro il profilo di un browser mai usato.
+        ''' </remarks>
+        Public ReadOnly Property CartellaWebView2 As String
+            Get
+                Return Path.Combine(Radice, "webview2")
+            End Get
+        End Property
+
+        ''' <summary>
         ''' Crea le cartelle nominate qui sopra se non ci sono già. È l'unico punto che
         ''' le crea: chi scrive un file la chiama prima e non si preoccupa d'altro.
         ''' </summary>

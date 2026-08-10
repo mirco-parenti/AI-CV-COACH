@@ -59,9 +59,15 @@ cambiare stampante non cambia il contenuto.
 
 ```
                      ┌───────────► DOCX  (scrittore OOXML interno)
-CV JSON / Lettera ──►│  pagina     │
-   (impaginazione)   └───────────► PDF   (modello HTML → WebView2 → stampa PDF)
+CV JSON / Lettera ──►│  pagina     ├───────────► PDF   (modello HTML → WebView2 → stampa PDF)
+   (impaginazione)   └───────────► testo (anteprima a video in P6)
 ```
+
+*Le stampanti sono tre, e la terza non scrive file (2026-08-10, T4c).* L'anteprima che
+P6 mostra accanto all'annuncio nasce **dagli stessi blocchi** degli altri due formati,
+non dal JSON: se leggesse il JSON per conto suo, il giorno in cui l'impaginazione cambia
+mostrerebbe un documento che i file non contengono — cioè mentirebbe proprio nel punto in
+cui l'utente controlla prima di esportare.
 
 *In mezzo c'è una pagina, e non è un dettaglio di implementazione (2026-08-10, T4b).*
 Il JSON non arriva alle stampanti: prima diventa una **pagina di blocchi** — un nome,
@@ -137,6 +143,11 @@ due uscite una accanto all'altra a verificarlo (cap. 14).
   nome: `CV_Mirco_Parenti_<AAAA-MM-GG>.docx`.
 - Un bottone «Apri cartella» accanto a ogni documento generato: l'utente deve sempre
   poter mettere le mani sui suoi file.
+- **Si scrive solo il formato che si chiede** *(2026-08-10, T4c)*: P6 ha due bottoni
+  d'esportazione (cap. 03.6), e chi preme «Esporta PDF» non deve ritrovarsi accanto anche
+  un DOCX che non ha chiesto. Resta invece l'ordine di T4b quando si chiedono entrambi —
+  prima i DOCX, poi i PDF — perché il PDF è l'unico che dipende da un pezzo di Windows
+  che potrebbe mancare.
 
 ## 5.7 Collaudo previsto (rimando al cap. 14)
 

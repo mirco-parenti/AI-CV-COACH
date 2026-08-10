@@ -69,6 +69,13 @@ Namespace Motore
         Public ReadOnly Property Pipeline As PipelineCandidatura
 
         ''' <summary>
+        ''' Chi scrive i documenti; <c>Nothing</c> senza AI o senza pool. È lo stesso che
+        ''' lavora dentro la <see cref="Pipeline"/>, ed è qui perché il 📄 CV base non
+        ''' passa da quella fila: nasce dal solo profilo, senza alcun annuncio.
+        ''' </summary>
+        Public ReadOnly Property Generatore As IGeneratore
+
+        ''' <summary>
         ''' Le candidature su disco: c'è sempre, anche senza AI — le opportunità già
         ''' generate si riaprono comunque (cap. 12.7).
         ''' </summary>
@@ -246,10 +253,14 @@ Namespace Motore
 
             ' I tre mestieri di T4 e la fila che li ordina. La taratura le serve per il
             ' punteggio, ed è già montata a questo punto (MontaNumeri viene prima).
+            ' Il tipo si scrive qualificato: qui «Generatore» è anche il nome della
+            ' proprietà, e in VB una cosa che si chiama come un'altra la copre.
+            _Generatore = New Ai.Generatore(Libreria, Client)
+
             _Pipeline = New PipelineCandidatura(
                 New AnalizzatoreAnnuncio(Libreria, Client),
                 New Confrontatore(Libreria, Client),
-                New Generatore(Libreria, Client),
+                _Generatore,
                 Taratura)
 
         End Sub

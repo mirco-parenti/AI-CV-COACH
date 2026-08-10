@@ -29,6 +29,7 @@ Partial Class FormPrincipale
         Me.btnHome = New System.Windows.Forms.Button()
         Me.btnProfilo = New System.Windows.Forms.Button()
         Me.btnRicerca = New System.Windows.Forms.Button()
+        Me.btnCandidatura = New System.Windows.Forms.Button()
         Me.btnImpostazioni = New System.Windows.Forms.Button()
         Me.pnlBordoBarraSuperiore = New System.Windows.Forms.Panel()
         Me.pnlAreaCentrale = New System.Windows.Forms.Panel()
@@ -37,6 +38,8 @@ Partial Class FormPrincipale
         Me.pnlBordoFasciaInferiore = New System.Windows.Forms.Panel()
         Me.pnlProfilo = New PannelloProfilo()
         Me.pnlDialogo = New PannelloDialogo()
+        Me.pnlOpportunita = New PannelloOpportunita()
+        Me.pnlDocumenti = New PannelloDocumenti()
         Me.pnlLogo = New System.Windows.Forms.Panel()
         Me.picLogo = New System.Windows.Forms.PictureBox()
         Me.lblMarchio = New System.Windows.Forms.Label()
@@ -74,6 +77,7 @@ Partial Class FormPrincipale
         Me.pnlBarraSuperiore.Controls.Add(Me.btnHome)
         Me.pnlBarraSuperiore.Controls.Add(Me.btnProfilo)
         Me.pnlBarraSuperiore.Controls.Add(Me.btnRicerca)
+        Me.pnlBarraSuperiore.Controls.Add(Me.btnCandidatura)
         Me.pnlBarraSuperiore.Controls.Add(Me.btnImpostazioni)
         Me.pnlBarraSuperiore.Controls.Add(Me.pnlBordoBarraSuperiore)
         Me.pnlBarraSuperiore.Dock = System.Windows.Forms.DockStyle.Fill
@@ -125,6 +129,22 @@ Partial Class FormPrincipale
         Me.btnRicerca.Text = "🔍 Ricerca"
         Me.btnRicerca.UseVisualStyleBackColor = False
         '
+        'btnCandidatura
+        '
+        ' La porta di P4. Il cruscotto che raccoglierà le opportunità è di T5: fino ad
+        ' allora questa è l'unica strada per arrivare a un annuncio (cap. 12.3).
+        Me.btnCandidatura.BackColor = StileApp.SfondoContenuto
+        Me.btnCandidatura.FlatAppearance.BorderColor = StileApp.BordoLeggero
+        Me.btnCandidatura.FlatAppearance.BorderSize = 1
+        Me.btnCandidatura.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnCandidatura.ForeColor = StileApp.TestoPrimario
+        Me.btnCandidatura.Location = New System.Drawing.Point(380, 7)
+        Me.btnCandidatura.Name = "btnCandidatura"
+        Me.btnCandidatura.Size = StileApp.BottoneBarraSuperiore
+        Me.btnCandidatura.TabIndex = 3
+        Me.btnCandidatura.Text = "📋 Candidatura"
+        Me.btnCandidatura.UseVisualStyleBackColor = False
+        '
         'btnImpostazioni
         '
         Me.btnImpostazioni.BackColor = StileApp.SfondoContenuto
@@ -132,10 +152,10 @@ Partial Class FormPrincipale
         Me.btnImpostazioni.FlatAppearance.BorderSize = 1
         Me.btnImpostazioni.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnImpostazioni.ForeColor = StileApp.TestoPrimario
-        Me.btnImpostazioni.Location = New System.Drawing.Point(380, 7)
+        Me.btnImpostazioni.Location = New System.Drawing.Point(502, 7)
         Me.btnImpostazioni.Name = "btnImpostazioni"
         Me.btnImpostazioni.Size = StileApp.BottoneBarraSuperiore
-        Me.btnImpostazioni.TabIndex = 3
+        Me.btnImpostazioni.TabIndex = 4
         Me.btnImpostazioni.Text = "⚙ Impostazioni"
         Me.btnImpostazioni.UseVisualStyleBackColor = False
         '
@@ -146,13 +166,15 @@ Partial Class FormPrincipale
         Me.pnlBordoBarraSuperiore.Location = New System.Drawing.Point(0, 47)
         Me.pnlBordoBarraSuperiore.Name = "pnlBordoBarraSuperiore"
         Me.pnlBordoBarraSuperiore.Size = New System.Drawing.Size(1134, 1)
-        Me.pnlBordoBarraSuperiore.TabIndex = 4
+        Me.pnlBordoBarraSuperiore.TabIndex = 5
         '
         'pnlAreaCentrale
         '
         Me.pnlAreaCentrale.BackColor = StileApp.SfondoBase
         Me.pnlAreaCentrale.Controls.Add(Me.pnlProfilo)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlDialogo)
+        Me.pnlAreaCentrale.Controls.Add(Me.pnlOpportunita)
+        Me.pnlAreaCentrale.Controls.Add(Me.pnlDocumenti)
         Me.pnlAreaCentrale.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlAreaCentrale.Location = New System.Drawing.Point(0, 48)
         Me.pnlAreaCentrale.Margin = New System.Windows.Forms.Padding(0)
@@ -177,6 +199,24 @@ Partial Class FormPrincipale
         Me.pnlDialogo.Size = New System.Drawing.Size(1134, 485)
         Me.pnlDialogo.TabIndex = 1
         Me.pnlDialogo.Visible = False
+        '
+        'pnlOpportunita
+        '
+        Me.pnlOpportunita.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlOpportunita.Location = New System.Drawing.Point(0, 0)
+        Me.pnlOpportunita.Name = "pnlOpportunita"
+        Me.pnlOpportunita.Size = New System.Drawing.Size(1134, 485)
+        Me.pnlOpportunita.TabIndex = 2
+        Me.pnlOpportunita.Visible = False
+        '
+        'pnlDocumenti
+        '
+        Me.pnlDocumenti.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlDocumenti.Location = New System.Drawing.Point(0, 0)
+        Me.pnlDocumenti.Name = "pnlDocumenti"
+        Me.pnlDocumenti.Size = New System.Drawing.Size(1134, 485)
+        Me.pnlDocumenti.TabIndex = 3
+        Me.pnlDocumenti.Visible = False
         '
         'pnlFasciaInferiore
         '
@@ -295,11 +335,14 @@ Partial Class FormPrincipale
     Friend WithEvents btnHome As System.Windows.Forms.Button
     Friend WithEvents btnProfilo As System.Windows.Forms.Button
     Friend WithEvents btnRicerca As System.Windows.Forms.Button
+    Friend WithEvents btnCandidatura As System.Windows.Forms.Button
     Friend WithEvents btnImpostazioni As System.Windows.Forms.Button
     Friend WithEvents pnlBordoBarraSuperiore As System.Windows.Forms.Panel
     Friend WithEvents pnlAreaCentrale As System.Windows.Forms.Panel
     Friend WithEvents pnlProfilo As PannelloProfilo
     Friend WithEvents pnlDialogo As PannelloDialogo
+    Friend WithEvents pnlOpportunita As PannelloOpportunita
+    Friend WithEvents pnlDocumenti As PannelloDocumenti
     Friend WithEvents ttSuggerimenti As System.Windows.Forms.ToolTip
     Friend WithEvents pnlFasciaInferiore As System.Windows.Forms.Panel
     Friend WithEvents lblStato As System.Windows.Forms.Label

@@ -70,6 +70,13 @@ Public Class PannelloProfilo
     ''' </summary>
     Public Event DialogoRichiesto As EventHandler
 
+    ''' <summary>
+    ''' Chiede alla finestra il 📄 CV-1 base: si genera e si guarda in P6, dove stanno
+    ''' tutti i documenti (cap. 12.2, punto 5). Anche qui il pannello non conosce nessuno:
+    ''' dice cosa vuole.
+    ''' </summary>
+    Public Event CvBaseRichiesto As EventHandler
+
     Public Sub New()
 
         InitializeComponent()
@@ -836,6 +843,25 @@ Public Class PannelloProfilo
     End Sub
 
     ''' <summary>
+    ''' Il 📄 CV-1 base nasce dal profilo <b>salvato</b>: se ci sono correzioni ancora nei
+    ''' campi, generarlo adesso scriverebbe un CV che non somiglia a quello che l'utente
+    ''' sta guardando — e lui non avrebbe modo di accorgersene.
+    ''' </summary>
+    Private Sub btnGeneraCv1_Click(sender As Object, e As EventArgs) Handles btnGeneraCv1.Click
+
+        If _modificato Then
+            RaccontaLoStato(
+                "Hai correzioni non salvate: il 📄 CV base nasce dal profilo salvato." & vbLf &
+                "Salva prima, poi generalo.",
+                StileApp.Avviso)
+            Return
+        End If
+
+        RaiseEvent CvBaseRichiesto(Me, EventArgs.Empty)
+
+    End Sub
+
+    ''' <summary>
     ''' Mette nella scheda un profilo che arriva da fuori — oggi il dialogo guidato (P5).
     ''' È una <b>proposta</b>: entra nei campi e accende il «Salva», ma su disco non si
     ''' muove niente finché l'utente non lo conferma (cap. 12.7).
@@ -919,7 +945,6 @@ Public Class PannelloProfilo
 
         _suggerimenti.SetToolTip(btnAggiornamento,
             "La sessione di aggiornamento del profilo arriva più avanti (flusso D).")
-        _suggerimenti.SetToolTip(btnGeneraCv1, "La generazione dei documenti arriva con la tappa T4.")
         _suggerimenti.SetToolTip(btnEsportaBackup, "Backup e ripristino arrivano con la tappa T9.")
 
     End Sub
@@ -948,8 +973,20 @@ Public Class PannelloProfilo
         End If
 
         btnAggiornamento.Enabled = False
-        btnGeneraCv1.Enabled = False
         btnEsportaBackup.Enabled = False
+
+        ' Il 📄 CV-1 base nasce dal profilo che sta su disco, non da quello che si sta
+        ' correggendo adesso: si genera quando c'è un profilo salvato, e le correzioni in
+        ' sospeso vanno salvate prima (il pannello lo dice quando succede).
+        btnGeneraCv1.Enabled = Not occupato AndAlso conMotore AndAlso
+                               _contesto.AiDisponibile AndAlso _contesto.Archivio.Esiste
+
+        If Not occupato AndAlso conMotore AndAlso Not _contesto.AiDisponibile Then
+            _suggerimenti.SetToolTip(btnGeneraCv1,
+                $"Per scrivere il CV serve la chiave API ({ClientClaude.NomeVariabileChiave}).")
+        ElseIf Not occupato AndAlso conMotore AndAlso Not _contesto.Archivio.Esiste Then
+            _suggerimenti.SetToolTip(btnGeneraCv1, "Prima salva il profilo: il CV base nasce da lì.")
+        End If
 
         ' Salvare ha senso solo se c'è qualcosa di nuovo da mettere su disco: una
         ' conferma a vuoto lascerebbe nello storico una versione identica alla

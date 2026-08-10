@@ -7,6 +7,20 @@ Imports TrovaLavoro.Motore
 Namespace Documenti
 
     ''' <summary>
+    ''' In quali formati si vuole un documento. Esiste perché P6 ha <b>due</b> bottoni
+    ''' d'esportazione (cap. 03.6): l'utente che vuole solo il PDF non deve ritrovarsi
+    ''' anche un DOCX che non ha chiesto.
+    ''' </summary>
+    Public Enum FormatiDocumento
+        ''' <summary>Il solo <c>.docx</c>.</summary>
+        Docx
+        ''' <summary>Il solo <c>.pdf</c>.</summary>
+        Pdf
+        ''' <summary>Tutti e due, il DOCX per primo.</summary>
+        Entrambi
+    End Enum
+
+    ''' <summary>
     ''' Chi mette i documenti al loro posto: prende un CV o una lettera in JSON, li fa
     ''' impaginare, li stampa nei due formati e li scrive dove devono stare — accanto al
     ''' profilo il 📄 CV base, nella cartella della candidatura tutto il resto
@@ -49,8 +63,11 @@ Namespace Documenti
         ''' </summary>
         ''' <param name="cv">Il CV base JSON.</param>
         ''' <param name="quando">Il giorno da mettere nel nome; oggi, se non si dice.</param>
+        ''' <param name="formati">Quali file scrivere; tutti e due, se non si dice.</param>
         Public Function ScriviCvBaseAsync(cv As JsonNode,
-                                          Optional quando As Date = Nothing) As Task(Of IReadOnlyList(Of String))
+                                          Optional quando As Date = Nothing,
+                                          Optional formati As FormatiDocumento = FormatiDocumento.Entrambi) _
+                                          As Task(Of IReadOnlyList(Of String))
 
             If cv Is Nothing Then Throw New ArgumentNullException(NameOf(cv))
 
@@ -62,7 +79,7 @@ Namespace Documenti
             Dim nome As String = NomiDocumenti.Cv(DiChiE(pagina), String.Empty, giorno)
 
             Return ScriviAsync(_cartella.CartellaOutProfilo,
-                               New List(Of Lavoro) From {New Lavoro(pagina, nome)})
+                               New List(Of Lavoro) From {New Lavoro(pagina, nome)}, formati)
 
         End Function
 
@@ -76,7 +93,10 @@ Namespace Documenti
         ''' metà non deve lasciare a mani vuote.
         ''' </remarks>
         ''' <param name="opportunita">La candidatura, già salvata su disco.</param>
-        Public Function ScriviCandidaturaAsync(opportunita As Opportunita) As Task(Of IReadOnlyList(Of String))
+        ''' <param name="formati">Quali file scrivere; tutti e due, se non si dice.</param>
+        Public Function ScriviCandidaturaAsync(opportunita As Opportunita,
+                                               Optional formati As FormatiDocumento = FormatiDocumento.Entrambi) _
+                                               As Task(Of IReadOnlyList(Of String))
 
             If opportunita Is Nothing Then Throw New ArgumentNullException(NameOf(opportunita))
 
@@ -94,7 +114,7 @@ Namespace Documenti
                     NomiDocumenti.Lettera(opportunita.Azienda, opportunita.Creata, opportunita.Lingua)))
             End If
 
-            Return ScriviAsync(ArchivioOpportunita.CartellaOut(opportunita), lavori)
+            Return ScriviAsync(ArchivioOpportunita.CartellaOut(opportunita), lavori, formati)
 
         End Function
 
@@ -115,21 +135,23 @@ Namespace Documenti
         ''' Scrive i documenti nella cartella indicata: prima tutti i DOCX, poi — se c'è
         ''' una stampante — tutti i PDF.
         ''' </summary>
-        Private Async Function ScriviAsync(cartella As String,
-                                           lavori As List(Of Lavoro)) As Task(Of IReadOnlyList(Of String))
+        Private Async Function ScriviAsync(cartella As String, lavori As List(Of Lavoro),
+                                           formati As FormatiDocumento) As Task(Of IReadOnlyList(Of String))
 
             Dim scritti As New List(Of String)
             If lavori.Count = 0 Then Return scritti
 
             Directory.CreateDirectory(cartella)
 
-            For Each lavoro As Lavoro In lavori
-                Dim percorso As String = Path.Combine(cartella, lavoro.Nome & NomiDocumenti.EstensioneDocx)
-                ScrittoreDocx.Scrivi(lavoro.Pagina, percorso)
-                scritti.Add(percorso)
-            Next
+            If formati <> FormatiDocumento.Pdf Then
+                For Each lavoro As Lavoro In lavori
+                    Dim percorso As String = Path.Combine(cartella, lavoro.Nome & NomiDocumenti.EstensioneDocx)
+                    ScrittoreDocx.Scrivi(lavoro.Pagina, percorso)
+                    scritti.Add(percorso)
+                Next
+            End If
 
-            If _stampante Is Nothing Then Return scritti
+            If _stampante Is Nothing OrElse formati = FormatiDocumento.Docx Then Return scritti
 
             For Each lavoro As Lavoro In lavori
                 Dim percorso As String = Path.Combine(cartella, lavoro.Nome & NomiDocumenti.EstensionePdf)

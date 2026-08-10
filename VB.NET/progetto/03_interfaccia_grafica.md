@@ -103,7 +103,7 @@ con icona** (FontAwesome.Sharp); i menu contestuali (tasto destro) usano voci co
 ```
 ┌────────────────────────────────────────────────────────────────────┐
 │ BARRA SUPERIORE   [🏠 Home] [👤 Profilo] [🔍 Ricerca]              │
-│         [⚙ Impostazioni]     stato AI · modello · consumo contesto │
+│      [📋 Candidatura] [⚙ Impostazioni]  stato AI · modello · …     │
 ├────────────────────────────────────────────────────────────────────┤
 │                                                                    │
 │                    AREA CENTRALE                                   │
@@ -125,6 +125,19 @@ con icona** (FontAwesome.Sharp); i menu contestuali (tasto destro) usano voci co
   fisse. I pannelli P1–P7 sono **UserControl disegnati nel designer**, impilati
   nell'area centrale e mostrati uno alla volta: struttura statica, nessun controllo
   creato a runtime.
+- **La barra ha cinque bottoni, non quattro** *(deciso in T4c, 2026-08-10)*: fra Ricerca
+  e Impostazioni c'è **📋 Candidatura**, che porta a P4. Nel disegno originale a P4 si
+  arrivava dalla coda delle opportunità in Home, ma la Home è di T5 e l'incolla-testo è
+  già di T4: senza una porta propria, il pannello che questa tappa costruisce non
+  sarebbe raggiungibile. Resta anche dopo T5 — un annuncio arriva spesso da un'email,
+  senza passare dal registro (cap. 12.3).
+- **Non ogni pannello ha un bottone in barra.** P5 (dialogo), P6 (documenti) e P7 (email)
+  sono **passi di un flusso**, non destinazioni: ci si arriva dal pannello che li
+  precede, e il bottone della barra resta acceso su quello — P5 e il 📄 CV-1 base sotto
+  «Profilo», P6 di una candidatura sotto «Candidatura». Il bottone «torna indietro» di
+  quei pannelli riporta **da dove si è venuti**, e lo dice nell'etichetta: a P6 si arriva
+  da due strade, e mandare l'utente in un pannello dove non è mai stato sarebbe il vicolo
+  cieco che il cap. 12.7 vieta. *(T4c, 2026-08-10.)*
 - Finestra principale: avvio massimizzata, `MinimumSize` 1150×600, DPI `SystemAware`,
   sfondo `SfondoBase`.
 - Finestre secondarie (Impostazioni, Primo avvio, Anteprima file, Informazioni su…):
