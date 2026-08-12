@@ -137,6 +137,52 @@ Namespace Motore
         End Sub
 
         <TestMethod>
+        Public Sub LeRicercheDelFileArrivanoNelContesto()
+            ' Stessa ragione dei due file dei numeri: un portale aggiunto a mano deve
+            ' comparire nel programma, altrimenti «aggiungere un portale è una riga di
+            ' ricerche.json» (cap. 06.3) sarebbe una promessa non mantenuta.
+            Dim radice As String = CartellaTemporanea()
+            Directory.CreateDirectory(radice)
+            Try
+                File.WriteAllText(Path.Combine(radice, "ricerche.json"),
+                                  "{ ""portali"": [ { ""nome"": ""Il mio portale"", " &
+                                  """schema"": ""https://esempio.it/jobs?q={cosa}"" } ] }")
+
+                Using contesto As ContestoApp = Monta(radice)
+                    Assert.AreEqual(OrigineRicerche.File, contesto.Ricerche.Origine, "origine")
+                    Assert.HasCount(1, contesto.Ricerche.Portali, "solo il suo")
+                    Assert.AreEqual("Il mio portale", contesto.Ricerche.Portali(0).Nome)
+                    Assert.IsNotNull(contesto.ArchivioRicerche, "e da qualche parte si risalva")
+                    Assert.IsNull(contesto.Avviso, "un file valido non è un avviso")
+                End Using
+            Finally
+                Directory.Delete(radice, recursive:=True)
+            End Try
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaRicercaScartataSiFaSentireAllAvvio()
+            ' Qui il file c'è ed è leggibile: a non entrare è una riga che l'utente ha
+            ' scritto. È un avviso e non una nota, perché quella ricerca sta per non
+            ' trovarsi nel menù e nessuno gliel'avrebbe detto.
+            Dim radice As String = CartellaTemporanea()
+            Directory.CreateDirectory(radice)
+            Try
+                File.WriteAllText(Path.Combine(radice, "ricerche.json"),
+                                  "{ ""salvate"": [ { ""nome"": ""Va a vuoto"", " &
+                                  """portale"": ""PortaleCheNonCe"" } ] }")
+
+                Using contesto As ContestoApp = Monta(radice)
+                    Assert.IsNotNull(contesto.Avviso, "l'utente deve saperlo")
+                    Assert.Contains("Va a vuoto", contesto.Avviso, "e sapere quale ricerca")
+                    Assert.IsEmpty(contesto.Ricerche.Salvate, "intanto nel menù non c'è")
+                End Using
+            Finally
+                Directory.Delete(radice, recursive:=True)
+            End Try
+        End Sub
+
+        <TestMethod>
         Public Sub UnFileDiNumeriRottoSiFaSentire()
             ' Un file che c'è ma non si legge è un'anomalia: senza dirlo, chi ha
             ' ritoccato un numero crederebbe che il suo ritocco sia in vigore.

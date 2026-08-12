@@ -188,7 +188,7 @@ Namespace Motore
         <TestMethod>
         Public Async Function DalTestoIncollatoEscePureUnProfilo() As Task
             ' È il ripiego di tutti i casi limite, e sarà anche la porta del profilo
-            ' LinkedIn (T5b): stessa strada, senza passare dal disco.
+            ' LinkedIn (T5d): stessa strada, senza passare dal disco.
             Dim strutturatore As New StrutturatoreFinto()
             strutturatore.Dara(ProfiloStrutturato())
 

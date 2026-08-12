@@ -40,6 +40,7 @@ Partial Class FormPrincipale
         Me.pnlDialogo = New PannelloDialogo()
         Me.pnlOpportunita = New PannelloOpportunita()
         Me.pnlDocumenti = New PannelloDocumenti()
+        Me.pnlRicerca = New PannelloRicerca()
         Me.pnlLogo = New System.Windows.Forms.Panel()
         Me.picLogo = New System.Windows.Forms.PictureBox()
         Me.lblMarchio = New System.Windows.Forms.Label()
@@ -175,6 +176,7 @@ Partial Class FormPrincipale
         Me.pnlAreaCentrale.Controls.Add(Me.pnlDialogo)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlOpportunita)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlDocumenti)
+        Me.pnlAreaCentrale.Controls.Add(Me.pnlRicerca)
         Me.pnlAreaCentrale.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlAreaCentrale.Location = New System.Drawing.Point(0, 48)
         Me.pnlAreaCentrale.Margin = New System.Windows.Forms.Padding(0)
@@ -217,6 +219,15 @@ Partial Class FormPrincipale
         Me.pnlDocumenti.Size = New System.Drawing.Size(1134, 485)
         Me.pnlDocumenti.TabIndex = 3
         Me.pnlDocumenti.Visible = False
+        '
+        'pnlRicerca
+        '
+        Me.pnlRicerca.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlRicerca.Location = New System.Drawing.Point(0, 0)
+        Me.pnlRicerca.Name = "pnlRicerca"
+        Me.pnlRicerca.Size = New System.Drawing.Size(1134, 485)
+        Me.pnlRicerca.TabIndex = 4
+        Me.pnlRicerca.Visible = False
         '
         'pnlFasciaInferiore
         '
@@ -343,6 +354,7 @@ Partial Class FormPrincipale
     Friend WithEvents pnlDialogo As PannelloDialogo
     Friend WithEvents pnlOpportunita As PannelloOpportunita
     Friend WithEvents pnlDocumenti As PannelloDocumenti
+    Friend WithEvents pnlRicerca As PannelloRicerca
     Friend WithEvents ttSuggerimenti As System.Windows.Forms.ToolTip
     Friend WithEvents pnlFasciaInferiore As System.Windows.Forms.Panel
     Friend WithEvents lblStato As System.Windows.Forms.Label

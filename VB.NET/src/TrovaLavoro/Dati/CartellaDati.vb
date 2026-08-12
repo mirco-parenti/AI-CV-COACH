@@ -74,6 +74,17 @@ Namespace Dati
             End Get
         End Property
 
+        ''' <summary>
+        ''' I portali e le ricerche salvate (cap. 06.3, cap. 11.1). È il primo file di
+        ''' questa mappa che tiene insieme <b>dati di prodotto</b> — la tabella dei
+        ''' portali — e <b>roba dell'utente</b>: le ricerche che si è messo da parte.
+        ''' </summary>
+        Public ReadOnly Property FileRicerche As String
+            Get
+                Return Path.Combine(Radice, "ricerche.json")
+            End Get
+        End Property
+
         ''' <summary>La cartella del profilo e del suo storico.</summary>
         Public ReadOnly Property CartellaProfilo As String
             Get

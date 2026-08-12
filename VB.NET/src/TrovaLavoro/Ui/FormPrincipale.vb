@@ -2,6 +2,7 @@ Imports System.Drawing
 Imports System.Windows.Forms
 Imports TrovaLavoro.Documenti
 Imports TrovaLavoro.Motore
+Imports TrovaLavoro.Web
 
 ''' <summary>
 ''' Finestra principale dell'applicazione (cap. 03.4): barra superiore di navigazione,
@@ -31,6 +32,13 @@ Public Class FormPrincipale
     Private _contesto As ContestoApp
 
     ''' <summary>
+    ''' L'unico motore del browser dell'applicazione (v. <see cref="MotoreBrowser"/>).
+    ''' Nasce qui, come la stampante, perché è di qui che scendono i due usi che lo
+    ''' vogliono: la stampa dei PDF e il browser integrato del pannello Ricerca.
+    ''' </summary>
+    Private _motoreBrowser As MotoreBrowser
+
+    ''' <summary>
     ''' La stampante PDF nasce <b>qui</b> e non nel motore: WebView2 è un controllo
     ''' WinForms e vuole il thread dell'interfaccia con la sua pompa di messaggi
     ''' (v. <see cref="StampantePdf"/>). Accenderla costa, e resta accesa per tutte le
@@ -54,12 +62,17 @@ Public Class FormPrincipale
 
         DichiaraLeTappeCheMancano()
 
-        _stampante = New StampantePdf(_contesto.Cartella.CartellaWebView2)
+        ' Un motore del browser per tutta l'applicazione, e da lui la stampante: due
+        ' ambienti sulla stessa cartella di navigazione stanno buoni solo finché nessuno
+        ' cambia loro un'opzione (v. MotoreBrowser, cancello di T5a).
+        _motoreBrowser = New MotoreBrowser(_contesto.Cartella.CartellaWebView2)
+        _stampante = New StampantePdf(_motoreBrowser)
 
         pnlProfilo.Collega(_contesto)
         pnlDialogo.Collega(_contesto)
         pnlOpportunita.Collega(_contesto)
         pnlDocumenti.Collega(_contesto, New ArchivioDocumenti(_contesto.Cartella, _stampante))
+        pnlRicerca.Collega(_contesto, _motoreBrowser)
 
         pnlLogo.BringToFront()
         AggiornaPannelloLogo()
@@ -78,9 +91,6 @@ Public Class FormPrincipale
 
         btnHome.Enabled = False
         ttSuggerimenti.SetToolTip(btnHome, "Il cruscotto con il registro delle candidature arriva con la tappa T5.")
-
-        btnRicerca.Enabled = False
-        ttSuggerimenti.SetToolTip(btnRicerca, "La ricerca degli annunci nel browser integrato arriva con la tappa T5.")
 
         btnImpostazioni.Enabled = False
         ttSuggerimenti.SetToolTip(btnImpostazioni, "La finestra delle impostazioni arriva con la tappa T9.")
@@ -118,6 +128,19 @@ Public Class FormPrincipale
 
     Private Sub btnCandidatura_Click(sender As Object, e As EventArgs) Handles btnCandidatura.Click
         MostraPannello(pnlOpportunita, btnCandidatura)
+    End Sub
+
+    ''' <summary>
+    ''' Alla ricerca: il pannello si mostra <b>subito</b> e il browser si accende dopo, che
+    ''' è l'ordine giusto — accendere il motore prima di mostrare il pannello lascerebbe la
+    ''' finestra ferma sul pannello di prima per il tempo dell'accensione, e sembrerebbe
+    ''' che il bottone non abbia funzionato.
+    ''' </summary>
+    Private Async Sub btnRicerca_Click(sender As Object, e As EventArgs) Handles btnRicerca.Click
+
+        MostraPannello(pnlRicerca, btnRicerca)
+        Await pnlRicerca.ApriAsync()
+
     End Sub
 
     ''' <summary>
@@ -239,6 +262,7 @@ Public Class FormPrincipale
 
         btnProfilo.Enabled = libera
         btnCandidatura.Enabled = libera
+        btnRicerca.Enabled = libera
 
     End Sub
 

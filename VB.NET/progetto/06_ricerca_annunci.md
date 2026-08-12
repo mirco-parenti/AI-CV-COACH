@@ -51,13 +51,26 @@ flusso A3 del cap. 12) diventano ricerche pronte per i portali supportati. Una r
 salvata è solo un **indirizzo parametrizzato**: il programma compone l'URL di ricerca
 del portale con le parole chiave e la zona, e lo apre nel browser integrato.
 
-- Portali previsti al primo rilascio: **Indeed, InfoJobs, Subito.it** più una
+- Portali previsti al primo rilascio: **Indeed, Jooble, Subito.it** più una
   ricerca generica via motore di ricerca (per le pagine «lavora con noi» dei siti
   aziendali). *Scelta rivista il 2026-08-05 (cap. 15, voce 7):* LinkedIn Jobs esce dalla
   terna iniziale perché è il portale meno adatto ai ruoli operativi che il nostro utente
   cerca — magazziniere, addetto alle vendite, manutentore — mentre **Subito.it** è quello
   che quel pubblico riconosce di più. Resta comunque aggiungibile in qualunque momento,
   come tutti gli altri: è una riga di `ricerche.json`.
+- *E rivista di nuovo il 2026-08-12, a T5a, dai fatti:* la **verifica sul campo** chiesta
+  dal cap. 14 ha aperto i quattro indirizzi uno per uno nel browser integrato, e
+  **InfoJobs non esiste più** — al suo posto risponde un avviso che dichiara la
+  piattaforma «ufficialmente chiusa e non più disponibile». Al suo posto entra **Jooble**,
+  un aggregatore che raccoglie anche gli annunci delle agenzie per il lavoro, dove sta
+  gran parte delle offerte per quei ruoli. Gli altri tre hanno risposto: Indeed e Subito.it
+  con le loro pagine di risultati, la ricerca generica con i suoi. La sostituzione è
+  costata **una riga**, che è esattamente ciò che la tabella-dati prometteva.
+- **Un portale può chiudere, e il programma deve poterlo scoprire tardi.** Gli schemi
+  invecchiano — cambiano forma o spariscono — e il rimedio non è ricompilare: si corregge
+  `ricerche.json` nella cartella dati. Uno schema che non è un indirizzo `http`/`https`
+  viene rifiutato e dichiarato: quel file finisce dritto nella barra di un browser vero, e
+  un `file://` o un `javascript:` lì dentro non sarebbe configurazione ma una sorpresa.
 - L'elenco è una **tabella dati** (nome portale + schema di URL), non codice: aggiungere
   un portale non richiede una nuova build. La tabella vive in `ricerche.json` nella
   cartella dati (cap. 11.1), insieme alle preferenze e alle ricerche salvate.

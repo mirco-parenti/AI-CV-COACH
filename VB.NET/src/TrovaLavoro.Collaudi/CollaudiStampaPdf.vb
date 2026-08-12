@@ -4,9 +4,9 @@ Imports System.Text
 Imports System.Text.Json.Nodes
 Imports System.Threading
 Imports System.Threading.Tasks
-Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro.Documenti
+Imports TrovaLavoro.Web
 
 Namespace Documenti
 
@@ -55,42 +55,6 @@ Namespace Documenti
 
         End Function
 
-        ''' <summary>
-        ''' Fa girare un lavoro asincrono su un thread STA con la sua pompa di messaggi:
-        ''' è l'ambiente in cui WebView2 vive dentro l'applicazione, ricostruito qui
-        ''' perché il banco di collaudo non ne ha uno. Le eccezioni tornano a chi chiama.
-        ''' </summary>
-        Private Shared Sub SulThreadDellInterfaccia(lavoro As Func(Of Task))
-
-            Dim scoppio As Exception = Nothing
-
-            Dim thread As New Thread(
-                Sub()
-                    SynchronizationContext.SetSynchronizationContext(
-                        New WindowsFormsSynchronizationContext())
-
-                    Dim compito As Task = lavoro()
-
-                    ' Quando il lavoro è finito si ferma la pompa: senza, Application.Run
-                    ' resterebbe in attesa per sempre.
-                    compito.ContinueWith(
-                        Sub(finito)
-                            scoppio = finito.Exception?.InnerExceptions.FirstOrDefault()
-                            Application.ExitThread()
-                        End Sub,
-                        TaskScheduler.FromCurrentSynchronizationContext())
-
-                    Application.Run()
-                End Sub)
-
-            thread.SetApartmentState(ApartmentState.STA)
-            thread.Start()
-            thread.Join()
-
-            If scoppio IsNot Nothing Then Throw scoppio
-
-        End Sub
-
         ''' <summary>Una cartella temporanea che si porta via tutto alla fine.</summary>
         Private Shared Sub ConCartellaTemporanea(prova As Action(Of String))
 
@@ -138,9 +102,10 @@ Namespace Documenti
                     Dim documento As String = Path.Combine(cartella, "CV.pdf")
                     Dim lettera As String = Path.Combine(cartella, "Lettera.pdf")
 
-                    SulThreadDellInterfaccia(
+                    ThreadInterfaccia.Esegui(
                         Async Function() As Task
-                            Using stampante As New StampantePdf(Path.Combine(cartella, "webview2"))
+                            Using stampante As New StampantePdf(
+                                New MotoreBrowser(Path.Combine(cartella, "webview2")))
 
                                 Await stampante.StampaAsync(
                                     Impaginazione.PaginaCv(CvDiProva()), documento)

@@ -60,6 +60,12 @@
     <Compile Update="Ui\PannelloDialogo.Designer.vb">
       <DependentUpon>PannelloDialogo.vb</DependentUpon>
     </Compile>
+    <Compile Update="Ui\PannelloRicerca.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Ui\PannelloRicerca.Designer.vb">
+      <DependentUpon>PannelloRicerca.vb</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <!-- Il pool integrato (cap. 4.2): i prompt entrano nell'eseguibile come risorse,

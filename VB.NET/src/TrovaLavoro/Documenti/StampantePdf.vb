@@ -4,6 +4,7 @@ Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports Microsoft.Web.WebView2.Core
 Imports Microsoft.Web.WebView2.WinForms
+Imports TrovaLavoro.Web
 
 Namespace Documenti
 
@@ -49,9 +50,13 @@ Namespace Documenti
     ''' thread qualunque non funziona. Nell'applicazione è il thread in cui vive la
     ''' finestra; nel collaudo, un thread STA aperto apposta.</para>
     ''' <para><b>Una stampante, molte stampe.</b> Accendere il motore costa: la finestra
-    ''' e l'ambiente si preparano alla prima stampa e restano pronti per le successive —
-    ''' un CV e la sua lettera sono due stampe di fila. Si chiude con
-    ''' <see cref="Dispose"/>.</para>
+    ''' si prepara alla prima stampa e resta pronta per le successive — un CV e la sua
+    ''' lettera sono due stampe di fila. Si chiude con <see cref="Dispose"/>.</para>
+    ''' <para><b>L'ambiente non è suo</b> <i>(da T5a, 2026-08-12)</i>: lo chiede al
+    ''' <see cref="MotoreBrowser"/>, che è l'unico dell'applicazione. Prima se lo creava
+    ''' da sé, e finché il browser di P3 non esisteva era lo stesso; da qui in poi due
+    ''' ambienti sulla stessa cartella di navigazione sono un guasto che aspetta soltanto
+    ''' che le loro opzioni divergano.</para>
     ''' </remarks>
     Public Class StampantePdf
         Implements IDisposable
@@ -76,21 +81,20 @@ Namespace Documenti
         ''' </summary>
         Private Shared ReadOnly FuoriSchermo As New Point(-32000, -32000)
 
-        Private ReadOnly _cartellaNavigazione As String
+        Private ReadOnly _motore As MotoreBrowser
 
         Private _finestra As Form
         Private _vista As WebView2
 
-        ''' <param name="cartellaNavigazione">
-        ''' La cartella in cui WebView2 tiene i suoi dati (cap. 11.1, <c>webview2\</c>).
+        ''' <param name="motore">
+        ''' L'unico motore del browser dell'applicazione, che porta con sé la cartella di
+        ''' navigazione (cap. 11.1, <c>webview2\</c>).
         ''' </param>
-        Public Sub New(cartellaNavigazione As String)
+        Public Sub New(motore As MotoreBrowser)
 
-            If String.IsNullOrWhiteSpace(cartellaNavigazione) Then
-                Throw New ArgumentException("Manca la cartella di WebView2.", NameOf(cartellaNavigazione))
-            End If
+            If motore Is Nothing Then Throw New ArgumentNullException(NameOf(motore))
 
-            _cartellaNavigazione = cartellaNavigazione
+            _motore = motore
 
         End Sub
 
@@ -137,15 +141,21 @@ Namespace Documenti
             Dim ambiente As CoreWebView2Environment
 
             Try
-                ambiente = Await CoreWebView2Environment.
-                    CreateAsync(userDataFolder:=_cartellaNavigazione).ConfigureAwait(True)
+                ambiente = Await _motore.AmbienteAsync().ConfigureAwait(True)
 
-            Catch ex As WebView2RuntimeNotFoundException
+            Catch ex As ErroreBrowser When ex.MotoreAssente
                 ' Il runtime è di serie in Windows 11, ma su una macchina bloccata può
                 ' mancare: l'app non muore e lo dice, perché il DOCX resta disponibile.
                 Throw New ErroreStampa(CausaStampa.MotoreAssente,
                     "Per creare il PDF serve il componente WebView2 di Windows, che su questo " &
                     "computer non c'è. Il documento in formato Word è stato scritto lo stesso.", ex)
+
+            Catch ex As ErroreBrowser
+                ' Il motore c'è ma non si è acceso: il ripiego è lo stesso, e vale la pena
+                ' dirlo con le stesse parole invece di lasciar passare un guasto tecnico.
+                Throw New ErroreStampa(CausaStampa.StampaFallita,
+                    "Non sono riuscita ad accendere il motore che stampa i PDF. " &
+                    "Il documento in formato Word è stato scritto lo stesso.", ex)
             End Try
 
             _finestra = New Form With {

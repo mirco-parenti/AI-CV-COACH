@@ -228,11 +228,47 @@ iniziare.**
 Pannello P3 con WebView2, ricerche salvate, cattura dell'annuncio, coda delle
 opportunità; cartelle-opportunità su disco; pannello P1 Home con registro e stati.
 Verifica sul campo degli schemi di indirizzo dei portali del primo rilascio.
-**Collaudo:** su **Indeed / InfoJobs / Subito.it** reali: login manuale dove serve,
+**Collaudo:** su **Indeed / Jooble / Subito.it** reali *(era InfoJobs: chiuso, v. T5a)*:
+login manuale dove serve,
 cattura di annunci veri, rifiuto garbato delle pagine-elenco; riapertura dell'app con
 stato intatto.
 
-### T5b — Il profilo da LinkedIn (voce 2.1.3)
+**Il pedaggio è già pagato.** T5 introdurrebbe WebView2, l'unica libreria con codice
+nativo dentro un exe che deve restare uno solo — ma il cancello l'ha attraversato **T4**
+il 2026-08-10 per la stampa PDF: il pacchetto è già nel progetto, il publish resta un
+file solo, e la WebView gira già in produzione. Qui non c'è un rischio nuovo da provare
+il primo giorno; c'è un componente noto usato in modo nuovo — visibile e navigabile
+invece che fuori schermo.
+
+La tappa si spezza in tre *(deciso con Mirco il 2026-08-12)*. Il criterio **non** è
+quello di T3 e T4 — motore prima dell'interfaccia — perché qui il motore *è*
+l'interfaccia: la cattura non esiste senza una pagina vera aperta in un browser vero, e
+una WebView2 non si sostituisce con un finto come si è fatto per l'AI. Il taglio segue
+allora l'ordine in cui le cose si accendono, ciascuna appoggiata alla precedente:
+**T5a — il browser e le ricerche salvate**: pannello P3 con la WebView2 a tutta area e
+il suo profilo di navigazione nella cartella dati (cap. 6.6); `ricerche.json` con la
+tabella dei portali e le ricerche salvate (cap. 6.3); il campo del link diretto
+(cap. 6.5). Qui si verificano **sul campo gli schemi di indirizzo** dei tre portali del
+primo rilascio (cap. 15, voce 7). Alla fine il bottone **🔍 Ricerca** della barra si
+accende: oggi è lì spento, col tooltip «arriva con la tappa T5» (regola 3.8).
+**T5b — la cattura**: titolo, URL e testo visibile letti dal DOM della pagina che
+l'utente sta guardando, passati ad `AnalizzatoreAnnuncio` — che esiste da T4a e non va
+toccato — e da lì alla coda delle opportunità; più il rifiuto garbato delle pagine che
+un annuncio non lo contengono (cap. 6.4). La fascia incolla-testo di P4 non sparisce: le
+si affianca, e resta di prima classe (cap. 03.6, cap. 12.3).
+**T5c — la Home e il registro (F6)**: pannello P1 con lo stato del profilo, la coda
+delle opportunità con stelle e stati, le scorciatoie ai flussi (cap. 03.6);
+`registro.json` e la macchina degli stati — nuova → interessante → generata → inviata →
+chiusa (cap. 07.3) — che legge le cartelle-opportunità già scritte da T4 (cap. 11.1).
+Accende il bottone **🏠 Home**, e chiude la voce in sospeso «la coda dell'opportunità non
+si riapre»: la promessa del cap. 12.7 smette di essere mantenuta solo sul disco.
+
+Con T5b si chiude anche l'altro debito lasciato aperto da T4: **un annuncio davvero
+pescato da un portale**, non verosimile ma scritto per il collaudo.
+
+### T5d — Il profilo da LinkedIn (voce 2.1.3)
+*Rinominata il 2026-08-12: si chiamava «T5b», nome che le tre gambe di T5 hanno preso.
+La tappa è la stessa, e resta una coda a sé dopo T5.*
 Piccola coda di T5: cattura della **propria** pagina profilo LinkedIn dal browser
 integrato e invio alla strutturazione `importa_cv` già esistente (cap. 06.7). Nessun
 componente nuovo — riusa cattura e prompt di T5 e T3.
@@ -272,7 +308,7 @@ aggiornamento del diario e del README; demo (video) per il portfolio; tag `v1.0`
 ## Ordine e dipendenze
 
 ```
-T0 ─► T1 ─► T2 ─► T3 ─► T4 ─► T5 ─► T5b ─► T6 ─► T9
+T0 ─► T1 ─► T2 ─► T3 ─► T4 ─► T5 ─► T5d ─► T6 ─► T9
                         ├────► T7 (dopo T4)
                         └────► T8 (dopo T4, in parallelo a T6-T7)
 ```

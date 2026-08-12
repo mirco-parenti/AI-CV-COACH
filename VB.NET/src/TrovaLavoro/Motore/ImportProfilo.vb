@@ -78,7 +78,7 @@ Namespace Motore
     ''' invece sempre la stessa e passa dal turno <c>importa_cv</c> del pool, cioè dallo
     ''' stesso strutturatore che serve il dialogo. Un solo posto dove il testo di un CV
     ''' diventa profilo: da qui passeranno anche il ripiego «incollo il testo a mano» e,
-    ''' più avanti, il profilo LinkedIn (T5b, cap. 06.7).</para>
+    ''' più avanti, il profilo LinkedIn (T5d, cap. 06.7).</para>
     ''' <para>Qui non si scrive niente su disco e non si tocca il profilo esistente:
     ''' quello che esce è una <i>proposta</i>. A salvarla — dopo che l'utente l'ha vista e
     ''' corretta — ci pensa il pannello con <see cref="ArchivioProfilo"/>. È la stessa
@@ -182,7 +182,7 @@ Namespace Motore
         ''' <summary>
         ''' Importa un CV da un testo già pronto: è il ripiego quando il documento non si
         ''' lascia leggere («incollalo a mano»), e la porta da cui passerà il profilo
-        ''' LinkedIn (T5b).
+        ''' LinkedIn (T5d).
         ''' </summary>
         ''' <param name="testo">Il testo del CV.</param>
         ''' <param name="origine">Da dove viene, per chi legge l'esito.</param>

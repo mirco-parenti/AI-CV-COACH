@@ -82,6 +82,15 @@ Namespace Motore
         Public ReadOnly Property Opportunita As ArchivioOpportunita
 
         ''' <summary>
+        ''' I portali e le ricerche salvate in vigore (cap. 06.3). C'è sempre: senza file
+        ''' sono i portali predefiniti, e cercare lavoro non dipende dall'AI.
+        ''' </summary>
+        Public ReadOnly Property Ricerche As Dati.Ricerche
+
+        ''' <summary>Da dove le <see cref="Ricerche"/> si rileggono e dove si riscrivono.</summary>
+        Public ReadOnly Property ArchivioRicerche As ArchivioRicerche
+
+        ''' <summary>
         ''' Se c'è tutto ciò che serve per una chiamata all'AI: la chiave <b>e</b> i
         ''' prompt. È la domanda che i pannelli fanno prima di accendere un bottone.
         ''' </summary>
@@ -285,12 +294,35 @@ Namespace Motore
 
             _Archivio = New ArchivioProfilo(Cartella)
             _Opportunita = New ArchivioOpportunita(Cartella)
+
+            _ArchivioRicerche = New ArchivioRicerche(Cartella)
+            _Ricerche = ArchivioRicerche.Carica()
+            RiportaRicerche()
             Nota(If(Archivio.Esiste,
                     $"Profilo presente in «{Cartella.FileProfilo}».",
                     "Nessun profilo salvato: si parte dal bivio «ho già un CV» / «costruiamolo insieme»."))
 
             If Strutturatore IsNot Nothing Then
                 _ImportCv = New ImportProfilo(Strutturatore, Trascrittore)
+            End If
+
+        End Sub
+
+        ''' <summary>
+        ''' Come si racconta ciò che le ricerche hanno da dire. Il file assente è la
+        ''' normalità del primo avvio e resta una nota; un file che <b>c'è</b> e ha qualcosa
+        ''' che non è entrato — uno schema che non è un indirizzo del web, una ricerca che
+        ''' nomina un portale sconosciuto — è un avviso, perché quella riga l'ha scritta
+        ''' l'utente e sta per non trovarsela nel menù.
+        ''' </summary>
+        Private Sub RiportaRicerche()
+
+            If Ricerche.Avviso Is Nothing Then Return
+
+            If Ricerche.Origine = OrigineRicerche.File Then
+                Avvisa(Ricerche.Avviso)
+            Else
+                RiportaRipiego(Ricerche.Avviso, ripiegato:=True, percorso:=Cartella.FileRicerche)
             End If
 
         End Sub

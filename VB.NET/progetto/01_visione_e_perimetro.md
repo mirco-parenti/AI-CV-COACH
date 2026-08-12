@@ -11,7 +11,7 @@ voce 3) — è un'applicazione desktop per Windows 11, distribuita come **un sol
 `.exe`**, che accompagna una persona lungo **tutto** il percorso di candidatura:
 
 1. costruire (o importare) il proprio **profilo professionale**;
-2. **trovare** annunci di lavoro adatti, anche sui grandi portali (Indeed, InfoJobs,
+2. **trovare** annunci di lavoro adatti, anche sui grandi portali (Indeed, Jooble,
    Subito.it…) o partendo da un link;
 3. **valutare** ogni annuncio con un punteggio di match onesto (stelle 0–5, con
    requisiti eliminatori che fanno da cancello);
