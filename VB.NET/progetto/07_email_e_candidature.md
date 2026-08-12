@@ -86,6 +86,33 @@ bianco l'uso reale del prodotto nella sua ricerca di lavoro. Per questo
 l'esportazione del registro in un riepilogo leggibile (CSV/markdown) è prevista fin
 dal primo rilascio.
 
+### Com'è stato costruito (T5c, 2026-08-13)
+
+- **Le cartelle-opportunità sono la fonte di verità; `registro.json` è un indice
+  rigenerabile.** Un indice è comodo — apre la Home senza leggere venti cartelle — ma non
+  è un secondo posto dove vive il dato: se manca, se non si legge o se non torna coi
+  fatti su disco, si **ricostruisce** dalle cartelle e si riscrive. Chi guarda l'elenco è
+  anche chi lo tiene in riga. La conseguenza vale la regola: una cartella copiata a mano
+  compare nell'elenco da sola, e una cancellata sparisce senza lasciare una voce fantasma.
+- **Le candidature nate prima deducono il proprio stato dai file che hanno.** Le cartelle
+  scritte da T4 e T5b non hanno il campo `stato` — nasce qui — e riscrivere all'indietro i
+  file dell'utente per aggiungercelo sarebbe un'invasione: se ci sono i documenti è
+  *generata*, se ci sono i giudizi è *interessante*, altrimenti è *nuova*. Lo **scarto non
+  si deduce**: è una decisione, e una decisione che nessuno ha scritto non c'è.
+- **`inviata` ed `esito` esistono nello schema ma dall'interfaccia non si raggiungono**:
+  sono di T6, con la conferma dell'utente descritta qui sopra. Stanno nello schema fin
+  d'ora perché T6 aggiunga dei passaggi e non una migrazione dei file scritti fino a lì.
+  Per la stessa ragione **il contatore delle inviate non c'è ancora**: fino a T6 sarebbe
+  fermo a zero, e un contatore che non può muoversi non conta niente. Restano a T6 anche
+  il promemoria di follow-up e, nella voce di registro, il destinatario e l'esito.
+- **Lo scarto è terminale, e chiede conferma.** Da uno scarto non si torna indietro
+  dall'interfaccia, ma la cartella **resta su disco**: si scarta, non si cancella — la
+  conferma lo dice con parole sue, invece di un generico «sei sicuro?». Chi ci ripensa
+  davvero ha ancora tutto. *(Ripescare uno scarto dall'interfaccia è in `idee_future.md`.)*
+- **L'esportazione in CSV/markdown non è stata fatta qui** e sta in `in_sospeso.md`: è
+  promessa per il primo rilascio, non per questa tappa, e a T5c avrebbe aggiunto una
+  strada di uscita a dei dati che stavano ancora prendendo forma.
+
 ## 7.4 Sicurezza e buon senso
 
 - Il programma **non spedisce**: scrive un file e lo consegna al programma di posta

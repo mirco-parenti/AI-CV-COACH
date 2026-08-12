@@ -336,6 +336,55 @@ const ATTREZZI = [
   },
 
   {
+    name: "scegli_riga",
+    description:
+      "Sceglie una riga in una lista dell'applicazione — la coda delle candidature di P1 — cercandola " +
+      "per un pezzo di quello che c'è scritto nelle sue celle, non solo nella prima. Ci clicca sopra " +
+      "come farebbe una persona, e poi verifica che risulti davvero scelta. Senza «testo» non sceglie " +
+      "niente: elenca le righe che ci sono, con una freccia su quella di adesso. Con «doppio» fa il " +
+      "doppio clic, che nella coda apre la candidatura.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        testo: {
+          type: "string",
+          description: "Un pezzo del contenuto della riga: «Rossi S.p.A.», «magazziniere».",
+        },
+        doppio: {
+          type: "boolean",
+          description: "Vero per fare il doppio clic invece del clic solo.",
+        },
+      },
+      additionalProperties: false,
+    },
+    async esegui({ testo: contenuto, doppio = false }) {
+      return testo(await interfaccia({ azione: "riga", testo: contenuto, doppio }));
+    },
+  },
+
+  {
+    name: "rispondi_finestra",
+    description:
+      "Risponde a una finestra di messaggio dell'applicazione — una conferma, un avviso — premendo " +
+      "il bottone che si dice, per nome («Sì», «No», «OK», «Annulla»). Senza «bottone» non risponde: " +
+      "legge cosa chiede e quali scelte dà, così si sa cosa si sta per confermare. Per la finestra di " +
+      "scelta file c'è «scegli_file»: quella ha la casella del nome, questa no.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        bottone: {
+          type: "string",
+          description: "L'etichetta del bottone da premere, anche parziale. Senza, li elenca.",
+        },
+      },
+      additionalProperties: false,
+    },
+    async esegui({ bottone }) {
+      return testo(await interfaccia({ azione: "rispondi", bottone }));
+    },
+  },
+
+  {
     name: "scegli_file",
     description:
       "Risponde alla finestra di scelta file che l'applicazione ha aperto — «Importa da un CV…», un " +
@@ -518,8 +567,27 @@ async function rispondiA(richiesta) {
     const attrezzo = ATTREZZI.find((a) => a.name === params?.name);
     if (!attrezzo) return errore(id, -32602, `Attrezzo sconosciuto: ${params?.name}`);
 
+    // Un argomento obbligatorio che non arriva va fermato **qui**, non lasciato passare
+    // vuoto: chi cerca un controllo con l'etichetta vuota la trova su tutto, prende il
+    // primo bottone della finestra e riferisce di averlo premuto. È successo il
+    // 2026-08-12 chiamando «clic» col nome di argomento sbagliato, e la risposta è stata
+    // «Premuto «🏠 Home»» — un successo per una cosa mai chiesta.
+    const argomenti = params.arguments ?? {};
+    const mancanti = (attrezzo.inputSchema.required ?? []).filter(
+      (quale) => argomenti[quale] === undefined || argomenti[quale] === "",
+    );
+
+    if (mancanti.length > 0) {
+      return errore(
+        id,
+        -32602,
+        `A «${attrezzo.name}» manca ${mancanti.map((quale) => `«${quale}»`).join(" e ")}. ` +
+          `Gli argomenti che vuole sono: ${Object.keys(attrezzo.inputSchema.properties ?? {}).join(", ")}.`,
+      );
+    }
+
     try {
-      return risultato(id, await attrezzo.esegui(params.arguments ?? {}));
+      return risultato(id, await attrezzo.esegui(argomenti));
     } catch (guasto) {
       return risultato(id, testo(`L'attrezzo è inciampato: ${guasto.message}`, true));
     }

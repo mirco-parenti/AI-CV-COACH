@@ -250,6 +250,7 @@ Public Class PannelloDocumenti
 
         Try
             _contesto.Opportunita.Salva(_candidatura)
+            AnnotaNelRegistro()
             Return "CV e lettera sono pronti, e li ho salvati con la candidatura." & vbLf &
                    "Esportali in DOCX o PDF quando ti vanno bene."
 
@@ -259,6 +260,25 @@ Public Class PannelloDocumenti
         End Try
 
     End Function
+
+    ''' <summary>
+    ''' Tiene in riga la vista d'insieme dopo che la cartella è stata scritta: da qui la
+    ''' candidatura passa a «generata», ed è quello che la Home deve mostrare (cap. 07.3).
+    ''' </summary>
+    ''' <remarks>
+    ''' Come in P4, il suo <c>Try</c> è separato: un indice che non si lascia scrivere non
+    ''' è un documento perso, e dirlo come se lo fosse sarebbe un falso allarme.
+    ''' </remarks>
+    Private Sub AnnotaNelRegistro()
+
+        Try
+            _contesto.Registro.Annota(_candidatura)
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+        End Try
+
+    End Sub
 
     ''' <summary>Scrive il 📄 CV base accanto al profilo, annotando da quale versione nasce.</summary>
     Private Function ArchiviaIlCvBase() As String
@@ -325,8 +345,12 @@ Public Class PannelloDocumenti
         End If
 
         ' Senza cartella non c'è un «dove»: l'opportunità arriva qui già salvata da P4, ma
-        ' se così non fosse la si salva adesso invece di rifiutare l'esportazione.
-        If String.IsNullOrEmpty(_candidatura.Cartella) Then _contesto.Opportunita.Salva(_candidatura)
+        ' se così non fosse la si salva adesso invece di rifiutare l'esportazione — e una
+        ' cartella nata qui deve comparire nella Home come tutte le altre.
+        If String.IsNullOrEmpty(_candidatura.Cartella) Then
+            _contesto.Opportunita.Salva(_candidatura)
+            AnnotaNelRegistro()
+        End If
 
         Return _documenti.ScriviCandidaturaAsync(_candidatura, formati)
 

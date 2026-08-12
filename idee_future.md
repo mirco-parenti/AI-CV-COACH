@@ -208,6 +208,14 @@ pagina, cioè il primo pezzo di programma che tocca il mondo esterno per davvero
   InfoJobs aveva chiuso). Finché sono quattro va bene; se diventassero molti, servirebbe un
   modo di accorgersene senza riprovarli uno per uno. *(2026-08-12 — emersa verificando i
   portali del primo rilascio, cap. 06.3.)*
+- **Ripescare uno scarto dall'interfaccia** — a T5c lo scarto è **terminale**: si conferma, e
+  da lì l'applicazione non torna indietro. La cartella però **resta su disco** con tutto
+  dentro, quindi il dato per ripensarci c'è già; manca solo il comando, che vorrebbe una sua
+  domanda («a quale stato torna, quello di prima?») e un posto dove metterlo, dato che la
+  Home è il pannello in cui si guarda e non si decide. Rimandata di proposito il 2026-08-12,
+  ragionando con Mirco: un'uscita di sicurezza costruita insieme alla porta rischia di
+  togliere peso alla conferma, che è ciò che rende lo scarto una decisione.
+  *(2026-08-12 — decisa aprendo T5c; cap. 07.3; diario Step 2.13.)*
 
 ## Collaudi e non-regressione (Fase VB.NET)
 
@@ -236,13 +244,8 @@ giudice per la prima volta.
   aspettare che l'applicazione fosse pronta è finita sui controlli sbagliati, e ha scritto in
   una casella del profilo vero. Il rimedio immediato è stato stringere la ricerca dei
   controlli (adesso vuole una parola intera); l'attesa vera resta da fare.
-- **Un attrezzo per rispondere alle finestre di messaggio** — `scegli_file` sa rispondere solo
-  alla scelta di un file; a una `MessageBox` («dimentico questa ricerca?», «chiudo senza
-  salvare?») non risponde nessuno, e finché è aperta l'applicazione non ascolta nient'altro.
-  La mancanza si è sentita il 2026-08-12: la ricerca salvata per prova si è tolta cancellando
-  il file dei dati invece che premendo «Sì». I bottoni di quelle finestre si chiamano per
-  numero, come quelli del dialogo dei file: è lo stesso mestiere già scritto una volta.
-  *(2026-08-12 — emersa provando T5b sull'applicazione vera.)*
+- ~~**Un attrezzo per rispondere alle finestre di messaggio**~~ — **realizzato a T5c**
+  (vedi «Realizzate»).
 
 ## Realizzate
 
@@ -318,6 +321,17 @@ implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
   risultati. Restano fuori due rifiniture, annotate nel backlog attivo (le cornici `iframe` e
   la normalizzazione dell'indirizzo). *(2026-08-12, T5a-T5b; diario Step 2.11 e 2.12;
   cap. 06.1/06.4.)*
+- ✅ **Un attrezzo per rispondere alle finestre di messaggio** — è `rispondi_finestra`, nato a
+  T5c perché lo scarto va confermato e una `MessageBox` aperta blocca tutto il resto. Preme il
+  bottone per **nome** («Sì», «No», «OK») e non per numero, come si era ipotizzato: quali
+  bottoni mostri una finestra di messaggio non si sa in anticipo, mentre il testo c'è sempre
+  (ripulito della `&` dell'acceleratore). Senza argomenti **legge cosa chiede** e quali scelte
+  dà, il che è la parte che conta davvero: si sa cosa si sta per confermare invece di premere
+  al buio. Ha anche insegnato a distinguere le due finestre che Windows chiama allo stesso
+  modo — la scelta file ha la casella del nome, una finestra di messaggio no. La prima cosa
+  provata con lui è stata uno «Scarta» a cui si è risposto **No**: è così che si collauda un
+  comando distruttivo sui dati veri di qualcuno senza distruggere niente.
+  *(2026-08-13, T5c; `strumenti/mcp-collaudi/README.md`; diario Step 2.13.)*
 - ✅ **Validazione di range della taratura** — ogni numero letto da `taratura.json` dichiara
   ora l'intervallo in cui ha senso, e un valore fuori scala viene **scartato e annotato**
   invece di entrare zitto: un `"clamp_su": -50` non falsa più le stelle. Fatta a T4 perché è

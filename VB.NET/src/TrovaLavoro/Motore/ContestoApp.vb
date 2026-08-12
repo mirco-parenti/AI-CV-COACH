@@ -82,6 +82,14 @@ Namespace Motore
         Public ReadOnly Property Opportunita As ArchivioOpportunita
 
         ''' <summary>
+        ''' La vista d'insieme delle candidature (cap. 07.3). C'è sempre, come l'archivio
+        ''' da cui si ricostruisce. Qui sta l'<b>archivio</b> e non il registro già letto:
+        ''' l'elenco cambia sotto i piedi — una candidatura in più, uno scarto — e chi lo
+        ''' mostra se lo rilegge quando torna in vista (cap. 03.8).
+        ''' </summary>
+        Public ReadOnly Property Registro As ArchivioRegistro
+
+        ''' <summary>
         ''' I portali e le ricerche salvate in vigore (cap. 06.3). C'è sempre: senza file
         ''' sono i portali predefiniti, e cercare lavoro non dipende dall'AI.
         ''' </summary>
@@ -294,6 +302,7 @@ Namespace Motore
 
             _Archivio = New ArchivioProfilo(Cartella)
             _Opportunita = New ArchivioOpportunita(Cartella)
+            _Registro = New ArchivioRegistro(Cartella, _Opportunita)
 
             _ArchivioRicerche = New ArchivioRicerche(Cartella)
             _Ricerche = ArchivioRicerche.Carica()

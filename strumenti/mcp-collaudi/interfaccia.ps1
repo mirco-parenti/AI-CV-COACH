@@ -17,6 +17,11 @@
 #   { "azione": "scegli",      "nome": "Cerca su" }              # senza «voce»: le elenca
 #   { "azione": "scegli_file", "percorso": "C:\\...\\CV.pdf" }
 #   { "azione": "scegli_file", "annulla": true }
+#   { "azione": "riga",        "testo": "Rossi S.p.A." }        # sceglie una riga di lista
+#   { "azione": "riga",        "testo": "Rossi", "doppio": true }
+#   { "azione": "riga" }                                        # senza «testo»: le elenca
+#   { "azione": "rispondi",    "bottone": "No" }                # finestra di messaggio
+#   { "azione": "rispondi" }                                    # senza: legge e elenca
 
 param([Parameter(Mandatory = $true)][string]$Argomenti)
 
@@ -89,6 +94,21 @@ public class Finestre {
             return true;
         }, IntPtr.Zero);
         return trovata;
+    }
+
+    /// <summary>
+    /// I pezzi di una finestra, uno per riga: «classe|numero|testo». Serve alle finestre
+    /// di messaggio, dove i bottoni non hanno un numero che si possa sapere in anticipo —
+    /// dipendono da quali bottoni la finestra ha — e vanno riconosciuti dal loro testo.
+    /// </summary>
+    public static string Figli(IntPtr padre) {
+        StringBuilder tutti = new StringBuilder();
+        EnumChildWindows(padre, delegate(IntPtr h, IntPtr l) {
+            tutti.Append(Classe(h)).Append("|").Append(GetDlgCtrlID(h)).Append("|")
+                 .Append(TestoDi(h).Replace("\r", " ").Replace("\n", " ")).Append("\n");
+            return true;
+        }, IntPtr.Zero);
+        return tutti.ToString();
     }
 
     /// <summary>Una finestra figlia, cercata per classe e numero: è così che si nominano i pezzi di un dialogo.</summary>
@@ -386,10 +406,20 @@ switch ($azione) {
         foreach ($elemento in $radice.FindAll($tutti, $condizione)) {
 
             $tipo = $elemento.Current.ControlType.ProgrammaticName -replace "ControlType\.", ""
-            if ($tipo -notin @("Button", "Edit", "Tab", "TabItem", "List", "ComboBox", "CheckBox", "DataItem")) { continue }
+            if ($tipo -notin @("Button", "Edit", "Tab", "TabItem", "List", "Table", "ComboBox", "CheckBox", "DataItem")) { continue }
 
             $etichetta = $elemento.Current.Name
             if ([string]::IsNullOrWhiteSpace($etichetta)) { $etichetta = "(senza nome)" }
+
+            # Una lista in vista dettagli non ha nome — la coda di P1 si chiama «(senza
+            # nome)» — e il suo nome non è quel che serve sapere: serve sapere quante righe
+            # ha, e che si sceglie con «scegli_riga».
+            if ($tipo -in @("Table", "List")) {
+                $quante = @($elemento.FindAll($figli, (New-Object System.Windows.Automation.PropertyCondition(
+                    [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
+                    [System.Windows.Automation.ControlType]::ListItem)))).Count
+                $etichetta = "$etichetta — $quante righe (si scelgono con «scegli_riga»)"
+            }
 
             # Di un menù a tendina l'etichetta non basta: quella non cambia mai, e quel che
             # serve sapere è la voce che mostra adesso. Senza, l'unico modo di scoprirla
@@ -408,13 +438,18 @@ switch ($azione) {
             Write-Output ("{0,-8} {1,-8} {2}" -f $tipo, $stato, $etichetta)
         }
 
-        # Una finestra di scelta file aperta cambia tutto: finché non le si risponde
-        # l'applicazione non ascolta nessuno, e i controlli elencati qui sopra sono di
-        # una finestra che in quel momento non si lascia toccare.
+        # Una finestra aperta cambia tutto: finché non le si risponde l'applicazione non
+        # ascolta nessuno, e i controlli elencati qui sopra sono di una finestra che in
+        # quel momento non si lascia toccare. Le due specie si distinguono da un dettaglio
+        # concreto — la scelta file ha la casella del nome (Edit 1148), una finestra di
+        # messaggio no — e vogliono due attrezzi diversi: dirlo qui evita di provare
+        # quello sbagliato.
         $dialogo = [Finestre]::Dialogo([uint32]$processo.Id)
         if ($dialogo -ne [IntPtr]::Zero) {
+            $conCasella = [Finestre]::Figlia($dialogo, "Edit", 1148) -ne [IntPtr]::Zero
+            $come = if ($conCasella) { "scegli_file" } else { "rispondi_finestra" }
             Write-Output ""
-            Write-Output "C'è una finestra aperta che aspetta una risposta: «$([Finestre]::Titolo($dialogo))». Rispondile con «scegli_file»."
+            Write-Output "C'è una finestra aperta che aspetta una risposta: «$([Finestre]::Titolo($dialogo))». Rispondile con «$come»."
         }
     }
 
@@ -451,7 +486,12 @@ switch ($azione) {
             # un altro bottone.
             $dialogo = [Finestre]::Dialogo([uint32]$processo.Id)
             if ($dialogo -ne [IntPtr]::Zero) {
-                Write-Output "Premuto «$etichetta»: ha aperto «$([Finestre]::Titolo($dialogo))», che ora aspetta una risposta (rispondi con «scegli_file»)."
+                # Quale delle due specie di finestra sia lo dice la casella del nome file:
+                # ce l'ha la scelta file, non una finestra di messaggio. Dirlo storto manda
+                # a provare l'attrezzo sbagliato, e la finestra intanto blocca tutto.
+                $conCasella = [Finestre]::Figlia($dialogo, "Edit", 1148) -ne [IntPtr]::Zero
+                $come = if ($conCasella) { "scegli_file" } else { "rispondi_finestra" }
+                Write-Output "Premuto «$etichetta»: ha aperto «$([Finestre]::Titolo($dialogo))», che ora aspetta una risposta (rispondi con «$come»)."
             } else {
                 Write-Output "Premuto «$etichetta»."
             }
@@ -715,6 +755,201 @@ switch ($azione) {
             Write-Output "Scelto «$percorso»: «$titolo» si è chiusa e l'applicazione ha ripreso il lavoro."
         } else {
             Write-Output "«$titolo» è ancora aperta: il percorso non le è piaciuto (esiste? è il formato che chiede?)."
+            exit 1
+        }
+    }
+
+    "riga" {
+
+        # Una lista in vista dettagli — la coda delle candidature di P1 — UI Automation la
+        # espone come **Table senza nome**, con una ListItem per riga e dentro una Text per
+        # colonna. Il nome della riga è la sola prima colonna: cercare «Rossi S.p.A.» fra i
+        # nomi delle righe non troverebbe niente, perché lì c'è scritto «★☆☆☆☆ 1,0».
+        # Perciò la riga si cerca **nel testo delle sue celle**.
+        $voluto = [string]$scelte.testo
+
+        $tabelle = @($radice.FindAll($tutti, (New-Object System.Windows.Automation.OrCondition(
+            (New-Object System.Windows.Automation.PropertyCondition(
+                [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
+                [System.Windows.Automation.ControlType]::Table)),
+            (New-Object System.Windows.Automation.PropertyCondition(
+                [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
+                [System.Windows.Automation.ControlType]::List))))) |
+            Where-Object { -not $_.Current.IsOffscreen -and $_.Current.FrameworkId -ne "Chrome" })
+
+        if ($tabelle.Count -eq 0) {
+            Write-Output "Nel pannello che si vede adesso non c'è nessuna lista."
+            exit 1
+        }
+
+        $lista = $tabelle[0]
+
+        $condizioneRighe = New-Object System.Windows.Automation.PropertyCondition(
+            [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
+            [System.Windows.Automation.ControlType]::ListItem)
+
+        $righe = @($lista.FindAll($figli, $condizioneRighe))
+
+        if ($righe.Count -eq 0) {
+            Write-Output "La lista è vuota: non c'è nessuna riga da scegliere."
+            exit 0
+        }
+
+        # Il testo intero di una riga: il suo nome più tutte le celle.
+        function TestoDellaRiga($riga) {
+            $celle = @($riga.FindAll($tutti, (New-Object System.Windows.Automation.PropertyCondition(
+                [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
+                [System.Windows.Automation.ControlType]::Text))) | ForEach-Object { $_.Current.Name })
+
+            if ($celle.Count -eq 0) { return $riga.Current.Name }
+            return ($celle -join " · ")
+        }
+
+        # Senza «testo» non si sceglie niente: si racconta cosa c'è, con una freccia sulla
+        # riga di adesso. È il gemello di «scegli» sui menù.
+        if ([string]::IsNullOrEmpty($voluto)) {
+
+            Write-Output "La lista ha $($righe.Count) righe:"
+            foreach ($r in $righe) {
+                $suo = $null
+                $scelta = $false
+                if ($r.TryGetCurrentPattern(
+                        [System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$suo)) {
+                    $scelta = $suo.Current.IsSelected
+                }
+                $segno = if ($scelta) { "→" } else { " " }
+                Write-Output "  $segno $(TestoDellaRiga $r)"
+            }
+            exit 0
+        }
+
+        $trovata = $righe | Where-Object { (TestoDellaRiga $_) -like "*$voluto*" } | Select-Object -First 1
+
+        if (-not $trovata) {
+            Write-Output "Nessuna riga contiene «$voluto». Ci sono:"
+            foreach ($r in $righe) { Write-Output "  $(TestoDellaRiga $r)" }
+            exit 1
+        }
+
+        $suoTesto = TestoDellaRiga $trovata
+        $area = $trovata.Current.BoundingRectangle
+
+        if (($area.Width -le 0) -or ($area.Height -le 0)) {
+            Write-Output "La riga «$suoTesto» non ha una posizione sullo schermo: non ci posso cliccare."
+            exit 1
+        }
+
+        [Finestre]::SetForegroundWindow($radice.Current.NativeWindowHandle) | Out-Null
+        Start-Sleep -Milliseconds 250
+
+        # Si sceglie col mouse per la stessa ragione dei bottoni e delle tendine: la
+        # Select() dello schema cambia la selezione senza far scattare gli eventi
+        # dell'applicazione, e allora il collaudo direbbe una bugia.
+        $x = [int]($area.X + 40)
+        $y = [int]($area.Y + $area.Height / 2)
+
+        [Finestre]::Clic($x, $y)
+        Start-Sleep -Milliseconds 400
+
+        if ($scelte.doppio) {
+            # Il doppio clic è due clic vicini: il secondo entro il tempo di sistema.
+            [Finestre]::Clic($x, $y)
+            Start-Sleep -Milliseconds 80
+            [Finestre]::Clic($x, $y)
+            Start-Sleep -Milliseconds 900
+            Write-Output "Doppio clic sulla riga «$suoTesto»."
+            exit 0
+        }
+
+        # La prova non è aver cliccato: è che la riga adesso risulti scelta.
+        $stato = $null
+        if ($trovata.TryGetCurrentPattern(
+                [System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$stato)) {
+
+            if ($stato.Current.IsSelected) {
+                Write-Output "Scelta la riga «$suoTesto»."
+            } else {
+                Write-Output "Ho cliccato la riga «$suoTesto», ma non risulta scelta: la scelta non ha attecchito."
+                exit 1
+            }
+        } else {
+            Write-Output "Cliccata la riga «$suoTesto» (non racconta se è scelta: da qui non posso confermarlo)."
+        }
+    }
+
+    "rispondi" {
+
+        # Una finestra di messaggio è una finestra di dialogo come quella di scelta file
+        # (classe #32770), e come quella non si pilota con UI Automation: si passa dalle
+        # finestre native. La differenza è che i suoi bottoni **non hanno un numero che si
+        # possa sapere in anticipo** — dipendono da quali bottoni la finestra mostra — e si
+        # riconoscono dal testo.
+        $finestra = [Finestre]::Dialogo([uint32]$processo.Id)
+
+        if ($finestra -eq [IntPtr]::Zero) {
+            Write-Output "Nessuna finestra aperta che aspetti una risposta."
+            exit 1
+        }
+
+        $titolo = [Finestre]::Titolo($finestra)
+        $pezzi = @([Finestre]::Figli($finestra) -split "`n" | Where-Object { $_ })
+
+        $bottoni = @()
+        $messaggio = @()
+
+        foreach ($pezzo in $pezzi) {
+            $parti = $pezzo -split "\|", 3
+            if ($parti.Count -lt 3) { continue }
+
+            if ($parti[0] -eq "Button") {
+                $bottoni += [pscustomobject]@{ Id = [int]$parti[1]; Testo = $parti[2].Replace("&", "") }
+            } elseif ($parti[0] -eq "Static" -and $parti[2].Trim()) {
+                $messaggio += $parti[2].Trim()
+            }
+        }
+
+        if ($bottoni.Count -eq 0) {
+            Write-Output "«$titolo» non ha bottoni: non è una finestra di messaggio (una scelta file si chiude con «scegli_file»)."
+            exit 1
+        }
+
+        $voluto = [string]$scelte.bottone
+
+        # Senza «bottone» non si risponde: si legge cosa chiede e che scelte dà. È il modo
+        # di sapere cosa si sta per confermare invece di premere al buio.
+        if ([string]::IsNullOrEmpty($voluto)) {
+            Write-Output "«$titolo» chiede: $($messaggio -join " ")"
+            Write-Output "Bottoni: $(($bottoni | ForEach-Object { $_.Testo }) -join " · ")"
+            exit 0
+        }
+
+        $scelto = $bottoni | Where-Object { $_.Testo -eq $voluto } | Select-Object -First 1
+        if (-not $scelto) {
+            $scelto = $bottoni | Where-Object { $_.Testo -like "*$voluto*" } | Select-Object -First 1
+        }
+
+        if (-not $scelto) {
+            Write-Output "In «$titolo» non c'è nessun bottone «$voluto». Ci sono: $(($bottoni | ForEach-Object { $_.Testo }) -join " · ")."
+            exit 1
+        }
+
+        $suo = [Finestre]::Figlia($finestra, "Button", $scelto.Id)
+        if ($suo -eq [IntPtr]::Zero) {
+            Write-Output "Non ho ritrovato il bottone «$($scelto.Testo)» in «$titolo»."
+            exit 1
+        }
+
+        [Finestre]::SetForegroundWindow($finestra) | Out-Null
+        Start-Sleep -Milliseconds 200
+        [Finestre]::SendMessage($suo, [Finestre]::BM_CLICK, [IntPtr]::Zero, [IntPtr]::Zero) | Out-Null
+        Start-Sleep -Milliseconds 900
+
+        # La prova è che la finestra si sia chiusa: finché è lì, l'applicazione non ascolta
+        # nessun altro e il comando dopo mentirebbe.
+        if ([Finestre]::Dialogo([uint32]$processo.Id) -eq [IntPtr]::Zero) {
+            Write-Output "Risposto «$($scelto.Testo)» a «$titolo», che si è chiusa."
+        } else {
+            Write-Output "Ho premuto «$($scelto.Testo)», ma «$titolo» è ancora aperta."
             exit 1
         }
     }

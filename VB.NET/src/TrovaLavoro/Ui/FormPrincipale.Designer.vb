@@ -36,6 +36,7 @@ Partial Class FormPrincipale
         Me.pnlFasciaInferiore = New System.Windows.Forms.Panel()
         Me.lblStato = New System.Windows.Forms.Label()
         Me.pnlBordoFasciaInferiore = New System.Windows.Forms.Panel()
+        Me.pnlHome = New PannelloHome()
         Me.pnlProfilo = New PannelloProfilo()
         Me.pnlDialogo = New PannelloDialogo()
         Me.pnlOpportunita = New PannelloOpportunita()
@@ -172,6 +173,7 @@ Partial Class FormPrincipale
         'pnlAreaCentrale
         '
         Me.pnlAreaCentrale.BackColor = StileApp.SfondoBase
+        Me.pnlAreaCentrale.Controls.Add(Me.pnlHome)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlProfilo)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlDialogo)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlOpportunita)
@@ -183,6 +185,15 @@ Partial Class FormPrincipale
         Me.pnlAreaCentrale.Name = "pnlAreaCentrale"
         Me.pnlAreaCentrale.Size = New System.Drawing.Size(1134, 485)
         Me.pnlAreaCentrale.TabIndex = 1
+        '
+        'pnlHome
+        '
+        Me.pnlHome.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlHome.Location = New System.Drawing.Point(0, 0)
+        Me.pnlHome.Name = "pnlHome"
+        Me.pnlHome.Size = New System.Drawing.Size(1134, 485)
+        Me.pnlHome.TabIndex = 5
+        Me.pnlHome.Visible = False
         '
         'pnlProfilo
         '
@@ -350,6 +361,7 @@ Partial Class FormPrincipale
     Friend WithEvents btnImpostazioni As System.Windows.Forms.Button
     Friend WithEvents pnlBordoBarraSuperiore As System.Windows.Forms.Panel
     Friend WithEvents pnlAreaCentrale As System.Windows.Forms.Panel
+    Friend WithEvents pnlHome As PannelloHome
     Friend WithEvents pnlProfilo As PannelloProfilo
     Friend WithEvents pnlDialogo As PannelloDialogo
     Friend WithEvents pnlOpportunita As PannelloOpportunita

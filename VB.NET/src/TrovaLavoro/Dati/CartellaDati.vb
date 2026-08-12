@@ -142,6 +142,18 @@ Namespace Dati
         End Property
 
         ''' <summary>
+        ''' La vista d'insieme delle candidature (cap. 07.3, cap. 11.1). È l'unico file di
+        ''' questa mappa che non contiene niente di suo: tutto quello che dice sta già
+        ''' nelle cartelle-opportunità, e se manca o non torna si <b>rigenera</b> da lì
+        ''' (v. <see cref="ArchivioRegistro"/>).
+        ''' </summary>
+        Public ReadOnly Property FileRegistro As String
+            Get
+                Return Path.Combine(Radice, "registro.json")
+            End Get
+        End Property
+
+        ''' <summary>
         ''' Dove il motore del browser tiene i suoi dati di navigazione (cap. 11.1). Serve
         ''' alla stampa PDF, che passa da WebView2, e la useranno il browser integrato
         ''' (T5) e la «pulizia dati» delle Impostazioni (T9).

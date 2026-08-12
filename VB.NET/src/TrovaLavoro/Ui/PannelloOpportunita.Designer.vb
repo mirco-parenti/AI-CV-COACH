@@ -35,6 +35,7 @@ Partial Class PannelloOpportunita
         Me.colEsito = New System.Windows.Forms.ColumnHeader()
         Me.pnlPunteggio = New System.Windows.Forms.Panel()
         Me.lblStelle = New System.Windows.Forms.Label()
+        Me.lblStatoCandidatura = New System.Windows.Forms.Label()
         Me.lblNota = New System.Windows.Forms.Label()
         Me.pnlSpiegazione = New System.Windows.Forms.Panel()
         Me.lblEtichettaSpiegazione = New System.Windows.Forms.Label()
@@ -222,6 +223,7 @@ Partial Class PannelloOpportunita
         'pnlPunteggio
         '
         Me.pnlPunteggio.Controls.Add(Me.lblStelle)
+        Me.pnlPunteggio.Controls.Add(Me.lblStatoCandidatura)
         Me.pnlPunteggio.Controls.Add(Me.lblNota)
         Me.pnlPunteggio.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlPunteggio.Location = New System.Drawing.Point(0, 0)
@@ -239,6 +241,19 @@ Partial Class PannelloOpportunita
         Me.lblStelle.Size = New System.Drawing.Size(500, 32)
         Me.lblStelle.TabIndex = 0
         '
+        'lblStatoCandidatura
+        '
+        ' A che punto è questa candidatura (cap. 07.3), accanto alle stelle: riaprendola
+        ' dalla Home è la prima cosa che si vuole sapere dopo il punteggio.
+        Me.lblStatoCandidatura.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblStatoCandidatura.Font = StileApp.FontTitoloGruppo
+        Me.lblStatoCandidatura.ForeColor = StileApp.TestoSecondario
+        Me.lblStatoCandidatura.Location = New System.Drawing.Point(426, 10)
+        Me.lblStatoCandidatura.Name = "lblStatoCandidatura"
+        Me.lblStatoCandidatura.Size = New System.Drawing.Size(300, 20)
+        Me.lblStatoCandidatura.TabIndex = 1
+        Me.lblStatoCandidatura.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
         'lblNota
         '
         Me.lblNota.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
@@ -248,7 +263,7 @@ Partial Class PannelloOpportunita
         Me.lblNota.Location = New System.Drawing.Point(2, 34)
         Me.lblNota.Name = "lblNota"
         Me.lblNota.Size = New System.Drawing.Size(724, 38)
-        Me.lblNota.TabIndex = 1
+        Me.lblNota.TabIndex = 2
         '
         'pnlSpiegazione
         '
@@ -407,6 +422,7 @@ Partial Class PannelloOpportunita
     Friend WithEvents pnlValutazione As System.Windows.Forms.Panel
     Friend WithEvents pnlPunteggio As System.Windows.Forms.Panel
     Friend WithEvents lblStelle As System.Windows.Forms.Label
+    Friend WithEvents lblStatoCandidatura As System.Windows.Forms.Label
     Friend WithEvents lblNota As System.Windows.Forms.Label
     Friend WithEvents lvwGiudizi As System.Windows.Forms.ListView
     Friend WithEvents colSegno As System.Windows.Forms.ColumnHeader

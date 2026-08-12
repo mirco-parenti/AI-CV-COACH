@@ -54,6 +54,13 @@ opportunità sono esaurite.
    messo il tetto al punteggio (≤ 1 stella), lettura d'insieme.
 2. L'utente ordina/filtra la coda per stelle e decide, opportunità per opportunità:
    **«Mi interessa»**, **«Scarto»**, **«Più tardi»**.
+   *Costruito a T5c (2026-08-13), delle tre scelte ne è rimasta **una sola esplicita**.
+   «Mi interessa» non è un bottone: un'opportunità confrontata **è** già interessante — lo
+   stato lo scrive la pipeline quando i giudizi esistono, e chiedere all'utente di
+   ribadirlo sarebbe stato un clic per confermare quel che aveva appena fatto. «Più tardi»
+   non è un bottone per la ragione opposta: rimandare vuol dire **non fare niente**, e la
+   candidatura resta dov'è, in coda. Resta esplicito **«Scarta»**, che è l'unica delle tre
+   a dire qualcosa che dai fatti non si deduce (cap. 07.3).*
 3. Sotto 1,5 stelle l'app **sconsiglia** la candidatura (senza impedirla), come nel
    prototipo.
 
@@ -181,6 +188,10 @@ Per l'utente evoluto che lavora con Claude Desktop / Claude Code:
 - **Conferma prima di scrivere**: nessun dato entra nel profilo, nessun file viene
   scritto, nessuna email parte senza un passaggio esplicito di conferma.
 - **Tutto riapribile**: ogni opportunità conserva annuncio, giudizi, documenti
-  generati e stato; si può riprendere domani da dove si era rimasti.
+  generati e stato; si può riprendere domani da dove si era rimasti. *Dal 2026-08-10 (T4)
+  questo era vero **sul disco** ma non a video: le cartelle c'erano e l'interfaccia non
+  sapeva tornarci. **Da T5c (2026-08-13) la promessa è mantenuta per intero**: la coda
+  della Home riapre qualunque candidatura, comprese quelle scritte prima che la Home
+  esistesse. Una promessa mantenuta solo dove l'utente non guarda non è mantenuta.*
 - **Onestà visibile**: stelle, ⛔ eliminatori e avvisi di soglia non si nascondono mai;
   sono il valore del prodotto, non un fastidio da minimizzare.

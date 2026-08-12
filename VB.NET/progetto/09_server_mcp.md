@@ -17,7 +17,8 @@ annuncio e dimmi se vale la pena candidarmi» — e Claude userà **la nostra pi
 > `strumenti/mcp-collaudi/` vive un secondo server MCP che **non è parte del prodotto**:
 > non entra nell'eseguibile, non si distribuisce e non tocca la pipeline. Quello espone
 > gli attrezzi per **provare** l'applicazione — compilare, far girare il banco, avviarla,
-> fotografarla, premerle i bottoni, risponderle quando chiede un file. Questo capitolo
+> fotografarla, premerle i bottoni, sceglierle una voce da una tendina o una riga da un
+> elenco, risponderle quando chiede un file o una conferma. Questo capitolo
 > parla invece dei tool che l'applicazione **offre** ai client AI dell'utente (tappa T9).
 > Uno serve a chi costruisce il programma, l'altro a chi lo usa.
 

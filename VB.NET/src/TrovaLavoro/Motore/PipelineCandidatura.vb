@@ -79,7 +79,14 @@ Namespace Motore
             Dim annuncio As JsonNode = Await _analizzatore.AnalizzaAsync(testoAnnuncio, annulla).
                 ConfigureAwait(False)
 
-            Return New Opportunita With {.Annuncio = annuncio, .Creata = Date.Now}
+            ' L'opportunità nasce «nuova» (cap. 07.3): c'è l'annuncio, non ancora un
+            ' confronto. Lo stesso istante fa da data di nascita e da data del primo
+            ' stato, che sono la stessa cosa detta due volte solo se le si scrive diverse.
+            Dim ora As Date = Date.Now
+            Dim opportunita As New Opportunita With {.Annuncio = annuncio, .Creata = ora}
+            opportunita.Avanza(StatoOpportunita.Nuova, ora)
+
+            Return opportunita
 
         End Function
 
@@ -114,6 +121,13 @@ Namespace Motore
                 opportunita.Mitigazioni = New JsonObject From {{"mitigazioni", New JsonArray()}}
             End If
 
+            ' Confrontata vuol dire «interessante» (cap. 07.3): le stelle ci sono e adesso
+            ' si può decidere. Un'opportunità già andata avanti — i documenti scritti, o
+            ' uno scarto deciso — non torna indietro perché la si riconfronta.
+            If opportunita.Stato = StatoOpportunita.Nuova Then
+                opportunita.Avanza(StatoOpportunita.Interessante)
+            End If
+
         End Function
 
         ''' <summary>
@@ -143,6 +157,12 @@ Namespace Motore
             opportunita.Lettera = Await _generatore.GeneraLetteraAsync(
                 profiloJson, opportunita.Annuncio, giudizi, opportunita.Cv,
                 ElencoMitigazioni(opportunita.Mitigazioni), annulla).ConfigureAwait(False)
+
+            ' I documenti ci sono: la candidatura è «generata» (cap. 07.3). Rigenerarli
+            ' non è un passaggio nuovo, e la data resta quella della prima volta.
+            If opportunita.Stato = StatoOpportunita.Interessante Then
+                opportunita.Avanza(StatoOpportunita.Generata)
+            End If
 
         End Function
 

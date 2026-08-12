@@ -255,7 +255,7 @@ Public Class PannelloOpportunita
                 MostraLOpportunita()
                 FasciaDIngresso(aperta:=False)
 
-                RaccontaLoStato(Archivia(candidatura), StileApp.TestoSecondario)
+                RaccontaLoStato(Archivia(candidatura, RiassuntoDelMatch()), StileApp.TestoSecondario)
 
             Catch ex As OperationCanceledException
                 RaccontaLoStato("Analisi annullata: non ho scritto niente.", StileApp.TestoSecondario)
@@ -299,21 +299,78 @@ Public Class PannelloOpportunita
     ''' pagato all'AI non si butta per un disco che non collabora — ma non si finge
     ''' nemmeno che sia al sicuro.
     ''' </summary>
-    Private Function Archivia(candidatura As Opportunita) As String
+    ''' <param name="riassunto">
+    ''' Cosa è appena successo, detto da chi lo sa: il match dopo un confronto, lo scarto
+    ''' dopo uno scarto. Qui si aggiunge solo dove la candidatura è finita.
+    ''' </param>
+    Private Function Archivia(candidatura As Opportunita, riassunto As String) As String
 
-        If _contesto Is Nothing Then Return RiassuntoDelMatch()
+        If _contesto Is Nothing Then Return riassunto
 
         Try
             _contesto.Opportunita.Salva(candidatura)
-            Return RiassuntoDelMatch() & vbLf & $"Salvata in «{candidatura.Cartella}»."
+            AnnotaNelRegistro(candidatura)
+            Return riassunto & vbLf & $"Salvata in «{candidatura.Cartella}»."
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException
-            Return RiassuntoDelMatch() & vbLf &
+            Return riassunto & vbLf &
                    $"Attenzione: non sono riuscita a salvarla su disco ({ex.Message})."
         End Try
 
     End Function
+
+    ''' <summary>
+    ''' Tiene in riga la vista d'insieme dopo che la cartella è stata scritta (cap. 07.3).
+    ''' </summary>
+    ''' <remarks>
+    ''' Ha il suo <c>Try</c> apposta, separato da quello di <see cref="Archivia"/>: un
+    ''' indice che non si lascia scrivere <b>non</b> è una candidatura persa — quella sta
+    ''' nella sua cartella — e dirlo all'utente come se lo fosse sarebbe un falso allarme.
+    ''' La Home se lo rigenera da sé alla prossima occhiata.
+    ''' </remarks>
+    Private Sub AnnotaNelRegistro(candidatura As Opportunita)
+
+        Try
+            _contesto.Registro.Annota(candidatura)
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' Rimette in mostra una candidatura già scritta su disco, com'era: l'annuncio letto,
+    ''' le stelle, i giudizi (cap. 12.7). Non chiama l'AI e non cambia niente — è una
+    ''' riapertura, ed è la strada che arriva dalla coda della Home.
+    ''' </summary>
+    Public Sub RiapriLaCandidatura(candidatura As Opportunita)
+
+        If candidatura Is Nothing Then Throw New ArgumentNullException(NameOf(candidatura))
+        If AiAlLavoro Then Return
+
+        _opportunita = candidatura
+        txtAnnuncio.Clear()
+
+        If candidatura.Confrontata Then
+            MostraLOpportunita()
+            FasciaDIngresso(aperta:=False)
+        Else
+            ' Una candidatura rimasta al solo annuncio non ha giudizi da mostrare: si
+            ' riapre con la fascia aperta, che è da dove si riprende.
+            MostraLaValutazione(Nothing)
+            txtAnnuncioLetto.Text = VistaAnnuncio.Riassunto(candidatura.Annuncio)
+            FasciaDIngresso(aperta:=True)
+        End If
+
+        RaccontaLoStato(
+            $"Riaperta da «{Path.GetFileName(If(candidatura.Cartella, String.Empty))}». " &
+            RiassuntoDelMatch(), StileApp.TestoSecondario)
+
+        AggiornaComandi()
+
+    End Sub
 
     ''' <summary>
     ''' La versione di profilo con cui si sta confrontando: è ciò che tiene spiegabile un
@@ -392,6 +449,7 @@ Public Class PannelloOpportunita
             MostraLaNota("", StileApp.TestoSecondario)
             lvwGiudizi.EndUpdate()
             MostraLaLetturaDInsieme()
+            MostraLoStatoDellaCandidatura()
             AggiornaComandi()
             Return
         End If
@@ -407,7 +465,33 @@ Public Class PannelloOpportunita
         MostraLaNota(NotaDaMostrare(vista), If(vista.GateEliminatorio OrElse vista.Sconsigliata,
                                                StileApp.Pericolo, StileApp.TestoSecondario))
         MostraLaLetturaDInsieme()
+        MostraLoStatoDellaCandidatura()
         AggiornaComandi()
+
+    End Sub
+
+    ''' <summary>
+    ''' A che punto è questa candidatura, accanto alle stelle (cap. 07.3): riaprendola
+    ''' dalla Home è la prima cosa che si vuole sapere dopo il punteggio. Con la data del
+    ''' passaggio, quando c'è — le candidature scritte prima di T5c non ce l'hanno.
+    ''' </summary>
+    Private Sub MostraLoStatoDellaCandidatura()
+
+        If _opportunita Is Nothing Then
+            lblStatoCandidatura.Text = ""
+            Return
+        End If
+
+        Dim quando As Date
+        Dim scritto As String = StatiOpportunita.Etichetta(_opportunita.Stato)
+
+        If _opportunita.DateStati.TryGetValue(_opportunita.Stato, quando) Then
+            scritto &= $" il {quando:dd/MM/yyyy}"
+        End If
+
+        lblStatoCandidatura.Text = scritto
+        lblStatoCandidatura.ForeColor = If(_opportunita.Stato = StatoOpportunita.Scartata,
+                                           StileApp.Pericolo, StileApp.TestoSecondario)
 
     End Sub
 
@@ -543,6 +627,34 @@ Public Class PannelloOpportunita
         RaiseEvent DocumentiRichiesti(Me, EventArgs.Empty)
     End Sub
 
+    ''' <summary>
+    ''' Scarta la candidatura in mostra (cap. 07.3): la dà per chiusa, senza cancellare
+    ''' niente. Si chiede conferma prima — è una decisione che non si disfa, e la regola
+    ''' del cap. 12.7 è che nessuno scriva senza un passaggio esplicito.
+    ''' </summary>
+    Private Sub btnScarta_Click(sender As Object, e As EventArgs) Handles btnScarta.Click
+
+        If _opportunita Is Nothing OrElse AiAlLavoro Then Return
+
+        Dim risposta As DialogResult = MessageBox.Show(
+            "Vuoi scartare questa candidatura?" & vbLf &
+            "Non cancello niente: resta nella sua cartella e la ritrovi nella Home. " &
+            "Ma la do per chiusa, e da uno scarto non si torna indietro.",
+            "Scarta l'opportunità", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button2)
+
+        If risposta <> DialogResult.Yes Then Return
+
+        _opportunita.Avanza(StatoOpportunita.Scartata)
+
+        RaccontaLoStato(Archivia(_opportunita, "Scartata: la do per chiusa."),
+                        StileApp.TestoSecondario)
+
+        MostraLoStatoDellaCandidatura()
+        AggiornaComandi()
+
+    End Sub
+
     Private Sub txtAnnuncio_TextChanged(sender As Object, e As EventArgs) Handles txtAnnuncio.TextChanged
         AggiornaComandi()
     End Sub
@@ -614,10 +726,6 @@ Public Class PannelloOpportunita
         _suggerimenti.SetToolTip(btnBrainstorm,
                                  "Il ragionamento sull'opportunità, con gli appunti di mira, arriva con la tappa T7.")
 
-        btnScarta.Enabled = False
-        _suggerimenti.SetToolTip(btnScarta,
-                                 "Scartare un'opportunità vuole il registro delle candidature, che arriva con la tappa T5c.")
-
     End Sub
 
     ''' <summary>
@@ -663,8 +771,11 @@ Public Class PannelloOpportunita
 
         If _vista Is Nothing Then Return ""
 
+        ' Il trattino e non un secondo «su»: le stelle si scrivono già «4,3 su 5», e
+        ' «4,3 su 5 su 5 voci giudicate» è una frase che inciampa. Si è vista riaprendo una
+        ' candidatura da cinque voci sull'applicazione vera (2026-08-12).
         Dim conteggio As Integer = _vista.Giudizi.Count
-        Return $"Confronto fatto: {StelleScritte(_vista.Stelle)} su {conteggio} " &
+        Return $"Confronto fatto: {StelleScritte(_vista.Stelle)} — {conteggio} " &
                If(conteggio = 1, "voce giudicata.", "voci giudicate.")
 
     End Function
@@ -738,9 +849,16 @@ Public Class PannelloOpportunita
 
         ' I documenti si chiedono dopo aver visto le stelle: è la decisione che sta in
         ' mezzo al flusso (cap. 12, A5→A7). Sotto soglia il bottone resta acceso — si
-        ' sconsiglia, non si impedisce.
+        ' sconsiglia, non si impedisce — ma su una candidatura scartata no: quella è
+        ' chiusa, e scriverle un CV sarebbe lavorare per niente.
         btnGeneraDocumenti.Enabled = Not occupato AndAlso
-                                     _opportunita IsNot Nothing AndAlso _opportunita.Confrontata
+                                     _opportunita IsNot Nothing AndAlso _opportunita.Confrontata AndAlso
+                                     _opportunita.Stato <> StatoOpportunita.Scartata
+
+        ' Scartare si può finché c'è ancora una strada per lo scarto: è la macchina degli
+        ' stati a dirlo (cap. 07.3), non un elenco di casi scritto qui.
+        btnScarta.Enabled = Not occupato AndAlso _opportunita IsNot Nothing AndAlso
+                            StatiOpportunita.Consentita(_opportunita.Stato, StatoOpportunita.Scartata)
 
     End Sub
 

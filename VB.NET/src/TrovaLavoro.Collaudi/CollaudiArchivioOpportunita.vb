@@ -252,6 +252,85 @@ Namespace Dati
         End Sub
 
         <TestMethod>
+        Public Sub LoStatoEIsuoiPassaggiSiScrivonoESiRileggono()
+            ' Il campo che T4 non aveva e T5c porta (cap. 07.3, cap. 11.1).
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim generata As Opportunita = OpportunitaDiProva()
+                    generata.Avanza(StatoOpportunita.Interessante, New Date(2026, 8, 10, 9, 31, 0))
+                    generata.Avanza(StatoOpportunita.Generata, New Date(2026, 8, 10, 9, 40, 0))
+
+                    Dim riletta As Opportunita = archivio.Carica(archivio.Salva(generata))
+
+                    Assert.AreEqual(StatoOpportunita.Generata, riletta.Stato, "a che punto è")
+                    Assert.HasCount(2, riletta.DateStati, "e quando ci è arrivata")
+                    Assert.AreEqual(New Date(2026, 8, 10, 9, 40, 0),
+                                    riletta.DateStati(StatoOpportunita.Generata))
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub UnOpportunitaScrittaPrimaDiT5cSiRiapreColSuoStatoDedotto()
+            ' Le cartelle di T4 non dichiarano lo stato: non si migrano, si guarda cosa
+            ' hanno dentro (deciso con Mirco il 2026-08-12).
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim aMeta As Opportunita = OpportunitaDiProva()
+                    aMeta.Cv = Nothing
+                    aMeta.Lettera = Nothing
+
+                    Assert.AreEqual(StatoOpportunita.Interessante, ComeT4(archivio, aMeta).Stato,
+                                    "ci sono i giudizi: è stata confrontata")
+
+                    Dim intera As Opportunita = OpportunitaDiProva()
+                    Assert.AreEqual(StatoOpportunita.Generata, ComeT4(archivio, intera).Stato,
+                                    "c'è il CV: è stata generata")
+
+                    Dim appenaLetta As Opportunita = OpportunitaDiProva()
+                    appenaLetta.Confronto = Nothing
+                    appenaLetta.Mitigazioni = Nothing
+                    appenaLetta.Cv = Nothing
+                    appenaLetta.Lettera = Nothing
+                    Assert.AreEqual(StatoOpportunita.Nuova, ComeT4(archivio, appenaLetta).Stato,
+                                    "c'è solo l'annuncio: è nuova")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub UnoStatoScrittoAManoCheNonEsisteNonSiIndovina()
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim dove As String = archivio.Salva(OpportunitaDiProva())
+                    Dim stato As String = Path.Combine(dove, ArchivioOpportunita.FileStato)
+
+                    Dim corretto As JsonObject = TryCast(JsonNode.Parse(File.ReadAllText(stato)), JsonObject)
+                    corretto("stato") = "quasi fatta"
+                    File.WriteAllText(stato, corretto.ToJsonString())
+
+                    ' Non è una dichiarazione che possiamo credere: si torna ai fatti.
+                    Assert.AreEqual(StatoOpportunita.Generata, archivio.Carica(dove).Stato)
+                End Sub)
+        End Sub
+
+        ''' <summary>
+        ''' Salva l'opportunità e le toglie di dosso ciò che T4 non scriveva, poi la
+        ''' rilegge: è il modo di avere in mano una cartella com'era prima di T5c.
+        ''' </summary>
+        Private Shared Function ComeT4(archivio As ArchivioOpportunita, o As Opportunita) As Opportunita
+
+            Dim dove As String = archivio.Salva(o)
+            Dim stato As String = Path.Combine(dove, ArchivioOpportunita.FileStato)
+
+            Dim vecchio As JsonObject = TryCast(JsonNode.Parse(File.ReadAllText(stato)), JsonObject)
+            vecchio.Remove("stato")
+            vecchio.Remove("date_stati")
+            File.WriteAllText(stato, vecchio.ToJsonString())
+
+            Return archivio.Carica(dove)
+
+        End Function
+
+        <TestMethod>
         Public Sub UnaCartellaCheNonCESiDiceChiaramente()
             ConArchivioTemporaneo(
                 Sub(archivio, cartella)

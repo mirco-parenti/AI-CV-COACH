@@ -224,7 +224,7 @@ T4 le tocca comunque e chiuderle altrove costerebbe di più:
 **Fatto:** **355 collaudi verdi** senza rete e **10 reali** su aviolab03. **T5 può
 iniziare.**
 
-### T5 — La ricerca annunci (F2) e il registro (F6) — *in corso: T5a e T5b ✔ chiuse il 2026-08-12*
+### T5 — La ricerca annunci (F2) e il registro (F6) — ✔ **CHIUSA il 2026-08-13**
 Pannello P3 con WebView2, ricerche salvate, cattura dell'annuncio, coda delle
 opportunità; cartelle-opportunità su disco; pannello P1 Home con registro e stati.
 Verifica sul campo degli schemi di indirizzo dei portali del primo rilascio.
@@ -235,8 +235,9 @@ stato intatto.
 *Fatto per le prime tre voci il 2026-08-12, con T5b: i quattro portali percorsi dal menù
 uno per uno, un annuncio vero di Indeed analizzato e salvato con la sua provenienza, il
 rifiuto garbato visto scattare sulla griglia di Subito.it e su una pagina senza offerte.
-La **riapertura con stato intatto** resta a T5c, che è la tappa che costruisce la vista
-da riaprire.*
+La **riapertura con stato intatto** è arrivata con T5c: l'applicazione chiusa e riaperta
+mostra le sei candidature reali di Mirco al loro posto, con gli stati giusti — e la
+tappa che costruisce la vista è la stessa che permette di verificarla.*
 
 **Il pedaggio è già pagato.** T5 introdurrebbe WebView2, l'unica libreria con codice
 nativo dentro un exe che deve restare uno solo — ma il cancello l'ha attraversato **T4**
@@ -273,15 +274,49 @@ opportunità porta con sé fonte e link (cap. 11.1); la stessa pagina catturata 
 non genera due candidature gemelle. Il collaudo sul campo ha analizzato un annuncio vero
 di Indeed e ha visto il rifiuto scattare sulla griglia di Subito.it — e ha corretto il
 punto 3 del cap. 6.4, che prometteva un comportamento uniforme che i portali non hanno.*
-**T5c — la Home e il registro (F6)**: pannello P1 con lo stato del profilo, la coda
-delle opportunità con stelle e stati, le scorciatoie ai flussi (cap. 03.6);
-`registro.json` e la macchina degli stati — nuova → interessante → generata → inviata →
-chiusa (cap. 07.3) — che legge le cartelle-opportunità già scritte da T4 (cap. 11.1).
-Accende il bottone **🏠 Home**, e chiude la voce in sospeso «la coda dell'opportunità non
-si riapre»: la promessa del cap. 12.7 smette di essere mantenuta solo sul disco.
+**T5c — la Home e il registro (F6)** — ✔ **CHIUSA il 2026-08-13**: pannello P1 con lo
+stato del profilo, la coda delle opportunità con stelle e stati, le scorciatoie ai flussi
+(cap. 03.6); `registro.json` e la macchina degli stati — nuova → interessante → generata →
+inviata → esito (cap. 07.3) — che legge le cartelle-opportunità già scritte da T4
+(cap. 11.1). Accende il bottone **🏠 Home** — ed è lì che l'applicazione ora si apre — e
+chiude la voce in sospeso «la coda dell'opportunità non si riapre»: la promessa del
+cap. 12.7 smette di essere mantenuta solo sul disco.
+*Com'è andata: la decisione che regge tutto è che le **cartelle-opportunità sono la fonte
+di verità** e `registro.json` è solo un **indice rigenerabile** — si ricostruisce quando
+manca o non torna, e chi lo guarda è anche chi lo tiene in riga. Da lì discende il
+trattamento delle candidature nate prima: quelle di T4 il campo `stato` non ce l'hanno, e
+lo **deducono dai file che hanno** invece di farsi riscrivere all'indietro — riscrivere i
+file dell'utente per aggiungerci un campo nostro sarebbe stata un'invasione. Gli stati
+`inviata` ed `esito` esistono nello schema ma dall'interfaccia non si raggiungono: sono di
+T6, e stanno lì perché quella tappa aggiunga dei passaggi e non una migrazione. Lo scarto
+è **terminale e con conferma** (la cartella però resta: si scarta, non si cancella), e il
+suo comando vive nella scheda che si sta guardando, non nella Home — che, come dice il
+cap. 07.3, è il posto in cui si guarda, non quello in cui si decide.*
+
+Il **collaudo di tappa**, condotto la notte fra il 12 e il 13 agosto, ha una gamba sola —
+qui la domanda è una: *quello che è stato scritto ieri si ritrova domani?* Banco senza rete
+**verde prima e dopo**, poi l'applicazione vera sulla cartella dati reale di Mirco: si apre
+sulla Home con le **sei candidature** e gli stati dedotti giusti; una si riapre in P4 dal
+bottone e dal doppio clic, coi suoi giudizi e le sue stelle — **anche quella di T4**, che
+non ha né fonte né campo `stato`. Lo **scarto è stato provato davvero**: «No» su una
+candidatura reale (e il disco è rimasto intatto, verificato a mano), «Sì» su una cartella
+di prova fabbricata apposta — comparsa da sola nella coda, e sparita senza lasciare voci
+fantasma una volta cancellata, che è la prova che l'indice si rigenera. Infine
+l'applicazione **chiusa e riaperta**, con tutto al suo posto, scarto compreso. Nessuno
+`stato.json` reale è stato riscritto.
+*Due difetti trovati guardando, non collaudando* — ed è il motivo per cui il collaudo si fa
+sull'applicazione vera: lo **strumento** accettava una chiamata a cui mancava un argomento
+obbligatorio e premeva il primo bottone della finestra riferendo un successo (chiuso, con
+la trappola annotata nel suo README); e i contatori della Home dicevano «1 scartate»,
+perché la parola era fissa e il numero no. Il banco chiude a **452 collaudi** verdi.
 
 Con T5b si chiude anche l'altro debito lasciato aperto da T4: **un annuncio davvero
 pescato da un portale**, non verosimile ma scritto per il collaudo.
+
+**Fatto:** **452 collaudi verdi** senza rete. I collaudi della categoria *Reale* restano
+i **14** di T5b e non sono stati rilanciati qui: la Home e il registro non chiamano l'AI —
+leggono il disco e mostrano — e un collaudo con la chiave non avrebbe verificato niente
+che il banco non veda già. **T5d può iniziare.**
 
 ### T5d — Il profilo da LinkedIn (voce 2.1.3)
 *Rinominata il 2026-08-12: si chiamava «T5b», nome che le tre gambe di T5 hanno preso.

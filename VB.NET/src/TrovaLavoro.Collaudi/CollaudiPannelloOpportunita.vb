@@ -372,6 +372,90 @@ Namespace Ui
         End Function
 
         ' ==================================================================
+        ' Riaprire e scartare (T5c)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function UnaCandidaturaSiRiapreComEra() As Task
+
+            ' È la strada che arriva dalla coda della Home, e chiude il debito di T4: si
+            ' rientra in una candidatura senza pagare una riga all'AI (cap. 12.7).
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Await IncollaEAnalizzaAsync(pannello, TestoIncollato)
+                    Dim dove As String = pannello.Candidatura.Cartella
+
+                    ' Un pannello nuovo, come dopo aver chiuso e riaperto l'applicazione.
+                    Using riaperto As New PannelloOpportunita()
+                        riaperto.CreateControl()
+                        riaperto.Collega(contesto, PipelineFinta())
+
+                        riaperto.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                        Assert.HasCount(2, Giudizi(riaperto), "i giudizi di allora, tutti")
+                        Assert.Contains("Autista consegne", Casella(riaperto, "txtAnnuncioLetto").Text)
+                        Assert.Contains("su 5", Etichetta(riaperto, "lblStelle").Text, "e le stelle")
+                        Assert.AreEqual("Interessante", Etichetta(riaperto, "lblStatoCandidatura").Text.
+                                        Split(" "c)(0), "con lo stato a cui era arrivata")
+                        Assert.IsFalse(Riquadro(riaperto, "pnlIngresso").Visible,
+                                       "la fascia d'ingresso resta chiusa: non c'è niente da incollare")
+                    End Using
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SuUnaCandidaturaScartataNonSiLavoraPiu() As Task
+
+            ' Lo scarto è un capolinea (cap. 07.3): niente documenti, e niente da scartare
+            ' una seconda volta. Il bottone non si preme qui — chiede conferma con una
+            ' finestra — ma la sua condizione sì.
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Await IncollaEAnalizzaAsync(pannello, TestoIncollato)
+
+                    Assert.IsTrue(Bottone(pannello, "btnScarta").Enabled, "prima si può scartare")
+
+                    Dim candidatura As Opportunita = pannello.Candidatura
+                    candidatura.Avanza(StatoOpportunita.Scartata)
+                    pannello.RiapriLaCandidatura(candidatura)
+
+                    Assert.IsFalse(Bottone(pannello, "btnScarta").Enabled, "poi non più")
+                    Assert.IsFalse(Bottone(pannello, "btnGeneraDocumenti").Enabled,
+                                   "e non le si scrive un CV")
+                    Assert.Contains("Scartata", Etichetta(pannello, "lblStatoCandidatura").Text)
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaCandidaturaAnalizzataEntraSubitoNellIndice() As Task
+
+            ' Il registro è un indice rigenerabile, ma tenerlo in riga strada facendo è
+            ' quello che fa comparire la candidatura nella Home senza rileggere tutto.
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Await IncollaEAnalizzaAsync(pannello, TestoIncollato)
+
+                    Dim indice As Registro = contesto.Registro.Carica()
+
+                    Assert.IsFalse(indice.Rigenerato, "l'indice su disco è già quello giusto")
+                    Assert.AreEqual("Rossi S.p.A.", indice.Voci.Single().Azienda)
+                    Assert.AreEqual(StatoOpportunita.Interessante, indice.Voci.Single().Stato)
+
+                End Function)
+
+        End Function
+
+        ' ==================================================================
         ' Lo spazio del logo
         ' ==================================================================
 

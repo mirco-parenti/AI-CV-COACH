@@ -168,7 +168,7 @@ Namespace Dati
 
                 If stato Is Nothing Then Continue For
 
-                If String.Equals(Testo(stato, "link"), cercato, StringComparison.OrdinalIgnoreCase) Then
+                If String.Equals(CampiJson.Testo(stato, "link"), cercato, StringComparison.OrdinalIgnoreCase) Then
                     Return cartella
                 End If
 
@@ -208,16 +208,23 @@ Namespace Dati
         End Function
 
         ''' <summary>
-        ''' Lo <c>stato.json</c>: le date, la lingua, la versione di profilo e il
-        ''' punteggio di quel giorno. Lo <b>stato del ciclo di vita</b> non c'è ancora, ed
-        ''' è voluto: la macchina a stati e il registro sono di T5 (cap. 11.1), che
-        ''' aggiungerà una vista sopra dati già scritti invece di doverli migrare.
+        ''' Lo <c>stato.json</c>: lo stato del ciclo di vita con le date dei suoi
+        ''' passaggi, le date della cartella, la lingua, la versione di profilo, la
+        ''' provenienza e il punteggio di quel giorno (cap. 07.3, cap. 11.1).
         ''' </summary>
+        ''' <remarks>
+        ''' Lo <b>stato</b> e le sue date arrivano con T5c: è l'unico campo che il disegno
+        ''' del cap. 11.1 aveva promesso e T4 non aveva ancora scritto, ed è per questo che
+        ''' le cartelle di T4 si riaprono deducendolo invece di essere migrate
+        ''' (<see cref="StatiOpportunita.Dedotto"/>).
+        ''' </remarks>
         Private Shared Function Stato(o As Opportunita) As JsonObject
 
             Dim scritto As New JsonObject From {
-                {"creata", Quando(o.Creata)},
-                {"aggiornata", Quando(o.Aggiornata)},
+                {"creata", CampiJson.Quando(o.Creata)},
+                {"aggiornata", CampiJson.Quando(o.Aggiornata)},
+                {"stato", StatiOpportunita.Nome(o.Stato)},
+                {"date_stati", StatiOpportunita.DateComeJson(o.DateStati)},
                 {"lingua", o.Lingua},
                 {"versione_profilo", o.VersioneProfilo},
                 {"azienda", o.Azienda},
@@ -243,33 +250,48 @@ Namespace Dati
         ''' <summary>Rimette nell'opportunità ciò che lo <c>stato.json</c> conserva.</summary>
         Private Shared Sub RileggiStato(o As Opportunita, stato As JsonObject)
 
-            If stato Is Nothing Then Return
+            ' Nemmeno lo stato.json: una cartella rimasta senza — cancellato a mano, o
+            ' un salvataggio interrotto prima di scriverlo — si riapre lo stesso, con lo
+            ' stato che i suoi file dichiarano.
+            If stato Is Nothing Then
+                o.Stato = StatiOpportunita.Dedotto(o)
+                Return
+            End If
 
-            o.Creata = Istante(stato, "creata")
-            o.Aggiornata = Istante(stato, "aggiornata")
+            o.Creata = CampiJson.Istante(stato, "creata")
+            o.Aggiornata = CampiJson.Istante(stato, "aggiornata")
 
-            Dim lingua As String = Testo(stato, "lingua")
+            ' Da T5c. Nelle cartelle scritte prima il campo «stato» non c'è, e nemmeno un
+            ' valore che non riconosciamo vale come dichiarazione: in entrambi i casi lo
+            ' stato si deduce dai file presenti invece di riscrivere all'indietro i file
+            ' dell'utente (cap. 07.3).
+            Dim dichiarato As StatoOpportunita? = StatiOpportunita.DaNome(CampiJson.Testo(stato, "stato"))
+            o.Stato = If(dichiarato.HasValue, dichiarato.Value, StatiOpportunita.Dedotto(o))
+
+            StatiOpportunita.RiempiDate(o.DateStati, TryCast(CampiJson.Nodo(stato, "date_stati"), JsonObject))
+
+            Dim lingua As String = CampiJson.Testo(stato, "lingua")
             If Not String.IsNullOrEmpty(lingua) Then o.Lingua = lingua
 
-            o.VersioneProfilo = Testo(stato, "versione_profilo")
+            o.VersioneProfilo = CampiJson.Testo(stato, "versione_profilo")
 
             ' Da T5b in poi. Nei file scritti prima questi due campi non ci sono, e
-            ' <c>Testo</c> restituisce <c>Nothing</c>: un'opportunità vecchia si riapre
-            ' senza fonte né link, che è esattamente com'era.
-            o.Fonte = Testo(stato, "fonte")
-            o.Link = Testo(stato, "link")
+            ' <c>CampiJson.Testo</c> restituisce <c>Nothing</c>: un'opportunità vecchia si
+            ' riapre senza fonte né link, che è esattamente com'era.
+            o.Fonte = CampiJson.Testo(stato, "fonte")
+            o.Link = CampiJson.Testo(stato, "link")
 
-            Dim match As JsonObject = TryCast(Nodo(stato, "match"), JsonObject)
+            Dim match As JsonObject = TryCast(CampiJson.Nodo(stato, "match"), JsonObject)
             If match Is Nothing Then Return
 
             o.Match = New RisultatoMatch With {
-                .MatchFinale = Intero(match, "match_finale"),
-                .Stelle = Numero(match, "stelle"),
-                .ScoreBase = Intero(match, "score_base"),
-                .NumeroLlm = Numero(match, "numero_llm"),
-                .ScartoTagliato = Vero(match, "scarto_tagliato"),
-                .GateEliminatorio = Vero(match, "gate_eliminatorio"),
-                .Nota = Testo(match, "nota")}
+                .MatchFinale = CampiJson.Intero(match, "match_finale"),
+                .Stelle = CampiJson.Numero(match, "stelle"),
+                .ScoreBase = CampiJson.Intero(match, "score_base"),
+                .NumeroLlm = CampiJson.Numero(match, "numero_llm"),
+                .ScartoTagliato = CampiJson.Vero(match, "scarto_tagliato"),
+                .GateEliminatorio = CampiJson.Vero(match, "gate_eliminatorio"),
+                .Nota = CampiJson.Testo(match, "nota")}
 
         End Sub
 
@@ -359,54 +381,6 @@ Namespace Dati
 
             Return JsonNode.Parse(File.ReadAllText(percorso, Encoding.UTF8))
 
-        End Function
-
-        ''' <summary>Un istante scritto in modo ordinabile e leggibile.</summary>
-        Private Shared Function Quando(istante As Date) As String
-            If istante = Nothing Then Return Nothing
-            Return istante.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)
-        End Function
-
-        Private Shared Function Nodo(oggetto As JsonObject, campo As String) As JsonNode
-            Dim valore As JsonNode = Nothing
-            If oggetto Is Nothing OrElse Not oggetto.TryGetPropertyValue(campo, valore) Then Return Nothing
-            Return valore
-        End Function
-
-        Private Shared Function Testo(oggetto As JsonObject, campo As String) As String
-            Dim valore As JsonNode = Nodo(oggetto, campo)
-            If valore Is Nothing OrElse valore.GetValueKind() <> JsonValueKind.String Then Return Nothing
-            Return valore.GetValue(Of String)()
-        End Function
-
-        Private Shared Function Istante(oggetto As JsonObject, campo As String) As Date
-
-            Dim scritto As String = Testo(oggetto, campo)
-            Dim letto As Date
-
-            If scritto IsNot Nothing AndAlso Date.TryParseExact(
-                scritto, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture,
-                DateTimeStyles.None, letto) Then Return letto
-
-            Return Nothing
-
-        End Function
-
-        Private Shared Function Intero(oggetto As JsonObject, campo As String) As Integer?
-            Dim valore As JsonNode = Nodo(oggetto, campo)
-            If valore Is Nothing OrElse valore.GetValueKind() <> JsonValueKind.Number Then Return Nothing
-            Return valore.GetValue(Of Integer)()
-        End Function
-
-        Private Shared Function Numero(oggetto As JsonObject, campo As String) As Double?
-            Dim valore As JsonNode = Nodo(oggetto, campo)
-            If valore Is Nothing OrElse valore.GetValueKind() <> JsonValueKind.Number Then Return Nothing
-            Return valore.GetValue(Of Double)()
-        End Function
-
-        Private Shared Function Vero(oggetto As JsonObject, campo As String) As Boolean
-            Dim valore As JsonNode = Nodo(oggetto, campo)
-            Return valore IsNot Nothing AndAlso valore.GetValueKind() = JsonValueKind.True
         End Function
 
     End Class

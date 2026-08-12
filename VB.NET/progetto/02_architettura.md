@@ -58,9 +58,9 @@ Artefatti **nuovi** della fase desktop:
 | Artefatto | Cos'è |
 |---|---|
 | **Preferenze di ricerca** | tipologie di lavoro, zona, contratto, parole chiave, ricerche salvate per portale |
-| **Opportunità** | annuncio + fonte/link + stato (`nuova → interessante → generata → inviata → chiusa/scartata`) + tutti gli artefatti prodotti per esso |
+| **Opportunità** | annuncio + fonte/link + stato (`nuova → interessante → generata → inviata → esito`, con `scartata` che chiude la strada) + tutti gli artefatti prodotti per esso |
 | **Appunti di mira** | l'esito confermato del brainstorming (cosa enfatizzare, tono); orientano la generazione, non aggiungono fatti |
-| **Registro candidature** | vista d'insieme delle opportunità e dei loro stati, con date |
+| **Registro candidature** | vista d'insieme delle opportunità e dei loro stati, con date. *È l'unico artefatto **derivato**: si ricava dalle cartelle-opportunità e si può buttare senza perdere niente (cap. 07.3, cap. 11.1)* |
 | **Backup JSON** | profilo (+ storico candidature a scelta) esportabile e reimportabile |
 
 La proprietà «un profilo, molti CV» resta: il profilo è uno, versionato nel tempo; ogni
@@ -111,7 +111,14 @@ ogni modulo abbia **un compito solo**:
     prototipo (questo è anche il suo collaudo, cap. 14);
   - `EstrattoreJson`: la versione VB di `estraiJson` — toglie il recinto markdown,
     tenta il parse, e solo in caso di errore ritaglia dal primo `{` all'ultimo `}`;
-  - `StatiOpportunita`: la macchina a stati del registro.
+  - `StatiOpportunita`: la macchina a stati del registro. *Costruita a T5c (2026-08-13) e
+    nata in **`Dati/`** invece che qui, insieme a ciò che legge e scrive: uno stato che
+    esiste solo per essere conservato in `stato.json` e riletto da lì appartiene ai dati
+    più che al motore. Con lei `Dati/Registro` — la voce, l'indice e il suo archivio — e
+    `Dati/CampiJson`, i lettori difensivi estratti perché adesso lo stesso `stato.json` lo
+    leggono in due (l'opportunità e il registro) e devono capirlo allo stesso modo. Il
+    motore ci mette del suo solo dove c'è una decisione: `Opportunita.Avanza`, che rifiuta
+    i passaggi che il ciclo di vita non prevede, e la pipeline che li fa scattare.*
 - **`Ai/`** —
   - `LibreriaPrompt`: carica i `.md` dal pool, ne legge i metadati, riempie i
     segnaposto (cap. 04);
@@ -287,3 +294,11 @@ Tutto lo stato persistente sta nella **cartella dati** (cap. 11), in file JSON
 leggibili. L'app è l'unica a scriverli; niente database, niente registro di Windows
 (salvo l'associazione minima di configurazione se servisse). Chiudere l'app e riaprirla
 riporta esattamente dov'eravamo: lo stato in memoria è sempre ricostruibile dal disco.
+
+*Provato per la prima volta a T5c (2026-08-13), e non su dati finti: l'applicazione chiusa
+e riaperta sulla cartella dati vera ha ritrovato tutte le candidature con i loro stati.
+La frase qui sopra dice però qualcosa di più forte di «i file restano», e T5c ne è la
+dimostrazione: `registro.json` è **ricostruibile** dalle cartelle, quindi il disco non
+contiene solo lo stato — contiene abbastanza da rifarlo. Un file d'appoggio che non si
+potesse rigenerare sarebbe uno stato che vive in un posto solo, cioè il contrario di
+questa regola.*

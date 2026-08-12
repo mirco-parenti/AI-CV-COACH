@@ -68,6 +68,7 @@ Public Class FormPrincipale
         _motoreBrowser = New MotoreBrowser(_contesto.Cartella.CartellaWebView2)
         _stampante = New StampantePdf(_motoreBrowser)
 
+        pnlHome.Collega(_contesto)
         pnlProfilo.Collega(_contesto)
         pnlDialogo.Collega(_contesto)
         pnlOpportunita.Collega(_contesto)
@@ -77,9 +78,10 @@ Public Class FormPrincipale
         pnlLogo.BringToFront()
         AggiornaPannelloLogo()
 
-        ' Finché il cruscotto (P1) non esiste, la casa è il profilo: è comunque il primo
-        ' passo del flusso A, e senza di lui non si fa nient'altro.
-        MostraPannello(pnlProfilo, btnProfilo)
+        ' La casa è il cruscotto (T5c): dice a che punto si è e da dove riprendere. Al
+        ' primo avvio, quando non c'è ancora niente, è lui a mandare al profilo — che
+        ' resta il primo passo del flusso A.
+        MostraPannello(pnlHome, btnHome)
     End Sub
 
     ''' <summary>
@@ -88,9 +90,6 @@ Public Class FormPrincipale
     ''' che si spiega dice come è fatto il programma.
     ''' </summary>
     Private Sub DichiaraLeTappeCheMancano()
-
-        btnHome.Enabled = False
-        ttSuggerimenti.SetToolTip(btnHome, "Il cruscotto con il registro delle candidature arriva con la tappa T5c.")
 
         btnImpostazioni.Enabled = False
         ttSuggerimenti.SetToolTip(btnImpostazioni, "La finestra delle impostazioni arriva con la tappa T9.")
@@ -122,8 +121,36 @@ Public Class FormPrincipale
         Return {btnHome, btnProfilo, btnRicerca, btnCandidatura, btnImpostazioni}
     End Function
 
+    Private Sub btnHome_Click(sender As Object, e As EventArgs) Handles btnHome.Click
+        MostraPannello(pnlHome, btnHome)
+    End Sub
+
     Private Sub btnProfilo_Click(sender As Object, e As EventArgs) Handles btnProfilo.Click
         MostraPannello(pnlProfilo, btnProfilo)
+    End Sub
+
+    ''' <summary>Dalle scorciatoie del cruscotto ai due flussi che ci portano (cap. 03.6).</summary>
+    Private Sub pnlHome_ProfiloRichiesto(sender As Object, e As EventArgs) Handles pnlHome.ProfiloRichiesto
+        MostraPannello(pnlProfilo, btnProfilo)
+    End Sub
+
+    Private Async Sub pnlHome_RicercaRichiesta(sender As Object, e As EventArgs) Handles pnlHome.RicercaRichiesta
+
+        MostraPannello(pnlRicerca, btnRicerca)
+        Await pnlRicerca.ApriAsync()
+
+    End Sub
+
+    ''' <summary>
+    ''' Una candidatura scelta nella coda torna nella sua scheda, com'era: è la promessa
+    ''' «tutto riapribile» del cap. 12.7, che fino a T5c era mantenuta solo sul disco.
+    ''' </summary>
+    Private Sub pnlHome_CandidaturaScelta(sender As Object, e As CandidaturaSceltaEventArgs) _
+        Handles pnlHome.CandidaturaScelta
+
+        MostraPannello(pnlOpportunita, btnCandidatura)
+        pnlOpportunita.RiapriLaCandidatura(e.Candidatura)
+
     End Sub
 
     Private Sub btnCandidatura_Click(sender As Object, e As EventArgs) Handles btnCandidatura.Click
@@ -275,6 +302,7 @@ Public Class FormPrincipale
     ''' </summary>
     Private Sub BarraDiNavigazione(libera As Boolean)
 
+        btnHome.Enabled = libera
         btnProfilo.Enabled = libera
         btnCandidatura.Enabled = libera
         btnRicerca.Enabled = libera

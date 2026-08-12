@@ -127,6 +127,56 @@ Namespace Motore
         End Function
 
         <TestMethod>
+        Public Async Function OgniPassoPortaAvantiLoStato() As Task
+
+            ' La macchina degli stati (cap. 07.3) la muove chi fa il lavoro, non chi
+            ' guarda: l'annuncio letto fa una candidatura «nuova», il confronto la fa
+            ' «interessante», i documenti la fanno «generata».
+            Dim analizzatore As New AnalizzatoreFinto
+            Dim confrontatore As New ConfrontatoreFinto
+            Dim generatore As New GeneratoreFinto
+
+            analizzatore.Dara(AnnuncioJson)
+            confrontatore.Dara(ConfrontoPieno)
+            generatore.Dara("{""intestazione"": {}}").Dara("{""corpo"": ""Gentile azienda…""}")
+
+            Dim pipeline As PipelineCandidatura = PipelineDiProva(analizzatore, confrontatore, generatore)
+            Dim profilo As TrovaLavoro.Dati.Profilo = ProfiloDiProva()
+
+            Dim opportunita As Opportunita = Await pipeline.AnalizzaAsync(TestoAnnuncio)
+            Assert.AreEqual(StatoOpportunita.Nuova, opportunita.Stato, "letto l'annuncio, è nuova")
+            Assert.AreEqual(opportunita.Creata, opportunita.DateStati(StatoOpportunita.Nuova),
+                            "la data di nascita e quella del primo stato sono la stessa cosa")
+
+            Await pipeline.ConfrontaAsync(opportunita, profilo)
+            Assert.AreEqual(StatoOpportunita.Interessante, opportunita.Stato,
+                            "ci sono le stelle: adesso si può decidere")
+
+            Await pipeline.GeneraAsync(opportunita, profilo)
+            Assert.AreEqual(StatoOpportunita.Generata, opportunita.Stato, "e i documenti ci sono")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function RiconfrontareUnaCandidaturaNonLaFaTornareIndietro() As Task
+
+            ' Succede riaprendo una candidatura già completa: i giudizi si rifanno, ma i
+            ' documenti restano scritti e lo stato non retrocede.
+            Dim confrontatore As New ConfrontatoreFinto
+            confrontatore.Dara(ConfrontoPieno)
+
+            Dim opportunita As New Opportunita With {.Annuncio = JsonNode.Parse(AnnuncioJson)}
+            opportunita.Avanza(StatoOpportunita.Interessante)
+            opportunita.Avanza(StatoOpportunita.Generata)
+
+            Await PipelineDiProva(New AnalizzatoreFinto, confrontatore, New GeneratoreFinto).
+                ConfrontaAsync(opportunita, ProfiloDiProva())
+
+            Assert.AreEqual(StatoOpportunita.Generata, opportunita.Stato)
+
+        End Function
+
+        <TestMethod>
         Public Async Function IlPunteggioLoCalcolaIlProgrammaNonLAi() As Task
 
             ' L'AI dice 90, ma un requisito eliminatorio non soddisfatto impone il tetto:

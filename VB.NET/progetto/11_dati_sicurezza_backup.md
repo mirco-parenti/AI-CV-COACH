@@ -27,7 +27,7 @@ TrovaLavoro\
 │       ├── cv.json · lettera.json
 │       ├── stato.json     (stato, date, lingua, versione profilo, fonte e link)
 │       └── out\           (i file prodotti: .docx .pdf .eml)
-├── registro.json          la vista d'insieme delle candidature
+├── registro.json          l'indice delle candidature: comodo, ma rigenerabile
 ├── webview2\              profilo di navigazione del browser integrato
 ├── log\app.log            log tecnico (senza segreti, v. 11.3)
 └── backup\                gli export JSON (v. 11.4)
@@ -48,6 +48,17 @@ TrovaLavoro\
   prodotti nel frattempo. È lo stesso principio dell'app che «riapre dov'era»
   (cap. 12.7): un documento generato e non ritrovabile domani sarebbe un documento
   perso, e T4 genera i primi documenti veri del progetto.
+- **La vista è arrivata, e non ha toccato niente di quel che c'era** *(T5c,
+  2026-08-13)*. `registro.json` esiste, ma è **solo un indice**: la verità sono le
+  cartelle. Si ricostruisce quando manca, quando non si legge o quando non torna coi fatti
+  su disco — così una cartella copiata a mano compare da sola nell'elenco, e una cancellata
+  sparisce senza lasciare una voce fantasma. Lo `stato.json` di oggi porta in più il campo
+  **`stato`** e il blocco **`date_stati`**, con la data di ogni passaggio; ma le cartelle
+  nate prima **non sono state riscritte per uniformarle**: il loro stato si **deduce dai
+  file che hanno** ogni volta che si legge (cap. 07.3). Il principio è quello del punto qui
+  sopra guardato dall'altra parte: se non ritoccare i file dell'utente costa una deduzione
+  in lettura, la deduzione è il prezzo giusto — un campo scritto a sua insaputa dentro
+  tutte le cartelle già fatte sarebbe stato un'invasione, e per giunta irreversibile.
 - **Da dove veniva l'annuncio si conserva** *(T5b, 2026-08-12)*: lo `stato.json` di
   un'opportunità catturata porta anche la **fonte** (il nome del portale se lo
   conosciamo, altrimenti il sito) e il **link** della pagina. È quello che permette di

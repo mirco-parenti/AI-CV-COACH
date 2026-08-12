@@ -94,7 +94,10 @@ Alla pressione di **«Cattura annuncio»**:
    home, una schermata di accesso), lo schema esce vuoto e l'app risponde con garbo:
    «questa sembra una pagina di elenco: apri il singolo annuncio e ricattura»;
 4. l'annuncio entra nella **coda delle opportunità** con fonte e link; da lì in poi la
-   pipeline è quella di sempre (confronto → stelle → generazione).
+   pipeline è quella di sempre (confronto → stelle → generazione). *Fino a T5b «coda»
+   voleva dire una cartella su disco; da **T5c** è anche una cosa che si vede — la Home la
+   mostra con stelle, stato e provenienza (cap. 03.6), e la colonna «Da dove» è proprio la
+   fonte che la cattura ha scritto qui.*
 
 *Il punto 3 riscritto sui fatti (T5b, 2026-08-12).* Diceva «se la pagina non contiene un
 annuncio», e sul campo si è scoperto che **dipende da com'è fatto il portale**. Il rifiuto

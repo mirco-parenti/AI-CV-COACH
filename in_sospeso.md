@@ -66,13 +66,20 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   chiusura di T4** *(2026-08-11)*: il collaudo di tappa ha ripercorso la gamba per intero —
   114 campi su 114 ritrovati, DOCX e PDF identici — ma la metà di Word è di nuovo rimasta
   fuori, per la stessa ragione.
-- **La coda dell'opportunità non si riapre.** T4 scrive ogni candidatura nella sua cartella
-  definitiva (cap. 11.1), ma riaprendo l'applicazione non c'è ancora modo di **tornarci**:
-  la coda e il registro sono di **T5c**, e fino a lì si arriva a un'opportunità solo
-  incollando o catturando di nuovo l'annuncio. È previsto dal piano — la cartella nasce a
-  T4 apposta perché T5 ci costruisca sopra una vista — ma finché quella vista non c'è, la
-  promessa «tutto riapribile» del cap. 12.7 è mantenuta **sul disco e non
-  nell'interfaccia**. *(cap. 11.1; cap. 12.7; cap. 14, T5c.)*
+## Da T5 — la ricerca annunci e il registro (2026-08-13, alla chiusura di T5c)
+
+- **L'export del registro in CSV/markdown.** Il cap. 07.3 lo promette «fin dal primo
+  rilascio» — serve a Mirco per documentare l'uso reale del prodotto nella propria ricerca
+  di lavoro — e a T5c **non è stato fatto**: deciso con Mirco il 2026-08-12, perché
+  aggiungere una strada d'uscita a dei dati che stavano ancora prendendo forma sarebbe
+  costato due volte. Ora la forma ce l'hanno. Va fatto entro la 1.0 (T9 al più tardi).
+  *(cap. 07.3; cap. 14, T9.)*
+- **Il filtro per stelle nella coda.** Il cap. 07.3 chiede un elenco «ordinabile e
+  filtrabile **per stato e stelle**»: a T5c si ordina per qualunque colonna (stelle
+  comprese) e si filtra **per stato** («Mostra»: tutte, da completare, generate, scartate),
+  ma un filtro sulle stelle — «fammi vedere solo quelle sopra le 3» — non c'è. Con sei
+  candidature l'ordinamento basta; con sessanta no, ed è quello lo scenario per cui il
+  registro esiste. *(cap. 07.3; cap. 03.6, P1.)*
 
 ## Da revisione adversariale (2026-08-09)
 
@@ -91,6 +98,15 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Chiuse
 
+- ✅ **La coda dell'opportunità non si riapre** *(aperta il 2026-08-10 da T4, chiusa il
+  2026-08-13 da T5c)*. La vista che mancava è la **Home**: la coda mostra tutte le
+  candidature con stelle, stato e provenienza, e da lì una si riapre col doppio clic o col
+  suo bottone, giudizi e documenti compresi. Provata sulle sei candidature vere di Mirco —
+  comprese quelle di T4, che il campo `stato` non ce l'hanno e se lo fanno **dedurre dai
+  file presenti** invece di farsi riscrivere — e con l'applicazione **chiusa e riaperta**,
+  che è la domanda vera: quello che è stato scritto ieri si ritrova domani. La promessa
+  «tutto riapribile» del cap. 12.7 non è più mantenuta solo sul disco.
+  *(cap. 11.1; cap. 12.7; cap. 14, T5c; diario Step 2.13.)*
 - ✅ **Un annuncio davvero pescato da un portale** *(aperta il 2026-08-10 da T4, chiusa il
   2026-08-12 da T5b)*. La gamba B di T4 era stata percorsa con un annuncio **verosimile ma
   scritto per il collaudo**; adesso la cattura dal browser esiste, e l'annuncio è arrivato

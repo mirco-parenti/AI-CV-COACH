@@ -155,8 +155,9 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
 - **Lo strumento di collaudo (puntatore)** *(dal 2026-08-10)*: in `strumenti/mcp-collaudi/`
   c'è un server MCP locale con cui **provare l'applicazione vera** — compilarla, far girare
   il banco, avviarla, fotografarla, elencare i controlli dicendo se sono accesi e che voce
-  mostrano i menù, premerli, scrivere in una casella, scegliere una voce da una tendina,
-  rispondere alla finestra di scelta file. Non parte da solo
+  mostrano i menù, premerli, scrivere in una casella, scegliere una voce da una tendina o
+  una riga da un elenco, rispondere alla finestra di scelta file e alle finestre di
+  conferma (leggendo prima cosa chiedono). Non parte da solo
   (`node strumenti/mcp-collaudi/server.mjs`) e **non** è il server MCP del prodotto, che è
   il cap. 09 ed è di T9. Come si accende, cosa sa fare e le trappole già pagate stanno nel
   suo `README.md`: **leggilo prima di usarlo**, sono ore risparmiate.

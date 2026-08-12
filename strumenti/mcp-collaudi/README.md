@@ -61,6 +61,8 @@ comando **uccide sé stesso** prima di arrivare al server.
 | `controlli` | Elenca bottoni, caselle e schede dicendo per ciascuno se è **acceso o SPENTO**; dei menù a tendina dice anche **la voce che mostrano**, e marca `[pagina]` quel che è del sito aperto nel browser. |
 | `clic` · `scrivi` | Preme un controllo per etichetta; scrive in una casella. Se il controllo è spento lo dichiara invece di fingere. |
 | `scegli_voce` | Sceglie una voce in un menù a tendina — il portale in «Cerca su» — aprendolo e cliccandoci dentro come farebbe una persona, e poi verificando che il menù la mostri davvero. Senza la voce, le **elenca**. |
+| `scegli_riga` | Sceglie una riga di una lista — la coda delle candidature in P1 — cercandola per un pezzo di quel che c'è scritto **in una qualsiasi delle sue celle**, e verificando poi che risulti scelta. Senza il testo, le **elenca**; con `doppio`, fa il doppio clic (che nella coda apre la candidatura). |
+| `rispondi_finestra` | Risponde a una finestra di messaggio premendo il bottone per nome («Sì», «No», «OK»). Senza il bottone **legge cosa chiede** e quali scelte dà, così si sa cosa si sta per confermare. |
 | `scegli_file` | Risponde alla finestra di scelta file che l'applicazione ha aperto: il file da prendere (anche in forma `/mnt/c/…`), oppure `annulla`. |
 | `cartella_dati` | Cosa l'applicazione ha scritto su disco: profilo, storico, opportunità, documenti. |
 
@@ -69,17 +71,15 @@ profilo, incollare un annuncio, analizzarlo, generare CV e lettera, esportarli. 
 fatto per la prima volta il 2026-08-10. Dal **2026-08-12** ci si aggiunge la ricerca:
 scegliere un portale nel menù, scrivere cosa e dove, premere «Cerca» e guardare la pagina
 che arriva — il giro con cui si è chiuso il buco dichiarato di T5a, su tutti e quattro i
-portali.
+portali. Con **T5c**, lo stesso giorno, arriva anche la Home: scegliere una candidatura
+nella coda e riaprirla, e rispondere alle conferme — la prima cosa provata con
+`rispondi_finestra` è stato uno «Scarta» a cui si è risposto **No**, che è il modo di
+collaudare un comando distruttivo su dati veri senza distruggere niente.
 
 ## Quel che ancora non sa fare
 
 - **Le attese.** Non c'è un `aspetta_che` (che il bottone si accenda, che l'attesa
   finisca): per ora si alterna `clic` e `controlli`.
-- **Le finestre di messaggio** (`MessageBox`) non hanno un attrezzo loro: `scegli_file`
-  sa rispondere solo alla scelta di un file. La mancanza si è sentita il 2026-08-12:
-  «Dimentica» chiede conferma, e la ricerca salvata per prova si è tolta cancellando il
-  file dei dati invece che rispondendo «Sì». È il prossimo attrezzo naturale — i bottoni
-  di una finestra di messaggio si chiamano per numero come quelli di `scegli_file`.
 - **Il contenuto delle caselle di testo non si legge.** L'elenco dice la voce dei menù,
   ma non cosa c'è scritto in una casella: per leggere l'indirizzo del browser serve
   ancora una fotografia.
@@ -153,6 +153,31 @@ portali.
   condotta: **un comando alla volta, con `controlli` in mezzo a dire dove siamo**; e se
   una prova ha toccato dati veri senza volerlo, si chiude con `chiudi_app` — che è
   `taskkill /F` e **non** passa dal salvataggio — e si verifica la data del file su disco.
+- **Una lista in vista dettagli non ha nome, e le sue righe hanno il nome sbagliato.**
+  *(2026-08-12, T5c.)* La coda delle candidature di P1 arriva a UI Automation come una
+  **`Table` senza nome** — cercarla per etichetta è impossibile — con una `ListItem` per
+  riga; e il `Name` della riga è la **sola prima colonna**, che lì dentro sono le stelle:
+  chiedere «Rossi S.p.A.» fra i nomi delle righe non trova niente, perché in quel campo
+  c'è scritto «★☆☆☆☆ 1,0». La riga si cerca perciò nel testo di **tutte** le sue celle,
+  che nell'albero sono dei `Text` sotto la riga. Per la stessa ragione `controlli`, di una
+  lista, non dice il nome ma **quante righe ha**.
+- **Una finestra di messaggio è la stessa classe della scelta file** (`#32770`), e come
+  quella non si pilota con UI Automation. Distinguerle serve, perché vogliono due attrezzi
+  diversi: la scelta file ha la **casella del nome** (`Edit` 1148), una finestra di
+  messaggio no — ed è così che `controlli` e `clic` dicono quale dei due usare, invece di
+  mandare a provare quello sbagliato mentre la finestra blocca tutto il resto. I bottoni,
+  poi, **non hanno un numero che si possa sapere in anticipo** (dipende da quali bottoni
+  la finestra mostra): si riconoscono dal loro testo, ripulito della `&` dell'acceleratore.
+- **Un argomento obbligatorio che manca era peggio di un errore.** *(2026-08-12, T5c.)*
+  Chiamando `clic` col nome di argomento sbagliato — `etichetta` invece di `nome` — il
+  server accettava lo stesso, e l'etichetta arrivava **vuota**: un'etichetta vuota combacia
+  con qualunque nome, così il ripiego «a parola intera» prendeva il **primo controllo della
+  finestra**. La risposta è stata «Premuto «🏠 Home»» — un successo riferito per una cosa
+  mai chiesta, che su un'altra schermata sarebbe stato un comando premuto davvero. Ora
+  `tools/call` **rifiuta** la chiamata a cui manca un argomento `required`, e nel dirlo
+  **elenca quelli che l'attrezzo vuole**: è l'informazione con cui si rimedia al primo
+  colpo, invece di indovinare. Chi parla col server via `curl` i nomi giusti li vede da
+  `tools/list`, ed è lì che conviene guardare **prima**.
 - **La tendina va sempre richiusa**, anche quando qualcosa va storto (in un `finally`):
   lasciata aperta blocca tutte le chiamate dopo, e l'errore sembra dell'applicazione.
   Va anche portata avanti la finestra **prima** di aprirla: una tendina aperta mentre la

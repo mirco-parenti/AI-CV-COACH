@@ -1,4 +1,5 @@
 Imports System.Text.Json.Nodes
+Imports TrovaLavoro.Dati
 
 Namespace Motore
 
@@ -80,6 +81,25 @@ Namespace Motore
         Public Property Aggiornata As Date
 
         ''' <summary>
+        ''' A che punto è la candidatura (cap. 07.3). Si cambia con <see cref="Avanza"/>,
+        ''' che è l'unico a conoscere le strade lecite; il valore si assegna direttamente
+        ''' solo quando lo si <b>rilegge</b> da disco, dove il passaggio è già avvenuto.
+        ''' </summary>
+        Public Property Stato As StatoOpportunita = StatoOpportunita.Nuova
+
+        ''' <summary>
+        ''' Quando l'opportunità è entrata in ciascuno stato: è la storia che il registro
+        ''' racconta («inviata il 12/08, nessun esito registrato», cap. 07.3).
+        ''' </summary>
+        ''' <remarks>
+        ''' Uno stato per volta, perché la macchina non torna mai indietro: la data qui
+        ''' dentro è quella del <b>primo</b> ingresso, e ripassare dallo stesso stato non
+        ''' la riscrive. L'ingresso in <see cref="StatoOpportunita.Nuova"/> coincide con
+        ''' <see cref="Creata"/>, che è scritta comunque.
+        ''' </remarks>
+        Public ReadOnly Property DateStati As New Dictionary(Of StatoOpportunita, Date)
+
+        ''' <summary>
         ''' Dove è stata scritta su disco; <c>Nothing</c> finché non lo è. Lo riempie
         ''' l'archivio, che è l'unico a sapere come si chiama la cartella.
         ''' </summary>
@@ -138,6 +158,41 @@ Namespace Motore
                 Return Giudizi() IsNot Nothing
             End Get
         End Property
+
+        ''' <summary>
+        ''' Porta la candidatura allo stato successivo, annotando quando (cap. 07.3).
+        ''' </summary>
+        ''' <param name="nuovo">Dove si va; dev'essere una strada lecita da dove si è.</param>
+        ''' <param name="quando">L'istante del passaggio; se omesso, adesso.</param>
+        ''' <remarks>
+        ''' <para><b>Restare dov'è non è un errore</b>: rigenerare i documenti di
+        ''' un'opportunità già generata è una cosa che si fa, e non è un passaggio nuovo —
+        ''' la data del primo ingresso resta quella. Si annota però se mancava, ed è così
+        ''' che una candidatura appena nata prende la data della sua prima casella.</para>
+        ''' <para>Una strada che la macchina non prevede solleva: non è un caso d'uso
+        ''' dell'utente, è un errore di chi programma. L'utente non può chiedere una
+        ''' transizione illecita — i comandi che non si possono premere sono spenti
+        ''' (cap. 03.8).</para>
+        ''' </remarks>
+        Public Sub Avanza(nuovo As StatoOpportunita, Optional quando As Date = Nothing)
+
+            Dim istante As Date = If(quando = Nothing, Date.Now, quando)
+
+            If nuovo = Stato Then
+                If Not DateStati.ContainsKey(nuovo) Then DateStati(nuovo) = istante
+                Return
+            End If
+
+            If Not StatiOpportunita.Consentita(Stato, nuovo) Then
+                Throw New InvalidOperationException(
+                    $"Da «{StatiOpportunita.Nome(Stato)}» non si passa a " &
+                    $"«{StatiOpportunita.Nome(nuovo)}» (cap. 07.3).")
+            End If
+
+            Stato = nuovo
+            DateStati(nuovo) = istante
+
+        End Sub
 
         ''' <summary>
         ''' La sola lista dei giudizi, che è ciò che i prompt successivi ricevono;

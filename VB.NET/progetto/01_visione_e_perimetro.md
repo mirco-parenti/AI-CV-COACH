@@ -91,7 +91,7 @@ Le funzioni sono numerate **F1–F8** e mappate sui capitoli di questo progetto:
 | **F3** | Valutazione e ragionamento | analisi annuncio, confronto, stelle + hard-gate, mitigazione, brainstorming con l'utente | 02, 12 |
 | **F4** | Generazione | 📄 CV-1 base, 🎯 CV-2 mirato, ✉️ lettera; multilingua IT/EN; rifinitura anti-slop | 04, 08, 10 |
 | **F5** | Uscite | export DOCX e PDF, email `.eml` pronta da inviare con gli allegati | 05, 07 |
-| **F6** | Registro candidature | stati per opportunità (nuova → interessante → generata → inviata → chiusa), storico | 07, 11 |
+| **F6** | Registro candidature | stati per opportunità (nuova → interessante → generata → inviata → esito, più scartata), storico | 07, 11 |
 | **F7** | Dati e backup | cartella dati, export/import del profilo in JSON, chiave API protetta | 11 |
 | **F8** | Server MCP integrato | le funzioni di lettura, analisi e generazione esposte come tool MCP a client esterni (Claude Desktop, Claude Code…); le azioni a conseguenza esterna restano nell'app | 09 |
 
