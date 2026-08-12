@@ -8,6 +8,32 @@ Imports TrovaLavoro.Motore
 Imports TrovaLavoro.Web
 
 ''' <summary>
+''' Un annuncio catturato dalla pagina che l'utente stava guardando: il testo da
+''' analizzare, e da dove viene (cap. 06.4).
+''' </summary>
+Public Class AnnuncioCatturatoEventArgs
+    Inherits EventArgs
+
+    Public Sub New(testo As String, fonte As String, link As String)
+
+        Me.Testo = testo
+        Me.Fonte = fonte
+        Me.Link = link
+
+    End Sub
+
+    ''' <summary>Il testo visibile della pagina: è ciò che andrà all'analisi.</summary>
+    Public ReadOnly Property Testo As String
+
+    ''' <summary>Il portale, se è uno dei nostri; altrimenti il sito.</summary>
+    Public ReadOnly Property Fonte As String
+
+    ''' <summary>L'indirizzo della pagina catturata.</summary>
+    Public ReadOnly Property Link As String
+
+End Class
+
+''' <summary>
 ''' Pannello P3 — la ricerca degli annunci (cap. 06; cap. 12, A3-A4): un browser vero
 ''' dentro l'applicazione, dove naviga l'utente, con le ricerche salvate sopra e la
 ''' cattura sotto.
@@ -40,6 +66,15 @@ Public Class PannelloRicerca
     ''' <summary>Sotto questa altezza la fascia delle azioni non scende: i bottoni ci devono stare.</summary>
     Private Const AltezzaMinimaAzioni As Integer = 64
 
+    ''' <summary>
+    ''' Sotto questi caratteri la pagina non si manda all'analisi. Non è un modo di
+    ''' indovinare se è un annuncio — quello lo dice l'AI (cap. 06.4) — ma di non spendere
+    ''' una chiamata e un'attesa per una pagina che non ha testo: una scheda vuota, una
+    ''' pagina che non si è caricata, un annuncio dentro un <c>iframe</c> che il lettore
+    ''' non vede. Il più corto degli annunci veri sta comodamente sopra.
+    ''' </summary>
+    Private Const MinimoTestoDellaPagina As Integer = 200
+
     Private ReadOnly _suggerimenti As New ToolTip()
 
     Private _contesto As ContestoApp
@@ -49,6 +84,12 @@ Public Class PannelloRicerca
 
     ''' <summary>I portali e le ricerche salvate: lo stesso oggetto che ha il contesto.</summary>
     Private _ricerche As Ricerche
+
+    ''' <summary>
+    ''' Chi legge la pagina aperta. Di norma nasce dalla vista al momento della cattura;
+    ''' il banco ne passa uno finto e prova la cattura senza WebView2.
+    ''' </summary>
+    Private _lettore As ILettorePagina
 
     ''' <summary>Se la vista è già accesa: l'accensione si fa una volta per sessione.</summary>
     Private _accesa As Boolean
@@ -60,6 +101,13 @@ Public Class PannelloRicerca
     ''' </summary>
     Private _browserFuoriUso As Boolean
 
+    ''' <summary>
+    ''' L'utente ha catturato un annuncio dalla pagina aperta: la finestra lo porta alla
+    ''' scheda della candidatura. Il pannello non conosce gli altri pannelli — dice cosa
+    ''' ha in mano (come <c>PannelloOpportunita.DocumentiRichiesti</c>).
+    ''' </summary>
+    Public Event AnnuncioCatturato As EventHandler(Of AnnuncioCatturatoEventArgs)
+
     Public Sub New()
 
         InitializeComponent()
@@ -68,7 +116,10 @@ Public Class PannelloRicerca
         AddHandler Me.Disposed, Sub() _suggerimenti.Dispose()
 
         VestiIBottoni()
-        DichiaraLeTappeCheMancano()
+
+        _suggerimenti.SetToolTip(btnCattura,
+            "Legge l'annuncio dalla pagina aperta e lo manda all'analisi.")
+
         AggiornaComandi()
 
     End Sub
@@ -79,12 +130,18 @@ Public Class PannelloRicerca
     ''' Il motore del browser. Il banco lo omette: senza di lui il pannello si costruisce e
     ''' i suoi comandi si provano, ma non si naviga.
     ''' </param>
-    Public Sub Collega(contesto As ContestoApp, Optional motore As MotoreBrowser = Nothing)
+    ''' <param name="lettore">
+    ''' Chi legge la pagina. Di norma si omette ed è la vista stessa; il banco passa qui il
+    ''' suo, e prova la cattura senza pretendere WebView2 (v. <see cref="ILettorePagina"/>).
+    ''' </param>
+    Public Sub Collega(contesto As ContestoApp, Optional motore As MotoreBrowser = Nothing,
+                       Optional lettore As ILettorePagina = Nothing)
 
         If contesto Is Nothing Then Throw New ArgumentNullException(NameOf(contesto))
 
         _contesto = contesto
         _motore = motore
+        _lettore = lettore
         _ricerche = contesto.Ricerche
 
         RiempiIMenu()
@@ -347,6 +404,123 @@ Public Class PannelloRicerca
 
     End Function
 
+    ' ==================================================================
+    ' La cattura
+    ' ==================================================================
+
+    Private Async Sub btnCattura_Click(sender As Object, e As EventArgs) Handles btnCattura.Click
+        Await CatturaAsync()
+    End Sub
+
+    ''' <summary>
+    ''' Legge la pagina che l'utente sta guardando e la consegna all'analisi (cap. 06.4).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>È il metodo che preme «Cattura annuncio»; il banco lo chiama direttamente,
+    ''' perché di un gestore di clic non si può aspettare la fine (come in P4).</para>
+    ''' <para><b>Qui non si giudica se sia un annuncio</b>: quello lo dice l'analisi, e il
+    ''' pannello non ha nessun titolo per indovinarlo dal testo. L'unica cosa che si
+    ''' controlla è che una pagina da mandare ci sia — perché mandare il nulla costerebbe
+    ''' un'attesa e una chiamata per sentirsi dire quel che si sapeva già.</para>
+    ''' </remarks>
+    Public Async Function CatturaAsync() As Task
+
+        Dim lettore As ILettorePagina = LettoreDellaPagina()
+        If lettore Is Nothing Then Return
+
+        Racconta("Leggo la pagina…")
+
+        Dim pagina As PaginaLetta
+
+        Try
+            pagina = Await lettore.LeggiAsync().ConfigureAwait(True)
+
+        Catch ex As Exception
+            ' Una pagina che non si lascia leggere non è un crash: è un annuncio che si
+            ' potrà sempre incollare a mano in Candidatura.
+            Racconta($"Non sono riuscita a leggere questa pagina ({ex.Message}). " &
+                     "Puoi copiarne il testo e incollarlo nel pannello Candidatura.")
+            Return
+
+        End Try
+
+        Dim testo As String = If(pagina?.Testo, String.Empty).Trim()
+
+        If testo.Length < MinimoTestoDellaPagina Then
+            Racconta("In questa pagina non c'è testo da leggere. Aspetta che finisca di " &
+                     "caricarsi, oppure apri la pagina di un singolo annuncio.")
+            Return
+        End If
+
+        ' Premere due volte sulla stessa pagina non deve produrre due candidature
+        ' identiche: costerebbe due chiamate all'AI per riscrivere quel che c'è già, e
+        ' lascerebbe nella coda di T5c due voci che l'utente non sa distinguere.
+        Dim gia As String = GiaCatturato(pagina.Indirizzo)
+        If gia IsNot Nothing Then
+            Racconta($"Questo annuncio l'avevi già catturato: è fra le tue opportunità, in «{gia}». " &
+                     "Per rileggerlo da capo, incolla il testo nel pannello Candidatura.")
+            Return
+        End If
+
+        Racconta(Racconto(pagina))
+
+        RaiseEvent AnnuncioCatturato(
+            Me, New AnnuncioCatturatoEventArgs(testo, _ricerche.FonteDi(pagina.Indirizzo), pagina.Indirizzo))
+
+    End Function
+
+    ''' <summary>
+    ''' Il nome della cartella in cui quell'indirizzo è già stato catturato, o
+    ''' <c>Nothing</c> se è la prima volta.
+    ''' </summary>
+    Private Function GiaCatturato(indirizzo As String) As String
+
+        If _contesto Is Nothing Then Return Nothing
+
+        Try
+            Dim dove As String = _contesto.Opportunita.CercaPerLink(indirizzo)
+            Return If(dove Is Nothing, Nothing, IO.Path.GetFileName(dove))
+
+        Catch ex As Exception When TypeOf ex Is IO.IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            ' Un disco che non risponde non deve impedire una cattura: al massimo si
+            ' finisce con un doppione, che è molto meno grave di un annuncio perso.
+            Return Nothing
+
+        End Try
+
+    End Function
+
+    ''' <summary>
+    ''' Chi può leggere la pagina adesso: quello che il banco ha passato, o la vista se è
+    ''' accesa. <c>Nothing</c> quando non c'è niente da leggere.
+    ''' </summary>
+    Private Function LettoreDellaPagina() As ILettorePagina
+
+        If _lettore IsNot Nothing Then Return _lettore
+        If Not _accesa Then Return Nothing
+
+        Return New LettorePagina(vista.CoreWebView2)
+
+    End Function
+
+    ''' <summary>
+    ''' Cosa si è preso, detto all'utente. Il titolo della pagina è il modo più corto di
+    ''' rispondere alla domanda «ma ha catturato quello giusto?»; il taglio, se c'è stato,
+    ''' si dichiara — nel progetto niente si perde in silenzio.
+    ''' </summary>
+    Private Shared Function Racconto(pagina As PaginaLetta) As String
+
+        Dim titolo As String = If(pagina.Titolo, String.Empty).Trim()
+
+        Return If(titolo = "", "Pagina catturata.", $"Catturato: «{titolo}».") &
+               If(pagina.Troncato,
+                  $" La pagina era più lunga di {LettorePagina.MassimoCaratteri} caratteri: " &
+                  "all'analisi va la prima parte.",
+                  String.Empty)
+
+    End Function
+
     Private Sub btnIndietro_Click(sender As Object, e As EventArgs) Handles btnIndietro.Click
 
         If _accesa AndAlso vista.CoreWebView2.CanGoBack Then vista.CoreWebView2.GoBack()
@@ -453,6 +627,10 @@ Public Class PannelloRicerca
         btnRicarica.Enabled = cIlBrowser AndAlso _accesa
         btnIndietro.Enabled = cIlBrowser AndAlso _accesa AndAlso vista.CoreWebView2.CanGoBack
 
+        ' Si cattura da una pagina: finché non ce n'è una aperta il comando resta spento,
+        ' che è più onesto di un bottone che risponde «non c'è niente da leggere».
+        btnCattura.Enabled = LettoreDellaPagina() IsNot Nothing
+
     End Sub
 
     ''' <summary>Il browser non c'è: si dice una volta e i comandi che navigano si spengono.</summary>
@@ -521,18 +699,6 @@ Public Class PannelloRicerca
         ' Dimenticare una ricerca butta via qualcosa che l'utente ha fatto: pesa quanto
         ' un'eliminazione, e si chiede prima.
         StileApp.VestiBottone(btnDimentica, LivelloBottone.Distruttivo)
-
-    End Sub
-
-    ''' <summary>
-    ''' I comandi delle tappe che verranno restano visibili e spenti, con scritto quando
-    ''' arrivano (cap. 03.8).
-    ''' </summary>
-    Private Sub DichiaraLeTappeCheMancano()
-
-        btnCattura.Enabled = False
-        _suggerimenti.SetToolTip(btnCattura,
-            "La cattura dell'annuncio dalla pagina aperta arriva con la tappa T5b.")
 
     End Sub
 

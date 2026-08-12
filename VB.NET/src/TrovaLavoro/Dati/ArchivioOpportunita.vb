@@ -132,6 +132,53 @@ Namespace Dati
         End Function
 
         ''' <summary>
+        ''' La cartella dell'opportunità già catturata da <b>quell'indirizzo</b>, o
+        ''' <c>Nothing</c> se quell'annuncio non c'è ancora.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Serve alla cattura (cap. 06.4): premere «Cattura annuncio» due volte sulla
+        ''' stessa pagina non deve produrre due candidature identiche. L'identità è
+        ''' l'<b>indirizzo</b>, che è l'unica cosa esatta che si ha in mano — a differenza
+        ''' del nome della cartella, dove due offerte diverse della stessa azienda per lo
+        ''' stesso ruolo si somigliano al punto da confondersi.</para>
+        ''' <para><b>Il confronto è esatto</b>: lo stesso annuncio raggiunto per due strade
+        ''' con parametri di tracciamento diversi non viene riconosciuto. È il verso giusto
+        ''' in cui sbagliare — meglio un doppione in più che una cattura buona rifiutata.
+        ''' Le opportunità nate prima di T5b non hanno link e non fanno mai da doppione.</para>
+        ''' <para>Legge il solo <c>stato.json</c> di ogni cartella, non gli artefatti: è una
+        ''' domanda che si fa a ogni cattura. Una cartella con lo stato illeggibile si
+        ''' scavalca — l'utente è padrone dei suoi file, e uno rovinato a mano non deve
+        ''' impedire di catturare.</para>
+        ''' </remarks>
+        Public Function CercaPerLink(link As String) As String
+
+            If String.IsNullOrWhiteSpace(link) Then Return Nothing
+
+            Dim cercato As String = link.Trim()
+
+            For Each cartella As String In Elenco()
+
+                Dim stato As JsonObject = Nothing
+
+                Try
+                    stato = TryCast(Leggi(cartella, FileStato), JsonObject)
+                Catch ex As JsonException
+                    Continue For
+                End Try
+
+                If stato Is Nothing Then Continue For
+
+                If String.Equals(Testo(stato, "link"), cercato, StringComparison.OrdinalIgnoreCase) Then
+                    Return cartella
+                End If
+
+            Next
+
+            Return Nothing
+
+        End Function
+
+        ''' <summary>
         ''' Rilegge un'opportunità dalla sua cartella. I file che non ci sono restano
         ''' <c>Nothing</c>: è il modo in cui un'opportunità a metà si riapre a metà,
         ''' invece di sembrare rotta.
@@ -174,7 +221,9 @@ Namespace Dati
                 {"lingua", o.Lingua},
                 {"versione_profilo", o.VersioneProfilo},
                 {"azienda", o.Azienda},
-                {"titolo", o.Titolo}}
+                {"titolo", o.Titolo},
+                {"fonte", o.Fonte},
+                {"link", o.Link}}
 
             If o.Match IsNot Nothing Then
                 scritto("match") = New JsonObject From {
@@ -203,6 +252,12 @@ Namespace Dati
             If Not String.IsNullOrEmpty(lingua) Then o.Lingua = lingua
 
             o.VersioneProfilo = Testo(stato, "versione_profilo")
+
+            ' Da T5b in poi. Nei file scritti prima questi due campi non ci sono, e
+            ' <c>Testo</c> restituisce <c>Nothing</c>: un'opportunità vecchia si riapre
+            ' senza fonte né link, che è esattamente com'era.
+            o.Fonte = Testo(stato, "fonte")
+            o.Link = Testo(stato, "link")
 
             Dim match As JsonObject = TryCast(Nodo(stato, "match"), JsonObject)
             If match Is Nothing Then Return

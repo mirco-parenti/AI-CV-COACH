@@ -44,6 +44,15 @@ Namespace Ui
             """esito"": ""soddisfatto"", ""eliminatorio"": false, ""spiegazione"": ""Dichiarato nel profilo.""}]," &
             """lettura_insieme"": ""Bene il magazzino, manca la patente C."", ""numero_complessivo"": 45}"
 
+        ''' <summary>
+        ''' Lo schema con tutti i campi vuoti: è quel che il prompt restituisce quando il
+        ''' testo non è un annuncio di lavoro — una pagina di elenco, una home, un login.
+        ''' </summary>
+        Private Const SchemaVuoto As String =
+            "{""competenze_richieste"": [], ""esperienza_richiesta"": [], ""formazione_richiesta"": []," &
+            """altri_requisiti"": [], ""titolo"": """", ""azienda"": """", ""sede"": []," &
+            """contratto"": {}, ""mansioni"": [], ""benefit"": []}"
+
         ''' <summary>Un confronto pieno: nessun gap, nessuna mitigazione da chiedere.</summary>
         Private Const ConfrontoPieno As String =
             "{""giudizi"": [" &
@@ -388,6 +397,81 @@ Namespace Ui
         ' Il banco
         ' ==================================================================
 
+        ' ==================================================================
+        ' L'annuncio catturato dal browser (cap. 06.4; cap. 12, A4)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function IlCatturatoSiVedeEPortaConSeLaProvenienza() As Task
+
+            Await ConPannelloAsync(PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Await pannello.AnalizzaIlCatturatoAsync(
+                        TestoIncollato, "Indeed", "https://it.indeed.com/viewjob?jk=9f3c1a")
+
+                    ' Il testo catturato entra dalla porta di sempre, e si vede: chi guarda
+                    ' deve poter leggere quello che è stato mandato all'AI.
+                    Assert.AreEqual(TestoIncollato, Casella(pannello, "txtAnnuncio").Text)
+
+                    Assert.AreEqual("Indeed", pannello.Candidatura.Fonte)
+                    Assert.AreEqual("https://it.indeed.com/viewjob?jk=9f3c1a", pannello.Candidatura.Link)
+
+                    ' E la provenienza arriva su disco insieme al resto.
+                    Dim stato As String = File.ReadAllText(Path.Combine(
+                        pannello.Candidatura.Cartella, ArchivioOpportunita.FileStato))
+                    Assert.Contains("Indeed", stato)
+                    Assert.Contains("viewjob", stato)
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaPaginaDiElencoNonDiventaUnaCandidatura() As Task
+
+            ' Lo schema tutto vuoto è il modo in cui il prompt dice «questo non è un
+            ' annuncio» (cap. 06.4).
+            Dim chiConfronta As New ConfrontatoreFinto
+
+            Await ConPannelloAsync(PipelineFinta(confrontatore:=chiConfronta, annuncio:=SchemaVuoto),
+                Async Function(pannello, contesto) As Task
+
+                    Await pannello.AnalizzaIlCatturatoAsync(
+                        TestoIncollato, "Indeed", "https://it.indeed.com/jobs?q=magazziniere")
+
+                    Assert.Contains("ricattura", Etichetta(pannello, "lblStatoOpportunita").Text,
+                                    "si rimanda al singolo annuncio")
+
+                    ' Ci si ferma prima del confronto: non si paga una seconda chiamata
+                    ' per confrontare il profilo con niente.
+                    Assert.IsEmpty(chiConfronta.Chiamate, "il confronto non è stato chiesto")
+
+                    ' E non si scrive su disco una candidatura che non esiste.
+                    Assert.IsEmpty(contesto.Opportunita.Elenco(), "niente cartelle-opportunità")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnTestoIncollatoCheNonEUnAnnuncioSiDiceInModoDiverso() As Task
+
+            Await ConPannelloAsync(PipelineFinta(annuncio:=SchemaVuoto),
+                Async Function(pannello, contesto) As Task
+
+                    Await IncollaEAnalizzaAsync(pannello, "Ricetta della torta di mele.")
+
+                    ' Chi non ha aperto nessuna pagina non può «ricatturare»: il consiglio
+                    ' deve essere uno che si può seguire.
+                    Dim detto As String = Etichetta(pannello, "lblStatoOpportunita").Text
+                    Assert.Contains("incollato", detto)
+                    Assert.DoesNotContain("ricattura", detto)
+
+                End Function)
+
+        End Function
+
         ''' <summary>
         ''' Un pannello collegato a un motore vero — cartella dati temporanea, nessuna
         ''' chiave — con la pipeline finta che gli si vuol dare.
@@ -427,10 +511,11 @@ Namespace Ui
 
         ''' <summary>La pipeline coi mestieri finti, già pronti a rispondere.</summary>
         Private Shared Function PipelineFinta(Optional confronto As String = ConfrontoConPaletto,
-                                              Optional confrontatore As ConfrontatoreFinto = Nothing) As PipelineCandidatura
+                                              Optional confrontatore As ConfrontatoreFinto = Nothing,
+                                              Optional annuncio As String = AnnuncioLetto) As PipelineCandidatura
 
             Dim analizzatore As New AnalizzatoreFinto
-            analizzatore.Dara(AnnuncioLetto)
+            analizzatore.Dara(annuncio)
 
             Dim chiConfronta As ConfrontatoreFinto = If(confrontatore, New ConfrontatoreFinto)
             chiConfronta.Dara(confronto).Dara("{""mitigazioni"": [{""requisito_gap"": ""Patente C""}]}")

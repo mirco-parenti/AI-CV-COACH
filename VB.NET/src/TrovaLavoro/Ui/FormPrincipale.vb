@@ -144,6 +144,21 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
+    ''' L'annuncio catturato in P3 va alla scheda della candidatura, che è dove si
+    ''' analizza (cap. 12, A4 → A5). Si mostra il pannello <b>prima</b> di far partire
+    ''' l'analisi, per la stessa ragione per cui la ricerca si mostra prima di accendere il
+    ''' browser: altrimenti la finestra resterebbe sul pannello di prima per tutta
+    ''' l'attesa, e sembrerebbe che il bottone non abbia funzionato.
+    ''' </summary>
+    Private Async Sub pnlRicerca_AnnuncioCatturato(sender As Object, e As AnnuncioCatturatoEventArgs) _
+        Handles pnlRicerca.AnnuncioCatturato
+
+        MostraPannello(pnlOpportunita, btnCandidatura)
+        Await pnlOpportunita.AnalizzaIlCatturatoAsync(e.Testo, e.Fonte, e.Link)
+
+    End Sub
+
+    ''' <summary>
     ''' Dalla scheda dell'opportunità ai documenti. Il bottone della barra resta quello
     ''' della candidatura: P6 non è un'altra destinazione, è il passo successivo dello
     ''' stesso flusso (cap. 12, A7).

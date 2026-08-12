@@ -171,6 +171,40 @@ Public Class PannelloOpportunita
             Return
         End If
 
+        ' Un testo incollato non ha provenienza: arriva da un'email, da un messaggio, da
+        ' uno screenshot letto altrove. Fonte e link restano vuoti, e va bene così.
+        Await AvviaIPassiAsync(testo, fonte:=Nothing, link:=Nothing).ConfigureAwait(True)
+
+    End Function
+
+    ''' <summary>
+    ''' L'annuncio catturato dalla pagina che l'utente stava guardando (cap. 06.4; cap. 12,
+    ''' A4): stessa strada del testo incollato, con in più la provenienza.
+    ''' </summary>
+    ''' <remarks>
+    ''' Il testo <b>si vede</b>: entra nella casella della fascia d'ingresso, dove l'utente
+    ''' può leggerlo, correggerlo e rilanciare. È la stessa onestà con cui il resto del
+    ''' programma mostra ciò che manda all'AI — una cattura che analizzasse in silenzio
+    ''' qualcosa di invisibile chiederebbe di fidarsi al buio.
+    ''' </remarks>
+    Public Async Function AnalizzaIlCatturatoAsync(testo As String, fonte As String, link As String) As Task
+
+        If AiAlLavoro Then Return
+
+        FasciaDIngresso(aperta:=True)
+        txtAnnuncio.Text = If(testo, String.Empty)
+
+        Await AvviaIPassiAsync(If(testo, String.Empty).Trim(), fonte, link).ConfigureAwait(True)
+
+    End Function
+
+    ''' <summary>
+    ''' Le condizioni che valgono comunque — l'AI, il profilo — e poi i due passi.
+    ''' </summary>
+    Private Async Function AvviaIPassiAsync(testo As String, fonte As String, link As String) As Task
+
+        If testo = "" Then Return
+
         If _pipeline Is Nothing Then
             RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
             Return
@@ -179,7 +213,7 @@ Public Class PannelloOpportunita
         Dim profilo As Profilo = LeggiIlProfilo()
         If profilo Is Nothing Then Return
 
-        Await ConducoIDuePassiAsync(_pipeline, testo, profilo).ConfigureAwait(True)
+        Await ConducoIDuePassiAsync(_pipeline, testo, profilo, fonte, link).ConfigureAwait(True)
 
     End Function
 
@@ -188,7 +222,8 @@ Public Class PannelloOpportunita
     ''' racconta dov'è successo, e quel che si è già ottenuto non si butta.
     ''' </summary>
     Private Async Function ConducoIDuePassiAsync(pipeline As PipelineCandidatura,
-                                                 testo As String, profilo As Profilo) As Task
+                                                 testo As String, profilo As Profilo,
+                                                 fonte As String, link As String) As Task
 
         Using filo As New CancellationTokenSource()
 
@@ -198,6 +233,18 @@ Public Class PannelloOpportunita
             Try
                 RaccontaLoStato("Leggo l'annuncio… (1 di 2)", StileApp.TestoSecondario)
                 Dim candidatura As Opportunita = Await pipeline.AnalizzaAsync(testo, filo.Token).ConfigureAwait(True)
+
+                candidatura.Fonte = fonte
+                candidatura.Link = link
+
+                ' Lo schema vuoto è il modo in cui il prompt dice «questo non è un
+                ' annuncio» (cap. 06.4): ci si ferma qui, senza pagare il confronto e
+                ' senza scrivere su disco una candidatura che non esiste. Il testo resta
+                ' nella casella, che è da dove si riprova.
+                If candidatura.AnnuncioVuoto Then
+                    RaccontaLoStato(NonSembraUnAnnuncio(link), StileApp.TestoSecondario)
+                    Return
+                End If
 
                 RaccontaLoStato("Confronto l'annuncio con il tuo profilo… (2 di 2)", StileApp.TestoSecondario)
                 Await pipeline.ConfrontaAsync(candidatura, profilo, filo.Token).ConfigureAwait(True)
@@ -225,6 +272,24 @@ Public Class PannelloOpportunita
             End Try
 
         End Using
+
+    End Function
+
+    ''' <summary>
+    ''' Il rifiuto garbato di cap. 06.4, detto in modo diverso a seconda di come il testo
+    ''' è arrivato: chi ha catturato una pagina va rimandato al singolo annuncio, chi ha
+    ''' incollato un testo va rimandato al testo. Dire «pagina di elenco» a chi non ha
+    ''' aperto nessuna pagina sarebbe un consiglio che non si può seguire.
+    ''' </summary>
+    Private Shared Function NonSembraUnAnnuncio(link As String) As String
+
+        If String.IsNullOrWhiteSpace(link) Then
+            Return "In questo testo non ho trovato un annuncio di lavoro. " &
+                   "Controlla di aver incollato l'annuncio per intero, poi riprova."
+        End If
+
+        Return "In questa pagina non ho trovato un annuncio: sembra un elenco di risultati, " &
+               "una home o una schermata di accesso. Apri il singolo annuncio e ricattura."
 
     End Function
 

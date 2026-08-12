@@ -176,6 +176,82 @@ Namespace Dati
         End Sub
 
         <TestMethod>
+        Public Sub LaProvenienzaSiScriveESiRilegge()
+            ' Da T5b un annuncio catturato porta con sé da dove viene (cap. 06.4): il
+            ' link è ciò che permette di tornare all'originale mesi dopo.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim catturata As Opportunita = OpportunitaDiProva()
+                    catturata.Fonte = "Indeed"
+                    catturata.Link = "https://it.indeed.com/viewjob?jk=9f3c1a"
+
+                    Dim riletta As Opportunita = archivio.Carica(archivio.Salva(catturata))
+
+                    Assert.AreEqual("Indeed", riletta.Fonte, "da che portale veniva")
+                    Assert.AreEqual("https://it.indeed.com/viewjob?jk=9f3c1a", riletta.Link, "e da quale pagina")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub UnOpportunitaScrittaPrimaDiT5bSiRiapreLoStesso()
+            ' Le opportunità di T4 hanno uno stato.json senza «fonte» né «link»: riaprirle
+            ' non deve rompersi, e non deve inventare una provenienza che non c'era.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim dove As String = archivio.Salva(OpportunitaDiProva())
+                    Dim stato As String = Path.Combine(dove, ArchivioOpportunita.FileStato)
+
+                    Dim vecchio As JsonObject = TryCast(JsonNode.Parse(File.ReadAllText(stato)), JsonObject)
+                    vecchio.Remove("fonte")
+                    vecchio.Remove("link")
+                    File.WriteAllText(stato, vecchio.ToJsonString())
+
+                    Dim riletta As Opportunita = archivio.Carica(dove)
+
+                    Assert.IsNull(riletta.Fonte, "nessuna provenienza inventata")
+                    Assert.IsNull(riletta.Link)
+                    Assert.AreEqual("Rossi S.p.A.", riletta.Azienda, "e il resto si rilegge come sempre")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub LoStessoIndirizzoSiRitrova()
+            ' È così che la cattura sa di aver già preso quella pagina, e non rianalizza
+            ' due volte lo stesso annuncio (cap. 06.4).
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim catturata As Opportunita = OpportunitaDiProva()
+                    catturata.Link = "https://it.indeed.com/viewjob?jk=9f3c1a"
+
+                    Dim dove As String = archivio.Salva(catturata)
+
+                    Assert.AreEqual(dove, archivio.CercaPerLink("https://it.indeed.com/viewjob?jk=9f3c1a"))
+                    Assert.IsNull(archivio.CercaPerLink("https://it.indeed.com/viewjob?jk=unaltro"),
+                                  "un altro annuncio non è un doppione")
+
+                    ' Le opportunità nate prima di T5b non hanno link: non devono mai
+                    ' rispondere «ci sono già io».
+                    For Each niente As String In {Nothing, "", "   "}
+                        Assert.IsNull(archivio.CercaPerLink(niente))
+                    Next
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub UnoStatoRovinatoAManoNonImpedisceDiCatturare()
+            ' L'utente è padrone dei suoi file (cap. 11.1): uno stato.json illeggibile si
+            ' scavalca, invece di far cadere la cattura che sta solo facendo una domanda.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim rovinata As Opportunita = OpportunitaDiProva()
+                    Dim dove As String = archivio.Salva(rovinata)
+                    File.WriteAllText(Path.Combine(dove, ArchivioOpportunita.FileStato), "{ questo non è json")
+
+                    Assert.IsNull(archivio.CercaPerLink("https://it.indeed.com/viewjob?jk=9f3c1a"))
+                End Sub)
+        End Sub
+
+        <TestMethod>
         Public Sub UnaCartellaCheNonCESiDiceChiaramente()
             ConArchivioTemporaneo(
                 Sub(archivio, cartella)

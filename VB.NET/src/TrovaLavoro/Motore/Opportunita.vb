@@ -61,6 +61,20 @@ Namespace Motore
         ''' </summary>
         Public Property Lingua As String = "it"
 
+        ''' <summary>
+        ''' Da dove viene l'annuncio: il nome del portale se è uno di quelli conosciuti,
+        ''' altrimenti il sito (cap. 06.4; cap. 12, A4). Vuoto per un annuncio incollato a
+        ''' mano, che una provenienza non ce l'ha.
+        ''' </summary>
+        Public Property Fonte As String
+
+        ''' <summary>
+        ''' L'indirizzo della pagina da cui l'annuncio è stato catturato. È ciò che
+        ''' permette di tornare all'originale mesi dopo — quando l'annuncio non c'è più,
+        ''' resta almeno la prova di dove stava.
+        ''' </summary>
+        Public Property Link As String
+
         ''' <summary>Quando l'opportunità è nata e quando è stata toccata l'ultima volta.</summary>
         Public Property Creata As Date
         Public Property Aggiornata As Date
@@ -82,6 +96,36 @@ Namespace Motore
         Public ReadOnly Property Titolo As String
             Get
                 Return DallAnnuncio("titolo")
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' Se l'annuncio è uscito <b>vuoto</b>: è così che il prompt <c>analisi_annuncio</c>
+        ''' dice «questo testo non è un annuncio di lavoro» — una pagina di elenco, una
+        ''' home, una schermata di accesso (cap. 06.4).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>La domanda si fa <b>conservativa</b>: vuoto vuol dire che non c'è né il
+        ''' ruolo, né una mansione, né uno solo dei quattro gruppi di requisiti. Basta una
+        ''' di quelle cose perché l'annuncio valga la pena — un annuncio scarno esiste, e
+        ''' rifiutarlo sarebbe peggio che analizzarlo. Il rischio si sceglie da questa
+        ''' parte: meglio un'analisi in più che una cattura buona buttata via.</para>
+        ''' <para>Non guarda azienda, sede, contratto e benefit: sono contorno, e una
+        ''' pagina di elenco quelli può averli (il nome del portale, la città della
+        ''' ricerca) proprio mentre di annuncio non ne ha nessuno.</para>
+        ''' </remarks>
+        Public ReadOnly Property AnnuncioVuoto As Boolean
+            Get
+                If Annuncio Is Nothing Then Return True
+
+                If Not String.IsNullOrWhiteSpace(Titolo) Then Return False
+
+                For Each lista As String In {"competenze_richieste", "esperienza_richiesta",
+                                             "formazione_richiesta", "altri_requisiti", "mansioni"}
+                    If Not ListaVuota(lista) Then Return False
+                Next
+
+                Return True
             End Get
         End Property
 
@@ -109,6 +153,24 @@ Namespace Motore
             If Not oggetto.TryGetPropertyValue("giudizi", voci) Then Return Nothing
 
             Return TryCast(voci, JsonArray)
+
+        End Function
+
+        ''' <summary>
+        ''' Se una lista dell'annuncio è assente o senza voci. Un campo che non è una lista
+        ''' conta come vuoto: l'AI ha risposto fuori schema, e su una forma che non
+        ''' riconosciamo non si può dire che ci sia qualcosa.
+        ''' </summary>
+        Private Function ListaVuota(campo As String) As Boolean
+
+            Dim oggetto As JsonObject = TryCast(Annuncio, JsonObject)
+            If oggetto Is Nothing Then Return True
+
+            Dim valore As JsonNode = Nothing
+            If Not oggetto.TryGetPropertyValue(campo, valore) Then Return True
+
+            Dim voci As JsonArray = TryCast(valore, JsonArray)
+            Return voci Is Nothing OrElse voci.Count = 0
 
         End Function
 

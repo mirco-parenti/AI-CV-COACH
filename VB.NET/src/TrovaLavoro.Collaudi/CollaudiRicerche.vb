@@ -245,6 +245,50 @@ Namespace Dati
         End Sub
 
         ' ==================================================================
+        ' Da dove viene un annuncio catturato
+        ' ==================================================================
+
+        <TestMethod>
+        Public Sub LaFonteEIlNomeDelPortaleQuandoLoConosciamo()
+
+            Dim ricerche As Ricerche = Ricerche.Predefinita()
+
+            ' La pagina di **un** annuncio non somiglia allo schema di ricerca del suo
+            ' portale: quel che le lega è il sito, ed è quello che si guarda.
+            Assert.AreEqual("Indeed", ricerche.FonteDi("https://it.indeed.com/viewjob?jk=9f3c1a"))
+
+            ' Il «www.» non conta: chi scrive un portale in ricerche.json non deve
+            ' indovinare quale forma userà il sito nei suoi link.
+            Assert.AreEqual("Subito.it",
+                            ricerche.FonteDi("https://www.subito.it/offerte-lavoro/magazziniere-genova-123"))
+
+            Assert.AreEqual("Jooble", ricerche.FonteDi("https://it.jooble.org/jdp/-482913"))
+
+        End Sub
+
+        <TestMethod>
+        Public Sub DaUnSitoSconosciutoLaFonteEIlSito()
+
+            ' Il flusso C (cap. 12.3): un link arrivato per email, da un sito che non è
+            ' fra i nostri portali. Una provenienza c'è lo stesso, ed è il sito.
+            Assert.AreEqual("aziendarossi.it",
+                            Ricerche.Predefinita().FonteDi("https://www.aziendarossi.it/lavora-con-noi/magazziniere"))
+
+        End Sub
+
+        <TestMethod>
+        Public Sub QuelCheNonEUnIndirizzoNonHaFonte()
+
+            Dim ricerche As Ricerche = Ricerche.Predefinita()
+
+            For Each niente As String In {Nothing, "", "   ", "it.indeed.com/jobs", "una frase qualunque"}
+                Assert.AreEqual(String.Empty, ricerche.FonteDi(niente),
+                                $"«{niente}» non è un indirizzo assoluto")
+            Next
+
+        End Sub
+
+        ' ==================================================================
         ' Andata e ritorno
         ' ==================================================================
 

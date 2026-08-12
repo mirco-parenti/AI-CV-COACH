@@ -1,9 +1,12 @@
 Imports System.IO
 Imports System.Linq
+Imports System.Text.Json.Nodes
+Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Motore
+Imports TrovaLavoro.Web
 
 Namespace Ui
 
@@ -55,17 +58,15 @@ Namespace Ui
         End Sub
 
         <TestMethod>
-        Public Sub LaCatturaSiDichiaraDiT5b()
+        Public Sub SenzaUnaPaginaDaLeggereLaCatturaRestaSpenta()
 
             ConPannello(
                 Sub(pannello, contesto, cartella)
 
-                    ' Regola 03.8: il comando della tappa che verrà è visibile e spento,
-                    ' con scritto quando arriva.
+                    ' Il pannello è collegato senza browser: non c'è nessuna pagina, e un
+                    ' bottone che risponderebbe «non c'è niente da leggere» è peggio di un
+                    ' bottone spento.
                     Assert.IsFalse(Bottone(pannello, "btnCattura").Enabled)
-                    Assert.IsTrue(Bottone(pannello, "btnCattura").Visible OrElse
-                                  Not pannello.Visible,
-                                  "il bottone c'è: è il pannello che nasce nascosto")
 
                 End Sub)
 
@@ -241,14 +242,217 @@ Namespace Ui
         End Sub
 
         ' ==================================================================
+        ' La cattura (cap. 06.4)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function LaCatturaConsegnaTestoFonteELink() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {
+                    .Titolo = "Magazziniere - Rossi S.p.A. | Indeed",
+                    .Indirizzo = "https://it.indeed.com/viewjob?jk=9f3c1a",
+                    .Testo = TestoDiUnAnnuncio()}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    ' Con una pagina da leggere il comando è acceso: è la sola condizione.
+                    Assert.IsTrue(Bottone(pannello, "btnCattura").Enabled)
+
+                    Dim consegnato As AnnuncioCatturatoEventArgs = Nothing
+                    AddHandler pannello.AnnuncioCatturato,
+                        Sub(mittente, argomenti) consegnato = argomenti
+
+                    Await pannello.CatturaAsync()
+
+                    Assert.IsNotNull(consegnato, "la cattura non ha consegnato niente")
+                    Assert.AreEqual(TestoDiUnAnnuncio(), consegnato.Testo, "il testo della pagina")
+                    Assert.AreEqual("Indeed", consegnato.Fonte, "riconosciuto dal sito, non dallo schema")
+                    Assert.AreEqual("https://it.indeed.com/viewjob?jk=9f3c1a", consegnato.Link)
+
+                    ' E all'utente si dice cosa si è preso: è il modo più corto di
+                    ' rispondere alla domanda «ma ha catturato quello giusto?».
+                    Assert.Contains("Magazziniere", Etichetta(pannello, "lblStatoRicerca").Text)
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaPaginaSenzaTestoNonSiManda() As Task
+
+            ' Una scheda vuota, una pagina non ancora caricata, un annuncio dentro un
+            ' iframe: non si spende una chiamata all'AI per sentirsi dire quel che si sa.
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {.Titolo = "Indeed", .Testo = "Caricamento…"}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Dim consegnato As Boolean = False
+                    AddHandler pannello.AnnuncioCatturato, Sub(mittente, argomenti) consegnato = True
+
+                    Await pannello.CatturaAsync()
+
+                    Assert.IsFalse(consegnato, "niente da analizzare, niente da consegnare")
+                    Assert.IsNotEmpty(Etichetta(pannello, "lblStatoRicerca").Text,
+                                      "ma l'utente sa perché non è successo niente")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaPaginaCheNonSiLasciaLeggereNonFaCadereIlPannello() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Guasto = New InvalidOperationException("la vista non risponde")}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Dim consegnato As Boolean = False
+                    AddHandler pannello.AnnuncioCatturato, Sub(mittente, argomenti) consegnato = True
+
+                    Await pannello.CatturaAsync()
+
+                    Assert.IsFalse(consegnato)
+                    Assert.AreEqual(1, lettore.Letture, "ci ha provato")
+
+                    ' Il ripiego onesto: il testo si può sempre incollare a mano in P4.
+                    Assert.Contains("Candidatura", Etichetta(pannello, "lblStatoRicerca").Text)
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaPaginaTroncataLoDichiara() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {
+                    .Titolo = "Annuncio lunghissimo",
+                    .Indirizzo = "https://www.aziendarossi.it/lavora-con-noi",
+                    .Testo = TestoDiUnAnnuncio(), .Troncato = True}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Dim consegnato As AnnuncioCatturatoEventArgs = Nothing
+                    AddHandler pannello.AnnuncioCatturato,
+                        Sub(mittente, argomenti) consegnato = argomenti
+
+                    Await pannello.CatturaAsync()
+
+                    ' Si cattura lo stesso — un annuncio letto a metà è ancora un annuncio —
+                    ' ma il taglio si dice: niente si perde in silenzio.
+                    Assert.IsNotNull(consegnato)
+                    Assert.AreEqual("aziendarossi.it", consegnato.Fonte, "un sito che non è fra i portali")
+                    Assert.Contains("prima parte", Etichetta(pannello, "lblStatoRicerca").Text)
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnAnnuncioGiaCatturatoNonSiRianalizza() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {
+                    .Titolo = "Magazziniere - Rossi S.p.A.",
+                    .Indirizzo = "https://it.indeed.com/viewjob?jk=9f3c1a",
+                    .Testo = TestoDiUnAnnuncio()}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    ' Come se quella pagina fosse già stata catturata prima.
+                    contesto.Opportunita.Salva(New Opportunita With {
+                        .Annuncio = JsonNode.Parse("{""titolo"": ""Magazziniere"", ""azienda"": ""Rossi S.p.A.""}"),
+                        .Link = "https://it.indeed.com/viewjob?jk=9f3c1a"})
+
+                    Dim consegnato As Boolean = False
+                    AddHandler pannello.AnnuncioCatturato, Sub(mittente, argomenti) consegnato = True
+
+                    Await pannello.CatturaAsync()
+
+                    ' Niente seconda analisi — sarebbero due chiamate all'AI per riscrivere
+                    ' quel che c'è già — e niente seconda cartella nella coda.
+                    Assert.IsFalse(consegnato)
+                    Assert.HasCount(1, contesto.Opportunita.Elenco())
+
+                    ' Ma si dice dov'è la prima, e come rifarla se è quello che si vuole.
+                    Dim detto As String = Etichetta(pannello, "lblStatoRicerca").Text
+                    Assert.Contains("già catturato", detto)
+                    Assert.Contains("Candidatura", detto)
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnAltroAnnuncioDelloStessoPortaleSiCatturaLoStesso() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {
+                    .Indirizzo = "https://it.indeed.com/viewjob?jk=DIVERSO",
+                    .Testo = TestoDiUnAnnuncio()}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    contesto.Opportunita.Salva(New Opportunita With {
+                        .Annuncio = JsonNode.Parse("{""titolo"": ""Magazziniere"", ""azienda"": ""Rossi S.p.A.""}"),
+                        .Link = "https://it.indeed.com/viewjob?jk=9f3c1a"})
+
+                    Dim consegnato As Boolean = False
+                    AddHandler pannello.AnnuncioCatturato, Sub(mittente, argomenti) consegnato = True
+
+                    Await pannello.CatturaAsync()
+
+                    Assert.IsTrue(consegnato, "il doppione è la pagina, non il portale")
+
+                End Function)
+
+        End Function
+
+        ' ==================================================================
         ' Attrezzi
         ' ==================================================================
+
+        ''' <summary>Un annuncio abbastanza lungo da valere una chiamata all'AI.</summary>
+        Private Shared Function TestoDiUnAnnuncio() As String
+
+            Return "Magazziniere addetto al carico e scarico merci. " &
+                   "Cerchiamo una persona con esperienza di almeno un anno in magazzino, " &
+                   "patentino del muletto in corso di validità e disponibilità ai turni. " &
+                   "Sede di lavoro: Genova. Contratto a tempo determinato con possibilità di proroga."
+
+        End Function
 
         ''' <summary>
         ''' Un pannello collegato a un contesto tutto suo, su una cartella dati temporanea,
         ''' <b>senza motore del browser</b>: la WebView resta spenta.
         ''' </summary>
         Private Shared Sub ConPannello(prova As Action(Of PannelloRicerca, ContestoApp, CartellaDati))
+
+            ' Tutto quel che c'è dentro è sincrono: aspettare qui non blocca niente.
+            ConPannelloAsync(Nothing,
+                Function(pannello, contesto, cartella) As Task
+                    prova(pannello, contesto, cartella)
+                    Return Task.CompletedTask
+                End Function).GetAwaiter().GetResult()
+
+        End Sub
+
+        ''' <summary>
+        ''' Lo stesso pannello, con un lettore di pagina in mano: è così che la cattura si
+        ''' prova senza WebView2 e senza un thread STA.
+        ''' </summary>
+        Private Shared Async Function ConPannelloAsync(
+            lettore As ILettorePagina,
+            prova As Func(Of PannelloRicerca, ContestoApp, CartellaDati, Task)) As Task
 
             Dim radice As String = Path.Combine(Path.GetTempPath(),
                                                 "ricerca-" & Guid.NewGuid().ToString("N"))
@@ -259,8 +463,8 @@ Namespace Ui
                 Dim pannello As New PannelloRicerca()
 
                 Try
-                    pannello.Collega(contesto)
-                    prova(pannello, contesto, contesto.Cartella)
+                    pannello.Collega(contesto, lettore:=lettore)
+                    Await prova(pannello, contesto, contesto.Cartella)
                 Finally
                     pannello.Dispose()
                     If Directory.Exists(radice) Then Directory.Delete(radice, recursive:=True)
@@ -268,7 +472,7 @@ Namespace Ui
 
             End Using
 
-        End Sub
+        End Function
 
         Private Shared Function Casella(pannello As Control, nome As String) As TextBox
             Return DirectCast(pannello.Controls.Find(nome, searchAllChildren:=True).Single(), TextBox)

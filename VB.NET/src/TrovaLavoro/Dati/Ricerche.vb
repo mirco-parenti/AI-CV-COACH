@@ -142,6 +142,44 @@ Namespace Dati
         End Function
 
         ''' <summary>
+        ''' Da dove viene un indirizzo: il <b>nome del portale</b> se è uno dei nostri,
+        ''' altrimenti il <b>sito</b> nudo e crudo (cap. 06.4). Vuoto se non è un indirizzo.
+        ''' </summary>
+        ''' <remarks>
+        ''' Serve alla cattura, che deve scrivere una provenienza leggibile accanto
+        ''' all'annuncio. Il confronto è sul sito e non sull'indirizzo intero, perché la
+        ''' pagina di <i>un</i> annuncio non somiglia allo schema di ricerca del suo
+        ''' portale: <c>it.indeed.com/jobs?q=…</c> cerca, <c>it.indeed.com/viewjob?jk=…</c>
+        ''' è l'annuncio, e sono lo stesso portale. Il <c>www.</c> non conta: chi scrive un
+        ''' portale in <c>ricerche.json</c> non deve indovinare quale forma userà il sito.
+        ''' </remarks>
+        Public Function FonteDi(indirizzo As String) As String
+
+            Dim sito As String = SitoDi(indirizzo)
+            If sito = "" Then Return String.Empty
+
+            Dim suo As Portale = Portali.FirstOrDefault(
+                Function(p) String.Equals(SitoDi(p.Schema), sito, StringComparison.OrdinalIgnoreCase))
+
+            Return If(suo IsNot Nothing, suo.Nome, sito)
+
+        End Function
+
+        ''' <summary>Il sito di un indirizzo, senza <c>www.</c>; vuoto se non è un indirizzo.</summary>
+        Private Shared Function SitoDi(indirizzo As String) As String
+
+            Dim letto As Uri = Nothing
+            If String.IsNullOrWhiteSpace(indirizzo) OrElse
+               Not Uri.TryCreate(indirizzo.Trim(), UriKind.Absolute, letto) Then Return String.Empty
+
+            Dim sito As String = letto.Host
+            If sito.StartsWith("www.", StringComparison.OrdinalIgnoreCase) Then sito = sito.Substring(4)
+
+            Return sito
+
+        End Function
+
+        ''' <summary>
         ''' Mette da parte una ricerca. Se una con lo stesso nome c'è già la <b>sostituisce</b>
         ''' al suo posto nell'elenco, invece di aggiungerne una gemella: due voci uguali nel
         ''' menù di P3 non aiuterebbero nessuno a scegliere.
