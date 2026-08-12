@@ -309,6 +309,33 @@ const ATTREZZI = [
   },
 
   {
+    name: "scegli_voce",
+    description:
+      "Sceglie una voce in un menù a tendina dell'applicazione — per esempio il portale in «Cerca su» " +
+      "di P3. Lo apre e ci clicca dentro come farebbe una persona, così scattano gli eventi veri, e " +
+      "poi verifica che il menù mostri davvero la voce chiesta. Senza «voce» non sceglie niente: " +
+      "elenca le voci che ci sono, con una freccia su quella di adesso.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        nome: {
+          type: "string",
+          description: "L'etichetta del menù, anche parziale: «Cerca su», «Ricerche salvate».",
+        },
+        voce: {
+          type: "string",
+          description: "La voce da scegliere, anche parziale. Senza, l'attrezzo si limita a elencarle.",
+        },
+      },
+      required: ["nome"],
+      additionalProperties: false,
+    },
+    async esegui({ nome, voce }) {
+      return testo(await interfaccia({ azione: "scegli", nome, voce }));
+    },
+  },
+
+  {
     name: "scegli_file",
     description:
       "Risponde alla finestra di scelta file che l'applicazione ha aperto — «Importa da un CV…», un " +
