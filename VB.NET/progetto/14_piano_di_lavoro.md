@@ -224,7 +224,7 @@ T4 le tocca comunque e chiuderle altrove costerebbe di più:
 **Fatto:** **355 collaudi verdi** senza rete e **10 reali** su aviolab03. **T5 può
 iniziare.**
 
-### T5 — La ricerca annunci (F2) e il registro (F6)
+### T5 — La ricerca annunci (F2) e il registro (F6) — *in corso: T5a e T5b ✔ chiuse il 2026-08-12*
 Pannello P3 con WebView2, ricerche salvate, cattura dell'annuncio, coda delle
 opportunità; cartelle-opportunità su disco; pannello P1 Home con registro e stati.
 Verifica sul campo degli schemi di indirizzo dei portali del primo rilascio.
@@ -232,6 +232,11 @@ Verifica sul campo degli schemi di indirizzo dei portali del primo rilascio.
 login manuale dove serve,
 cattura di annunci veri, rifiuto garbato delle pagine-elenco; riapertura dell'app con
 stato intatto.
+*Fatto per le prime tre voci il 2026-08-12, con T5b: i quattro portali percorsi dal menù
+uno per uno, un annuncio vero di Indeed analizzato e salvato con la sua provenienza, il
+rifiuto garbato visto scattare sulla griglia di Subito.it e su una pagina senza offerte.
+La **riapertura con stato intatto** resta a T5c, che è la tappa che costruisce la vista
+da riaprire.*
 
 **Il pedaggio è già pagato.** T5 introdurrebbe WebView2, l'unica libreria con codice
 nativo dentro un exe che deve restare uno solo — ma il cancello l'ha attraversato **T4**
@@ -245,17 +250,29 @@ quello di T3 e T4 — motore prima dell'interfaccia — perché qui il motore *�
 l'interfaccia: la cattura non esiste senza una pagina vera aperta in un browser vero, e
 una WebView2 non si sostituisce con un finto come si è fatto per l'AI. Il taglio segue
 allora l'ordine in cui le cose si accendono, ciascuna appoggiata alla precedente:
-**T5a — il browser e le ricerche salvate**: pannello P3 con la WebView2 a tutta area e
-il suo profilo di navigazione nella cartella dati (cap. 6.6); `ricerche.json` con la
-tabella dei portali e le ricerche salvate (cap. 6.3); il campo del link diretto
-(cap. 6.5). Qui si verificano **sul campo gli schemi di indirizzo** dei tre portali del
-primo rilascio (cap. 15, voce 7). Alla fine il bottone **🔍 Ricerca** della barra si
-accende: oggi è lì spento, col tooltip «arriva con la tappa T5» (regola 3.8).
-**T5b — la cattura**: titolo, URL e testo visibile letti dal DOM della pagina che
-l'utente sta guardando, passati ad `AnalizzatoreAnnuncio` — che esiste da T4a e non va
-toccato — e da lì alla coda delle opportunità; più il rifiuto garbato delle pagine che
-un annuncio non lo contengono (cap. 6.4). La fascia incolla-testo di P4 non sparisce: le
-si affianca, e resta di prima classe (cap. 03.6, cap. 12.3).
+**T5a — il browser e le ricerche salvate** — ✔ **CHIUSA il 2026-08-12**: pannello P3 con
+la WebView2 a tutta area e il suo profilo di navigazione nella cartella dati (cap. 6.6);
+`ricerche.json` con la tabella dei portali e le ricerche salvate (cap. 6.3); il campo del
+link diretto (cap. 6.5). Qui si verificano **sul campo gli schemi di indirizzo** dei tre
+portali del primo rilascio (cap. 15, voce 7). Alla fine il bottone **🔍 Ricerca** della
+barra si accende: oggi è lì spento, col tooltip «arriva con la tappa T5» (regola 3.8).
+*Com'è andata: la verifica sul campo ha trovato **InfoJobs chiuso** e l'ha sostituito con
+Jooble (cap. 6.3), e un cancello passato prima di scrivere il pannello ha stabilito che
+l'ambiente WebView2 dev'essere **uno solo** per tutta l'applicazione (cap. 05.5, cap. 02.3).
+La tappa si è chiusa con un buco dichiarato — il giro che parte dal **menù dei portali**
+non era mai stato percorso sull'applicazione vera, perché lo strumento di collaudo non
+sapeva scegliere una voce da una tendina — chiuso poi il 2026-08-12 insegnandoglielo, e
+percorso su tutti e quattro i portali.*
+**T5b — la cattura** — ✔ **CHIUSA il 2026-08-12**: titolo, URL e testo visibile letti dal
+DOM della pagina che l'utente sta guardando, passati ad `AnalizzatoreAnnuncio` — che
+esiste da T4a e non va toccato — e da lì alla coda delle opportunità; più il rifiuto
+garbato delle pagine che un annuncio non lo contengono (cap. 6.4). La fascia incolla-testo
+di P4 non sparisce: le si affianca, e resta di prima classe (cap. 03.6, cap. 12.3).
+*Com'è andata: il testo catturato **entra proprio in quella fascia**, così si vede; ogni
+opportunità porta con sé fonte e link (cap. 11.1); la stessa pagina catturata due volte
+non genera due candidature gemelle. Il collaudo sul campo ha analizzato un annuncio vero
+di Indeed e ha visto il rifiuto scattare sulla griglia di Subito.it — e ha corretto il
+punto 3 del cap. 6.4, che prometteva un comportamento uniforme che i portali non hanno.*
 **T5c — la Home e il registro (F6)**: pannello P1 con lo stato del profilo, la coda
 delle opportunità con stelle e stati, le scorciatoie ai flussi (cap. 03.6);
 `registro.json` e la macchina degli stati — nuova → interessante → generata → inviata →

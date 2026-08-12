@@ -22,6 +22,11 @@ CV)** sono realizzate (vedi «Realizzate»); resta l'ultima fonte di estrazione.
 puntatore.
 - **Estrazione da LinkedIn / sito web (2.1.3)** — fetch di un link pubblico → stesso profilo
   JSON. Complessità alta. *(2026-06-15 — formalizzato nel disegno top-down; architettura.md §8.)*
+  **Costo rivisto dai fatti** *(2026-08-12)*: con la cattura di T5b il meccanismo c'è già —
+  si legge la pagina che l'utente sta guardando, dopo che si è loggato **come sé** — e il
+  prompt che struttura (`importa_cv`) è indipendente dalla fonte. Non è più «complessità
+  alta»: è poco più di un pulsante, ed è entrata nel piano come **T5d**, coda di T5
+  (cap. 06.7; cap. 14, T5d).
 
 Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annunci insieme)
 — prospettiva futura, non gap dell'MVP. *(architettura.md §8.)*
@@ -50,18 +55,8 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   ricominciare; (d)
   **limite dimensione del PDF** — nessun tetto esplicito lato server (l'API rifiuta comunque oltre
   ~32 MB). *(2026-08-03 — emersi realizzando 2.1.2, diario Step 1.33; (b) valutata 2026-08-04.)*
-- **Fonte-link per l'annuncio → browser incorporato (WebView2)**: leggere l'annuncio da un **link**
-  invece di incollarne il testo (anello 2, fonte alternativa gemella dell'import da CV). Il
-  meccanismo `web_fetch` dell'API è stato **provato e accantonato**: apre solo le pagine a **HTML
-  statico** (career/ATS), ma **non** i portali renderizzati in **JavaScript** o dietro login/anti-bot
-  (LinkedIn, Indeed, Infojobs), cioè quasi tutti quelli reali — nell'MVP risultava inutile, quindi
-  rimosso. Pista pulita per la **Fase VB.NET**: un **WebView2** (browser Edge/Chromium nativo di
-  Windows 11) in cui l'utente naviga e si logga **come sé**; l'app legge il **DOM già renderizzato**
-  della pagina — JS risolto (è un vero browser) e muro anti-bot aggirato (sessione reale dell'utente:
-  nessuno scraping, nessun ToS violato). A valle nulla cambia: il testo estratto va ad
-  `analisi_annuncio` (invariato), come per l'incolla-testo. Lo stesso meccanismo abiliterebbe anche
-  la **2.1.3** (profilo da LinkedIn). *(2026-08-04 — provato `web_fetch` sull'annuncio-da-link:
-  limite JS, reso alla Fase VB.NET.)*
+- ~~**Fonte-link per l'annuncio → browser incorporato (WebView2)**~~ — **realizzata a T5a-T5b**
+  (vedi «Realizzate»).
 
 ## Profilo, annuncio & schema
 - **Estensione del profilo** a specchio di `altri_requisiti` (domicilio, disponibilità,
@@ -193,6 +188,27 @@ motivo, o rifiniture che farebbero salire l'app di classe.
   tenue? il bordo che sparisce?). Segnalata a Mirco, in attesa di decisione.
   *(2026-08-10 — emersa a T4c, guardando i pannelli nuovi nella prova a video.)*
 
+Idee emerse **costruendo T5** *(2026-08-12)*: la ricerca degli annunci e la cattura dalla
+pagina, cioè il primo pezzo di programma che tocca il mondo esterno per davvero.
+- **La cattura non vede dentro un `iframe`** — legge il testo del documento in cima, e quello
+  di una cornice annidata è un'altra pagina. Sui portali del primo rilascio la pagina di un
+  singolo annuncio non ne usa, e se un domani uno cambiasse idea il difetto si dichiara da
+  sé (il testo torna troppo corto e la cattura lo dice, invece di mandare all'analisi
+  un'accozzaglia di menù). Leggere anche le cornici è il raffinamento, da fare **se e quando**
+  un portale lo renderà necessario. *(2026-08-12 — limite dichiarato in `LettorePagina`.)*
+- **Il doppione si riconosce solo sull'indirizzo esatto** — lo stesso annuncio raggiunto per
+  due strade con parametri di tracciamento diversi (`?from=serp`, `&utm_…`) conta come due.
+  Il confronto è alla lettera apposta, perché sbagliare da quella parte costa un doppione e
+  sbagliare dall'altra costa una cattura buona rifiutata; normalizzare l'indirizzo prima di
+  confrontarlo è il passo successivo, e vuole conoscere quali parametri sono davvero
+  ininfluenti per ciascun portale. *(2026-08-12 — limite dichiarato in
+  `ArchivioOpportunita.CercaPerLink`.)*
+- **Un portale che cambia forma non lo scopre nessuno** — gli indirizzi dei portali sono dati
+  in `ricerche.json`, verificati a mano il 2026-08-12 (ed è così che si è scoperto che
+  InfoJobs aveva chiuso). Finché sono quattro va bene; se diventassero molti, servirebbe un
+  modo di accorgersene senza riprovarli uno per uno. *(2026-08-12 — emersa verificando i
+  portali del primo rilascio, cap. 06.3.)*
+
 ## Collaudi e non-regressione (Fase VB.NET)
 
 Idee emerse **costruendo la batteria di T2** (cap. 14), quando il prototipo ha fatto da
@@ -216,6 +232,17 @@ giudice per la prima volta.
   è finita, si alternano `clic` e `controlli` a mano. Un attrezzo che aspetti una condizione
   («finché quel bottone non si riaccende», con un tetto di tempo) renderebbe i giri lunghi
   scrivibili in una riga sola. *(2026-08-10 — emersa percorrendo il giro completo di T4c.)*
+  **Il caso peggiore è arrivato** *(2026-08-12)*: una catena di comandi lanciata senza
+  aspettare che l'applicazione fosse pronta è finita sui controlli sbagliati, e ha scritto in
+  una casella del profilo vero. Il rimedio immediato è stato stringere la ricerca dei
+  controlli (adesso vuole una parola intera); l'attesa vera resta da fare.
+- **Un attrezzo per rispondere alle finestre di messaggio** — `scegli_file` sa rispondere solo
+  alla scelta di un file; a una `MessageBox` («dimentico questa ricerca?», «chiudo senza
+  salvare?») non risponde nessuno, e finché è aperta l'applicazione non ascolta nient'altro.
+  La mancanza si è sentita il 2026-08-12: la ricerca salvata per prova si è tolta cancellando
+  il file dei dati invece che premendo «Sì». I bottoni di quelle finestre si chiamano per
+  numero, come quelli del dialogo dei file: è lo stesso mestiere già scritto una volta.
+  *(2026-08-12 — emersa provando T5b sull'applicazione vera.)*
 
 ## Realizzate
 
@@ -278,6 +305,19 @@ implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
   risponde alla finestra di scelta file) e lascia il giudizio a chi guarda, che era proprio
   il nodo per cui l'idea era rimasta ferma. Col suo aiuto il giro completo di T4 è stato
   percorso dall'interfaccia, senza mani. *(2026-08-10, T4c; cap. 09.1 e 13.7.)*
+- ✅ **Fonte-link per l'annuncio → browser incorporato (WebView2)** — l'annuncio si prende
+  dalla **pagina**, non più solo dal testo incollato. Il `web_fetch` dell'API era stato provato
+  e accantonato nell'MVP: apriva le pagine a HTML statico, ma non i portali renderizzati in
+  JavaScript o dietro login e anti-bot, cioè quasi tutti quelli veri. La pista indicata allora
+  era un browser dentro l'applicazione, ed è quella che si è percorsa: **T5a** ha messo la
+  WebView2 in piena vista nel pannello Ricerca, dove l'utente naviga e si logga **come sé**;
+  **T5b** legge dal DOM già renderizzato titolo, indirizzo e testo visibile e li manda ad
+  `analisi_annuncio`, **invariato**, esattamente come per l'incolla-testo. La previsione del
+  2026-08-04 ha avuto anche la sua prova numerica: lo stesso indirizzo di Jooble chiesto da un
+  programma qualunque torna `403` con la sfida di Cloudflare, chiesto dalla WebView apre i
+  risultati. Restano fuori due rifiniture, annotate nel backlog attivo (le cornici `iframe` e
+  la normalizzazione dell'indirizzo). *(2026-08-12, T5a-T5b; diario Step 2.11 e 2.12;
+  cap. 06.1/06.4.)*
 - ✅ **Validazione di range della taratura** — ogni numero letto da `taratura.json` dichiara
   ora l'intervallo in cui ha senso, e un valore fuori scala viene **scartato e annotato**
   invece di entrare zitto: un `"clamp_su": -50` non falsa più le stelle. Fatta a T4 perché è

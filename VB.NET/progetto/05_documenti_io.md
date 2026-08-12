@@ -116,7 +116,12 @@ due uscite una accanto all'altra a verificarlo (cap. 14).
   T4 il 2026-08-10:* la ricerca annunci è **T5**, la stampa PDF è **T4**, quindi a
   introdurre davvero WebView2 nel programma è questa tappa, non quella. Chi legge il
   capitolo 06 come «il posto da cui WebView2 arriva» ha ragione sul disegno e torto
-  sull'ordine.
+  sull'ordine. *E quando T5a è arrivata davvero (2026-08-12) le due WebView non sono
+  diventate due mondi: l'ambiente dell'applicazione è **uno solo**, lo tiene
+  `Web/MotoreBrowser` e la stampante se lo fa dare invece di accendersene uno suo. Il
+  perché sta nel cap. 06.1 — due ambienti sulla stessa cartella di navigazione stanno
+  buoni finché nessuno cambia loro un'opzione, e quando si rompono lo fanno con un errore
+  che non spiega niente.*
 - **I margini del foglio li mette la stampa, non il foglio di stile** *(2026-08-10, T4b)*:
   sono gli stessi 2 cm del DOCX, dichiarati una volta sola nelle impostazioni di stampa.
   Scriverli anche nel CSS della pagina rischierebbe di sommarli, e un CV con margini

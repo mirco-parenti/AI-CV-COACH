@@ -82,7 +82,9 @@ ogni modulo abbia **un compito solo**:
     contesto. La stampa passa da una WebView2, che vuole il thread dell'interfaccia, e il
     contesto lo montano anche i collaudi — fuori da qualunque finestra. Metterla lì
     avrebbe legato il motore all'interfaccia proprio nel punto in cui il motore serve
-    senza;*
+    senza. **A T5a la stessa regola vale per il `MotoreBrowser`**, che la finestra
+    costruisce per prima e passa sia alla stampante sia al pannello Ricerca: l'ambiente
+    WebView2 dell'applicazione è **uno solo**, e questo è il punto in cui lo si garantisce;*
   - `DialogoProfilo` + `Mossa`: la macchina a mosse del dialogo guidato (v. 2.4);
   - `ImportProfilo`: i due passi dell'import di un CV, dal file al profilo;
   - `Orchestratore`: conduce i flussi del cap. 12 (quale passo viene dopo quale).
@@ -92,7 +94,10 @@ ogni modulo abbia **un compito solo**:
     li chiama — la stessa ragione per cui il dialogo passa da `Mossa` (v. 2.4);*
   - `Opportunita` *(T4)*: l'artefatto che tiene insieme una candidatura — annuncio,
     giudizi, punteggio, mitigazioni, i due documenti, e da quale versione di profilo
-    sono nati. È ciò che `Dati/ArchivioOpportunita` scrive nella cartella del cap. 11.1;
+    sono nati. È ciò che `Dati/ArchivioOpportunita` scrive nella cartella del cap. 11.1.
+    *Da T5b porta anche **da dove viene**: fonte e link della pagina catturata
+    (cap. 11.1), e sa dire se l'annuncio è uscito **vuoto** dall'analisi — cioè se quella
+    pagina un annuncio non lo conteneva (cap. 06.4);*
   - `VistaConfronto`, `VistaAnnuncio` *(T4c)*: le due **viste di sola lettura** promesse
     a T4a. Gli artefatti nuovi restano JSON grezzo — il profilo è tipizzato perché P2 lo
     edita campo per campo, un annuncio e dei giudizi si mostrano e basta — ma un pannello
@@ -145,6 +150,14 @@ ogni modulo abbia **un compito solo**:
   CV» promessa qui a T4a è la pagina stessa*: una classe intermedia che ricalcasse lo
   schema del CV, per poi tradurlo comunque in blocchi, sarebbe stata un terzo modello da
   tenere allineato agli altri due.
+- **`Web/`** *(nata a T5a, cresciuta a T5b)* — quel che riguarda il browser dentro
+  l'applicazione (cap. 06). Ci stanno `MotoreBrowser`, che accende e custodisce
+  l'**unico** ambiente WebView2 — lo chiedono la stampa PDF, che lavora fuori schermo, e
+  il pannello Ricerca, che sta in piena vista — e `LettorePagina`, che porta fuori dal DOM
+  titolo, indirizzo e testo visibile della pagina aperta. Anche quest'ultimo ha la sua
+  interfaccia (`ILettorePagina`), per la stessa ragione dei mestieri dell'AI: le decisioni
+  della cattura — il testo basta? da che portale viene? l'avevamo già presa? — devono
+  potersi collaudare senza pretendere WebView2 e un thread STA.
 - **`Posta/`** — composizione dell'email e scrittura del file `.eml` marcato come bozza
   da inviare (cap. 07). *Nella 1.0 non spedisce:* né `.msg` né SMTP (cap. 15, voci 8 e 9),
   quindi questo componente non tocca alcuna credenziale.

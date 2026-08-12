@@ -66,19 +66,13 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   chiusura di T4** *(2026-08-11)*: il collaudo di tappa ha ripercorso la gamba per intero —
   114 campi su 114 ritrovati, DOCX e PDF identici — ma la metà di Word è di nuovo rimasta
   fuori, per la stessa ragione.
-- **Un annuncio davvero pescato da un portale.** La gamba B è stata percorsa con un
-  annuncio **verosimile ma scritto per il collaudo**. Un annuncio vero porta cose che
-  nessuno inventa — sigle, sezioni fuori posto, boilerplate legale, testo copiato male da
-  una pagina — ed è lì che l'analisi si mette alla prova davvero. Non serve una macchina
-  diversa: serve **T5**, quando la cattura dal browser esisterà e un annuncio vero si
-  prenderà con un clic. *(cap. 14, T4 gamba B — limite dichiarato nel piano.)*
 - **La coda dell'opportunità non si riapre.** T4 scrive ogni candidatura nella sua cartella
   definitiva (cap. 11.1), ma riaprendo l'applicazione non c'è ancora modo di **tornarci**:
-  la coda e il registro sono di T5, e a T4 si arriva a un'opportunità solo incollando di
-  nuovo l'annuncio. È previsto dal piano — la cartella nasce a T4 apposta perché T5 ci
-  costruisca sopra una vista — ma finché quella vista non c'è, la promessa «tutto
-  riapribile» del cap. 12.7 è mantenuta **sul disco e non nell'interfaccia**.
-  *(cap. 11.1; cap. 12.7; cap. 14, T5.)*
+  la coda e il registro sono di **T5c**, e fino a lì si arriva a un'opportunità solo
+  incollando o catturando di nuovo l'annuncio. È previsto dal piano — la cartella nasce a
+  T4 apposta perché T5 ci costruisca sopra una vista — ma finché quella vista non c'è, la
+  promessa «tutto riapribile» del cap. 12.7 è mantenuta **sul disco e non
+  nell'interfaccia**. *(cap. 11.1; cap. 12.7; cap. 14, T5c.)*
 
 ## Da revisione adversariale (2026-08-09)
 
@@ -97,6 +91,23 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Chiuse
 
+- ✅ **Un annuncio davvero pescato da un portale** *(aperta il 2026-08-10 da T4, chiusa il
+  2026-08-12 da T5b)*. La gamba B di T4 era stata percorsa con un annuncio **verosimile ma
+  scritto per il collaudo**; adesso la cattura dal browser esiste, e l'annuncio è arrivato
+  da **Indeed** con tutto quello che nessuno si inventa — il banner dei cookie, i filtri, i
+  menù e i titoli degli altri annunci nella stessa pagina. L'analisi ne ha ricavato il
+  ruolo giusto con la sua azienda e il suo contratto, il confronto ha dato 1,4 stelle su 10
+  voci, e l'opportunità è finita nella sua cartella con fonte e link.
+  *(cap. 06.4; cap. 14, T4 gamba B e T5b; diario Step 2.12.)*
+- ✅ **Il giro dal menù dei portali, mai provato sull'applicazione vera** *(aperta il
+  2026-08-12 alla chiusura di T5a, chiusa lo stesso giorno)*. Non era un difetto del
+  pannello ma un **limite dello strumento** di collaudo, che sapeva premere bottoni e
+  scrivere nelle caselle ma non scegliere una voce da una tendina: Indeed risultava provato
+  solo perché è il primo ed è già selezionato, gli altri tre erano stati aperti dalla
+  casella dell'indirizzo. Insegnato allo strumento a scegliere (`scegli_voce`), il giro è
+  stato percorso su tutti e quattro i portali. Lungo la strada lo strumento ha scoperto due
+  difetti **propri**, che facevano premere il controllo sbagliato e riferire il contrario
+  del vero. *(strumenti/mcp-collaudi/README.md; diario Step 2.11 e 2.12.)*
 - ✅ **`taratura.json` e `modelli.json` non li legge nessuno all'avvio** *(aperta il
   2026-08-07 da T3, chiusa il 2026-08-07 da T3c)*. Mancava il punto in cui il motore si
   monta all'avvio: l'ha portato **`Motore/ContestoApp`**, che carica entrambi i file e

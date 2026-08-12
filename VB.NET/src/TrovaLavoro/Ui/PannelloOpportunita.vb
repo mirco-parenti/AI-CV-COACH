@@ -616,7 +616,7 @@ Public Class PannelloOpportunita
 
         btnScarta.Enabled = False
         _suggerimenti.SetToolTip(btnScarta,
-                                 "Scartare un'opportunità vuole il registro delle candidature, che arriva con la tappa T5.")
+                                 "Scartare un'opportunità vuole il registro delle candidature, che arriva con la tappa T5c.")
 
     End Sub
 

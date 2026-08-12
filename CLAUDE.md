@@ -109,7 +109,8 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   cap. 14 — le batterie di T2 e T3 sono passate, ma i collaudi reali restano rieseguibili
   e gli attesi del banco si rigenerano da `server.js`; a T3 ha fatto da giudice
   sull'import di un CV e su un turno del dialogo. Attenzione: da **Pool 1.01** su
-  `importa_cv`, e dal **Pool 1.02** anche sui sette turni del profilo, non è più il metro
+  `importa_cv`, dal **Pool 1.02** anche sui sette turni del profilo e dal **Pool 1.03** su
+  `analisi_annuncio`, non è più il metro
   — è il termine di paragone, cap. 04.7; il metro carattere-per-carattere resta su
   `confronto` e `mitigazione`): Node ≥ 20.12,
   **niente dipendenze npm**, chiave in
@@ -153,8 +154,9 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   lì un'idea può non farsi mai, qui una voce **va fatta**.
 - **Lo strumento di collaudo (puntatore)** *(dal 2026-08-10)*: in `strumenti/mcp-collaudi/`
   c'è un server MCP locale con cui **provare l'applicazione vera** — compilarla, far girare
-  il banco, avviarla, fotografarla, elencare i controlli dicendo se sono accesi, premerli,
-  scrivere in una casella, rispondere alla finestra di scelta file. Non parte da solo
+  il banco, avviarla, fotografarla, elencare i controlli dicendo se sono accesi e che voce
+  mostrano i menù, premerli, scrivere in una casella, scegliere una voce da una tendina,
+  rispondere alla finestra di scelta file. Non parte da solo
   (`node strumenti/mcp-collaudi/server.mjs`) e **non** è il server MCP del prodotto, che è
   il cap. 09 ed è di T9. Come si accende, cosa sa fare e le trappole già pagate stanno nel
   suo `README.md`: **leggilo prima di usarlo**, sono ore risparmiate.
@@ -176,5 +178,6 @@ un file nuovo, aggiungi qui la sua riga.
 | `VB.NET/src/**` | Codice e collaudi. **Non si riscrive per allineamento**: si tocca quando una decisione di progetto o una tappa lo richiede. Commenti e nomi in italiano come il codice già presente; ogni modifica passa da `dotnet test` **prima** di dirsi fatta. Le cartelle `obj/` e `bin/` non si toccano mai. |
 | `strumenti/**` | Attrezzi di sviluppo, **fuori dal prodotto** (non entrano nell'exe, non si distribuiscono). Stessa regola del codice: non si riscrivono per allineamento, si toccano quando servono. Il loro `README.md` però sì: ogni trappola nuova pagata sul campo va scritta lì, perché è il solo posto in cui quel sapere sopravvive. |
 | `HTML+JS/**` | **Fuori dal rito** *(dal 2026-08-06)*: prototipo congelato. Si tocca solo per manutenzione che chiedo esplicitamente; in quel caso valgono le regole 1 e 3. |
+| `situazione-*.txt` in radice | **Mai aggiornate**: sono fotografie di una situazione a una certa data (come uno Step del diario), e riscriverle ne distruggerebbe il senso. Si toccano solo per cancellarle, se e quando lo dico. |
 | `.gitignore`, `.gitattributes` | Config: solo se serve un cambiamento concreto. |
 | `.env`, `.claude/`, `node_modules/`, gitignored | **MAI** toccati. |

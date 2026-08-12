@@ -30,17 +30,21 @@ qualità dei dati: si analizza solo ciò che un umano ha giudicato interessante.
 
 ## 6.2 Il pannello Ricerca (P3)
 
+*Com'è venuto costruendolo (T5a, 2026-08-12): la barra di sopra è di tre righe, non di
+una. Il disegno di dettaglio sta nel cap. 03.6, che è la sua casa; qui il ritratto.*
+
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│ Ricerca salvata: [Indeed — perito elettronico Genova ▼] [Apri]   │
-│ Oppure link diretto: [___________________________] [Vai]         │
+│ Ricerche salvate: [Indeed — magazziniere, Genova ▼] [Apri] [Dim.]│
+│ Cerca su: [Indeed ▼]  cosa [________] dove [______] [Cerca][Salva]│
+│ [◀] [⟳] [https://it.indeed.com/jobs?q=…________________]   [Vai] │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │                  WebView2 (il portale, navigabile)               │
 │                                                                  │
 ├──────────────────────────────────────────────────────────────────┤
-│ [✔ Cattura annuncio]   Ultima cattura: «Tecnico manutenzione —   │
-│                        Rossi SpA» → in coda (⭐ da calcolare)     │
+│ [✔ Cattura annuncio]   Catturato: «Addetto/a spedizioni per      │
+│                        servizi logistici».                       │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -86,14 +90,34 @@ Alla pressione di **«Cattura annuncio»**:
 2. il testo va al prompt `analisi_annuncio` (invariato dal prototipo): ne esce
    l'**Annuncio JSON** con requisiti, contesto e — novità — la **lingua** rilevata
    dell'annuncio (per il cap. 10);
-3. se la pagina **non contiene un annuncio** (è una lista di risultati, una home, una
-   pagina di login), lo schema esce vuoto e l'app risponde con garbo: «questa sembra
-   una pagina di elenco: apri il singolo annuncio e ricattura»;
+3. se la pagina **non contiene il testo di un annuncio** (una griglia di risultati, una
+   home, una schermata di accesso), lo schema esce vuoto e l'app risponde con garbo:
+   «questa sembra una pagina di elenco: apri il singolo annuncio e ricattura»;
 4. l'annuncio entra nella **coda delle opportunità** con fonte e link; da lì in poi la
    pipeline è quella di sempre (confronto → stelle → generazione).
 
+*Il punto 3 riscritto sui fatti (T5b, 2026-08-12).* Diceva «se la pagina non contiene un
+annuncio», e sul campo si è scoperto che **dipende da com'è fatto il portale**. Il rifiuto
+scatta dove doveva: sulla griglia di risultati di Subito.it e su una pagina senza offerte
+(provata anche sulla nostra pagina di casa). Su **Indeed no**, e non è un difetto: quel
+portale non ha una pagina di solo elenco — nel riquadro di destra tiene **sempre** un
+annuncio aperto, il suo testo fa parte della pagina, e la cattura prende quello che
+l'utente sta guardando, che è la cosa giusta. Il disegno prometteva un comportamento
+uniforme che i portali non hanno: qui si corregge la carta, non il territorio.
+
+Due cose che il programma **non** fa, e sono decisioni:
+- **non indovina** se la pagina sia un elenco. A dirlo è l'analisi, con lo schema vuoto;
+  l'unica cosa che si controlla prima è che una pagina da mandare ci sia — sotto un
+  minimo di testo non si spende una chiamata per sentirsi dire quel che si sa già;
+- **non cattura due volte la stessa pagina.** L'identità è l'indirizzo, che è l'unica
+  cosa esatta che si ha in mano: se quell'annuncio è già fra le opportunità lo dice e si
+  ferma, invece di pagare una seconda analisi e lasciare nella coda due voci gemelle.
+  Due candidature allo **stesso posto** restano invece legittime (cap. 11.1).
+
 Il ripiego del prototipo resta sempre disponibile: **incollare il testo** dell'annuncio
-a mano (utile per annunci ricevuti via email o messaggio).
+a mano (utile per annunci ricevuti via email o messaggio). *E le due strade non sono
+due: il testo catturato entra nella stessa casella in cui lo si incollerebbe, si vede, e
+da lì parte l'analisi di sempre (cap. 03.6, P4).*
 
 ## 6.5 L'annuncio da link (flusso C)
 

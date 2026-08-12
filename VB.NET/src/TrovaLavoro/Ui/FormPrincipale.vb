@@ -90,7 +90,7 @@ Public Class FormPrincipale
     Private Sub DichiaraLeTappeCheMancano()
 
         btnHome.Enabled = False
-        ttSuggerimenti.SetToolTip(btnHome, "Il cruscotto con il registro delle candidature arriva con la tappa T5.")
+        ttSuggerimenti.SetToolTip(btnHome, "Il cruscotto con il registro delle candidature arriva con la tappa T5c.")
 
         btnImpostazioni.Enabled = False
         ttSuggerimenti.SetToolTip(btnImpostazioni, "La finestra delle impostazioni arriva con la tappa T9.")

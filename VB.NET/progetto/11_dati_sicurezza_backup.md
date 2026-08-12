@@ -25,7 +25,7 @@ TrovaLavoro\
 │       ├── annuncio.json · giudizi.json · mitigazioni.json
 │       ├── appunti.json   (esito confermato del brainstorming)
 │       ├── cv.json · lettera.json
-│       ├── stato.json     (stato, date, lingua, versione profilo usata)
+│       ├── stato.json     (stato, date, lingua, versione profilo, fonte e link)
 │       └── out\           (i file prodotti: .docx .pdf .eml)
 ├── registro.json          la vista d'insieme delle candidature
 ├── webview2\              profilo di navigazione del browser integrato
@@ -37,7 +37,7 @@ TrovaLavoro\
   insieme, apribile anche a mano con Esplora file. Il nome della cartella è parlante
   (data + azienda + ruolo).
 - **La cartella nasce a T4, la vista d'insieme a T5** *(deciso il 2026-08-10, aprendo
-  T4)*. La coda delle opportunità, il `registro.json` e la macchina a stati sono di T5,
+  T4)*. La coda delle opportunità, il `registro.json` e la macchina a stati sono di T5c,
   ma T4 produce già annuncio, giudizi, mitigazioni, CV e lettera: quella roba deve
   atterrare da qualche parte. La scelta è di **scriverla subito nella sua casa
   definitiva** — la cartella qui sopra, con i nomi qui sopra — e non in un ripiego
@@ -48,6 +48,13 @@ TrovaLavoro\
   prodotti nel frattempo. È lo stesso principio dell'app che «riapre dov'era»
   (cap. 12.7): un documento generato e non ritrovabile domani sarebbe un documento
   perso, e T4 genera i primi documenti veri del progetto.
+- **Da dove veniva l'annuncio si conserva** *(T5b, 2026-08-12)*: lo `stato.json` di
+  un'opportunità catturata porta anche la **fonte** (il nome del portale se lo
+  conosciamo, altrimenti il sito) e il **link** della pagina. È quello che permette di
+  tornare all'originale mesi dopo — e quando l'annuncio non ci sarà più, resta almeno la
+  prova di dove stava. Le opportunità scritte prima di T5b non hanno i due campi e si
+  riaprono senza: non si inventa una provenienza che non c'era. Il link è anche
+  l'identità con cui la cattura riconosce di aver già preso quella pagina (cap. 06.4).
 - **Il profilo è versionato**: ogni modifica confermata (editing, sessione di
   aggiornamento) salva una copia datata nello storico; `stato.json` di ogni
   opportunità annota **con quale versione** del profilo furono generati i documenti.
