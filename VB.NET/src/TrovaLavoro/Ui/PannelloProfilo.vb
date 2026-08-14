@@ -38,6 +38,13 @@ Public Class PannelloProfilo
     ''' <summary>Sotto questa altezza la fascia delle azioni non scende: i bottoni ci devono stare.</summary>
     Private Const AltezzaMinimaAzioni As Integer = 60
 
+    ''' <summary>
+    ''' Quanto vuoto tiene l'eliminazione definitiva lontana dagli altri comandi. Non è
+    ''' una spaziatura come le altre: è una difesa, e per questo vale il doppio della
+    ''' distanza normale fra due controlli.
+    ''' </summary>
+    Private Const StaccoDelCritico As Integer = 2 * StileApp.DistanzaControlli
+
     ''' <summary>Il titolo delle finestrelle di conferma: il nome che l'utente conosce.</summary>
     Private Const NomeProdotto As String = "TrovaLavoro"
 
@@ -98,6 +105,14 @@ Public Class PannelloProfilo
     ''' «Ricerca», dove nessuno la cercherebbe.
     ''' </remarks>
     Public Event ImportDaSitoRichiesto As EventHandler
+
+    ''' <summary>
+    ''' Il profilo è stato eliminato: chi tiene insieme i pannelli deve dimenticarlo
+    ''' <b>dappertutto</b> (cap. 11.5). Qui la scheda si è già svuotata da sé; quel che
+    ''' resta — il dialogo guidato, il 📄 CV base in mostra fra i documenti, il cruscotto —
+    ''' vive negli altri pannelli, che questo non conosce.
+    ''' </summary>
+    Public Event ProfiloEliminato As EventHandler
 
     Public Sub New()
 
@@ -204,6 +219,37 @@ Public Class PannelloProfilo
             bottone.Location = New Point(destra, riga)
             destra -= StileApp.DistanzaControlli
         Next
+
+        DisponiLEliminazione(riga, destra)
+
+    End Sub
+
+    ''' <summary>
+    ''' Dove va l'eliminazione definitiva. Sta con gli altri comandi del profilo — è lì
+    ''' che la si cerca — ma <b>non in fila con loro</b>: quando la fascia è alta abbastanza
+    ''' sale di una riga, sopra «Salva profilo»; quando il logo la schiaccia (modalità
+    ''' compatta, cap. 03.5) resta in riga, staccata dal resto.
+    ''' </summary>
+    ''' <remarks>
+    ''' È il solo bottone del pannello da cui non si torna indietro, e non deve stare
+    ''' sotto il dito di chi sta salvando: il salvataggio si preme cento volte,
+    ''' l'eliminazione una sola e volendolo. Il vuoto intorno è la prima difesa; la
+    ''' seconda è la parola da scrivere nella conferma (cap. 11.5).
+    ''' </remarks>
+    ''' <param name="riga">La riga dei bottoni in fondo alla fascia.</param>
+    ''' <param name="sinistraDellaFila">Dove finisce, a sinistra, la fila dei comandi di destra.</param>
+    Private Sub DisponiLEliminazione(riga As Integer, sinistraDellaFila As Integer)
+
+        Dim rigaSopra As Integer = riga - btnEliminaProfilo.Height - StaccoDelCritico
+
+        If rigaSopra >= StileApp.InterlineaMinima Then
+            btnEliminaProfilo.Location = New Point(
+                pnlAzioni.ClientSize.Width - StileApp.MargineRiquadro - btnEliminaProfilo.Width, rigaSopra)
+            Return
+        End If
+
+        btnEliminaProfilo.Location = New Point(
+            sinistraDellaFila - StaccoDelCritico - btnEliminaProfilo.Width, riga)
 
     End Sub
 
@@ -752,6 +798,105 @@ Public Class PannelloProfilo
     End Function
 
     ' ==================================================================
+    ' Eliminare, definitivamente
+    ' ==================================================================
+
+    ''' <summary>
+    ''' La porta opposta a «Salva profilo» (cap. 11.5). Non elimina niente da sé: mostra
+    ''' cosa sta per succedere e lascia decidere. La conferma è di livello 6 — una parola
+    ''' da scrivere a mano — perché un «sei sicuro?» a cui si risponde di riflesso, davanti
+    ''' a una cosa che non si disfa, non è una domanda ma una formalità.
+    ''' </summary>
+    Private Sub btnEliminaProfilo_Click(sender As Object, e As EventArgs) Handles btnEliminaProfilo.Click
+
+        If _contesto Is Nothing Then Return
+
+        If Not FinestraConfermaCritica.Chiedi(
+            Me.FindForm(),
+            "Elimina profilo - definitivo",
+            CosaSparisceECosaResta(),
+            "Elimina il profilo") Then Return
+
+        EliminaIlProfilo()
+
+    End Sub
+
+    ''' <summary>
+    ''' Quel che l'utente legge prima di decidere. Le due colonne sono la sostanza della
+    ''' decisione: chi elimina il profilo si toglie di dosso il proprio racconto, non il
+    ''' lavoro di ricerca già fatto — e deve saperlo <i>prima</i>, non scoprirlo dopo.
+    ''' </summary>
+    Private Shared Function CosaSparisceECosaResta() As String
+
+        Return "Sparisce tutto quello che riguarda il tuo profilo:" & vbLf &
+               "   · il profilo, con tutti i suoi campi" & vbLf &
+               "   · lo storico delle versioni che hai salvato" & vbLf &
+               "   · il 📄 CV base, e i file .docx e .pdf che ne sono nati" & vbLf &
+               "   · quello che stai scrivendo adesso, e un dialogo guidato lasciato a metà" & vbLf &
+               vbLf &
+               "Resta dov'è, e non lo tocco:" & vbLf &
+               "   · le candidature che vedi nella Home, con i loro annunci, CV e lettere" & vbLf &
+               "   · le ricerche che hai salvato" & vbLf &
+               vbLf &
+               "Non c'è un cestino e non c'è un «annulla»."
+
+    End Function
+
+    ''' <summary>
+    ''' Elimina il profilo e riporta la scheda a com'era prima che ne esistesse uno.
+    ''' <b>Non chiede niente</b>: a chiedere è il bottone. È pubblico perché di un gestore
+    ''' di clic che apre una finestra modale il banco non può aspettare la fine.
+    ''' </summary>
+    ''' <returns><c>False</c> se non c'è riuscita; il motivo è già a video.</returns>
+    Public Function EliminaIlProfilo() As Boolean
+
+        If _contesto Is Nothing Then Return False
+
+        Dim cerano As Boolean
+
+        Try
+            cerano = _contesto.Archivio.EliminaTutto()
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            ' Un file aperto in un altro programma può bloccare l'eliminazione a metà: si
+            ' dice dov'è la cartella e non si finge che sia andata bene.
+            RaccontaLoStato(
+                $"Non sono riuscita a eliminare tutto: {ex.Message}" & vbLf &
+                $"La cartella è {_contesto.Cartella.CartellaProfilo} — qualche file potrebbe " &
+                "essere aperto altrove. Parte del profilo potrebbe essere già sparita: " &
+                "riapri la scheda per vedere cos'è rimasto.",
+                StileApp.Pericolo)
+            Return False
+        End Try
+
+        ' La scheda torna quella del primo avvio: campi vuoti, liste vuote, e via la
+        ' scheda del testo letto, che apparteneva a un CV di cui non resta niente.
+        Mostra(New Profilo())
+        If tabSezioni.TabPages.Contains(tabTestoLetto) Then
+            tabSezioni.TabPages.Remove(tabTestoLetto)
+        End If
+        txtTestoLetto.Clear()
+
+        _modificato = False
+        AggiornaComandi()
+
+        ' Chi non aveva ancora salvato niente ha buttato via solo quel che stava
+        ' scrivendo: dirgli «eliminato dal disco» gli farebbe temere una perdita che
+        ' non c'è stata.
+        RaccontaLoStato(
+            If(cerano,
+               "Profilo eliminato: sul disco non è rimasto niente di lui.",
+               "Ho svuotato la scheda: su disco non c'era ancora niente da eliminare.") & vbLf &
+            "Le tue candidature sono ancora nella Home. Quando vorrai, si riparte da un CV o dal dialogo.",
+            StileApp.TestoSecondario)
+
+        RaiseEvent ProfiloEliminato(Me, EventArgs.Empty)
+        Return True
+
+    End Function
+
+    ' ==================================================================
     ' Importare da un CV
     ' ==================================================================
 
@@ -1016,6 +1161,10 @@ Public Class PannelloProfilo
         StileApp.VestiBottone(btnGeneraCv1, LivelloBottone.AzionePrincipale)
         StileApp.VestiBottone(btnSalva, LivelloBottone.SicuroPositivo)
 
+        ' Livello 6 e non 5: qui non si toglie una voce, si manda via il profilo intero
+        ' e non c'è un annullo (cap. 03.3, cap. 11.5).
+        StileApp.VestiBottone(btnEliminaProfilo, LivelloBottone.Critico)
+
     End Sub
 
     ''' <summary>
@@ -1101,6 +1250,19 @@ Public Class PannelloProfilo
         ' conferma a vuoto lascerebbe nello storico una versione identica alla
         ' precedente, e lo storico serve a raccontare i cambiamenti.
         btnSalva.Enabled = conMotore AndAlso _modificato AndAlso Not occupato
+
+        ' Eliminare ha senso se c'è qualcosa da eliminare: un profilo su disco, oppure
+        ' quello che si sta scrivendo adesso. Un bottone rosso che non ha niente da fare
+        ' insegna solo a non fidarsi del colore.
+        btnEliminaProfilo.Enabled = conMotore AndAlso Not occupato AndAlso
+                                    (_contesto.Archivio.Esiste OrElse _modificato)
+
+        If btnEliminaProfilo.Enabled Then
+            _suggerimenti.SetToolTip(btnEliminaProfilo,
+                "Manda via il profilo, lo storico e il 📄 CV base. Le candidature restano.")
+        ElseIf conMotore AndAlso Not occupato Then
+            _suggerimenti.SetToolTip(btnEliminaProfilo, "Non c'è ancora un profilo da eliminare.")
+        End If
 
         For Each bottone As Button In {btnAggiungiLavoro, btnAggiungiInformale,
                                        btnAggiungiCompetenza, btnAggiungiStudio}

@@ -92,6 +92,7 @@ Partial Class PannelloProfilo
         Me.btnGeneraCv1 = New System.Windows.Forms.Button()
         Me.btnEsportaBackup = New System.Windows.Forms.Button()
         Me.btnSalva = New System.Windows.Forms.Button()
+        Me.btnEliminaProfilo = New System.Windows.Forms.Button()
         Me.pnlIntestazione.SuspendLayout()
         Me.grpDatiPersonali.SuspendLayout()
         Me.tabSezioni.SuspendLayout()
@@ -828,6 +829,7 @@ Partial Class PannelloProfilo
         Me.pnlAzioni.Controls.Add(Me.btnGeneraCv1)
         Me.pnlAzioni.Controls.Add(Me.btnEsportaBackup)
         Me.pnlAzioni.Controls.Add(Me.btnSalva)
+        Me.pnlAzioni.Controls.Add(Me.btnEliminaProfilo)
         Me.pnlAzioni.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.pnlAzioni.Location = New System.Drawing.Point(14, 558)
         Me.pnlAzioni.Name = "pnlAzioni"
@@ -896,6 +898,15 @@ Partial Class PannelloProfilo
         Me.btnSalva.Size = New System.Drawing.Size(130, 32)
         Me.btnSalva.TabIndex = 6
         Me.btnSalva.Text = "Salva profilo"
+        '
+        'btnEliminaProfilo
+        '
+        Me.btnEliminaProfilo.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnEliminaProfilo.Location = New System.Drawing.Point(924, 86)
+        Me.btnEliminaProfilo.Name = "btnEliminaProfilo"
+        Me.btnEliminaProfilo.Size = New System.Drawing.Size(230, 32)
+        Me.btnEliminaProfilo.TabIndex = 7
+        Me.btnEliminaProfilo.Text = "ELIMINA PROFILO - DEFINITIVO"
         '
         'PannelloProfilo
         '
@@ -1008,5 +1019,6 @@ Partial Class PannelloProfilo
     Friend WithEvents btnGeneraCv1 As System.Windows.Forms.Button
     Friend WithEvents btnEsportaBackup As System.Windows.Forms.Button
     Friend WithEvents btnSalva As System.Windows.Forms.Button
+    Friend WithEvents btnEliminaProfilo As System.Windows.Forms.Button
 
 End Class

@@ -117,6 +117,26 @@ Public Class PannelloDocumenti
         _annulla?.Cancel()
     End Sub
 
+    ''' <summary>
+    ''' Toglie dalla vista il 📄 CV base, perché il profilo da cui nasceva è stato
+    ''' eliminato (cap. 11.5) e il suo file non c'è più.
+    ''' </summary>
+    ''' <remarks>
+    ''' I documenti di una <b>candidatura</b> non si toccano, e non è una dimenticanza:
+    ''' quelli sono suoi, stanno nella sua cartella e l'eliminazione del profilo non li
+    ''' riguarda. Qui sparisce solo ciò che del profilo era il ritratto.
+    ''' </remarks>
+    Public Sub DimenticaIlCvBase()
+
+        If AiAlLavoro OrElse _cvBase Is Nothing Then Return
+
+        _cvBase = Nothing
+        Mostra()
+        RaccontaLoStato("Il profilo è stato eliminato: il 📄 CV base che era qui non c'è più.",
+                        StileApp.TestoSecondario)
+
+    End Sub
+
     ' ==================================================================
     ' I due modi di arrivare qui
     ' ==================================================================

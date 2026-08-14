@@ -110,6 +110,27 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   **modalità compatta** e la fascia comincia a 142 invece che a 273 — è la ragione per cui i
   numeri a finestra stretta e a finestra grande non si ricavano l'uno dall'altro.
   *(`Ui/FormPrincipale.LarghezzaModalitaCompatta`.)*
+  **Peggiorata di nuovo il 2026-08-14** *(diario Step 2.16)*: «ELIMINA PROFILO - DEFINITIVO»
+  (230 px) sta **sopra** la fila di destra e a finestra grande non toglie niente a nessuno —
+  il margine fra le due file resta 245 px. Ma quando il logo passa in compatta la fascia si
+  abbassa a 68 px, due righe non ci stanno e il bottone **scende in riga**: lì la fila di
+  destra comincia a 372 invece che a 638, e la sovrapposizione sale da 410 a **676 px**. È
+  lo stesso difetto, e la stessa cura — una fascia che va a capo quando lo spazio non basta
+  la sistemerebbe tutta insieme. *(`Ui/PannelloProfilo.DisponiLEliminazione`.)*
+
+## Da «Elimina profilo» (2026-08-14)
+
+- **L'eliminazione vera non è mai stata premuta sull'applicazione.** Il giro è stato
+  percorso sull'exe fino all'ultimo passo — bottone, finestra di conferma, parola scritta,
+  bottone che si accende — e lì si è **annullato**, perché premere davvero avrebbe
+  cancellato il profilo vero di Mirco con il suo storico. Quello che manca non è il
+  comportamento (13 collaudi lo verificano: l'archivio, la scheda che si svuota, il dialogo
+  dimenticato, il 📄 CV base tolto dalla vista e i documenti delle candidature che restano),
+  ma la **prova dal vivo**. Per farla serve poter avviare l'applicazione su una **cartella
+  dati usa-e-getta**: oggi `avvia_app` usa sempre `%APPDATA%\TrovaLavoro` e l'unico modo
+  sarebbe spostare a mano la cartella vera. Le due strade sono un argomento della riga di
+  comando per la radice dati (che servirà comunque alle Impostazioni, cap. 11.1) o un
+  attrezzo del banco che prepari una cartella finta. *(cap. 11.5; `strumenti/mcp-collaudi/`.)*
 
 ## Da revisione adversariale (2026-08-09)
 

@@ -160,6 +160,38 @@ un'opportunità» (la sua cartella, con conferma di livello 5), «Elimina tutti 
 L'app non lascia nulla in giro fuori dalla cartella dati, quindi la disinstallazione
 è: cancellare l'exe e, se si vuole, la cartella dati.
 
+**«ELIMINA PROFILO - DEFINITIVO», dal pannello Profilo** *(2026-08-14)*. Le eliminazioni
+qui sopra stanno nelle Impostazioni e arrivano con T9; questa è la loro sorella mirata,
+e sta in P2 accanto a «Salva profilo» perché è lì che il profilo si guarda e si corregge.
+Il perimetro è **la cartella `profilo\` intera**: `profilo.json`, lo `storico\`, il
+`cv_base.json` con la sua `out\`, le copie `profilo.rotto-*` e ogni temporaneo rimasto.
+Non un file alla volta ma la cartella, perché «definitivo» non diventi una mezza verità
+la prima volta che qualcuno mette un file nuovo lì dentro.
+
+Cosa **non** tocca — ed è la parte da dire all'utente prima che confermi: le candidature
+(`opportunita\`), il `registro.json` che le indicizza, le ricerche salvate, la taratura,
+i modelli, i dati di navigazione. Chi elimina il profilo si toglie di dosso il proprio
+racconto, non il lavoro di ricerca già fatto: sono due decisioni diverse e restano due
+gesti diversi.
+
+Due conseguenze accettate a occhi aperti:
+
+- lo `stato.json` di ogni candidatura annota la **versione di profilo** con cui i suoi
+  documenti furono scritti (v. 11.1); sparito lo storico, quei riferimenti restano
+  scritti ma non puntano più a niente. La candidatura si riapre lo stesso — i suoi
+  documenti sono nella sua cartella — ma «con quale profilo fu scritto questo CV» non ha
+  più risposta. È il prezzo di un'eliminazione che si dichiara definitiva, e chi la
+  sceglie vuole proprio quello;
+- il 📄 CV-1 base se ne va con il profilo, e non perché sta nella sua cartella: contiene
+  nome, contatti ed esperienze. Lasciarlo lì vorrebbe dire non aver cancellato niente.
+
+**La conferma è di livello 6** (cap. 03.3), la prima del progetto: una finestra che
+elenca cosa sparisce e cosa resta, e per procedere chiede di **ridigitare `TrovaLavoro`**
+— lo stesso gesto che il paragrafo qui sopra riserva a «Elimina tutti i dati». Il bottone
+che elimina resta spento finché la parola non è esatta; il tasto Invio non lo preme, e
+Esc chiude senza fare niente. Non c'è cestino e non c'è «annulla»: è la ragione per cui
+il gesto costa una parola scritta a mano.
+
 ## 11.6 I due file dei numeri: taratura e modelli
 
 `taratura.json` contiene i numeri del calcolo delle stelle: soglia 1,5, pesi 5 e 1,

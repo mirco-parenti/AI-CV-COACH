@@ -568,6 +568,78 @@ Namespace Ui
 
         End Sub
 
+        <TestMethod>
+        Public Sub EliminareIlProfiloSvuotaLaSchedaEIlDisco()
+            ' Cap. 11.5. Qui si chiama il metodo e non il bottone: il bottone apre una
+            ' finestra modale, e di quella il banco non può aspettare la fine.
+            ConProfiloSalvato(
+                Sub(pannello, archivio)
+                    Dim avvisata As Boolean = False
+                    AddHandler pannello.ProfiloEliminato, Sub() avvisata = True
+
+                    Assert.IsTrue(Bottone(pannello, "btnEliminaProfilo").Enabled,
+                                  "col profilo su disco si può eliminare")
+
+                    Assert.IsTrue(pannello.EliminaIlProfilo(), "l'eliminazione riesce")
+
+                    Assert.IsFalse(archivio.Esiste, "su disco non è rimasto niente")
+                    Assert.IsEmpty(Casella(pannello, "txtNome").Text, "i campi sono vuoti")
+                    Assert.IsEmpty(Elenco(pannello, "lstLavoro").Items, "e le liste anche")
+                    Assert.IsFalse(Bottone(pannello, "btnSalva").Enabled, "niente da salvare")
+                    Assert.IsFalse(Bottone(pannello, "btnEliminaProfilo").Enabled, "e niente altro da eliminare")
+                    Assert.Contains("eliminato", Etichetta(pannello, "lblStatoProfilo").Text,
+                                    "la scheda dice cos'è successo")
+                    Assert.Contains("candidature", Etichetta(pannello, "lblStatoProfilo").Text,
+                                    "e dice anche cosa è rimasto")
+                    Assert.IsTrue(avvisata, "la finestra viene avvertita, per svuotare il resto dell'applicazione")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaNienteDaEliminareIlBottoneESpento()
+            ' Un bottone rosso che non ha niente da fare insegna solo a non fidarsi del
+            ' colore. Ma quel che si sta scrivendo adesso è già qualcosa da buttare via.
+            ConCartellaTemporanea(
+                Sub(radice)
+                    Using contesto As ContestoApp = ContestoApp.Monta(radice, "", PoolInesistente()),
+                          pannello As New TrovaLavoro.PannelloProfilo()
+
+                        pannello.Collega(contesto)
+
+                        Assert.IsFalse(Bottone(pannello, "btnEliminaProfilo").Enabled,
+                                       "nessun profilo, niente da eliminare")
+
+                        Casella(pannello, "txtNome").Text = "Luca Ferrari"
+
+                        Assert.IsTrue(Bottone(pannello, "btnEliminaProfilo").Enabled,
+                                      "ma quello che si sta scrivendo si può buttare via lo stesso")
+
+                        pannello.EliminaIlProfilo()
+
+                        Assert.IsEmpty(Casella(pannello, "txtNome").Text, "e la scheda si svuota")
+                        Assert.Contains("non c'era ancora niente", Etichetta(pannello, "lblStatoProfilo").Text,
+                                        "senza far temere una perdita che non c'è stata")
+                    End Using
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub LEliminazioneNonStaSottoIlDitoDelSalvataggio()
+            ' Cap. 03.6: il solo bottone del pannello da cui non si torna indietro non
+            ' sta in fila con quello che si preme cento volte. Quando la fascia è alta
+            ' (modalità piena, cap. 03.5) sale di una riga, con il suo vuoto intorno.
+            Using pannello As New TrovaLavoro.PannelloProfilo()
+                pannello.ImpostaIngombroLogo(New Size(261, 188))
+
+                Dim elimina As Button = Bottone(pannello, "btnEliminaProfilo")
+                Dim salva As Button = Bottone(pannello, "btnSalva")
+
+                Assert.IsLessThan(salva.Top, elimina.Bottom, "sta su una riga più in alto del salva")
+                Assert.IsGreaterThanOrEqualTo(24, salva.Top - elimina.Bottom, "con del vuoto in mezzo")
+                Assert.AreEqual(salva.Right, elimina.Right, "allineato al margine destro come gli altri")
+            End Using
+        End Sub
+
         ''' <summary>Quel che l'AI risponde sul testo della pagina: la forma di «importa_cv».</summary>
         Private Shared Function ProfiloDiRitorno() As String
 

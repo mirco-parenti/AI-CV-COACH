@@ -160,6 +160,53 @@ Namespace Dati
         End Function
 
         ''' <summary>
+        ''' Manda via il profilo e tutto ciò che ne discende: il file corrente, lo storico,
+        ''' il CV base con i suoi documenti, le copie messe in salvo. È l'eliminazione
+        ''' definitiva del cap. 11.5, e non ha un annullo.
+        ''' </summary>
+        ''' <returns><c>False</c> se non c'era niente da eliminare.</returns>
+        ''' <remarks>
+        ''' <para>Il perimetro è <b>la cartella del profilo</b>, non un elenco di nomi: lì
+        ''' dentro non vive nient'altro, e una lista da tenere allineata sarebbe la prima
+        ''' cosa a dimenticarsi un file — un <c>.tmp</c> rimasto da una scrittura
+        ''' interrotta, una copia <c>profilo.rotto-…</c>. Un'eliminazione che si dichiara
+        ''' definitiva non può permettersi un residuo.</para>
+        ''' <para>Le candidature stanno altrove (cap. 11.1) e qui non vengono sfiorate:
+        ''' sono l'altra metà dei dati dell'utente, e si eliminano con un altro gesto.</para>
+        ''' <para>L'ordine conta solo quando qualcosa va storto a metà — un file aperto in
+        ''' un altro programma, un permesso negato. Si comincia da ciò che si rigenera e si
+        ''' finisce col profilo corrente: se ci si ferma prima della fine, la cosa più
+        ''' preziosa è ancora al suo posto.</para>
+        ''' </remarks>
+        Public Function EliminaTutto() As Boolean
+
+            If Not Directory.Exists(_cartella.CartellaProfilo) Then Return False
+
+            Dim cerano As Boolean = Directory.EnumerateFileSystemEntries(_cartella.CartellaProfilo).Any()
+
+            EliminaCartella(_cartella.CartellaOutProfilo)
+            EliminaFile(_cartella.FileCvBase)
+            EliminaCartella(_cartella.CartellaStorico)
+            EliminaFile(_cartella.FileProfilo)
+
+            ' E poi la casa, con dentro quel che ci fosse rimasto.
+            Directory.Delete(_cartella.CartellaProfilo, recursive:=True)
+
+            Return cerano
+
+        End Function
+
+        ''' <summary>Toglie un file se c'è: cancellarne uno che non esiste non è un errore.</summary>
+        Private Shared Sub EliminaFile(percorso As String)
+            If File.Exists(percorso) Then File.Delete(percorso)
+        End Sub
+
+        ''' <summary>Toglie una cartella con tutto il suo contenuto, se c'è.</summary>
+        Private Shared Sub EliminaCartella(percorso As String)
+            If Directory.Exists(percorso) Then Directory.Delete(percorso, recursive:=True)
+        End Sub
+
+        ''' <summary>
         ''' Salva il 📄 CV base accanto al profilo, annotando da quale versione è nato.
         ''' </summary>
         ''' <remarks>

@@ -199,6 +199,32 @@ Public Class PannelloDialogo
 
     End Function
 
+    ''' <summary>
+    ''' Butta la conversazione <b>senza aprirne un'altra</b>: il profilo da cui nasceva è
+    ''' stato eliminato (cap. 11.5), e quel che l'utente aveva raccontato non ha più un
+    ''' posto dove andare.
+    ''' </summary>
+    ''' <remarks>
+    ''' Non è «Ricomincia»: quello riparte subito col primo turno, e qui ripartire
+    ''' vorrebbe dire chiamare l'AI per un racconto che nessuno ha chiesto — davanti a un
+    ''' utente che ha appena detto di voler sparire. Mentre l'AI lavora non si tocca
+    ''' niente: la mossa in arrivo troverebbe un dialogo che non c'è più.
+    ''' </remarks>
+    Public Sub Dimentica()
+
+        If _occupato Then Return
+
+        _dialogo = Nothing
+        _mossa = Nothing
+        _consegnato = False
+
+        SvuotaLaConversazione()
+        RaccontaLoStato("Il profilo è stato eliminato: qui non è rimasto niente di quel racconto.",
+                        StileApp.TestoSecondario)
+        AggiornaComandi()
+
+    End Sub
+
     Private Async Sub btnRicomincia_Click(sender As Object, e As EventArgs) Handles btnRicomincia.Click
 
         ' Quello che si butta è il racconto dell'utente: si chiede sempre — tranne

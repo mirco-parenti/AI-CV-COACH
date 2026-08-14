@@ -337,6 +337,34 @@ Namespace Ui
 
         End Function
 
+        <TestMethod>
+        Public Async Function DimenticareButtaIlRaccontoSenzaRicominciare() As Task
+
+            ' Cap. 11.5: eliminato il profilo, quel che l'utente aveva raccontato non ha
+            ' più un posto dove andare. È l'opposto di «Ricomincia»: lì si riparte subito
+            ' dal primo turno, qui non si chiama nessuno — chiedere di nuovo «come ti
+            ' chiami?» a chi ha appena cancellato tutto sarebbe una beffa.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome)
+
+            Await ConDialogoApertoAsync(
+                finto,
+                Async Function(pannello)
+                    Await RispondiAsync(pannello, "Mi chiamo Luca Ferrari")
+                    Assert.IsTrue(pannello.HaUnDialogoInCorso, "il dialogo è cominciato")
+
+                    pannello.Dimentica()
+
+                    Assert.IsFalse(pannello.HaUnDialogoInCorso, "e adesso non c'è più")
+                    Assert.IsFalse(pannello.HaUnRaccontoNonConsegnato, "né un racconto rimasto in sospeso")
+                    Assert.IsEmpty(Bolle(pannello), "la conversazione è sparita dallo schermo")
+                    Assert.IsEmpty(pannello.ProfiloCostruito.Nome, "e il nome raccolto con lei")
+                    Assert.IsFalse(Bottone(pannello, "btnRicomincia").Enabled, "non c'è niente da ricominciare")
+                    Assert.HasCount(1, finto.Chiamate, "e all'AI non si è chiesto nient'altro")
+                End Function)
+
+        End Function
+
         ' ==================================================================
         ' Quando l'AI non c'è, e lo spazio del logo
         ' ==================================================================

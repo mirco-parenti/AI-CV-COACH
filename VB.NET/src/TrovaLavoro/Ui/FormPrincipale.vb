@@ -275,6 +275,22 @@ Public Class FormPrincipale
 
     End Sub
 
+    ''' <summary>
+    ''' Il profilo è stato eliminato (cap. 11.5). La scheda si è già svuotata da sé; qui
+    ''' si spegne tutto il resto che ancora lo mostrava — il dialogo guidato, che
+    ''' altrimenti riproporrebbe un profilo cancellato, e il 📄 CV base in mostra fra i
+    ''' documenti. Le candidature <b>non</b> si toccano: sono l'altra metà dei dati
+    ''' dell'utente e restano nella Home, che le rilegge e basta.
+    ''' </summary>
+    Private Sub pnlProfilo_ProfiloEliminato(sender As Object, e As EventArgs) _
+        Handles pnlProfilo.ProfiloEliminato
+
+        pnlDialogo.Dimentica()
+        pnlDocumenti.DimenticaIlCvBase()
+        pnlHome.Aggiorna()
+
+    End Sub
+
     Private Sub pnlDocumenti_LavoroAiCambiato(sender As Object, e As EventArgs) _
         Handles pnlDocumenti.LavoroAiCambiato
 

@@ -335,6 +335,51 @@ Namespace Ui
 
         End Sub
 
+        <TestMethod>
+        Public Async Function EliminatoIlProfiloIlCvBaseSparisceDallaVista() As Task
+
+            ' Cap. 11.5: il 📄 CV base è il ritratto del profilo, e con lui se ne va.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Await pannello.MostraIlCvBaseAsync()
+                    Assert.Contains("Il ritratto del profilo.", Casella(pannello, "txtCv").Text, "prima c'è")
+
+                    pannello.DimenticaIlCvBase()
+
+                    Assert.IsEmpty(Casella(pannello, "txtCv").Text, "e dopo l'anteprima è vuota")
+                    Assert.Contains("eliminato", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "con detto il perché")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IDocumentiDiUnaCandidaturaNonSeNeVannoColProfilo() As Task
+
+            ' L'altra metà della stessa regola, ed è quella che pesa di più: i documenti
+            ' di una candidatura sono suoi, stanno nella sua cartella, e l'eliminazione
+            ' del profilo non li riguarda.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Await pannello.MostraLaCandidaturaAsync(Confrontata(contesto))
+                    Dim prima As String = Casella(pannello, "txtCv").Text
+
+                    pannello.DimenticaIlCvBase()
+
+                    Assert.AreEqual(prima, Casella(pannello, "txtCv").Text,
+                                    "il 🎯 CV mirato della candidatura resta dov'era")
+                End Function)
+
+        End Function
+
         ' ==================================================================
         ' Il banco
         ' ==================================================================

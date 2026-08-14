@@ -206,6 +206,68 @@ Namespace Dati
                 End Sub)
         End Sub
 
+        <TestMethod>
+        Public Sub EliminareIlProfiloNonLasciaNiente()
+            ' Cap. 11.5: «definitivo» vuol dire che dopo non si rimette insieme niente —
+            ' né dallo storico, né dal CV base, né da una copia messa in salvo. Il
+            ' collaudo mette apposta nella cartella i due residui che un elenco di nomi
+            ' da tenere allineato si dimenticherebbe.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim versione As String = archivio.Salva(ProfiloDiProva())
+                    archivio.Salva(ProfiloDiProva())
+                    archivio.SalvaCvBase(
+                        Text.Json.Nodes.JsonNode.Parse("{""intestazione"": {""nome"": ""Luca Ferrari""}}"),
+                        versione)
+
+                    File.WriteAllText(Path.Combine(cartella.CartellaOutProfilo, "cv_base.docx"), "documento")
+                    File.WriteAllText(Path.Combine(cartella.CartellaProfilo, "profilo.rotto-2026.json"), "rotto")
+
+                    Assert.IsTrue(archivio.EliminaTutto(), "c'era qualcosa da eliminare")
+
+                    Assert.IsFalse(archivio.Esiste, "il profilo non c'è più")
+                    Assert.IsEmpty(archivio.Versioni(), "e nemmeno una versione dello storico")
+                    Assert.IsNull(archivio.CaricaCvBase(), "né il 📄 CV base")
+                    Assert.IsFalse(Directory.Exists(cartella.CartellaProfilo),
+                                   "la cartella se n'è andata con tutto quello che aveva dentro")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub EliminareIlProfiloNonToccaLeCandidature()
+            ' La separazione del cap. 11.5, ed è il motivo per cui questo gesto esiste:
+            ' chi elimina il profilo si toglie di dosso il proprio racconto, non il lavoro
+            ' di ricerca già fatto.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    archivio.Salva(ProfiloDiProva())
+
+                    Dim candidatura As String = Path.Combine(cartella.CartellaOpportunita,
+                                                             "2026-08-14_rossi-spa_magazziniere")
+                    Directory.CreateDirectory(candidatura)
+                    File.WriteAllText(Path.Combine(candidatura, "cv.json"), "{}")
+                    File.WriteAllText(cartella.FileRegistro, "{}")
+                    File.WriteAllText(cartella.FileRicerche, "{}")
+
+                    archivio.EliminaTutto()
+
+                    Assert.IsTrue(File.Exists(Path.Combine(candidatura, "cv.json")),
+                                  "la candidatura resta con i suoi documenti")
+                    Assert.IsTrue(File.Exists(cartella.FileRegistro), "il registro della Home resta")
+                    Assert.IsTrue(File.Exists(cartella.FileRicerche), "e le ricerche salvate restano")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub EliminareQuandoNonCEnienteNonEUnErrore()
+            ' Il primo avvio: la cartella del profilo non esiste ancora, e chiedere di
+            ' eliminarla non è un guasto — semplicemente non c'era niente.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Assert.IsFalse(archivio.EliminaTutto(), "non c'era niente da eliminare")
+                End Sub)
+        End Sub
+
         ''' <summary>Il profilo del banco, quello ricco di accenti e campi vuoti.</summary>
         Private Shared Function ProfiloDiProva() As TrovaLavoro.Dati.Profilo
             Return TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo())
