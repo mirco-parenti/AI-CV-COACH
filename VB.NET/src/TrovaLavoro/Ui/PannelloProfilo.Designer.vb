@@ -841,7 +841,7 @@ Partial Class PannelloProfilo
         Me.btnImporta.Name = "btnImporta"
         Me.btnImporta.Size = New System.Drawing.Size(190, 32)
         Me.btnImporta.TabIndex = 0
-        Me.btnImporta.Text = "Importa CV da un file…"
+        Me.btnImporta.Text = "IMPORTA CV DA UN FILE"
         '
         'btnImportaDaSito
         '
@@ -850,16 +850,16 @@ Partial Class PannelloProfilo
         Me.btnImportaDaSito.Name = "btnImportaDaSito"
         Me.btnImportaDaSito.Size = New System.Drawing.Size(190, 32)
         Me.btnImportaDaSito.TabIndex = 1
-        Me.btnImportaDaSito.Text = "Importa CV da un sito…"
+        Me.btnImportaDaSito.Text = "IMPORTA CV DA LINKEDIN"
         '
         'btnDialogo
         '
         Me.btnDialogo.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnDialogo.Location = New System.Drawing.Point(445, 142)
         Me.btnDialogo.Name = "btnDialogo"
-        Me.btnDialogo.Size = New System.Drawing.Size(200, 32)
+        Me.btnDialogo.Size = New System.Drawing.Size(300, 32)
         Me.btnDialogo.TabIndex = 2
-        Me.btnDialogo.Text = "Costruiscilo con il dialogo"
+        Me.btnDialogo.Text = "COSTRUISCI IL TUO CV - DIALOGO GUIDATO"
         '
         'btnAggiornamento
         '

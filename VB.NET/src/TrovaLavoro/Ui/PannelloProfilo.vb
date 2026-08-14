@@ -791,7 +791,7 @@ Public Class PannelloProfilo
     ''' integrato, di norma la propria pagina LinkedIn (cap. 06.7, T5d).
     ''' </summary>
     ''' <remarks>
-    ''' <para>È la <b>stessa porta</b> del bottone «Importa CV da un file…»: cambia solo
+    ''' <para>È la <b>stessa porta</b> del bottone «IMPORTA CV DA UN FILE»: cambia solo
     ''' da dove viene il testo, e da lì in poi la strada è una — <c>importa_cv</c>, i campi
     ''' della scheda, la scheda «Testo letto», e niente su disco finché non si preme
     ''' «Salva profilo». È il motivo per cui T5d non ha avuto bisogno di componenti nuovi:
@@ -927,7 +927,7 @@ Public Class PannelloProfilo
     ''' <summary>Il pannello mentre l'AI lavora: niente si tocca, e si può rinunciare.</summary>
     Private Sub LetturaInCorso(inCorso As Boolean)
 
-        btnImporta.Text = If(inCorso, "Annulla lettura", "Importa CV da un file…")
+        btnImporta.Text = If(inCorso, "Annulla lettura", "IMPORTA CV DA UN FILE")
         Cursor = If(inCorso, Cursors.AppStarting, Cursors.Default)
 
         AggiornaComandi()

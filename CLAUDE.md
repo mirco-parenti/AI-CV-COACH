@@ -181,4 +181,5 @@ un file nuovo, aggiungi qui la sua riga.
 | `HTML+JS/**` | **Fuori dal rito** *(dal 2026-08-06)*: prototipo congelato. Si tocca solo per manutenzione che chiedo esplicitamente; in quel caso valgono le regole 1 e 3. |
 | `situazione-*.txt` in radice | **Mai aggiornate**: sono fotografie di una situazione a una certa data (come uno Step del diario), e riscriverle ne distruggerebbe il senso. Si toccano solo per cancellarle, se e quando lo dico. |
 | `.gitignore`, `.gitattributes` | Config: solo se serve un cambiamento concreto. |
+| `.mcp.json` | Config dello **strumento di collaudo** (dichiara il server MCP locale su `127.0.0.1:3300`, vedi `strumenti/mcp-collaudi/`): si tocca solo se cambia il modo di accenderlo. Non è configurazione del prodotto. |
 | `.env`, `.claude/`, `node_modules/`, gitignored | **MAI** toccati. |

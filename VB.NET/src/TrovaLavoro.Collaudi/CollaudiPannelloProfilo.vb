@@ -545,8 +545,8 @@ Namespace Ui
                 Dim daFile As Button = Bottone(pannello, "btnImporta")
                 Dim daSito As Button = Bottone(pannello, "btnImportaDaSito")
 
-                Assert.AreEqual("Importa CV da un file…", daFile.Text)
-                Assert.AreEqual("Importa CV da un sito…", daSito.Text)
+                Assert.AreEqual("IMPORTA CV DA UN FILE", daFile.Text)
+                Assert.AreEqual("IMPORTA CV DA LINKEDIN", daSito.Text)
 
                 Assert.IsGreaterThanOrEqualTo(daFile.Right, daSito.Left,
                                               "il sito viene dopo il file, e non gli finisce sopra")

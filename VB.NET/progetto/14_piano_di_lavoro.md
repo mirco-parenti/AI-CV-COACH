@@ -359,6 +359,15 @@ della categoria *Reale* restano i **14** di T5b: la lettura della pagina si prov
 lettore finto, e l'unica cosa che l'AI fa qui è il turno `importa_cv`, che ha già il suo.
 **T6 può iniziare.**
 
+*Dopo T5d, lo stesso 2026-08-14, è passata una modifica **fuori tappa** chiesta da Mirco:
+le tre porte del profilo in P2 cambiano nome — «IMPORTA CV DA UN FILE», «IMPORTA CV DA
+LINKEDIN», «COSTRUISCI IL TUO CV - DIALOGO GUIDATO» (cap. 03.6). I due nomi citati qui
+sopra nella cronaca di T5d sono quelli con cui i bottoni erano nati. Non è una tappa e non
+cambia nessuna funzione: banco fermo a **465 verdi**, versione **0.3.017**. Lascia però un
+segno che vale la pena aver scritto — il bottone del dialogo è dovuto crescere di 100 px
+per contenere l'etichetta, e la fascia più lunga peggiora la sovrapposizione a finestra
+stretta già annotata in `in_sospeso.md` (diario Step 2.15).*
+
 ### T6 — Le email (F5 completo)
 Composizione con allegati suggeriti (inclusa la scansione della cartella documenti,
 cap. 05.2); scrittura del file `.eml` con intestazione `X-Unsent`; conferma dell'avvenuto

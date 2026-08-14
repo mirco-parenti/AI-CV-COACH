@@ -31,8 +31,11 @@ opportunità sono esaurite.
    trivio: il CV può non essere un file.* Se il proprio percorso è già scritto in una
    pagina — di norma la **propria** pagina LinkedIn — la si apre nel browser integrato e
    si preme «Importa CV da questa pagina» (cap. 06.7). Ci si arriva anche partendo dal
-   profilo: «Importa CV da un sito…» in P2 porta al browser e il pannello, arrivando,
+   profilo: **«IMPORTA CV DA LINKEDIN»** in P2 porta al browser e il pannello, arrivando,
    dice cosa fare. Da qui in avanti i passi sono gli stessi degli altri due.
+   *(Quel bottone si chiamava «Importa CV da un sito…» quando è nato; ribattezzato il
+   2026-08-14, cap. 03.6. Il nome nomina il caso d'uso tipico, ma la porta non è ristretta
+   a LinkedIn: di là si legge qualunque pagina che racconti un percorso.)*
 4. Il CV scelto viene trascritto — se è un PDF; una pagina è già testo — e strutturato
    nel **profilo JSON** (stessi due passi del prototipo: trascrizione fedele +
    strutturazione anti-invenzione).

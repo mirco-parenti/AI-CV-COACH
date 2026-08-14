@@ -173,7 +173,12 @@ legge la pagina è lo stesso `importa_cv` che legge un CV in PDF.
 pagina aperta da leggere. In P2 c'è la scelta — «Importa CV da un sito…» — perché il
 profilo si costruisce lì, e una terza strada raggiungibile solo entrando in un pannello
 che si chiama «Ricerca» nessuno l'avrebbe trovata; quel bottone non legge niente, porta
-in P3 e il pannello, arrivando, dice cosa fare. Il testo letto va **a P2**, che ha già
+in P3 e il pannello, arrivando, dice cosa fare. *(I due nomi qui sopra sono quelli con cui
+i bottoni sono nati. Il 2026-08-14 quello di P2 è stato ribattezzato **«IMPORTA CV DA
+LINKEDIN»** — cap. 03.6: un nome che sceglie il caso d'uso vero e promette meno di quanto
+il bottone faccia, visto che di là si legge qualunque pagina; a dire il resto restano la
+pagina di casa e il suggerimento. Quello di P3, «Importa CV da questa pagina», non è
+cambiato.)* Il testo letto va **a P2**, che ha già
 l'attesa annullabile, la guardia sulle correzioni non salvate e la scheda «Testo letto»
 dove si controlla campo per campo: la finestra mostra prima il pannello e poi gli chiede
 di leggere, com'era per l'annuncio catturato, così l'attesa si vede dove succede.

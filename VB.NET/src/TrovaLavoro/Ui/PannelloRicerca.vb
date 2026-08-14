@@ -235,7 +235,7 @@ Public Class PannelloRicerca
 
     ''' <summary>
     ''' Come <see cref="ApriAsync"/>, ma per chi è arrivato qui dalla scheda del profilo
-    ''' col bottone «Importa CV da un sito…»: oltre ad accendere il browser, dice cosa
+    ''' col bottone «IMPORTA CV DA LINKEDIN»: oltre ad accendere il browser, dice cosa
     ''' fare adesso (cap. 06.7).
     ''' </summary>
     ''' <remarks>
@@ -837,7 +837,7 @@ Public Class PannelloRicerca
                "il testo va all'analisi e l'annuncio entra fra le tue opportunità.</li>" &
                "<li>Da qui puoi anche compilare il profilo: apri la <b>tua</b> pagina su LinkedIn " &
                "(o un altro sito che racconti il tuo percorso) e premi <b>Importa CV da questa " &
-               "pagina</b>. È la stessa cosa che fa «Importa CV da un file…» nella scheda Profilo, " &
+               "pagina</b>. È la stessa cosa che fa «IMPORTA CV DA UN FILE» nella scheda Profilo, " &
                "ma legge da qui.</li>" &
                "</ol>" &
                "<p class=""nota"">Se un portale ti chiede di accedere, fallo qui come faresti in un " &

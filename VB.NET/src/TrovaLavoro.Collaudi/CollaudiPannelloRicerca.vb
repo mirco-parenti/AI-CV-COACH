@@ -595,7 +595,7 @@ Namespace Ui
         <TestMethod>
         Public Async Function ArrivandoDalProfiloIlPannelloDiceCosaFare() As Task
 
-            ' Chi preme «Importa CV da un sito…» nella scheda del profilo si ritrova qui,
+            ' Chi preme «IMPORTA CV DA LINKEDIN» nella scheda del profilo si ritrova qui,
             ' in un pannello che si chiama «Ricerca» e che di profili non parla: senza
             ' questa frase avrebbe fatto un passo e non saprebbe qual è il successivo.
             ' Alla prima apertura lo direbbe anche la pagina di casa; alla seconda il

@@ -101,6 +101,15 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   collaudo non sa ancora ridimensionare la finestra. Il rimedio naturale è che la fascia
   vada a capo quando lo spazio non basta, come farebbe qualunque barra di comandi.
   *(cap. 03.4; `Ui/PannelloProfilo.DisponiLeAzioni`.)*
+  **Peggiorata il 2026-08-14** *(diario Step 2.15)*: rinominando i tre bottoni dell'import e
+  del dialogo, il bottone del dialogo è passato da 200 a **300 px** perché l'etichetta nuova
+  in maiuscolo non ci stava più. Alla larghezza minima la fila di sinistra finisce ora a
+  **1048** px invece di 948, quindi la sovrapposizione sale da 310 a **410 px**; a finestra
+  massimizzata resta senza sovrapposizioni, ma il margine fra le due file scende da 345 a
+  245 px. Attenzione al conto: sotto i 1350 px di larghezza il pannello del logo passa in
+  **modalità compatta** e la fascia comincia a 142 invece che a 273 — è la ragione per cui i
+  numeri a finestra stretta e a finestra grande non si ricavano l'uno dall'altro.
+  *(`Ui/FormPrincipale.LarghezzaModalitaCompatta`.)*
 
 ## Da revisione adversariale (2026-08-09)
 

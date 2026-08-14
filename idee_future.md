@@ -254,6 +254,15 @@ giudice per la prima volta.
   controlli (adesso vuole una parola intera); l'attesa vera resta da fare.
 - ~~**Un attrezzo per rispondere alle finestre di messaggio**~~ — **realizzato a T5c**
   (vedi «Realizzate»).
+- **Un collaudo che veda se un'etichetta ci sta nel suo bottone** — il banco confronta il
+  testo dei bottoni **carattere per carattere** e resta verde anche quando quel testo, a
+  schermo, esce mozzato: la larghezza è un numero fisso nel `Designer` e nessuno la confronta
+  con la frase che ci deve stare dentro. Windows Forms sa dire quanto spazio vorrebbe un
+  controllo (`PreferredSize`), quindi il controllo costa poco: per ogni bottone dei pannelli,
+  «il testo ci sta?». Oggi la verifica l'ho fatta guardando la finestra, che funziona ma non
+  si ripete da sé. *(2026-08-14 — emersa rinominando i tre bottoni del Profilo, diario Step
+  2.15: l'etichetta nuova del dialogo non entrava nei 200 px e i 465 collaudi non se ne sono
+  accorti.)*
 
 ## Realizzate
 

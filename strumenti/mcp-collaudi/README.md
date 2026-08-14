@@ -88,7 +88,12 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   stretta — alla `MinimumSize` dichiarata, per esempio — con questi attrezzi non si
   guarda. Si può ancora rifare a mano il conto che fa il codice, ed è quel che è stato
   fatto per la fascia dei comandi di P2 (`in_sospeso.md`), ma un conto non è una
-  fotografia.
+  fotografia. *E ha una trappola sua, pagata il 2026-08-14 rifacendolo*: sotto i 1350 px
+  di larghezza il pannello del logo passa in **modalità compatta** e si stringe da 261 a
+  130 px, quindi la fascia comincia a 142 invece che a 273. Chi misura il caso stretto
+  usando la larghezza del logo a finestra grande sbaglia di 131 px — cioè proprio nel caso
+  che sta misurando. La prova che il conto è giusto è che riproduca i numeri già a verbale
+  per il caso noto, prima di applicarlo a quello nuovo.
 
 ## Le trappole già pagate
 
