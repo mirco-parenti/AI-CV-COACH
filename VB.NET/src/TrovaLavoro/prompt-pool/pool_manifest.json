@@ -1,11 +1,11 @@
 {
   "formato": 1,
-  "versione_pool": "1.05",
-  "data": "2026-08-14",
+  "versione_pool": "1.06",
+  "data": "2026-08-15",
   "file": [
     {
       "percorso": "annuncio/analisi_annuncio.md",
-      "sha256": "ea4457c7733cb5aefc44e9a09149cb2a2959646ddd4a2ca4b91547985a501ebd"
+      "sha256": "b0a88aadb5cf27ffe1529a903cd52e54c97e48b44074276baec279e3171d407b"
     },
     {
       "percorso": "confronto/confronto.md",
@@ -16,8 +16,16 @@
       "sha256": "5883092b99fdc41e41ee3355c059643adda6bbd121e8ff5919e5f1a17a69eccf"
     },
     {
+      "percorso": "generazione/cv_base.en.md",
+      "sha256": "d9150a75ebda1f369ef23a30248e4175c60cbee52a50739b3074bb91c91077cd"
+    },
+    {
       "percorso": "generazione/cv_base.it.md",
       "sha256": "adfe02c00afde2b70e97403a998ff0910712872e2cbbbca785c5314301f5b5ae"
+    },
+    {
+      "percorso": "generazione/cv_mirato.en.md",
+      "sha256": "fdcc05d9698cf77819e4d96862748480e43557150646a6caf5157de6d5519017"
     },
     {
       "percorso": "generazione/cv_mirato.it.md",
@@ -26,6 +34,10 @@
     {
       "percorso": "generazione/email_candidatura.md",
       "sha256": "76e4348c55233254f8274ce0f2d3941a1aee52db96ac76c6ccafe76054375b1a"
+    },
+    {
+      "percorso": "generazione/lettera.en.md",
+      "sha256": "da5889fd6968421857495b6e3c4546ab1c4fd99ec047bb0a62be9485848155d9"
     },
     {
       "percorso": "generazione/lettera.it.md",

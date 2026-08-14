@@ -1,5 +1,5 @@
 id: analisi_annuncio
-versione: 1.1
+versione: 1.2
 lingua: it
 modello: semplice
 max_token: 8000
@@ -29,6 +29,8 @@ Se l'annuncio dichiara che non serve esperienza, metti in "esperienza_richiesta"
 - "contratto": oggetto { "tipo", "durata", "orario", "retribuzione" }; riempi solo i campi che l'annuncio dichiara.
 - "mansioni": cosa si farà concretamente nel ruolo, come lista di stringhe.
 - "benefit": vantaggi offerti oltre la paga (buoni pasto, smart working, formazione, ecc.), come lista di stringhe.
+- "lingua": la lingua in cui l'annuncio è scritto, come codice di due lettere: "it" se italiano, "en" se inglese, altrimenti il codice della lingua che riconosci. Conta la lingua del testo, non la sede né la nazionalità di chi offre il posto: un annuncio scritto in italiano per una sede a Dublino è "it".
+- "contatto": oggetto { "email", "riferimento" } — a chi si manda la candidatura, e SOLO se l'annuncio lo scrive per esteso. "email" è l'indirizzo a cui inviarla, ricopiato alla lettera. "riferimento" è la persona o l'ufficio a cui rivolgersi, o il codice della posizione, quando l'annuncio li indica. Non dedurre né comporre: un indirizzo non si ricava dal sito dell'azienda né dal nome di chi firma. Se l'annuncio non li scrive, i due campi restano vuoti.
 
 # 3 — PRIORITÀ (campo "priorita" di ogni requisito)
 Comprendi il SENSO dell'annuncio, non solo le parole, e valuta OGNI voce dal suo testo, non solo dalla sezione in cui si trova.
@@ -59,7 +61,9 @@ Esempi: "con esperienza" generico → "richiesto" (palese); "con esperienza di b
   "sede": [],
   "contratto": { "tipo": "", "durata": "", "orario": "", "retribuzione": "" },
   "mansioni": [],
-  "benefit": []
+  "benefit": [],
+  "lingua": "",
+  "contatto": { "email": "", "riferimento": "" }
 }
 
 Annuncio:

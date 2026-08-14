@@ -27,6 +27,49 @@ La non-regressione contro il prototipo (cap. 14, T2) è passata su questa versio
 prompt del confronto costruito dal pool è identico carattere per carattere a quello che
 il prototipo costruisce nel codice.
 
+## Pool 1.06 — 2026-08-15
+
+**Il pool impara l'inglese** (T7a, cap. 10). Entrano le tre varianti `en` dei prompt di
+generazione e `analisi_annuncio` guadagna due campi. È il primo bump in cui uno stesso
+prompt esiste in **due lingue**: il caricatore le distingue dal nome del file
+(`cv_base.it.md` / `cv_base.en.md`) e sceglie in base alla lingua chiesta (cap. 04.6),
+cosa che sapeva fare da T2 senza aver mai avuto niente fra cui scegliere.
+
+- **`generazione/cv_base.en.md`**, **`cv_mirato.en.md`**, **`lettera.en.md`** — non sono
+  traduzioni dei tre italiani e non contengono nessuna istruzione «traduci»: sono prompt
+  **scritti in inglese che generano in inglese**, con le stesse sezioni numerate, la
+  stessa distinzione campi-fatto / campi-prosa e le stesse regole anti-invenzione
+  (cap. 10.2). Il profilo che ricevono resta **in italiano** e resta l'unica fonte di
+  fatti: tradurre è un lavoro che fanno loro, non un secondo profilo da mantenere
+  (cap. 10.5).
+- Le quattro regole del cap. 10.3 sono cablate in una **sezione 3 dedicata**, e la seconda
+  è quella che conta: **vietato l'upgrade nella traduzione**. Un «diploma di perito» non
+  diventa un *degree* e «me la cavo con l'inglese» non diventa *fluent*; dove due
+  traduzioni sono possibili si prende **la più modesta**. In `cv_mirato.en` e `lettera.en`
+  la regola porta con sé la sua tentazione, scritta accanto: la traduzione generosa va
+  rifiutata **soprattutto** quando è quella che combacerebbe con un requisito
+  dell'annuncio. Un'invenzione fatta in traduzione è pur sempre un'invenzione.
+- Le **chiavi del JSON restano italiane** in tutti e tre, dichiarato in apertura del
+  prompt: le legge il programma, non chi riceve il CV. Tradurle avrebbe rotto
+  l'impaginazione, gli archivi e le anteprime — e per il lettore del documento non
+  cambiava niente, perché quelle parole non le vede.
+- **`annuncio/analisi_annuncio.md`** (→ versione 1.2) — due campi nuovi in uscita, e un
+  bump solo per entrambi perché aprire quel prompt due volte in una tappa sarebbe stato
+  uno spreco. **`lingua`**: in che lingua è scritto l'annuncio, che è ciò da cui si
+  propone la lingua dei documenti (cap. 10.2) — e conta il testo, non la sede, perché un
+  annuncio italiano per un posto a Dublino resta italiano. **`contatto`**
+  (`{ email, riferimento }`): a chi si manda la candidatura, e **solo se l'annuncio lo
+  scrive per esteso**. Chiude il debito che T6 aveva lasciato aperto (`in_sospeso.md`): il
+  cap. 07.1 prometteva un destinatario proposto, e finora il campo di P7 era sempre vuoto
+  non per prudenza ma perché nessuno estraeva un recapito. L'altra metà della promessa —
+  *il programma non inventa mai un indirizzo* — è scritta nel campo stesso: niente
+  deduzioni dal dominio dell'azienda, niente indirizzi composti dal nome di chi firma.
+
+*Cosa questo bump non tocca:* nessuno degli altri prompt, `confronto` e `mitigazione`
+compresi, che restano il metro della parità carattere-per-carattere (cap. 04.7). E non
+tocca il **profilo**, che resta in italiano e uno solo: le rese inglesi vivono nei
+documenti generati, non in un secondo profilo da tenere allineato.
+
 ## Pool 1.05 — 2026-08-14
 
 **Un esempio che contraddiceva la sua regola.** Toccato un file solo,

@@ -26,8 +26,8 @@ Namespace Ai
             Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
 
             Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "origine")
-            Assert.AreEqual("1.05", libreria.Versione, "versione del pool")
-            Assert.AreEqual("Pool 1.05 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
+            Assert.AreEqual("1.06", libreria.Versione, "versione del pool")
+            Assert.AreEqual("Pool 1.06 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
         End Sub
 
         <TestMethod>
@@ -61,6 +61,53 @@ Namespace Ai
             Assert.AreEqual("semplice", documenti.Modello, "documenti: smistare non è ragionare")
             Assert.AreEqual("json", documenti.Uscita, "documenti: uscita")
             CollectionAssert.AreEqual({"DOCUMENTI"}, documenti.Segnaposto.ToArray(), "documenti: segnaposto")
+        End Sub
+
+        <TestMethod>
+        Public Sub LeTreVariantiIngleseDiT7SiCaricano()
+            ' Il Pool 1.06 è il primo in cui uno stesso id esiste in due lingue. Il
+            ' caricatore sapeva sceglierle da T2 (cap. 04.6) senza aver mai avuto niente
+            ' fra cui scegliere: qui, per la prima volta, la scelta c'è davvero.
+            Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
+
+            For Each id As String In {"cv_base", "cv_mirato", "lettera"}
+
+                Dim italiano = libreria.Carica(id, "it")
+                Dim inglese = libreria.Carica(id, "en")
+
+                Assert.AreEqual(id, inglese.Id, $"«{id}»: l'id resta lo stesso nelle due lingue")
+                Assert.AreEqual("it", italiano.Lingua, $"«{id}»: la variante italiana si dichiara")
+                Assert.AreEqual("en", inglese.Lingua, $"«{id}»: la variante inglese si dichiara")
+
+                ' Che siano due file diversi va detto: un ripiego silenzioso sull'italiano
+                ' — il caricatore lo fa apposta quando la variante manca — produrrebbe
+                ' documenti in italiano senza che nessuno se ne accorga.
+                Assert.AreNotEqual(italiano.Corpo, inglese.Corpo,
+                                   $"«{id}»: la variante inglese non è la copia dell'italiana")
+
+                ' Stesso mestiere, stessi ingressi: cambia la lingua, non il contratto.
+                CollectionAssert.AreEqual(italiano.Segnaposto.ToArray(), inglese.Segnaposto.ToArray(),
+                                          $"«{id}»: gli stessi segnaposto nelle due lingue")
+                Assert.AreEqual(italiano.Modello, inglese.Modello, $"«{id}»: lo stesso livello di modello")
+                Assert.AreEqual(italiano.Uscita, inglese.Uscita, $"«{id}»: la stessa forma d'uscita")
+
+            Next
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnPromptSenzaVarianteDiLinguaNonCambia()
+            ' L'altra faccia del collaudo qui sopra, e la ragione per cui il ripiego
+            ' esiste: i prompt che parlano con l'utente — il profilo, il confronto — una
+            ' variante inglese non ce l'hanno e non devono averla (cap. 10.1). Chiederli
+            ' in inglese deve dare l'unico che c'è, non un errore.
+            Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
+
+            For Each id As String In {"confronto", "mitigazione", "analisi_annuncio", "nome"}
+                Assert.AreEqual(libreria.Carica(id, "it").Corpo, libreria.Carica(id, "en").Corpo,
+                                $"«{id}»: senza variante inglese si ripiega su quello che c'è")
+            Next
+
         End Sub
 
         <TestMethod>
@@ -175,7 +222,7 @@ Namespace Ai
                 Dim libreria = LibreriaPrompt.Apri(cartella)
 
                 Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "deve ripiegare sull'integrato")
-                Assert.AreEqual("1.05", libreria.Versione, "con la versione dell'integrato")
+                Assert.AreEqual("1.06", libreria.Versione, "con la versione dell'integrato")
                 Assert.IsNotNull(libreria.Avviso, "e deve dire perché")
                 Assert.Contains("manca.md", libreria.Avviso, "l'avviso deve nominare il file mancante")
             Finally
