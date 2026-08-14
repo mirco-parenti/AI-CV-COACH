@@ -101,6 +101,70 @@ Namespace Documenti
         End Sub
 
         <TestMethod>
+        Public Sub UnCvIngleseHaLeSueEtichette()
+
+            ' T7, cap. 10.4. È il difetto che i prompt da soli non chiudono: un CV
+            ' generato in inglese con «Esperienze professionali» stampato sopra sarebbe un
+            ' documento a metà, e nessun collaudo del pool se ne accorgerebbe — il pool ha
+            ' fatto il suo lavoro, il testo dentro è inglese davvero.
+            Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(CvDiProva(), "en")
+
+            CollectionAssert.AreEqual(
+                {"Work experience", "Other experience", "Skills", "Education"},
+                Sezioni(pagina))
+
+            Assert.AreEqual("CV — Luca Ferrari", pagina.Titolo, "il titolo del CV vale in tutte e due")
+
+            ' La patente sta su una riga sua, e anche la sua etichetta parla inglese.
+            Dim patente As Blocco = pagina.Blocchi.
+                Where(Function(b) b.Genere = GenereBlocco.Recapiti).ToList()(1)
+            Assert.AreEqual("Driving licence: B", patente.Voci.Single(), "la patente")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaLinguaLeEtichetteRestanoItaliane()
+
+            ' Il vero rischio di questa modifica non è l'inglese: è che una chiamata
+            ' rimasta indietro cambi lingua da sola. Le decine di chiamate che la lingua
+            ' non la dichiarano devono impaginare esattamente come prima di T7.
+            CollectionAssert.AreEqual(Sezioni(Impaginazione.PaginaCv(CvDiProva())),
+                                      Sezioni(Impaginazione.PaginaCv(CvDiProva(), "it")),
+                                      "chi non dichiara la lingua ottiene l'italiano")
+
+            CollectionAssert.AreEqual(
+                {Impaginazione.SezioneEsperienze, Impaginazione.SezioneAltreEsperienze,
+                 Impaginazione.SezioneCompetenze, Impaginazione.SezioneFormazione},
+                Sezioni(Impaginazione.PaginaCv(CvDiProva(), "it")))
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaTerzaLinguaImpaginaInInglese()
+
+            ' La stessa regola del motore vale qui: il pool ha due varianti e le etichette
+            ' pure. Se le due parti ripiegassero in modo diverso, un annuncio in tedesco
+            ' darebbe un documento inglese con i titoli in italiano.
+            CollectionAssert.AreEqual(Sezioni(Impaginazione.PaginaCv(CvDiProva(), "en")),
+                                      Sezioni(Impaginazione.PaginaCv(CvDiProva(), "de")))
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaLetteraIngleseHaIlSuoTitolo()
+
+            ' Il titolo non è testo stampato: è la proprietà del file, quella che Word
+            ' mostra nella scheda «Dettagli» (cap. 05.4).
+            Dim lettera As PaginaDocumento = Impaginazione.PaginaLettera(LetteraDiProva(), "en")
+
+            Assert.AreEqual("Cover letter — Luca Ferrari", lettera.Titolo)
+            Assert.AreEqual($"{Impaginazione.TitoloLettera} — Luca Ferrari",
+                            Impaginazione.PaginaLettera(LetteraDiProva()).Titolo,
+                            "e in italiano resta quello di sempre")
+
+        End Sub
+
+        <TestMethod>
         Public Sub LEsperienzaPortaRuoloAziendaDurataEDescrizione()
 
             Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(CvDiProva())

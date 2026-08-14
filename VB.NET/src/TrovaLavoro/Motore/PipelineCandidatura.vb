@@ -83,7 +83,9 @@ Namespace Motore
             ' confronto. Lo stesso istante fa da data di nascita e da data del primo
             ' stato, che sono la stessa cosa detta due volte solo se le si scrive diverse.
             Dim ora As Date = Date.Now
-            Dim opportunita As New Opportunita With {.Annuncio = annuncio, .Creata = ora}
+            Dim opportunita As New Opportunita With {
+                .Annuncio = annuncio, .Creata = ora,
+                .Lingua = LinguaDocumenti.PerDocumenti(LinguaDellAnnuncio(annuncio))}
             opportunita.Avanza(StatoOpportunita.Nuova, ora)
 
             Return opportunita
@@ -149,14 +151,19 @@ Namespace Motore
             Dim profiloJson As JsonNode = ComeJson(profilo)
             Dim giudizi As JsonArray = opportunita.Giudizi()
 
+            ' La lingua è dell'opportunità, non della chiamata: l'ha proposta l'analisi e
+            ' può averla cambiata l'utente in P6 (cap. 10.1). Qui si legge e basta — così
+            ' rigenerare i documenti dopo un ripensamento li rifà nella lingua nuova.
+            Dim lingua As String = LinguaDocumenti.PerDocumenti(opportunita.Lingua)
+
             Annuncia(avanzamento, 3, "Scrivo il CV mirato")
             opportunita.Cv = Await _generatore.GeneraCvMiratoAsync(
-                profiloJson, opportunita.Annuncio, giudizi, annulla).ConfigureAwait(False)
+                profiloJson, opportunita.Annuncio, giudizi, annulla, lingua).ConfigureAwait(False)
 
             Annuncia(avanzamento, 4, "Scrivo la lettera")
             opportunita.Lettera = Await _generatore.GeneraLetteraAsync(
                 profiloJson, opportunita.Annuncio, giudizi, opportunita.Cv,
-                ElencoMitigazioni(opportunita.Mitigazioni), annulla).ConfigureAwait(False)
+                ElencoMitigazioni(opportunita.Mitigazioni), annulla, lingua).ConfigureAwait(False)
 
             ' I documenti ci sono: la candidatura è «generata» (cap. 07.3). Rigenerarli
             ' non è un passaggio nuovo, e la data resta quella della prima volta.
@@ -187,6 +194,24 @@ Namespace Motore
             Await GeneraAsync(opportunita, profilo, avanzamento, annulla).ConfigureAwait(False)
 
             Return opportunita
+
+        End Function
+
+        ''' <summary>
+        ''' La lingua che l'analisi ha riconosciuto nell'annuncio (cap. 10.2), o vuoto.
+        ''' </summary>
+        ''' <remarks>
+        ''' Vuoto non è un guasto: lo restituiscono gli annunci analizzati prima del
+        ''' Pool 1.06, quando quel campo non esisteva. È la ragione per cui a decidere cosa
+        ''' farne è <see cref="LinguaDocumenti"/> e non questa funzione, che si limita a
+        ''' riferire cosa c'era scritto.
+        ''' </remarks>
+        Private Shared Function LinguaDellAnnuncio(annuncio As JsonNode) As String
+
+            Dim radice As JsonObject = TryCast(annuncio, JsonObject)
+            If radice Is Nothing Then Return String.Empty
+
+            Return CampiJson.Testo(radice, "lingua")
 
         End Function
 

@@ -113,31 +113,46 @@ Friend Class ConfrontatoreFinto
 End Class
 
 ''' <summary>Il generatore, finto: i due CV e la lettera.</summary>
+''' <remarks>
+''' <b>Annota la lingua che gli è stata chiesta</b> (T7): un finto non carica prompt, e
+''' quindi non potrebbe accorgersi da sé se la lingua si fermasse per strada — che è
+''' esattamente il difetto che il filo dell'annuncio fino al pool può avere (cap. 10.2).
+''' Senza questo, un collaudo del multilingua verificherebbe solo che nessuno è esploso.
+''' </remarks>
 Friend Class GeneratoreFinto
     Inherits MestiereFinto
     Implements IGeneratore
 
+    ''' <summary>Le lingue chieste, una per chiamata e nell'ordine in cui sono arrivate.</summary>
+    Friend ReadOnly Property LingueChieste As New List(Of String)
+
     Public Function GeneraCvBaseAsync(profilo As JsonNode,
-                                      Optional annulla As CancellationToken = Nothing) _
+                                      Optional annulla As CancellationToken = Nothing,
+                                      Optional lingua As String = "it") _
                                       As Task(Of JsonNode) Implements IGeneratore.GeneraCvBaseAsync
 
+        LingueChieste.Add(lingua)
         Return Prossima("cv_base", profilo)
 
     End Function
 
     Public Function GeneraCvMiratoAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
-                                        Optional annulla As CancellationToken = Nothing) _
+                                        Optional annulla As CancellationToken = Nothing,
+                                        Optional lingua As String = "it") _
                                         As Task(Of JsonNode) Implements IGeneratore.GeneraCvMiratoAsync
 
+        LingueChieste.Add(lingua)
         Return Prossima("cv_mirato", profilo, annuncio, giudizi)
 
     End Function
 
     Public Function GeneraLetteraAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
                                        cv As JsonNode, mitigazioni As JsonNode,
-                                       Optional annulla As CancellationToken = Nothing) _
+                                       Optional annulla As CancellationToken = Nothing,
+                                       Optional lingua As String = "it") _
                                        As Task(Of JsonNode) Implements IGeneratore.GeneraLetteraAsync
 
+        LingueChieste.Add(lingua)
         Return Prossima("lettera", profilo, annuncio, giudizi, cv, mitigazioni)
 
     End Function

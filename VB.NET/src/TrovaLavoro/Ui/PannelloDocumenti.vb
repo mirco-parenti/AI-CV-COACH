@@ -67,6 +67,17 @@ Public Class PannelloDocumenti
     ''' <summary>Il 📄 CV base in mostra; <c>Nothing</c> se si sta guardando una candidatura.</summary>
     Private _cvBase As JsonNode
 
+    ''' <summary>
+    ''' Vero mentre è il pannello a muovere la tendina della lingua, non l'utente.
+    ''' </summary>
+    ''' <remarks>
+    ''' Senza, mostrare una candidatura scriverebbe sulla candidatura stessa la lingua che
+    ''' le si sta leggendo addosso — e la scrittura, passando dal salvataggio, toccherebbe
+    ''' il disco a ogni apertura. Un dato si legge o si scrive, non tutte e due nello
+    ''' stesso gesto.
+    ''' </remarks>
+    Private _tendinaInAllestimento As Boolean
+
     Private _annulla As CancellationTokenSource
 
     ''' <summary>
@@ -442,15 +453,48 @@ Public Class PannelloDocumenti
             Return
         End If
 
+        Dim lingua As String = LinguaDocumenti.PerDocumenti(_candidatura.Lingua)
+
+        AllestisciLaTendina(lingua)
+
         txtAnnuncio.Text = VistaAnnuncio.Riassunto(_candidatura.Annuncio)
-        txtCv.Text = Anteprima(_candidatura.Cv, AddressOf Impaginazione.PaginaCv,
+
+        ' L'anteprima si impagina nella lingua della candidatura: è la stessa pagina di
+        ' blocchi che finirà nel DOCX e nel PDF (cap. 05.3), e vederla qui con le etichette
+        ' sbagliate vorrebbe dire scoprire l'errore solo aprendo il file.
+        txtCv.Text = Anteprima(_candidatura.Cv,
+                               Function(d) Impaginazione.PaginaCv(d, lingua),
                                "Il CV non è ancora stato scritto.")
-        txtLettera.Text = Anteprima(_candidatura.Lettera, AddressOf Impaginazione.PaginaLettera,
+        txtLettera.Text = Anteprima(_candidatura.Lettera,
+                                    Function(d) Impaginazione.PaginaLettera(d, lingua),
                                     "La lettera non è ancora stata scritta.")
 
         AggiornaComandi()
 
     End Sub
+
+    ''' <summary>
+    ''' Mette la tendina sulla lingua della candidatura senza che questo conti come una
+    ''' scelta dell'utente.
+    ''' </summary>
+    Private Sub AllestisciLaTendina(lingua As String)
+
+        _tendinaInAllestimento = True
+
+        Try
+            cmbLingua.SelectedIndex = If(lingua = LinguaDocumenti.Inglese, 1, 0)
+        Finally
+            _tendinaInAllestimento = False
+        End Try
+
+    End Sub
+
+    ''' <summary>La lingua che la tendina sta mostrando.</summary>
+    Private Function LinguaDallaTendina() As String
+
+        Return If(cmbLingua.SelectedIndex = 1, LinguaDocumenti.Inglese, LinguaDocumenti.Italiano)
+
+    End Function
 
     ''' <summary>Un documento come si legge, o il motivo per cui non c'è ancora.</summary>
     Private Shared Function Anteprima(documento As JsonNode,
@@ -528,6 +572,86 @@ Public Class PannelloDocumenti
 
     End Function
 
+    ''' <summary>
+    ''' La lingua della candidatura è cambiata: i documenti si riscrivono (cap. 10.1).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Perché rigenera invece di prendere solo nota.</b> Se la scelta restasse
+    ''' un'impostazione muta, il pannello si troverebbe con una candidatura «in inglese» e
+    ''' due documenti scritti in italiano: l'anteprima li impagina nella lingua della
+    ''' candidatura, e ne uscirebbe un CV col testo italiano sotto «Work experience». Legare
+    ''' la tendina alla rigenerazione è ciò che impedisce ai due di divergere, e costa una
+    ''' domanda invece di un campo nuovo in <c>stato.json</c> che dica in che lingua sono i
+    ''' documenti che ci sono.</para>
+    ''' <para>Se documenti non ce ne sono ancora, non c'è niente da riscrivere e niente da
+    ''' chiedere: si prende nota e si va avanti.</para>
+    ''' </remarks>
+    Private Async Sub cmbLingua_SelectedIndexChanged(sender As Object, e As EventArgs) _
+                                                     Handles cmbLingua.SelectedIndexChanged
+
+        If _tendinaInAllestimento Then Return
+        If _candidatura Is Nothing Then Return
+
+        Dim scelta As String = LinguaDallaTendina()
+        Dim comEra As String = LinguaDocumenti.PerDocumenti(_candidatura.Lingua)
+        If scelta = comEra Then Return
+
+        Dim nome As String = LinguaDocumenti.Nome(scelta).ToLowerInvariant()
+
+        If _candidatura.Cv Is Nothing AndAlso _candidatura.Lettera Is Nothing Then
+            _candidatura.Lingua = scelta
+            RicordaLaLingua()
+            RaccontaLoStato($"Quando li scriverò, saranno in {nome}.", StileApp.TestoSecondario)
+            Return
+        End If
+
+        If MessageBox.Show(
+            $"Vuoi che riscriva CV e lettera in {nome}?" & vbLf &
+            "I testi che vedi adesso vengono sostituiti.",
+            NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then
+
+            ' Rifiutando, la tendina torna dov'era: lasciarla sulla lingua nuova
+            ' racconterebbe una candidatura che non esiste.
+            AllestisciLaTendina(comEra)
+            Return
+
+        End If
+
+        _candidatura.Lingua = scelta
+        RicordaLaLingua()
+
+        Await RigeneraAsync().ConfigureAwait(True)
+
+    End Sub
+
+    ''' <summary>
+    ''' Mette per iscritto la lingua scelta, subito.
+    ''' </summary>
+    ''' <remarks>
+    ''' La lingua è uno dei dati che il registro tiene (cap. 07.3), e la lezione di T6 vale
+    ''' anche qui: <b>chi cambia un dato dell'indice deve annotarlo</b>, o la Home continua
+    ''' a raccontare quello di prima. Si scrive adesso e non alla generazione, perché fra i
+    ''' due momenti l'utente può chiudere l'applicazione — e una scelta persa in silenzio è
+    ''' peggio di una scelta non offerta.
+    ''' </remarks>
+    Private Sub RicordaLaLingua()
+
+        If _contesto Is Nothing Then Return
+
+        Try
+            _contesto.Opportunita.Salva(_candidatura)
+            AnnotaNelRegistro()
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            ' La scelta vale comunque per questa sessione: dei documenti nella lingua
+            ' giusta è quello che conta, e il salvataggio ha già la sua voce quando
+            ' fallisce alla generazione.
+        End Try
+
+    End Sub
+
     Private Async Sub btnEsportaDocx_Click(sender As Object, e As EventArgs) Handles btnEsportaDocx.Click
         Await EsportaAsync(FormatiDocumento.Docx)
     End Sub
@@ -597,10 +721,9 @@ Public Class PannelloDocumenti
     ''' </summary>
     Private Sub DichiaraLeTappeCheMancano()
 
+        ' La lingua non sta più qui: T7 è arrivata, e la tendina la accende
+        ' AggiornaComandi quando c'è una candidatura a cui appartenga.
         cmbLingua.SelectedIndex = 0
-        cmbLingua.Enabled = False
-        _suggerimenti.SetToolTip(cmbLingua, "I documenti in inglese arrivano con la tappa T7.")
-        _suggerimenti.SetToolTip(lblLingua, "I documenti in inglese arrivano con la tappa T7.")
 
         chkRifinitura.Enabled = False
         _suggerimenti.SetToolTip(chkRifinitura,
@@ -656,6 +779,23 @@ Public Class PannelloDocumenti
                               (_pipeline IsNot Nothing OrElse _generatore IsNot Nothing)
 
         btnTornaIndietro.Enabled = Not occupato
+
+        ' La lingua è una proprietà della candidatura (cap. 10.1): il 📄 CV base non ne ha
+        ' una da scegliere qui, perché non nasce da un annuncio e non si genera da questo
+        ' pannello. Il pool la variante inglese ce l'ha, ma la porta per chiederla starebbe
+        ' in P2, dove il CV base si genera (v. «in_sospeso.md»).
+        cmbLingua.Enabled = Not occupato AndAlso _candidatura IsNot Nothing
+        lblLingua.Enabled = cmbLingua.Enabled
+
+        If _candidatura IsNot Nothing Then
+            _suggerimenti.SetToolTip(cmbLingua,
+                "La lingua di CV e lettera. Cambiandola li riscrivo: il tuo profilo resta com'è.")
+            _suggerimenti.SetToolTip(lblLingua, Nothing)
+        Else
+            _suggerimenti.SetToolTip(cmbLingua,
+                "Il 📄 CV base segue la lingua del profilo: la lingua si sceglie su una candidatura.")
+            _suggerimenti.SetToolTip(lblLingua, Nothing)
+        End If
 
         ' L'email nasce dalla lettera (cap. 07.1): senza, non c'è niente da scrivere. E il
         ' 📄 CV base non porta a nessuna email, perché non ha un'azienda a cui mandarla.

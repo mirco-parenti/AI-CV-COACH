@@ -63,13 +63,19 @@ Namespace Ai
         ''' </param>
         ''' <param name="valori">Un valore per ogni segnaposto che il prompt dichiara.</param>
         ''' <param name="annulla">Il gettone del pulsante Annulla (cap. 02.6).</param>
+        ''' <param name="lingua">
+        ''' Quale variante di lingua del prompt caricare (cap. 04.6). La chiedono solo i
+        ''' mestieri che scrivono documenti per l'azienda: il profilo e il confronto
+        ''' restano in italiano perché parlano con l'utente (cap. 10.1).
+        ''' </param>
         ''' <returns>Il frammento JSON prodotto dall'AI, già estratto.</returns>
         Protected Async Function EseguiAsync(idPrompt As String, etichetta As String,
                                              valori As IDictionary(Of String, String),
-                                             Optional annulla As CancellationToken = Nothing) _
+                                             Optional annulla As CancellationToken = Nothing,
+                                             Optional lingua As String = "it") _
                                              As Task(Of JsonNode)
 
-            Dim prompt As Prompt = CaricaPrompt(idPrompt)
+            Dim prompt As Prompt = CaricaPrompt(idPrompt, lingua)
             Dim testo As String = Riempi(prompt, etichetta, valori)
 
             Dim uscita As RispostaAi = Await ChiediAsync(
@@ -84,10 +90,11 @@ Namespace Ai
         ''' il pool esterno è modificabile per design (cap. 04.2), e chi lo ritocca deve
         ''' ricevere il messaggio in italiano dei pannelli, non un crash a metà lavoro.
         ''' </summary>
-        Protected Function CaricaPrompt(idPrompt As String) As Prompt
+        Protected Function CaricaPrompt(idPrompt As String,
+                                        Optional lingua As String = "it") As Prompt
 
             Try
-                Return Libreria.Carica(idPrompt)
+                Return Libreria.Carica(idPrompt, lingua)
             Catch ex As Exception When TypeOf ex Is InvalidDataException OrElse
                                        TypeOf ex Is IOException OrElse
                                        TypeOf ex Is ArgumentException

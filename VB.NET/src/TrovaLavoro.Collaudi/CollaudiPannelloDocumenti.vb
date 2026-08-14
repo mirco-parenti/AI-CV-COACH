@@ -384,6 +384,123 @@ Namespace Ui
         ' Il banco
         ' ==================================================================
 
+        ' ==================================================================
+        ' La lingua dei documenti (T7a, cap. 10.1)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function LaTendinaSegueLaLinguaDellaCandidatura() As Task
+
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = GiaScritta(contesto, "en")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.AreEqual("Inglese", Scelta(pannello, "cmbLingua").Text,
+                                    "la tendina dice la lingua della candidatura")
+                    Assert.IsTrue(Scelta(pannello, "cmbLingua").Enabled,
+                                  "e su una candidatura si può cambiare")
+
+                    ' Il pezzo che conta: l'anteprima è la stessa pagina di blocchi che
+                    ' finirà nei file, quindi qui si vede già se le etichette seguono. Il
+                    ' CV di prova ha le sole competenze, e quella sezione basta a dirlo.
+                    Assert.Contains("Skills", Casella(pannello, "txtCv").Text,
+                                    "le etichette del CV parlano inglese")
+                    Assert.DoesNotContain("Competenze", Casella(pannello, "txtCv").Text,
+                                          "e non c'è rimasta nessuna etichetta italiana")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function MostrareUnaCandidaturaNonNeCambiaLaLingua() As Task
+
+            ' Leggere un dato non è scriverlo: allestire la tendina non deve far scattare
+            ' la scelta dell'utente — che salva su disco e annota nel registro.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = GiaScritta(contesto, "en")
+                    Dim quandoFuScritta As Date = File.GetLastWriteTimeUtc(
+                        Path.Combine(candidatura.Cartella, "stato.json"))
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.AreEqual("en", candidatura.Lingua, "la lingua resta quella")
+                    Assert.AreEqual(quandoFuScritta,
+                                    File.GetLastWriteTimeUtc(Path.Combine(candidatura.Cartella, "stato.json")),
+                                    "e il file su disco non è stato riscritto per averlo solo guardato")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlCvBaseNonHaUnaLinguaDaScegliere() As Task
+
+            ' Cap. 10.1: la lingua è una proprietà della candidatura. Il 📄 CV base non
+            ' nasce da un annuncio e non si genera da questo pannello, quindi la tendina
+            ' resta spenta — col suo motivo, non muta (cap. 03.8).
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.IsFalse(Scelta(pannello, "cmbLingua").Enabled, "la tendina è spenta")
+                    Assert.AreEqual("it", generatore.LingueChieste.Single(),
+                                    "e il CV base si scrive nella lingua di casa")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        <Timeout(15000)>
+        Public Async Function SenzaDocumentiCambiareLinguaNonChiedeNiente() As Task
+
+            ' Non c'è niente da riscrivere, quindi non c'è niente da chiedere: si prende
+            ' nota e si va avanti. Il tetto di tempo è la rete di sicurezza del caso
+            ' opposto — una finestra di conferma aperta qui bloccherebbe il banco intero
+            ' invece di farlo fallire.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+
+                    ' Senza pipeline la generazione non parte: la candidatura resta senza
+                    ' documenti, che è proprio il caso da provare.
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    Assert.AreEqual("it", candidatura.Lingua, "si parte dall'italiano")
+
+                    Scelta(pannello, "cmbLingua").SelectedIndex = 1
+
+                    Assert.AreEqual("en", candidatura.Lingua, "la scelta è passata alla candidatura")
+                    Assert.AreEqual("en", contesto.Opportunita.Carica(candidatura.Cartella).Lingua,
+                                    "ed è già su disco, perché fra qui e la generazione si può chiudere tutto")
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Una candidatura con i documenti già scritti, nella lingua data: è il caso in
+        ''' cui P6 mostra e basta, senza generare niente.
+        ''' </summary>
+        Private Shared Function GiaScritta(contesto As ContestoApp, lingua As String) As Opportunita
+
+            Dim candidatura As Opportunita = Confrontata(contesto)
+
+            candidatura.Lingua = lingua
+            candidatura.Cv = JsonNode.Parse(CvMirato)
+            candidatura.Lettera = JsonNode.Parse(Lettera)
+            contesto.Opportunita.Salva(candidatura)
+
+            Return candidatura
+
+        End Function
+
         ''' <summary>
         ''' Un pannello collegato a un motore vero — cartella temporanea, nessuna chiave —
         ''' con un profilo salvato, il generatore finto che gli si vuol dare e un archivio

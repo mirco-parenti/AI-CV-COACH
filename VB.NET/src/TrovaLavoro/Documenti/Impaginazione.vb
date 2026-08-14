@@ -1,6 +1,7 @@
 Imports System.Linq
 Imports System.Text.Json
 Imports System.Text.Json.Nodes
+Imports TrovaLavoro.Motore
 
 Namespace Documenti
 
@@ -19,7 +20,10 @@ Namespace Documenti
     ''' <para><b>Le etichette sono quelle del prototipo</b> («Esperienze professionali»,
     ''' «Altre esperienze», «Competenze», «Formazione», i recapiti uniti da « · », la
     ''' patente su una riga sua): lì quel CV l'utente l'ha già letto a schermo, e non c'è
-    ''' motivo perché su carta si chiami in un altro modo.</para>
+    ''' motivo perché su carta si chiami in un altro modo. <b>Da T7</b> quelle parole
+    ''' seguono la <b>lingua del documento</b> (v. <see cref="Etichette"/>): le chiavi del
+    ''' JSON restano italiane perché le legge l'applicazione, le parole stampate no perché
+    ''' le legge chi riceve il CV.</para>
     ''' <para>Il <b>sommario non ha titolo di sezione</b>: sta sotto i recapiti come
     ''' ritratto d'apertura, che è la forma in cui il prototipo lo mostra e quella che il
     ''' cap. 05.4 descrive.</para>
@@ -43,22 +47,110 @@ Namespace Documenti
         Public Const TitoloLettera As String = "Lettera di presentazione"
 
         ''' <summary>
+        ''' Le parole che il documento stampa, nella lingua del documento (cap. 10.1).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Le <b>chiavi del JSON restano italiane</b> — quelle le legge
+        ''' l'applicazione, non chi riceve il CV — ma le parole stampate no: un CV generato
+        ''' in inglese con «Esperienze professionali» scritto sopra il testo inglese
+        ''' sarebbe un documento a metà. La lingua è una proprietà della candidatura, e
+        ''' arriva fin qui.</para>
+        ''' <para>Le etichette italiane restano <b>quelle del prototipo</b>, per la ragione
+        ''' di sempre: a schermo l'utente quel CV l'ha già letto così.</para>
+        ''' </remarks>
+        Public Class Etichette
+
+            ''' <summary>I titoli delle sezioni del CV.</summary>
+            Public Property Esperienze As String
+            Public Property AltreEsperienze As String
+            Public Property Competenze As String
+            Public Property Formazione As String
+
+            ''' <summary>Come si presenta la patente nell'intestazione.</summary>
+            Public Property Patente As String
+
+            ''' <summary>I titoli dei due documenti.</summary>
+            Public Property TitoloCv As String
+            Public Property TitoloLettera As String
+
+            ''' <summary>
+            ''' Le etichette della lingua chiesta.
+            ''' </summary>
+            ''' <remarks>
+            ''' A dire in quale delle due si finisce non è questa funzione ma
+            ''' <see cref="LinguaDocumenti"/>, che è il posto unico di quella regola. La
+            ''' prima versione la ripeteva qui, e le due copie divergevano già: un annuncio
+            ''' in tedesco andava in inglese per il pool e in italiano per le etichette,
+            ''' cioè un documento inglese coi titoli italiani. Lo ha trovato un collaudo,
+            ''' non l'occhio.
+            ''' </remarks>
+            Public Shared Function PerLingua(lingua As String) As Etichette
+
+                If LinguaDocumenti.PerDocumenti(lingua) = LinguaDocumenti.Inglese Then
+                    Return Inglesi()
+                End If
+
+                Return Italiane()
+
+            End Function
+
+            ''' <summary>Le etichette di casa, che sono le costanti di sempre.</summary>
+            Public Shared Function Italiane() As Etichette
+
+                Return New Etichette With {
+                    .Esperienze = SezioneEsperienze,
+                    .AltreEsperienze = SezioneAltreEsperienze,
+                    .Competenze = SezioneCompetenze,
+                    .Formazione = SezioneFormazione,
+                    .Patente = EtichettaPatente,
+                    .TitoloCv = Impaginazione.TitoloCv,
+                    .TitoloLettera = Impaginazione.TitoloLettera}
+
+            End Function
+
+            ''' <summary>
+            ''' Le etichette inglesi. Sono quelle di un CV britannico — «CV», non
+            ''' «Resume», e «Driving licence» — perché è a un mercato europeo che questi
+            ''' documenti si mandano.
+            ''' </summary>
+            Public Shared Function Inglesi() As Etichette
+
+                Return New Etichette With {
+                    .Esperienze = "Work experience",
+                    .AltreEsperienze = "Other experience",
+                    .Competenze = "Skills",
+                    .Formazione = "Education",
+                    .Patente = "Driving licence: ",
+                    .TitoloCv = "CV",
+                    .TitoloLettera = "Cover letter"}
+
+            End Function
+
+        End Class
+
+        ''' <summary>
         ''' Impagina un CV — base o mirato: sono lo stesso schema, e lo stesso documento.
         ''' </summary>
         ''' <param name="cv">Il CV JSON come esce dal generatore (cap. 04.3).</param>
-        Public Shared Function PaginaCv(cv As JsonNode) As PaginaDocumento
+        ''' <param name="lingua">
+        ''' La lingua del documento, che decide le etichette stampate (cap. 10.1). Chi non
+        ''' la dichiara ottiene l'italiano, che è la lingua di casa.
+        ''' </param>
+        Public Shared Function PaginaCv(cv As JsonNode,
+                                        Optional lingua As String = "it") As PaginaDocumento
 
             If cv Is Nothing Then Throw New ArgumentNullException(NameOf(cv))
 
+            Dim etichette As Etichette = Etichette.PerLingua(lingua)
             Dim radice As JsonObject = TryCast(cv, JsonObject)
-            Dim pagina As New PaginaDocumento With {.Titolo = TitoloCv}
+            Dim pagina As New PaginaDocumento With {.Titolo = etichette.TitoloCv}
             If radice Is Nothing Then Return pagina
 
             Dim intestazione As JsonObject = Oggetto(radice, "intestazione")
             Dim nome As String = Testo(intestazione, "nome")
 
             If nome.Length > 0 Then
-                pagina.Titolo = $"{TitoloCv} — {nome}"
+                pagina.Titolo = $"{etichette.TitoloCv} — {nome}"
                 pagina.Blocchi.Add(New Blocco With {.Genere = GenereBlocco.Nome, .Testo = nome})
             End If
 
@@ -76,26 +168,26 @@ Namespace Documenti
             If patente.Length > 0 Then
                 pagina.Blocchi.Add(New Blocco With {
                     .Genere = GenereBlocco.Recapiti,
-                    .Voci = New List(Of String) From {EtichettaPatente & patente}})
+                    .Voci = New List(Of String) From {etichette.Patente & patente}})
             End If
 
             For Each capoverso As String In Paragrafi(Grezzo(radice, "sommario"))
                 pagina.Blocchi.Add(New Blocco With {.Genere = GenereBlocco.Paragrafo, .Testo = capoverso})
             Next
 
-            Sezione(pagina, SezioneEsperienze,
+            Sezione(pagina, etichette.Esperienze,
                     Voci(radice, "esperienze_professionali", AddressOf VoceEsperienza))
 
-            Sezione(pagina, SezioneAltreEsperienze,
+            Sezione(pagina, etichette.AltreEsperienze,
                     Voci(radice, "altre_esperienze", AddressOf VoceAltraEsperienza))
 
             Dim competenze As List(Of String) = Testi(radice, "competenze")
             If competenze.Count > 0 Then
-                pagina.Blocchi.Add(New Blocco With {.Genere = GenereBlocco.Sezione, .Testo = SezioneCompetenze})
+                pagina.Blocchi.Add(New Blocco With {.Genere = GenereBlocco.Sezione, .Testo = etichette.Competenze})
                 pagina.Blocchi.Add(New Blocco With {.Genere = GenereBlocco.Elenco, .Voci = competenze})
             End If
 
-            Sezione(pagina, SezioneFormazione,
+            Sezione(pagina, etichette.Formazione,
                     Voci(radice, "formazione", AddressOf VoceFormazione))
 
             Return pagina
@@ -107,12 +199,15 @@ Namespace Documenti
         ''' recapiti, i tre blocchi di testo e la firma (cap. 05.4).
         ''' </summary>
         ''' <param name="lettera">La lettera JSON come esce dal generatore.</param>
-        Public Shared Function PaginaLettera(lettera As JsonNode) As PaginaDocumento
+        ''' <param name="lingua">La lingua del documento (v. <see cref="PaginaCv"/>).</param>
+        Public Shared Function PaginaLettera(lettera As JsonNode,
+                                             Optional lingua As String = "it") As PaginaDocumento
 
             If lettera Is Nothing Then Throw New ArgumentNullException(NameOf(lettera))
 
+            Dim etichette As Etichette = Etichette.PerLingua(lingua)
             Dim radice As JsonObject = TryCast(lettera, JsonObject)
-            Dim pagina As New PaginaDocumento With {.Titolo = TitoloLettera}
+            Dim pagina As New PaginaDocumento With {.Titolo = etichette.TitoloLettera}
             If radice Is Nothing Then Return pagina
 
             ' Il prototipo accetta una firma scritta come semplice stringa oltre che come
@@ -121,7 +216,7 @@ Namespace Documenti
             Dim nome As String = If(firma Is Nothing, Testo(radice, "firma"), Testo(firma, "nome"))
 
             If nome.Length > 0 Then
-                pagina.Titolo = $"{TitoloLettera} — {nome}"
+                pagina.Titolo = $"{etichette.TitoloLettera} — {nome}"
                 pagina.Blocchi.Add(New Blocco With {.Genere = GenereBlocco.Nome, .Testo = nome})
             End If
 

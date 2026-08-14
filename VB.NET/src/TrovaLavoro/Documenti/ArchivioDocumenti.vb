@@ -102,16 +102,21 @@ Namespace Documenti
 
             Dim lavori As New List(Of Lavoro)
 
+            ' Una volta sola, e prima di tutto: la stessa lingua deve decidere le etichette
+            ' stampate e la sigla nel nome del file, o si otterrebbe un CV_..._EN_ con
+            ' «Formazione» dentro (cap. 10.4, cap. 05.6).
+            Dim lingua As String = LinguaDocumenti.PerDocumenti(opportunita.Lingua)
+
             If opportunita.Cv IsNot Nothing Then
-                Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(opportunita.Cv)
+                Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(opportunita.Cv, lingua)
                 lavori.Add(New Lavoro(pagina, NomiDocumenti.Cv(
-                    DiChiE(pagina), opportunita.Azienda, opportunita.Creata, opportunita.Lingua)))
+                    DiChiE(pagina), opportunita.Azienda, opportunita.Creata, lingua)))
             End If
 
             If opportunita.Lettera IsNot Nothing Then
                 lavori.Add(New Lavoro(
-                    Impaginazione.PaginaLettera(opportunita.Lettera),
-                    NomiDocumenti.Lettera(opportunita.Azienda, opportunita.Creata, opportunita.Lingua)))
+                    Impaginazione.PaginaLettera(opportunita.Lettera, lingua),
+                    NomiDocumenti.Lettera(opportunita.Azienda, opportunita.Creata, lingua)))
             End If
 
             Return ScriviAsync(ArchivioOpportunita.CartellaOut(opportunita), lavori, formati)

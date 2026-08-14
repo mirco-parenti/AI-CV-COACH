@@ -94,8 +94,9 @@ Partial Class PannelloDocumenti
         '
         'pnlOpzioni
         '
-        ' La lingua e la rifinitura anti-slop sono di T7: si vedono, spente, col loro
-        ' suggerimento (cap. 03.8), perché è qui che arriveranno.
+        ' La rifinitura anti-slop è di T7b: si vede, spenta, col suo suggerimento
+        ' (cap. 03.8), perché è qui che arriverà. La lingua accanto a lei era nella stessa
+        ' condizione fino a T7a, che l'ha accesa.
         Me.pnlOpzioni.Controls.Add(Me.lblLingua)
         Me.pnlOpzioni.Controls.Add(Me.cmbLingua)
         Me.pnlOpzioni.Controls.Add(Me.chkRifinitura)
@@ -119,7 +120,10 @@ Partial Class PannelloDocumenti
         '
         Me.cmbLingua.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cmbLingua.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.cmbLingua.Items.AddRange(New Object() {"Italiano", "English"})
+        ' I due nomi sono quelli di «LinguaDocumenti.Nome», e sono in italiano perché
+        ' l'interfaccia è in una lingua sola (cap. 10.1): la tendina dice «Inglese», non
+        ' «English». L'ordine conta — è quello che «LinguaDaTendina» legge.
+        Me.cmbLingua.Items.AddRange(New Object() {"Italiano", "Inglese"})
         Me.cmbLingua.Location = New System.Drawing.Point(64, 3)
         Me.cmbLingua.Name = "cmbLingua"
         Me.cmbLingua.Size = New System.Drawing.Size(140, 23)

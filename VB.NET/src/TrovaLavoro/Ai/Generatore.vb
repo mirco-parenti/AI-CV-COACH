@@ -16,6 +16,10 @@ Namespace Ai
     ''' regola sopra ogni altra: <b>il profilo è l'unica fonte di fatti</b>. Annuncio,
     ''' giudizi, CV e mitigazioni orientano l'enfasi e la coerenza, non aggiungono nulla
     ''' che il profilo non dichiari.
+    ''' <para><b>Da T7 tutti e tre parlano due lingue</b> (cap. 10): il profilo che
+    ''' ricevono resta italiano, il documento che scrivono segue la lingua chiesta, ed è il
+    ''' pool a portare la variante giusta (cap. 04.6). Chi non la chiede scrive in
+    ''' italiano, che è la lingua di casa.</para>
     ''' </remarks>
     Public Interface IGeneratore
 
@@ -24,8 +28,10 @@ Namespace Ai
         ''' </summary>
         ''' <param name="profilo">Il profilo del candidato (anello 1).</param>
         ''' <param name="annulla">Il gettone del pulsante Annulla (cap. 02.6).</param>
+        ''' <param name="lingua">La lingua del documento: <c>it</c> o <c>en</c> (cap. 10).</param>
         Function GeneraCvBaseAsync(profilo As JsonNode,
-                                   Optional annulla As CancellationToken = Nothing) As Task(Of JsonNode)
+                                   Optional annulla As CancellationToken = Nothing,
+                                   Optional lingua As String = "it") As Task(Of JsonNode)
 
         ''' <summary>
         ''' Genera il 🎯 <b>CV mirato</b> su un annuncio: stessi fatti del CV base, messi
@@ -35,8 +41,10 @@ Namespace Ai
         ''' <param name="annuncio">L'annuncio strutturato (anello 2): il segnale di mira.</param>
         ''' <param name="giudizi">La lista dei giudizi dell'anello 3.</param>
         ''' <param name="annulla">Il gettone del pulsante Annulla (cap. 02.6).</param>
+        ''' <param name="lingua">La lingua del documento: <c>it</c> o <c>en</c> (cap. 10).</param>
         Function GeneraCvMiratoAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
-                                     Optional annulla As CancellationToken = Nothing) As Task(Of JsonNode)
+                                     Optional annulla As CancellationToken = Nothing,
+                                     Optional lingua As String = "it") As Task(Of JsonNode)
 
         ''' <summary>
         ''' Genera la <b>lettera</b> di presentazione, coerente col CV mirato e onesta sui
@@ -52,9 +60,11 @@ Namespace Ai
         ''' assenza (è il comportamento del prototipo, cap. 14).
         ''' </param>
         ''' <param name="annulla">Il gettone del pulsante Annulla (cap. 02.6).</param>
+        ''' <param name="lingua">La lingua del documento: <c>it</c> o <c>en</c> (cap. 10).</param>
         Function GeneraLetteraAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
                                     cv As JsonNode, mitigazioni As JsonNode,
-                                    Optional annulla As CancellationToken = Nothing) As Task(Of JsonNode)
+                                    Optional annulla As CancellationToken = Nothing,
+                                    Optional lingua As String = "it") As Task(Of JsonNode)
 
     End Interface
 
@@ -92,20 +102,22 @@ Namespace Ai
 
         ''' <inheritdoc/>
         Public Function GeneraCvBaseAsync(profilo As JsonNode,
-                                          Optional annulla As CancellationToken = Nothing) _
+                                          Optional annulla As CancellationToken = Nothing,
+                                          Optional lingua As String = "it") _
                                           As Task(Of JsonNode) Implements IGeneratore.GeneraCvBaseAsync
 
             Esigi(profilo, "il profilo", EtichettaCvBase)
 
             Return EseguiAsync(IdPromptCvBase, EtichettaCvBase,
                 New Dictionary(Of String, String) From {
-                    {SegnapostoProfilo, LibreriaPrompt.ComeNelPrompt(profilo)}}, annulla)
+                    {SegnapostoProfilo, LibreriaPrompt.ComeNelPrompt(profilo)}}, annulla, lingua)
 
         End Function
 
         ''' <inheritdoc/>
         Public Function GeneraCvMiratoAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
-                                            Optional annulla As CancellationToken = Nothing) _
+                                            Optional annulla As CancellationToken = Nothing,
+                                            Optional lingua As String = "it") _
                                             As Task(Of JsonNode) Implements IGeneratore.GeneraCvMiratoAsync
 
             Esigi(profilo, "il profilo", EtichettaCvMirato)
@@ -116,14 +128,15 @@ Namespace Ai
                 New Dictionary(Of String, String) From {
                     {SegnapostoProfilo, LibreriaPrompt.ComeNelPrompt(profilo)},
                     {SegnapostoAnnuncio, LibreriaPrompt.ComeNelPrompt(annuncio)},
-                    {SegnapostoGiudizi, LibreriaPrompt.ComeNelPrompt(giudizi)}}, annulla)
+                    {SegnapostoGiudizi, LibreriaPrompt.ComeNelPrompt(giudizi)}}, annulla, lingua)
 
         End Function
 
         ''' <inheritdoc/>
         Public Function GeneraLetteraAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
                                            cv As JsonNode, mitigazioni As JsonNode,
-                                           Optional annulla As CancellationToken = Nothing) _
+                                           Optional annulla As CancellationToken = Nothing,
+                                           Optional lingua As String = "it") _
                                            As Task(Of JsonNode) Implements IGeneratore.GeneraLetteraAsync
 
             Esigi(profilo, "il profilo", EtichettaLettera)
@@ -142,7 +155,7 @@ Namespace Ai
                     {SegnapostoGiudizi, LibreriaPrompt.ComeNelPrompt(giudizi)},
                     {SegnapostoCv, LibreriaPrompt.ComeNelPrompt(cv)},
                     {SegnapostoMitigazioni, LibreriaPrompt.ComeNelPrompt(If(mitigazioni, New JsonArray()))}},
-                annulla)
+                annulla, lingua)
 
         End Function
 

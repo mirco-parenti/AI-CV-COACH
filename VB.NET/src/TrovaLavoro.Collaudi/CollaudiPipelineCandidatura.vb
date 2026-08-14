@@ -259,6 +259,106 @@ Namespace Motore
 
         End Function
 
+        <TestMethod>
+        Public Async Function LaLinguaDellAnnuncioDiventaQuellaDellaCandidatura() As Task
+
+            ' Cap. 10.1: la lingua è una proprietà della candidatura, e la propone
+            ' l'analisi. Qui si verifica il primo anello del filo — dal campo del JSON al
+            ' campo dell'opportunità, che è quello che finisce su disco e nel registro.
+            Dim analizzatore As New AnalizzatoreFinto
+            analizzatore.Dara("{""titolo"": ""Maintenance technician"", ""lingua"": ""en""}")
+
+            Dim opportunita As Opportunita = Await PipelineDiProva(
+                analizzatore, New ConfrontatoreFinto, New GeneratoreFinto).AnalizzaAsync(TestoAnnuncio)
+
+            Assert.AreEqual("en", opportunita.Lingua, "l'annuncio è in inglese, la candidatura pure")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnAnnuncioSenzaLinguaRestaInItaliano() As Task
+
+            ' Il caso di tutti gli annunci analizzati prima del Pool 1.06 — e di quelli
+            ' che il modello dovesse restituire senza quel campo. La lingua di casa è
+            ' l'unica risposta che non riscrive niente all'indietro.
+            Dim analizzatore As New AnalizzatoreFinto
+            analizzatore.Dara(AnnuncioJson)
+
+            Dim opportunita As Opportunita = Await PipelineDiProva(
+                analizzatore, New ConfrontatoreFinto, New GeneratoreFinto).AnalizzaAsync(TestoAnnuncio)
+
+            Assert.AreEqual("it", opportunita.Lingua, "senza il campo, italiano")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnAnnuncioInUnaTerzaLinguaSiScriveInInglese() As Task
+
+            ' Cap. 10.2: il pool ha due varianti, non tutte le lingue. Un annuncio in
+            ' tedesco non deve fermare la candidatura né chiedere un prompt che non esiste
+            ' — «de» arriverebbe al caricatore e non troverebbe nessun «cv_mirato.de.md».
+            Dim analizzatore As New AnalizzatoreFinto
+            analizzatore.Dara("{""titolo"": ""Instandhaltungstechniker"", ""lingua"": ""de""}")
+
+            Dim opportunita As Opportunita = Await PipelineDiProva(
+                analizzatore, New ConfrontatoreFinto, New GeneratoreFinto).AnalizzaAsync(TestoAnnuncio)
+
+            Assert.AreEqual("en", opportunita.Lingua, "una terza lingua si scrive in inglese")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaLinguaDellaCandidaturaArrivaAlGeneratore() As Task
+
+            ' Il secondo anello del filo, e quello che senza un finto che se ne accorga
+            ' nessuno vedrebbe: la lingua deve arrivare fino alla scelta della variante di
+            ' prompt (cap. 04.6). Se si fermasse per strada, i documenti uscirebbero in
+            ' italiano con un nome di file che dice EN.
+            Dim analizzatore As New AnalizzatoreFinto
+            Dim confrontatore As New ConfrontatoreFinto
+            Dim generatore As New GeneratoreFinto
+
+            analizzatore.Dara("{""titolo"": ""Maintenance technician"", ""lingua"": ""en""}")
+            confrontatore.Dara(ConfrontoPieno)
+            generatore.Dara("{""intestazione"": {}}").Dara("{""corpo"": ""Dear Sir or Madam…""}")
+
+            Await PipelineDiProva(analizzatore, confrontatore, generatore).
+                EseguiTuttoAsync(TestoAnnuncio, ProfiloDiProva())
+
+            CollectionAssert.AreEqual({"en", "en"}, generatore.LingueChieste.ToArray(),
+                                      "il CV e la lettera, tutti e due in inglese")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function CambiareLinguaERigenerareScriveNellaLinguaNuova() As Task
+
+            ' P6 lascia cambiare la lingua proposta (cap. 10.1), e da lì si rigenera. La
+            ' pipeline legge la lingua dall'opportunità a ogni generazione, non se la
+            ' ricorda dall'analisi: è ciò che rende il ripensamento un'operazione sola.
+            Dim analizzatore As New AnalizzatoreFinto
+            Dim confrontatore As New ConfrontatoreFinto
+            Dim generatore As New GeneratoreFinto
+
+            analizzatore.Dara(AnnuncioJson)
+            confrontatore.Dara(ConfrontoPieno)
+            generatore.Dara("{""intestazione"": {}}").Dara("{""corpo"": ""Dear Sir or Madam…""}")
+
+            Dim pipeline As PipelineCandidatura = PipelineDiProva(analizzatore, confrontatore, generatore)
+            Dim opportunita As Opportunita = Await pipeline.AnalizzaAsync(TestoAnnuncio)
+            Assert.AreEqual("it", opportunita.Lingua, "l'annuncio era italiano")
+
+            Await pipeline.ConfrontaAsync(opportunita, ProfiloDiProva())
+
+            ' L'utente ci ripensa: l'azienda è italiana ma vuole candidarsi in inglese.
+            opportunita.Lingua = "en"
+            Await pipeline.GeneraAsync(opportunita, ProfiloDiProva())
+
+            CollectionAssert.AreEqual({"en", "en"}, generatore.LingueChieste.ToArray(),
+                                      "vale la lingua di adesso, non quella rilevata")
+
+        End Function
+
         ''' <summary>
         ''' Chi guarda l'avanzamento, e lo guarda <b>subito</b>. Non si usa
         ''' <see cref="Progress(Of T)"/> di proposito: quello consegna sul contesto di
