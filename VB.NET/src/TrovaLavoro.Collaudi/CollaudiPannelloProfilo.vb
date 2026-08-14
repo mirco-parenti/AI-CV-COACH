@@ -110,30 +110,117 @@ Namespace Ui
             Using pannello As New TrovaLavoro.PannelloProfilo()
                 pannello.ImpostaIngombroLogo(New Size(261, 188))
 
-                Dim azioni As Panel = DirectCast(
-                    pannello.Controls.Find("pnlAzioni", searchAllChildren:=True).Single(), Panel)
+                Dim azioni As Panel = Fascia(pannello)
 
-                Assert.AreEqual(188, azioni.Height, "alta quanto il logo sfonda nell'area centrale")
+                Assert.IsGreaterThanOrEqualTo(188, azioni.Height,
+                                              "alta almeno quanto il logo sfonda nell'area centrale")
                 Assert.AreEqual(273, azioni.Padding.Left, "e i bottoni cominciano dopo la sua larghezza")
 
-                Dim primo As Button = DirectCast(
-                    pannello.Controls.Find("btnImporta", searchAllChildren:=True).Single(), Button)
+                Dim primo As Button = Bottone(pannello, "btnImporta")
                 Assert.IsGreaterThanOrEqualTo(273, primo.Left, "nessun bottone sotto il logo")
             End Using
         End Sub
 
         <TestMethod>
-        Public Sub InModalitaCompattaLaFasciaNonSchiacciaIBottoni()
-            ' In compatta il logo sfonda molto meno (68 px): la fascia non deve scendere
-            ' sotto l'altezza che serve a un bottone con i suoi margini.
+        Public Sub LaFasciaCresceQuantoServeAiComandi()
+            ' In compatta il logo sfonda molto meno (68 px), e i comandi in quello spazio
+            ' non ci stanno: la fascia deve <b>crescere</b>, non schiacciarli uno sopra
+            ' l'altro. Fino alla 0.3.018 l'altezza era quella del logo e basta, e i
+            ' bottoni si sovrapponevano in silenzio.
             Using pannello As New TrovaLavoro.PannelloProfilo()
                 pannello.ImpostaIngombroLogo(New Size(130, 68))
 
-                Dim azioni As Panel = DirectCast(
-                    pannello.Controls.Find("pnlAzioni", searchAllChildren:=True).Single(), Panel)
+                Dim azioni As Panel = Fascia(pannello)
 
-                Assert.AreEqual(68, azioni.Height, "quanto l'ingombro, che qui è già sufficiente")
+                Assert.IsGreaterThan(68, azioni.Height, "più alta dell'ingombro, perché i comandi lo chiedono")
                 Assert.AreEqual(142, azioni.Padding.Left, "e il rientro segue il logo compatto")
+            End Using
+        End Sub
+
+        <TestMethod>
+        Public Sub IComandiNonSiSovrappongonoMaiAQualunqueLarghezza()
+            ' È il difetto che questa disposizione chiude, e l'unico invariante che vale
+            ' la pena tenere fermo: alla larghezza minima della finestra i bottoni
+            ' arrivavano a coprirsi per 676 px. Non si vedeva perché l'applicazione si
+            ' apre massimizzata — ed è per questo che è rimasto lì per tre tappe.
+            Using pannello As New TrovaLavoro.PannelloProfilo()
+
+                For Each larghezza As Integer In {1106, 1150, 1250, 1350, 1600, 1920}
+
+                    ' Sotto i 1350 px di finestra il logo passa in compatta (cap. 03.5), e
+                    ' l'ingombro della fascia cambia con lui: il caso stretto non si ricava
+                    ' da quello largo.
+                    Dim ingombro As Size = If(larghezza < 1350, New Size(130, 68), New Size(261, 188))
+
+                    pannello.Width = larghezza
+                    pannello.ImpostaIngombroLogo(ingombro)
+
+                    Dim comandi As Button() = ComandiDellaFascia(pannello)
+
+                    For primo As Integer = 0 To comandi.Length - 2
+                        For secondo As Integer = primo + 1 To comandi.Length - 1
+                            Assert.IsFalse(comandi(primo).Bounds.IntersectsWith(comandi(secondo).Bounds),
+                                           $"a {larghezza} px «{comandi(primo).Text}» copre «{comandi(secondo).Text}»")
+                        Next
+                    Next
+
+                    Dim azioni As Panel = Fascia(pannello)
+                    For Each comando As Button In comandi
+                        Assert.IsGreaterThanOrEqualTo(azioni.Padding.Left, comando.Left,
+                                                      $"a {larghezza} px «{comando.Text}» finisce sotto il logo")
+                        Assert.IsGreaterThanOrEqualTo(comando.Bounds.Right, azioni.ClientSize.Width,
+                                                      $"a {larghezza} px «{comando.Text}» esce dalla fascia")
+                        Assert.IsGreaterThanOrEqualTo(0, comando.Top,
+                                                      $"a {larghezza} px «{comando.Text}» esce dalla fascia in alto")
+                    Next
+
+                Next
+            End Using
+        End Sub
+
+        <TestMethod>
+        Public Sub AFinestraLargaIComandiRestanoDovErano()
+            ' La disposizione nuova non deve cambiare il caso di sempre: l'applicazione si
+            ' apre massimizzata, e lì i comandi stanno su una riga sola — il profilo a
+            ' sinistra, le uscite a destra.
+            Using pannello As New TrovaLavoro.PannelloProfilo()
+                pannello.Width = 1890
+                pannello.ImpostaIngombroLogo(New Size(261, 188))
+
+                Dim fondo As Integer = Bottone(pannello, "btnSalva").Top
+
+                For Each nome As String In {"btnImporta", "btnImportaDaSito", "btnDialogo",
+                                            "btnAggiornamento", "btnGeneraCv1", "btnEsportaBackup"}
+                    Assert.AreEqual(fondo, Bottone(pannello, nome).Top, $"«{nome}» sulla stessa riga di «Salva profilo»")
+                Next
+
+                Assert.IsGreaterThan(Bottone(pannello, "btnEliminaProfilo").Top, fondo,
+                                     "e l'eliminazione definitiva una riga sopra, mai in fila con loro")
+            End Using
+        End Sub
+
+        <TestMethod>
+        Public Sub LEliminazioneDefinitivaNonStaMaiInFilaConGliAltri()
+            ' Il vuoto intorno è la sua prima difesa (cap. 11.5): non deve finire sotto il
+            ' dito di chi sta salvando, a nessuna larghezza. Prima stava in riga con gli
+            ' altri quando lo spazio mancava — cioè proprio quando i bottoni erano più
+            ' vicini fra loro.
+            Using pannello As New TrovaLavoro.PannelloProfilo()
+
+                For Each larghezza As Integer In {1106, 1150, 1350, 1920}
+
+                    pannello.Width = larghezza
+                    pannello.ImpostaIngombroLogo(If(larghezza < 1350, New Size(130, 68), New Size(261, 188)))
+
+                    Dim critico As Button = Bottone(pannello, "btnEliminaProfilo")
+
+                    For Each comando As Button In ComandiDellaFascia(pannello)
+                        If comando Is critico Then Continue For
+                        Assert.AreNotEqual(critico.Top, comando.Top,
+                                           $"a {larghezza} px «{comando.Text}» finisce sulla sua riga")
+                    Next
+
+                Next
             End Using
         End Sub
 
@@ -746,6 +833,19 @@ Namespace Ui
 
         Private Shared Function Bottone(pannello As Control, nome As String) As Button
             Return DirectCast(pannello.Controls.Find(nome, searchAllChildren:=True).Single(), Button)
+        End Function
+
+        ''' <summary>La fascia dei comandi in fondo al pannello.</summary>
+        Private Shared Function Fascia(pannello As Control) As Panel
+            Return DirectCast(pannello.Controls.Find("pnlAzioni", searchAllChildren:=True).Single(), Panel)
+        End Function
+
+        ''' <summary>
+        ''' Tutti i bottoni della fascia, chiesti a lei e non elencati a mano: un comando
+        ''' aggiunto domani entra da solo nei collaudi che verificano che non si sovrappongano.
+        ''' </summary>
+        Private Shared Function ComandiDellaFascia(pannello As Control) As Button()
+            Return Fascia(pannello).Controls.OfType(Of Button)().ToArray()
         End Function
 
         Private Shared Function PoolInesistente() As String

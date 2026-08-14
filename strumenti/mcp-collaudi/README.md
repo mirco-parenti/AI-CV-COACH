@@ -58,6 +58,7 @@ comando **uccide sé stesso** prima di arrivare al server.
 | `avvia_app` | Avvia TrovaLavoro.exe con la chiave API presa dal `.env` del prototipo. Con `dati` lo fa partire su una **cartella usa-e-getta** (`--dati`), che è il modo di provare ciò che cancella senza toccare i dati veri. |
 | `stato_app` · `chiudi_app` | Se è viva; e la chiude. |
 | `schermata` | Riprende la finestra dell'applicazione (o tutto il desktop) e restituisce il PNG. |
+| `ridimensiona` | Cambia la misura della finestra, o la rimette massimizzata. È il modo di guardare i difetti di impaginazione che si vedono **solo stretti**. |
 | `controlli` | Elenca bottoni, caselle e schede dicendo per ciascuno se è **acceso o SPENTO**; dei menù a tendina dice anche **la voce che mostrano**, e marca `[pagina]` quel che è del sito aperto nel browser. |
 | `clic` · `scrivi` | Preme un controllo per etichetta; scrive in una casella. Se il controllo è spento lo dichiara invece di fingere. |
 | `scegli_voce` | Sceglie una voce in un menù a tendina — il portale in «Cerca su» — aprendolo e cliccandoci dentro come farebbe una persona, e poi verificando che il menù la mostri davvero. Senza la voce, le **elenca**. |
@@ -83,17 +84,10 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
 - **Il contenuto delle caselle di testo non si legge.** L'elenco dice la voce dei menù,
   ma non cosa c'è scritto in una casella: per leggere l'indirizzo del browser serve
   ancora una fotografia.
-- **La finestra non si ridimensiona.** *(Emerso a T5d, 2026-08-14.)* L'applicazione si
-  apre massimizzata e lì resta: un difetto di impaginazione che si vede solo a finestra
-  stretta — alla `MinimumSize` dichiarata, per esempio — con questi attrezzi non si
-  guarda. Si può ancora rifare a mano il conto che fa il codice, ed è quel che è stato
-  fatto per la fascia dei comandi di P2 (`in_sospeso.md`), ma un conto non è una
-  fotografia. *E ha una trappola sua, pagata il 2026-08-14 rifacendolo*: sotto i 1350 px
-  di larghezza il pannello del logo passa in **modalità compatta** e si stringe da 261 a
-  130 px, quindi la fascia comincia a 142 invece che a 273. Chi misura il caso stretto
-  usando la larghezza del logo a finestra grande sbaglia di 131 px — cioè proprio nel caso
-  che sta misurando. La prova che il conto è giusto è che riproduca i numeri già a verbale
-  per il caso noto, prima di applicarlo a quello nuovo.
+- **Le fotografie non si confrontano fra loro.** Non c'è un «com'era prima»: due
+  schermate della stessa finestra si guardano una dopo l'altra, e a dire se qualcosa si è
+  spostato è l'occhio di chi legge. Per i difetti di geometria conviene perciò accompagnare
+  la fotografia con un collaudo del banco che misuri la stessa cosa in numeri.
 
 ## Le trappole già pagate
 
@@ -199,6 +193,18 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   14/08 la prima chiamata è andata a segno — ed è proprio l'intermittenza a renderla
   insidiosa: prima di credere a quel che si vede, si guarda **di chi** è la finestra
   fotografata.
+- **Il caso stretto non si ricava da quello largo.** *(2026-08-14, misurando la fascia dei
+  comandi di P2.)* Sotto i **1350 px** di larghezza il pannello del logo passa in modalità
+  compatta e si stringe da 261 a 130 px: la fascia dei comandi comincia a 142 invece che a
+  273, e i conti fatti sui numeri della finestra grande sbagliano di 131 px — cioè proprio
+  nel caso che si sta misurando. Vale anche per `ridimensiona`: chiedere 1150 px e
+  aspettarsi il layout di prima in piccolo è il modo di diagnosticare un difetto che non
+  c'è, o di non vedere quello che c'è. Da qui la regola: **prima si ridimensiona, poi si
+  fotografa**, e non si crede a nessun numero che non sia stato riletto dopo.
+- **La finestra non scende sotto la sua `MinimumSize`** (1150x600, cap. 03.4): chiedere
+  1000 px dà 1150 e Windows non protesta. `ridimensiona` rilegge sempre la misura vera e
+  la dichiara, perché una misura chiesta e non ottenuta è il modo più silenzioso di
+  guardare la cosa sbagliata.
 - **La tendina va sempre richiusa**, anche quando qualcosa va storto (in un `finally`):
   lasciata aperta blocca tutte le chiamate dopo, e l'errore sembra dell'applicazione.
   Va anche portata avanti la finestra **prima** di aprirla: una tendina aperta mentre la

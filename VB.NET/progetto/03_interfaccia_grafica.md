@@ -140,6 +140,19 @@ con icona** (FontAwesome.Sharp); i menu contestuali (tasto destro) usano voci co
   cieco che il cap. 12.7 vieta. *(T4c, 2026-08-10.)*
 - Finestra principale: avvio massimizzata, `MinimumSize` 1150×600, DPI `SystemAware`,
   sfondo `SfondoBase`.
+- **La fascia dei comandi va a capo** *(2026-08-14)*. In fondo a ogni pannello sta una
+  fascia con due file di bottoni: i comandi di quel pannello a sinistra, quelli che portano
+  altrove a destra. Fino alla 0.3.018 ognuna si disponeva per conto suo — una da sinistra,
+  una da destra — e quando lo spazio finiva **si incontravano a metà strada**: alla
+  `MinimumSize` fino a 676 px di bottoni sopra altri bottoni. Non si vedeva perché
+  l'applicazione si apre massimizzata, ed è rimasto lì per tre tappe, peggiorando a ogni
+  bottone aggiunto. Ora la fascia si comporta come qualunque barra di comandi: se le due
+  file non ci stanno insieme si dispongono su **righe diverse** — quelle che portano
+  altrove restano in fondo, dove «Salva profilo» si cerca — e una fila troppo lunga si
+  spezza a sua volta. La **fascia cresce in altezza** quanto le righe richiedono: a
+  rimetterci è l'area dei dati, che di spazio ne ha, e non la leggibilità dei comandi. Le
+  azioni di **livello 6** restano su una riga tutta loro (v. cap. 11.5): il vuoto intorno è
+  la loro prima difesa, e non si baratta per due righe di spazio.
 - Finestre secondarie (Impostazioni, Primo avvio, Anteprima file, Informazioni su…):
   dialoghi a bordo fisso, sfondo bianco, titolo Segoe UI 14 Bold in `RossoTitoli`.
 - **La prima finestra secondaria è la conferma critica** *(2026-08-14)*: `FinestraConfermaCritica`,

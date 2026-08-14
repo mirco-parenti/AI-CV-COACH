@@ -280,6 +280,34 @@ const ATTREZZI = [
   },
 
   {
+    name: "ridimensiona",
+    description:
+      "Cambia la misura della finestra dell'applicazione, o la rimette massimizzata. Serve a guardare " +
+      "i difetti di impaginazione che si vedono solo a finestra stretta: l'applicazione si apre " +
+      "massimizzata e da sola non ci arriva mai. La misura ottenuta viene riletta e riferita — sotto " +
+      "la MinimumSize dichiarata (1150x600) Windows non scende, e va saputo prima di trarre conclusioni.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        larghezza: { type: "number", description: "Larghezza della finestra in pixel." },
+        altezza: { type: "number", description: "Altezza della finestra in pixel." },
+        massimizza: {
+          type: "boolean",
+          description: "Invece di una misura, rimette la finestra massimizzata (com'è all'avvio).",
+        },
+      },
+      additionalProperties: false,
+    },
+    async esegui({ larghezza, altezza, massimizza = false }) {
+      if (!massimizza && (!larghezza || !altezza)) {
+        return testo("Servono «larghezza» e «altezza», oppure «massimizza».", true);
+      }
+
+      return testo(await interfaccia({ azione: "ridimensiona", larghezza, altezza, massimizza }));
+    },
+  },
+
+  {
     name: "controlli",
     description:
       "Elenca i controlli visibili dell'applicazione — bottoni, caselle, schede — dicendo per ciascuno " +

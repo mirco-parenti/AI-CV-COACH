@@ -61,6 +61,22 @@ public class Finestre {
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr SendMessage(IntPtr h, uint m, IntPtr w, StringBuilder l);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
 
+    // Il ridimensionamento: senza questo, un difetto di impaginazione che si vede solo a
+    // finestra stretta non si può guardare in faccia — l'applicazione si apre massimizzata
+    // e lì resta.
+    [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr dopo, int x, int y, int cx, int cy, uint flag);
+    [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int comando);
+    [DllImport("user32.dll")] public static extern bool IsZoomed(IntPtr h);
+    [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out Rettangolo r);
+    [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out Rettangolo r);
+
+    public struct Rettangolo { public int Sinistra, Alto, Destra, Basso; }
+
+    public const uint SWP_NOMOVE = 0x0002;
+    public const uint SWP_NOZORDER = 0x0004;
+    public const int SW_RESTORE = 9;
+    public const int SW_MAXIMIZE = 3;
+
     public const uint GIU = 0x0002;   // MOUSEEVENTF_LEFTDOWN
     public const uint SU  = 0x0004;   // MOUSEEVENTF_LEFTUP
     public const uint WM_SETTEXT = 0x000C;
@@ -951,6 +967,54 @@ switch ($azione) {
         } else {
             Write-Output "Ho premuto «$($scelto.Testo)», ma «$titolo» è ancora aperta."
             exit 1
+        }
+    }
+
+    "ridimensiona" {
+
+        # Perché serve: i difetti di impaginazione che contano si vedono **stretti**. La
+        # finestra ha una MinimumSize dichiarata (1150x600, cap. 03.4), e Windows non
+        # scende sotto di quella: la misura che si ottiene va perciò sempre riletta, mai
+        # data per fatta. E per rimpicciolire una finestra massimizzata bisogna prima
+        # ripristinarla, altrimenti SetWindowPos non muove niente.
+        $finestra = $processo.MainWindowHandle
+
+        if ($scelte.massimizza) {
+            [Finestre]::ShowWindow($finestra, [Finestre]::SW_MAXIMIZE) | Out-Null
+        } else {
+
+            if (-not $scelte.larghezza -or -not $scelte.altezza) {
+                Write-Output "Servono «larghezza» e «altezza» (oppure «massimizza»)."
+                exit 1
+            }
+
+            if ([Finestre]::IsZoomed($finestra)) {
+                [Finestre]::ShowWindow($finestra, [Finestre]::SW_RESTORE) | Out-Null
+                Start-Sleep -Milliseconds 300
+            }
+
+            [Finestre]::SetWindowPos($finestra, [IntPtr]::Zero, 0, 0,
+                                     [int]$scelte.larghezza, [int]$scelte.altezza,
+                                     [Finestre]::SWP_NOMOVE -bor [Finestre]::SWP_NOZORDER) | Out-Null
+        }
+
+        # Il tempo di rifare l'impaginazione: senza, si fotografa la finestra a metà strada.
+        Start-Sleep -Milliseconds 500
+
+        $fuori = New-Object Finestre+Rettangolo
+        $dentro = New-Object Finestre+Rettangolo
+        [Finestre]::GetWindowRect($finestra, [ref]$fuori) | Out-Null
+        [Finestre]::GetClientRect($finestra, [ref]$dentro) | Out-Null
+
+        $larga = $fuori.Destra - $fuori.Sinistra
+        $alta = $fuori.Basso - $fuori.Alto
+        $dentroLarga = $dentro.Destra - $dentro.Sinistra
+        $dentroAlta = $dentro.Basso - $dentro.Alto
+
+        Write-Output "Finestra $larga x $alta (area utile $dentroLarga x $dentroAlta)."
+
+        if (-not $scelte.massimizza -and $larga -gt [int]$scelte.larghezza) {
+            Write-Output "Più larga di quanto chiesto: è la MinimumSize dichiarata dall'applicazione."
         }
     }
 

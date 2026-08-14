@@ -50,6 +50,13 @@ Public Class PannelloProfilo
 
     Private ReadOnly _suggerimenti As New ToolTip()
 
+    ''' <summary>
+    ''' Quanto spazio si prende il logo flottante nell'angolo in basso a sinistra
+    ''' (cap. 03.5). Si tiene qui perché serve a ogni ridisposizione della fascia, non
+    ''' solo a quella che arriva dalla finestra: l'altezza minima della fascia è la sua.
+    ''' </summary>
+    Private _ingombroLogo As Size
+
     Private _contesto As ContestoApp
 
     ''' <summary>Il profilo mostrato adesso: cambia mentre si scrive, non è ancora su disco.</summary>
@@ -188,10 +195,11 @@ Public Class PannelloProfilo
     ''' <inheritdoc/>
     Public Sub ImpostaIngombroLogo(ingombro As Size) Implements IPannelloArea.ImpostaIngombroLogo
 
-        ' La fascia delle azioni si prende tutta l'altezza che il logo sfonda nell'area
-        ' centrale, e comincia dopo la sua larghezza: così nessun dato finisce coperto,
-        ' e a cedere il posto sono i bottoni, che di spazio ne chiedono poco.
-        pnlAzioni.Height = Math.Max(AltezzaMinimaAzioni, ingombro.Height)
+        ' La fascia delle azioni comincia dopo la larghezza del logo, così nessun dato
+        ' finisce coperto, e a cedere il posto sono i bottoni, che di spazio ne chiedono
+        ' poco. L'altezza la decide DisponiLeAzioni: dev'essere almeno quella che il logo
+        ' sfonda nell'area centrale, ma anche quella che le righe dei comandi richiedono.
+        _ingombroLogo = ingombro
         pnlAzioni.Padding = New Padding(ingombro.Width + StileApp.DistanzaControlli, 0, 0, 0)
 
         DisponiLeAzioni()
@@ -199,59 +207,213 @@ Public Class PannelloProfilo
     End Sub
 
     ''' <summary>
-    ''' Mette i bottoni sul fondo della fascia, quelli del profilo a sinistra e quelli
-    ''' che portano altrove a destra. Si rifà a ogni cambio di ingombro e a ogni
-    ''' ridimensionamento, perché entrambi cambiano il rettangolo disponibile.
+    ''' Mette i bottoni in fondo alla fascia, quelli del profilo a sinistra e quelli che
+    ''' portano altrove a destra, e li <b>manda a capo</b> quando in una riga non ci stanno
+    ''' più — come farebbe qualunque barra di comandi. Si rifà a ogni cambio di ingombro e
+    ''' a ogni ridimensionamento, perché entrambi cambiano il rettangolo disponibile.
     ''' </summary>
+    ''' <remarks>
+    ''' L'andare a capo non è un abbellimento. Fino alla 0.3.018 le due file si
+    ''' disponevano ognuna per conto suo — una da sinistra, una da destra — e quando lo
+    ''' spazio finiva si <b>sovrapponevano</b>: alla larghezza minima della finestra fino
+    ''' a 676 px di bottoni sopra altri bottoni. Non si vedeva perché l'applicazione si
+    ''' apre massimizzata, e per la stessa ragione era rimasta lì per tre tappe.
+    ''' </remarks>
     Private Sub DisponiLeAzioni()
 
-        Dim riga As Integer = pnlAzioni.Height - StileApp.MargineRiquadro - StileApp.BottoneStandard.Height
+        Dim righe As List(Of RigaDiComandi) = ComponiLeRighe()
 
-        Dim sinistra As Integer = pnlAzioni.Padding.Left
-        For Each bottone As Button In {btnImporta, btnImportaDaSito, btnDialogo, btnAggiornamento}
-            bottone.Location = New Point(sinistra, riga)
-            sinistra += bottone.Width + StileApp.DistanzaControlli
-        Next
+        ' L'altezza va decisa prima di posare i bottoni: le righe si contano a partire dal
+        ' fondo della fascia, e il fondo si sposta se la fascia deve crescere.
+        Dim altezza As Integer = Math.Max(
+            Math.Max(AltezzaMinimaAzioni, _ingombroLogo.Height), AltezzaNecessaria(righe))
 
-        Dim destra As Integer = pnlAzioni.ClientSize.Width - StileApp.MargineRiquadro
-        For Each bottone As Button In {btnSalva, btnEsportaBackup, btnGeneraCv1}
-            destra -= bottone.Width
-            bottone.Location = New Point(destra, riga)
-            destra -= StileApp.DistanzaControlli
-        Next
+        If pnlAzioni.Height <> altezza Then pnlAzioni.Height = altezza
 
-        DisponiLEliminazione(riga, destra)
+        PosaLeRighe(righe)
 
     End Sub
 
     ''' <summary>
-    ''' Dove va l'eliminazione definitiva. Sta con gli altri comandi del profilo — è lì
-    ''' che la si cerca — ma <b>non in fila con loro</b>: quando la fascia è alta abbastanza
-    ''' sale di una riga, sopra «Salva profilo»; quando il logo la schiaccia (modalità
-    ''' compatta, cap. 03.5) resta in riga, staccata dal resto.
+    ''' Come si dividono i comandi fra le righe. Il caso di sempre — l'applicazione
+    ''' massimizzata — resta quello di prima: una riga sola, il profilo a sinistra e le
+    ''' uscite a destra. Le righe sono in ordine dall'alto verso il basso.
     ''' </summary>
-    ''' <remarks>
-    ''' È il solo bottone del pannello da cui non si torna indietro, e non deve stare
-    ''' sotto il dito di chi sta salvando: il salvataggio si preme cento volte,
-    ''' l'eliminazione una sola e volendolo. Il vuoto intorno è la prima difesa; la
-    ''' seconda è la parola da scrivere nella conferma (cap. 11.5).
-    ''' </remarks>
-    ''' <param name="riga">La riga dei bottoni in fondo alla fascia.</param>
-    ''' <param name="sinistraDellaFila">Dove finisce, a sinistra, la fila dei comandi di destra.</param>
-    Private Sub DisponiLEliminazione(riga As Integer, sinistraDellaFila As Integer)
+    Private Function ComponiLeRighe() As List(Of RigaDiComandi)
 
-        Dim rigaSopra As Integer = riga - btnEliminaProfilo.Height - StaccoDelCritico
+        Dim disponibile As Integer = pnlAzioni.ClientSize.Width -
+                                     pnlAzioni.Padding.Left - StileApp.MargineRiquadro
 
-        If rigaSopra >= StileApp.InterlineaMinima Then
-            btnEliminaProfilo.Location = New Point(
-                pnlAzioni.ClientSize.Width - StileApp.MargineRiquadro - btnEliminaProfilo.Width, rigaSopra)
-            Return
+        Dim delProfilo As Button() = {btnImporta, btnImportaDaSito, btnDialogo, btnAggiornamento}
+        Dim cheEscono As Button() = {btnGeneraCv1, btnEsportaBackup, btnSalva}
+
+        Dim righe As New List(Of RigaDiComandi)
+
+        ' L'eliminazione definitiva ha sempre una riga sua, in cima e a destra: è il solo
+        ' bottone del pannello da cui non si torna indietro, e non deve stare sotto il dito
+        ' di chi sta salvando. Il vuoto intorno è la sua prima difesa; la seconda è la
+        ' parola da riscrivere nella conferma (cap. 11.5).
+        Dim critica As New RigaDiComandi(StaccoDelCritico)
+        critica.ADestra.Add(btnEliminaProfilo)
+        righe.Add(critica)
+
+        If Larghezza(delProfilo) + StileApp.DistanzaControlli + Larghezza(cheEscono) <= disponibile Then
+            Dim unica As New RigaDiComandi(StileApp.InterlineaMinima)
+            unica.ASinistra.AddRange(delProfilo)
+            unica.ADestra.AddRange(cheEscono)
+            righe.Add(unica)
+            Return righe
         End If
 
-        btnEliminaProfilo.Location = New Point(
-            sinistraDellaFila - StaccoDelCritico - btnEliminaProfilo.Width, riga)
+        ' Insieme non ci stanno: ogni fila prende le righe che le servono, e quelle che
+        ' portano altrove restano <b>in fondo</b> — «Salva profilo» si preme cento volte, e
+        ' deve restare dove l'utente lo cerca.
+        righe.AddRange(Spezzata(delProfilo, disponibile, aDestra:=False))
+        righe.AddRange(Spezzata(cheEscono, disponibile, aDestra:=True))
+
+        Return righe
+
+    End Function
+
+    ''' <summary>
+    ''' Una fila di bottoni divisa nelle righe che le servono, riempiendo ogni riga finché
+    ''' ci stanno. Un bottone più largo dello spazio disponibile resta comunque da solo
+    ''' sulla sua riga: sarà largo quanto la fascia, ma non finirà sotto un altro.
+    ''' </summary>
+    Private Shared Function Spezzata(bottoni As Button(), disponibile As Integer,
+                                     aDestra As Boolean) As List(Of RigaDiComandi)
+
+        Dim righe As New List(Of RigaDiComandi)
+        Dim corrente As RigaDiComandi = Nothing
+
+        For Each bottone As Button In bottoni
+
+            If corrente IsNot Nothing AndAlso
+               corrente.Larghezza + StileApp.DistanzaControlli + bottone.Width > disponibile Then
+                corrente = Nothing
+            End If
+
+            If corrente Is Nothing Then
+                corrente = New RigaDiComandi(StileApp.InterlineaMinima)
+                righe.Add(corrente)
+            End If
+
+            corrente.Aggiungi(bottone, aDestra)
+
+        Next
+
+        Return righe
+
+    End Function
+
+    ''' <summary>Posa le righe dal fondo della fascia verso l'alto.</summary>
+    Private Sub PosaLeRighe(righe As List(Of RigaDiComandi))
+
+        Dim riga As Integer = pnlAzioni.Height - StileApp.MargineRiquadro - StileApp.BottoneStandard.Height
+
+        For indice As Integer = righe.Count - 1 To 0 Step -1
+
+            Dim sinistra As Integer = pnlAzioni.Padding.Left
+            For Each bottone As Button In righe(indice).ASinistra
+                bottone.Location = New Point(sinistra, riga)
+                sinistra += bottone.Width + StileApp.DistanzaControlli
+            Next
+
+            ' A destra si posa a ritroso, dall'ultimo bottone al primo: è così che l'ordine
+            ' in cui si leggono resta quello in cui sono scritti.
+            Dim destra As Integer = pnlAzioni.ClientSize.Width - StileApp.MargineRiquadro
+            For indietro As Integer = righe(indice).ADestra.Count - 1 To 0 Step -1
+                Dim bottone As Button = righe(indice).ADestra(indietro)
+                destra -= bottone.Width
+                bottone.Location = New Point(destra, riga)
+                destra -= StileApp.DistanzaControlli
+            Next
+
+            ' Lo stacco che conta è quello della riga di sopra: è lei a dichiarare quanto
+            ' vuoto vuole sotto di sé.
+            If indice > 0 Then
+                riga -= StileApp.BottoneStandard.Height + righe(indice - 1).StaccoSotto
+            End If
+
+        Next
 
     End Sub
+
+    ''' <summary>
+    ''' L'altezza che la fascia deve avere perché tutte le righe ci stiano: il margine del
+    ''' riquadro sotto, l'interlinea minima sopra, e in mezzo le righe con i loro stacchi.
+    ''' </summary>
+    Private Shared Function AltezzaNecessaria(righe As List(Of RigaDiComandi)) As Integer
+
+        Dim altezza As Integer = StileApp.MargineRiquadro + StileApp.InterlineaMinima
+
+        For indice As Integer = 0 To righe.Count - 1
+            altezza += StileApp.BottoneStandard.Height
+            If indice < righe.Count - 1 Then altezza += righe(indice).StaccoSotto
+        Next
+
+        Return altezza
+
+    End Function
+
+    ''' <summary>Quanto spazio vuole una fila di bottoni messi in riga.</summary>
+    Private Shared Function Larghezza(bottoni As Button()) As Integer
+
+        Dim totale As Integer = 0
+        For Each bottone As Button In bottoni
+            If totale > 0 Then totale += StileApp.DistanzaControlli
+            totale += bottone.Width
+        Next
+
+        Return totale
+
+    End Function
+
+    ''' <summary>
+    ''' Una riga della fascia dei comandi: i bottoni che ci stanno, da che parte si
+    ''' allineano, e quanto vuoto tiene sotto di sé.
+    ''' </summary>
+    Private NotInheritable Class RigaDiComandi
+
+        Public Sub New(staccoSotto As Integer)
+            _StaccoSotto = staccoSotto
+        End Sub
+
+        ''' <summary>I bottoni allineati al bordo sinistro, nell'ordine in cui si leggono.</summary>
+        Public ReadOnly Property ASinistra As New List(Of Button)
+
+        ''' <summary>I bottoni allineati al bordo destro, nell'ordine in cui si leggono.</summary>
+        Public ReadOnly Property ADestra As New List(Of Button)
+
+        ''' <summary>Il vuoto fra questa riga e quella sotto.</summary>
+        Public ReadOnly Property StaccoSotto As Integer
+
+        ''' <summary>Quanto spazio si prende la riga, comprese le distanze fra i bottoni.</summary>
+        Public ReadOnly Property Larghezza As Integer
+            Get
+                Dim totale As Integer = 0
+                For Each bottone As Button In ASinistra
+                    If totale > 0 Then totale += StileApp.DistanzaControlli
+                    totale += bottone.Width
+                Next
+                For Each bottone As Button In ADestra
+                    If totale > 0 Then totale += StileApp.DistanzaControlli
+                    totale += bottone.Width
+                Next
+                Return totale
+            End Get
+        End Property
+
+        ''' <remarks>
+        ''' Attenzione al nome del parametro: in VB le maiuscole non distinguono, e
+        ''' chiamarlo <c>aDestra</c> lo farebbe scambiare per la proprietà
+        ''' <see cref="ADestra"/> — che qui dentro diventerebbe un <c>Boolean</c>.
+        ''' </remarks>
+        Public Sub Aggiungi(bottone As Button, versoDestra As Boolean)
+            If versoDestra Then ADestra.Add(bottone) Else ASinistra.Add(bottone)
+        End Sub
+
+    End Class
 
     Private Sub PannelloProfilo_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize
         DisponiLeAzioni()
