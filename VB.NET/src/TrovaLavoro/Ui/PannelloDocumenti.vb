@@ -19,8 +19,9 @@ Imports TrovaLavoro.Motore
 ''' <remarks>
 ''' <para><b>Intero nella struttura, parziale nelle funzioni</b> (cap. 03.6): anteprime ed
 ''' esportazioni funzionano; la scelta della lingua e il prima/dopo dell'anti-slop sono
-''' lì spenti — arrivano con T7 — e «Prepara email» con T6. Chi guarda l'applicazione a
-''' metà strada deve vedere dove sta andando.</para>
+''' lì spenti — arrivano con T7. «Prepara email» era spento allo stesso modo fino a T6,
+''' che l'ha acceso. Chi guarda l'applicazione a metà strada deve vedere dove sta
+''' andando.</para>
 ''' <para><b>Le anteprime passano dalla pagina di blocchi</b>, non dal JSON: le stampanti
 ''' sono tre — DOCX, PDF e questa, a video — e leggono tutte lo stesso modello (cap. 05.3).
 ''' Se l'anteprima leggesse il JSON per conto suo, mostrerebbe un documento che i file non

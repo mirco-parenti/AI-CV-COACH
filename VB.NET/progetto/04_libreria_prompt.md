@@ -158,6 +158,13 @@ descrizione: Genera il CV mirato; il profilo è l'unica fonte di fatti.
 - Il **bump del pool** è un piccolo rito documentato: si modificano i file, si
   aggiorna `versione_pool`, si rigenerano le impronte (lo fa un comando
   dell'app stessa, in Impostazioni → «Sigilla pool»), si annota il `CHANGELOG.md`.
+  *A T6 (2026-08-14) il rito ha finalmente il suo attrezzo, e non poteva aspettare le
+  Impostazioni*: quel comando vive nelle Impostazioni, che sono di T9, mentre i prompt si
+  toccano da T2 — e il primo bump che **aggiunge** prompt è arrivato prima. Perciò
+  `strumenti/sigilla-pool` chiama `LibreriaPrompt.Sigilla`, cioè **lo stesso codice** con
+  cui il caricatore verifica le impronte: la regola resta scritta in un posto solo, e chi
+  sigilla e chi controlla non possono divergere. Rilegge il manifest dopo averlo scritto,
+  perché un sigillo che non si rilegge non è una prova.
   *Dal Pool 1.02 (2026-08-09) anche la `versione:` del singolo file cresce col file:
   un prompt toccato incrementa il suo numero, così la storia si legge a due livelli —
   il pool nel changelog, il file nella sua intestazione.*
@@ -193,7 +200,7 @@ Compiti, in ordine:
 | Dove vive un prompt | duplicato in `prompt_design.md` + `server.js` | **solo** nel pool |
 | Regola di allineamento | sync char-by-char tra i due doppioni | non serve più; al suo posto: validazione manifest + segnaposto |
 | Scelta del modello | costanti nel server | metadato `modello` + configurazione |
-| Testo dei prompt | 15 prompt validati | **identici** alla migrazione (Pool 1.00), salvo adattamento segnaposto; nuovi prompt ✚ progettati con lo stesso metodo. Dal **Pool 1.01** `importa_cv` diverge di proposito, dal **Pool 1.02** anche i sette turni del profilo, e dal **Pool 1.03** `analisi_annuncio`, che estrae anche il nome dell'azienda (v. `CHANGELOG.md`): su quei prompt il prototipo non è più il metro, è il termine di paragone. Il metro carattere-per-carattere resta su `confronto` e `mitigazione` |
+| Testo dei prompt | 15 prompt validati | **identici** alla migrazione (Pool 1.00), salvo adattamento segnaposto; nuovi prompt ✚ progettati con lo stesso metodo. Dal **Pool 1.01** `importa_cv` diverge di proposito, dal **Pool 1.02** anche i sette turni del profilo, e dal **Pool 1.03** `analisi_annuncio`, che estrae anche il nome dell'azienda (v. `CHANGELOG.md`): su quei prompt il prototipo non è più il metro, è il termine di paragone. Il metro carattere-per-carattere resta su `confronto` e `mitigazione`. Il **Pool 1.04** (2026-08-14) è il primo bump che **aggiunge** invece di correggere — i due prompt di T6, `email_candidatura` e `classifica_documenti` — e non tocca nessuno dei quindici: le loro impronte restano quelle di 1.03, e chi confronta i due manifest lo vede subito. Il **Pool 1.05**, poche ore dopo, corregge il primo dei due su una lezione che vale oltre il suo caso: **l'esempio pesa più della regola**, e se i due si contraddicono vince l'esempio |
 | Limiti di token | costanti `MAX_TOKENS_*` nel server | metadato `max_token` di ogni prompt, e dal **Pool 1.03** dimensionato sul contenuto invece che sul suo (cap. 04.4): il banco verifica che non scendano sotto quelli del prototipo, non che coincidano |
 | Documentazione | `prompt_design.md` (prompt + note di design) | il pool **è** la documentazione dei prompt; le note di design restano nel diario e nei capitoli di questo progetto |
 

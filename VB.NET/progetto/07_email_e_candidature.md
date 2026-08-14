@@ -43,6 +43,18 @@ Email (P7) prepara la bozza:
 - **«L'ho spedita» è staccato dalla domanda che lo precede.** La conferma sta nel bottone,
   l'atto in un metodo suo: è anche l'unico modo di collaudarlo, perché una finestra di
   messaggio in un banco resta lì ad aspettare per sempre.
+- **Gli attestati arrivano spenti, e lo dicono.** Gli allegati suggeriti dalla cartella
+  documenti (cap. 05.2) compaiono in fondo all'elenco, marcati «(dai tuoi documenti)» e
+  **senza spunta**: quali provino qualcosa *per quell'annuncio* lo sa l'utente, e mandare a
+  un'azienda tutti i certificati che una persona possiede è il modo di non farne leggere
+  nessuno. Si distinguono a vista dai documenti appena generati perché nella stessa lista
+  convivono file nati un minuto fa e file che l'utente ha da anni. Quel che la
+  classificazione ha messo in «altro» non compare affatto: una busta paga non deve poter
+  finire in un'email per sbaglio, e il posto per correggere una categoria è la finestra di
+  conferma, non l'elenco degli allegati.
+- **Dell'elenco su disco ci si fida per le categorie, non per l'esistenza.** Gli attestati
+  proposti sono solo quelli che **ci sono ancora** nella cartella: è la stessa regola con
+  cui si rifanno i documenti della candidatura, applicata a file che vivono fuori da qui.
 
 ## 7.2 L'uscita: il file `.eml`
 
@@ -129,6 +141,13 @@ dal primo rilascio — **fatta il 2026-08-14**, v. più sotto.
   Per la stessa ragione **il contatore delle inviate non c'è ancora**: fino a T6 sarebbe
   fermo a zero, e un contatore che non può muoversi non conta niente. Restano a T6 anche
   il promemoria di follow-up e, nella voce di registro, il destinatario e l'esito.
+  *(Aggiornamento del 2026-08-14, a T6 chiusa: lo stato **`inviata` si raggiunge** — lo
+  dichiara l'utente da P7 — e con lui è arrivato il **suo contatore**, insieme al filtro
+  per stelle e all'esportazione dell'elenco, v. qui sotto. Restano fuori, e sono in
+  `in_sospeso.md`, le tre cose che T6 non ha portato: lo stato **`esito`**, che nello
+  schema c'è ma dall'interfaccia non si raggiunge, il **promemoria di follow-up**, e il
+  **destinatario nella voce di registro** — oggi vive nella bozza `email.json` della
+  candidatura, non nell'indice.)*
 - **Lo scarto è terminale, e chiede conferma.** Da uno scarto non si torna indietro
   dall'interfaccia, ma la cartella **resta su disco**: si scarta, non si cancella — la
   conferma lo dice con parole sue, invece di un generico «sei sicuro?». Chi ci ripensa

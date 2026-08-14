@@ -154,7 +154,9 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   lì un'idea può non farsi mai, qui una voce **va fatta**.
 - **Lo strumento di collaudo (puntatore)** *(dal 2026-08-10)*: in `strumenti/mcp-collaudi/`
   c'è un server MCP locale con cui **provare l'applicazione vera** — compilarla, far girare
-  il banco, avviarla, fotografarla, elencare i controlli dicendo se sono accesi e che voce
+  il banco, avviarla (anche su una **cartella dati usa-e-getta**, dal 2026-08-14),
+  fotografarla, **ridimensionarne la finestra**, elencare i controlli dicendo se sono accesi
+  e che voce
   mostrano i menù, premerli, scrivere in una casella, scegliere una voce da una tendina o
   una riga da un elenco, rispondere alla finestra di scelta file e alle finestre di
   conferma (leggendo prima cosa chiedono). Non parte da solo

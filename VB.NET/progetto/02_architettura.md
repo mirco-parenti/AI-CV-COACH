@@ -138,6 +138,12 @@ ogni modulo abbia **un compito solo**:
     motore li chiama in **tre momenti diversi** del flusso e i collaudi devono poter
     sostituire un momento per volta; la meccanica che hanno in comune — carica il prompt,
     riempi i segnaposto, chiama, estrai il JSON — sta sotto, scritta una volta sola.
+  - *A T6 se ne aggiungono due, con la stessa forma* — `CompositoreEmail`, che dalla
+    ✉️ lettera ricava oggetto e corpo del messaggio (cap. 07.1), e
+    `ClassificatoreDocumenti`, che smista la cartella documenti dell'utente (cap. 05.2).
+    Nessuno dei due sta nella pipeline di T4, e non è una dimenticanza: la fila si percorre
+    da sé fino ai documenti, mentre da lì in poi decide l'utente — a chi mandare, quali
+    allegati, se spedire.
 - **`Documenti/`** — lettura (PDF via API con blocco `document`, DOCX/TXT/MD in
   locale), scrittura (DOCX e PDF), scansione e classificazione della cartella
   documenti (cap. 05).
@@ -176,8 +182,22 @@ ogni modulo abbia **un compito solo**:
 - **`Posta/`** — composizione dell'email e scrittura del file `.eml` marcato come bozza
   da inviare (cap. 07). *Nella 1.0 non spedisce:* né `.msg` né SMTP (cap. 15, voci 8 e 9),
   quindi questo componente non tocca alcuna credenziale.
+  *In implementazione (T6) quella cartella non è nata*, e la ragione è la stessa della
+  lettura dei documenti: i tre pezzi appartengono a tre mestieri che esistevano già.
+  `Ai/CompositoreEmail` è un mestiere dell'AI come gli altri, `Motore/BozzaEmail` è
+  l'artefatto che l'utente corregge e che si salva in `email.json`, e
+  `Documenti/ScrittoreEml` è **una stampante**: parte da un contenuto e produce un file,
+  come `ScrittoreDocx` e `StampantePdf`. Una cartella `Posta/` avrebbe raccolto tre cose
+  che non si somigliano, solo perché finiscono nella stessa email.
 - **`Dati/`** — cartella dati, profilo e sue versioni, opportunità, registro,
   configurazione, chiave API cifrata, backup (cap. 11).
+  *A T6 ci nascono i due pezzi che il capitolo prometteva da tempo*: `ArchivioSegreti`,
+  che cifra la chiave API con la protezione dati di Windows (cap. 11.3), e la coppia
+  `RaccoltaDocumenti` + `ArchivioRaccoltaDocumenti`, che tiene la cartella documenti
+  dell'utente e le categorie riconosciute (cap. 05.2). Con loro `ScansioneDocumenti`, che
+  legge quella cartella e ne assaggia i file: sta **qui** e non in `Documenti/` per la
+  stessa divisione di sempre — tocca il disco e non chiama nessuno, come
+  `LettoreDocumenti`, mentre `Documenti/` resta il posto di chi **scrive**.
 - **`Mcp/`** — il server MCP: traduce le richieste del protocollo in chiamate al
   motore (cap. 09).
 
@@ -240,6 +260,11 @@ i tool MCP).
 - **La chiave API**: `ClientClaude` la riceve già pronta, non va a cercarsela. Alla tappa
   T2 arriva dalla variabile d'ambiente `ANTHROPIC_API_KEY` — non tocca il disco e non
   entra nel repo; dalla 1.0 arriverà cifrata dalla cartella dati (cap. 11).
+  *Arrivata a T6 (2026-08-14)*: chi la cerca è `ContestoApp`, che guarda in tre posti e in
+  quest'ordine — quella dichiarata da chi avvia (la porta del banco), il file cifrato della
+  cartella dati, la variabile d'ambiente di sempre. Il file viene prima perché è la volontà
+  più recente dell'utente; perché la precedenza non diventi una sorpresa muta, la
+  provenienza finisce nel resoconto d'avvio con la chiave **mascherata** (cap. 11.3).
 - **Sincrono, per ora**: tutte le chiamate sono **sincrone**. Le risposte stanno fra i
   1500 e i 4000 token e si aspettano bene con un indicatore, quindi lo streaming a T2
   non pagherebbe la sua complessità. Lo **streaming** (`stream: true`, eventi SSE) arriva

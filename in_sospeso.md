@@ -48,13 +48,6 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   trascritto dal PDF: provano le *strade di lettura*, non l'impaginazione di Word, che su
   questa postazione non c'è. Serve una macchina che ce l'abbia. *(cap. 05.1; cap. 14, T3,
   gamba A — il limite è dichiarato anche nel collaudo.)*
-- **La chiave API cifrata (DPAPI) è assegnata a T6.** Oggi arriva dalla variabile
-  d'ambiente `ANTHROPIC_API_KEY`, come a T2, e a T3 resta così: il passaggio a
-  `segreti.bin` cifrato vuole un posto dove l'utente la digita — primo avvio o
-  Impostazioni — che a T3 non esiste ancora. Il cap. 14 non lo assegnava a nessuna
-  tappa; deciso il 2026-08-07 di metterlo in **T6**, il cui collaudo già verifica che la
-  chiave non compaia in chiaro su disco né nei log. *(cap. 02.5; cap. 11.3; cap. 14, T6.)*
-
 ## Da T4 — la pipeline di candidatura (2026-08-10 · integrata alla chiusura, 2026-08-11)
 
 - **I documenti prodotti aperti in Word.** La gamba C del collaudo di tappa (cap. 14)
@@ -66,20 +59,10 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   chiusura di T4** *(2026-08-11)*: il collaudo di tappa ha ripercorso la gamba per intero —
   114 campi su 114 ritrovati, DOCX e PDF identici — ma la metà di Word è di nuovo rimasta
   fuori, per la stessa ragione.
+
 ## Da T5 — la ricerca annunci e il registro (2026-08-13, alla chiusura di T5c)
 
-- **L'export del registro in CSV/markdown.** Il cap. 07.3 lo promette «fin dal primo
-  rilascio» — serve a Mirco per documentare l'uso reale del prodotto nella propria ricerca
-  di lavoro — e a T5c **non è stato fatto**: deciso con Mirco il 2026-08-12, perché
-  aggiungere una strada d'uscita a dei dati che stavano ancora prendendo forma sarebbe
-  costato due volte. Ora la forma ce l'hanno. Va fatto entro la 1.0 (T9 al più tardi).
-  *(cap. 07.3; cap. 14, T9.)*
-- **Il filtro per stelle nella coda.** Il cap. 07.3 chiede un elenco «ordinabile e
-  filtrabile **per stato e stelle**»: a T5c si ordina per qualunque colonna (stelle
-  comprese) e si filtra **per stato** («Mostra»: tutte, da completare, generate, scartate),
-  ma un filtro sulle stelle — «fammi vedere solo quelle sopra le 3» — non c'è. Con sei
-  candidature l'ordinamento basta; con sessanta no, ed è quello lo scenario per cui il
-  registro esiste. *(cap. 07.3; cap. 03.6, P1.)*
+*Tutte chiuse a T6: l'export del registro e il filtro per stelle sono in «Chiuse».*
 
 ## Da T5d — il profilo dalla propria pagina (2026-08-14)
 
@@ -90,44 +73,42 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   quella pagina ha dovuto cercarsi da solo il contenitore che scorre: un sito fatto in un
   altro modo può scorrere in un altro modo. Serve una prova su una pagina «chi sono» vera.
   *(cap. 06.7.)*
-- **La fascia dei comandi di P2 a finestra stretta.** Con la finestra alla sua
-  `MinimumSize` (1150×600, cap. 03.4) i bottoni di sinistra e quelli di destra **si
-  sovrappongono**: la fila di sinistra finisce a 948 px e quella di destra comincia a 638.
-  Non è un difetto nato qui — con tre bottoni la sovrapposizione era già di 108 px — ma il
-  quarto la porta a 310, e questo lo rende una cosa da sistemare invece che una da tollerare.
-  A finestra massimizzata, che è come l'applicazione si apre, il problema non esiste (fila
-  sinistra a 1079, destra a 1424): è per questo che non si era mai visto. **Misurato
-  rifacendo il conto di `DisponiLeAzioni`, non guardandolo**, perché lo strumento di
-  collaudo non sa ancora ridimensionare la finestra. Il rimedio naturale è che la fascia
-  vada a capo quando lo spazio non basta, come farebbe qualunque barra di comandi.
-  *(cap. 03.4; `Ui/PannelloProfilo.DisponiLeAzioni`.)*
-  **Peggiorata il 2026-08-14** *(diario Step 2.15)*: rinominando i tre bottoni dell'import e
-  del dialogo, il bottone del dialogo è passato da 200 a **300 px** perché l'etichetta nuova
-  in maiuscolo non ci stava più. Alla larghezza minima la fila di sinistra finisce ora a
-  **1048** px invece di 948, quindi la sovrapposizione sale da 310 a **410 px**; a finestra
-  massimizzata resta senza sovrapposizioni, ma il margine fra le due file scende da 345 a
-  245 px. Attenzione al conto: sotto i 1350 px di larghezza il pannello del logo passa in
-  **modalità compatta** e la fascia comincia a 142 invece che a 273 — è la ragione per cui i
-  numeri a finestra stretta e a finestra grande non si ricavano l'uno dall'altro.
-  *(`Ui/FormPrincipale.LarghezzaModalitaCompatta`.)*
-  **Peggiorata di nuovo il 2026-08-14** *(diario Step 2.16)*: «ELIMINA PROFILO - DEFINITIVO»
-  (230 px) sta **sopra** la fila di destra e a finestra grande non toglie niente a nessuno —
-  il margine fra le due file resta 245 px. Ma quando il logo passa in compatta la fascia si
-  abbassa a 68 px, due righe non ci stanno e il bottone **scende in riga**: lì la fila di
-  destra comincia a 372 invece che a 638, e la sovrapposizione sale da 410 a **676 px**. È
-  lo stesso difetto, e la stessa cura — una fascia che va a capo quando lo spazio non basta
-  la sistemerebbe tutta insieme. *(`Ui/PannelloProfilo.DisponiLEliminazione`.)*
 
 ## Da «Elimina profilo» (2026-08-14)
 
-- **Avviare l'applicazione su una cartella dati usa-e-getta.** Oggi l'exe legge sempre
-  `%APPDATA%\TrovaLavoro`, e l'unico modo di provare una funzione distruttiva senza
-  rischiare i dati veri è spostare a mano quella cartella. È il limite che ha costretto
-  l'assistente a fermarsi un passo prima dell'eliminazione vera (poi provata da Mirco sui
-  propri dati, con la copia di sicurezza accanto). Le due strade sono un argomento della
-  riga di comando per la radice dati — che servirà comunque alle Impostazioni, cap. 11.1 —
-  o un attrezzo del banco che prepari una cartella finta.
-  *(cap. 11.1; `strumenti/mcp-collaudi/`.)*
+*Chiusa a T6: la cartella dati usa-e-getta è in «Chiuse».*
+
+## Da T6 — le email di candidatura (2026-08-14, alla chiusura)
+
+- **L'`.eml` aperto in un programma di posta vero e spedito da lì.** È la metà mancante del
+  collaudo di tappa dichiarato dal cap. 14: il file è stato validato da un **lettore di
+  posta indipendente** — intestazioni giuste, `X-Unsent`, corpo integro, allegati identici
+  byte per byte — ma «lo apre davvero un client, e da lì parte» è un'altra domanda.
+  Thunderbird è installato su questa postazione e **senza un account configurato non apre
+  niente**, quindi la prova tocca a Mirco, sulla sua posta vera. *(cap. 07.2; cap. 14, T6.)*
+- **Il destinatario proposto dall'annuncio.** Il cap. 07.1 promette: «se l'annuncio conteneva
+  un indirizzo, viene proposto». Oggi il campo è **sempre vuoto**, e non per prudenza: il
+  prompt `analisi_annuncio` non estrae nessun recapito, quindi non c'è niente da proporre.
+  Metà della promessa è mantenuta (il programma non inventa mai un indirizzo), l'altra metà
+  no. Costa un campo nell'analisi e un bump di pool. *(cap. 07.1; pool `analisi_annuncio`.)*
+- **La porta «qui c'è tutto» del profilo.** Il cap. 05.2 descrive una cartella che serve a
+  **due** cose: proporre gli attestati da allegare (fatto a T6) e trovare da sé il CV da cui
+  costruire il profilo. La classificazione dice già quale CV sembra il più recente e il dato
+  si salva in `documenti.json`, ma **non lo legge nessuno**: l'import di un CV passa ancora
+  dalla scelta di un file singolo. *(cap. 05.2; `RaccoltaDocumenti.CvPiuRecente`.)*
+- **Lo stato «esito», il follow-up e il destinatario nel registro.** Il cap. 07.3 assegnava
+  a T6 tre cose oltre all'invio, e T6 ne ha portata una sola. Restano: lo stato **`esito`**
+  (in attesa · colloquio · rifiutata · assunto 🎉), che nello schema c'è ma dall'interfaccia
+  non si raggiunge; il **promemoria di follow-up** per le candidature ferme da giorni; e il
+  **destinatario nella voce di registro**, che oggi vive nella bozza `email.json` della
+  candidatura e non nell'indice. Sono tre passi del racconto «a che punto sono», e vanno
+  fatti entro la 1.0. *(cap. 07.3; cap. 14, T9.)*
+- **La scelta della cartella documenti, premuta a mano.** Nel giro di collaudo di T6 tutto è
+  stato percorso con lo strumento tranne il `FolderBrowserDialog` di «Documenti da
+  allegare…»: lo strumento sa rispondere alla scelta di un **file**, non di una **cartella**
+  (limite dichiarato nel suo README). La cartella è stata registrata scrivendo
+  `documenti.json` a mano; premere quel bottone e scegliere una cartella vera resta da fare,
+  ed è di due minuti. *(cap. 05.2; `strumenti/mcp-collaudi/`.)*
 
 ## Da revisione adversariale (2026-08-09)
 
@@ -146,6 +127,32 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Chiuse
 
+- ✅ **La chiave API cifrata (DPAPI)** *(aperta il 2026-08-07 da T3, chiusa il 2026-08-14 da
+  T6)*. Vive in `segreti.bin` nella cartella dati, cifrata con la protezione dati di Windows
+  e **legata all'account** che l'ha salvata: copiata altrove non si apre. La si digita in una
+  finestra al primo avvio — il posto che a T3 mancava — e la si sostituisce riavviando con
+  `--chiave`, finché le Impostazioni non arriveranno con T9. Nella diagnostica compare solo
+  come `sk-ant-…1234`, che è la metà del collaudo di tappa verificabile qui.
+  *(cap. 11.3; diario Step 2.19.)*
+- ✅ **Avviare l'applicazione su una cartella dati usa-e-getta** *(aperta il 2026-08-14 da
+  «Elimina profilo», chiusa lo stesso giorno aprendo T6)*. `--dati <percorso>` sposta l'intera
+  applicazione su un'altra radice, dichiarandolo nel titolo della finestra e nella barra di
+  stato. Ha fatto subito il suo mestiere: tutto il collaudo di T6 è stato percorso su copie
+  dei dati veri, senza mai toccarli. *(cap. 11.1; diario Step 2.17.)*
+- ✅ **La fascia dei comandi a finestra stretta** *(aperta il 2026-08-14 da T5d, peggiorata due
+  volte, chiusa lo stesso giorno aprendo T6)*. La fascia ora **va a capo** quando lo spazio non
+  basta, e la geometria — che era ricopiata in cinque pannelli — vive in un posto solo
+  (`Ui/FasciaDeiComandi`). I 676 px di bottoni sovrapposti alla larghezza minima non ci sono
+  più, e il collaudo cammina su cinque pannelli a sei larghezze verificando che due comandi non
+  si intersechino mai. *(cap. 03.4; diario Step 2.17.)*
+- ✅ **L'export del registro in CSV/markdown** *(aperta il 2026-08-13 da T5c, chiusa il
+  2026-08-14 aprendo T6)*. Esce quel che è a schermo, filtrato e ordinato com'è: il markdown si
+  porta il proprio perimetro in cima («3 di 12»), il CSV no perché una frase sopra una tabella
+  non è più una tabella. *(cap. 07.3; diario Step 2.17.)*
+- ✅ **Il filtro per stelle nella coda** *(aperta il 2026-08-13 da T5c, chiusa il 2026-08-14
+  aprendo T6)*. La tendina dice «almeno N», i due filtri si intersecano, e quando nascondono
+  qualcosa i contatori aggiungono «ne vedi 1 su 3» — perché una candidatura mai confrontata non
+  ha stelle e sparirebbe in silenzio. *(cap. 07.3; diario Step 2.17.)*
 - ✅ **L'eliminazione vera non è mai stata premuta sull'applicazione** *(aperta e chiusa il
   2026-08-14)*. L'assistente si era fermata un passo prima — bottone premuto, finestra
   aperta, parola scritta, «Elimina il profilo» acceso, e poi **annullato**, perché

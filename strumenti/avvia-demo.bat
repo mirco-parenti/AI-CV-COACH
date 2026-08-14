@@ -1,9 +1,11 @@
 @echo off
 REM Lanciatore per mostrare TrovaLavoro dal vivo, senza passare da Claude Code.
 REM
-REM Serve perche' l'applicazione prende la chiave API dalla variabile d'ambiente
-REM ANTHROPIC_API_KEY (la cifratura su disco e' di T6): con un doppio clic
-REM sull'exe la variabile non c'e', e tutto cio' che passa dall'AI si ferma.
+REM Serve dove una chiave cifrata non e' mai stata salvata: dal 2026-08-14 (T6)
+REM l'applicazione tiene la sua in segreti.bin dentro la cartella dati, e il file
+REM viene prima della variabile d'ambiente ANTHROPIC_API_KEY. Su una cartella dati
+REM nuova, pero', quel file non c'e' — e con un doppio clic sull'exe non c'e'
+REM nemmeno la variabile: tutto cio' che passa dall'AI si ferma.
 REM Qui la chiave si legge dal .env del prototipo e vive solo per questo avvio:
 REM non viene copiata da nessuna parte, e non viene mai stampata a schermo.
 REM

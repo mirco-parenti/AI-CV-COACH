@@ -57,6 +57,34 @@ La cartella resta **registrata** in configurazione: i suoi attestati compaiono p
 gli allegati suggeriti quando si prepara un'email (cap. 07), e la scansione si può
 ripetere quando il contenuto cambia.
 
+### Com'è stata costruita (T6, 2026-08-14)
+
+- **Costruita per gli allegati, non per il profilo.** Delle due cose che questa cartella
+  serve a fare, T6 ha fatto la seconda: gli attestati da allegare a un'email. La porta
+  «qui c'è tutto» del profilo — prendere da sé il CV più recente e importarlo — **non
+  c'è ancora**, anche se la classificazione quel CV lo indica già e il dato si salva. Sta
+  in `in_sospeso.md`, perché è una promessa di questo capitolo.
+- **Dei PDF non si assaggia il testo.** Il passo 2 vale per TXT, MD e DOCX, che si leggono
+  dal disco; per un PDF servirebbe una **trascrizione dell'AI a file** (cap. 05.1), e in
+  una cartella di documenti i PDF sono quasi tutto: quindici chiamate per smistare della
+  carta. Si mandano nome, data e dimensione, e l'elenco dichiara che l'assaggio non c'è —
+  il prompt lo sa e giudica su quel che vede, dicendolo nel motivo. Sul campo ha retto:
+  nove file su nove riconosciuti, i tre attestati compresi.
+- **Un tetto dichiarato invece di un elenco troncato.** Si mandano a classificare al
+  massimo **60 file**, perché l'elenco entra in un prompt; quel che resta fuori **si
+  dice**, altrimenti si leggerebbe come «nella cartella non c'era altro».
+- **Solo il primo livello di sottocartelle**, come dice il passo 1: una cartella
+  «documenti» qualunque ha dentro di tutto, e scendere all'infinito vorrebbe dire proporre
+  a un'azienda un file pescato chissà dove. Il nome che si conserva è **relativo** alla
+  cartella (`attestati\HACCP.pdf`), così spostare la cartella non invalida l'elenco.
+- **Una correzione dell'utente non si rimette in discussione.** Il documento che è stato
+  corretto a mano resta com'è anche quando la cartella si rilegge: la rilettura serve a
+  riconoscere i file **nuovi**, non a ridiscutere una decisione già presa (passo 4).
+- **Nessun file viene copiato**, e i nomi non bastano: quel che si conserva è un elenco di
+  nomi con una categoria, e gli allegati si leggono da dove sono. Un attestato cancellato
+  dalla cartella sparisce anche dagli allegati proposti — che è quel che l'utente si
+  aspetta di aver fatto cancellandolo.
+
 ## 5.3 Il modello di contenuto in uscita
 
 CV e lettera nascono come **JSON strutturato** (stessi schemi del prototipo: sezioni

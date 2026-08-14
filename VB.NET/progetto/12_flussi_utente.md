@@ -14,6 +14,13 @@ opportunità sono esaurite.
 1. L'utente avvia l'exe. Al primo avvio l'app chiede due sole cose: cartella dati
    (proposta: `%APPDATA%\TrovaLavoro`) e chiave API Anthropic (salvata cifrata,
    cap. 11). *Nessun account di posta da configurare:* l'app non spedisce (cap. 07).
+   *A T6 (2026-08-14) di quelle due domande ne esiste **una**, la chiave: compare in una
+   finestra prima di ogni altra cosa, e «Non adesso» è una risposta — si entra lo stesso,
+   con le sole funzioni dell'AI spente (cap. 11.3). La **cartella dati** non si chiede:
+   vale quella predefinita, e per lavorare altrove c'è `--dati` alla riga di comando
+   (cap. 11.1). Chiederla al primo avvio a chi non sa ancora cosa sia il programma
+   sarebbe stato un ostacolo prima del primo vantaggio; quando arriveranno le
+   Impostazioni (T9) sarà lì che si cambia.*
 2. L'app carica la libreria prompt — quella integrata nell'exe o, se presente, la
    cartella `prompt-pool/` accanto all'exe (cap. 04.2) — e ne mostra versione e
    sorgente nel riquadro del logo, in basso a sinistra.
@@ -27,6 +34,11 @@ opportunità sono esaurite.
    *Dal 2026-08-07 la scelta della cartella è rimandata a **T6***, dove la scansione
    della cartella documenti serve comunque agli allegati dell'email (cap. 05.2): T3 ha
    chiuso la strada del file singolo, che è quella che porta al profilo.
+   *E a T6 (2026-08-14) è arrivata **metà**: la cartella si sceglie, si legge e si
+   conferma, ma da lì escono gli **attestati per l'email**, non il profilo. Il CV più
+   recente la classificazione lo indica già — è scritto in `documenti.json` — e a non
+   leggerlo è l'import, che continua a chiedere un file singolo. Questo punto 2 resta
+   quindi una promessa a metà, annotata in `in_sospeso.md`.*
 3. *Da T5d (2026-08-14) c'è una **terza porta**, e il bivio del punto 1 diventa un
    trivio: il CV può non essere un file.* Se il proprio percorso è già scritto in una
    pagina — di norma la **propria** pagina LinkedIn — la si apre nel browser integrato e
@@ -109,6 +121,16 @@ opportunità sono esaurite.
    pulsante «Invia» — è nel suo programma di posta.
 3. Al ritorno nell'app, una domanda sola: «l'hai spedita?». Alla conferma l'opportunità
    passa allo stato **«inviata»** con data e ora, e il registro si aggiorna.
+
+*Com'è venuto (T6, 2026-08-14).* Il punto 1 è vero a metà, e la metà mancante è
+dichiarata: il **destinatario resta vuoto** anche quando l'annuncio ne conterrebbe uno,
+perché l'analisi non estrae recapiti (sta in `in_sospeso.md`). Gli **attestati della
+cartella documenti** ci sono, e arrivano spenti (cap. 07.1). Prima del punto 1 c'è un
+passo che il flusso non prevedeva: la **cartella documenti va indicata una volta**, dal
+bottone «Documenti da allegare…» di P7 — è configurazione, e quando ci saranno le
+Impostazioni sarà lì che si sposterà (cap. 03.6). Il punto 2 è come scritto; il punto 3
+pure, con una precisazione che vale la pena: «l'hai spedita?» è **spento** finché il
+messaggio non è stato preparato, perché un `.eml` che non esiste non può essere partito.
 
 **A9. Fino a esaurimento**
 1. Si torna ad A5 per la prossima opportunità in coda; quando la coda è vuota, si
@@ -203,5 +225,10 @@ Per l'utente evoluto che lavora con Claude Desktop / Claude Code:
   sapeva tornarci. **Da T5c (2026-08-13) la promessa è mantenuta per intero**: la coda
   della Home riapre qualunque candidatura, comprese quelle scritte prima che la Home
   esistesse. Una promessa mantenuta solo dove l'utente non guarda non è mantenuta.*
+  *Con T6 (2026-08-14) entra nell'elenco anche la **bozza dell'email** (`email.json`):
+  destinatario, oggetto, corpo e spunte degli allegati. È l'unico punto di una candidatura
+  in cui l'utente scrive parole sue, quindi è anche quello in cui «riprendere da dove si
+  era rimasti» conta di più — e rientrando l'AI non riscrive sopra: propone solo quando
+  non c'è ancora niente.*
 - **Onestà visibile**: stelle, ⛔ eliminatori e avvisi di soglia non si nascondono mai;
   sono il valore del prodotto, non un fastidio da minimizzare.

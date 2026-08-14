@@ -18,9 +18,12 @@ Namespace Dati
     ''' giorno in cui quei percorsi cambiano. Il percorso lo ricompone chi legge, che la
     ''' radice ce l'ha.</para>
     ''' <para>Cosa <b>non</b> c'è ancora: il destinatario e l'esito della candidatura, che
-    ''' il cap. 07.3 elenca insieme a questi. Sono di T6, e non è un debito — questo file
-    ''' si rigenera dalle cartelle, quindi la tappa che scriverà quei dati aggiungerà qui
-    ''' una colonna e l'indice si ricostruirà da sé, senza migrare niente.</para>
+    ''' il cap. 07.3 elenca insieme a questi. Erano assegnati a T6, che ha portato l'invio
+    ''' ma non loro (v. <c>in_sospeso.md</c>): il destinatario oggi vive nella bozza
+    ''' <c>email.json</c> della candidatura, l'esito è uno stato che dall'interfaccia non
+    ''' si raggiunge. Resta vero il motivo per cui non è un debito grave — questo file si
+    ''' rigenera dalle cartelle, quindi chi scriverà quei dati aggiungerà qui una colonna e
+    ''' l'indice si ricostruirà da sé, senza migrare niente.</para>
     ''' </remarks>
     Public Class VoceRegistro
 

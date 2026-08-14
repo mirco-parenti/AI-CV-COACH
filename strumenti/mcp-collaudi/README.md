@@ -88,6 +88,15 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   schermate della stessa finestra si guardano una dopo l'altra, e a dire se qualcosa si è
   spostato è l'occhio di chi legge. Per i difetti di geometria conviene perciò accompagnare
   la fotografia con un collaudo del banco che misuri la stessa cosa in numeri.
+- **La finestra di scelta *cartella* non si pilota.** *(2026-08-14, T6.)* `scegli_file`
+  sa rispondere alla scelta di un file — cerca la casella `Edit` 1148 — ma la finestra che
+  chiede una **cartella** (P7, «Documenti da allegare…») quella casella non ce l'ha: ha una
+  casella «Cartella:» con un altro identificativo, e i bottoni si chiamano «Selezione
+  cartella» e «Annulla». `rispondi_finestra` la **legge** (dice cosa chiede e che bottoni
+  ha) ma non sa scriverci dentro, e UI Automation non la vede nemmeno come finestra —
+  stessa storia della scelta file. Finché non le si insegna, la cartella si registra
+  scrivendo a mano `documenti.json` nella cartella dati e si prova il resto del giro con
+  «Fai rileggere la cartella»: è così che T6 è stata collaudata.
 
 ## Le trappole già pagate
 
@@ -209,3 +218,11 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   lasciata aperta blocca tutte le chiamate dopo, e l'errore sembra dell'applicazione.
   Va anche portata avanti la finestra **prima** di aprirla: una tendina aperta mentre la
   finestra sta dietro si richiude da sola appena la si mette in primo piano.
+- **Un `testhost` che sopravvive blocca la compilazione dopo.** *(2026-08-14, T6.)* Se
+  `collaudi` viene interrotto — un timeout della chiamata, una sessione chiusa a metà — il
+  processo `testhost.exe` che faceva girare il banco **resta vivo** e tiene bloccata
+  `TrovaLavoro.Collaudi\bin\…\TrovaLavoro.dll`. Il giro successivo fallisce con dieci
+  tentativi di copia e un `MSB3027`, e l'errore parla di file bloccati: sembra un guasto
+  del progetto ed è un avanzo del giro di prima. Si chiude dal nome, perché il nome ce
+  l'ha solo lui: `taskkill.exe /F /IM testhost.exe`, e poi si rifà il banco. Vale anche
+  fra una sessione e l'altra — il processo sopravvive alla chiusura di chi l'ha lanciato.

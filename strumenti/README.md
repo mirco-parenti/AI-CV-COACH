@@ -39,12 +39,18 @@ avvisi. *(Nato il 2026-08-14, col bump a Pool 1.04 di T6.)*
 
 ## Perché esiste `avvia-demo.bat`
 
-L'applicazione prende la chiave API dalla variabile d'ambiente `ANTHROPIC_API_KEY` (la
-chiave cifrata nella cartella dati arriva con la 1.0 — capp. 02.5 e 11.3). Con un doppio
-clic sull'eseguibile quella variabile non c'è,
-e **tutto ciò che passa dall'AI si ferma**: l'analisi di un annuncio, il confronto, la
+Fino a T6 l'applicazione prendeva la chiave API **solo** dalla variabile d'ambiente
+`ANTHROPIC_API_KEY`. Con un doppio clic sull'eseguibile quella variabile non c'è, e
+**tutto ciò che passa dall'AI si ferma**: l'analisi di un annuncio, il confronto, la
 generazione. L'applicazione si apre e sembra viva — il guasto si scopre solo al primo
 comando che chiama l'AI, cioè nel momento peggiore, davanti a chi guarda.
+
+*Dal 2026-08-14 (T6) la chiave ha una casa vera*: cifrata in `segreti.bin` dentro la
+cartella dati, chiesta in una finestra al primo avvio (cap. 11.3). Su un PC dove è già
+stata salvata, questo lanciatore non serve più — l'applicazione la trova da sé, e anzi il
+file **viene prima** della variabile. Resta comodo qui: la postazione di sviluppo lavora
+di continuo su cartelle dati usa-e-getta (`--dati`), dove nessuna chiave è mai stata
+salvata.
 
 Il lanciatore legge la chiave dal `.env` del prototipo e la tiene in vita **solo per quell'avvio**:
 non la copia da nessuna parte e non la stampa mai a schermo. Avvia la build di

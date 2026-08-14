@@ -225,6 +225,32 @@ Idee emerse **costruendo T5d** *(2026-08-14)*: la pagina che diventa profilo.
   conviene disegnarli insieme quando arriverà quella. *(2026-08-14 — emersa dal collaudo di
   T5d sul profilo vero; cap. 06.7, cap. 12.4.)*
 
+Idee emerse **costruendo T6** *(2026-08-14)*: l'email di candidatura e la cartella dei
+documenti dell'utente.
+- **L'assaggio dei PDF, che oggi non c'è.** La classificazione della cartella documenti
+  (cap. 05.2) giudica i PDF **dal solo nome**: leggerne il testo vorrebbe dire una
+  trascrizione dell'AI per ciascuno, e in una cartella vera i PDF sono quasi tutto. Sul
+  campo è bastato — nove file su nove riconosciuti — ma un file dal nome opaco
+  (`doc1.pdf`, `scan_0007.pdf`) finisce in «altro» e tocca all'utente ripescarlo. Due
+  strade il giorno che servisse: leggere la prima pagina **senza AI** (vuole un lettore di
+  PDF, che oggi il progetto non ha e non vuole), oppure trascrivere **solo i dubbi** —
+  quelli che il primo giro mette in «altro» dicendo che l'assaggio non bastava. La seconda
+  costa poco ed è già preparata dal prompt, che quel caso lo dichiara.
+  *(2026-08-14 — decisa costruendo `ScansioneDocumenti`; cap. 05.2.)*
+- **Attestati proposti in base all'annuncio.** Oggi gli attestati riconosciuti compaiono
+  **tutti** fra gli allegati, spenti, e a scegliere è l'utente. Il cap. 07.1 li chiama
+  «pertinenti», e la pertinenza a quel punto è nota: i requisiti dell'annuncio sono già
+  stati letti, e un patentino del muletto davanti a un annuncio che lo chiede è una
+  risposta, non un file. Farlo vorrebbe dire una passata in più (o un campo in più nella
+  classificazione) e una scelta di interfaccia — evidenziare, non spuntare da soli, perché
+  l'ultima parola resta di chi si candida. *(2026-08-14 — emersa chiudendo T6; cap. 07.1.)*
+- **Il CV più recente della cartella, che nessuno usa ancora.** La classificazione dice già
+  quale dei CV trovati sembra il più aggiornato e il dato si salva, ma serve alla porta
+  «qui c'è tutto» del profilo (cap. 05.2), che a T6 non è stata costruita: l'import di un
+  CV passa ancora dalla scelta di un file singolo. È un'idea a metà fra il backlog e il
+  debito, e sta anche in `in_sospeso.md` perché quella porta il capitolo la promette.
+  *(2026-08-14 — emersa chiudendo T6.)*
+
 ## Collaudi e non-regressione (Fase VB.NET)
 
 Idee emerse **costruendo la batteria di T2** (cap. 14), quando il prototipo ha fatto da
@@ -254,6 +280,14 @@ giudice per la prima volta.
   controlli (adesso vuole una parola intera); l'attesa vera resta da fare.
 - ~~**Un attrezzo per rispondere alle finestre di messaggio**~~ — **realizzato a T5c**
   (vedi «Realizzate»).
+- **Rispondere anche alla finestra di scelta di una cartella** — lo strumento sa pilotare
+  la scelta di un **file** (cerca la casella del nome, che nel dialogo di Windows ha un
+  identificativo noto), ma la finestra che chiede una **cartella** quella casella non ce
+  l'ha: ha una «Cartella:» diversa, e i bottoni si chiamano «Selezione cartella» e
+  «Annulla». La legge — dice cosa chiede e che bottoni ha — ma non sa scriverci dentro,
+  così il bottone «Documenti da allegare…» di P7 è l'unico di T6 che ho dovuto lasciare da
+  premere a mano. *(2026-08-14 — emersa collaudando T6; limite dichiarato nel README dello
+  strumento.)*
 - **Un collaudo che veda se un'etichetta ci sta nel suo bottone** — il banco confronta il
   testo dei bottoni **carattere per carattere** e resta verde anche quando quel testo, a
   schermo, esce mozzato: la larghezza è un numero fisso nel `Designer` e nessuno la confronta

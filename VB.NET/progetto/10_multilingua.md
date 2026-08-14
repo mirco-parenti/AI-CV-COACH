@@ -64,6 +64,11 @@ tutto il resto.
 - L'email di candidatura (cap. 07) segue la lingua dei documenti, oggetto compreso:
   il suo prompt è unico e **parametrico per lingua**, come la rifinitura (non ha
   varianti `.it`/`.en`).
+  *Costruito a T6 (2026-08-14), quel «parametrico» è risultato ancora più semplice: il
+  prompt non riceve nessun parametro di lingua — scrive «nella stessa lingua della
+  lettera», che è l'unica cosa che ha davanti. La lingua sta già nel contenuto, e
+  chiederla a parte avrebbe creato un secondo posto da tenere d'accordo col primo. Da
+  provare quando T7 porterà i documenti in inglese: l'email dovrà seguirli da sé.*
 - I nomi dei file generati dichiarano la lingua quando è inglese
   (`CV_Mirco_Parenti_EN_...`, cap. 05.6).
 

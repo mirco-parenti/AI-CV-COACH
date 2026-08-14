@@ -368,7 +368,7 @@ segno che vale la pena aver scritto — il bottone del dialogo è dovuto crescer
 per contenere l'etichetta, e la fascia più lunga peggiora la sovrapposizione a finestra
 stretta già annotata in `in_sospeso.md` (diario Step 2.15).*
 
-### T6 — Le email (F5 completo)
+### T6 — Le email (F5 completo) — ✔ **CHIUSA il 2026-08-14**
 Composizione con allegati suggeriti (inclusa la scansione della cartella documenti,
 cap. 05.2); scrittura del file `.eml` con intestazione `X-Unsent`; conferma dell'avvenuto
 invio da parte dell'utente e aggiornamento del registro.
@@ -378,6 +378,40 @@ quindi niente pannello di configurazione del server né password di posta da cus
 **Collaudo:** un'`.eml` generata, aperta in un programma di posta vero e spedita da lì,
 con allegati integri; verifica che la chiave API non compaia né su disco in chiaro né
 nei log.
+
+*Com'è andata (2026-08-14).* La tappa è cominciata **saldando quattro debiti** di
+`in_sospeso.md`, e tre servivano proprio qui: la cartella dati usa-e-getta (`--dati`), con
+cui tutto il resto è stato collaudato senza mettere in gioco i dati veri; la **fascia dei
+comandi che va a capo**, che ha retto il bottone in più di P7 e ha chiuso una
+sovrapposizione arrivata a 676 px; il **filtro per stelle** e l'**esportazione del
+registro**, promessi dal cap. 07.3 fin dal primo rilascio.
+
+Poi i tre pezzi della tappa. **Il messaggio**: `email_candidatura` (Pool 1.04) accorcia la
+✉️ lettera già scritta invece di rifarne una, `Documenti/ScrittoreEml` scrive a mano il
+file MIME con `X-Unsent` — niente librerie, e tre trappole pagate: CRLF, intestazioni
+ASCII con l'oggetto accentato da codificare, nome dell'allegato in forma RFC 2231 — e
+**P7** mette insieme destinatario, oggetto, corpo e allegati, salvando la bozza in
+`email.json`. Il **Pool 1.05**, poche ore dopo, corregge un esempio che contraddiceva la
+sua regola: *in un'istruzione l'esempio pesa più della regola*. **La chiave API**: cifrata
+in `segreti.bin` con la protezione dati di Windows, chiesta in una finestra al primo
+avvio, rifacibile con `--chiave` (cap. 11.3) — ed è il debito che T3 aveva assegnato qui.
+**La cartella documenti**: letta, classificata con una sola chiamata, confermata
+dall'utente in una finestra, e da lì gli attestati compaiono fra gli allegati, spenti
+(cap. 05.2).
+
+Il **collaudo di tappa è passato per metà, e la metà mancante non è del codice.** Fatto:
+il file `.eml` prodotto dall'applicazione vera è stato validato da un **lettore di posta
+indipendente** — intestazioni, `X-Unsent`, corpo integro, e l'attestato preso dalla
+cartella dell'utente **identico byte per byte**; la classificazione ha riconosciuto **nove
+file su nove** (PDF compresi, dal solo nome); e della chiave si è verificato che su disco
+non compaia in chiaro — il file comincia con la firma di DPAPI — né nella diagnostica, che
+la mostra come `sk-ant-…1234`. Non fatto: **aprire l'`.eml` in un programma di posta vero
+e spedirlo**, perché il client installato su questa postazione senza un account
+configurato non apre niente. Sta in `in_sospeso.md` e tocca a Mirco, sulla sua posta.
+
+**Fatto:** **598 collaudi verdi** senza rete (erano 478), versione **0.3.026**, Pool
+**1.05**. Restano indietro, dichiarate: il destinatario proposto dall'annuncio, la porta
+«qui c'è tutto» del profilo, lo stato `esito` col follow-up. **T7 può iniziare.**
 
 ### T7 — Multilingua e qualità (F4 completo)
 Varianti `en` dei prompt di generazione; campo `lingua` nell'analisi; prompt di

@@ -1583,3 +1583,121 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Ho scritto prima il capitolo, poi il codice.** Cap. 11.5 e cap. 03: perimetro, cosa resta, livello della conferma. Poi il codice ha fatto quello che c'era scritto. È la regola del progetto, e su una funzione che cancella dati è la volta in cui conviene di più.
 
 💡 *Mia intuizione / scelta ragionata* — La cosa che mi porto è che questo bottone non ha aggiunto una capacità: ha **reso visibile una separazione che c'era già**. Profilo di qua, candidature di là, in due cartelle diverse, fin da quando ho deciso dove mettere i file — per ordine, non per prudenza. Il giorno in cui ho voluto poter buttare l'uno e tenere l'altro, quella scelta di ordine è diventata una scelta di potere: se il CV base fosse finito dentro la cartella di una candidatura, oggi «elimina il profilo» sarebbe stata una funzione da scrivere a mano, file per file, con la certezza di dimenticarne uno. Le decisioni di dove mettere le cose non si pagano quando si prendono: si incassano anni dopo, quando qualcuno chiede qualcosa che allora non esisteva.
+
+### Step 2.17 — Quattro debiti prima di cominciare
+
+*Prima di aprire T6 sono andato a rileggere `in_sospeso.md`, che è la regola: a inizio tappa si guarda se qualcosa si può chiudere adesso. Ne ho trovate quattro che si potevano chiudere subito, e tre di loro T6 le avrebbe rese più care — non impossibili, più care. Le ho fatte tutte e quattro prima di scrivere una riga della tappa nuova.*
+
+**Cosa ho fatto**
+- **`--dati`, la cartella di prova.** L'applicazione partiva sempre da `%APPDATA%\TrovaLavoro`, e provare una funzione che cancella voleva dire rischiare i miei dati veri. Ora un argomento sulla riga di comando la sposta in blocco su un'altra radice. Tre cose la tengono onesta: **si vede** (una cartella diversa da quella di sempre è dichiarata nel titolo della finestra e nella barra di stato), **non impedisce l'avvio** (una radice illeggibile ripiega sulla predefinita dicendolo, un argomento sconosciuto si segnala e si scavalca) e lo ha imparato anche lo strumento di collaudo.
+- **La fascia dei comandi che va a capo.** Il difetto che mi ero annotato due volte, peggiorandolo due volte: alla larghezza minima le due file di bottoni si incontravano in mezzo, fino a **676 px** di bottoni sopra altri bottoni. Adesso la fascia si comporta come qualunque barra di comandi — se le due file non ci stanno insieme vanno su righe separate, e una riga troppo lunga si spezza ancora. L'area dei dati cede lo spazio, non la leggibilità dei comandi.
+- **La stessa geometria, in un posto solo.** Scrivendo la fascia per il Profilo mi sono accorto che quella disposizione era **la quinta copia** della stessa cosa: Home, Profilo, Opportunità, Dialogo e Documenti se la disponevano ognuno per conto suo. `FasciaDeiComandi` adesso possiede la geometria; i pannelli dichiarano solo quello che sanno loro — quali comandi stanno a sinistra, quali a destra, quale è critico.
+- **Il filtro per stelle.** Il cap. 07.3 prometteva una coda filtrabile «per stato e stelle»: a T5c avevo fatto la metà sullo stato. La tendina dice **«almeno N»** e non «N», perché chi ha una coda lunga chiede quali valgono da 3 in su. E i due filtri si intersecano invece di sostituirsi: rispondono a domande diverse.
+- **L'export del registro.** In CSV per il foglio di calcolo, in markdown per leggerlo. Esce **quello che è a schermo**, filtrato e ordinato com'è: la forma leggibile si porta il proprio perimetro in cima (data, filtri, «3 di 12»), così una vista non si scambia per l'archivio intero.
+- **Il banco.** Da 478 a **514 collaudi** verdi, in cinque passaggi.
+
+**Cosa ho imparato**
+- **Un difetto che si aggrava da solo va chiuso, non riannotato.** Quella sovrapposizione l'avevo scritta tre volte in `in_sospeso.md`, e ogni volta con un numero più grande: 310, 410, 676. Non peggiorava perché nessuno ci badava — peggiorava **perché il programma cresceva**, e ogni bottone nuovo la spingeva avanti. Un debito così non aspetta il momento buono: se lo lasci lì, il momento buono si allontana da solo.
+- **Cinque copie della stessa geometria erano cinque occasioni di sbagliare.** Nessuna delle cinque era rotta. Ma la sesta lo sarebbe stata, e il difetto lo avrei visto solo in un pannello — quello dove qualcuno aveva aggiunto un bottone.
+- **Un file che esce dall'applicazione ha due lettori diversi.** Il CSV lo apre un programma, il markdown lo legge una persona: al primo una frase di intestazione **rompe la tabella**, al secondo serve per non credere di avere tutto. La stessa informazione, due destini opposti.
+
+**Dove ho faticato / cosa non era ovvio**
+- **Excel legge l'UTF-8 con la codepage di sistema.** Un CSV corretto si apriva con «perché» diventato «perchÃ©» su ogni riga. Servono due cose che non c'entrano niente col contenuto: il **punto e virgola** come separatore (Excel usa quello di elenco di Windows) e il **segno d'ordine dei byte** in testa al file. Sono dettagli da impianto idraulico, e decidono se il file si apre dritto o storto.
+- **Le stelle mancanti non sono zero.** Nell'export ho lasciato la cella **vuota**: zero vorrebbe dire confrontata e senza valore, che non è la stessa cosa di non ancora confrontata. È la stessa distinzione dell'anti-invenzione, applicata a un foglio di calcolo.
+
+**Cosa ho deciso e perché**
+- **Ho chiuso i debiti prima, non dopo.** Avrei potuto cominciare T6 e infilarli in mezzo. Ma `--dati` mi serviva **durante** T6 per provare senza rischiare, e la fascia dei comandi doveva reggere il bottone nuovo che T6 avrebbe aggiunto a P7: farli dopo voleva dire farli due volte.
+- **La riga di comando cresce, quindi l'ignoto si scavalca.** T8 aggiungerà `--mcp`. Un eseguibile che rifiuta di partire per una parola in più è peggio di uno che spiega e prosegue.
+
+💡 *Mia intuizione / scelta ragionata* — La cosa che mi porto è che `in_sospeso.md` ha fatto il suo mestiere per la prima volta sul serio. Non è un elenco di rimpianti: è la lista delle cose che **so** di dover fare, e leggerla a inizio tappa ha cambiato l'ordine del lavoro invece di produrre solo un po' di senso di colpa. Tre di quei quattro debiti sono diventati strumenti della tappa nuova — la cartella usa-e-getta con cui l'ho collaudata, la fascia che ha retto il bottone in più. Un debito pagato al momento giusto non è una spesa: è un attrezzo che ti ritrovi in mano.
+
+### Step 2.18 — T6: l'email che nasce dalla lettera, e un esempio che smentiva la sua regola
+
+*L'ultimo miglio: da qui la candidatura o parte o resta una cartella di file. Il capitolo 7 lo avevo scritto mesi fa e diceva già la cosa più importante — che il programma **non spedisce**. Prepara un messaggio e lo consegna al mio programma di posta, dove sono già autenticato. Scriverlo è stato più facile che accettarlo.*
+
+**Cosa ho fatto**
+- **Pool 1.04, due prompt nuovi.** `email_candidatura` prende la ✉️ lettera **già generata** e la accorcia: profilo → lettera → email, e ogni anello stringe invece di aggiungere. `classifica_documenti` smista una cartella di file in `cv`, `attestato`, `lettera`, `altro` — serve agli allegati, ed è il pezzo che ho usato due step più avanti.
+- **Un attrezzo per il rito del bump.** Il comando «Sigilla pool» sta nelle Impostazioni, che sono di T9, ma i prompt si toccano da T2: `strumenti/sigilla-pool` chiama **lo stesso codice** con cui il caricatore verifica le impronte, così la regola delle impronte resta in un posto solo.
+- **Il file `.eml`, scritto a mano.** Niente librerie: `MailMessage` di .NET sa consegnare un messaggio a un server SMTP ma non salvarlo come file. Il messaggio esce con l'intestazione **`X-Unsent`**, che i programmi di posta riconoscono e aprono come una finestra di composizione pronta per «Invia».
+- **Il pannello P7.** Destinatario (vuoto se l'annuncio non ne portava uno: il programma non lo inventa mai), oggetto, corpo e allegati da spuntare, con il PDF già acceso e il DOCX spento. La bozza si salva in `email.json`, e riaprendola **l'AI non viene disturbata**.
+- **Pool 1.05, poche ore dopo.** La prima email vera ha fatto vedere un difetto in tre parole: il prompt vietava di dare del tu all'azienda e due sezioni più giù ne dava un esempio che lo faceva — *«In allegato **trovi** il mio CV»*. Il modello ha seguito l'esempio, e per giunta l'ha storpiato: *«In allegato **trovo** il mio CV»*.
+- **Il banco.** Da 514 a **539 collaudi** verdi, di cui 13 sul solo formato del messaggio.
+
+**Cosa ho imparato**
+- **In un'istruzione l'esempio pesa più della regola.** Se i due si contraddicono vince l'esempio, perché è la cosa concreta da imitare. Da oggi, quando rileggo un prompt, comincio dagli esempi e mi chiedo se uno di loro stia insegnando l'opposto di quel che c'è scritto sopra.
+- **Tre trappole MIME che l'italiano di ogni giorno non incontra.** Le righe finiscono con CRLF; le intestazioni sono ASCII, quindi un oggetto accentato va codificato o arriva a pezzi; un allegato dal nome accentato vuole la forma RFC 2231 accanto a quella semplice. E un a capo dentro l'oggetto farebbe leggere come corpo tutto quello che segue — l'AI può produrlo, quindi si appiattisce.
+- **Il vantaggio di collaudare un file che è testo.** Ogni promessa fatta al formato si può rileggere: intestazioni, `X-Unsent`, confini delle parti, allegati. Tredici collaudi non sono un lusso, sono la cosa più facile della tappa.
+- **Gli a capo che Windows non mostra.** L'AI scrive `\n`, e una casella multiriga li fa vedere solo se sono CRLF: il messaggio compariva tutto attaccato — «Cordiali saluti,Mirco Parenti» — e chi lo rilegge crede che sia stato scritto così. Visto sull'applicazione vera, non al banco.
+
+**Dove ho faticato / cosa non era ovvio**
+- **Il messaggio non appartiene alla fila.** La pipeline di T4 si percorre da sé fino ai documenti. L'email no: chiede a chi mandare, quali allegati, e se spedire. Un passo che aspetta delle scelte non sta dentro una fila automatica, e ho tenuto il compositore **accanto** alla pipeline invece che dentro.
+- **Il `.eml` che si allegava a sé stesso.** Alla seconda preparazione il messaggio scritto la prima volta è un file come gli altri nella cartella dei documenti: senza escluderlo finiva dentro la copia successiva, e ogni giro raddoppiava.
+- **Una `MessageBox` in un banco aspetta per sempre.** «L'ho spedita» chiede conferma, e quella conferma non si può collaudare. Ho staccato l'**atto** dalla domanda: la conferma sta nel bottone, quel che succede dopo un sì sta in un metodo suo — che il banco può chiamare.
+
+**Cosa ho deciso e perché**
+- **Nessun bottone «Invia», e non è una rinuncia.** L'invio con utente e password si sta chiudendo ovunque: Microsoft ha spento l'autenticazione di base su SMTP, Google ha annunciato di voler togliere le password per le app. Rientrare vorrebbe dire OAuth 2.0, cioè un progetto a sé — registrazione dell'applicazione presso ogni provider, finestra di consenso, rinnovo dei permessi. In cambio: **nessuna password di posta da custodire**, che è anche la ragione per cui la chiave API è rimasta l'unico segreto del programma.
+- **La bozza si salva, perché qui l'utente scrive davvero.** È l'unico punto della candidatura in cui le parole sono sue: riaprirla domani non deve voler dire ricominciare, e riscriverle sopra con una chiamata all'AI sarebbe il modo peggiore di essere utili.
+- **Delle spunte mi fido, dei file no.** Rientrando in P7 l'elenco si rifà dai file che ci sono **adesso** su disco, e dalla bozza si riprendono solo le spunte: un documento cancellato nel frattempo non torna in vita perché un elenco lo nominava.
+
+💡 *Mia intuizione / scelta ragionata* — Il difetto del Pool 1.05 mi ha insegnato più della funzione intera. Avevo scritto una regola chiara e un esempio comodo, e il modello ha imitato l'esempio: non perché sia distratto, ma perché **un esempio è più concreto di un divieto**. È esattamente quello che farebbe una persona che impara un mestiere guardando. Da allora ho un metodo in più per rileggere un prompt — leggerlo come lo leggerebbe qualcuno che deve *fare* quella cosa, non qualcuno che deve *capirla* — e la conferma che il collaudo vero non è il banco: quel difetto è saltato fuori alla prima email scritta sul serio, con il mio nome in fondo.
+
+### Step 2.19 — La chiave che non stava più in una variabile d'ambiente
+
+*Da T2 la chiave dell'API la leggevo da una variabile d'ambiente. Va benissimo per me, che apro un terminale; non vuol dire niente per chiunque altro apra l'eseguibile con un doppio clic. Era un debito assegnato a T6 da un anno di calendario e da due tappe, e il collaudo di tappa lo chiede espressamente: che la chiave non compaia in chiaro né su disco né nei log.*
+
+**Cosa ho fatto**
+- **`segreti.bin`, cifrato da Windows.** La chiave vive nella cartella dati, cifrata con la **protezione dati di Windows** e legata all'account che l'ha salvata: quel file copiato su un altro PC, o letto da un altro utente, non si apre. Nessuna crittografia inventata da me, e nessun pacchetto in più — sta già dentro .NET per le applicazioni Windows.
+- **Una finestrella al primo avvio.** Se la chiave non c'è, prima ancora che i pannelli si colleghino al motore, l'applicazione la chiede: dice a cosa serve, dove si prende, e che resta su questo computer. La casella è mascherata, con una spunta per rileggere quel che si è incollato.
+- **«Non adesso» è una risposta.** Chi rimanda entra lo stesso: profilo, candidature e documenti si vedono, e restano spente le sole funzioni che chiamano l'AI.
+- **Tre posti dove cercarla, in ordine.** Quella dichiarata da chi avvia (che è la porta del banco), poi il file cifrato, poi la variabile d'ambiente di sempre. E una **nota all'avvio che dice da dove è arrivata**, con la chiave mascherata: `sk-ant-…1234`.
+- **`--chiave` per rifarla.** Le Impostazioni sono di T9: finché non ci sono, riavviare con questo argomento fa ricomparire la finestra anche quando una chiave c'è già.
+- **Il banco.** Da 539 a **566 collaudi** verdi.
+
+**Cosa ho imparato**
+- **«Alla prima chiamata all'AI» non poteva esistere.** Era la mia idea di partenza: chiedere la chiave quando serve. Ma senza chiave i pannelli **spengono i bottoni** che chiamano l'AI — quindi non c'è nessun bottone da premere che faccia scattare la richiesta. L'unico posto possibile era l'avvio, e me l'ha detto il codice che avevo già scritto io mesi fa.
+- **Su una finestra mai mostrata, `Visible` è sempre falso.** Vale per i controlli figli, e me ne sono accorto perché il **layout** ne dipendeva: la riga «adesso ne è salvata una» non riservava mai il suo spazio, perché il calcolo avveniva nel costruttore — cioè proprio quando la finestra non è ancora a video. Lo stato voluto e lo stato visibile sono due cose diverse, e per il layout serve il primo.
+- **E un bottone di una finestra mai mostrata non si lascia premere.** `PerformClick` vuole un controllo selezionabile. È la stessa lezione di «l'ho spedita», arrivata da un'altra porta: l'**atto** va staccato dal gesto, se lo si vuole collaudare.
+- **Un `testhost` sopravvissuto blocca la compilazione dopo.** Se il banco viene interrotto a metà, il processo che lo faceva girare resta vivo e tiene bloccata la libreria: il giro successivo fallisce con dieci tentativi di copia e un errore che parla di file bloccati, e sembra un guasto del progetto. È un avanzo del giro di prima, e adesso sta scritto nel README dello strumento.
+
+**Dove ho faticato / cosa non era ovvio**
+- **Chi vince fra il file e la variabile.** Ci ho ragionato più del previsto. Ho messo il **file davanti**, perché è la volontà più recente dell'utente — l'ha digitata lui nell'applicazione — mentre la variabile è l'eredità di T2 e resta per lo sviluppo. Il rischio è la sorpresa muta: «ho cambiato la variabile e non succede niente». Per questo la provenienza finisce nel resoconto d'avvio.
+- **Una chiave sulla riga di comando resterebbe scritta.** `--chiave` **non** prende un valore: se qualcuno lo passa lo stesso, si scarta dicendolo — e senza ripeterlo nell'avviso, perché quell'avviso finisce nella barra di stato, cioè sotto gli occhi di chiunque guardi lo schermo.
+- **Il file che c'è ma non si apre.** Non è un «non ce l'ho»: è il caso del file copiato da un altro PC, e l'utente quel file lo vede su disco e lo crede buono. Torna come caso a parte e diventa un avviso che dice il perché.
+
+**Cosa ho deciso e perché**
+- **Nessuna prova della chiave.** Verificarla vorrebbe dire spendere una chiamata mentre l'utente sta ancora entrando, e comunque non distinguerebbe una chiave sbagliata da una rete che non c'è. Della **forma** dico quel che vedo — le chiavi di Anthropic cominciano per `sk-ant-` — ma avverto senza bloccare: chi ne ha una fatta in un altro modo la sa usare meglio di me.
+- **Se il salvataggio fallisce, la chiave vale per la sessione.** Disco pieno o cartella in sola lettura: l'utente l'ha data per lavorare adesso, e perderla in silenzio sarebbe la reazione peggiore. Glielo dico, e vado avanti.
+- **Niente pannello Impostazioni adesso.** Sarebbe stato il posto naturale, ed è di T9. Una finestra e un argomento della riga di comando bastano, e non lasciano un pannello a metà da riprendere.
+
+💡 *Mia intuizione / scelta ragionata* — Mi porto via una prova su me stesso, più che sul codice. Ho scritto la finestrella con l'idea di chiederla «quando serve», e il programma mi ha risposto di no: i bottoni che chiamano l'AI erano già spenti, quindi quel momento non sarebbe mai arrivato. Non l'ho scoperto ragionando — l'ho scoperto **rileggendo una regola che avevo scritto io** a T3, che i pannelli spengono ciò che non si può fare. Le decisioni vecchie continuano a decidere per te molto tempo dopo, e la differenza tra scoprirlo prima o dopo aver scritto il codice è tutta lì.
+
+### Step 2.20 — I documenti che ho già, e quali di loro allegare
+
+*Il pezzo che chiude T6, ed è quello a cui tenevo di più: una candidatura non è solo il CV che il programma ha appena scritto. Sono anche gli attestati che ho in una cartella da anni — il patentino del muletto, l'HACCP, il corso sicurezza — e che a mandarli tutti insieme non li legge nessuno.*
+
+**Cosa ho fatto**
+- **La cartella si registra una volta.** «Documenti da allegare…» in P7 chiede dove tengo i miei documenti; il percorso finisce in `documenti.json`, ed è l'unico posto del programma che contiene un percorso **fuori** dalla cartella dati — quella cartella è mia e sta dove voglio io.
+- **La lettura.** File dei formati che l'applicazione sa leggere, nella cartella e nelle sottocartelle di **primo livello**; per ognuno nome, data, dimensione e un **assaggio** delle prime righe dove il disco lo concede.
+- **Una sola chiamata all'AI** per tutta la cartella: il prompt propone per ogni file se è un CV, un attestato, una lettera o altro, e dice il perché in una riga.
+- **La conferma è mia.** Una finestra mostra l'elenco con categoria e motivo; scelgo una riga, cambio la voce dalla tendina, e quella correzione **resta**: le riletture successive non ci ripassano sopra. Da lì «Conferma», oppure «Fai rileggere la cartella», oppure «Cambia cartella».
+- **Gli attestati fra gli allegati, spenti.** Compaiono in fondo all'elenco di P7, marcati «(dai tuoi documenti)», da spuntare uno per uno.
+- **Un contatore che finalmente può muoversi.** Nella Home mancava quello delle **inviate**, e il commento nel codice diceva perché: «lo aggiungerà la tappa che lo fa salire». Quella tappa era questa, e me ne sono accorto rileggendo il capitolo 07 per l'«aggiorna-tutto» — cioè dal documento, non dal codice.
+- **Il banco e il campo.** Da 566 a **598 collaudi** verdi; e sul campo, con la chiave vera, **nove file su nove** classificati giusti — compresi i tre attestati, la busta paga e un rapporto tecnico finiti dove dovevano. L'attestato spuntato è finito nel messaggio **identico byte per byte**.
+
+**Cosa ho imparato**
+- **L'assaggio dei PDF costerebbe una trascrizione a testa.** Il disco non basta a leggere un PDF: ci vuole l'AI, una chiamata per file. In una cartella di documenti i PDF sono quasi tutto, quindi sarebbero quindici chiamate per smistare della carta. Ho deciso di **non assaggiarli** e di farli giudicare dal nome — e sul campo ha funzionato: «Attestato_HACCP_2019.pdf» non ha bisogno di essere aperto.
+- **Un prompt che sa dire «non basta» vale più di uno che indovina.** L'avevo scritto in `classifica_documenti` prima ancora di avere il codice che lo chiama, e nella prova si è visto nei motivi: *«assaggio non disponibile ma la nomenclatura è inequivocabile»*. È una frase che dice **su cosa** ha deciso, e a me serve esattamente quella per correggerlo a colpo d'occhio.
+- **Il modello dati era già pronto da tre giorni.** La bozza dell'email sapeva già distinguere un allegato «della candidatura» da uno «dei documenti», e sapeva già ricomporne il percorso: l'avevo scritto a P7, quando la cartella documenti non esisteva ancora. Trovarselo fatto è il premio di aver seguito il capitolo invece di scrivere il minimo che serviva quel giorno.
+
+**Dove ho faticato / cosa non era ovvio**
+- **Quanti file mandare.** Una cartella con trecento documenti farebbe scoppiare il prompt. Ho messo un tetto a sessanta — ma la cosa che conta non è il numero: è che quel che resta fuori **si dica**. Un elenco troncato in silenzio si legge come «nella cartella non c'era altro».
+- **La griglia con la tendina dentro ogni riga non l'ho fatta.** Sarebbe stato il modo ovvio di correggere una categoria, e sarebbe stato l'unico controllo del suo genere in tutta l'applicazione: da vestire, da collaudare e da spiegare. Ho usato quello che c'è già ovunque — una lista in vista dettagli — con una tendina sotto che agisce sulla riga scelta.
+- **La finestra di scelta cartella non l'ho potuta premere io.** Lo strumento di collaudo sa rispondere alla scelta di un *file*, non di una *cartella*: sono due finestre diverse e la seconda non espone la casella che il primo cerca. Ho registrato la cartella scrivendo il file di configurazione a mano e ho provato tutto il resto del giro; quel bottone resta da premere a mano, e sta scritto fra i limiti dello strumento.
+
+**Cosa ho deciso e perché**
+- **Gli attestati arrivano spenti.** Quali provino qualcosa **per questo annuncio** lo so solo io, e allegare a un'azienda tutti i certificati che possiedo è il modo di far leggere nessuno. Il programma me li mette a portata di mano; a sceglierli sono io.
+- **Quello che l'AI mette in «altro» non si propone.** Una busta paga non deve poter finire in un'email per sbaglio. Se sbaglia categoria, il posto per correggerla è la finestra di conferma — non l'elenco degli allegati.
+- **Dei nomi mi fido, dei file no.** L'elenco su disco dice cosa c'era l'ultima volta; a dire cosa c'è adesso è solo il disco. Un attestato cancellato nel frattempo non compare fra le cose allegabili, ed è quello che uno si aspetta di aver fatto cancellandolo.
+- **Nessun file viene copiato.** La raccolta è un elenco di nomi con una categoria: gli allegati si leggono da dove sono. Se sposto la cartella, il programma lo dice invece di allegare fantasmi.
+
+💡 *Mia intuizione / scelta ragionata* — La cosa che mi porto è la differenza fra **classificare** e **capire**. Il prompt che smista quella cartella non legge i miei documenti per sapere cosa contengono: li guarda da fuori — nome, data, forma delle prime righe — e dice a quale mucchio appartengono. È un lavoro modesto, e proprio per questo costa una chiamata sola e si può correggere con due clic. Avevo cominciato immaginando che l'AI dovesse *leggere* ogni file per meritarsi la risposta; e invece la risposta giusta era chiedere molto meno, dichiarare quel che non si è visto, e lasciare l'ultima parola a chi quei documenti li ha in mano.

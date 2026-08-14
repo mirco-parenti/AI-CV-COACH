@@ -187,6 +187,10 @@ VB.NET/
   oggi il server MCP di collaudo (cap. 09.1), che compila, fa girare il banco e prova
   l'applicazione vera. Stanno nel repo perché sono ripetibili e servono su tutt'e due le
   postazioni, non perché si distribuiscano.
+  *Da T6 (2026-08-14) ce n'è un secondo, **`strumenti/sigilla-pool`**: rigenera le impronte
+  del manifest chiamando lo stesso codice del caricatore (cap. 04.5). Esiste perché quel
+  comando, nel disegno, vive nelle Impostazioni — cioè a T9 — mentre i prompt si toccano
+  da T2. Come l'altro, è un progetto a sé che non entra in nessuna pubblicazione.*
 - Build di sviluppo da Visual Studio (o `dotnet build` da riga di comando Windows);
   collaudi con `dotnet test` da `VB.NET/src` (cap. 14).
 - Lo script `publish.bat` in `src/` produce l'exe di rilascio con i parametri del

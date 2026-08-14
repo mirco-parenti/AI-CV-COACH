@@ -14,6 +14,7 @@ TrovaLavoro\
 ├── ricerche.json          preferenze di ricerca, ricerche salvate e tabella dei portali
 ├── taratura.json          soglia, pesi e limiti del match (v. 11.6)
 ├── modelli.json           mappa livello → modello AI (v. 11.6, cap. 02.5)
+├── documenti.json         la cartella documenti dell'utente e cosa c'è dentro (cap. 05.2)
 ├── segreti.bin            chiave API Anthropic, cifrata (v. 11.3)
 ├── profilo\
 │   ├── profilo.json       il profilo corrente (fonte di verità unica)
@@ -99,8 +100,18 @@ TrovaLavoro\
   sconosciuto viene detto e ignorato, perché la riga di comando cresce con le tappe (T8
   aggiungerà `--mcp`, cap. 09) e un eseguibile che rifiuta di partire per una parola in
   più è peggio di uno che spiega.
+- **Un file che punta fuori di qui** *(T6, 2026-08-14)*: `documenti.json` conserva il
+  **percorso assoluto** della cartella documenti dell'utente (cap. 05.2), ed è l'unico
+  della cartella dati a farlo. È una necessità, non una svista — quella cartella è sua e
+  sta dove vuole lui, spesso su un altro disco — ma porta due conseguenze dichiarate: se
+  la cartella sparisce l'applicazione **lo dice all'avvio** invece di proporre allegati che
+  non si aprono, e un backup ripristinato su un altro PC troverà quel percorso senza
+  senso. Dentro non ci sono copie di file: solo nomi (relativi alla cartella) con la loro
+  categoria.
 - Formati **JSON con rientri**, leggibili in qualsiasi editor: l'utente è padrone dei
-  suoi dati anche senza l'app.
+  suoi dati anche senza l'app. *Con un'eccezione, e si vede dal nome*: `segreti.bin` è
+  l'unico file **non leggibile**, ed è il punto — gli altri sono dati dell'utente, quello
+  è una credenziale (v. 11.3).
 
 ## 11.2 Cosa esce dal PC (e cosa no)
 
@@ -132,6 +143,40 @@ silenziosi.
 - I backup JSON (11.4) **non contengono i segreti**, di proposito: dopo un ripristino
   la chiave API va reinserita. Un backup che gira via email o chiavetta non deve poter
   bruciare la chiave.
+
+### Com'è stato costruito (T6, 2026-08-14)
+
+- **Nessun pacchetto in più.** La protezione dati di Windows sta già dentro .NET per le
+  applicazioni desktop: cifrare la chiave non ha aggiunto una sola dipendenza al vincolo
+  «un solo exe» (cap. 01.6). Al blob si aggiunge un'entropia fissa dell'applicazione, che
+  **non è un segreto** — sta nell'eseguibile come starebbe in qualunque programma — e non
+  serve a irrobustire: fa fallire subito la decifratura di un file che non è nostro.
+- **Dove si digita, finché le Impostazioni non ci sono.** Una finestra al **primo avvio**,
+  prima che i pannelli si colleghino al motore (cap. 03.4). «Alla prima chiamata all'AI»
+  sarebbe stato più elegante e non poteva funzionare: senza chiave i pannelli spengono i
+  bottoni che la userebbero, quindi quella prima chiamata non sarebbe mai arrivata.
+  Per **sostituirla** si riavvia con `--chiave`, che fa ricomparire la finestra anche
+  quando una chiave c'è già; l'argomento **non prende un valore**, perché una chiave
+  scritta sulla riga di comando resterebbe nella cronologia della shell e nell'elenco dei
+  processi.
+- **Tre posti dove cercarla, in ordine dichiarato**: quella indicata da chi avvia (la
+  porta del banco), il file cifrato, la variabile d'ambiente `ANTHROPIC_API_KEY` che
+  reggeva da T2. Il file viene prima perché è la volontà più recente dell'utente; perché
+  la precedenza non diventi una sorpresa muta — «ho cambiato la variabile e non succede
+  niente» — la **provenienza** finisce nel resoconto d'avvio, con la chiave mascherata.
+- **Il file che c'è ma non si apre non è un «non ce l'ho».** È il caso di `segreti.bin`
+  copiato su un altro PC o salvato da un altro account di Windows: DPAPI lo rifiuta, ed è
+  quel che promette. L'utente però quel file lo vede su disco e lo crede buono, quindi
+  quel caso torna **a parte** e diventa un avviso che spiega perché va reinserita.
+- **Senza chiave si entra lo stesso.** «Non adesso» è una risposta legittima: profilo,
+  candidature e documenti si leggono, e restano spente le sole funzioni che chiamano l'AI
+  (cap. 03.8). Un programma che non parte finché non gli si dà una credenziale sarebbe un
+  ricatto, oltre che una bugia sul suo funzionamento.
+- **La chiave non si prova.** Verificarla costerebbe una chiamata proprio mentre l'utente
+  sta entrando, e comunque non distinguerebbe una chiave sbagliata da una rete che non
+  c'è. Della **forma** si dice quel che si vede — le chiavi di Anthropic cominciano per
+  `sk-ant-` — ma si avverte senza impedire: chi ne ha una fatta in un altro modo la sa
+  usare meglio di noi.
 
 ## 11.4 Backup e ripristino (F7)
 
