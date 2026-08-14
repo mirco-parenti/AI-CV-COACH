@@ -120,17 +120,14 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Da «Elimina profilo» (2026-08-14)
 
-- **L'eliminazione vera non è mai stata premuta sull'applicazione.** Il giro è stato
-  percorso sull'exe fino all'ultimo passo — bottone, finestra di conferma, parola scritta,
-  bottone che si accende — e lì si è **annullato**, perché premere davvero avrebbe
-  cancellato il profilo vero di Mirco con il suo storico. Quello che manca non è il
-  comportamento (13 collaudi lo verificano: l'archivio, la scheda che si svuota, il dialogo
-  dimenticato, il 📄 CV base tolto dalla vista e i documenti delle candidature che restano),
-  ma la **prova dal vivo**. Per farla serve poter avviare l'applicazione su una **cartella
-  dati usa-e-getta**: oggi `avvia_app` usa sempre `%APPDATA%\TrovaLavoro` e l'unico modo
-  sarebbe spostare a mano la cartella vera. Le due strade sono un argomento della riga di
-  comando per la radice dati (che servirà comunque alle Impostazioni, cap. 11.1) o un
-  attrezzo del banco che prepari una cartella finta. *(cap. 11.5; `strumenti/mcp-collaudi/`.)*
+- **Avviare l'applicazione su una cartella dati usa-e-getta.** Oggi l'exe legge sempre
+  `%APPDATA%\TrovaLavoro`, e l'unico modo di provare una funzione distruttiva senza
+  rischiare i dati veri è spostare a mano quella cartella. È il limite che ha costretto
+  l'assistente a fermarsi un passo prima dell'eliminazione vera (poi provata da Mirco sui
+  propri dati, con la copia di sicurezza accanto). Le due strade sono un argomento della
+  riga di comando per la radice dati — che servirà comunque alle Impostazioni, cap. 11.1 —
+  o un attrezzo del banco che prepari una cartella finta.
+  *(cap. 11.1; `strumenti/mcp-collaudi/`.)*
 
 ## Da revisione adversariale (2026-08-09)
 
@@ -149,6 +146,17 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Chiuse
 
+- ✅ **L'eliminazione vera non è mai stata premuta sull'applicazione** *(aperta e chiusa il
+  2026-08-14)*. L'assistente si era fermata un passo prima — bottone premuto, finestra
+  aperta, parola scritta, «Elimina il profilo» acceso, e poi **annullato**, perché
+  dall'altra parte c'era il profilo vero. L'ha premuto **Mirco**, lanciando l'applicazione
+  con `avvia-demo.bat` sui propri dati, con la copia di sicurezza pronta accanto. Il
+  risultato è quello che il cap. 11.5 promette e i collaudi verificavano al banco: la
+  cartella `profilo\` sparita per intero — profilo, storico, `cv_base.json` e la sua
+  `out\` — e **tutto il resto al suo posto**, le sei candidature nelle loro cartelle, il
+  `registro.json` non riscritto, i dati di navigazione intatti. La prova che mancava era
+  questa; resta aperto il modo di rifarla **senza** rischiare i dati veri (voce qui sopra).
+  *(cap. 11.5; diario Step 2.16.)*
 - ✅ **La coda dell'opportunità non si riapre** *(aperta il 2026-08-10 da T4, chiusa il
   2026-08-13 da T5c)*. La vista che mancava è la **Home**: la coda mostra tutte le
   candidature con stelle, stato e provenienza, e da lì una si riapre col doppio clic o col
