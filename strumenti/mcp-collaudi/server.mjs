@@ -178,16 +178,36 @@ const ATTREZZI = [
     name: "avvia_app",
     description:
       "Avvia TrovaLavoro.exe con la chiave API caricata dal .env del prototipo, e restituisce lo stato " +
-      "del processo. Usa la cartella dati predefinita (%APPDATA%\\TrovaLavoro): finché l'applicazione " +
-      "non sa ricevere una radice diversa, provare «da zero» vuol dire spostare quella cartella.",
-    inputSchema: { type: "object", properties: {}, additionalProperties: false },
-    async esegui() {
+      "del processo. Senza «dati» lavora sulla cartella vera (%APPDATA%\\TrovaLavoro); con «dati» " +
+      "l'applicazione parte su una radice usa-e-getta, che è il modo di provare le funzioni che " +
+      "cancellano senza mettere in gioco i dati di Mirco.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        dati: {
+          type: "string",
+          description:
+            "La cartella dati su cui far vivere l'applicazione (opzione --dati). Si può dare alla " +
+            "maniera di WSL (/mnt/c/…): viene tradotta. Se non esiste, la crea l'applicazione.",
+        },
+      },
+      additionalProperties: false,
+    },
+    async esegui({ dati }) {
       if (!existsSync(ESEGUIBILE)) {
         return testo("L'eseguibile non c'è: compila prima (attrezzo «compila»).", true);
       }
 
       const chiave = await chiaveApi();
       if (!chiave) return testo(`Chiave API non trovata in ${CHIAVE_DA}.`, true);
+
+      // L'exe è un programma Windows: una radice alla maniera di WSL non la
+      // capirebbe, e finirebbe per creare una cartella dal nome assurdo accanto a sé.
+      let radice = null;
+      if (dati) {
+        radice = dati.startsWith("/") ? (await esegui(`wslpath -w "${dati}"`)).uscita.trim() : dati;
+        if (!radice) return testo(`Non ho saputo tradurre il percorso «${dati}».`, true);
+      }
 
       // WSLENV è ciò che fa arrivare una variabile d'ambiente da WSL a un exe Windows.
       const ambiente = {
@@ -196,7 +216,7 @@ const ATTREZZI = [
       };
 
       // Staccato dal server: l'applicazione resta viva anche fra una chiamata e l'altra.
-      const figlio = spawn(ESEGUIBILE, [], {
+      const figlio = spawn(ESEGUIBILE, radice ? ["--dati", radice] : [], {
         cwd: dirname(ESEGUIBILE),
         env: { ...process.env, ...ambiente },
         detached: true,
@@ -209,7 +229,8 @@ const ATTREZZI = [
 
       return testo(
         `Avviata (pid del lanciatore ${figlio.pid}).\n${coda(viva.uscita, 5)}` +
-          (chiave ? "\nChiave API: caricata." : "")
+          (chiave ? "\nChiave API: caricata." : "") +
+          (radice ? `\nCartella dati: ${radice} (la finestra lo dice nel titolo).` : "")
       );
     },
   },

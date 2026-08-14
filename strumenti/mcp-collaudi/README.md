@@ -55,7 +55,7 @@ comando **uccide sé stesso** prima di arrivare al server.
 |---|---|
 | `compila` | Compila TrovaLavoro in Release. Chiude prima l'applicazione, che altrimenti tiene bloccato l'exe. |
 | `collaudi` | Fa girare il banco (`dotnet test`); con `filtro` ne esegue solo una parte. |
-| `avvia_app` | Avvia TrovaLavoro.exe con la chiave API presa dal `.env` del prototipo. |
+| `avvia_app` | Avvia TrovaLavoro.exe con la chiave API presa dal `.env` del prototipo. Con `dati` lo fa partire su una **cartella usa-e-getta** (`--dati`), che è il modo di provare ciò che cancella senza toccare i dati veri. |
 | `stato_app` · `chiudi_app` | Se è viva; e la chiude. |
 | `schermata` | Riprende la finestra dell'applicazione (o tutto il desktop) e restituisce il PNG. |
 | `controlli` | Elenca bottoni, caselle e schede dicendo per ciascuno se è **acceso o SPENTO**; dei menù a tendina dice anche **la voce che mostrano**, e marca `[pagina]` quel che è del sito aperto nel browser. |

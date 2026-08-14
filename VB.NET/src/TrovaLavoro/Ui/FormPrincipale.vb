@@ -31,6 +31,24 @@ Public Class FormPrincipale
     ''' <summary>Il motore montato all'avvio: da qui in avanti lo usano i pannelli.</summary>
     Private _contesto As ContestoApp
 
+    ''' <summary>Quel che è stato chiesto dalla riga di comando (cap. 11.1).</summary>
+    Private ReadOnly _argomenti As ArgomentiAvvio
+
+    ''' <summary>
+    ''' Il costruttore senza argomenti serve alla finestra di progettazione, che non ha
+    ''' nessuna riga di comando da passare: là dentro vale la cartella dati di sempre.
+    ''' </summary>
+    Public Sub New()
+        Me.New(Nothing)
+    End Sub
+
+    Public Sub New(argomenti As ArgomentiAvvio)
+
+        InitializeComponent()
+        _argomenti = If(argomenti, ArgomentiAvvio.Leggi(Nothing))
+
+    End Sub
+
     ''' <summary>
     ''' L'unico motore del browser dell'applicazione (v. <see cref="MotoreBrowser"/>).
     ''' Nasce qui, come la stampante, perché è di qui che scendono i due usi che lo
@@ -51,8 +69,9 @@ Public Class FormPrincipale
     Private _bottoneDelRitorno As Button
 
     Private Sub FormPrincipale_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        _contesto = ContestoApp.Monta()
+        _contesto = ContestoApp.Monta(_argomenti.RadiceDati)
         MostraLoStatoDellAvvio()
+        DichiaraLaCartellaDati()
 
         ' La barra di navigazione è fatta di bottoni neutri (livello 0, cap. 03.3): li
         ' veste StileApp, che sa anche come si spegne un bottone.
@@ -439,7 +458,44 @@ Public Class FormPrincipale
         Dim etichettaPool As String = If(_contesto.Libreria IsNot Nothing,
                                          _contesto.Libreria.Etichetta, "Pool —")
         lblVersione.Text = $"Ver. {Versione.Numero} · {etichettaPool}"
-        lblStato.Text = If(_contesto.Avviso, "Pronto")
+        lblStato.Text = If(AvvisoDellAvvio(), "Pronto")
+    End Sub
+
+    ''' <summary>
+    ''' Tutto ciò che l'utente deve sapere appena aperta la finestra, in un ordine che
+    ''' non è casuale: prima <b>dove</b> si sta lavorando — se non è il posto di sempre,
+    ''' cambia il senso di tutto il resto — poi quel che la riga di comando non ha potuto
+    ''' rispettare, e infine quel che il motore ha trovato montandosi.
+    ''' </summary>
+    Private Function AvvisoDellAvvio() As String
+
+        Dim voci As New List(Of String)
+
+        If Not _contesto.Cartella.SullaRadicePredefinita Then
+            voci.Add($"Cartella dati: {_contesto.Cartella.Radice}")
+        End If
+
+        If _argomenti.Avviso IsNot Nothing Then voci.Add(_argomenti.Avviso)
+        If _contesto.Avviso IsNot Nothing Then voci.Add(_contesto.Avviso)
+
+        If voci.Count = 0 Then Return Nothing
+        Return String.Join(" · ", voci)
+
+    End Function
+
+    ''' <summary>
+    ''' Una cartella dati diversa da quella di sempre si dichiara <b>nel titolo</b>
+    ''' (cap. 11.1). La barra di stato lo dice già, ma la barra di stato è una riga che il
+    ''' primo messaggio successivo si porta via: il titolo resta lì per tutta la sessione,
+    ''' ed è quello che si legge tornando alla finestra un'ora dopo, quando ci si è
+    ''' dimenticati con quale comando la si era aperta.
+    ''' </summary>
+    Private Sub DichiaraLaCartellaDati()
+
+        If _contesto.Cartella.SullaRadicePredefinita Then Return
+
+        Me.Text = $"{Me.Text} — dati in «{_contesto.Cartella.Radice}»"
+
     End Sub
 
     Private Sub FormPrincipale_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize

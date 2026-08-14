@@ -56,6 +56,27 @@ Namespace Dati
         End Sub
 
         <TestMethod>
+        Public Sub LaRadiceDiSempreSiRiconosce()
+            ' Da qui dipende se l'applicazione dichiara nel titolo di lavorare altrove
+            ' (cap. 11.1): dirlo quando non serve stancherebbe, non dirlo quando serve
+            ' farebbe scambiare una cartella di prova per quella dei dati veri.
+            Assert.IsTrue(CartellaDati.Predefinita().SullaRadicePredefinita, "la predefinita è sé stessa")
+
+            Dim altrove As New CartellaDati(Path.Combine(Path.GetTempPath(), "cartella-dati-altrove"))
+            Assert.IsFalse(altrove.SullaRadicePredefinita, "una cartella di prova non è quella di sempre")
+        End Sub
+
+        <TestMethod>
+        Public Sub LaBarraFinaleNonFaUnAltraCartella()
+            ' «…\TrovaLavoro» e «…\TrovaLavoro\» sono la stessa cartella ma non la stessa
+            ' stringa: senza normalizzare, avviare sulla propria cartella scrivendola con
+            ' la barra finale farebbe comparire l'avviso «stai lavorando altrove».
+            Dim conBarra As New CartellaDati(CartellaDati.RadicePredefinita & Path.DirectorySeparatorChar)
+
+            Assert.IsTrue(conBarra.SullaRadicePredefinita, "è sempre lei")
+        End Sub
+
+        <TestMethod>
         Public Sub UnaRadiceVuotaVieneRifiutata()
             ' Una radice vuota produrrebbe percorsi relativi alla cartella di lavoro:
             ' meglio l'errore subito che file dell'utente sparsi accanto all'eseguibile.

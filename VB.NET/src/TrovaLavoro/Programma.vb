@@ -1,5 +1,6 @@
 Imports System.Threading
 Imports System.Windows.Forms
+Imports TrovaLavoro.Motore
 
 ''' <summary>
 ''' Punto d'ingresso dell'applicazione: prepara l'ambiente grafico e apre la
@@ -8,8 +9,13 @@ Imports System.Windows.Forms
 ''' </summary>
 Friend Module Programma
 
+    ''' <param name="argomenti">
+    ''' La riga di comando, letta da <see cref="ArgomentiAvvio"/> (cap. 11.1). Qui non si
+    ''' decide niente su di essa: gli argomenti arrivano alla finestra, che è l'unica a
+    ''' sapere come si mostra un avviso a chi guarda.
+    ''' </param>
     <STAThread>
-    Friend Sub Main()
+    Friend Sub Main(argomenti As String())
         Application.SetHighDpiMode(HighDpiMode.SystemAware)
         Application.EnableVisualStyles()
         Application.SetCompatibleTextRenderingDefault(False)
@@ -21,7 +27,7 @@ Friend Module Programma
         Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException)
         AddHandler Application.ThreadException, AddressOf MostraErroreImprevisto
 
-        Application.Run(New FormPrincipale())
+        Application.Run(New FormPrincipale(ArgomentiAvvio.Leggi(argomenti)))
     End Sub
 
     Private Sub MostraErroreImprevisto(mittente As Object, e As ThreadExceptionEventArgs)

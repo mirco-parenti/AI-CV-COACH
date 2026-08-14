@@ -85,6 +85,20 @@ TrovaLavoro\
   (`profilo.rotto-<data>.json`) prima che qualunque «Salva» possa sovrascriverlo, e il
   messaggio dice dove sta la copia. La promessa «il file resta lì da recuperare» ora è
   mantenuta anche se l'utente preme un tasto qualsiasi.
+- **La cartella dati si può dire all'avvio** *(2026-08-14)*: `TrovaLavoro.exe --dati
+  "D:\prova"` fa vivere tutta l'applicazione in un'altra radice. Nasce da un bisogno di
+  collaudo — provare una funzione che **cancella** senza mettere in gioco i dati veri
+  (cap. 11.5) — ma è la stessa porta che servirà alle Impostazioni, dove la cartella è
+  dichiarata «modificabile» fin dalla prima riga di questo capitolo. Tre cose la rendono
+  onesta invece che pericolosa. **Si vede**: quando la radice non è quella predefinita
+  l'applicazione lo dice sempre, nel **titolo della finestra** e nella barra di stato
+  all'avvio — scambiare una cartella di prova per quella vera è precisamente l'errore che
+  questa comodità renderebbe possibile. **Non impedisce di partire**: una radice
+  illeggibile ripiega sulla predefinita dicendolo (cap. 03.8), come già faceva chiunque
+  passasse una radice storta. **Non pretende di conoscere il futuro**: un argomento
+  sconosciuto viene detto e ignorato, perché la riga di comando cresce con le tappe (T8
+  aggiungerà `--mcp`, cap. 09) e un eseguibile che rifiuta di partire per una parola in
+  più è peggio di uno che spiega.
 - Formati **JSON con rientri**, leggibili in qualsiasi editor: l'utente è padrone dei
   suoi dati anche senza l'app.
 

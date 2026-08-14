@@ -60,6 +60,29 @@ Namespace Dati
             Return New CartellaDati(RadicePredefinita)
         End Function
 
+        ''' <summary>
+        ''' Se questa mappa lavora nella cartella di sempre (cap. 11.1). Serve a chi deve
+        ''' <b>dirlo</b>: un'applicazione avviata su un'altra radice — con <c>--dati</c>,
+        ''' o un domani dalle Impostazioni — non deve poter essere scambiata per quella
+        ''' che tiene i dati veri.
+        ''' </summary>
+        Public ReadOnly Property SullaRadicePredefinita As Boolean
+            Get
+                Return String.Equals(SenzaBarraFinale(Radice),
+                                     SenzaBarraFinale(RadicePredefinita),
+                                     StringComparison.OrdinalIgnoreCase)
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' Il percorso in forma confrontabile. <c>C:\dati</c> e <c>C:\dati\</c> sono la
+        ''' stessa cartella, ma non la stessa stringa: senza questo, una radice scritta
+        ''' con la barra finale sembrerebbe diversa dalla predefinita anche quando è lei.
+        ''' </summary>
+        Private Shared Function SenzaBarraFinale(percorso As String) As String
+            Return Path.TrimEndingDirectorySeparator(Path.GetFullPath(percorso))
+        End Function
+
         ''' <summary>I numeri del calcolo delle stelle (cap. 11.6).</summary>
         Public ReadOnly Property FileTaratura As String
             Get
