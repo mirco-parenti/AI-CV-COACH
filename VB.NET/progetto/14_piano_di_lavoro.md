@@ -399,17 +399,30 @@ avvio, rifacibile con `--chiave` (cap. 11.3) — ed è il debito che T3 aveva as
 dall'utente in una finestra, e da lì gli attestati compaiono fra gli allegati, spenti
 (cap. 05.2).
 
-Il **collaudo di tappa è passato per metà, e la metà mancante non è del codice.** Fatto:
-il file `.eml` prodotto dall'applicazione vera è stato validato da un **lettore di posta
-indipendente** — intestazioni, `X-Unsent`, corpo integro, e l'attestato preso dalla
-cartella dell'utente **identico byte per byte**; la classificazione ha riconosciuto **nove
-file su nove** (PDF compresi, dal solo nome); e della chiave si è verificato che su disco
-non compaia in chiaro — il file comincia con la firma di DPAPI — né nella diagnostica, che
-la mostra come `sk-ant-…1234`. Non fatto: **aprire l'`.eml` in un programma di posta vero
-e spedirlo**, perché il client installato su questa postazione senza un account
-configurato non apre niente. Sta in `in_sospeso.md` e tocca a Mirco, sulla sua posta.
+Il **collaudo di tappa è passato per intero**, in due riprese. Dalla sessione: il file
+`.eml` prodotto dall'applicazione vera validato da un **lettore di posta indipendente** —
+intestazioni, `X-Unsent`, corpo integro, e l'attestato preso dalla cartella dell'utente
+**identico byte per byte**; la classificazione che riconosce **nove file su nove** (PDF
+compresi, dal solo nome); e la chiave che su disco non compare in chiaro — il file comincia
+con la firma di DPAPI — né nella diagnostica, che la mostra come `sk-ant-…1234`.
 
-**Fatto:** **598 collaudi verdi** senza rete (erano 478), versione **0.3.026**, Pool
+La sera stessa, **da Mirco sui dati veri**, la parte che dalla sessione non si poteva fare:
+la chiave digitata e salvata nella finestra del primo avvio; la **sua** cartella di
+documenti personali indicata al dialogo di Windows — tredici file, i due CV riconosciuti e
+tutto il resto in «altro», carte d'identità comprese, quindi **nessun documento personale
+fra gli allegabili**; e la candidatura a Delta Sistemi **aperta nel nuovo Outlook e spedita
+da lì**, arrivata con i suoi allegati. Un falso allarme lungo la strada — «non è stato
+possibile allegare i file» — si è rivelato una **sessione dell'account scaduta** e non un
+difetto del formato (cap. 07.2).
+
+*E ha stanato due difetti veri, chiusi con il loro collaudo (diario Step 2.21):* la Home
+restava a «generata» dopo un invio, perché **chi cambia uno stato deve annotarlo
+nell'indice** e P7 non lo faceva (cap. 07.3); e il **banco apriva il programma di posta**
+dell'utente, perché premeva il bottone che scrive il messaggio *e lo consegna* — ora le due
+cose sono separate. Sono difetti che 598 collaudi verdi non potevano vedere: uno viveva fra
+due pannelli, l'altro era il banco stesso.
+
+**Fatto:** **599 collaudi verdi** senza rete (erano 478), versione **0.3.027**, Pool
 **1.05**. Restano indietro, dichiarate: il destinatario proposto dall'annuncio, la porta
 «qui c'è tutto» del profilo, lo stato `esito` col follow-up. **T7 può iniziare.**
 

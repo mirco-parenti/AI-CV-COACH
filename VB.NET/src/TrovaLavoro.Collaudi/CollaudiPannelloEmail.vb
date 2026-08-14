@@ -206,7 +206,7 @@ Namespace Ui
                     Casella(pannello, "txtDestinatario").Text = "lavoro@rossi.it"
 
                     Assert.IsTrue(Bottone(pannello, "btnPreparaEmail").Enabled, "c'è un messaggio da preparare")
-                    Bottone(pannello, "btnPreparaEmail").PerformClick()
+                    pannello.PreparaIlMessaggio()
 
                     Dim scritti As String() = Directory.GetFiles(
                         Path.Combine(candidatura.Cartella, ArchivioOpportunita.NomeCartellaOut), "*.eml")
@@ -233,7 +233,7 @@ Namespace Ui
 
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
                     Casella(pannello, "txtDestinatario").Text = "lavoro@rossi.it"
-                    Bottone(pannello, "btnPreparaEmail").PerformClick()
+                    pannello.PreparaIlMessaggio()
 
                     Dim riletta As Opportunita = contesto.Opportunita.Carica(candidatura.Cartella)
                     Dim bozza As BozzaEmail = BozzaEmail.DaJson(riletta.Email)
@@ -268,6 +268,35 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function DichiararlaSpeditaLoDiceAncheAllIndice() As Task
+
+            ' Difetto visto sull'applicazione vera il 2026-08-15, al collaudo di tappa: la
+            ' cartella diceva «inviata» e la Home continuava a mostrare «generata». L'indice
+            ' si fida di sé stesso finché l'insieme delle cartelle combacia (cap. 07.3), e un
+            ' cambio di stato dentro una cartella non lo fa scattare: ad annotarlo dev'essere
+            ' chi lo cambia, come già fanno P4 quando scarta e P6 quando genera.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ScriviDocumenti(candidatura, "CV_Luca_Rossi.pdf")
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    contesto.Registro.Salva(contesto.Registro.Carica())
+
+                    pannello.SegnaComeInviata()
+
+                    Dim voce As VoceRegistro = contesto.Registro.Carica().Trova(candidatura.Cartella)
+
+                    Assert.IsNotNull(voce, "la candidatura è nell'indice")
+                    Assert.AreEqual(StatoOpportunita.Inviata, voce.Stato,
+                                    "e l'indice sa che è partita, senza aspettare una rigenerazione")
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Async Function IlMessaggioGiaScrittoNonSiAllegaASeStesso() As Task
 
             Dim compositore As New CompositoreFinto
@@ -278,7 +307,7 @@ Namespace Ui
                     ScriviDocumenti(candidatura, "CV_Luca_Rossi.pdf")
 
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
-                    Bottone(pannello, "btnPreparaEmail").PerformClick()
+                    pannello.PreparaIlMessaggio()
 
                     ' Si rientra: adesso nella cartella c'è anche il .eml appena scritto.
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
@@ -366,7 +395,7 @@ Namespace Ui
                     elenco.SetItemChecked(1, True)
 
                     Casella(pannello, "txtDestinatario").Text = "lavoro@rossi.it"
-                    Bottone(pannello, "btnPreparaEmail").PerformClick()
+                    pannello.PreparaIlMessaggio()
 
                     Dim scritti As String() = Directory.GetFiles(
                         Path.Combine(candidatura.Cartella, ArchivioOpportunita.NomeCartellaOut), "*.eml")

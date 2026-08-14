@@ -69,6 +69,25 @@ Il formato `.eml` è **aperto e verificabile**: niente dipendenze, funziona con 
 client, e — questo è il punto che ha deciso il resto — **non chiede una password a
 nessuno**.
 
+### La prova sul campo (2026-08-14)
+
+Il collaudo che il cap. 14 chiedeva a questa tappa — «un'`.eml` generata, aperta in un
+programma di posta vero e spedita da lì, con allegati integri» — è stato fatto da Mirco
+sui **dati veri**, e la promessa ha retto: il **nuovo Outlook** ha riconosciuto `X-Unsent`
+e ha mostrato il messaggio come **bozza pronta**, con destinatario, oggetto e corpo; da lì
+è partito, ed è arrivato con i suoi allegati.
+
+Una cosa merita di restare scritta, perché la prossima volta farà risparmiare un'ora. Al
+primo tentativo Outlook ha risposto: *«Non è stato possibile allegare i file seguenti…
+Riprova più tardi»*. Sembrava un difetto del formato, e non lo era: il file, riletto con un
+lettore di posta indipendente, aveva le intestazioni giuste e i due PDF **identici byte per
+byte** agli originali. A mancare era la **sessione dell'account** dentro Outlook, scaduta —
+il nuovo Outlook, per allegare a un messaggio importato, deve parlare col servizio, e senza
+autenticazione quel caricamento fallisce con un messaggio che parla d'altro. Rifatto
+l'accesso, gli allegati sono saliti e l'invio è andato. *Un errore del client che nomina i
+nostri file si legge come un errore nostro: prima di toccare il formato conviene verificare
+che il client sia in condizione di funzionare.*
+
 **Perché il `.msg` è uscito.** Avrebbe prodotto esattamente lo stesso risultato:
 l'`.eml` con `X-Unsent`, aperto in Outlook classico, mostra già la finestra di
 composizione pronta con destinatario e allegati. In cambio sarebbe costato
@@ -148,6 +167,16 @@ dal primo rilascio — **fatta il 2026-08-14**, v. più sotto.
   schema c'è ma dall'interfaccia non si raggiunge, il **promemoria di follow-up**, e il
   **destinatario nella voce di registro** — oggi vive nella bozza `email.json` della
   candidatura, non nell'indice.)*
+- **Chi cambia uno stato lo annota anche nell'indice** *(regola resa esplicita il
+  2026-08-15, dopo un difetto)*. `registro.json` si fida di sé stesso finché **l'insieme
+  delle cartelle** combacia: un cambiamento *dentro* una cartella non lo fa scattare, e
+  rileggere lo stato di ogni cartella a ogni apertura vorrebbe dire rigenerare sempre —
+  cioè buttare via il motivo per cui l'indice esiste. Perciò annota chi cambia: P4 quando
+  scarta, P6 quando genera, **P7 quando segna «inviata»**. Quest'ultimo mancava, ed è
+  saltato fuori al collaudo di tappa sui dati veri: la cartella diceva `inviata` e la Home
+  continuava a mostrare «generata», col contatore fermo a zero. La verità era comunque sul
+  disco — l'indice buttato si è ricostruito giusto — ma una promessa mantenuta solo dove
+  l'utente non guarda non è mantenuta (cap. 12.7).
 - **Lo scarto è terminale, e chiede conferma.** Da uno scarto non si torna indietro
   dall'interfaccia, ma la cartella **resta su disco**: si scarta, non si cancella — la
   conferma lo dice con parole sue, invece di un generico «sei sicuro?». Chi ci ripensa

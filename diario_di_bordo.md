@@ -1701,3 +1701,30 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Nessun file viene copiato.** La raccolta è un elenco di nomi con una categoria: gli allegati si leggono da dove sono. Se sposto la cartella, il programma lo dice invece di allegare fantasmi.
 
 💡 *Mia intuizione / scelta ragionata* — La cosa che mi porto è la differenza fra **classificare** e **capire**. Il prompt che smista quella cartella non legge i miei documenti per sapere cosa contengono: li guarda da fuori — nome, data, forma delle prime righe — e dice a quale mucchio appartengono. È un lavoro modesto, e proprio per questo costa una chiamata sola e si può correggere con due clic. Avevo cominciato immaginando che l'AI dovesse *leggere* ogni file per meritarsi la risposta; e invece la risposta giusta era chiedere molto meno, dichiarare quel che non si è visto, e lasciare l'ultima parola a chi quei documenti li ha in mano.
+
+### Step 2.21 — Il collaudo di T6 in mano mia, e i due difetti che ha stanato
+
+*T6 era chiusa, fusa e pushata. Restavano due prove che dalla sessione non si potevano fare: aprire l'`.eml` in un programma di posta vero e spedirlo, e premere il bottone che sceglie la cartella dei documenti. Le ho fatte io, sui miei dati veri, la sera stessa. Sono servite: hanno trovato due difetti che 598 collaudi verdi non avevano visto.*
+
+**Cosa ho fatto**
+- **La chiave, salvata per davvero.** Doppio clic sull'exe — senza il lanciatore, così la variabile d'ambiente non c'era — e la finestra ha chiesto la chiave. Incollata, salvata. Su disco: `segreti.bin`, 326 byte, che comincia con la firma della protezione dati di Windows e **non contiene «sk-ant» in chiaro**. Da lì in poi l'applicazione parte col doppio clic.
+- **La mia cartella dei documenti personali**, indicata al dialogo di Windows. Tredici file, sottocartelle comprese: i **due CV riconosciuti** (col più recente indicato), e tutto il resto in «altro» — carte d'identità, codici fiscali, NASPI, documenti dello stage. La cosa che conta è quella che **non** è successa: nessun documento personale è finito fra gli allegabili.
+- **La candidatura a Delta Sistemi spedita davvero**, al mio indirizzo. Aperta nel nuovo Outlook come bozza pronta, con destinatario, oggetto, corpo e allegati; premuto Invia; ricevuta.
+- **Due difetti trovati e chiusi**, più una falsa pista.
+- **Il banco**: 599 verdi, versione 0.3.027.
+
+**Cosa ho imparato**
+- **Un errore del client che nomina i miei file si legge come un errore mio.** Al primo tentativo Outlook ha detto: «Non è stato possibile allegare i file… Riprova più tardi», elencando i miei due PDF. Sembrava il formato. Non lo era: il file, riletto con un lettore indipendente, aveva le intestazioni giuste e i PDF **identici byte per byte**. A mancare era la **sessione dell'account** dentro Outlook, scaduta — il nuovo Outlook, per allegare a un messaggio importato, deve parlare col servizio. Rifatto l'accesso, tutto è partito. *Prima di toccare il formato, guarda se il client è in condizione di funzionare.*
+- **Un indice si fida di sé stesso finché nessuno gli dice il contrario.** Dopo l'invio la cartella diceva `inviata` e la Home mostrava ancora «generata», col contatore a zero: `registro.json` controlla che **l'insieme delle cartelle** combaci, non cosa c'è dentro. P4 e P6 lo annotavano a ogni cambio di stato; P7 no — l'avevo dimenticato scrivendo T6.
+- **Un collaudo che apre un programma vero non è un collaudo, è un'invasione.** Sullo schermo c'erano cinque finestre di Outlook con «non è stato possibile aprire *Email_Rossi_S_p_A…*»: le apriva il **banco**, che premeva «Prepara l'email» — bottone che scrive il file *e lo apre* — su cartelle temporanee poi cancellate. Ogni giro del banco, una finestra.
+
+**Dove ho faticato / cosa non era ovvio**
+- **La riga di comando che non trova niente.** Il percorso dell'eseguibile mi era stato dato relativo alla radice del repo: l'ho copiato e incollato, e non c'era. Da qui una regola che vale sempre: **i percorsi che devo usare io si scrivono completi**, da `C:\Users\…` in giù.
+- **Il registro non si ripara da solo.** Corretto il codice, la mia riga restava sbagliata: l'indice si rigenera solo quando *non combacia*. È bastato cancellarlo — è un file rigenerabile per costruzione, e riaprendo l'applicazione si è ricostruito giusto, con «1 inviata». Il capitolo lo prometteva; è la prima volta che quella promessa è servita davvero.
+
+**Cosa ho deciso e perché**
+- **Ho corretto invece di annotare.** Erano difetti piccoli e a portata di mano, e uno di loro rendeva falsa la prima cosa che l'utente guarda. Entrambi hanno ora il loro collaudo — e quello dell'indice l'ho **provato al contrario**, disattivando la correzione per vedere il test fallire: un collaudo che non morde non è una prova.
+- **L'atto separato dal gesto, di nuovo.** «Prepara l'email» fa due cose: scrive il file e lo consegna al programma di posta. Ho estratto la prima in un metodo suo, che è quello che chiama il banco; l'effetto verso il mondo esterno resta nel gestore del bottone, dove nessun collaudo lo tocca. È la terza volta in questa tappa che la stessa lezione torna utile.
+- **Ho buttato il registro invece di riscriverlo a mano.** Modificare un file dell'utente per aggiustare un mio errore sarebbe stato peggio del difetto: l'indice è dichiaratamente rigenerabile, e ho usato quella porta.
+
+💡 *Mia intuizione / scelta ragionata* — Il conto della serata: 598 collaudi automatici verdi, due difetti veri trovati in venti minuti di uso vero. Non è una critica al banco — quei due erano fuori dalla sua portata per costruzione: uno viveva nel dialogo fra due pannelli che il banco prova separatamente, l'altro **era** il banco. È la conferma di una cosa che sospettavo da T4: il collaudo automatico difende da ciò che si rompe, l'uso vero rivela ciò che non è mai stato collegato. Servono tutti e due, e il secondo lo può fare solo chi il programma lo usa per il suo lavoro — cioè io.

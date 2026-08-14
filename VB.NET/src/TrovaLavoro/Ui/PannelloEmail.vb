@@ -416,23 +416,8 @@ Public Class PannelloEmail
     ''' </summary>
     Private Sub btnPreparaEmail_Click(sender As Object, e As EventArgs) Handles btnPreparaEmail.Click
 
-        If _candidatura Is Nothing Then Return
-
-        Dim percorso As String = PercorsoDelMessaggio()
-
-        Try
-            ScrittoreEml.Scrivi(percorso,
-                                MittenteDalProfilo(), _bozza.Destinatario,
-                                _bozza.Oggetto, _bozza.Corpo, AllegatiDaMandare())
-
-        Catch ex As Exception When TypeOf ex Is IOException OrElse
-                                   TypeOf ex Is UnauthorizedAccessException
-
-            Racconta($"Non sono riuscita a scrivere il messaggio: {ex.Message}", StileApp.Pericolo)
-            Return
-        End Try
-
-        SalvaLaBozza()
+        Dim percorso As String = PreparaIlMessaggio()
+        If percorso Is Nothing Then Return
 
         Try
             Process.Start(New ProcessStartInfo(percorso) With {.UseShellExecute = True})
@@ -452,6 +437,42 @@ Public Class PannelloEmail
         AggiornaComandi()
 
     End Sub
+
+    ''' <summary>
+    ''' Scrive il messaggio e salva la bozza, <b>senza aprirlo</b>; restituisce il percorso
+    ''' del file, o <c>Nothing</c> se non si è potuto scrivere (e in quel caso lo dice).
+    ''' </summary>
+    ''' <remarks>
+    ''' Sta in un metodo suo per la stessa ragione di <see cref="SegnaComeInviata"/>: è
+    ''' l'unico modo di collaudarlo. Il bottone fa **due** cose — scrive il file e lo
+    ''' consegna al programma di posta — e un banco che preme il bottone apre il client
+    ''' dell'utente per davvero, su un file di prova che poi cancella. Visto sul serio il
+    ''' 2026-08-15: cinque finestre di Outlook rimaste aperte su un «Email_Rossi_S_p_A…»
+    ''' che nel frattempo non esisteva più. L'effetto verso il mondo esterno resta nel
+    ''' gestore del bottone, dove nessun collaudo lo tocca.
+    ''' </remarks>
+    Public Function PreparaIlMessaggio() As String
+
+        If _candidatura Is Nothing Then Return Nothing
+
+        Dim percorso As String = PercorsoDelMessaggio()
+
+        Try
+            ScrittoreEml.Scrivi(percorso,
+                                MittenteDalProfilo(), _bozza.Destinatario,
+                                _bozza.Oggetto, _bozza.Corpo, AllegatiDaMandare())
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+
+            Racconta($"Non sono riuscita a scrivere il messaggio: {ex.Message}", StileApp.Pericolo)
+            Return Nothing
+        End Try
+
+        SalvaLaBozza()
+        Return percorso
+
+    End Function
 
     ''' <summary>
     ''' L'utente dichiara di aver spedito: è l'unica prova che il programma può avere
@@ -701,6 +722,33 @@ Public Class PannelloEmail
         End If
 
         _contesto.Opportunita.Salva(_candidatura)
+
+        If avanzaAInviata Then AnnotaNelRegistro()
+
+    End Sub
+
+    ''' <summary>
+    ''' Mette lo stato nuovo anche nell'<b>indice</b> delle candidature, come fanno P4
+    ''' quando scarta e P6 quando genera.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Senza questo, la cartella dice «inviata» e la Home continua a mostrare
+    ''' «generata»: l'indice si fida di sé stesso finché l'insieme delle cartelle combacia,
+    ''' e un cambio di stato dentro una cartella non lo fa scattare (cap. 07.3). La verità
+    ''' resta sul disco, ma quel che l'utente guarda no — e una promessa mantenuta solo
+    ''' dove non si guarda non è mantenuta (cap. 12.7).</para>
+    ''' <para>Il suo <c>Try</c> è separato da quello del salvataggio, come in P4 e P6: un
+    ''' indice che non si lascia scrivere non è una candidatura persa, e dirlo come se lo
+    ''' fosse sarebbe un falso allarme.</para>
+    ''' </remarks>
+    Private Sub AnnotaNelRegistro()
+
+        Try
+            _contesto.Registro.Annota(_candidatura)
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+        End Try
 
     End Sub
 

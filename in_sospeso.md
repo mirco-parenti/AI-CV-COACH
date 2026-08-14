@@ -80,12 +80,6 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Da T6 — le email di candidatura (2026-08-14, alla chiusura)
 
-- **L'`.eml` aperto in un programma di posta vero e spedito da lì.** È la metà mancante del
-  collaudo di tappa dichiarato dal cap. 14: il file è stato validato da un **lettore di
-  posta indipendente** — intestazioni giuste, `X-Unsent`, corpo integro, allegati identici
-  byte per byte — ma «lo apre davvero un client, e da lì parte» è un'altra domanda.
-  Thunderbird è installato su questa postazione e **senza un account configurato non apre
-  niente**, quindi la prova tocca a Mirco, sulla sua posta vera. *(cap. 07.2; cap. 14, T6.)*
 - **Il destinatario proposto dall'annuncio.** Il cap. 07.1 promette: «se l'annuncio conteneva
   un indirizzo, viene proposto». Oggi il campo è **sempre vuoto**, e non per prudenza: il
   prompt `analisi_annuncio` non estrae nessun recapito, quindi non c'è niente da proporre.
@@ -103,12 +97,6 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   **destinatario nella voce di registro**, che oggi vive nella bozza `email.json` della
   candidatura e non nell'indice. Sono tre passi del racconto «a che punto sono», e vanno
   fatti entro la 1.0. *(cap. 07.3; cap. 14, T9.)*
-- **La scelta della cartella documenti, premuta a mano.** Nel giro di collaudo di T6 tutto è
-  stato percorso con lo strumento tranne il `FolderBrowserDialog` di «Documenti da
-  allegare…»: lo strumento sa rispondere alla scelta di un **file**, non di una **cartella**
-  (limite dichiarato nel suo README). La cartella è stata registrata scrivendo
-  `documenti.json` a mano; premere quel bottone e scegliere una cartella vera resta da fare,
-  ed è di due minuti. *(cap. 05.2; `strumenti/mcp-collaudi/`.)*
 
 ## Da revisione adversariale (2026-08-09)
 
@@ -127,6 +115,25 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Chiuse
 
+- ✅ **L'`.eml` aperto in un programma di posta vero e spedito da lì** *(aperta e chiusa il
+  2026-08-14, la sera stessa della tappa)*. Mirco ha percorso il giro sui **dati veri**: la
+  candidatura a Delta Sistemi preparata dall'applicazione, aperta nel **nuovo Outlook** —
+  che ha riconosciuto `X-Unsent` e l'ha mostrata come bozza pronta, con destinatario,
+  oggetto e corpo — e **spedita da lì**, al proprio indirizzo. L'email è arrivata, allegati
+  compresi. Lungo la strada un falso allarme istruttivo: al primo tentativo Outlook ha detto
+  «Non è stato possibile allegare i file… Riprova più tardi». Il file era a posto (validato
+  di nuovo con un lettore indipendente: `X-Unsent`, intestazioni, e i due PDF **identici
+  byte per byte**); a mancare era **la sessione dell'account**, scaduta dentro Outlook — che
+  per allegare un messaggio importato deve parlare col servizio. Rifatto l'accesso, gli
+  allegati sono stati caricati e l'invio è andato. *(cap. 07.2; cap. 14, T6.)*
+- ✅ **La scelta della cartella documenti, premuta a mano** *(aperta e chiusa il
+  2026-08-14)*. Il `FolderBrowserDialog` che lo strumento di collaudo non sa pilotare l'ha
+  premuto Mirco, indicando la **sua** cartella dei documenti personali. Tredici file letti,
+  sottocartelle di primo livello comprese: i due CV riconosciuti (col più recente indicato),
+  e **tutto il resto in «altro»** — carte d'identità, codici fiscali, NASPI, documenti dello
+  stage. La prova ha mostrato la cosa che contava, cioè quella che **non** è successa:
+  nessun documento personale è finito fra gli allegabili di un'email. *(cap. 05.2;
+  `strumenti/mcp-collaudi/`.)*
 - ✅ **La chiave API cifrata (DPAPI)** *(aperta il 2026-08-07 da T3, chiusa il 2026-08-14 da
   T6)*. Vive in `segreti.bin` nella cartella dati, cifrata con la protezione dati di Windows
   e **legata all'account** che l'ha salvata: copiata altrove non si apre. La si digita in una
