@@ -198,6 +198,75 @@ Namespace Ui
         End Sub
 
         <TestMethod>
+        Public Sub IlFiltroPerStelleTieneQuelleDaLiInSu()
+            ' Il cap. 07.3 chiede un elenco filtrabile «per stato e stelle»: lo stato c'era
+            ' da T5c, le stelle no. La domanda vera di chi ha una coda lunga non è «quali
+            ' valgono 3» ma «quali valgono da 3 in su».
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim stelle As ComboBox = Tendina(pannello, "cboStelle")
+
+                    stelle.SelectedItem = "almeno 3 ★"
+                    Assert.AreEqual("Rossi S.p.A.", Coda(pannello).Single().SubItems(1).Text,
+                                    "solo quella da 4,1")
+
+                    stelle.SelectedItem = "almeno 2 ★"
+                    Assert.HasCount(2, Coda(pannello), "anche quella da 2,3")
+
+                    stelle.SelectedItem = "tutte"
+                    Assert.HasCount(3, Coda(pannello), "e senza filtro ci sono tutte")
+                End Sub, AddressOf TreCandidature)
+        End Sub
+
+        <TestMethod>
+        Public Sub IDueFiltriSiSommanoInvecediSostituirsi()
+            ' Sono due domande diverse — a che punto sono, e quanto valgono — e chi le fa
+            ' entrambe si aspetta l'incrocio, non l'ultima delle due.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Tendina(pannello, "cboMostra").SelectedItem = "Generate"
+                    Tendina(pannello, "cboStelle").SelectedItem = "almeno 4 ★"
+                    Assert.AreEqual("Rossi S.p.A.", Coda(pannello).Single().SubItems(1).Text)
+
+                    Tendina(pannello, "cboMostra").SelectedItem = "Da completare"
+                    Assert.IsEmpty(Coda(pannello), "da completare ce n'è una, ma vale 2,3")
+                End Sub, AddressOf TreCandidature)
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaCandidaturaSenzaStelleNonPassaIlFiltro()
+            ' Una candidatura appena catturata non è ancora stata confrontata: non è che
+            ' valga poco, è che non lo sappiamo. Con un filtro sulle stelle non passa — e
+            ' senza, si vede come tutte le altre.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Assert.HasCount(2, Coda(pannello), "senza filtro ci sono entrambe")
+
+                    Tendina(pannello, "cboStelle").SelectedItem = "almeno 1 ★"
+                    Assert.AreEqual("Rossi S.p.A.", Coda(pannello).Single().SubItems(1).Text,
+                                    "quella mai confrontata resta fuori")
+                End Sub,
+                Sub(candidature)
+                    candidature.Salva(Candidatura("Rossi S.p.A.", 10, 4.1, StatoOpportunita.Generata))
+                    candidature.Salva(Candidatura("Neri S.p.A.", 11, Nothing, StatoOpportunita.Nuova))
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub QuandoIFiltriNascondonoQualcosaILContatoreLoDice()
+            ' Una coda che si accorcia senza spiegazione fa credere che una candidatura sia
+            ' sparita. I contatori restano sul totale, ma dicono quante se ne stanno vedendo.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Assert.DoesNotContain("ne vedi", Etichetta(pannello, "lblContatori").Text,
+                                          "senza filtri non c'è niente da spiegare")
+
+                    Tendina(pannello, "cboStelle").SelectedItem = "almeno 3 ★"
+                    Assert.Contains("ne vedi 1 su 3", Etichetta(pannello, "lblContatori").Text)
+                End Sub, AddressOf TreCandidature)
+        End Sub
+
+        <TestMethod>
         Public Sub CliccandoUnIntestazioneSiOrdinaERiCliccandolaSiGira()
             ConPannelloHome(
                 Sub(pannello, contesto)

@@ -26,6 +26,8 @@ Partial Class PannelloHome
         Me.btnApriProfilo = New System.Windows.Forms.Button()
         Me.pnlFiltro = New System.Windows.Forms.Panel()
         Me.lblContatori = New System.Windows.Forms.Label()
+        Me.lblStelle = New System.Windows.Forms.Label()
+        Me.cboStelle = New System.Windows.Forms.ComboBox()
         Me.lblMostra = New System.Windows.Forms.Label()
         Me.cboMostra = New System.Windows.Forms.ComboBox()
         Me.pnlCorpo = New System.Windows.Forms.Panel()
@@ -123,6 +125,8 @@ Partial Class PannelloHome
         'pnlFiltro
         '
         Me.pnlFiltro.Controls.Add(Me.lblContatori)
+        Me.pnlFiltro.Controls.Add(Me.lblStelle)
+        Me.pnlFiltro.Controls.Add(Me.cboStelle)
         Me.pnlFiltro.Controls.Add(Me.lblMostra)
         Me.pnlFiltro.Controls.Add(Me.cboMostra)
         Me.pnlFiltro.Dock = System.Windows.Forms.DockStyle.Top
@@ -137,8 +141,29 @@ Partial Class PannelloHome
         Me.lblContatori.ForeColor = StileApp.TestoPrimario
         Me.lblContatori.Location = New System.Drawing.Point(0, 6)
         Me.lblContatori.Name = "lblContatori"
-        Me.lblContatori.Size = New System.Drawing.Size(700, 20)
+        Me.lblContatori.Size = New System.Drawing.Size(620, 20)
         Me.lblContatori.TabIndex = 0
+        '
+        'lblStelle
+        '
+        Me.lblStelle.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblStelle.Font = StileApp.FontDidascalia
+        Me.lblStelle.ForeColor = StileApp.TestoSecondario
+        Me.lblStelle.Location = New System.Drawing.Point(686, 8)
+        Me.lblStelle.Name = "lblStelle"
+        Me.lblStelle.Size = New System.Drawing.Size(42, 18)
+        Me.lblStelle.TabIndex = 1
+        Me.lblStelle.Text = "Stelle"
+        '
+        'cboStelle
+        '
+        Me.cboStelle.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.cboStelle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cboStelle.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.cboStelle.Location = New System.Drawing.Point(728, 4)
+        Me.cboStelle.Name = "cboStelle"
+        Me.cboStelle.Size = New System.Drawing.Size(140, 23)
+        Me.cboStelle.TabIndex = 2
         '
         'lblMostra
         '
@@ -148,7 +173,7 @@ Partial Class PannelloHome
         Me.lblMostra.Location = New System.Drawing.Point(886, 8)
         Me.lblMostra.Name = "lblMostra"
         Me.lblMostra.Size = New System.Drawing.Size(50, 18)
-        Me.lblMostra.TabIndex = 1
+        Me.lblMostra.TabIndex = 3
         Me.lblMostra.Text = "Mostra"
         '
         'cboMostra
@@ -159,7 +184,7 @@ Partial Class PannelloHome
         Me.cboMostra.Location = New System.Drawing.Point(936, 4)
         Me.cboMostra.Name = "cboMostra"
         Me.cboMostra.Size = New System.Drawing.Size(170, 23)
-        Me.cboMostra.TabIndex = 2
+        Me.cboMostra.TabIndex = 4
         '
         'pnlCorpo
         '
@@ -301,6 +326,8 @@ Partial Class PannelloHome
     Friend WithEvents btnApriProfilo As System.Windows.Forms.Button
     Friend WithEvents pnlFiltro As System.Windows.Forms.Panel
     Friend WithEvents lblContatori As System.Windows.Forms.Label
+    Friend WithEvents lblStelle As System.Windows.Forms.Label
+    Friend WithEvents cboStelle As System.Windows.Forms.ComboBox
     Friend WithEvents lblMostra As System.Windows.Forms.Label
     Friend WithEvents cboMostra As System.Windows.Forms.ComboBox
     Friend WithEvents pnlCorpo As System.Windows.Forms.Panel

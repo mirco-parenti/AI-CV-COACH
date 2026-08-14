@@ -74,6 +74,14 @@ Public Class PannelloHome
     Private Const FiltroGenerate As Integer = 2
     Private Const FiltroScartate As Integer = 3
 
+    ''' <summary>
+    ''' La prima voce del filtro «Stelle»: quella che non filtra niente. Le altre non hanno
+    ''' una costante ciascuna perché <b>sono</b> il loro numero — la voce all'indice 3 è
+    ''' «almeno 3 stelle» — ed è quel che rende la tendina estendibile senza toccare il
+    ''' codice che filtra.
+    ''' </summary>
+    Private Const StelleQualunque As Integer = 0
+
     Private ReadOnly _suggerimenti As New ToolTip()
 
     Private _contesto As ContestoApp
@@ -249,7 +257,7 @@ Public Class PannelloHome
 
         lvwCoda.EndUpdate()
 
-        MostraIContatori()
+        MostraIContatori(quanteSeNeVedono:=lvwCoda.Items.Count)
 
     End Sub
 
@@ -258,7 +266,13 @@ Public Class PannelloHome
     ''' sempre zero finché T6 non arriva, e un contatore che non può muoversi non conta
     ''' niente — lo aggiungerà la tappa che lo fa salire.
     ''' </summary>
-    Private Sub MostraIContatori()
+    ''' <param name="quanteSeNeVedono">
+    ''' Quante righe la coda mostra adesso. I contatori restano sul <b>totale</b> — dicono
+    ''' a che punto si è, non cosa si sta guardando — ma quando i filtri ne nascondono una
+    ''' parte va detto: una coda che si accorcia senza spiegazione fa credere che una
+    ''' candidatura sia sparita.
+    ''' </param>
+    Private Sub MostraIContatori(quanteSeNeVedono As Integer)
 
         If _registro Is Nothing OrElse _registro.Voci.Count = 0 Then
             lblContatori.Text = "Nessuna candidatura, per ora."
@@ -268,10 +282,16 @@ Public Class PannelloHome
         Dim daCompletare As Integer = _registro.Quante(StatoOpportunita.Nuova) +
                                       _registro.Quante(StatoOpportunita.Interessante)
 
-        lblContatori.Text = String.Join(" · ", {
+        Dim voci As New List(Of String) From {
             $"{daCompletare} da completare",
             Contate(_registro.Quante(StatoOpportunita.Generata), "generata", "generate"),
-            Contate(_registro.Quante(StatoOpportunita.Scartata), "scartata", "scartate")})
+            Contate(_registro.Quante(StatoOpportunita.Scartata), "scartata", "scartate")}
+
+        If quanteSeNeVedono < _registro.Voci.Count Then
+            voci.Add($"ne vedi {quanteSeNeVedono} su {_registro.Voci.Count}")
+        End If
+
+        lblContatori.Text = String.Join(" · ", voci)
 
     End Sub
 
@@ -291,8 +311,35 @@ Public Class PannelloHome
 
     End Function
 
-    ''' <summary>Le voci che il filtro «Mostra» lascia passare.</summary>
+    ''' <summary>
+    ''' Le voci che i due filtri lasciano passare: prima lo stato, poi le stelle. Sono due
+    ''' domande diverse — <i>a che punto sono</i> e <i>quanto valgono</i> — e il cap. 07.3
+    ''' le vuole entrambe.
+    ''' </summary>
     Private Function Filtrate() As IEnumerable(Of VoceRegistro)
+
+        Dim minime As Integer? = StelleMinime
+        If minime Is Nothing Then Return PerStato()
+
+        ' Una candidatura non ancora confrontata non ha stelle, e con un filtro sulle
+        ' stelle non passa: non è che valga poco, è che non lo sappiamo ancora. Sparisce
+        ' senza rumore, ed è per questo che i contatori dicono quante se ne stanno vedendo.
+        Return PerStato().Where(Function(v) v.Stelle.HasValue AndAlso v.Stelle.Value >= minime.Value)
+
+    End Function
+
+    ''' <summary>
+    ''' Il minimo di stelle che il filtro lascia passare; <c>Nothing</c> quando non filtra.
+    ''' </summary>
+    Private ReadOnly Property StelleMinime As Integer?
+        Get
+            If cboStelle.SelectedIndex <= StelleQualunque Then Return Nothing
+            Return cboStelle.SelectedIndex
+        End Get
+    End Property
+
+    ''' <summary>Le voci che il filtro «Mostra» lascia passare.</summary>
+    Private Function PerStato() As IEnumerable(Of VoceRegistro)
 
         If _registro Is Nothing Then Return Enumerable.Empty(Of VoceRegistro)()
 
@@ -485,8 +532,12 @@ Public Class PannelloHome
 
     End Sub
 
-    Private Sub cboMostra_SelectedIndexChanged(sender As Object, e As EventArgs) _
-        Handles cboMostra.SelectedIndexChanged
+    ''' <summary>
+    ''' I due filtri fanno la stessa cosa: rifanno la coda e rivedono i comandi — quello
+    ''' che apre una candidatura si spegne se la riga scelta non è più in vista.
+    ''' </summary>
+    Private Sub Filtro_SelectedIndexChanged(sender As Object, e As EventArgs) _
+        Handles cboMostra.SelectedIndexChanged, cboStelle.SelectedIndexChanged
 
         RiempiLaCoda()
         AggiornaComandi()
@@ -575,11 +626,21 @@ Public Class PannelloHome
 
     End Sub
 
-    ''' <summary>Le voci del filtro «Mostra», nell'ordine delle costanti qui sopra.</summary>
+    ''' <summary>
+    ''' Le voci dei due filtri, nell'ordine delle costanti qui sopra. Quelle delle stelle
+    ''' dicono «almeno», che è la domanda vera di chi guarda una coda lunga: non «quali
+    ''' valgono 3» ma «quali valgono <b>da 3 in su</b>».
+    ''' </summary>
     Private Sub RiempiIlFiltro()
 
         cboMostra.Items.AddRange(New Object() {"Tutte", "Da completare", "Generate", "Scartate"})
         cboMostra.SelectedIndex = FiltroTutte
+
+        cboStelle.Items.Add("tutte")
+        For quante As Integer = 1 To StelleDellaScala
+            cboStelle.Items.Add($"almeno {quante} ★")
+        Next
+        cboStelle.SelectedIndex = StelleQualunque
 
     End Sub
 

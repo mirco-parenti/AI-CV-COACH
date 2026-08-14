@@ -113,6 +113,23 @@ dal primo rilascio.
   promessa per il primo rilascio, non per questa tappa, e a T5c avrebbe aggiunto una
   strada di uscita a dei dati che stavano ancora prendendo forma.
 
+### Il filtro per stelle (2026-08-14)
+
+Il filtro promesso qui sopra è **per stato e stelle**: a T5c era arrivata solo la metà
+sullo stato, e la coda si poteva sì ordinare per stelle ma non filtrare. Con sei
+candidature l'ordinamento basta; con sessanta no, ed è quello lo scenario per cui il
+registro esiste.
+
+- La tendina dice **«almeno N ★»**, non «N ★»: la domanda di chi guarda una coda lunga è
+  *quali valgono da 3 in su*, non *quali valgono esattamente 3*.
+- I due filtri **si sommano** invece di sostituirsi: sono due domande diverse — a che
+  punto sono, quanto valgono — e chi le fa entrambe si aspetta l'incrocio.
+- Una candidatura **mai confrontata non ha stelle** e con un filtro attivo non passa: non
+  è che valga poco, è che non lo sappiamo ancora. Perché quella sparizione non sembri una
+  perdita, quando i filtri nascondono qualcosa i contatori aggiungono **«ne vedi 1 su 3»**
+  — i numeri restano sul totale, che è la risposta alla domanda «a che punto sono»; la
+  riga in più risponde a «e perché ne vedo meno».
+
 ## 7.4 Sicurezza e buon senso
 
 - Il programma **non spedisce**: scrive un file e lo consegna al programma di posta
