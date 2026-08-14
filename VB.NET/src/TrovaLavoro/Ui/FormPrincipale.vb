@@ -201,6 +201,20 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
+    ''' Il viaggio contrario: dalla scheda del profilo al browser, perché è lì che si legge
+    ''' una pagina (cap. 06.7). La scelta della strada sta in P2, dove chi vuole un profilo
+    ''' la cerca; l'atto sta in P3, dove c'è il browser — e il pannello, arrivando, dice
+    ''' cosa fare, che è la ragione per cui questa apertura non è quella della barra.
+    ''' </summary>
+    Private Async Sub pnlProfilo_ImportDaSitoRichiesto(sender As Object, e As EventArgs) _
+        Handles pnlProfilo.ImportDaSitoRichiesto
+
+        MostraPannello(pnlRicerca, btnRicerca)
+        Await pnlRicerca.ApriPerIlCvAsync()
+
+    End Sub
+
+    ''' <summary>
     ''' Da dove viene il CV, detto all'utente. Il sito è già quello che il pannello della
     ''' ricerca sa riconoscere; quando non c'è — una pagina locale, un indirizzo strano —
     ''' si dice comunque qualcosa di vero.

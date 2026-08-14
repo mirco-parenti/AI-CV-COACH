@@ -16,17 +16,11 @@ attivo qui sopra resta **solo-futuro** e non induce in errore. Aggiornato con "a
 ## Gap del disegno top-down (Fase B/C)
 
 Componenti previsti dall'architettura ma **non ancora costruiti**, identificati formalmente
-nel disegno top-down. Dei tre individuati, la **2.2.4 (mitigazione)** e la **2.1.2 (import da
-CV)** sono realizzate (vedi «Realizzate»); resta l'ultima fonte di estrazione. Il dettaglio
+nel disegno top-down. **Tutti e tre sono ora realizzati** — la 2.2.4 (mitigazione), la 2.1.2
+(import da CV) e, dal 2026-08-14, la 2.1.3 (il profilo dalla propria pagina): stanno in
+«Realizzate», e questa sezione resta come indice di un elenco che si è svuotato. Il dettaglio
 (cosa entra → esce, complessità, dove si innesta) è in `architettura.md` §8: qui resta solo il
 puntatore.
-- **Estrazione da LinkedIn / sito web (2.1.3)** — fetch di un link pubblico → stesso profilo
-  JSON. Complessità alta. *(2026-06-15 — formalizzato nel disegno top-down; architettura.md §8.)*
-  **Costo rivisto dai fatti** *(2026-08-12)*: con la cattura di T5b il meccanismo c'è già —
-  si legge la pagina che l'utente sta guardando, dopo che si è loggato **come sé** — e il
-  prompt che struttura (`importa_cv`) è indipendente dalla fonte. Non è più «complessità
-  alta»: è poco più di un pulsante, ed è entrata nel piano come **T5d**, coda di T5
-  (cap. 06.7; cap. 14, T5d).
 
 Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annunci insieme)
 — prospettiva futura, non gap dell'MVP. *(architettura.md §8.)*
@@ -217,6 +211,20 @@ pagina, cioè il primo pezzo di programma che tocca il mondo esterno per davvero
   togliere peso alla conferma, che è ciò che rende lo scarto una decisione.
   *(2026-08-12 — decisa aprendo T5c; cap. 07.3; diario Step 2.13.)*
 
+Idee emerse **costruendo T5d** *(2026-08-14)*: la pagina che diventa profilo.
+- **Un import che fonde invece di sostituire.** Oggi ogni import — da file o da pagina —
+  **sostituisce** il profilo intero: è la regola giusta quando la fonte è il proprio CV, ma
+  la pagina di un sito è quasi sempre più povera del CV, e sostituire vuol dire perdere. Sul
+  profilo vero, provato il 2026-08-14, la differenza era netta: dalla pagina è uscita una sola
+  esperienza contro le tre del CV, e nessun recapito, perché LinkedIn quei campi non li
+  pubblica. L'applicazione si comporta onestamente — propone e non salva, e il vecchio profilo
+  resta su disco finché non si preme «Salva» — ma chi non guarda bene può salvare un profilo
+  dimezzato credendo di averlo aggiornato. Il seguito naturale è una **fusione dichiarata**:
+  campo per campo, «questo lo tengo, questo lo aggiungo, questo lo sostituisco», che è poi lo
+  stesso meccanismo differenziale della **sessione di aggiornamento** (flusso D, cap. 12.4) —
+  conviene disegnarli insieme quando arriverà quella. *(2026-08-14 — emersa dal collaudo di
+  T5d sul profilo vero; cap. 06.7, cap. 12.4.)*
+
 ## Collaudi e non-regressione (Fase VB.NET)
 
 Idee emerse **costruendo la batteria di T2** (cap. 14), quando il prototipo ha fatto da
@@ -321,6 +329,16 @@ implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
   risultati. Restano fuori due rifiniture, annotate nel backlog attivo (le cornici `iframe` e
   la normalizzazione dell'indirizzo). *(2026-08-12, T5a-T5b; diario Step 2.11 e 2.12;
   cap. 06.1/06.4.)*
+- ✅ **Estrazione da LinkedIn / sito web (2.1.3)** — l'ultima delle tre fonti di estrazione del
+  disegno top-down, e quella che era stata data per «complessità alta»: il costo vero è stato
+  **un bottone in P3 e uno in P2**. L'idea originale era un *fetch* di un link pubblico, e non
+  avrebbe funzionato — un profilo si costruisce in JavaScript e sta dietro un accesso — mentre
+  la strada aperta da T5b sì: si legge la pagina che l'utente **sta guardando**, dopo che si è
+  autenticato come sé, e la si manda a `importa_cv`, che non ha dovuto imparare niente perché
+  non ha mai saputo da dove venisse il testo. Una sola cosa il disegno non poteva prevederla, e
+  l'ha insegnata la pagina vera: **va scorsa prima di leggerla**, o ne esce l'intestazione e
+  basta (2196 caratteri contro 9681). *(2026-08-14, T5d; diario Step 2.14; cap. 06.7;
+  architettura.md §8.)*
 - ✅ **Un attrezzo per rispondere alle finestre di messaggio** — è `rispondi_finestra`, nato a
   T5c perché lo scarto va confermato e una `MessageBox` aperta blocca tutto il resto. Preme il
   bottone per **nome** («Sì», «No», «OK») e non per numero, come si era ipotizzato: quali

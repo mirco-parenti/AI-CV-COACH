@@ -86,6 +86,19 @@ Public Class PannelloProfilo
     ''' </summary>
     Public Event CvBaseRichiesto As EventHandler
 
+    ''' <summary>
+    ''' Chiede alla finestra di portare al browser integrato (P3), da cui si legge il CV
+    ''' dalla propria pagina profilo (cap. 06.7).
+    ''' </summary>
+    ''' <remarks>
+    ''' La <b>scelta</b> fra le strade per costruire il profilo sta qui, dove chi vuole un
+    ''' profilo la cerca; l'<b>atto</b> resta in P3, dove vive il browser — un comando che
+    ''' leggesse da qui troverebbe che non c'è nessuna pagina aperta. Senza questo bottone
+    ''' la terza strada era raggiungibile solo entrando in un pannello che si chiama
+    ''' «Ricerca», dove nessuno la cercherebbe.
+    ''' </remarks>
+    Public Event ImportDaSitoRichiesto As EventHandler
+
     Public Sub New()
 
         InitializeComponent()
@@ -96,6 +109,12 @@ Public Class PannelloProfilo
 
         VestiIBottoni()
         PreparaLaPatente()
+
+        ' Il bottone dice dove porta, non cosa fa: chi lo preme si ritrova in un altro
+        ' pannello, e deve saperlo prima di premere.
+        _suggerimenti.SetToolTip(btnImportaDaSito,
+            "Apre il browser integrato: lì apri la tua pagina profilo e premi " &
+            "«Importa CV da questa pagina».")
 
         ' La scheda del testo letto compare solo dopo un import: senza un CV alle
         ' spalle sarebbe una scheda vuota che promette qualcosa che non c'è.
@@ -174,7 +193,7 @@ Public Class PannelloProfilo
         Dim riga As Integer = pnlAzioni.Height - StileApp.MargineRiquadro - StileApp.BottoneStandard.Height
 
         Dim sinistra As Integer = pnlAzioni.Padding.Left
-        For Each bottone As Button In {btnImporta, btnDialogo, btnAggiornamento}
+        For Each bottone As Button In {btnImporta, btnImportaDaSito, btnDialogo, btnAggiornamento}
             bottone.Location = New Point(sinistra, riga)
             sinistra += bottone.Width + StileApp.DistanzaControlli
         Next
@@ -759,6 +778,15 @@ Public Class PannelloProfilo
     End Sub
 
     ''' <summary>
+    ''' L'altra strada per lo stesso mestiere: si va dove c'è il browser, e di lì si legge
+    ''' la propria pagina. Qui non si legge niente — il pannello non conosce il browser, e
+    ''' in questo momento non c'è nessuna pagina aperta da cui leggere.
+    ''' </summary>
+    Private Sub btnImportaDaSito_Click(sender As Object, e As EventArgs) Handles btnImportaDaSito.Click
+        RaiseEvent ImportDaSitoRichiesto(Me, EventArgs.Empty)
+    End Sub
+
+    ''' <summary>
     ''' Importa il CV da un testo già letto altrove — oggi la pagina aperta nel browser
     ''' integrato, di norma la propria pagina LinkedIn (cap. 06.7, T5d).
     ''' </summary>
@@ -974,8 +1002,8 @@ Public Class PannelloProfilo
 
     Private Sub VestiIBottoni()
 
-        For Each bottone As Button In {btnImporta, btnDialogo, btnAggiornamento, btnEsportaBackup,
-                                       btnAggiungiLavoro, btnAggiungiInformale,
+        For Each bottone As Button In {btnImporta, btnImportaDaSito, btnDialogo, btnAggiornamento,
+                                       btnEsportaBackup, btnAggiungiLavoro, btnAggiungiInformale,
                                        btnAggiungiCompetenza, btnAggiungiStudio}
             StileApp.VestiBottone(bottone, LivelloBottone.Esplorativo)
         Next
@@ -1034,6 +1062,15 @@ Public Class PannelloProfilo
         btnImporta.Enabled = occupato OrElse _importCv IsNot Nothing
         If Not occupato AndAlso conMotore AndAlso Not _contesto.AiDisponibile Then
             _suggerimenti.SetToolTip(btnImporta,
+                $"Per leggere un CV serve la chiave API ({ClientClaude.NomeVariabileChiave}).")
+        End If
+
+        ' L'altra porta dello stesso mestiere segue la stessa regola: manda a leggere una
+        ' pagina, e leggerla passa da qui e dall'AI. Mentre una lettura è in corso resta
+        ' spenta — l'annulla è uno solo, ed è il bottone qui accanto.
+        btnImportaDaSito.Enabled = Not occupato AndAlso _importCv IsNot Nothing
+        If Not occupato AndAlso conMotore AndAlso Not _contesto.AiDisponibile Then
+            _suggerimenti.SetToolTip(btnImportaDaSito,
                 $"Per leggere un CV serve la chiave API ({ClientClaude.NomeVariabileChiave}).")
         End If
 

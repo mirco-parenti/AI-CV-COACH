@@ -86,6 +86,7 @@ Partial Class PannelloProfilo
         Me.txtTestoLetto = New System.Windows.Forms.TextBox()
         Me.pnlAzioni = New System.Windows.Forms.Panel()
         Me.btnImporta = New System.Windows.Forms.Button()
+        Me.btnImportaDaSito = New System.Windows.Forms.Button()
         Me.btnDialogo = New System.Windows.Forms.Button()
         Me.btnAggiornamento = New System.Windows.Forms.Button()
         Me.btnGeneraCv1 = New System.Windows.Forms.Button()
@@ -821,6 +822,7 @@ Partial Class PannelloProfilo
         'pnlAzioni
         '
         Me.pnlAzioni.Controls.Add(Me.btnImporta)
+        Me.pnlAzioni.Controls.Add(Me.btnImportaDaSito)
         Me.pnlAzioni.Controls.Add(Me.btnDialogo)
         Me.pnlAzioni.Controls.Add(Me.btnAggiornamento)
         Me.pnlAzioni.Controls.Add(Me.btnGeneraCv1)
@@ -841,13 +843,22 @@ Partial Class PannelloProfilo
         Me.btnImporta.TabIndex = 0
         Me.btnImporta.Text = "Importa CV da un file…"
         '
+        'btnImportaDaSito
+        '
+        Me.btnImportaDaSito.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.btnImportaDaSito.Location = New System.Drawing.Point(475, 142)
+        Me.btnImportaDaSito.Name = "btnImportaDaSito"
+        Me.btnImportaDaSito.Size = New System.Drawing.Size(190, 32)
+        Me.btnImportaDaSito.TabIndex = 1
+        Me.btnImportaDaSito.Text = "Importa CV da un sito…"
+        '
         'btnDialogo
         '
         Me.btnDialogo.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnDialogo.Location = New System.Drawing.Point(445, 142)
         Me.btnDialogo.Name = "btnDialogo"
         Me.btnDialogo.Size = New System.Drawing.Size(200, 32)
-        Me.btnDialogo.TabIndex = 1
+        Me.btnDialogo.TabIndex = 2
         Me.btnDialogo.Text = "Costruiscilo con il dialogo"
         '
         'btnAggiornamento
@@ -856,7 +867,7 @@ Partial Class PannelloProfilo
         Me.btnAggiornamento.Location = New System.Drawing.Point(657, 142)
         Me.btnAggiornamento.Name = "btnAggiornamento"
         Me.btnAggiornamento.Size = New System.Drawing.Size(190, 32)
-        Me.btnAggiornamento.TabIndex = 2
+        Me.btnAggiornamento.TabIndex = 3
         Me.btnAggiornamento.Text = "Sessione di aggiornamento"
         '
         'btnGeneraCv1
@@ -865,7 +876,7 @@ Partial Class PannelloProfilo
         Me.btnGeneraCv1.Location = New System.Drawing.Point(700, 142)
         Me.btnGeneraCv1.Name = "btnGeneraCv1"
         Me.btnGeneraCv1.Size = New System.Drawing.Size(170, 32)
-        Me.btnGeneraCv1.TabIndex = 3
+        Me.btnGeneraCv1.TabIndex = 4
         Me.btnGeneraCv1.Text = "Genera 📄 CV-1 base"
         '
         'btnEsportaBackup
@@ -874,7 +885,7 @@ Partial Class PannelloProfilo
         Me.btnEsportaBackup.Location = New System.Drawing.Point(882, 142)
         Me.btnEsportaBackup.Name = "btnEsportaBackup"
         Me.btnEsportaBackup.Size = New System.Drawing.Size(130, 32)
-        Me.btnEsportaBackup.TabIndex = 4
+        Me.btnEsportaBackup.TabIndex = 5
         Me.btnEsportaBackup.Text = "Esporta backup"
         '
         'btnSalva
@@ -883,7 +894,7 @@ Partial Class PannelloProfilo
         Me.btnSalva.Location = New System.Drawing.Point(1024, 142)
         Me.btnSalva.Name = "btnSalva"
         Me.btnSalva.Size = New System.Drawing.Size(130, 32)
-        Me.btnSalva.TabIndex = 5
+        Me.btnSalva.TabIndex = 6
         Me.btnSalva.Text = "Salva profilo"
         '
         'PannelloProfilo
@@ -991,6 +1002,7 @@ Partial Class PannelloProfilo
     Friend WithEvents txtTestoLetto As System.Windows.Forms.TextBox
     Friend WithEvents pnlAzioni As System.Windows.Forms.Panel
     Friend WithEvents btnImporta As System.Windows.Forms.Button
+    Friend WithEvents btnImportaDaSito As System.Windows.Forms.Button
     Friend WithEvents btnDialogo As System.Windows.Forms.Button
     Friend WithEvents btnAggiornamento As System.Windows.Forms.Button
     Friend WithEvents btnGeneraCv1 As System.Windows.Forms.Button

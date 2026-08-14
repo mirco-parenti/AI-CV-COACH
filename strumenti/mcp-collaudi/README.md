@@ -83,6 +83,12 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
 - **Il contenuto delle caselle di testo non si legge.** L'elenco dice la voce dei menù,
   ma non cosa c'è scritto in una casella: per leggere l'indirizzo del browser serve
   ancora una fotografia.
+- **La finestra non si ridimensiona.** *(Emerso a T5d, 2026-08-14.)* L'applicazione si
+  apre massimizzata e lì resta: un difetto di impaginazione che si vede solo a finestra
+  stretta — alla `MinimumSize` dichiarata, per esempio — con questi attrezzi non si
+  guarda. Si può ancora rifare a mano il conto che fa il codice, ed è quel che è stato
+  fatto per la fascia dei comandi di P2 (`in_sospeso.md`), ma un conto non è una
+  fotografia.
 
 ## Le trappole già pagate
 
@@ -178,6 +184,16 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   **elenca quelli che l'attrezzo vuole**: è l'informazione con cui si rimedia al primo
   colpo, invece di indovinare. Chi parla col server via `curl` i nomi giusti li vede da
   `tools/list`, ed è lì che conviene guardare **prima**.
+- **La fotografia può ritrarre la finestra sbagliata.** *(2026-08-14, T5d.)* `schermata`
+  porta l'applicazione davanti e poi riprende **quel che sta davanti**: se il sistema non
+  le ha ancora dato il primo piano, quel che sta davanti è la finestra da cui si stava
+  lavorando — il terminale — e ne esce una fotografia che sembra un difetto
+  dell'applicazione mentre è solo la finestra sbagliata. Il rimedio è chiamarla **due
+  volte di fila** con `porta_in_primo_piano`: la seconda trova l'applicazione già davanti.
+  Non capita sempre — dipende da chi aveva il fuoco un attimo prima, e nella sessione del
+  14/08 la prima chiamata è andata a segno — ed è proprio l'intermittenza a renderla
+  insidiosa: prima di credere a quel che si vede, si guarda **di chi** è la finestra
+  fotografata.
 - **La tendina va sempre richiusa**, anche quando qualcosa va storto (in un `finally`):
   lasciata aperta blocca tutte le chiamate dopo, e l'errore sembra dell'applicazione.
   Va anche portata avanti la finestra **prima** di aprirla: una tendina aperta mentre la

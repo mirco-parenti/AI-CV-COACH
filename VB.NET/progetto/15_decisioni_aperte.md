@@ -99,7 +99,7 @@ estratto è troppo povero, l'app lo dice e propone l'incolla-testo (cap. 05.1).
 | Editing campo-per-campo del profilo | **dentro** (cap. 12, A2) |
 | `estraiFrammento` robusto lato client | **assorbita**: nel desktop c'è un solo estrattore, `EstrattoreJson` (cap. 02) |
 | Limite dimensione PDF | **dentro** (cap. 05.1, messaggio chiaro) |
-| Profilo da LinkedIn (2.1.3) | **dentro** *(promossa il 2026-08-05)*: il browser incorporato esiste già a T5 e la strutturazione (`importa_cv`) è indipendente dalla fonte — è quasi solo un pulsante in più. Si colloca **dopo T5**. |
+| Profilo da LinkedIn (2.1.3) | **dentro** *(promossa il 2026-08-05)*: il browser incorporato esiste già a T5 e la strutturazione (`importa_cv`) è indipendente dalla fonte — è quasi solo un pulsante in più. Si colloca **dopo T5**. ✔ **Fatta a T5d il 2026-08-14**, e la previsione ha retto: nessun componente nuovo, pool intatto. I pulsanti sono però **due** — l'atto in P3, la scelta in P2 — e la pagina va **scorsa** prima di leggerla, che era la sola cosa che il disegno non poteva sapere (cap. 06.7). |
 | PDF scannerizzati / OCR | **assorbita** *(2026-08-05)*: già risolta dal blocco `document`, che converte ogni pagina in immagine (vedi 15.3). Nessun componente da scrivere. |
 | Estensione profilo a specchio di `altri_requisiti`; domicilio confrontabile | **fuori**: resta nel backlog |
 | `pending_questions`; collocazione manuale degli esclusi | **fuori**: resta nel backlog |

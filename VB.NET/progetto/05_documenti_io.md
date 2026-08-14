@@ -14,6 +14,13 @@ L'utente può fornire un **file singolo** o una **cartella**. Formati accettati:
 | **TXT / MD** | lettura diretta dal disco (UTF-8, con riconoscimento del BOM; UTF-16 anche **senza** BOM; ripiego sulla codifica ANSI se serve). Il Markdown si usa così com'è: le intestazioni aiutano il modello. |
 | **DOCX** | un `.docx` è un archivio ZIP: il programma estrae `word/document.xml` e ne ricava il testo (paragrafi e tabelle, nell'ordine del documento) con gli strumenti standard di .NET — nessuna libreria esterna. |
 
+*Da T5d (2026-08-14) esiste una sorgente che **non è un file**: la pagina aperta nel
+browser integrato, di norma la propria pagina profilo (cap. 06.7). Non entra in questa
+tabella perché non c'è niente da leggere dal disco — il testo lo porta fuori il lettore
+di pagina — ma da lì in poi la strada è **la stessa**: `importa_cv`, gli stessi campi,
+lo stesso «Testo letto» a fronte. È il motivo per cui aggiungerla non ha richiesto un
+formato in più.*
+
 Casi limite dichiarati:
 
 - **PDF scannerizzati** (immagine): la trascrizione può uscire vuota o povera; l'app lo

@@ -504,6 +504,70 @@ Namespace Ui
 
         End Function
 
+        <TestMethod>
+        Public Async Function IlBottoneDelSitoChiedeIlBrowserSenzaLeggereNiente() As Task
+
+            ' La scheda del profilo è dove si sceglie la strada, ma la lettura vera sta in
+            ' P3: qui non c'è nessuna pagina aperta da leggere, e infatti non si legge —
+            ' si chiede il browser e basta.
+            Dim aiFinta As New StrutturatoreFinto()
+
+            Await ConImportFintoAsync(aiFinta,
+                Function(pannello, archivio) As Task
+
+                    Dim chiesto As Integer = 0
+                    AddHandler pannello.ImportDaSitoRichiesto, Sub(mittente, argomenti) chiesto += 1
+
+                    Assert.IsTrue(Bottone(pannello, "btnImportaDaSito").Enabled,
+                                  "con l'AI in casa la strada è aperta")
+
+                    Bottone(pannello, "btnImportaDaSito").PerformClick()
+
+                    Assert.AreEqual(1, chiesto, "la scheda ha chiesto il browser")
+                    Assert.IsEmpty(aiFinta.Chiamate, "senza spendere una chiamata all'AI")
+                    Assert.IsFalse(pannello.HaModificheNonSalvate, "e senza toccare il profilo")
+
+                    Return Task.CompletedTask
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Sub LeDuePorteDellImportDiconoQualeDelleDueSono()
+
+            ' Due bottoni che dicono entrambi «Importa CV» non si scelgono: ognuno deve
+            ' dire da dove legge. E stanno vicini, perché sono lo stesso mestiere — con la
+            ' fascia disposta come nell'applicazione vera, cioè dopo l'ingombro del logo.
+            Using pannello As New TrovaLavoro.PannelloProfilo()
+                pannello.ImpostaIngombroLogo(New Size(261, 188))
+
+                Dim daFile As Button = Bottone(pannello, "btnImporta")
+                Dim daSito As Button = Bottone(pannello, "btnImportaDaSito")
+
+                Assert.AreEqual("Importa CV da un file…", daFile.Text)
+                Assert.AreEqual("Importa CV da un sito…", daSito.Text)
+
+                Assert.IsGreaterThanOrEqualTo(daFile.Right, daSito.Left,
+                                              "il sito viene dopo il file, e non gli finisce sopra")
+                Assert.AreEqual(daFile.Top, daSito.Top, "sulla stessa riga")
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaChiaveNemmenoLaPortaDelSitoSiApre()
+
+            ' Manda a leggere una pagina, e leggere una pagina passa dall'AI come leggere
+            ' un file: spenta l'una, spenta l'altra — se no si arriverebbe in fondo alla
+            ' strada per sentirsi dire lì che mancava la chiave.
+            ConProfiloSalvato(
+                Sub(pannello, archivio)
+                    Assert.IsFalse(Bottone(pannello, "btnImportaDaSito").Enabled, "anche il sito è spento")
+                End Sub)
+
+        End Sub
+
         ''' <summary>Quel che l'AI risponde sul testo della pagina: la forma di «importa_cv».</summary>
         Private Shared Function ProfiloDiRitorno() As String
 

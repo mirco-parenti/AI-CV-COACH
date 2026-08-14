@@ -86,7 +86,7 @@ Le funzioni sono numerate **F1–F8** e mappate sui capitoli di questo progetto:
 
 | # | Funzione | Contenuto | Capitolo |
 |---|---|---|---|
-| **F1** | Profilo | dialogo guidato, import da CV (PDF/TXT/MD/DOCX o cartella), editing campo-per-campo, aggiornamento periodico assistito | 05, 12 |
+| **F1** | Profilo | dialogo guidato, import da CV (PDF/TXT/MD/DOCX o cartella) o dalla **propria pagina web** letta nel browser integrato *(voce 2.1.3, cap. 06.7)*, editing campo-per-campo, aggiornamento periodico assistito | 05, 06.7, 12 |
 | **F2** | Ricerca annunci | ricerche salvate sui portali, cattura dell'annuncio dal browser integrato, annuncio da link, coda di opportunità | 06 |
 | **F3** | Valutazione e ragionamento | analisi annuncio, confronto, stelle + hard-gate, mitigazione, brainstorming con l'utente | 02, 12 |
 | **F4** | Generazione | 📄 CV-1 base, 🎯 CV-2 mirato, ✉️ lettera; multilingua IT/EN; rifinitura anti-slop | 04, 08, 10 |

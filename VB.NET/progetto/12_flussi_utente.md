@@ -27,9 +27,16 @@ opportunità sono esaurite.
    *Dal 2026-08-07 la scelta della cartella è rimandata a **T6***, dove la scansione
    della cartella documenti serve comunque agli allegati dell'email (cap. 05.2): T3 ha
    chiuso la strada del file singolo, che è quella che porta al profilo.
-3. Il CV scelto viene trascritto e strutturato nel **profilo JSON** (stessi due passi
-   del prototipo: trascrizione fedele + strutturazione anti-invenzione).
-4. Il profilo viene mostrato **campo per campo, modificabile** (novità rispetto al
+3. *Da T5d (2026-08-14) c'è una **terza porta**, e il bivio del punto 1 diventa un
+   trivio: il CV può non essere un file.* Se il proprio percorso è già scritto in una
+   pagina — di norma la **propria** pagina LinkedIn — la si apre nel browser integrato e
+   si preme «Importa CV da questa pagina» (cap. 06.7). Ci si arriva anche partendo dal
+   profilo: «Importa CV da un sito…» in P2 porta al browser e il pannello, arrivando,
+   dice cosa fare. Da qui in avanti i passi sono gli stessi degli altri due.
+4. Il CV scelto viene trascritto — se è un PDF; una pagina è già testo — e strutturato
+   nel **profilo JSON** (stessi due passi del prototipo: trascrizione fedele +
+   strutturazione anti-invenzione).
+5. Il profilo viene mostrato **campo per campo, modificabile** (novità rispetto al
    prototipo: si corregge la singola voce, non si ricomincia). Alla conferma, il
    profilo diventa la **fonte di verità unica**.
 

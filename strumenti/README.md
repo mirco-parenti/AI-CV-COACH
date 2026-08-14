@@ -12,7 +12,8 @@ mai: com'è fatta l'applicazione mentre gira, e come la si mette in mano a qualc
 ## Perché esiste `avvia-demo.bat`
 
 L'applicazione prende la chiave API dalla variabile d'ambiente `ANTHROPIC_API_KEY` (la
-cifratura su disco è di T6). Con un doppio clic sull'eseguibile quella variabile non c'è,
+chiave cifrata nella cartella dati arriva con la 1.0 — capp. 02.5 e 11.3). Con un doppio
+clic sull'eseguibile quella variabile non c'è,
 e **tutto ciò che passa dall'AI si ferma**: l'analisi di un annuncio, il confronto, la
 generazione. L'applicazione si apre e sembra viva — il guasto si scopre solo al primo
 comando che chiama l'AI, cioè nel momento peggiore, davanti a chi guarda.

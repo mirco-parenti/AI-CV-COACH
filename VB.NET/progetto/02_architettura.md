@@ -46,7 +46,7 @@ artefatti JSON ben definiti. Quelli ereditati:
 
 | Artefatto | Prodotto da | Consumato da |
 |---|---|---|
-| **Profilo JSON** | dialogo guidato, import CV, aggiornamento periodico | tutto il resto (unica *fonte di fatti*) |
+| **Profilo JSON** | dialogo guidato, import CV (da file o dalla pagina aperta nel browser), aggiornamento periodico | tutto il resto (unica *fonte di fatti*) |
 | **Annuncio JSON** | analisi annuncio (da cattura WebView2, link o testo incollato) | confronto, generazione (come *segnale di mira*) |
 | **Giudizi + punteggio** | confronto (AI) + CalcoloMatch (codice) | scheda match, mitigazione, generazione |
 | **Mitigazioni JSON** | mitigazione (può essere lista vuota) | solo la ✉️ lettera |
@@ -86,7 +86,10 @@ ogni modulo abbia **un compito solo**:
     costruisce per prima e passa sia alla stampante sia al pannello Ricerca: l'ambiente
     WebView2 dell'applicazione è **uno solo**, e questo è il punto in cui lo si garantisce;*
   - `DialogoProfilo` + `Mossa`: la macchina a mosse del dialogo guidato (v. 2.4);
-  - `ImportProfilo`: i due passi dell'import di un CV, dal file al profilo;
+  - `ImportProfilo`: i due passi dell'import di un CV, dal file al profilo. *La seconda
+    porta — da un **testo già letto altrove** — era stata lasciata pronta a T3 e resta
+    inutilizzata fino a T5d, quando ci entra la pagina del browser: la strutturazione non
+    ha dovuto imparare niente, perché non ha mai saputo da dove venisse il testo;*
   - `Orchestratore`: conduce i flussi del cap. 12 (quale passo viene dopo quale).
     *Nasce a T4 nella sua prima forma concreta, `PipelineCandidatura`: annuncio →
     confronto → punteggio → mitigazione → i tre documenti. È il posto in cui il codice
@@ -165,6 +168,11 @@ ogni modulo abbia **un compito solo**:
   interfaccia (`ILettorePagina`), per la stessa ragione dei mestieri dell'AI: le decisioni
   della cattura — il testo basta? da che portale viene? l'avevamo già presa? — devono
   potersi collaudare senza pretendere WebView2 e un thread STA.
+  *A T5d il lettore impara una seconda cosa: **scendere** per la pagina prima di leggerla
+  (`ScorriAsync`). Su un sito moderno le sezioni entrano nel documento mentre si scorre, e
+  chi legge com'è si porta via l'intestazione credendola tutto (cap. 06.7). Resta un
+  compito del lettore, non del pannello, perché è mestiere del DOM; ma **chi lo chiama
+  decide se serve**: lo chiede l'import del CV, non la cattura dell'annuncio.*
 - **`Posta/`** — composizione dell'email e scrittura del file `.eml` marcato come bozza
   da inviare (cap. 07). *Nella 1.0 non spedisce:* né `.msg` né SMTP (cap. 15, voci 8 e 9),
   quindi questo componente non tocca alcuna credenziale.

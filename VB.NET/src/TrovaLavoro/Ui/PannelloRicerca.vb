@@ -233,6 +233,30 @@ Public Class PannelloRicerca
 
     End Function
 
+    ''' <summary>
+    ''' Come <see cref="ApriAsync"/>, ma per chi è arrivato qui dalla scheda del profilo
+    ''' col bottone «Importa CV da un sito…»: oltre ad accendere il browser, dice cosa
+    ''' fare adesso (cap. 06.7).
+    ''' </summary>
+    ''' <remarks>
+    ''' Chi arriva da lì ha in testa il profilo, non la ricerca, e si trova davanti un
+    ''' pannello che di quel mestiere non parla: la frase serve a colmare esattamente quel
+    ''' salto. Alla prima apertura la stessa cosa la dice già la pagina di casa, ma la
+    ''' seconda volta il browser è fermo su una pagina qualunque e non la direbbe nessuno.
+    ''' Se invece il browser è fuori uso, il perché è già scritto lì: coprirlo con un
+    ''' invito a fare una cosa che non si può fare sarebbe la peggiore delle due frasi.
+    ''' </remarks>
+    Public Async Function ApriPerIlCvAsync() As Task
+
+        Await ApriAsync().ConfigureAwait(True)
+
+        If _browserFuoriUso Then Return
+
+        Racconta("Apri la tua pagina profilo — su LinkedIn, o su un altro sito che racconti " &
+                 "il tuo percorso — e premi «Importa CV da questa pagina».")
+
+    End Function
+
     ' ==================================================================
     ' Le ricerche
     ' ==================================================================

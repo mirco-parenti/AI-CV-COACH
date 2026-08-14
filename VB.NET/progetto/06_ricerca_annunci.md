@@ -43,10 +43,14 @@ una. Il disegno di dettaglio sta nel cap. 03.6, che è la sua casa; qui il ritra
 │                  WebView2 (il portale, navigabile)               │
 │                                                                  │
 ├──────────────────────────────────────────────────────────────────┤
-│ [✔ Cattura annuncio]   Catturato: «Addetto/a spedizioni per      │
+│ [✔ Cattura annuncio] [✔ Importa CV da questa pagina]             │
+│                        Catturato: «Addetto/a spedizioni per      │
 │                        servizi logistici».                       │
 └──────────────────────────────────────────────────────────────────┘
 ```
+
+*Il secondo bottone in basso è di T5d (2026-08-14) e legge la stessa pagina per portarla
+altrove: al profilo invece che all'analisi (v. 6.7).*
 
 ## 6.3 Le ricerche salvate
 
@@ -140,7 +144,7 @@ Non c'è alcun tentativo di scaricare il link «alla cieca»: la lezione dello S
 - Ciò che viene catturato (testo dell'annuncio) resta **sul PC dell'utente**, nella
   cartella dati; l'unico invio all'esterno è quello verso l'API AI per l'analisi.
 
-## 6.7 Il profilo da LinkedIn (voce 2.1.3) — **dentro la 1.0**
+## 6.7 Il profilo da LinkedIn (voce 2.1.3) — **dentro la 1.0**, fatta a T5d
 
 Lo stesso meccanismo di cattura abilita la voce **2.1.3** del disegno funzionale:
 l'utente apre la **propria** pagina profilo nel browser integrato, la cattura e la manda
@@ -156,3 +160,52 @@ Due avvertenze da rispettare: l'utente deve **accedere a LinkedIn dentro il brow
 integrato** come farebbe altrove (l'app non vede le credenziali, cap. 6.6), e si cattura
 **solo la propria** pagina profilo — non quelle altrui. Vale anche qui la bussola del
 capitolo 01.4: si assiste la lettura di ciò che l'utente sta legittimamente guardando.
+
+### Com'è andata (T5d, 2026-08-14)
+
+La promessa era «poco più di un pulsante in più», e alla lettera è stata mantenuta:
+**nessun componente nuovo**. Il lettore di pagina era di T5a, la strutturazione non ha
+mai saputo da dove venisse il testo, e il **pool non è stato toccato** — il turno che
+legge la pagina è lo stesso `importa_cv` che legge un CV in PDF.
+
+**I pulsanti però sono due, e stanno in due pannelli diversi.** In P3 c'è l'atto —
+«Importa CV da questa pagina» — perché è lì che vive il browser ed è lì che c'è una
+pagina aperta da leggere. In P2 c'è la scelta — «Importa CV da un sito…» — perché il
+profilo si costruisce lì, e una terza strada raggiungibile solo entrando in un pannello
+che si chiama «Ricerca» nessuno l'avrebbe trovata; quel bottone non legge niente, porta
+in P3 e il pannello, arrivando, dice cosa fare. Il testo letto va **a P2**, che ha già
+l'attesa annullabile, la guardia sulle correzioni non salvate e la scheda «Testo letto»
+dove si controlla campo per campo: la finestra mostra prima il pannello e poi gli chiede
+di leggere, com'era per l'annuncio catturato, così l'attesa si vede dove succede.
+
+**Il fatto che il disegno non aveva previsto: una pagina va scorsa prima di leggerla.**
+Su un sito moderno le sezioni del profilo entrano nel documento solo mentre si scende, e
+un profilo tagliato a metà che si presenta come completo è peggio di un errore che si
+dichiara. Letta com'era, la pagina vera ha dato **2196 caratteri** — la sola intestazione,
+un'esperienza senza date né mansioni, nessuno studio, nessuna competenza; scorsa prima di
+leggere, **9681**, con l'esperienza intera, dieci voci di formazione e nove competenze.
+Due cose sono state misurate invece che supposte, e ognuna era costata un tentativo:
+`window.scrollBy` su quella pagina **non muove niente** (a scorrere non è la finestra: si
+chiede a `document.scrollingElement` chi lo faccia davvero, e in mancanza si cerca il
+contenitore più grande che possa farlo), e il primo «sono in fondo» **è una bugia**,
+perché una pagina non ancora caricata è corta — la discesa finisce solo dopo tre conferme
+di fila che la pagina è finita e non cresce più, e si ferma se non si muove affatto.
+
+**Lo scorrimento lo chiede solo l'import del CV.** La cattura dell'annuncio legge la
+pagina com'è, ed è così che è stata collaudata su quattro portali a T5b: aggiungerle uno
+scorrimento cambierebbe, su tutti, ciò che finisce nell'analisi — senza che nessuno
+l'abbia chiesto. Un collaudo tiene ferma la distinzione.
+
+**Non si controlla che la pagina sia LinkedIn, e nemmeno che sia la propria.** Il primo
+controllo sarebbe inutile: la strutturazione è indipendente dalla fonte e legge
+altrettanto bene la pagina «chi sono» di un sito personale. Il secondo è impossibile da
+fare onestamente, perché l'indirizzo di un profilo non dice di chi sia. Il «solo la tua
+pagina» resta una regola per l'utente, e gliela si **dice** — nella pagina di casa e nel
+suggerimento del bottone — invece di fingere un controllo che non esiste.
+
+*Provata sulla pagina vera con la chiave vera.* Il profilo che ne esce non contraddice
+quello costruito dal CV in PDF: dove differisce, differisce perché differiscono le fonti
+— LinkedIn non pubblica né email né telefono, e quei campi escono **vuoti invece che
+inventati**. La pagina portava con sé altre cinque persone con nome, ruolo e azienda, nei
+riquadri dei suggerimenti: nessuna è entrata nel profilo. E nemmeno «lingua del profilo:
+italiano», che è un'impostazione dell'interfaccia e non una lingua che si parla.

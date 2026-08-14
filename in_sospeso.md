@@ -81,6 +81,27 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   candidature l'ordinamento basta; con sessanta no, ed è quello lo scenario per cui il
   registro esiste. *(cap. 07.3; cap. 03.6, P1.)*
 
+## Da T5d — il profilo dalla propria pagina (2026-08-14)
+
+- **Una pagina che non sia LinkedIn.** L'import legge «la pagina aperta», e sia la pagina
+  di casa sia il suggerimento del bottone promettono che vada bene anche «un altro sito che
+  racconti il tuo percorso»: provato però è stato **solo** su LinkedIn. Il dubbio non è la
+  strutturazione — quella non sa da dove venga il testo — ma lo **scorrimento**, che su
+  quella pagina ha dovuto cercarsi da solo il contenitore che scorre: un sito fatto in un
+  altro modo può scorrere in un altro modo. Serve una prova su una pagina «chi sono» vera.
+  *(cap. 06.7.)*
+- **La fascia dei comandi di P2 a finestra stretta.** Con la finestra alla sua
+  `MinimumSize` (1150×600, cap. 03.4) i bottoni di sinistra e quelli di destra **si
+  sovrappongono**: la fila di sinistra finisce a 948 px e quella di destra comincia a 638.
+  Non è un difetto nato qui — con tre bottoni la sovrapposizione era già di 108 px — ma il
+  quarto la porta a 310, e questo lo rende una cosa da sistemare invece che una da tollerare.
+  A finestra massimizzata, che è come l'applicazione si apre, il problema non esiste (fila
+  sinistra a 1079, destra a 1424): è per questo che non si era mai visto. **Misurato
+  rifacendo il conto di `DisponiLeAzioni`, non guardandolo**, perché lo strumento di
+  collaudo non sa ancora ridimensionare la finestra. Il rimedio naturale è che la fascia
+  vada a capo quando lo spazio non basta, come farebbe qualunque barra di comandi.
+  *(cap. 03.4; `Ui/PannelloProfilo.DisponiLeAzioni`.)*
+
 ## Da revisione adversariale (2026-08-09)
 
 - **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:

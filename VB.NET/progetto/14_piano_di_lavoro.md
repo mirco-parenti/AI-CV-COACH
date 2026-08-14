@@ -318,7 +318,7 @@ i **14** di T5b e non sono stati rilanciati qui: la Home e il registro non chiam
 leggono il disco e mostrano — e un collaudo con la chiave non avrebbe verificato niente
 che il banco non veda già. **T5d può iniziare.**
 
-### T5d — Il profilo da LinkedIn (voce 2.1.3)
+### T5d — Il profilo da LinkedIn (voce 2.1.3) — ✔ **CHIUSA il 2026-08-14**
 *Rinominata il 2026-08-12: si chiamava «T5b», nome che le tre gambe di T5 hanno preso.
 La tappa è la stessa, e resta una coda a sé dopo T5.*
 Piccola coda di T5: cattura della **propria** pagina profilo LinkedIn dal browser
@@ -326,6 +326,38 @@ integrato e invio alla strutturazione `importa_cv` già esistente (cap. 06.7). N
 componente nuovo — riusa cattura e prompt di T5 e T3.
 **Collaudo:** dalla pagina profilo reale di Mirco esce un profilo JSON coerente con
 quello ottenuto dal suo CV in PDF.
+
+*Com'è andata, in due pezzi.* Il primo è la **lettura della pagina**: in P3 «Importa CV
+da questa pagina» legge quel che l'utente sta guardando e lo consegna a P2, che struttura
+col turno `importa_cv` di sempre — la finestra mostra prima il pannello e poi gli chiede
+di leggere, come per l'annuncio catturato, così l'attesa si vede dove succede. La
+promessa «nessun componente nuovo» ha retto alla lettera, e **il pool non è stato
+toccato**. Il secondo pezzo è la **porta in P2**: «Importa CV da un sito…» accanto a
+«Importa CV da un file…» — perché fino a lì la terza strada per costruire il profilo
+esisteva solo dentro un pannello chiamato «Ricerca», dove nessuno l'avrebbe cercata. Il
+bottone non legge niente: porta in P3, dove vive il browser, e il pannello arrivando dice
+cosa fare (cap. 06.7).
+
+*Quel che solo la pagina vera poteva insegnare:* un profilo su un sito moderno **non
+esiste finché non lo si scorre**. Letta com'era dava **2196 caratteri** — la sola
+intestazione — contro **9681** dopo lo scorrimento. Due tentativi buttati hanno pagato
+due misure: `window.scrollBy` lì non muove niente, e il primo «sono in fondo» è una
+bugia. Lo scorrimento lo chiede **solo** l'import del CV; la cattura dell'annuncio legge
+la pagina com'è, come era stata collaudata su quattro portali, e un collaudo tiene ferma
+la distinzione.
+
+Il **collaudo di tappa** è quello promesso qui sopra, e l'ha superato: sulla pagina vera,
+con la chiave vera, ne esce un profilo che non contraddice quello ricavato dal CV in PDF —
+dove differisce è perché differiscono le fonti, e i campi che LinkedIn non pubblica (email,
+telefono) escono **vuoti invece che inventati**. Le altre cinque persone che la pagina
+mostrava nei riquadri dei suggerimenti non sono entrate nel profilo. I dati reali sono
+stati verificati **intatti prima e dopo** ogni prova, per impronta: profilo, storico e le
+sei candidature identici, e l'applicazione chiusa senza passare dal salvataggio.
+
+**Fatto:** **465 collaudi verdi** senza rete (erano 452), versione **0.3.016**. I collaudi
+della categoria *Reale* restano i **14** di T5b: la lettura della pagina si prova col
+lettore finto, e l'unica cosa che l'AI fa qui è il turno `importa_cv`, che ha già il suo.
+**T6 può iniziare.**
 
 ### T6 — Le email (F5 completo)
 Composizione con allegati suggeriti (inclusa la scansione della cartella documenti,

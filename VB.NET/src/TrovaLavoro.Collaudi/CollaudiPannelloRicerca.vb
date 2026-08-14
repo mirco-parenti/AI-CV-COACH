@@ -593,6 +593,27 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function ArrivandoDalProfiloIlPannelloDiceCosaFare() As Task
+
+            ' Chi preme «Importa CV da un sito…» nella scheda del profilo si ritrova qui,
+            ' in un pannello che si chiama «Ricerca» e che di profili non parla: senza
+            ' questa frase avrebbe fatto un passo e non saprebbe qual è il successivo.
+            ' Alla prima apertura lo direbbe anche la pagina di casa; alla seconda il
+            ' browser è fermo su una pagina qualunque e non lo direbbe nessuno.
+            Await ConPannelloAsync(Nothing,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Await pannello.ApriPerIlCvAsync()
+
+                    Dim detto As String = Etichetta(pannello, "lblStatoRicerca").Text
+                    Assert.Contains("pagina profilo", detto, "dice cosa aprire")
+                    Assert.Contains("Importa CV da questa pagina", detto, "e cosa premere, con il suo nome")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Sub SenzaUnaPaginaDaLeggereAncheLImportRestaSpento()
 
             ConPannello(
