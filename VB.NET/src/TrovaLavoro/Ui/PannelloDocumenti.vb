@@ -1,4 +1,4 @@
-Imports System.Drawing
+﻿Imports System.Drawing
 Imports System.IO
 Imports System.Linq
 Imports System.Text.Json
@@ -34,6 +34,16 @@ Public Class PannelloDocumenti
 
     ''' <summary>Sotto questa altezza la fascia delle azioni non scende: i bottoni ci devono stare.</summary>
     Private Const AltezzaMinimaAzioni As Integer = 60
+
+    '''' <summary>Quanto spazio si prende il logo flottante (cap. 03.5).</summary>
+    Private _ingombroLogo As Size
+
+    '''' <summary>
+    '''' La fascia dei comandi in fondo (cap. 03.4). Nasce alla prima disposizione e non nel
+    '''' costruttore: i bottoni che le si dichiarano esistono solo dopo
+    '''' <c>InitializeComponent</c>.
+    '''' </summary>
+    Private _comandi As FasciaDeiComandi
 
     ''' <summary>Il titolo delle finestrelle di conferma: il nome che l'utente conosce.</summary>
     Private Const NomeProdotto As String = "TrovaLavoro"
@@ -515,7 +525,10 @@ Public Class PannelloDocumenti
     ''' <inheritdoc/>
     Public Sub ImpostaIngombroLogo(ingombro As Size) Implements IPannelloArea.ImpostaIngombroLogo
 
-        pnlAzioni.Height = Math.Max(AltezzaMinimaAzioni, ingombro.Height)
+        ' A cedere il posto al logo è la fascia delle azioni, dove ci sono bottoni e non
+        ' dati (v. IPannelloArea). L'altezza la decide la fascia stessa: almeno quella che
+        ' il logo sfonda, di più se i comandi devono andare a capo (cap. 03.4).
+        _ingombroLogo = ingombro
         pnlAzioni.Padding = New Padding(ingombro.Width + StileApp.DistanzaControlli, 0, 0, 0)
 
         DisponiLeAzioni()
@@ -523,22 +536,20 @@ Public Class PannelloDocumenti
     End Sub
 
     ''' <summary>Mette i bottoni sul fondo: si torna indietro a sinistra, si esporta a destra.</summary>
+    '''' <summary>
+    '''' Rifà la disposizione dei comandi in fondo al pannello. La geometria la sa la
+    '''' <see cref="FasciaDeiComandi"/>, che è di tutti i pannelli; qui resta la sola cosa
+    '''' che sa questo pannello — <b>quali</b> comandi vanno da che parte.
+    '''' </summary>
     Private Sub DisponiLeAzioni()
 
-        Dim riga As Integer = pnlAzioni.Height - StileApp.MargineRiquadro - StileApp.BottoneStandard.Height
+        If _comandi Is Nothing Then
+            _comandi = New FasciaDeiComandi(pnlAzioni)
+            _comandi.ASinistra(btnTornaIndietro, btnRigenera)
+            _comandi.ADestra(btnPreparaEmail, btnEsportaPdf, btnEsportaDocx)
+        End If
 
-        Dim sinistra As Integer = pnlAzioni.Padding.Left
-        For Each bottone As Button In {btnTornaIndietro, btnRigenera}
-            bottone.Location = New Point(sinistra, riga)
-            sinistra += bottone.Width + StileApp.DistanzaControlli
-        Next
-
-        Dim destra As Integer = pnlAzioni.ClientSize.Width - StileApp.MargineRiquadro
-        For Each bottone As Button In {btnPreparaEmail, btnEsportaPdf, btnEsportaDocx}
-            destra -= bottone.Width
-            bottone.Location = New Point(destra, riga)
-            destra -= StileApp.DistanzaControlli
-        Next
+        _comandi.Disponi(Math.Max(AltezzaMinimaAzioni, _ingombroLogo.Height))
 
     End Sub
 

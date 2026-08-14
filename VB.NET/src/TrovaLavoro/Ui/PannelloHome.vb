@@ -1,4 +1,4 @@
-Imports System.Drawing
+﻿Imports System.Drawing
 Imports System.Globalization
 Imports System.IO
 Imports System.Linq
@@ -42,6 +42,16 @@ Public Class PannelloHome
 
     ''' <summary>Sotto questa altezza la fascia delle azioni non scende: i bottoni ci devono stare.</summary>
     Private Const AltezzaMinimaAzioni As Integer = 60
+
+    '''' <summary>Quanto spazio si prende il logo flottante (cap. 03.5).</summary>
+    Private _ingombroLogo As Size
+
+    '''' <summary>
+    '''' La fascia dei comandi in fondo (cap. 03.4). Nasce alla prima disposizione e non nel
+    '''' costruttore: i bottoni che le si dichiarano esistono solo dopo
+    '''' <c>InitializeComponent</c>.
+    '''' </summary>
+    Private _comandi As FasciaDeiComandi
 
     ''' <summary>Quante stelle ha la scala: quelle piene e quelle vuote insieme.</summary>
     Private Const StelleDellaScala As Integer = 5
@@ -498,9 +508,10 @@ Public Class PannelloHome
     ''' <inheritdoc/>
     Public Sub ImpostaIngombroLogo(ingombro As Size) Implements IPannelloArea.ImpostaIngombroLogo
 
-        ' Come negli altri pannelli: a cedere il posto al logo è la fascia delle azioni,
-        ' dove ci sono bottoni e non dati (v. IPannelloArea).
-        pnlAzioni.Height = Math.Max(AltezzaMinimaAzioni, ingombro.Height)
+        ' A cedere il posto al logo è la fascia delle azioni, dove ci sono bottoni e non
+        ' dati (v. IPannelloArea). L'altezza la decide la fascia stessa: almeno quella che
+        ' il logo sfonda, di più se i comandi devono andare a capo (cap. 03.4).
+        _ingombroLogo = ingombro
         pnlAzioni.Padding = New Padding(ingombro.Width + StileApp.DistanzaControlli, 0, 0, 0)
 
         DisponiLeAzioni()
@@ -508,18 +519,20 @@ Public Class PannelloHome
     End Sub
 
     ''' <summary>Le vie laterali a sinistra, l'avanti a destra: come in P4.</summary>
+    '''' <summary>
+    '''' Rifà la disposizione dei comandi in fondo al pannello. La geometria la sa la
+    '''' <see cref="FasciaDeiComandi"/>, che è di tutti i pannelli; qui resta la sola cosa
+    '''' che sa questo pannello — <b>quali</b> comandi vanno da che parte.
+    '''' </summary>
     Private Sub DisponiLeAzioni()
 
-        Dim riga As Integer = pnlAzioni.Height - StileApp.MargineRiquadro - StileApp.BottoneStandard.Height
+        If _comandi Is Nothing Then
+            _comandi = New FasciaDeiComandi(pnlAzioni)
+            _comandi.ASinistra(btnApriCandidatura, btnAggiornaProfilo)
+            _comandi.ADestra(btnNuovaRicerca)
+        End If
 
-        Dim sinistra As Integer = pnlAzioni.Padding.Left
-        For Each bottone As Button In {btnApriCandidatura, btnAggiornaProfilo}
-            bottone.Location = New Point(sinistra, riga)
-            sinistra += bottone.Width + StileApp.DistanzaControlli
-        Next
-
-        btnNuovaRicerca.Location = New Point(
-            pnlAzioni.ClientSize.Width - StileApp.MargineRiquadro - btnNuovaRicerca.Width, riga)
+        _comandi.Disponi(Math.Max(AltezzaMinimaAzioni, _ingombroLogo.Height))
 
     End Sub
 
