@@ -1,5 +1,5 @@
 id: email_candidatura
-versione: 1.0
+versione: 1.1
 lingua: it
 modello: ragionamento
 max_token: 1500
@@ -23,7 +23,7 @@ Nell'ordine, e senza intestazioni o titoletti:
 1. Il saluto iniziale della lettera, ripreso tale e quale ("Spettabile Azienda," o come è scritto lì).
 2. Una o due frasi che dichiarano la candidatura per quel ruolo.
 3. UNO SOLO paragrafo breve — al massimo quattro righe — con la sostanza della lettera: cosa la persona porta e perché è adatta a quel ruolo. Questa è la versione corta, non un riassunto di tutto: scegli i due o tre elementi più forti fra quelli che la lettera già mette in risalto, e lascia cadere il resto. Chi vuole tutto apre la lettera.
-4. Il rimando agli allegati: una frase che dice cosa si trova in allegato, nominando i documenti come sono elencati in <allegati> (per esempio «In allegato trovi il mio CV e la lettera di presentazione»). Se l'elenco degli allegati è vuoto, questa frase NON va scritta: non si rimanda a niente.
+4. Il rimando agli allegati: una frase che dice cosa si trova in allegato, nominando i documenti come sono elencati in <allegati>. La forma è IMPERSONALE — «In allegato il mio CV e la lettera di presentazione», oppure «Allego il mio CV e la lettera di presentazione» — mai rivolta all'azienda in seconda persona («trovi», «troverai»): a leggere è qualcuno che non si conosce. Se l'elenco degli allegati è vuoto, questa frase NON va scritta: non si rimanda a niente.
 5. La chiusura di cortesia con la disponibilità e i saluti, ripresa dalla lettera.
 6. La firma: nome su una riga, e sotto email e telefono, presi dalla firma della lettera. Un contatto che nella lettera è vuoto qui non compare, e non si inventa.
 

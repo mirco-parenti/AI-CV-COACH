@@ -1,6 +1,6 @@
 {
   "formato": 1,
-  "versione_pool": "1.04",
+  "versione_pool": "1.05",
   "data": "2026-08-14",
   "file": [
     {
@@ -25,7 +25,7 @@
     },
     {
       "percorso": "generazione/email_candidatura.md",
-      "sha256": "c239b398e5adf6df1e21e2454febd415e59c7afab3f5a8778bee46bb88e160eb"
+      "sha256": "76e4348c55233254f8274ce0f2d3941a1aee52db96ac76c6ccafe76054375b1a"
     },
     {
       "percorso": "generazione/lettera.it.md",

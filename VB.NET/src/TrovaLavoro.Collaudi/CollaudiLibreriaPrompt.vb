@@ -26,8 +26,8 @@ Namespace Ai
             Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
 
             Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "origine")
-            Assert.AreEqual("1.04", libreria.Versione, "versione del pool")
-            Assert.AreEqual("Pool 1.04 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
+            Assert.AreEqual("1.05", libreria.Versione, "versione del pool")
+            Assert.AreEqual("Pool 1.05 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
         End Sub
 
         <TestMethod>
@@ -46,7 +46,7 @@ Namespace Ai
 
         <TestMethod>
         Public Sub IDuePromptNuoviDiT6SiCaricano()
-            ' Il Pool 1.04 aggiunge senza toccare: i quindici di sopra restano quelli, e
+            ' Il Pool 1.04 li ha aggiunti senza toccare gli altri: i quindici di sopra restano quelli, e
             ' questi due si caricano accanto a loro. Il collaudo dei quindici racconta la
             ' migrazione dal prototipo, e non va allungato a ogni tappa.
             Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
@@ -175,7 +175,7 @@ Namespace Ai
                 Dim libreria = LibreriaPrompt.Apri(cartella)
 
                 Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "deve ripiegare sull'integrato")
-                Assert.AreEqual("1.04", libreria.Versione, "con la versione dell'integrato")
+                Assert.AreEqual("1.05", libreria.Versione, "con la versione dell'integrato")
                 Assert.IsNotNull(libreria.Avviso, "e deve dire perché")
                 Assert.Contains("manca.md", libreria.Avviso, "l'avviso deve nominare il file mancante")
             Finally

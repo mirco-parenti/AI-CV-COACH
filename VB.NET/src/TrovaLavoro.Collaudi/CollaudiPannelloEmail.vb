@@ -63,6 +63,29 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function GliACapoDelMessaggioSiVedonoNellaCasella() As Task
+
+            ' Visto sull'applicazione vera il 2026-08-14: l'AI scrive «\n», e una casella
+            ' multiriga di Windows i ritorni a capo li mostra solo se sono CRLF. Il
+            ' messaggio compariva tutto attaccato — «Cordiali saluti,Mirco Parenti» — e chi
+            ' lo rilegge crede che sia stato scritto così.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim corpo As String = Casella(pannello, "txtCorpo").Text
+
+                    Assert.Contains(vbCrLf, corpo, "gli a capo ci sono")
+                    Assert.DoesNotContain("posizione." & vbLf, corpo, "e non sono quelli che Windows non mostra")
+                    Assert.Contains("Cordiali saluti," & vbCrLf & "Luca Ferrari", corpo, "la firma va a capo")
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Async Function IlDestinatarioNonLoScriveMaiIlProgramma() As Task
 
             Dim compositore As New CompositoreFinto

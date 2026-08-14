@@ -171,8 +171,24 @@ Namespace Motore
 
             Return New BozzaEmail With {
                 .Oggetto = If(CampiJson.Testo(oggetto, "oggetto"), ""),
-                .Corpo = If(CampiJson.Testo(oggetto, "corpo"), "")}
+                .Corpo = ConGliACapoDiWindows(CampiJson.Testo(oggetto, "corpo"))}
 
+        End Function
+
+        ''' <summary>
+        ''' Gli a capo come li vuole una casella di Windows. L'AI scrive <c>\n</c>, e una
+        ''' <c>TextBox</c> multiriga i ritorni a capo li mostra solo se sono CRLF: senza
+        ''' questo, il messaggio compare tutto attaccato — «Cordiali saluti,Mirco Parenti» —
+        ''' e chi lo rilegge crede che sia stato scritto così.
+        ''' </summary>
+        ''' <remarks>
+        ''' Si normalizza <b>qui</b>, alla porta da cui il testo dell'AI entra: è il punto in
+        ''' cui vale una volta sola per tutti — quel che si vede, quel che si salva e quel che
+        ''' parte. (Il messaggio di posta rinormalizza comunque a CRLF per conto suo,
+        ''' v. <c>ScrittoreEml</c>: là è il formato a pretenderlo, qui è chi legge.)
+        ''' </remarks>
+        Private Shared Function ConGliACapoDiWindows(testo As String) As String
+            Return If(testo, "").Replace(vbCrLf, vbLf).Replace(vbCr, vbLf).Replace(vbLf, vbCrLf)
         End Function
 
     End Class

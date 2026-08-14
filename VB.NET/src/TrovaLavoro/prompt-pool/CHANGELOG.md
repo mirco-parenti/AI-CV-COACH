@@ -27,6 +27,24 @@ La non-regressione contro il prototipo (cap. 14, T2) è passata su questa versio
 prompt del confronto costruito dal pool è identico carattere per carattere a quello che
 il prototipo costruisce nel codice.
 
+## Pool 1.05 — 2026-08-14
+
+**Un esempio che contraddiceva la sua regola.** Toccato un file solo,
+`generazione/email_candidatura.md` (→ versione 1.1), poche ore dopo la sua nascita: la
+prima email vera l'ha fatto vedere in tre parole.
+
+Il prompt vietava di dare del tu all'azienda («a leggere è qualcuno che non si conosce»)
+e due sezioni più giù ne dava un esempio che lo faceva: *«In allegato **trovi** il mio
+CV»*. Il modello ha seguito l'esempio invece della regola — e per giunta l'ha storpiato,
+scrivendo «In allegato **trovo** il mio CV». Ora la frase di rimando è dichiarata
+**impersonale**, con due forme buone («In allegato il mio CV…», «Allego il mio CV…») e il
+divieto esplicito della seconda persona.
+
+*La lezione, che vale oltre questo prompt:* in un'istruzione, **l'esempio pesa più della
+regola**. Se i due si contraddicono vince l'esempio, perché è la cosa concreta da imitare.
+Quando si rilegge un prompt conviene perciò rileggere prima gli esempi, e chiedersi se
+uno di loro sta insegnando l'opposto di quel che c'è scritto sopra.
+
 ## Pool 1.04 — 2026-08-14
 
 **Il primo bump che aggiunge prompt invece di correggerne.** Entrano i due prompt nuovi
