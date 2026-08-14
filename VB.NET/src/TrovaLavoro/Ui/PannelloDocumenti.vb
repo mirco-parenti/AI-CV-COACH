@@ -35,14 +35,14 @@ Public Class PannelloDocumenti
     ''' <summary>Sotto questa altezza la fascia delle azioni non scende: i bottoni ci devono stare.</summary>
     Private Const AltezzaMinimaAzioni As Integer = 60
 
-    '''' <summary>Quanto spazio si prende il logo flottante (cap. 03.5).</summary>
+    ''' <summary>Quanto spazio si prende il logo flottante (cap. 03.5).</summary>
     Private _ingombroLogo As Size
 
-    '''' <summary>
-    '''' La fascia dei comandi in fondo (cap. 03.4). Nasce alla prima disposizione e non nel
-    '''' costruttore: i bottoni che le si dichiarano esistono solo dopo
-    '''' <c>InitializeComponent</c>.
-    '''' </summary>
+    ''' <summary>
+    ''' La fascia dei comandi in fondo (cap. 03.4). Nasce alla prima disposizione e non nel
+    ''' costruttore: i bottoni che le si dichiarano esistono solo dopo
+    ''' <c>InitializeComponent</c>.
+    ''' </summary>
     Private _comandi As FasciaDeiComandi
 
     ''' <summary>Il titolo delle finestrelle di conferma: il nome che l'utente conosce.</summary>
@@ -535,12 +535,11 @@ Public Class PannelloDocumenti
 
     End Sub
 
-    ''' <summary>Mette i bottoni sul fondo: si torna indietro a sinistra, si esporta a destra.</summary>
-    '''' <summary>
-    '''' Rifà la disposizione dei comandi in fondo al pannello. La geometria la sa la
-    '''' <see cref="FasciaDeiComandi"/>, che è di tutti i pannelli; qui resta la sola cosa
-    '''' che sa questo pannello — <b>quali</b> comandi vanno da che parte.
-    '''' </summary>
+    ''' <summary>
+    ''' Rifà la disposizione dei comandi in fondo al pannello. La geometria la sa la
+    ''' <see cref="FasciaDeiComandi"/>, che è di tutti i pannelli; qui resta la sola cosa
+    ''' che sa questo pannello — <b>quali</b> comandi vanno da che parte.
+    ''' </summary>
     Private Sub DisponiLeAzioni()
 
         If _comandi Is Nothing Then

@@ -206,11 +206,11 @@ Public Class PannelloProfilo
 
     End Sub
 
-    '''' <summary>
-    '''' Rifà la disposizione dei comandi in fondo al pannello. La geometria la sa la
-    '''' <see cref="FasciaDeiComandi"/>, che è di tutti i pannelli; qui resta la sola cosa
-    '''' che sa questo pannello — <b>quali</b> comandi vanno da che parte.
-    '''' </summary>
+    ''' <summary>
+    ''' Rifà la disposizione dei comandi in fondo al pannello. La geometria la sa la
+    ''' <see cref="FasciaDeiComandi"/>, che è di tutti i pannelli; qui resta la sola cosa
+    ''' che sa questo pannello — <b>quali</b> comandi vanno da che parte.
+    ''' </summary>
     Private Sub DisponiLeAzioni()
 
         If _comandi Is Nothing Then
