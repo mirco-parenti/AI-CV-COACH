@@ -34,6 +34,38 @@ Public Class AnnuncioCatturatoEventArgs
 End Class
 
 ''' <summary>
+''' Un CV letto dalla pagina che l'utente stava guardando — di norma la <b>propria</b>
+''' pagina profilo LinkedIn (cap. 06.7, voce 2.1.3).
+''' </summary>
+''' <remarks>
+''' È il gemello di <see cref="AnnuncioCatturatoEventArgs"/>, e sono due classi distinte
+''' di proposito: portano lo stesso genere di dati ma vanno in due direzioni diverse — uno
+''' all'analisi dell'annuncio, l'altro alla scheda del profilo. Un solo tipo per entrambi
+''' risparmierebbe dieci righe e in cambio mentirebbe sul nome ogni volta che si legge.
+''' </remarks>
+Public Class CvCatturatoEventArgs
+    Inherits EventArgs
+
+    Public Sub New(testo As String, fonte As String, link As String)
+
+        Me.Testo = testo
+        Me.Fonte = fonte
+        Me.Link = link
+
+    End Sub
+
+    ''' <summary>Il testo visibile della pagina: è ciò che andrà alla strutturazione.</summary>
+    Public ReadOnly Property Testo As String
+
+    ''' <summary>Il sito da cui viene, per dirlo all'utente nella scheda del profilo.</summary>
+    Public ReadOnly Property Fonte As String
+
+    ''' <summary>L'indirizzo della pagina letta.</summary>
+    Public ReadOnly Property Link As String
+
+End Class
+
+''' <summary>
 ''' Pannello P3 — la ricerca degli annunci (cap. 06; cap. 12, A3-A4): un browser vero
 ''' dentro l'applicazione, dove naviga l'utente, con le ricerche salvate sopra e la
 ''' cattura sotto.
@@ -108,6 +140,12 @@ Public Class PannelloRicerca
     ''' </summary>
     Public Event AnnuncioCatturato As EventHandler(Of AnnuncioCatturatoEventArgs)
 
+    ''' <summary>
+    ''' L'utente ha letto il proprio CV dalla pagina aperta: la finestra lo porta alla
+    ''' scheda del profilo, che è dove un CV diventa profilo (cap. 06.7).
+    ''' </summary>
+    Public Event CvCatturato As EventHandler(Of CvCatturatoEventArgs)
+
     Public Sub New()
 
         InitializeComponent()
@@ -119,6 +157,9 @@ Public Class PannelloRicerca
 
         _suggerimenti.SetToolTip(btnCattura,
             "Legge l'annuncio dalla pagina aperta e lo manda all'analisi.")
+
+        _suggerimenti.SetToolTip(btnImportaCv,
+            "Legge il CV dalla pagina aperta — la tua pagina profilo — e lo porta nella scheda Profilo.")
 
         AggiornaComandi()
 
@@ -412,6 +453,10 @@ Public Class PannelloRicerca
         Await CatturaAsync()
     End Sub
 
+    Private Async Sub btnImportaCv_Click(sender As Object, e As EventArgs) Handles btnImportaCv.Click
+        Await ImportaCvAsync()
+    End Sub
+
     ''' <summary>
     ''' Legge la pagina che l'utente sta guardando e la consegna all'analisi (cap. 06.4).
     ''' </summary>
@@ -425,26 +470,14 @@ Public Class PannelloRicerca
     ''' </remarks>
     Public Async Function CatturaAsync() As Task
 
-        Dim lettore As ILettorePagina = LettoreDellaPagina()
-        If lettore Is Nothing Then Return
+        ' Una pagina che non si lascia leggere non è un crash: è un annuncio che si potrà
+        ' sempre incollare a mano in Candidatura.
+        Dim pagina As PaginaLetta = Await LeggiLaPaginaAsync(
+            "Puoi copiarne il testo e incollarlo nel pannello Candidatura.",
+            scorrendo:=False).ConfigureAwait(True)
+        If pagina Is Nothing Then Return
 
-        Racconta("Leggo la pagina…")
-
-        Dim pagina As PaginaLetta
-
-        Try
-            pagina = Await lettore.LeggiAsync().ConfigureAwait(True)
-
-        Catch ex As Exception
-            ' Una pagina che non si lascia leggere non è un crash: è un annuncio che si
-            ' potrà sempre incollare a mano in Candidatura.
-            Racconta($"Non sono riuscita a leggere questa pagina ({ex.Message}). " &
-                     "Puoi copiarne il testo e incollarlo nel pannello Candidatura.")
-            Return
-
-        End Try
-
-        Dim testo As String = If(pagina?.Testo, String.Empty).Trim()
+        Dim testo As String = If(pagina.Testo, String.Empty).Trim()
 
         If testo.Length < MinimoTestoDellaPagina Then
             Racconta("In questa pagina non c'è testo da leggere. Aspetta che finisca di " &
@@ -466,6 +499,81 @@ Public Class PannelloRicerca
 
         RaiseEvent AnnuncioCatturato(
             Me, New AnnuncioCatturatoEventArgs(testo, _ricerche.FonteDi(pagina.Indirizzo), pagina.Indirizzo))
+
+    End Function
+
+    ''' <summary>
+    ''' Legge dalla pagina aperta il <b>CV</b> di chi usa il programma — di norma la sua
+    ''' pagina profilo LinkedIn — e lo consegna alla scheda del profilo (cap. 06.7).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>È il gemello di <see cref="CatturaAsync"/> e legge la pagina allo stesso
+    ''' modo: la differenza sta tutta in <b>dove va a finire</b> il testo. Qui non si
+    ''' chiama l'AI — a strutturare è P2, che ha già l'attesa, l'annullamento, la guardia
+    ''' sulle correzioni non salvate e la scheda «Testo letto» dove l'utente controlla che
+    ''' nel profilo non sia comparso nulla che nella pagina non c'era.</para>
+    ''' <para><b>Non si controlla che la pagina sia LinkedIn</b>, e nemmeno che sia la
+    ''' propria. Il primo controllo sarebbe inutile — la strutturazione è indipendente
+    ''' dalla fonte, e legge altrettanto bene una pagina «chi sono» di un sito personale;
+    ''' il secondo è impossibile da fare onestamente, perché l'indirizzo di un profilo non
+    ''' dice di chi sia. Il «solo la tua pagina» del cap. 06.7 è una regola per l'utente, e
+    ''' gliela si <b>dice</b> (pagina di casa, suggerimento del bottone) invece di fingere
+    ''' un controllo che non esiste.</para>
+    ''' </remarks>
+    Public Async Function ImportaCvAsync() As Task
+
+        ' Il ripiego onesto qui è l'altra porta dello stesso mestiere: il file.
+        Dim pagina As PaginaLetta = Await LeggiLaPaginaAsync(
+            "Puoi importare il CV da un file nella scheda Profilo.",
+            scorrendo:=True).ConfigureAwait(True)
+        If pagina Is Nothing Then Return
+
+        Dim testo As String = If(pagina.Testo, String.Empty).Trim()
+
+        If testo.Length < MinimoTestoDellaPagina Then
+            Racconta("In questa pagina non c'è testo da leggere. Aspetta che finisca di " &
+                     "caricarsi, oppure apri la tua pagina profilo.")
+            Return
+        End If
+
+        Racconta(RaccontoDelCv(pagina, testo.Length))
+
+        RaiseEvent CvCatturato(
+            Me, New CvCatturatoEventArgs(testo, _ricerche.FonteDi(pagina.Indirizzo), pagina.Indirizzo))
+
+    End Function
+
+    ''' <summary>
+    ''' La pagina di adesso, o <c>Nothing</c> se non c'è o non si è lasciata leggere —
+    ''' detto all'utente col ripiego che compete a chi ha chiesto.
+    ''' </summary>
+    ''' <param name="scorrendo">
+    ''' Se prima di leggere si deve scendere per la pagina. Lo chiede l'import del CV, dove
+    ''' un profilo su un sito moderno esiste per metà finché non lo si scorre; <b>non</b> la
+    ''' cattura dell'annuncio, che legge la pagina com'è e in quel modo è stata collaudata.
+    ''' </param>
+    Private Async Function LeggiLaPaginaAsync(ripiego As String, scorrendo As Boolean) As Task(Of PaginaLetta)
+
+        Dim lettore As ILettorePagina = LettoreDellaPagina()
+        If lettore Is Nothing Then Return Nothing
+
+        Try
+
+            If scorrendo Then
+                ' Si dice, perché sono secondi in cui la pagina si muove da sola sotto gli
+                ' occhi di chi guarda: senza una parola sembrerebbe che sia impazzita.
+                Racconta("Scorro la pagina, per prendere anche quello che si carica scendendo…")
+                Await lettore.ScorriAsync().ConfigureAwait(True)
+            End If
+
+            Racconta("Leggo la pagina…")
+            Return Await lettore.LeggiAsync().ConfigureAwait(True)
+
+        Catch ex As Exception
+            Racconta($"Non sono riuscita a leggere questa pagina ({ex.Message}). " & ripiego)
+            Return Nothing
+
+        End Try
 
     End Function
 
@@ -517,6 +625,33 @@ Public Class PannelloRicerca
                If(pagina.Troncato,
                   $" La pagina era più lunga di {LettorePagina.MassimoCaratteri} caratteri: " &
                   "all'analisi va la prima parte.",
+                  String.Empty)
+
+    End Function
+
+    ''' <summary>
+    ''' Cosa si è letto, quanto, e dove sta andando.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>«Dove sta andando» conta quanto il resto: chi preme si ritrova su un altro
+    ''' pannello, e deve sapere che è successo apposta.</para>
+    ''' <para><b>Il numero di caratteri non è un vezzo da programmatori.</b> Un profilo su
+    ''' un sito moderno esiste per metà finché non lo si scorre, e il collaudo di T5d l'ha
+    ''' misurato sul campo: dalla stessa pagina, prima e dopo lo scorrimento, sono uscite
+    ''' una esperienza spoglia e un profilo intero. Lo scorrimento ora lo facciamo noi, ma
+    ''' un sito può sempre caricare in un modo che non prevediamo: quel numero è il solo
+    ''' modo che l'utente ha di accorgersi che alla strutturazione è andata poca roba,
+    ''' <i>prima</i> di guardare un profilo dimezzato e crederlo completo.</para>
+    ''' </remarks>
+    Private Shared Function RaccontoDelCv(pagina As PaginaLetta, quantoTesto As Integer) As String
+
+        Dim titolo As String = If(pagina.Titolo, String.Empty).Trim()
+
+        Return If(titolo = "", "Pagina letta", $"Letto: «{titolo}»") &
+               $" — {quantoTesto} caratteri. Lo porto nella scheda Profilo." &
+               If(pagina.Troncato,
+                  $" La pagina era più lunga di {LettorePagina.MassimoCaratteri} caratteri: " &
+                  "alla strutturazione va la prima parte.",
                   String.Empty)
 
     End Function
@@ -627,9 +762,11 @@ Public Class PannelloRicerca
         btnRicarica.Enabled = cIlBrowser AndAlso _accesa
         btnIndietro.Enabled = cIlBrowser AndAlso _accesa AndAlso vista.CoreWebView2.CanGoBack
 
-        ' Si cattura da una pagina: finché non ce n'è una aperta il comando resta spento,
-        ' che è più onesto di un bottone che risponde «non c'è niente da leggere».
-        btnCattura.Enabled = LettoreDellaPagina() IsNot Nothing
+        ' Si legge da una pagina: finché non ce n'è una aperta i due comandi restano
+        ' spenti, che è più onesto di un bottone che risponde «non c'è niente da leggere».
+        Dim cEUnaPagina As Boolean = LettoreDellaPagina() IsNot Nothing
+        btnCattura.Enabled = cEUnaPagina
+        btnImportaCv.Enabled = cEUnaPagina
 
     End Sub
 
@@ -674,10 +811,16 @@ Public Class PannelloRicerca
                "<li>Oppure incolla il <b>link</b> di un annuncio nella casella dell'indirizzo e premi <b>Vai</b>.</li>" &
                "<li>Quando hai davanti la pagina di <b>un</b> annuncio, premi <b>Cattura annuncio</b>: " &
                "il testo va all'analisi e l'annuncio entra fra le tue opportunità.</li>" &
+               "<li>Da qui puoi anche compilare il profilo: apri la <b>tua</b> pagina su LinkedIn " &
+               "(o un altro sito che racconti il tuo percorso) e premi <b>Importa CV da questa " &
+               "pagina</b>. È la stessa cosa che fa «Importa CV da un file…» nella scheda Profilo, " &
+               "ma legge da qui.</li>" &
                "</ol>" &
                "<p class=""nota"">Se un portale ti chiede di accedere, fallo qui come faresti in un " &
                "browser qualunque: la sessione resta su questo computer e l'applicazione non vede " &
-               "la tua password. Le ricerche che salvi restano anche dopo aver chiuso.</p>" &
+               "la tua password. Le ricerche che salvi restano anche dopo aver chiuso. " &
+               "L'importazione del CV è pensata per la <b>tua</b> pagina: quella di un'altra persona " &
+               "non è tua da prendere, e il programma non può accorgersene al posto tuo.</p>" &
                "</body></html>"
 
     End Function
@@ -691,6 +834,10 @@ Public Class PannelloRicerca
         StileApp.VestiBottone(btnCerca, LivelloBottone.AzionePrincipale)
         StileApp.VestiBottone(btnSalvaRicerca, LivelloBottone.SicuroPositivo)
         StileApp.VestiBottone(btnCattura, LivelloBottone.SicuroPositivo)
+
+        ' Come la cattura: costa una chiamata all'AI e propone qualcosa, ma non scrive
+        ' niente su disco — il profilo si salva solo dal suo pannello.
+        StileApp.VestiBottone(btnImportaCv, LivelloBottone.SicuroPositivo)
         StileApp.VestiBottone(btnApri, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnVai, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnIndietro, LivelloBottone.Neutro)
@@ -713,14 +860,18 @@ Public Class PannelloRicerca
 
     End Sub
 
-    ''' <summary>Mette la cattura sul fondo della fascia, col suo racconto a destra.</summary>
+    ''' <summary>Mette i due comandi sul fondo della fascia, col racconto a destra.</summary>
     Private Sub DisponiLeAzioni()
 
         Dim riga As Integer = pnlAzioni.Height - StileApp.MargineRiquadro - StileApp.BottoneStandard.Height
 
         btnCattura.Location = New Point(pnlAzioni.Padding.Left, riga)
 
-        Dim doveComincia As Integer = btnCattura.Right + StileApp.DistanzaControlli
+        ' L'annuncio prima del CV: è il mestiere di questo pannello, e l'altro è la coda
+        ' di T5 che ci si è appoggiata (cap. 06.7).
+        btnImportaCv.Location = New Point(btnCattura.Right + StileApp.DistanzaControlli, riga)
+
+        Dim doveComincia As Integer = btnImportaCv.Right + StileApp.DistanzaControlli
         lblStatoRicerca.Location = New Point(doveComincia, riga + 6)
         lblStatoRicerca.Width = Math.Max(0, pnlAzioni.ClientSize.Width -
                                             StileApp.MargineRiquadro - doveComincia)

@@ -1,5 +1,7 @@
 Imports System.Drawing
 Imports System.IO
+Imports System.Linq
+Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro
@@ -430,6 +432,150 @@ Namespace Ui
                     Assert.HasCount(1, archivio.Versioni(), "e nello storico non è comparso nulla")
                 End Sub)
         End Sub
+
+        ' ==================================================================
+        ' Il CV che arriva da una pagina (cap. 06.7 — T5d)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function IlCvLettoDaUnaPaginaRiempieLaSchedaMaNonIlDisco() As Task
+
+            ' È l'altra porta dello stesso mestiere: cambia da dove viene il testo, e da
+            ' lì in poi la strada è quella dell'import da file — turno «importa_cv»,
+            ' campi proposti, testo a disposizione, e su disco niente finché non si salva.
+            Dim aiFinta As New StrutturatoreFinto()
+            aiFinta.Dara(ProfiloDiRitorno())
+
+            Await ConImportFintoAsync(aiFinta,
+                Async Function(pannello, archivio) As Task
+
+                    Dim primaDi As String = archivio.Carica().ComeTesto()
+
+                    Await pannello.ImportaDaTestoAsync(TestoDiUnaPaginaProfilo(), "da linkedin.com")
+
+                    ' All'AI è andato il turno del CV, col testo della pagina e nient'altro.
+                    Assert.HasCount(1, aiFinta.Chiamate, "una sola chiamata")
+                    Assert.AreEqual("importa_cv", aiFinta.Chiamate.Single().Turno,
+                                    "lo stesso turno del CV in PDF: la fonte non cambia il prompt")
+                    Assert.AreEqual(TestoDiUnaPaginaProfilo(), aiFinta.Chiamate.Single().Risposta)
+
+                    ' Il profilo proposto è nei campi.
+                    Assert.AreEqual("Mirco Parenti", Casella(pannello, "txtNome").Text)
+                    Assert.AreEqual("Chiavari", Casella(pannello, "txtDomicilio").Text)
+                    Assert.HasCount(1, Elenco(pannello, "lstCompetenze").Items)
+
+                    ' E il testo originale resta a disposizione: è la prova con cui si
+                    ' controlla che nel profilo non sia comparso nulla che lì non c'era.
+                    Assert.Contains("Rossi S.p.A.", Casella(pannello, "txtTestoLetto").Text)
+
+                    Assert.IsTrue(pannello.HaModificheNonSalvate, "resta da salvare")
+                    Assert.Contains("linkedin.com", Etichetta(pannello, "lblStatoProfilo").Text,
+                                    "e la scheda dice da dove arriva")
+
+                    Assert.AreEqual(primaDi, archivio.Carica().ComeTesto(),
+                                    "ma su disco non si è mosso niente")
+                    Assert.HasCount(1, archivio.Versioni(), "e nello storico non è comparso nulla")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SenzaChiaveIlCvDallaPaginaDiceCosaManca() As Task
+
+            ' Il comando che l'ha mandato sta in un altro pannello, che di chiavi non sa
+            ' niente: se qui non si dicesse perché non è successo nulla, l'utente
+            ' cambierebbe pannello e troverebbe la scheda com'era, senza una parola.
+            Dim ilProfiloDiPrima As String = Nothing
+
+            Await ConProfiloSalvatoAsync(
+                Async Function(pannello, archivio) As Task
+
+                    ilProfiloDiPrima = Casella(pannello, "txtNome").Text
+
+                    Await pannello.ImportaDaTestoAsync(TestoDiUnaPaginaProfilo(), "da linkedin.com")
+
+                    Assert.Contains("chiave", Etichetta(pannello, "lblStatoProfilo").Text)
+                    Assert.AreEqual(ilProfiloDiPrima, Casella(pannello, "txtNome").Text,
+                                    "e la scheda è rimasta com'era")
+                    Assert.IsFalse(pannello.HaModificheNonSalvate, "niente da salvare")
+
+                End Function)
+
+        End Function
+
+        ''' <summary>Quel che l'AI risponde sul testo della pagina: la forma di «importa_cv».</summary>
+        Private Shared Function ProfiloDiRitorno() As String
+
+            Return "{""nome"": ""Mirco Parenti""," &
+                   " ""contatti"": {""email"": """", ""telefono"": """", ""citta"": ""Chiavari"", ""link"": """"}," &
+                   " ""patente"": {""ha"": """", ""categorie"": []}," &
+                   " ""esperienze_formali"": [{""ruolo"": ""Magazziniere"", ""azienda"": ""Rossi S.p.A.""," &
+                   " ""durata"": ""2023-2024"", ""cosa_facevo"": ""Carico e scarico merci"", ""tipo"": """"}]," &
+                   " ""esperienze_informali"": []," &
+                   " ""competenze"": [""Uso del muletto""]," &
+                   " ""formazione"": [{""titolo"": ""Perito elettronico"", ""istituto"": ""ITIS Marconi""," &
+                   " ""anno"": ""2019""}]}"
+
+        End Function
+
+        ''' <summary>Una pagina profilo come la legge il browser: il percorso e la fuffa intorno.</summary>
+        Private Shared Function TestoDiUnaPaginaProfilo() As String
+
+            Return "Mirco Parenti" & vbLf &
+                   "Perito elettronico — Chiavari, Liguria" & vbLf &
+                   "Esperienza" & vbLf &
+                   "Magazziniere presso Rossi S.p.A. — 2023-2024." & vbLf &
+                   "Persone che potresti conoscere · Annunci"
+
+        End Function
+
+        ''' <summary>
+        ''' Come <see cref="ConProfiloSalvato"/>, ma con un lettore di CV <b>finto</b> in
+        ''' mano al pannello: è così che un import intero si prova senza chiave e senza
+        ''' rete (lo stesso gancio che P4 ha per la pipeline).
+        ''' </summary>
+        Private Shared Async Function ConImportFintoAsync(
+            aiFinta As StrutturatoreFinto,
+            prova As Func(Of TrovaLavoro.PannelloProfilo, ArchivioProfilo, Task)) As Task
+
+            Await ConPannelloCollegatoAsync(New ImportProfilo(aiFinta), prova)
+
+        End Function
+
+        ''' <summary>Lo stesso, ma col motore vero: senza chiave, l'import non esiste.</summary>
+        Private Shared Async Function ConProfiloSalvatoAsync(
+            prova As Func(Of TrovaLavoro.PannelloProfilo, ArchivioProfilo, Task)) As Task
+
+            Await ConPannelloCollegatoAsync(Nothing, prova)
+
+        End Function
+
+        Private Shared Async Function ConPannelloCollegatoAsync(
+            importCv As ImportProfilo,
+            prova As Func(Of TrovaLavoro.PannelloProfilo, ArchivioProfilo, Task)) As Task
+
+            Dim radice As String = Path.Combine(Path.GetTempPath(),
+                                                "pannello-profilo-" & Guid.NewGuid().ToString("N"))
+
+            Try
+                Dim archivio As New ArchivioProfilo(New CartellaDati(radice))
+                archivio.Salva(ProfiloDiProva())
+
+                Using contesto As ContestoApp = ContestoApp.Monta(radice, "", PoolInesistente()),
+                      pannello As New TrovaLavoro.PannelloProfilo()
+
+                    pannello.CreateControl()
+                    pannello.Collega(contesto, importCv)
+
+                    Await prova(pannello, archivio)
+                End Using
+
+            Finally
+                If Directory.Exists(radice) Then Directory.Delete(radice, recursive:=True)
+            End Try
+
+        End Function
 
         ''' <summary>
         ''' Prepara una cartella dati con dentro il profilo del banco e un pannello già

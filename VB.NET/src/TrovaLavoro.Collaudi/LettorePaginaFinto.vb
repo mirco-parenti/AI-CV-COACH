@@ -23,13 +23,40 @@ Friend Class LettorePaginaFinto
     ''' <summary>Quante volte gli è stata chiesta la pagina.</summary>
     Public Property Letture As Integer
 
+    ''' <summary>Quante volte gli è stato chiesto di scorrere.</summary>
+    Public Property Scorrimenti As Integer
+
+    ''' <summary>
+    ''' Quel che si legge <b>dopo</b> aver scorso, se il collaudo vuole una pagina che
+    ''' cresce scendendo. <c>Nothing</c> per una pagina che è già tutta lì.
+    ''' </summary>
+    ''' <remarks>
+    ''' Serve a provare la cosa che a T5d si è vista sul campo e che nessun collaudo
+    ''' vedrebbe da sé: su un sito che carica mentre si scende, leggere senza aver scorso
+    ''' dà un profilo dimezzato — e la differenza fra le due letture è tutta la ragione per
+    ''' cui lo scorrimento esiste.
+    ''' </remarks>
+    Public Property PaginaDopoScorrimento As PaginaLetta
+
     Public Function LeggiAsync() As Task(Of PaginaLetta) Implements ILettorePagina.LeggiAsync
 
         Letture += 1
 
         If Guasto IsNot Nothing Then Throw Guasto
 
+        If Scorrimenti > 0 AndAlso PaginaDopoScorrimento IsNot Nothing Then
+            Return Task.FromResult(PaginaDopoScorrimento)
+        End If
+
         Return Task.FromResult(Pagina)
+
+    End Function
+
+    Public Function ScorriAsync() As Task Implements ILettorePagina.ScorriAsync
+
+        Scorrimenti += 1
+
+        Return Task.CompletedTask
 
     End Function
 

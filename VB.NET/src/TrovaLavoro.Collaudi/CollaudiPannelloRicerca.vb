@@ -418,8 +418,228 @@ Namespace Ui
         End Function
 
         ' ==================================================================
+        ' Il CV dalla pagina (cap. 06.7 — T5d)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function IlCvLettoDallaPaginaVaAllaSchedaDelProfilo() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {
+                    .Titolo = "Mirco Parenti | LinkedIn",
+                    .Indirizzo = "https://www.linkedin.com/in/mirco-parenti",
+                    .Testo = TestoDiUnaPaginaProfilo()}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Assert.IsTrue(Bottone(pannello, "btnImportaCv").Enabled,
+                                  "con una pagina aperta si può leggere")
+
+                    Dim consegnato As CvCatturatoEventArgs = Nothing
+                    AddHandler pannello.CvCatturato,
+                        Sub(mittente, argomenti) consegnato = argomenti
+
+                    Await pannello.ImportaCvAsync()
+
+                    Assert.IsNotNull(consegnato, "la lettura non ha consegnato niente")
+                    Assert.AreEqual(TestoDiUnaPaginaProfilo(), consegnato.Testo, "il testo della pagina")
+                    Assert.AreEqual("linkedin.com", consegnato.Fonte,
+                                    "il sito, che non è fra i portali di ricerca")
+                    Assert.AreEqual("https://www.linkedin.com/in/mirco-parenti", consegnato.Link)
+
+                    ' Chi preme si ritrova su un altro pannello: deve sapere che è apposta.
+                    Assert.Contains("Profilo", Etichetta(pannello, "lblStatoRicerca").Text)
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaStessaPaginaSiPuoRileggereQuanteVolteSiVuole() As Task
+
+            ' Il divieto del doppione è una regola degli **annunci**: due candidature
+            ' gemelle nella coda non servono a nessuno. Un profilo no — il proprio
+            ' percorso cambia, e rileggerlo dopo averlo aggiornato è esattamente quel che
+            ' si vuole fare. Qui si verifica che le due regole non si siano mescolate.
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {
+                    .Titolo = "Mirco Parenti | LinkedIn",
+                    .Indirizzo = "https://www.linkedin.com/in/mirco-parenti",
+                    .Testo = TestoDiUnaPaginaProfilo()}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Dim quante As Integer = 0
+                    AddHandler pannello.CvCatturato, Sub(mittente, argomenti) quante += 1
+
+                    Await pannello.ImportaCvAsync()
+                    Await pannello.ImportaCvAsync()
+
+                    Assert.AreEqual(2, quante, "un profilo si rilegge quante volte si vuole")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaPaginaSenzaTestoNonDiventaUnProfilo() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {.Titolo = "LinkedIn", .Testo = "Caricamento…"}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Dim consegnato As Boolean = False
+                    AddHandler pannello.CvCatturato, Sub(mittente, argomenti) consegnato = True
+
+                    Await pannello.ImportaCvAsync()
+
+                    Assert.IsFalse(consegnato, "niente da strutturare, niente da consegnare")
+                    Assert.Contains("pagina profilo", Etichetta(pannello, "lblStatoRicerca").Text,
+                                    "e si dice cosa aprire, invece di lasciare l'utente a indovinare")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaPaginaIlleggibileRimandaAllAltraPortaDelloStessoMestiere() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Guasto = New InvalidOperationException("la vista non risponde")}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Dim consegnato As Boolean = False
+                    AddHandler pannello.CvCatturato, Sub(mittente, argomenti) consegnato = True
+
+                    Await pannello.ImportaCvAsync()
+
+                    Assert.IsFalse(consegnato)
+                    Assert.AreEqual(1, lettore.Letture, "ci ha provato")
+
+                    ' Il ripiego onesto di questo comando non è «incolla in Candidatura»
+                    ' come per l'annuncio: è l'altra porta dell'import, cioè il file.
+                    Assert.Contains("file", Etichetta(pannello, "lblStatoRicerca").Text)
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LImportScorreLaPaginaPrimaDiLeggerla() As Task
+
+            ' Il fatto misurato a T5d sulla pagina vera: senza scorrere esce l'intestazione
+            ' e basta — una esperienza senza date né mansioni, zero studi, zero competenze —
+            ' perché le sezioni entrano nel documento solo mentre si scende.
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {
+                    .Titolo = "Mirco Parenti | LinkedIn",
+                    .Indirizzo = "https://www.linkedin.com/in/mirco-parenti",
+                    .Testo = TestoDiUnaPaginaProfilo()},
+                .PaginaDopoScorrimento = New PaginaLetta With {
+                    .Titolo = "Mirco Parenti | LinkedIn",
+                    .Indirizzo = "https://www.linkedin.com/in/mirco-parenti",
+                    .Testo = TestoDiUnaPaginaProfilo() & vbLf & TestoCheArrivaScendendo()}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Dim consegnato As CvCatturatoEventArgs = Nothing
+                    AddHandler pannello.CvCatturato,
+                        Sub(mittente, argomenti) consegnato = argomenti
+
+                    Await pannello.ImportaCvAsync()
+
+                    Assert.AreEqual(1, lettore.Scorrimenti, "ha scorso, e una volta sola")
+                    Assert.IsNotNull(consegnato)
+                    Assert.Contains("Diploma", consegnato.Testo,
+                                    "e ha letto **dopo** aver scorso: c'è anche quel che si carica scendendo")
+
+                    ' Quanto si è preso si dice: è il solo modo che l'utente ha di
+                    ' accorgersi che alla strutturazione è andata poca roba.
+                    Assert.Contains("caratteri", Etichetta(pannello, "lblStatoRicerca").Text)
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaCatturaDellAnnuncioNonScorre() As Task
+
+            ' La cattura è collaudata così com'è dal 2026-08-12, e legge la pagina che
+            ' l'utente sta guardando: aggiungerle uno scorrimento cambierebbe, su tutti i
+            ' portali, quello che finisce nell'analisi — senza che nessuno l'abbia chiesto.
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {
+                    .Titolo = "Magazziniere - Rossi S.p.A. | Indeed",
+                    .Indirizzo = "https://it.indeed.com/viewjob?jk=9f3c1a",
+                    .Testo = TestoDiUnAnnuncio()}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Await pannello.CatturaAsync()
+
+                    Assert.AreEqual(0, lettore.Scorrimenti, "la cattura legge la pagina com'è")
+                    Assert.AreEqual(1, lettore.Letture)
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Sub SenzaUnaPaginaDaLeggereAncheLImportRestaSpento()
+
+            ConPannello(
+                Sub(pannello, contesto, cartella)
+
+                    ' Stessa regola della cattura, e per la stessa ragione: senza browser
+                    ' non c'è niente da leggere, e il bottone lo dice stando spento.
+                    Assert.IsFalse(Bottone(pannello, "btnImportaCv").Enabled)
+
+                End Sub)
+
+        End Sub
+
+        ' ==================================================================
         ' Attrezzi
         ' ==================================================================
+
+        ''' <summary>
+        ''' Una pagina profilo come la rende <c>innerText</c>: il percorso della persona
+        ''' insieme a tutto quello che il sito ci mette intorno.
+        ''' </summary>
+        Private Shared Function TestoDiUnaPaginaProfilo() As String
+
+            Return "Mirco Parenti" & vbLf &
+                   "Perito elettronico — Chiavari, Liguria" & vbLf &
+                   "Esperienza" & vbLf &
+                   "Magazziniere presso Rossi S.p.A. — 2023-2024. Carico e scarico merci, " &
+                   "gestione dei documenti di trasporto, uso del muletto." & vbLf &
+                   "Formazione" & vbLf &
+                   "Diploma di perito elettronico, ITIS Marconi, 2019." & vbLf &
+                   "Patentino del muletto, 2023." & vbLf &
+                   "Persone che potresti conoscere · Annunci · Altro dal feed"
+
+        End Function
+
+        ''' <summary>
+        ''' Le sezioni che un sito moderno aggiunge al documento <b>mentre si scende</b>:
+        ''' finché non si scorre, per il lettore non esistono.
+        ''' </summary>
+        Private Shared Function TestoCheArrivaScendendo() As String
+
+            Return "Formazione" & vbLf &
+                   "Diploma di perito elettronico, ITIS Marconi, 2019." & vbLf &
+                   "Licenze e certificazioni" & vbLf &
+                   "Patentino del muletto, 2023."
+
+        End Function
 
         ''' <summary>Un annuncio abbastanza lungo da valere una chiamata all'AI.</summary>
         Private Shared Function TestoDiUnAnnuncio() As String

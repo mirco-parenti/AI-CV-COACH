@@ -186,6 +186,34 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
+    ''' Il CV letto in P3 va alla scheda del profilo (cap. 06.7, T5d), per la stessa
+    ''' ragione per cui l'annuncio va alla candidatura: è lì che quel testo diventa
+    ''' qualcosa, ed è lì che l'utente lo controlla prima di salvarlo. Anche qui il
+    ''' pannello si mostra <b>prima</b> della lettura, così l'attesa si vede dove
+    ''' succede invece che su un pannello che si sta per lasciare.
+    ''' </summary>
+    Private Async Sub pnlRicerca_CvCatturato(sender As Object, e As CvCatturatoEventArgs) _
+        Handles pnlRicerca.CvCatturato
+
+        MostraPannello(pnlProfilo, btnProfilo)
+        Await pnlProfilo.ImportaDaTestoAsync(e.Testo, OrigineDi(e.Fonte))
+
+    End Sub
+
+    ''' <summary>
+    ''' Da dove viene il CV, detto all'utente. Il sito è già quello che il pannello della
+    ''' ricerca sa riconoscere; quando non c'è — una pagina locale, un indirizzo strano —
+    ''' si dice comunque qualcosa di vero.
+    ''' </summary>
+    Private Shared Function OrigineDi(fonte As String) As String
+
+        Return If(String.IsNullOrWhiteSpace(fonte),
+                  "dalla pagina aperta nel browser",
+                  $"da {fonte}")
+
+    End Function
+
+    ''' <summary>
     ''' Dalla scheda dell'opportunità ai documenti. Il bottone della barra resta quello
     ''' della candidatura: P6 non è un'altra destinazione, è il passo successivo dello
     ''' stesso flusso (cap. 12, A7).

@@ -64,6 +64,15 @@ Public Class PannelloProfilo
     Private _annullaImport As CancellationTokenSource
 
     ''' <summary>
+    ''' Chi legge un CV e ne propone il profilo. È <c>Nothing</c> quando l'AI non c'è —
+    ''' senza chiave il contesto non lo costruisce nemmeno — ed è quella l'unica domanda
+    ''' che il pannello si fa prima di importare: <i>ho lo strumento?</i>, non <i>c'è la
+    ''' chiave?</i>. Sono la stessa cosa nell'applicazione vera, ma la prima si può
+    ''' provare al banco.
+    ''' </summary>
+    Private _importCv As ImportProfilo
+
+    ''' <summary>
     ''' Chiede alla finestra di portare in vista il dialogo guidato (P5). Il pannello non
     ''' conosce né la finestra né gli altri pannelli: dice cosa vuole, e chi sa navigare
     ''' se ne occupa.
@@ -100,10 +109,16 @@ Public Class PannelloProfilo
     ''' <summary>
     ''' Collega il pannello al motore e mostra il profilo che c'è su disco.
     ''' </summary>
-    Public Sub Collega(contesto As ContestoApp)
+    ''' <param name="importCv">
+    ''' Chi legge un CV. Di norma si omette ed è quello del contesto; il banco passa qui
+    ''' il suo, e prova un import intero senza chiave e senza rete (come P4 fa con la
+    ''' pipeline).
+    ''' </param>
+    Public Sub Collega(contesto As ContestoApp, Optional importCv As ImportProfilo = Nothing)
 
         If contesto Is Nothing Then Throw New ArgumentNullException(NameOf(contesto))
         _contesto = contesto
+        _importCv = If(importCv, contesto.ImportCv)
 
         CaricaIlProfilo()
         AggiornaComandi()
@@ -734,24 +749,81 @@ Public Class PannelloProfilo
         Dim percorso As String = ChiediIlFileDelCv()
         If percorso Is Nothing Then Return
 
+        Dim nome As String = Path.GetFileName(percorso)
+
+        Await ConducoLImportAsync(
+            Function(annulla) _importCv.DaFileAsync(percorso, annulla),
+            $"Sto leggendo «{nome}»…",
+            $"Profilo proposto da «{nome}».")
+
+    End Sub
+
+    ''' <summary>
+    ''' Importa il CV da un testo già letto altrove — oggi la pagina aperta nel browser
+    ''' integrato, di norma la propria pagina LinkedIn (cap. 06.7, T5d).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>È la <b>stessa porta</b> del bottone «Importa CV da un file…»: cambia solo
+    ''' da dove viene il testo, e da lì in poi la strada è una — <c>importa_cv</c>, i campi
+    ''' della scheda, la scheda «Testo letto», e niente su disco finché non si preme
+    ''' «Salva profilo». È il motivo per cui T5d non ha avuto bisogno di componenti nuovi:
+    ''' la strutturazione era già indipendente dalla fonte.</para>
+    ''' <para>Chiama chi ha in mano il testo (la finestra, per conto di P3); il pannello
+    ''' non conosce il browser, come il browser non conosce lui.</para>
+    ''' </remarks>
+    ''' <param name="testo">Il testo letto dalla pagina.</param>
+    ''' <param name="origine">Da dove viene, detto all'utente («dalla tua pagina su LinkedIn»).</param>
+    Public Async Function ImportaDaTestoAsync(testo As String, origine As String) As Task
+
+        ' Una lettura per volta: la seconda sovrascriverebbe i campi mentre la prima è
+        ' ancora in volo, e chi guarda non saprebbe quale delle due sta vedendo.
+        If _annullaImport IsNot Nothing Then Return
+
+        If _importCv Is Nothing Then
+            RaccontaLoStato(
+                $"Per leggere un CV serve la chiave API ({ClientClaude.NomeVariabileChiave}), " &
+                "che qui non c'è.",
+                StileApp.Pericolo)
+            Return
+        End If
+
+        If Not PossoSostituireIlProfilo($"Il CV che arriva {origine}") Then Return
+
+        Await ConducoLImportAsync(
+            Function(annulla) _importCv.DaTestoAsync(testo, origine, annulla),
+            $"Sto leggendo il CV che arriva {origine}…",
+            $"Profilo proposto {origine}.")
+
+    End Function
+
+    ''' <summary>
+    ''' Il giro di un import, uguale da qualunque porta arrivi: l'attesa che si può
+    ''' annullare, i campi riempiti, il testo messo a disposizione, e ogni inciampo
+    ''' raccontato dov'è successo.
+    ''' </summary>
+    ''' <param name="leggi">Come si arriva al profilo proposto: da un file, o da un testo.</param>
+    ''' <param name="mentreLegge">Cosa si dice durante l'attesa.</param>
+    ''' <param name="aFineFatta">La prima riga di quel che si dice a cose fatte.</param>
+    Private Async Function ConducoLImportAsync(leggi As Func(Of CancellationToken, Task(Of EsitoImport)),
+                                               mentreLegge As String, aFineFatta As String) As Task
+
         Using filo As New CancellationTokenSource()
 
             _annullaImport = filo
             LetturaInCorso(True)
             RaccontaLoStato(
-                $"Sto leggendo «{Path.GetFileName(percorso)}»…" & vbLf &
-                "Può volerci qualche secondo: il CV passa dall'AI.",
+                mentreLegge & vbLf & "Può volerci qualche secondo: il CV passa dall'AI.",
                 StileApp.TestoSecondario)
 
             Try
-                Dim esito As EsitoImport = Await _contesto.ImportCv.DaFileAsync(percorso, filo.Token)
+                Dim esito As EsitoImport = Await leggi(filo.Token)
 
                 Mostra(esito.Profilo)
                 MostraIlTestoLetto(esito.TestoLetto)
 
                 _modificato = True
                 RaccontaLoStato(
-                    $"Profilo proposto da «{Path.GetFileName(percorso)}»." & vbLf &
+                    aFineFatta & vbLf &
                     "Controllalo campo per campo — la scheda «Testo letto» ha l'originale — poi salvalo.",
                     StileApp.TestoSecondario)
 
@@ -770,7 +842,7 @@ Public Class PannelloProfilo
 
         End Using
 
-    End Sub
+    End Function
 
     ''' <summary>
     ''' Chiede il file da importare. I formati sono quelli che il motore sa leggere
@@ -827,7 +899,7 @@ Public Class PannelloProfilo
     ''' <summary>Il pannello mentre l'AI lavora: niente si tocca, e si può rinunciare.</summary>
     Private Sub LetturaInCorso(inCorso As Boolean)
 
-        btnImporta.Text = If(inCorso, "Annulla lettura", "Importa da un CV…")
+        btnImporta.Text = If(inCorso, "Annulla lettura", "Importa CV da un file…")
         Cursor = If(inCorso, Cursors.AppStarting, Cursors.Default)
 
         AggiornaComandi()
@@ -959,7 +1031,7 @@ Public Class PannelloProfilo
         Dim occupato As Boolean = _annullaImport IsNot Nothing
 
         ' A lettura in corso il bottone dell'import resta acceso: è l'annulla.
-        btnImporta.Enabled = occupato OrElse (conMotore AndAlso _contesto.AiDisponibile)
+        btnImporta.Enabled = occupato OrElse _importCv IsNot Nothing
         If Not occupato AndAlso conMotore AndAlso Not _contesto.AiDisponibile Then
             _suggerimenti.SetToolTip(btnImporta,
                 $"Per leggere un CV serve la chiave API ({ClientClaude.NomeVariabileChiave}).")

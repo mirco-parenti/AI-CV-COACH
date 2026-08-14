@@ -41,6 +41,7 @@ Partial Class PannelloRicerca
         Me.vista = New Microsoft.Web.WebView2.WinForms.WebView2()
         Me.pnlAzioni = New System.Windows.Forms.Panel()
         Me.btnCattura = New System.Windows.Forms.Button()
+        Me.btnImportaCv = New System.Windows.Forms.Button()
         Me.lblStatoRicerca = New System.Windows.Forms.Label()
         Me.pnlIntestazione.SuspendLayout()
         Me.pnlComandi.SuspendLayout()
@@ -282,6 +283,7 @@ Partial Class PannelloRicerca
         'pnlAzioni
         '
         Me.pnlAzioni.Controls.Add(Me.btnCattura)
+        Me.pnlAzioni.Controls.Add(Me.btnImportaCv)
         Me.pnlAzioni.Controls.Add(Me.lblStatoRicerca)
         Me.pnlAzioni.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.pnlAzioni.Location = New System.Drawing.Point(14, 682)
@@ -298,16 +300,25 @@ Partial Class PannelloRicerca
         Me.btnCattura.TabIndex = 0
         Me.btnCattura.Text = "Cattura annuncio"
         '
+        'btnImportaCv
+        '
+        Me.btnImportaCv.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.btnImportaCv.Location = New System.Drawing.Point(192, 12)
+        Me.btnImportaCv.Name = "btnImportaCv"
+        Me.btnImportaCv.Size = New System.Drawing.Size(210, 32)
+        Me.btnImportaCv.TabIndex = 1
+        Me.btnImportaCv.Text = "Importa CV da questa pagina"
+        '
         'lblStatoRicerca
         '
         Me.lblStatoRicerca.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblStatoRicerca.Font = StileApp.FontDidascalia
         Me.lblStatoRicerca.ForeColor = StileApp.TestoSecondario
-        Me.lblStatoRicerca.Location = New System.Drawing.Point(192, 20)
+        Me.lblStatoRicerca.Location = New System.Drawing.Point(414, 20)
         Me.lblStatoRicerca.Name = "lblStatoRicerca"
-        Me.lblStatoRicerca.Size = New System.Drawing.Size(914, 36)
-        Me.lblStatoRicerca.TabIndex = 1
+        Me.lblStatoRicerca.Size = New System.Drawing.Size(692, 36)
+        Me.lblStatoRicerca.TabIndex = 2
         '
         'PannelloRicerca
         '
@@ -354,6 +365,7 @@ Partial Class PannelloRicerca
     Friend WithEvents vista As Microsoft.Web.WebView2.WinForms.WebView2
     Friend WithEvents pnlAzioni As System.Windows.Forms.Panel
     Friend WithEvents btnCattura As System.Windows.Forms.Button
+    Friend WithEvents btnImportaCv As System.Windows.Forms.Button
     Friend WithEvents lblStatoRicerca As System.Windows.Forms.Label
 
 End Class

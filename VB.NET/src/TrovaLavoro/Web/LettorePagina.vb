@@ -45,6 +45,17 @@ Namespace Web
         ''' <summary>Legge la pagina di adesso.</summary>
         Function LeggiAsync() As Task(Of PaginaLetta)
 
+        ''' <summary>
+        ''' Scorre la pagina fino in fondo e torna in cima, per far entrare nel documento
+        ''' anche quello che il sito carica solo <b>mentre si scende</b>.
+        ''' </summary>
+        ''' <remarks>
+        ''' Non serve a tutte le letture, e infatti non lo chiede nessuno d'ufficio: la
+        ''' cattura di un annuncio legge la pagina com'è. Lo chiede l'import del CV, dove
+        ''' la differenza è fra un profilo intero e un profilo dimezzato (cap. 06.7).
+        ''' </remarks>
+        Function ScorriAsync() As Task
+
     End Interface
 
     ''' <summary>
@@ -83,9 +94,149 @@ Namespace Web
 
         End Sub
 
+        ''' <summary>
+        ''' Quante schermate al massimo si scende, e quanto si aspetta a ogni passo perché
+        ''' il sito abbia il tempo di caricare quel che manca. In tutto fanno pochi secondi:
+        ''' è uno scorrimento, non una raccolta — la pagina è una, quella che l'utente ha
+        ''' davanti, e il tetto c'è perché una pagina infinita non tenga occupato il
+        ''' programma finché l'utente non si stufa.
+        ''' </summary>
+        Public Const PassiDiScorrimento As Integer = 25
+        Public Const AttesaFraPassiMs As Integer = 400
+
+        ''' <summary>
+        ''' Quante volte di fila si deve trovare la pagina «finita» prima di crederci.
+        ''' </summary>
+        ''' <remarks>
+        ''' Misurato sul campo il 2026-08-14, ed è la ragione per cui il primo tentativo
+        ''' non serviva a niente: una pagina non ancora caricata è <b>corta</b>, così il
+        ''' fondo arriva dopo due passi, e in quel momento il sito non ha ancora aggiunto
+        ''' nulla. Chi si ferma alla prima impressione di aver finito legge la sola
+        ''' intestazione — 2196 caratteri, esattamente come se non avesse scorso.
+        ''' </remarks>
+        Public Const ConfermeDiFine As Integer = 3
+
         Public Async Function LeggiAsync() As Task(Of PaginaLetta) Implements ILettorePagina.LeggiAsync
 
             Return Interpreta(Await _vista.ExecuteScriptAsync(Copione()).ConfigureAwait(True))
+
+        End Function
+
+        ''' <summary>
+        ''' Scende per la pagina una schermata alla volta e poi risale, come farebbe una
+        ''' persona che vuole leggersela tutta prima di copiarla.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para><b>Perché a passi dal lato nostro e non con un ciclo in JavaScript.</b>
+        ''' Il ciclo dovrebbe aspettare, e una funzione JavaScript che aspetta restituisce
+        ''' una promessa: <c>ExecuteScriptAsync</c> non la attende, tornerebbe subito e
+        ''' l'attesa non ci sarebbe. Facendo i passi da qui, fra un passo e l'altro
+        ''' l'attesa è vera — ed è quella che dà al sito il tempo di aggiungere quel che
+        ''' mancava.</para>
+        ''' <para><b>Quando ci si ferma</b>: quando si è in fondo <i>e</i> la pagina non è
+        ''' più cresciuta rispetto al passo precedente. Il solo «sono in fondo» non basta:
+        ''' su una pagina che carica scendendo, il fondo di adesso è la metà di quello di
+        ''' fra un istante.</para>
+        ''' <para>Alla fine si <b>torna in cima</b>: la pagina resta come l'utente l'aveva
+        ''' lasciata, perché è sua e non l'ha spostata lui.</para>
+        ''' </remarks>
+        Public Async Function ScorriAsync() As Task Implements ILettorePagina.ScorriAsync
+
+            Dim altezzaDiPrima As Double = -1
+            Dim conferme As Integer = 0
+
+            For passo As Integer = 1 To PassiDiScorrimento
+
+                Dim dove As JsonObject = TryCast(
+                    JsonNode.Parse(Await _vista.ExecuteScriptAsync(UnPasso()).ConfigureAwait(True)),
+                    JsonObject)
+
+                ' Una pagina che non si lascia scorrere non è un guasto: si legge quel che
+                ' c'è, che è esattamente ciò che si sarebbe letto senza tutto questo.
+                If dove Is Nothing Then Exit For
+
+                Await Task.Delay(AttesaFraPassiMs).ConfigureAwait(True)
+
+                Dim altezza As Double = Numero(dove, "altezza")
+
+                ' Una pagina che non si muove non si muoverà nemmeno insistendo: non c'è
+                ' niente da scorrere, o lo scorrimento non è nostro da comandare.
+                If Not Vero(dove, "mosso") AndAlso Vero(dove, "fondo") Then Exit For
+
+                ' Si conta quante volte di fila la pagina si dichiara finita e non cresce.
+                ' Basta che una volta cresca perché il conto riparta: vuol dire che il
+                ' sito stava ancora lavorando, e il fondo di prima non era il fondo.
+                If Vero(dove, "fondo") AndAlso altezza <= altezzaDiPrima Then
+                    conferme += 1
+                    If conferme >= ConfermeDiFine Then Exit For
+                Else
+                    conferme = 0
+                End If
+
+                altezzaDiPrima = Math.Max(altezzaDiPrima, altezza)
+
+            Next
+
+            ' Si torna in cima da dove si è scesi — che non è detto sia la finestra.
+            Await _vista.ExecuteScriptAsync(
+                "(function () {" &
+                "  var d = document.scrollingElement || document.documentElement;" &
+                "  if (d) d.scrollTop = 0;" &
+                "  var tutti = document.querySelectorAll('div, main, section');" &
+                "  for (var i = 0; i < tutti.length; i++) {" &
+                "    if (tutti[i].scrollTop > 0) tutti[i].scrollTop = 0;" &
+                "  }" &
+                "})()").ConfigureAwait(True)
+
+        End Function
+
+        ''' <summary>
+        ''' Un passo in giù, e il resoconto di dove si è arrivati.
+        ''' </summary>
+        ''' <remarks>
+        ''' Qui l'oggetto torna <b>così com'è</b>, senza passare da <c>JSON.stringify</c>:
+        ''' <c>ExecuteScriptAsync</c> consegna già la forma JSON del risultato, e
+        ''' impacchettarlo a mano vorrebbe dire toglierne due strati invece di uno
+        ''' (v. <see cref="Interpreta"/>, dove la stringa serve perché il testo di una
+        ''' pagina non ha una forma prevedibile).
+        ''' </remarks>
+        Private Shared Function UnPasso() As String
+
+            Return "(function () {" &
+                   "  function chiScorre() {" &
+                   "    var d = document.scrollingElement || document.documentElement;" &
+                   "    if (d && d.scrollHeight > d.clientHeight + 4) return d;" &
+                   "    var scelto = null, area = 0;" &
+                   "    var tutti = document.querySelectorAll('div, main, section');" &
+                   "    for (var i = 0; i < tutti.length; i++) {" &
+                   "      var c = tutti[i];" &
+                   "      if (c.scrollHeight > c.clientHeight + 4 && c.clientHeight > 200) {" &
+                   "        var a = c.clientHeight * c.clientWidth;" &
+                   "        if (a > area) { area = a; scelto = c; }" &
+                   "      }" &
+                   "    }" &
+                   "    return scelto || d;" &
+                   "  }" &
+                   "  var e = chiScorre();" &
+                   "  if (!e) return { altezza: 0, mosso: false, fondo: true };" &
+                   "  var prima = e.scrollTop;" &
+                   "  e.scrollTop = prima + Math.max(200, e.clientHeight);" &
+                   "  return {" &
+                   "    altezza: e.scrollHeight," &
+                   "    mosso: e.scrollTop !== prima," &
+                   "    fondo: (e.scrollTop + e.clientHeight) >= e.scrollHeight - 4" &
+                   "  };" &
+                   "})()"
+
+        End Function
+
+        ''' <summary>Un numero dal resoconto del passo; <c>-1</c> se non c'è.</summary>
+        Private Shared Function Numero(oggetto As JsonObject, campo As String) As Double
+
+            Dim valore As JsonNode = Nothing
+            If Not oggetto.TryGetPropertyValue(campo, valore) OrElse valore Is Nothing Then Return -1
+
+            Return If(valore.GetValueKind() = JsonValueKind.Number, valore.GetValue(Of Double)(), -1)
 
         End Function
 

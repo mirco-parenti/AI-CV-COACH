@@ -837,9 +837,9 @@ Partial Class PannelloProfilo
         Me.btnImporta.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnImporta.Location = New System.Drawing.Point(273, 142)
         Me.btnImporta.Name = "btnImporta"
-        Me.btnImporta.Size = New System.Drawing.Size(160, 32)
+        Me.btnImporta.Size = New System.Drawing.Size(190, 32)
         Me.btnImporta.TabIndex = 0
-        Me.btnImporta.Text = "Importa da un CV…"
+        Me.btnImporta.Text = "Importa CV da un file…"
         '
         'btnDialogo
         '
