@@ -57,6 +57,36 @@ Namespace Motore
 
         End Function
 
+        ''' <summary>
+        ''' L'indirizzo a cui candidarsi, se l'annuncio lo scriveva; stringa vuota
+        ''' altrimenti (cap. 07.1).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È la metà della promessa che T6 aveva lasciato aperta: il cap. 07.1 dice
+        ''' «se l'annuncio conteneva un indirizzo, viene proposto», e fino al Pool 1.06 non
+        ''' c'era niente da proporre perché l'analisi non estraeva recapiti. L'altra metà —
+        ''' <b>il programma non inventa mai un indirizzo</b> — sta nel prompt, che vieta di
+        ''' dedurlo, e qui: quello che non c'è resta vuoto, e a scriverlo è l'utente.</para>
+        ''' <para>Si legge solo l'<c>email</c>. Il <c>riferimento</c> — la persona, l'ufficio,
+        ''' il codice della posizione — l'annuncio lo dà spesso, ma non è un indirizzo a cui
+        ''' si spedisce: metterlo nella casella del destinatario darebbe un'email che non
+        ''' parte.</para>
+        ''' </remarks>
+        Public Shared Function IndirizzoPerCandidarsi(annuncio As JsonNode) As String
+
+            Dim oggetto As JsonObject = TryCast(annuncio, JsonObject)
+            If oggetto Is Nothing Then Return String.Empty
+
+            Dim trovato As JsonNode = Nothing
+            If Not oggetto.TryGetPropertyValue("contatto", trovato) Then Return String.Empty
+
+            Dim contatto As JsonObject = TryCast(trovato, JsonObject)
+            If contatto Is Nothing Then Return String.Empty
+
+            Return Testo(contatto, "email")
+
+        End Function
+
         ''' <summary>Chi cerca, per cosa, dove e a quali condizioni.</summary>
         Private Shared Sub Intestazione(scritto As StringBuilder, annuncio As JsonObject)
 

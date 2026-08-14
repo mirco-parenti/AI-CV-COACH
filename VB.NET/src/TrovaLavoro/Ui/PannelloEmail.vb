@@ -50,6 +50,13 @@ Public Class PannelloEmail
     ''' <summary>La candidatura a cui l'email appartiene; <c>Nothing</c> finché non ne arriva una.</summary>
     Private _candidatura As Opportunita
 
+    ''' <summary>
+    ''' Vero quando il destinatario in casella l'ha proposto l'annuncio invece di
+    ''' scriverlo l'utente: serve a dirglielo, perché un indirizzo comparso da solo in
+    ''' un'email che sta per partire va spiegato (cap. 07.1).
+    ''' </summary>
+    Private _destinatarioVieneDallAnnuncio As Boolean
+
     ''' <summary>La bozza mostrata adesso: cambia mentre si scrive, e si salva a ogni passo che conta.</summary>
     Private _bozza As New BozzaEmail
 
@@ -130,6 +137,11 @@ Public Class PannelloEmail
         _candidatura = candidatura
         If _candidatura Is Nothing Then Return
 
+        ' Il pannello si riusa da una candidatura all'altra: quel che si sapeva del
+        ' destinatario di prima non vale per questa.
+        _destinatarioVieneDallAnnuncio = False
+        _suggerimenti.SetToolTip(txtDestinatario, Nothing)
+
         RiempiGliAllegati()
 
         Dim salvata As BozzaEmail = BozzaEmail.DaJson(_candidatura.Email)
@@ -140,6 +152,11 @@ Public Class PannelloEmail
             AggiornaComandi()
             Return
         End If
+
+        ' Primo arrivo: se l'annuncio portava un indirizzo, si propone (cap. 07.1). Solo
+        ' qui, e mai sopra una bozza ripresa: lì il destinatario è già passato per le mani
+        ' dell'utente, e sostituirglielo sarebbe cancellargli una decisione.
+        ProponiIlDestinatario()
 
         Await ScriviLaBozzaAsync()
 
@@ -189,7 +206,10 @@ Public Class PannelloEmail
 
             ' Il destinatario non si tocca: non viene dall'AI, e se l'utente l'ha già
             ' scritto riscriverlo sarebbe cancellargli il lavoro.
-            Racconta("Messaggio scritto. Rileggilo: è quello che l'azienda legge per primo.",
+            Racconta("Messaggio scritto. Rileggilo: è quello che l'azienda legge per primo." &
+                     If(_destinatarioVieneDallAnnuncio,
+                        vbLf & "Il destinatario l'ho preso dall'annuncio: controllalo prima di mandare.",
+                        ""),
                      StileApp.TestoSecondario)
 
         Catch ex As OperationCanceledException
@@ -206,6 +226,37 @@ Public Class PannelloEmail
         End Try
 
     End Function
+
+    ''' <summary>
+    ''' Mette nel destinatario l'indirizzo che l'annuncio dichiarava, se ne aveva uno.
+    ''' </summary>
+    ''' <remarks>
+    ''' <b>Proporre non è decidere.</b> L'indirizzo finisce nella casella dove l'utente
+    ''' scrive, modificabile e cancellabile come se l'avesse digitato lui, e il pannello lo
+    ''' dice invece di lasciarlo comparire dal nulla: chi manda una candidatura deve sapere
+    ''' <i>perché</i> quel destinatario è lì. Quando l'annuncio non porta niente non si
+    ''' scrive niente e non si dice niente — un «non ho trovato l'indirizzo» a ogni email
+    ''' sarebbe rumore, visto che la maggior parte degli annunci non lo pubblica.
+    ''' </remarks>
+    Private Sub ProponiIlDestinatario()
+
+        If _candidatura Is Nothing Then Return
+
+        Dim proposto As String = VistaAnnuncio.IndirizzoPerCandidarsi(_candidatura.Annuncio)
+        If proposto.Length = 0 Then Return
+
+        _bozza.Destinatario = proposto
+        _destinatarioVieneDallAnnuncio = True
+
+        Riempiendo(Sub() txtDestinatario.Text = proposto)
+
+        ' Il perché sta sulla casella e non nella barra di stato: la barra racconta
+        ' l'ultima cosa successa, e fra un istante la scrittura del messaggio ci scriverà
+        ' sopra la sua. Un suggerimento resta lì finché quel destinatario è lì.
+        _suggerimenti.SetToolTip(txtDestinatario,
+                                 "Questo indirizzo l'ho preso dall'annuncio, non l'ho dedotto: controllalo.")
+
+    End Sub
 
     ''' <summary>
     ''' Rimette nei campi una bozza salvata. Gli allegati non si sostituiscono: quelli veri
@@ -369,7 +420,16 @@ Public Class PannelloEmail
     Private Sub txtDestinatario_TextChanged(sender As Object, e As EventArgs) Handles txtDestinatario.TextChanged
 
         If _riempimenti > 0 Then Return
+
         _bozza.Destinatario = txtDestinatario.Text
+
+        ' Se l'utente ci mette mano, l'indirizzo è suo: il suggerimento che diceva «l'ho
+        ' preso dall'annuncio» diventerebbe una bugia, e va tolto insieme al motivo.
+        If _destinatarioVieneDallAnnuncio Then
+            _destinatarioVieneDallAnnuncio = False
+            _suggerimenti.SetToolTip(txtDestinatario, Nothing)
+        End If
+
         AggiornaComandi()
 
     End Sub

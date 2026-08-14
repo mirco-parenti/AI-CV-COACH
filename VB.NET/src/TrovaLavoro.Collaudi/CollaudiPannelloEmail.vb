@@ -36,6 +36,11 @@ Namespace Ui
         Private Const AnnuncioLetto As String =
             "{""titolo"": ""Magazziniere"", ""azienda"": ""Rossi S.p.A."", ""sede"": [""Forlì""]}"
 
+        ''' <summary>Lo stesso annuncio, ma che dichiara a chi mandare (Pool 1.06).</summary>
+        Private Const AnnuncioColContatto As String =
+            "{""titolo"": ""Magazziniere"", ""azienda"": ""Rossi S.p.A."", ""sede"": [""Forlì""]," &
+            """contatto"": {""email"": ""selezione@rossi.it"", ""riferimento"": ""Ufficio Selezione""}}"
+
         Private Const EmailScritta As String =
             "{""tipo"": ""email_candidatura"", ""oggetto"": ""Candidatura per Magazziniere — Luca Ferrari""," &
             """corpo"": ""Spettabile Azienda,\nmi candido per la posizione.\nCordiali saluti,\nLuca Ferrari""}"
@@ -97,7 +102,78 @@ Namespace Ui
 
                     ' Il cap. 07.1 è netto: se l'annuncio non porta un indirizzo, il campo
                     ' resta vuoto. Un indirizzo inventato è peggio di un campo da riempire.
+                    ' Da T7a l'annuncio un indirizzo può portarlo (Pool 1.06), e questo
+                    ' collaudo conta il doppio: «Rossi S.p.A.» non ne dichiara nessuno, e
+                    ' né il prompt né il pannello devono ricavarne uno dall'azienda.
                     Assert.IsEmpty(Casella(pannello, "txtDestinatario").Text)
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlDestinatarioDellAnnuncioVienePropostoo() As Task
+
+            ' L'altra metà della promessa del cap. 07.1, che fino a T6 non era mantenuta:
+            ' se l'annuncio l'indirizzo lo scrive, si propone.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    candidatura.Annuncio = JsonNode.Parse(AnnuncioColContatto)
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.AreEqual("selezione@rossi.it", Casella(pannello, "txtDestinatario").Text,
+                                    "l'indirizzo dell'annuncio arriva in casella")
+                    Assert.Contains("preso dall'annuncio", Etichetta(pannello, "lblStatoEmail").Text,
+                                    "e il pannello dice da dove viene, invece di farlo comparire dal nulla")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlRiferimentoDellAnnuncioNonFiniscePerDestinatario() As Task
+
+            ' Il «riferimento» — l'ufficio, la persona, il codice della posizione — è un
+            ' dato dell'annuncio, ma non è un indirizzo a cui si spedisce: nella casella
+            ' del destinatario darebbe un'email che non parte.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    candidatura.Annuncio = JsonNode.Parse(
+                        "{""titolo"": ""Magazziniere"", ""azienda"": ""Rossi S.p.A.""," &
+                        """contatto"": {""email"": """", ""riferimento"": ""Ufficio Selezione, rif. 4471/AB""}}")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.IsEmpty(Casella(pannello, "txtDestinatario").Text)
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaBozzaRipresaTieneIlSuoDestinatario() As Task
+
+            ' Se l'utente aveva già scritto (o corretto) il destinatario, riaprire la
+            ' candidatura non deve rimetterci sopra quello dell'annuncio: lì c'è una sua
+            ' decisione, e P7 è il pannello in cui l'utente scrive davvero.
+            Dim compositore As New CompositoreFinto
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    candidatura.Annuncio = JsonNode.Parse(AnnuncioColContatto)
+                    candidatura.Email = JsonNode.Parse(
+                        "{""destinatario"": ""lavoro@rossi.it"", ""oggetto"": ""Candidatura""," &
+                        """corpo"": ""Buongiorno."", ""allegati"": []}")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.AreEqual("lavoro@rossi.it", Casella(pannello, "txtDestinatario").Text,
+                                    "vale quello che l'utente aveva lasciato")
+                    Assert.IsEmpty(compositore.Chiamate, "e l'AI non viene disturbata")
                 End Function)
 
         End Function
@@ -506,6 +582,10 @@ Namespace Ui
 
         Private Shared Function Casella(pannello As Control, nome As String) As TextBox
             Return DirectCast(pannello.Controls.Find(nome, searchAllChildren:=True).Single(), TextBox)
+        End Function
+
+        Private Shared Function Etichetta(pannello As Control, nome As String) As Label
+            Return DirectCast(pannello.Controls.Find(nome, searchAllChildren:=True).Single(), Label)
         End Function
 
         Private Shared Function Bottone(pannello As Control, nome As String) As Button
