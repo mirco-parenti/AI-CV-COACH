@@ -75,6 +75,13 @@ Public Class PannelloDocumenti
     ''' </summary>
     Public Event TornaIndietro As EventHandler
 
+    ''' <summary>
+    ''' L'utente vuole preparare l'email di questa candidatura: si va in P7 (cap. 12, A8).
+    ''' Come sempre il pannello non conosce nessuno — dice cosa vuole, e chi sa navigare
+    ''' se ne occupa.
+    ''' </summary>
+    Public Event EmailRichiesta As EventHandler
+
     ''' <summary>L'AI ha cominciato o finito di lavorare: la barra si blocca (cap. 02.6).</summary>
     Public Event LavoroAiCambiato As EventHandler
 
@@ -367,6 +374,16 @@ Public Class PannelloDocumenti
 
     End Function
 
+    ''' <summary>
+    ''' La candidatura che si sta guardando; <c>Nothing</c> quando qui c'è il 📄 CV base,
+    ''' che di candidature non ne ha nessuna. Serve a chi porta il flusso avanti (P7).
+    ''' </summary>
+    Public ReadOnly Property Candidatura As Opportunita
+        Get
+            Return _candidatura
+        End Get
+    End Property
+
     ''' <summary>Chi dei due si sta guardando decide dove vanno i file (cap. 05.6).</summary>
     Private Function ScriviAsync(formati As FormatiDocumento) As Task(Of IReadOnlyList(Of String))
 
@@ -552,6 +569,10 @@ Public Class PannelloDocumenti
 
     End Sub
 
+    Private Sub btnPreparaEmail_Click(sender As Object, e As EventArgs) Handles btnPreparaEmail.Click
+        RaiseEvent EmailRichiesta(Me, EventArgs.Empty)
+    End Sub
+
     Private Sub PannelloDocumenti_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize
         DisponiLeAzioni()
     End Sub
@@ -584,8 +605,8 @@ Public Class PannelloDocumenti
         _suggerimenti.SetToolTip(chkRifinitura,
                                  "La rifinitura anti-slop, col prima/dopo, arriva con la tappa T7.")
 
-        btnPreparaEmail.Enabled = False
-        _suggerimenti.SetToolTip(btnPreparaEmail, "La composizione dell'email arriva con la tappa T6.")
+        ' «Prepara email» non sta più qui: T6 è arrivata, e il bottone lo accende
+        ' AggiornaComandi quando c'è una candidatura con la sua lettera.
 
     End Sub
 
@@ -634,6 +655,21 @@ Public Class PannelloDocumenti
                               (_pipeline IsNot Nothing OrElse _generatore IsNot Nothing)
 
         btnTornaIndietro.Enabled = Not occupato
+
+        ' L'email nasce dalla lettera (cap. 07.1): senza, non c'è niente da scrivere. E il
+        ' 📄 CV base non porta a nessuna email, perché non ha un'azienda a cui mandarla.
+        btnPreparaEmail.Enabled = Not occupato AndAlso
+                                  _candidatura IsNot Nothing AndAlso
+                                  _candidatura.Lettera IsNot Nothing
+
+        If btnPreparaEmail.Enabled Then
+            _suggerimenti.SetToolTip(btnPreparaEmail, Nothing)
+        ElseIf _cvBase IsNot Nothing Then
+            _suggerimenti.SetToolTip(btnPreparaEmail,
+                "Il CV base non si manda a nessuno: l'email nasce da una candidatura.")
+        Else
+            _suggerimenti.SetToolTip(btnPreparaEmail, "Prima genera i documenti: l'email nasce dalla lettera.")
+        End If
 
     End Sub
 

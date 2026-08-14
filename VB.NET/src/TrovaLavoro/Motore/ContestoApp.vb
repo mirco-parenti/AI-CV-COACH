@@ -76,6 +76,12 @@ Namespace Motore
         Public ReadOnly Property Generatore As IGeneratore
 
         ''' <summary>
+        ''' Chi scrive l'email di candidatura dalla lettera (T6, cap. 07.1);
+        ''' <c>Nothing</c> senza AI o senza pool, come gli altri mestieri.
+        ''' </summary>
+        Public ReadOnly Property Email As ICompositoreEmail
+
+        ''' <summary>
         ''' Le candidature su disco: c'è sempre, anche senza AI — le opportunità già
         ''' generate si riaprono comunque (cap. 12.7).
         ''' </summary>
@@ -279,6 +285,12 @@ Namespace Motore
                 New Confrontatore(Libreria, Client),
                 _Generatore,
                 Taratura)
+
+            ' L'email sta fuori dalla pipeline e non è una dimenticanza: la fila di T4
+            ' arriva ai documenti, e da lì in poi decide l'utente — quali allegati, a chi,
+            ' e se spedire. Un passo che aspetta delle scelte non appartiene a una fila
+            ' che si percorre da sé (cap. 07.1).
+            _Email = New CompositoreEmail(Libreria, Client)
 
         End Sub
 

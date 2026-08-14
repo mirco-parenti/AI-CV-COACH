@@ -143,3 +143,28 @@ Friend Class GeneratoreFinto
     End Function
 
 End Class
+
+''' <summary>
+''' Il compositore dell'email, finto (T6). Oltre a rispondere annota <b>quali allegati</b>
+''' gli sono stati nominati: è la promessa del cap. 07.1 — il messaggio nomina quello che
+''' parte davvero — e senza guardarli non si potrebbe verificare.
+''' </summary>
+Friend Class CompositoreFinto
+    Inherits MestiereFinto
+    Implements ICompositoreEmail
+
+    ''' <summary>Gli elenchi di allegati ricevuti, uno per chiamata.</summary>
+    Public ReadOnly Property AllegatiNominati As New List(Of List(Of String))
+
+    Public Function ComponiAsync(lettera As JsonNode, annuncio As JsonNode,
+                                 allegati As IEnumerable(Of String),
+                                 Optional annulla As CancellationToken = Nothing) _
+                                 As Task(Of JsonNode) Implements ICompositoreEmail.ComponiAsync
+
+        AllegatiNominati.Add(If(allegati Is Nothing, New List(Of String), allegati.ToList()))
+
+        Return Prossima("email", lettera, annuncio)
+
+    End Function
+
+End Class

@@ -50,6 +50,19 @@ Namespace Motore
         Public Property Lettera As JsonNode
 
         ''' <summary>
+        ''' La bozza dell'email: destinatario, oggetto, corpo e allegati scelti (T6,
+        ''' cap. 07.1). È l'ultima cosa che l'utente <b>tocca a mano</b> prima di uscire
+        ''' dal programma, e per questo si salva: senza, riaprire la candidatura domani
+        ''' vorrebbe dire riscrivere il destinatario e rifare le spunte agli allegati.
+        ''' </summary>
+        ''' <remarks>
+        ''' Che ci sia una bozza <b>non</b> vuol dire che sia partita: a spedire è il
+        ''' programma di posta dell'utente, e l'unica prova che l'app può avere è la sua
+        ''' parola (cap. 07.3). Lo stato «inviata» viene da lì, mai da questo campo.
+        ''' </remarks>
+        Public Property Email As JsonNode
+
+        ''' <summary>
         ''' La versione di profilo da cui i documenti sono nati (il nome che
         ''' <c>ArchivioProfilo.Salva</c> restituisce): è ciò che tiene spiegabile un CV
         ''' già inviato anche a profilo evoluto (cap. 11.1).

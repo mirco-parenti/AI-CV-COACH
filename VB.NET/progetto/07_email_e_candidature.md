@@ -20,6 +20,30 @@ Email (P7) prepara la bozza:
 - Tutto è modificabile a mano prima di procedere; l'anteprima mostra esattamente ciò
   che partirà.
 
+### Com'è stata costruita (T6, 2026-08-14)
+
+- **L'email non sta nella pipeline, e non è una dimenticanza.** La fila di T4 si percorre
+  da sé fino ai documenti; da lì in poi decide l'utente — a chi, quali allegati, e se
+  spedire. Un passo che aspetta delle scelte non appartiene a una fila automatica: il
+  compositore vive accanto alla pipeline, non dentro.
+- **La bozza si salva** (`email.json` nella cartella dell'opportunità): destinatario,
+  oggetto, corpo e le spunte degli allegati. È l'unico punto della candidatura in cui
+  l'utente **scrive davvero**, e riaprirla domani non deve voler dire ricominciare. Quando
+  una bozza c'è, rientrando in P7 **l'AI non viene disturbata**: riscrivere sopra le
+  correzioni fatte a mano sarebbe il modo peggiore di essere utili.
+- **Delle spunte si fida, dei file no.** Riaprendo, l'elenco degli allegati si rifà dai
+  file che ci sono *adesso* su disco e dalla bozza si riprendono solo le spunte: un
+  documento cancellato nel frattempo non torna in vita perché un elenco lo nominava.
+- **Il PDF si spunta da solo, il DOCX no.** È il formato che si apre uguale dappertutto ed
+  è quello che si manda a un'azienda; il DOCX resta lì, spento, per gli annunci che lo
+  chiedono espressamente.
+- **Il `.eml` non si allega a sé stesso.** Alla seconda preparazione il messaggio scritto
+  la prima volta è un file come gli altri nella `out\`: senza escluderlo finirebbe dentro
+  la copia successiva, e ogni giro raddoppierebbe.
+- **«L'ho spedita» è staccato dalla domanda che lo precede.** La conferma sta nel bottone,
+  l'atto in un metodo suo: è anche l'unico modo di collaudarlo, perché una finestra di
+  messaggio in un banco resta lì ad aspettare per sempre.
+
 ## 7.2 L'uscita: il file `.eml`
 
 *Il capitolo prevedeva tre uscite. La revisione del 2026-08-05 (cap. 15, voci 8 e 9) ne

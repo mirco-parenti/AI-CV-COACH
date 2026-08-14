@@ -1,4 +1,4 @@
-Imports System.Globalization
+﻿Imports System.Globalization
 Imports System.IO
 Imports System.Linq
 Imports System.Text
@@ -50,6 +50,9 @@ Namespace Dati
         Public Const FileMitigazioni As String = "mitigazioni.json"
         Public Const FileCv As String = "cv.json"
         Public Const FileLettera As String = "lettera.json"
+
+        ''' <summary>La bozza dell'email: destinatario, oggetto, corpo, allegati scelti (T6).</summary>
+        Public Const FileEmail As String = "email.json"
         Public Const FileStato As String = "stato.json"
 
         Private ReadOnly _cartella As CartellaDati
@@ -87,6 +90,7 @@ Namespace Dati
             Scrivi(cartella, FileMitigazioni, opportunita.Mitigazioni)
             Scrivi(cartella, FileCv, opportunita.Cv)
             Scrivi(cartella, FileLettera, opportunita.Lettera)
+            Scrivi(cartella, FileEmail, opportunita.Email)
             Scrivi(cartella, FileStato, Stato(opportunita))
 
             opportunita.Cartella = cartella
@@ -199,7 +203,8 @@ Namespace Dati
                 .Confronto = Leggi(cartella, FileGiudizi),
                 .Mitigazioni = Leggi(cartella, FileMitigazioni),
                 .Cv = Leggi(cartella, FileCv),
-                .Lettera = Leggi(cartella, FileLettera)}
+                .Lettera = Leggi(cartella, FileLettera),
+                .Email = Leggi(cartella, FileEmail)}
 
             RileggiStato(o, TryCast(Leggi(cartella, FileStato), JsonObject))
 

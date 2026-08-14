@@ -1,4 +1,4 @@
-<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class FormPrincipale
     Inherits System.Windows.Forms.Form
 
@@ -41,6 +41,7 @@ Partial Class FormPrincipale
         Me.pnlDialogo = New PannelloDialogo()
         Me.pnlOpportunita = New PannelloOpportunita()
         Me.pnlDocumenti = New PannelloDocumenti()
+        Me.pnlEmail = New PannelloEmail()
         Me.pnlRicerca = New PannelloRicerca()
         Me.pnlLogo = New System.Windows.Forms.Panel()
         Me.picLogo = New System.Windows.Forms.PictureBox()
@@ -178,6 +179,7 @@ Partial Class FormPrincipale
         Me.pnlAreaCentrale.Controls.Add(Me.pnlDialogo)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlOpportunita)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlDocumenti)
+        Me.pnlAreaCentrale.Controls.Add(Me.pnlEmail)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlRicerca)
         Me.pnlAreaCentrale.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlAreaCentrale.Location = New System.Drawing.Point(0, 48)
@@ -230,6 +232,15 @@ Partial Class FormPrincipale
         Me.pnlDocumenti.Size = New System.Drawing.Size(1134, 485)
         Me.pnlDocumenti.TabIndex = 3
         Me.pnlDocumenti.Visible = False
+        '
+        'pnlEmail
+        '
+        Me.pnlEmail.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlEmail.Location = New System.Drawing.Point(0, 0)
+        Me.pnlEmail.Name = "pnlEmail"
+        Me.pnlEmail.Size = New System.Drawing.Size(1134, 485)
+        Me.pnlEmail.TabIndex = 6
+        Me.pnlEmail.Visible = False
         '
         'pnlRicerca
         '
@@ -366,6 +377,7 @@ Partial Class FormPrincipale
     Friend WithEvents pnlDialogo As PannelloDialogo
     Friend WithEvents pnlOpportunita As PannelloOpportunita
     Friend WithEvents pnlDocumenti As PannelloDocumenti
+    Friend WithEvents pnlEmail As PannelloEmail
     Friend WithEvents pnlRicerca As PannelloRicerca
     Friend WithEvents ttSuggerimenti As System.Windows.Forms.ToolTip
     Friend WithEvents pnlFasciaInferiore As System.Windows.Forms.Panel

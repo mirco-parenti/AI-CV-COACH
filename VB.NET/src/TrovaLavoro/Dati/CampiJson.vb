@@ -79,6 +79,20 @@ Namespace Dati
         End Function
 
         ''' <summary>
+        ''' Un sì o un no, dicendo cosa vale l'<b>assenza</b> del campo. Non sempre «non
+        ''' detto» vuol dire no: un allegato scritto senza la spunta è un allegato che
+        ''' parte, perché è finito in quell'elenco per essere spedito (cap. 07.1).
+        ''' </summary>
+        Friend Shared Function Vero(oggetto As JsonObject, campo As String, quandoManca As Boolean) As Boolean
+
+            Dim valore As JsonNode = Nodo(oggetto, campo)
+            If valore Is Nothing Then Return quandoManca
+
+            Return valore.GetValueKind() = JsonValueKind.True
+
+        End Function
+
+        ''' <summary>
         ''' Un istante; <c>Nothing</c> (cioè la data vuota) se manca o non è scritto nel
         ''' formato che <see cref="Quando"/> produce.
         ''' </summary>

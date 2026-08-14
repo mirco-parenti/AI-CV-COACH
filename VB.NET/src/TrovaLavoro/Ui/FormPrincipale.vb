@@ -93,6 +93,7 @@ Public Class FormPrincipale
         pnlOpportunita.Collega(_contesto)
         pnlDocumenti.Collega(_contesto, New ArchivioDocumenti(_contesto.Cartella, _stampante))
         pnlRicerca.Collega(_contesto, _motoreBrowser)
+        pnlEmail.Collega(_contesto)
 
         pnlLogo.BringToFront()
         AggiornaPannelloLogo()
@@ -262,6 +263,50 @@ Public Class FormPrincipale
 
     End Sub
 
+    ''' <summary>
+    ''' Dai documenti all'email (cap. 12, A8). Come per i documenti, il bottone della barra
+    ''' resta quello della candidatura: P7 non è un'altra destinazione, è l'ultimo passo
+    ''' dello stesso flusso — quello in cui il programma si ferma e passa la parola al
+    ''' programma di posta.
+    ''' </summary>
+    Private Async Sub pnlDocumenti_EmailRichiesta(sender As Object, e As EventArgs) _
+        Handles pnlDocumenti.EmailRichiesta
+
+        Dim candidatura As Opportunita = pnlDocumenti.Candidatura
+        If candidatura Is Nothing Then Return
+
+        MostraPannello(pnlEmail, btnCandidatura)
+        Await pnlEmail.MostraLaCandidaturaAsync(candidatura)
+
+    End Sub
+
+    ''' <summary>Dall'email si torna ai documenti, che è da dove si è venuti.</summary>
+    Private Sub pnlEmail_TornaAiDocumenti(sender As Object, e As EventArgs) _
+        Handles pnlEmail.TornaAiDocumenti
+
+        MostraPannello(pnlDocumenti, btnCandidatura)
+
+    End Sub
+
+    ''' <summary>
+    ''' La candidatura è stata dichiarata inviata: il cruscotto ha un numero in più da
+    ''' mostrare, e la coda uno stato nuovo (cap. 07.3).
+    ''' </summary>
+    Private Sub pnlEmail_CandidaturaInviata(sender As Object, e As EventArgs) _
+        Handles pnlEmail.CandidaturaInviata
+
+        pnlHome.Aggiorna()
+
+    End Sub
+
+    ''' <summary>Come per gli altri pannelli: mentre l'AI scrive, la barra non porta via.</summary>
+    Private Sub pnlEmail_LavoroAiCambiato(sender As Object, e As EventArgs) _
+        Handles pnlEmail.LavoroAiCambiato
+
+        BarraDiNavigazione(libera:=Not pnlEmail.AiAlLavoro)
+
+    End Sub
+
     Private Sub pnlDocumenti_TornaIndietro(sender As Object, e As EventArgs) _
         Handles pnlDocumenti.TornaIndietro
 
@@ -423,6 +468,10 @@ Public Class FormPrincipale
             inSospeso.Add("dei documenti che sto ancora scrivendo")
         End If
 
+        If pnlEmail.AiAlLavoro Then
+            inSospeso.Add("un'email che sto ancora scrivendo")
+        End If
+
         If inSospeso.Count = 0 Then Return
 
         Dim risposta As DialogResult = MessageBox.Show(
@@ -440,6 +489,7 @@ Public Class FormPrincipale
         pnlProfilo.AnnullaLaLettura()
         pnlOpportunita.AnnullaIlLavoro()
         pnlDocumenti.AnnullaIlLavoro()
+        pnlEmail.AnnullaIlLavoro()
 
         ' Il motore del browser si spegne con la finestra: è l'unica cosa che questa
         ' finestra possiede oltre al contesto.

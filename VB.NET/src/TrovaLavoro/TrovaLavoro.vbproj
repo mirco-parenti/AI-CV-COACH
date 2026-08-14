@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -65,6 +65,12 @@
     </Compile>
     <Compile Update="Ui\PannelloDialogo.Designer.vb">
       <DependentUpon>PannelloDialogo.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Ui\PannelloEmail.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Ui\PannelloEmail.Designer.vb">
+      <DependentUpon>PannelloEmail.vb</DependentUpon>
     </Compile>
     <Compile Update="Ui\PannelloRicerca.vb">
       <SubType>UserControl</SubType>
