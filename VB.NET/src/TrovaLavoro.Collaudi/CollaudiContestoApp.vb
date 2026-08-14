@@ -61,8 +61,85 @@ Namespace Motore
                 Assert.IsNotNull(contesto.Modelli, "i modelli ci sono comunque")
 
                 Assert.IsNotNull(contesto.Avviso, "e l'utente deve saperlo")
-                Assert.Contains(ClientClaude.NomeVariabileChiave, contesto.Avviso,
-                                "l'avviso dice quale variabile manca")
+                Assert.Contains("chiave API", contesto.Avviso,
+                                "l'avviso dice cosa manca, con le parole di chi la digita — " &
+                                "non con il nome di una variabile d'ambiente")
+            End Using
+        End Sub
+
+        <TestMethod>
+        Public Sub LaChiaveCifrataVienePrimaDellAmbiente()
+            ' Cap. 11.3: quella salvata nell'applicazione è la volontà più recente
+            ' dell'utente. Il collaudo regge anche dove la variabile d'ambiente c'è
+            ' davvero — è il caso della postazione di sviluppo — perché il file vince.
+            Dim radice As String = CartellaTemporanea()
+            Try
+                Dim segreti As New ArchivioSegreti(New CartellaDati(radice))
+                segreti.SalvaChiaveApi("sk-ant-dal-file-cifrato-1111")
+
+                Using contesto As ContestoApp = ContestoApp.Monta(radice, Nothing, PoolInesistente())
+
+                    Assert.IsNotNull(contesto.Client, "la chiave c'è, quindi l'AI si monta")
+                    Assert.Contains("file cifrato", String.Join(vbLf, contesto.Note),
+                                    "e il resoconto dice da dove è arrivata")
+                End Using
+            Finally
+                Directory.Delete(radice, recursive:=True)
+            End Try
+        End Sub
+
+        <TestMethod>
+        Public Sub LaChiaveIndicataAllAvvioVinceSuTutto()
+            ' È la porta del banco: senza questa precedenza un collaudo che monta il
+            ' contesto dipenderebbe da cosa c'è nella cartella dati della macchina.
+            Dim radice As String = CartellaTemporanea()
+            Try
+                Dim segreti As New ArchivioSegreti(New CartellaDati(radice))
+                segreti.SalvaChiaveApi("sk-ant-dal-file-cifrato-1111")
+
+                Using contesto As ContestoApp = Monta(radice)
+                    Assert.Contains("indicata all'avvio", String.Join(vbLf, contesto.Note),
+                                    "vale quella dichiarata dal chiamante")
+                End Using
+            Finally
+                Directory.Delete(radice, recursive:=True)
+            End Try
+        End Sub
+
+        <TestMethod>
+        Public Sub UnFileDellaChiaveCheNonSiApreSiFaSentire()
+            ' Il file copiato da un altro PC, o salvato da un altro account di Windows:
+            ' DPAPI lo rifiuta ed è giusto così, ma l'utente quel file lo vede su disco e
+            ' lo crede buono. Tacere sarebbe la cosa peggiore.
+            Dim radice As String = CartellaTemporanea()
+            Try
+                Dim cartella As New CartellaDati(radice)
+                cartella.Assicura()
+                File.WriteAllBytes(cartella.FileSegreti, New Byte() {9, 9, 9, 9})
+
+                Using contesto As ContestoApp = ContestoApp.Monta(radice, Nothing, PoolInesistente())
+                    Assert.IsNotNull(contesto.Avviso, "l'utente deve saperlo")
+                    Assert.Contains("non si decifra", contesto.Avviso, "e sapere perché")
+                End Using
+            Finally
+                Directory.Delete(radice, recursive:=True)
+            End Try
+        End Sub
+
+        <TestMethod>
+        Public Sub LaChiaveNonCompareMaiPerInteroNelResoconto()
+            ' Cap. 11.3: la diagnostica non contiene mai segreti. Il resoconto del
+            ' montaggio è la prima cosa che finirà nel log, e dice da dove viene la
+            ' chiave: deve dirlo mostrandone i soli bordi.
+            Dim radice As String = CartellaTemporanea()
+            Const chiave As String = "sk-ant-non-deve-comparire-mai-5555"
+
+            Using contesto As ContestoApp = Monta(radice, chiave)
+
+                Dim resoconto As String = String.Join(vbLf, contesto.Note)
+                Assert.DoesNotContain(chiave, resoconto, "per intero non c'è")
+                Assert.DoesNotContain("non-deve-comparire", resoconto, "nemmeno il suo mezzo")
+                Assert.Contains("sk-ant-…5555", resoconto, "ma la si riconosce")
             End Using
         End Sub
 

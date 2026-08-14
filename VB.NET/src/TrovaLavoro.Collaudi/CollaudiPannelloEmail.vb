@@ -290,9 +290,131 @@ Namespace Ui
 
         End Function
 
+        <TestMethod>
+        Public Async Function GliAttestatiDeiTuoiDocumentiSiPropongonoSpenti() As Task
+
+            ' Cap. 07.1: gli attestati pertinenti della cartella documenti compaiono fra
+            ' gli allegati, da spuntare. Spenti, perché quali provino qualcosa per questo
+            ' annuncio lo sa l'utente — e mandarli tutti è il modo di non farne leggere
+            ' nessuno.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ScriviDocumenti(candidatura, "CV_Luca_Rossi.pdf")
+                    CartellaDocumentiCon(contesto,
+                                         attestati:={"HACCP.pdf"},
+                                         altri:={"busta_paga.pdf"})
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim elenco As CheckedListBox = Allegati(pannello)
+                    Dim voci As String() = elenco.Items.Cast(Of String)().ToArray()
+
+                    Assert.HasCount(2, voci, "il documento generato e l'attestato")
+                    Assert.AreEqual("CV_Luca_Rossi.pdf", voci(0), "prima quel che è nato per questa candidatura")
+                    Assert.Contains("HACCP.pdf", voci(1), "poi l'attestato")
+                    Assert.Contains("dai tuoi documenti", voci(1), "e si vede da dove viene")
+
+                    Assert.IsTrue(elenco.GetItemChecked(0), "il CV in PDF parte")
+                    Assert.IsFalse(elenco.GetItemChecked(1), "l'attestato aspetta la spunta")
+
+                    ' Quel che l'AI mette in «altro» non si propone: una busta paga non si
+                    ' manda a un'azienda per sbaglio.
+                    Assert.IsFalse(voci.Any(Function(v) v.Contains("busta_paga")), "gli «altro» restano fuori")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnAttestatoCancellatoDalDiscoNonSiPropone() As Task
+
+            ' L'elenco su disco dice cosa c'era l'ultima volta; a dire cosa c'è adesso è
+            ' solo il disco (stessa regola degli allegati, cap. 07.1).
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    Dim cartella As String = CartellaDocumentiCon(contesto, attestati:={"HACCP.pdf"})
+                    File.Delete(Path.Combine(cartella, "HACCP.pdf"))
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.IsEmpty(Allegati(pannello).Items, "niente da allegare: quel file non c'è più")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnAttestatoSpuntatoParteDavvero() As Task
+
+            ' La prova che la strada regge fino in fondo: l'attestato vive fuori dalla
+            ' cartella della candidatura, e chi scrive il messaggio deve saperlo ritrovare.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ScriviDocumenti(candidatura, "CV_Luca_Rossi.pdf")
+                    CartellaDocumentiCon(contesto, attestati:={"HACCP.pdf"})
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim elenco As CheckedListBox = Allegati(pannello)
+                    elenco.SetItemChecked(1, True)
+
+                    Casella(pannello, "txtDestinatario").Text = "lavoro@rossi.it"
+                    Bottone(pannello, "btnPreparaEmail").PerformClick()
+
+                    Dim scritti As String() = Directory.GetFiles(
+                        Path.Combine(candidatura.Cartella, ArchivioOpportunita.NomeCartellaOut), "*.eml")
+
+                    Dim eml As String = File.ReadAllText(scritti(0), Encoding.ASCII)
+
+                    Assert.Contains("filename=""CV_Luca_Rossi.pdf""", eml, "il CV generato")
+                    Assert.Contains("filename=""HACCP.pdf""", eml, "e l'attestato preso dai documenti dell'utente")
+                End Function)
+
+        End Function
+
         ' ==================================================================
         ' Il banco
         ' ==================================================================
+
+        ''' <summary>
+        ''' Prepara la cartella documenti dell'utente: dei file veri su disco e le
+        ''' categorie già riconosciute, come se la classificazione fosse già stata
+        ''' confermata (cap. 05.2).
+        ''' </summary>
+        ''' <returns>La cartella, per chi vuole poi toccarne i file.</returns>
+        Private Shared Function CartellaDocumentiCon(contesto As ContestoApp,
+                                                     attestati As String(),
+                                                     Optional altri As String() = Nothing) As String
+
+            ' Sta sotto la radice del collaudo per essere buttata con lei, ma per il
+            ' programma è una cartella qualunque: quel che conta è che sia fuori dalle
+            ' cartelle delle candidature.
+            Dim cartella As String = Path.Combine(contesto.Cartella.Radice, "documenti-di-luca")
+            Directory.CreateDirectory(cartella)
+
+            For Each nome As String In attestati
+                File.WriteAllText(Path.Combine(cartella, nome), $"finto: {nome}")
+                contesto.Raccolta.Documenti.Add(New DocumentoClassificato With {
+                    .Nome = nome, .Categoria = CategoriaDocumento.Attestato})
+            Next
+
+            For Each nome As String In If(altri, Array.Empty(Of String)())
+                File.WriteAllText(Path.Combine(cartella, nome), $"finto: {nome}")
+                contesto.Raccolta.Documenti.Add(New DocumentoClassificato With {
+                    .Nome = nome, .Categoria = CategoriaDocumento.Altro})
+            Next
+
+            contesto.Raccolta.Cartella = cartella
+            Return cartella
+
+        End Function
 
         Private Shared Async Function ConPannelloAsync(
                 compositore As CompositoreFinto,

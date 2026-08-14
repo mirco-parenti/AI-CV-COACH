@@ -121,6 +121,52 @@ Namespace Motore
         End Sub
 
         <TestMethod>
+        Public Sub LaChiaveSiPuoChiedereDaCapo()
+            ' Finché le Impostazioni non ci sono (T9), «--chiave» è l'unico modo di
+            ' sostituire una chiave salvata storta: è un interruttore, e vale anche
+            ' insieme a una cartella dati diversa.
+            Dim sola As ArgomentiAvvio = ArgomentiAvvio.Leggi({"--chiave"})
+            Dim insieme As ArgomentiAvvio = ArgomentiAvvio.Leggi({"--dati", Percorso, "--CHIAVE"})
+
+            Assert.IsTrue(sola.ChiediLaChiave, "la chiede")
+            Assert.IsNull(sola.Avviso, "e non c'è niente da segnalare")
+            Assert.IsTrue(insieme.ChiediLaChiave, "anche scritta in maiuscolo")
+            Assert.AreEqual(Percorso, insieme.RadiceDati, "senza disturbare il resto della riga")
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaLOpzioneLaChiaveNonSiRichiede()
+            ' Il caso normale: chi ha già la sua chiave non deve vedersela richiedere a
+            ' ogni avvio.
+            Assert.IsFalse(ArgomentiAvvio.Leggi({"--dati", Percorso}).ChiediLaChiave, "nessuno l'ha chiesto")
+        End Sub
+
+        <TestMethod>
+        Public Sub LaChiaveAttaccataAllUgualeSiScarta()
+            ' «--chiave=sk-ant-…» resterebbe scritta nella cronologia della shell e
+            ' nell'elenco dei processi: si ignora il valore, si dice che lo si è fatto, e
+            ' non lo si ripete nell'avviso (cap. 11.3).
+            Dim letti As ArgomentiAvvio = ArgomentiAvvio.Leggi({"--chiave=sk-ant-vera-0000"})
+
+            Assert.IsTrue(letti.ChiediLaChiave, "la finestra si apre lo stesso")
+            Assert.IsNotNull(letti.Avviso, "dicendo che il valore è stato scartato")
+            Assert.DoesNotContain("sk-ant-vera-0000", letti.Avviso, "senza ripetere la chiave")
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaChiaveScrittaSullaRigaDiComandoNonFinisceNellAvviso()
+            ' «--chiave sk-ant-…»: la chiave resta un argomento sconosciuto, e l'avviso
+            ' degli sconosciuti li nomina. Quello che si vede nella barra di stato lo
+            ' vede chiunque guardi lo schermo.
+            Dim letti As ArgomentiAvvio = ArgomentiAvvio.Leggi({"--chiave", "sk-ant-vera-0000"})
+
+            Assert.IsTrue(letti.ChiediLaChiave, "la finestra si apre")
+            Assert.IsNotNull(letti.Avviso, "l'argomento di troppo si dice")
+            Assert.DoesNotContain("sk-ant-vera-0000", letti.Avviso, "ma non si scrive")
+            Assert.Contains("chiave API", letti.Avviso, "si dice però cos'era")
+        End Sub
+
+        <TestMethod>
         Public Sub GliArgomentiVuotiNonDisturbano()
             ' Windows non li produce, ma una catena di script sì: una stringa vuota non è
             ' un argomento sconosciuto, è niente.

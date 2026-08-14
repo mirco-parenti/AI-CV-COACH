@@ -1,9 +1,9 @@
 Namespace Motore
 
     ''' <summary>
-    ''' Quel che l'applicazione accetta dalla riga di comando (cap. 11.1). Oggi una cosa
-    ''' sola — la radice della cartella dati — ma il posto dove leggerla è questo, e non
-    ''' sparso fra <see cref="Programma"/> e la finestra.
+    ''' Quel che l'applicazione accetta dalla riga di comando (cap. 11.1): la radice
+    ''' della cartella dati e la richiesta di ridigitare la chiave API. Il posto dove
+    ''' leggerle è questo, e non sparso fra <see cref="Programma"/> e la finestra.
     ''' </summary>
     ''' <remarks>
     ''' <para><b>Nessun argomento è un errore fatale.</b> Un percorso storto, un'opzione
@@ -21,6 +21,14 @@ Namespace Motore
         ''' <summary>L'opzione con cui si indica la cartella dati: <c>--dati percorso</c>.</summary>
         Public Const OpzioneDati As String = "--dati"
 
+        ''' <summary>
+        ''' L'opzione con cui si chiede di reinserire la chiave API: <c>--chiave</c>,
+        ''' <b>senza valore</b> (cap. 11.3). Finché le Impostazioni non ci sono (T9) è il
+        ''' modo di sostituire una chiave salvata storta senza andare a cancellare un
+        ''' file a mano.
+        ''' </summary>
+        Public Const OpzioneChiave As String = "--chiave"
+
         Private ReadOnly _avvisi As New List(Of String)
 
         Private Sub New()
@@ -32,6 +40,13 @@ Namespace Motore
         ''' decide qui: lo scopre chi monta il motore, che sa anche come ripiegare.
         ''' </summary>
         Public ReadOnly Property RadiceDati As String
+
+        ''' <summary>
+        ''' Se si è chiesto di reinserire la chiave API: la finestra la domanda anche
+        ''' quando una chiave c'è già (cap. 11.3). Che poi l'utente la digiti davvero non
+        ''' lo decide qui.
+        ''' </summary>
+        Public ReadOnly Property ChiediLaChiave As Boolean
 
         ''' <summary>Cosa non si è potuto rispettare, in ordine; vuoto se è filato tutto liscio.</summary>
         Public ReadOnly Property Avvisi As IReadOnlyList(Of String)
@@ -81,9 +96,26 @@ Namespace Motore
                     valore = argomento.Substring(uguale + 1)
                 End If
 
-                If Not nome.Equals(OpzioneDati, StringComparison.OrdinalIgnoreCase) Then
-                    letti.Avvisa($"Non conosco l'argomento «{argomento}»: l'ho ignorato.")
+                If nome.Equals(OpzioneChiave, StringComparison.OrdinalIgnoreCase) Then
+                    letti.PrendiLaRichiestaDellaChiave(valore)
                     Continue While
+                End If
+
+                If Not nome.Equals(OpzioneDati, StringComparison.OrdinalIgnoreCase) Then
+
+                    ' Un argomento che ha l'aria di una chiave API non si ripete
+                    ' nell'avviso: quell'avviso finisce nella barra di stato, cioè sotto
+                    ' gli occhi di chiunque guardi lo schermo, e una chiave non compare
+                    ' mai in chiaro fuori dal suo file (cap. 11.3).
+                    If PareUnaChiave(argomento) Then
+                        letti.Avvisa("C'è un argomento che ha l'aria di una chiave API: l'ho ignorato, " &
+                                     $"e non lo ripeto qui. La chiave si digita nella finestra che «{OpzioneChiave}» fa comparire.")
+                    Else
+                        letti.Avvisa($"Non conosco l'argomento «{argomento}»: l'ho ignorato.")
+                    End If
+
+                    Continue While
+
                 End If
 
                 ' La forma «--dati percorso» tiene il valore nell'argomento dopo — ma solo
@@ -123,6 +155,33 @@ Namespace Motore
             _RadiceDati = valore.Trim()
 
         End Sub
+
+        ''' <summary>
+        ''' Segna che la chiave va richiesta. L'opzione <b>non prende un valore</b>, ed è
+        ''' una scelta: una chiave scritta sulla riga di comando resterebbe nella
+        ''' cronologia della shell e nell'elenco dei processi, cioè in chiaro in due
+        ''' posti che nessuno ripulisce (cap. 11.3). Se un valore arriva lo stesso, si
+        ''' scarta — dicendolo, ma senza ripeterlo.
+        ''' </summary>
+        Private Sub PrendiLaRichiestaDellaChiave(valore As String)
+
+            If valore IsNot Nothing Then
+                Avvisa($"L'argomento «{OpzioneChiave}» non vuole niente dopo di sé: la chiave API non " &
+                       "si passa dalla riga di comando, dove resterebbe scritta. Ho ignorato quel che " &
+                       "c'era e te la chiedo in una finestra.")
+            End If
+
+            _ChiediLaChiave = True
+
+        End Sub
+
+        ''' <summary>Se un argomento ha l'aria di essere una chiave API.</summary>
+        Private Shared Function PareUnaChiave(argomento As String) As Boolean
+
+            Return If(argomento, String.Empty).Trim().
+                StartsWith("sk-", StringComparison.OrdinalIgnoreCase)
+
+        End Function
 
         ''' <summary>Se un argomento ha l'aria di essere un'opzione e non un valore.</summary>
         Private Shared Function PareUnOpzione(argomento As String) As Boolean

@@ -145,6 +145,30 @@ Friend Class GeneratoreFinto
 End Class
 
 ''' <summary>
+''' Il classificatore dei documenti, finto (T6). Annota <b>quali file</b> gli sono stati
+''' dati da smistare: il cap. 05.2 promette che si guardi la cartella dell'utente e non
+''' altro, e senza guardarli non si potrebbe verificare.
+''' </summary>
+Friend Class ClassificatoreFinto
+    Inherits MestiereFinto
+    Implements IClassificatoreDocumenti
+
+    ''' <summary>Gli elenchi di file ricevuti, uno per chiamata.</summary>
+    Public ReadOnly Property FileVisti As New List(Of List(Of TrovaLavoro.Dati.FileTrovato))
+
+    Public Function ClassificaAsync(documenti As IEnumerable(Of TrovaLavoro.Dati.FileTrovato),
+                                    Optional annulla As CancellationToken = Nothing) _
+                                    As Task(Of JsonNode) Implements IClassificatoreDocumenti.ClassificaAsync
+
+        FileVisti.Add(If(documenti Is Nothing, New List(Of TrovaLavoro.Dati.FileTrovato), documenti.ToList()))
+
+        Return Prossima("classificazione")
+
+    End Function
+
+End Class
+
+''' <summary>
 ''' Il compositore dell'email, finto (T6). Oltre a rispondere annota <b>quali allegati</b>
 ''' gli sono stati nominati: è la promessa del cap. 07.1 — il messaggio nomina quello che
 ''' parte davvero — e senza guardarli non si potrebbe verificare.

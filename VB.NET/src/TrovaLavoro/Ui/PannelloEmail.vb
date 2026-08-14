@@ -44,6 +44,9 @@ Public Class PannelloEmail
     ''' <summary>Chi scrive il messaggio; <c>Nothing</c> quando l'AI non c'è.</summary>
     Private _compositore As ICompositoreEmail
 
+    ''' <summary>Chi riconosce i documenti della cartella; <c>Nothing</c> quando l'AI non c'è.</summary>
+    Private _classificatore As IClassificatoreDocumenti
+
     ''' <summary>La candidatura a cui l'email appartiene; <c>Nothing</c> finché non ne arriva una.</summary>
     Private _candidatura As Opportunita
 
@@ -85,11 +88,17 @@ Public Class PannelloEmail
     ''' passa qui il suo, e prova il pannello intero senza chiave e senza rete — come P2
     ''' fa con l'import e P6 con la pipeline.
     ''' </param>
-    Public Sub Collega(contesto As ContestoApp, Optional compositore As ICompositoreEmail = Nothing)
+    ''' <param name="classificatore">
+    ''' Chi riconosce i documenti della cartella dell'utente (cap. 05.2). Come sopra: di
+    ''' norma è quello del contesto, il banco passa il suo.
+    ''' </param>
+    Public Sub Collega(contesto As ContestoApp, Optional compositore As ICompositoreEmail = Nothing,
+                       Optional classificatore As IClassificatoreDocumenti = Nothing)
 
         If contesto Is Nothing Then Throw New ArgumentNullException(NameOf(contesto))
         _contesto = contesto
         _compositore = If(compositore, contesto.Email)
+        _classificatore = If(classificatore, contesto.Classificatore)
 
         AggiornaComandi()
 
@@ -231,12 +240,15 @@ Public Class PannelloEmail
     ' ==================================================================
 
     ''' <summary>
-    ''' Riempie l'elenco con i documenti generati per questa candidatura: i file che stanno
-    ''' nella sua <c>out\</c>. Sono già spuntati — sono il motivo per cui l'email esiste.
+    ''' Riempie l'elenco: prima i documenti generati per questa candidatura — i file della
+    ''' sua <c>out\</c>, già spuntati, perché sono il motivo per cui l'email esiste — e poi
+    ''' gli <b>attestati</b> della cartella documenti (cap. 05.2), spenti.
     ''' </summary>
     ''' <remarks>
-    ''' Gli attestati della cartella documenti (cap. 05.2) si aggiungeranno qui accanto: la
-    ''' bozza sa già distinguerli, e l'elenco è costruito per accoglierli.
+    ''' Gli attestati arrivano spenti di proposito: quali provino qualcosa <i>per questo
+    ''' annuncio</i> lo sa l'utente, e allegare a un'azienda tutti i certificati che una
+    ''' persona possiede è il modo di far leggere nessuno. Il programma li mette a portata
+    ''' di mano; a sceglierli è lui.
     ''' </remarks>
     Private Sub RiempiGliAllegati()
 
@@ -249,15 +261,57 @@ Public Class PannelloEmail
                 .Scelto = ConvieneAllegarlo(percorso)})
         Next
 
+        For Each attestato As DocumentoClassificato In AttestatiDaProporre()
+            _bozza.Allegati.Add(New AllegatoScelto With {
+                .Nome = attestato.Nome,
+                .Origine = OrigineAllegato.Documenti,
+                .Scelto = False})
+        Next
+
         Riempiendo(
             Sub()
                 lstAllegati.Items.Clear()
                 For Each allegato As AllegatoScelto In _bozza.Allegati
-                    lstAllegati.Items.Add(allegato.Nome, allegato.Scelto)
+                    lstAllegati.Items.Add(EtichettaAllegato(allegato), allegato.Scelto)
                 Next
             End Sub)
 
     End Sub
+
+    ''' <summary>
+    ''' Gli attestati riconosciuti nella cartella documenti che <b>ci sono ancora</b>.
+    ''' </summary>
+    ''' <remarks>
+    ''' L'elenco su disco dice cosa c'era l'ultima volta che la cartella è stata letta; a
+    ''' dire cosa c'è adesso è solo il disco. Un attestato cancellato nel frattempo non
+    ''' deve comparire fra le cose che si possono allegare: è la stessa regola con cui gli
+    ''' allegati della bozza si rifanno dai file veri (cap. 07.1).
+    ''' </remarks>
+    Private Function AttestatiDaProporre() As List(Of DocumentoClassificato)
+
+        If _contesto Is Nothing OrElse Not _contesto.Raccolta.CartellaUtilizzabile Then
+            Return New List(Of DocumentoClassificato)
+        End If
+
+        Return _contesto.Raccolta.Attestati().
+            Where(Function(a) File.Exists(Path.Combine(_contesto.Raccolta.Cartella, a.Nome))).
+            ToList()
+
+    End Function
+
+    ''' <summary>
+    ''' Come si legge un allegato nell'elenco. Quelli che vengono dalla cartella documenti
+    ''' lo dicono: nella stessa lista ci sono file appena generati per questa candidatura e
+    ''' file che l'utente ha da anni, e sapere da dove viene ciascuno è ciò che permette di
+    ''' spuntarli con cognizione.
+    ''' </summary>
+    Private Shared Function EtichettaAllegato(allegato As AllegatoScelto) As String
+
+        If allegato.Origine <> OrigineAllegato.Documenti Then Return allegato.Nome
+
+        Return $"{allegato.Nome}  (dai tuoi documenti)"
+
+    End Function
 
     ''' <summary>I file prodotti per questa candidatura, in ordine di nome.</summary>
     Private Function DocumentiDellaCandidatura() As IEnumerable(Of String)
@@ -447,6 +501,178 @@ Public Class PannelloEmail
 
     End Sub
 
+    ' ==================================================================
+    ' La cartella documenti dell'utente (cap. 05.2)
+    ' ==================================================================
+
+    Private Async Sub btnDocumenti_Click(sender As Object, e As EventArgs) Handles btnDocumenti.Click
+        Await GestisciIDocumentiAsync()
+    End Sub
+
+    ''' <summary>
+    ''' Il giro della cartella documenti: sceglierla, farla leggere, confermare quel che
+    ''' ci si è riconosciuto dentro. Alla fine gli attestati confermati compaiono fra gli
+    ''' allegati proposti, spenti.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Il giro sta <b>qui</b> e non nella finestra perché è qui che si sa aspettare
+    ''' l'AI e annullarla (cap. 02.6): la finestra chiede — «rileggi», «cambia cartella» —
+    ''' e il pannello esegue, poi la riapre. Un ciclo, non una catena di finestre che si
+    ''' aprono l'una sull'altra.</para>
+    ''' <para>Su «annulla» la raccolta si <b>rilegge da disco</b>: le correzioni si
+    ''' scrivono nell'oggetto vivo mentre l'utente le fa, e chi annulla si aspetta che non
+    ''' resti niente.</para>
+    ''' </remarks>
+    Public Async Function GestisciIDocumentiAsync() As Task
+
+        If _contesto Is Nothing Then Return
+
+        If Not _contesto.Raccolta.CartellaUtilizzabile Then
+            If Not Await ScegliLaCartellaAsync() Then Return
+        End If
+
+        Dim finito As Boolean = False
+
+        While Not finito
+
+            Select Case FinestraDocumenti.Chiedi(Me, _contesto.Raccolta)
+
+                Case EsitoDocumenti.Confermato
+                    SalvaLaRaccolta()
+                    RiempiGliAllegati()
+                    MostraLeSpunte()
+                    Racconta($"Documenti confermati: {_contesto.Raccolta.Attestati().Count} attestati " &
+                             "da spuntare qui sopra quando servono.", StileApp.TestoSecondario)
+                    finito = True
+
+                Case EsitoDocumenti.Rileggere
+                    Await LeggiLaCartellaAsync()
+
+                Case EsitoDocumenti.CambiaCartella
+                    If Not Await ScegliLaCartellaAsync() Then finito = True
+
+                Case Else
+                    ' Annullato: quel che è stato toccato non era ancora suo.
+                    _contesto.RileggiLaRaccolta()
+                    finito = True
+
+            End Select
+
+        End While
+
+    End Function
+
+    ''' <summary>
+    ''' Chiede la cartella all'utente e la fa leggere. Falso se ha rinunciato.
+    ''' </summary>
+    Private Async Function ScegliLaCartellaAsync() As Task(Of Boolean)
+
+        Dim scelta As String
+
+        Using dialogo As New FolderBrowserDialog()
+
+            dialogo.Description = "Scegli la cartella dove tieni i tuoi documenti: CV, attestati, certificati."
+            dialogo.UseDescriptionForTitle = True
+            dialogo.ShowNewFolderButton = False
+
+            If _contesto.Raccolta.CartellaUtilizzabile Then
+                dialogo.SelectedPath = _contesto.Raccolta.Cartella
+            End If
+
+            If dialogo.ShowDialog(Me) <> DialogResult.OK Then Return False
+            scelta = dialogo.SelectedPath
+
+        End Using
+
+        ' Cartella nuova, elenco nuovo: le categorie di prima erano di altri file, e
+        ' tenerle vorrebbe dire proporre come attestato un nome che qui non c'è.
+        If Not String.Equals(scelta, _contesto.Raccolta.Cartella, StringComparison.OrdinalIgnoreCase) Then
+            _contesto.Raccolta.Documenti.Clear()
+            _contesto.Raccolta.CvPiuRecente = ""
+        End If
+
+        _contesto.Raccolta.Cartella = scelta
+
+        Await LeggiLaCartellaAsync()
+        Return True
+
+    End Function
+
+    ''' <summary>
+    ''' Legge la cartella e, se l'AI c'è, le fa proporre una categoria per ogni file.
+    ''' Senza AI la lettura si fa lo stesso: i file si vedono, e a dire cos'è ciascuno
+    ''' resta l'utente.
+    ''' </summary>
+    Private Async Function LeggiLaCartellaAsync() As Task
+
+        Dim lasciatiFuori As Integer
+        Dim trovati As List(Of FileTrovato) = ScansioneDocumenti.Leggi(
+            _contesto.Raccolta.Cartella, lasciatiFuori)
+
+        _contesto.Raccolta.AllineaAiFile(trovati)
+        _contesto.Raccolta.Letta = Date.Now
+
+        If trovati.Count = 0 Then
+            Racconta("In quella cartella non ci sono file che io sappia leggere (PDF, DOCX, TXT, MD).",
+                     StileApp.Pericolo)
+            Return
+        End If
+
+        ' Un elenco troncato in silenzio si leggerebbe come «nella cartella non c'era
+        ' altro»: chi ha duecento file deve sapere che ne ho guardati sessanta.
+        If lasciatiFuori > 0 Then
+            Racconta($"La cartella ha più di {ScansioneDocumenti.MassimoFile} documenti: " &
+                     $"ne ho letti i primi {trovati.Count} in ordine di nome, {lasciatiFuori} sono rimasti fuori.",
+                     StileApp.Pericolo)
+        End If
+
+        If _classificatore Is Nothing Then
+            Racconta("Senza chiave API non posso riconoscerli: l'elenco c'è, la categoria mettila tu.",
+                     StileApp.Pericolo)
+            Return
+        End If
+
+        _annulla = New CancellationTokenSource()
+        RaiseEvent LavoroAiCambiato(Me, EventArgs.Empty)
+        AggiornaComandi()
+        Racconta($"Sto guardando i {trovati.Count} documenti della cartella…", StileApp.TestoSecondario)
+
+        Try
+            Dim proposta = Await _classificatore.ClassificaAsync(trovati, _annulla.Token)
+            _contesto.Raccolta.PrendiLaProposta(proposta, trovati)
+
+            Racconta("Ecco cosa ho riconosciuto: correggi quel che ho sbagliato e conferma.",
+                     StileApp.TestoSecondario)
+
+        Catch ex As OperationCanceledException
+            Racconta("Lettura annullata: l'elenco resta com'era.", StileApp.TestoSecondario)
+
+        Catch ex As ErroreAi
+            Racconta(ex.Message, StileApp.Pericolo)
+
+        Finally
+            _annulla?.Dispose()
+            _annulla = Nothing
+            RaiseEvent LavoroAiCambiato(Me, EventArgs.Empty)
+            AggiornaComandi()
+        End Try
+
+    End Function
+
+    ''' <summary>Scrive la raccolta su disco, dicendolo se non ci riesce.</summary>
+    Private Sub SalvaLaRaccolta()
+
+        Try
+            _contesto.ArchivioRaccolta.Salva(_contesto.Raccolta)
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+
+            Racconta($"Non sono riuscita a salvare l'elenco dei documenti: {ex.Message}", StileApp.Pericolo)
+        End Try
+
+    End Sub
+
     Private Sub btnTornaAiDocumenti_Click(sender As Object, e As EventArgs) Handles btnTornaAiDocumenti.Click
 
         ' Uscendo si salva quel che c'è: il destinatario scritto a metà e le spunte sono
@@ -496,7 +722,8 @@ Public Class PannelloEmail
 
         For Each allegato As AllegatoScelto In _bozza.AllegatiScelti()
 
-            Dim percorso As String = BozzaEmail.PercorsoDi(allegato, _candidatura.Cartella)
+            Dim percorso As String = BozzaEmail.PercorsoDi(
+                allegato, _candidatura.Cartella, _contesto?.Raccolta.Cartella)
 
             ' Un file sparito nel frattempo non ferma il messaggio: l'utente ha appena
             ' guardato l'elenco, e bloccare tutto per un file in meno sarebbe sproporzionato.
@@ -546,7 +773,7 @@ Public Class PannelloEmail
 
         If _comandi Is Nothing Then
             _comandi = New FasciaDeiComandi(pnlAzioni)
-            _comandi.ASinistra(btnTornaAiDocumenti, btnRiscrivi)
+            _comandi.ASinistra(btnTornaAiDocumenti, btnRiscrivi, btnDocumenti)
             _comandi.ADestra(btnHoSpedito, btnPreparaEmail)
         End If
 
@@ -564,6 +791,7 @@ Public Class PannelloEmail
         StileApp.VestiBottone(btnHoSpedito, LivelloBottone.SicuroPositivo)
         StileApp.VestiBottone(btnTornaAiDocumenti, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnRiscrivi, LivelloBottone.Esplorativo)
+        StileApp.VestiBottone(btnDocumenti, LivelloBottone.Esplorativo)
 
     End Sub
 
@@ -587,6 +815,10 @@ Public Class PannelloEmail
         btnHoSpedito.Enabled = conCandidatura AndAlso Not occupato AndAlso MessaggioGiaScritto()
 
         btnTornaAiDocumenti.Enabled = Not occupato
+
+        ' La cartella documenti non dipende dalla candidatura: si può sistemare anche
+        ' prima di avere un'email da mandare, ed è quel che conviene fare una volta sola.
+        btnDocumenti.Enabled = Not occupato AndAlso _contesto IsNot Nothing
 
         If Not btnPreparaEmail.Enabled AndAlso conCandidatura AndAlso Not occupato Then
             _suggerimenti.SetToolTip(btnPreparaEmail, "Prima serve un messaggio: fallo scrivere o scrivilo tu.")

@@ -45,9 +45,15 @@ Namespace Ui
                 o.Avanza(StatoOpportunita.Interessante, o.Creata.AddMinutes(2))
             End If
 
-            If arrivataA = StatoOpportunita.Generata Then
+            ' Una candidatura inviata è passata per forza dalla generazione: i documenti
+            ' sono quello che parte, e la macchina a stati non ammette il salto.
+            If arrivataA = StatoOpportunita.Generata OrElse arrivataA = StatoOpportunita.Inviata Then
                 o.Cv = JsonNode.Parse("{""intestazione"": {}}")
                 o.Avanza(StatoOpportunita.Generata, o.Creata.AddMinutes(9))
+            End If
+
+            If arrivataA = StatoOpportunita.Inviata Then
+                o.Avanza(StatoOpportunita.Inviata, o.Creata.AddMinutes(20))
             End If
 
             If arrivataA = StatoOpportunita.Scartata Then
@@ -147,6 +153,26 @@ Namespace Ui
                     Assert.Contains("1 generata", detto)
                     Assert.Contains("1 scartata", detto)
                 End Sub, AddressOf TreCandidature)
+        End Sub
+
+        <TestMethod>
+        Public Sub LeInviateSiContanoDaT6()
+            ' Il contatore è entrato con la tappa che lo fa salire (cap. 07.3): prima di T6
+            ' lo stato «inviata» non si raggiungeva, e un numero fermo a zero non conta
+            ' niente. È anche il solo contatore che dice quante candidature sono partite
+            ' davvero — cioè la domanda per cui il registro esiste.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim detto As String = Etichetta(pannello, "lblContatori").Text
+
+                    Assert.Contains("2 inviate", detto, "quelle partite")
+                    Assert.Contains("1 generata", detto, "e quelle ferme un passo prima")
+                End Sub,
+                Sub(candidature)
+                    candidature.Salva(Candidatura("Rossi S.p.A.", 10, 4.1, StatoOpportunita.Inviata))
+                    candidature.Salva(Candidatura("Neri S.p.A.", 11, 3.2, StatoOpportunita.Inviata))
+                    candidature.Salva(Candidatura("Verdi & C.", 12, 2.0, StatoOpportunita.Generata))
+                End Sub)
         End Sub
 
         <TestMethod>

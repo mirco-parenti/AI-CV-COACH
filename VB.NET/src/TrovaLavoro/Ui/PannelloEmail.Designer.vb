@@ -37,6 +37,7 @@ Partial Class PannelloEmail
         Me.pnlAzioni = New System.Windows.Forms.Panel()
         Me.btnTornaAiDocumenti = New System.Windows.Forms.Button()
         Me.btnRiscrivi = New System.Windows.Forms.Button()
+        Me.btnDocumenti = New System.Windows.Forms.Button()
         Me.btnHoSpedito = New System.Windows.Forms.Button()
         Me.btnPreparaEmail = New System.Windows.Forms.Button()
         Me.pnlIntestazione.SuspendLayout()
@@ -231,6 +232,7 @@ Partial Class PannelloEmail
         '
         Me.pnlAzioni.Controls.Add(Me.btnTornaAiDocumenti)
         Me.pnlAzioni.Controls.Add(Me.btnRiscrivi)
+        Me.pnlAzioni.Controls.Add(Me.btnDocumenti)
         Me.pnlAzioni.Controls.Add(Me.btnHoSpedito)
         Me.pnlAzioni.Controls.Add(Me.btnPreparaEmail)
         Me.pnlAzioni.Dock = System.Windows.Forms.DockStyle.Bottom
@@ -254,6 +256,14 @@ Partial Class PannelloEmail
         Me.btnRiscrivi.Size = New System.Drawing.Size(190, 32)
         Me.btnRiscrivi.TabIndex = 1
         Me.btnRiscrivi.Text = "Fallo riscrivere"
+        '
+        'btnDocumenti
+        '
+        Me.btnDocumenti.Location = New System.Drawing.Point(404, 12)
+        Me.btnDocumenti.Name = "btnDocumenti"
+        Me.btnDocumenti.Size = New System.Drawing.Size(240, 32)
+        Me.btnDocumenti.TabIndex = 2
+        Me.btnDocumenti.Text = "Documenti da allegare…"
         '
         'btnHoSpedito
         '
@@ -316,6 +326,7 @@ Partial Class PannelloEmail
     Friend WithEvents pnlAzioni As System.Windows.Forms.Panel
     Friend WithEvents btnTornaAiDocumenti As System.Windows.Forms.Button
     Friend WithEvents btnRiscrivi As System.Windows.Forms.Button
+    Friend WithEvents btnDocumenti As System.Windows.Forms.Button
     Friend WithEvents btnHoSpedito As System.Windows.Forms.Button
     Friend WithEvents btnPreparaEmail As System.Windows.Forms.Button
 

@@ -54,6 +54,18 @@
     <Compile Update="Ui\FinestraConfermaCritica.Designer.vb">
       <DependentUpon>FinestraConfermaCritica.vb</DependentUpon>
     </Compile>
+    <Compile Update="Ui\FinestraChiaveApi.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Ui\FinestraChiaveApi.Designer.vb">
+      <DependentUpon>FinestraChiaveApi.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Ui\FinestraDocumenti.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Ui\FinestraDocumenti.Designer.vb">
+      <DependentUpon>FinestraDocumenti.vb</DependentUpon>
+    </Compile>
     <Compile Update="Ui\PannelloProfilo.vb">
       <SubType>UserControl</SubType>
     </Compile>

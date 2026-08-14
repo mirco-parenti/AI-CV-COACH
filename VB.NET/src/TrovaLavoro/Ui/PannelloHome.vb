@@ -262,9 +262,9 @@ Public Class PannelloHome
     End Sub
 
     ''' <summary>
-    ''' I contatori del cap. 07.3. Le <b>inviate</b> non ci sono: quel numero sarebbe
-    ''' sempre zero finché T6 non arriva, e un contatore che non può muoversi non conta
-    ''' niente — lo aggiungerà la tappa che lo fa salire.
+    ''' I contatori del cap. 07.3. Le <b>inviate</b> sono entrate con T6, che è la tappa
+    ''' che le fa salire: prima quel numero sarebbe stato sempre zero, e un contatore che
+    ''' non può muoversi non conta niente.
     ''' </summary>
     ''' <param name="quanteSeNeVedono">
     ''' Quante righe la coda mostra adesso. I contatori restano sul <b>totale</b> — dicono
@@ -285,6 +285,7 @@ Public Class PannelloHome
         Dim voci As New List(Of String) From {
             $"{daCompletare} da completare",
             Contate(_registro.Quante(StatoOpportunita.Generata), "generata", "generate"),
+            Contate(_registro.Quante(StatoOpportunita.Inviata), "inviata", "inviate"),
             Contate(_registro.Quante(StatoOpportunita.Scartata), "scartata", "scartate")}
 
         If quanteSeNeVedono < _registro.Voci.Count Then

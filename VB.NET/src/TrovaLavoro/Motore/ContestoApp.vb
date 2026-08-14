@@ -33,10 +33,19 @@ Namespace Motore
 
         Private Sub New(cartella As CartellaDati)
             _Cartella = cartella
+            _Segreti = New ArchivioSegreti(cartella)
         End Sub
 
         ''' <summary>Dove vivono i file dell'utente (cap. 11.1).</summary>
         Public ReadOnly Property Cartella As CartellaDati
+
+        ''' <summary>
+        ''' La chiave API cifrata su disco (cap. 11.3). C'è sempre — è una porta, non un
+        ''' servizio: dice se una chiave c'è, e la salva quando l'utente ne digita una.
+        ''' Nasce con la cartella perché <see cref="MontaAi"/> la interroga prima di
+        ''' tutto il resto.
+        ''' </summary>
+        Public ReadOnly Property Segreti As ArchivioSegreti
 
         ''' <summary>Il pool dei prompt; <c>Nothing</c> se non si è lasciato aprire.</summary>
         Public ReadOnly Property Libreria As LibreriaPrompt
@@ -105,6 +114,23 @@ Namespace Motore
         Public ReadOnly Property ArchivioRicerche As ArchivioRicerche
 
         ''' <summary>
+        ''' La cartella documenti dell'utente e quel che ci si è riconosciuto dentro
+        ''' (cap. 05.2). C'è sempre — vuota finché una cartella non è stata scelta — perché
+        ''' leggere un elenco di nomi non dipende dall'AI.
+        ''' </summary>
+        Public ReadOnly Property Raccolta As RaccoltaDocumenti
+
+        ''' <summary>Da dove la <see cref="Raccolta"/> si rilegge e dove si riscrive.</summary>
+        Public ReadOnly Property ArchivioRaccolta As ArchivioRaccoltaDocumenti
+
+        ''' <summary>
+        ''' Chi riconosce i documenti di una cartella (cap. 05.2); <c>Nothing</c> senza AI
+        ''' o senza pool. Senza di lui la cartella si sceglie lo stesso: i file si vedono,
+        ''' e a dire cos'è ciascuno resta l'utente.
+        ''' </summary>
+        Public ReadOnly Property Classificatore As IClassificatoreDocumenti
+
+        ''' <summary>
         ''' Se c'è tutto ciò che serve per una chiamata all'AI: la chiave <b>e</b> i
         ''' prompt. È la domanda che i pannelli fanno prima di accendere un bottone.
         ''' </summary>
@@ -148,10 +174,11 @@ Namespace Motore
         ''' collaudi per lavorare in una cartella temporanea.
         ''' </param>
         ''' <param name="chiave">
-        ''' La chiave API. <c>Nothing</c> significa «cercala nell'ambiente» (cap. 02.5);
-        ''' una <b>stringa vuota</b> significa invece «non c'è, e non guardare
-        ''' nell'ambiente»: è ciò che permette al banco di collaudare l'applicazione
-        ''' senza chiave anche su una postazione che la chiave ce l'ha davvero.
+        ''' La chiave API. <c>Nothing</c> significa «cercala dove sta» — prima
+        ''' <c>segreti.bin</c>, poi l'ambiente (v. <see cref="LeggiChiave"/>); una
+        ''' <b>stringa vuota</b> significa invece «non c'è, e non cercarla da nessuna
+        ''' parte»: è ciò che permette al banco di collaudare l'applicazione senza chiave
+        ''' anche su una postazione che la chiave ce l'ha davvero.
         ''' </param>
         ''' <param name="cartellaPool">Un pool esterno diverso da quello predefinito (cap. 04.2).</param>
         Public Shared Function Monta(Optional radiceDati As String = Nothing,
@@ -174,6 +201,21 @@ Namespace Motore
             Return contesto
 
         End Function
+
+        ''' <summary>
+        ''' Rilegge la <see cref="Raccolta"/> da disco, dimenticando quel che è cambiato in
+        ''' memoria.
+        ''' </summary>
+        ''' <remarks>
+        ''' Serve a chi <b>annulla</b>: le correzioni alle categorie si scrivono
+        ''' nell'oggetto vivo mentre l'utente le fa — è quello che rende la finestra
+        ''' immediata — e annullare deve poterle dimenticare tutte insieme, senza tenere
+        ''' da parte una copia di riserva che poi qualcuno dovrebbe ricordarsi di
+        ''' riallineare.
+        ''' </remarks>
+        Public Sub RileggiLaRaccolta()
+            _Raccolta = ArchivioRaccolta.Carica()
+        End Sub
 
         ''' <summary>
         ''' La mappa della cartella dati, con ripiego sulla predefinita se la radice
@@ -257,8 +299,7 @@ Namespace Motore
             Dim chiaveInUso As String = LeggiChiave(chiave)
 
             If chiaveInUso Is Nothing Then
-                Avvisa($"Manca la chiave API ({ClientClaude.NomeVariabileChiave}): " &
-                       "le funzioni che usano l'AI restano spente.")
+                Avvisa("Manca la chiave API: le funzioni che usano l'AI restano spente.")
                 Return
             End If
 
@@ -292,18 +333,58 @@ Namespace Motore
             ' che si percorre da sé (cap. 07.1).
             _Email = New CompositoreEmail(Libreria, Client)
 
+            ' Chi smista la cartella documenti (cap. 05.2). Sta qui accanto all'email
+            ' perché è lì che serve — gli attestati da allegare — ma non appartiene a
+            ' quella fila più di quanto ci appartenga il compositore.
+            _Classificatore = New ClassificatoreDocumenti(Libreria, Client)
+
         End Sub
 
-        ''' <summary>La chiave da usare, o <c>Nothing</c> se non ce n'è una.</summary>
-        Private Shared Function LeggiChiave(chiave As String) As String
+        ''' <summary>
+        ''' La chiave da usare, o <c>Nothing</c> se non ce n'è una. Si cerca in tre
+        ''' posti, in quest'ordine: quella <b>dichiarata dal chiamante</b> (il banco), il
+        ''' <b>file cifrato</b> della cartella dati (cap. 11.3), la <b>variabile
+        ''' d'ambiente</b>.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Il file viene prima dell'ambiente perché è la volontà più recente
+        ''' dell'utente: l'ha digitata lui nell'applicazione, mentre la variabile è
+        ''' l'eredità di T2 e resta per lo sviluppo e per i collaudi reali. Perché la
+        ''' precedenza non diventi una sorpresa — «ho cambiato la variabile e non
+        ''' succede niente» — la provenienza finisce fra le <see cref="Note"/>, con la
+        ''' chiave <b>mascherata</b>: nella diagnostica non compare mai per intero
+        ''' (cap. 11.3).</para>
+        ''' </remarks>
+        Private Function LeggiChiave(chiave As String) As String
 
             ' Dichiarata dal chiamante: una stringa vuota è un «no» esplicito.
             If chiave IsNot Nothing Then
-                Return If(String.IsNullOrWhiteSpace(chiave), Nothing, chiave)
+                If String.IsNullOrWhiteSpace(chiave) Then Return Nothing
+                Nota($"Chiave API: quella indicata all'avvio ({ArchivioSegreti.Maschera(chiave)}).")
+                Return chiave
+            End If
+
+            Dim illeggibile As Boolean
+            Dim salvata As String = Segreti.LeggiChiaveApi(illeggibile)
+
+            If salvata IsNot Nothing Then
+                Nota($"Chiave API: dal file cifrato della cartella dati ({ArchivioSegreti.Maschera(salvata)}).")
+                Return salvata
+            End If
+
+            ' Un file che c'è e non si apre non è un «non ce l'ho»: l'utente lo vede su
+            ' disco e lo crede buono. Di solito è lo stesso file su un altro PC o sotto
+            ' un altro account di Windows, che è precisamente ciò che DPAPI promette.
+            If illeggibile Then
+                Avvisa("Il file della chiave API c'è ma non si decifra: è stato salvato " &
+                       "da un altro account di Windows o su un altro PC. Va reinserita.")
             End If
 
             Try
-                Return ClientClaude.ChiaveDaAmbiente()
+                Dim dallAmbiente As String = ClientClaude.ChiaveDaAmbiente()
+                Nota($"Chiave API: dalla variabile {ClientClaude.NomeVariabileChiave} " &
+                     $"({ArchivioSegreti.Maschera(dallAmbiente)}).")
+                Return dallAmbiente
             Catch ex As ErroreAi
                 Return Nothing
             End Try
@@ -319,6 +400,19 @@ Namespace Motore
             _ArchivioRicerche = New ArchivioRicerche(Cartella)
             _Ricerche = ArchivioRicerche.Carica()
             RiportaRicerche()
+
+            ' La cartella documenti dell'utente (cap. 05.2). Che non ci sia è la
+            ' normalità — è una comodità, non un ingranaggio — ma una cartella scelta e
+            ' poi sparita va detta: gli attestati che l'utente si aspetta fra gli
+            ' allegati non ci sarebbero, e nessuno gli avrebbe spiegato perché.
+            _ArchivioRaccolta = New ArchivioRaccoltaDocumenti(Cartella)
+            _Raccolta = ArchivioRaccolta.Carica()
+
+            If Not String.IsNullOrWhiteSpace(Raccolta.Cartella) AndAlso Not Raccolta.CartellaUtilizzabile Then
+                Avvisa($"La cartella dei documenti «{Raccolta.Cartella}» non c'è più: " &
+                       "gli attestati da allegare non si possono proporre finché non ne scegli un'altra.")
+            End If
+
             Nota(If(Archivio.Esiste,
                     $"Profilo presente in «{Cartella.FileProfilo}».",
                     "Nessun profilo salvato: si parte dal bivio «ho già un CV» / «costruiamolo insieme»."))

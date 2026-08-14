@@ -35,6 +35,7 @@ Namespace Dati
 
             Assert.AreEqual(Path.Combine(radice, "taratura.json"), cartella.FileTaratura, "taratura.json")
             Assert.AreEqual(Path.Combine(radice, "modelli.json"), cartella.FileModelli, "modelli.json")
+            Assert.AreEqual(Path.Combine(radice, "segreti.bin"), cartella.FileSegreti, "segreti.bin")
             Assert.AreEqual(Path.Combine(radice, "profilo"), cartella.CartellaProfilo, "profilo\")
             Assert.AreEqual(Path.Combine(radice, "profilo", "profilo.json"), cartella.FileProfilo, "profilo.json")
             Assert.AreEqual(Path.Combine(radice, "profilo", "storico"), cartella.CartellaStorico, "storico\")
@@ -49,8 +50,8 @@ Namespace Dati
 
             Assert.AreNotEqual(CartellaDati.RadicePredefinita, cartella.Radice, "non deve ricadere sul default")
             For Each percorso As String In {cartella.FileTaratura, cartella.FileModelli,
-                                            cartella.CartellaProfilo, cartella.FileProfilo,
-                                            cartella.CartellaStorico}
+                                            cartella.FileSegreti, cartella.CartellaProfilo,
+                                            cartella.FileProfilo, cartella.CartellaStorico}
                 Assert.StartsWith(cartella.Radice, percorso, "ogni percorso sta sotto la radice")
             Next
         End Sub

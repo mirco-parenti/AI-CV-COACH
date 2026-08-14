@@ -70,6 +70,12 @@ Public Class FormPrincipale
 
     Private Sub FormPrincipale_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         _contesto = ContestoApp.Monta(_argomenti.RadiceDati)
+
+        ' Prima dei pannelli, perché una chiave data adesso rimonta il motore: collegarli
+        ' a un contesto che sta per essere sostituito vorrebbe dire riaccenderli a mano
+        ' uno per uno (cap. 11.3).
+        ChiediLaChiaveApiSeServe()
+
         MostraLoStatoDellAvvio()
         DichiaraLaCartellaDati()
 
@@ -496,6 +502,57 @@ Public Class FormPrincipale
         _stampante?.Dispose()
         _contesto?.Dispose()
     End Sub
+
+    ''' <summary>
+    ''' Chiede la chiave API quando non ce n'è una, o quando l'avvio l'ha chiesto con
+    ''' <c>--chiave</c> (cap. 11.3). Se l'utente ne dà una, il motore si <b>rimonta</b>:
+    ''' è il modo di accendere tutti i servizi che dalla chiave dipendono senza
+    ''' inseguirli uno per uno.
+    ''' </summary>
+    ''' <remarks>
+    ''' Finché le Impostazioni non ci sono (T9) questa finestra è l'unico posto in cui la
+    ''' chiave si digita, e <c>--chiave</c> l'unico modo di richiamarla: per questo la
+    ''' richiesta esplicita vale anche a chiave presente.
+    ''' </remarks>
+    Private Sub ChiediLaChiaveApiSeServe()
+
+        If _contesto.Client IsNot Nothing AndAlso Not _argomenti.ChiediLaChiave Then Return
+
+        Dim illeggibile As Boolean
+        Dim digitata As String = FinestraChiaveApi.Chiedi(Me, _contesto.Segreti.LeggiChiaveApi(illeggibile))
+        If digitata Is Nothing Then Return
+
+        ' Se il salvataggio non riesce — disco pieno, cartella di sola lettura — la
+        ' chiave vale lo stesso per questa sessione: l'utente l'ha data per lavorare
+        ' adesso, e perderla in silenzio sarebbe il modo peggiore di reagire.
+        Dim salvata As Boolean = SalvaLaChiave(digitata)
+
+        _contesto.Dispose()
+        _contesto = ContestoApp.Monta(_argomenti.RadiceDati, If(salvata, Nothing, digitata))
+
+    End Sub
+
+    ''' <summary>Scrive la chiave cifrata e dice se c'è riuscita.</summary>
+    Private Function SalvaLaChiave(chiave As String) As Boolean
+
+        Try
+            _contesto.Segreti.SalvaChiaveApi(chiave)
+            Return True
+
+        Catch ex As Exception When TypeOf ex Is System.IO.IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException OrElse
+                                   TypeOf ex Is System.Security.Cryptography.CryptographicException
+
+            MessageBox.Show(
+                "Non sono riuscita a salvare la chiave sul disco:" & vbLf & ex.Message & vbLf & vbLf &
+                "La uso lo stesso per questa sessione, ma alla prossima apertura te la richiederò.",
+                "TrovaLavoro", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+
+            Return False
+
+        End Try
+
+    End Function
 
     ''' <summary>
     ''' Racconta com'è andato il montaggio: la riga «Ver. 0.3.003 · Pool 1.00

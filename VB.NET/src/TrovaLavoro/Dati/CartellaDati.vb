@@ -17,9 +17,9 @@ Namespace Dati
     ''' non viene mai toccata.
     '''
     ''' Qui stanno solo i percorsi che il programma usa oggi. Gli altri del cap. 11.1
-    ''' — opportunità, registro, log, backup, segreti, configurazione — si aggiungono
-    ''' con la tappa che li scrive: un percorso nominato prima di avere un file vero è
-    ''' solo un nome da tenere allineato.
+    ''' — log, backup, configurazione — si aggiungono con la tappa che li scrive: un
+    ''' percorso nominato prima di avere un file vero è solo un nome da tenere
+    ''' allineato.
     ''' </remarks>
     Public Class CartellaDati
 
@@ -105,6 +105,29 @@ Namespace Dati
         Public ReadOnly Property FileRicerche As String
             Get
                 Return Path.Combine(Radice, "ricerche.json")
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' La cartella documenti dell'utente e quel che ci si è riconosciuto dentro
+        ''' (cap. 05.2). È l'unico file di questa mappa che contiene un <b>percorso fuori
+        ''' dalla cartella dati</b>: quella cartella è dell'utente e sta dove vuole lui.
+        ''' </summary>
+        Public ReadOnly Property FileDocumenti As String
+            Get
+                Return Path.Combine(Radice, "documenti.json")
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' La chiave API cifrata con la protezione dati di Windows (cap. 11.3). È
+        ''' l'unico file di questa mappa che <b>non</b> è leggibile in un editor, ed è il
+        ''' punto: gli altri sono JSON con i rientri perché l'utente sia padrone dei suoi
+        ''' dati anche senza l'app, questo è una credenziale e va tenuta chiusa.
+        ''' </summary>
+        Public ReadOnly Property FileSegreti As String
+            Get
+                Return Path.Combine(Radice, "segreti.bin")
             End Get
         End Property
 
