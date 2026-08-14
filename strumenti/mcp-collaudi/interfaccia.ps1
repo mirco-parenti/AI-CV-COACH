@@ -216,6 +216,27 @@ l'attrezzo lo dichiara (v. `$Ripiegato`): premere un bottone della pagina è leg
 un giorno servirà — ma chi legge deve sapere che non ha premuto un comando nostro.
 #>
 
+<#
+.SYNOPSIS
+La casella del nome file di un dialogo di sistema; IntPtr::Zero se quel dialogo non ce l'ha.
+.DESCRIPTION
+I pezzi di un dialogo di sistema si chiamano per numero, e il numero **non è lo stesso
+nelle due specie**: nella finestra di *apertura* la casella è l'Edit 1148 (dentro il
+ComboBoxEx32), in quella di *salvataggio* è l'Edit 1001. Pagato il 2026-08-14 esportando
+il registro: cercando solo la 1148, il salvataggio veniva scambiato per una finestra di
+messaggio, «scegli_file» diceva di non trovare la casella e la finestra restava lì a
+bloccare tutto.
+#>
+function CasellaDelNome([IntPtr]$Dialogo) {
+
+    foreach ($numero in 1148, 1001) {
+        $casella = [Finestre]::Figlia($Dialogo, "Edit", $numero)
+        if ($casella -ne [IntPtr]::Zero) { return $casella }
+    }
+
+    return [IntPtr]::Zero
+}
+
 # Perché il controllo trovato da «Trova» non è un comando dell'applicazione; $null se lo è.
 $Ripiegato = $null
 
@@ -462,7 +483,7 @@ switch ($azione) {
         # quello sbagliato.
         $dialogo = [Finestre]::Dialogo([uint32]$processo.Id)
         if ($dialogo -ne [IntPtr]::Zero) {
-            $conCasella = [Finestre]::Figlia($dialogo, "Edit", 1148) -ne [IntPtr]::Zero
+            $conCasella = (CasellaDelNome $dialogo) -ne [IntPtr]::Zero
             $come = if ($conCasella) { "scegli_file" } else { "rispondi_finestra" }
             Write-Output ""
             Write-Output "C'è una finestra aperta che aspetta una risposta: «$([Finestre]::Titolo($dialogo))». Rispondile con «$come»."
@@ -505,7 +526,7 @@ switch ($azione) {
                 # Quale delle due specie di finestra sia lo dice la casella del nome file:
                 # ce l'ha la scelta file, non una finestra di messaggio. Dirlo storto manda
                 # a provare l'attrezzo sbagliato, e la finestra intanto blocca tutto.
-                $conCasella = [Finestre]::Figlia($dialogo, "Edit", 1148) -ne [IntPtr]::Zero
+                $conCasella = (CasellaDelNome $dialogo) -ne [IntPtr]::Zero
                 $come = if ($conCasella) { "scegli_file" } else { "rispondi_finestra" }
                 Write-Output "Premuto «$etichetta»: ha aperto «$([Finestre]::Titolo($dialogo))», che ora aspetta una risposta (rispondi con «$come»)."
             } else {
@@ -752,7 +773,7 @@ switch ($azione) {
         $percorso = [string]$scelte.percorso
         if (-not $percorso) { Write-Output "Serve il percorso del file (in forma Windows), oppure «annulla»."; exit 1 }
 
-        $casella = [Finestre]::Figlia($dialogo, "Edit", 1148)
+        $casella = CasellaDelNome $dialogo
         $conferma = [Finestre]::Figlia($dialogo, "Button", 1)
         if ($casella -eq [IntPtr]::Zero) { Write-Output "Non ho trovato la casella del nome file in «$titolo»."; exit 1 }
         if ($conferma -eq [IntPtr]::Zero) { Write-Output "Non ho trovato il bottone di conferma in «$titolo»."; exit 1 }

@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- L'attrezzo del rito del bump (cap. 04.5): rigenera le impronte del pool dei
+       prompt e riscrive il manifest.
+
+       Sta in strumenti/ perché è un attrezzo di sviluppo e non entra nell'eseguibile
+       (cap. 13). Non ricalcola niente per conto suo: chiama LibreriaPrompt.Sigilla,
+       cioè lo stesso codice che il caricatore usa per verificare le impronte. È la
+       ragione per cui esiste invece di uno script: se il sigillo e il caricatore
+       calcolassero l'impronta ognuno a modo suo, prima o poi divergerebbero e il pool
+       risulterebbe modificato senza esserlo.
+
+       Il comando «Sigilla pool» delle Impostazioni (T9) chiamerà lo stesso metodo, e
+       allora questo attrezzo potrà restare per chi lavora da riga di comando. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- L'attrezzo non ha finestre, ma il progetto che referenzia sì. La compilazione
+         emette un MSB3277 su WindowsBase (due versioni, una dal runtime e una da
+         WebView2) e sceglie la primaria: è innocuo e riguarda solo questo attrezzo, non
+         l'eseguibile del prodotto — che infatti compila senza avvisi. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>SigillaPool</RootNamespace>
+    <AssemblyName>SigillaPool</AssemblyName>
+    <StartupObject>SigillaPool.Programma</StartupObject>
+    <OptionStrict>On</OptionStrict>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionInfer>On</OptionInfer>
+    <CodePage>65001</CodePage>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\VB.NET\src\TrovaLavoro\TrovaLavoro.vbproj" />
+  </ItemGroup>
+
+</Project>

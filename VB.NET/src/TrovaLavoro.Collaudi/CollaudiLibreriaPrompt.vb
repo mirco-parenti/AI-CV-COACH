@@ -1,4 +1,4 @@
-Imports System.IO
+﻿Imports System.IO
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro.Ai
 
@@ -26,8 +26,8 @@ Namespace Ai
             Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
 
             Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "origine")
-            Assert.AreEqual("1.03", libreria.Versione, "versione del pool")
-            Assert.AreEqual("Pool 1.03 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
+            Assert.AreEqual("1.04", libreria.Versione, "versione del pool")
+            Assert.AreEqual("Pool 1.04 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
         End Sub
 
         <TestMethod>
@@ -42,6 +42,25 @@ Namespace Ai
             Next
 
             Assert.HasCount(15, Quindici, "il pool 1.00 ha quindici prompt")
+        End Sub
+
+        <TestMethod>
+        Public Sub IDuePromptNuoviDiT6SiCaricano()
+            ' Il Pool 1.04 aggiunge senza toccare: i quindici di sopra restano quelli, e
+            ' questi due si caricano accanto a loro. Il collaudo dei quindici racconta la
+            ' migrazione dal prototipo, e non va allungato a ogni tappa.
+            Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
+
+            Dim email = libreria.Carica("email_candidatura")
+            Assert.AreEqual("ragionamento", email.Modello, "email: è il testo che l'azienda legge per primo")
+            Assert.AreEqual("json", email.Uscita, "email: uscita")
+            CollectionAssert.AreEqual({"LETTERA", "ANNUNCIO", "ALLEGATI"}, email.Segnaposto.ToArray(),
+                                      "email: la lettera è la fonte, l'annuncio serve al ruolo, gli allegati al rimando")
+
+            Dim documenti = libreria.Carica("classifica_documenti")
+            Assert.AreEqual("semplice", documenti.Modello, "documenti: smistare non è ragionare")
+            Assert.AreEqual("json", documenti.Uscita, "documenti: uscita")
+            CollectionAssert.AreEqual({"DOCUMENTI"}, documenti.Segnaposto.ToArray(), "documenti: segnaposto")
         End Sub
 
         <TestMethod>
@@ -156,7 +175,7 @@ Namespace Ai
                 Dim libreria = LibreriaPrompt.Apri(cartella)
 
                 Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "deve ripiegare sull'integrato")
-                Assert.AreEqual("1.03", libreria.Versione, "con la versione dell'integrato")
+                Assert.AreEqual("1.04", libreria.Versione, "con la versione dell'integrato")
                 Assert.IsNotNull(libreria.Avviso, "e deve dire perché")
                 Assert.Contains("manca.md", libreria.Avviso, "l'avviso deve nominare il file mancante")
             Finally

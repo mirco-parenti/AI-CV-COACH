@@ -8,6 +8,34 @@ mai: com'è fatta l'applicazione mentre gira, e come la si mette in mano a qualc
 |---|---|
 | [`mcp-collaudi/`](mcp-collaudi/README.md) | Il server MCP con cui l'assistente prova l'applicazione vera: la compila, fa girare il banco, la avvia, la fotografa e le preme i bottoni. **Il suo README si legge prima di usarlo**: sono ore risparmiate. |
 | `avvia-demo.bat` | Apre TrovaLavoro con un doppio clic, per mostrarla a qualcuno senza passare da Claude Code. |
+| `sigilla-pool/` | Il **rito del bump** da riga di comando (cap. 04.5): rigenera le impronte del pool dei prompt e riscrive il manifest. |
+
+## Perché esiste `sigilla-pool/`
+
+Ogni modifica a un prompt si chiude col bump (cap. 04.5): versione nuova, impronte
+rigenerate, changelog annotato. Il comando che rigenera le impronte è dichiarato dentro
+l'applicazione — Impostazioni → «Sigilla pool» — ma le **Impostazioni sono di T9**, e i
+prompt si toccano da T2. Fino ad allora il rito non aveva un attrezzo, e ogni bump era
+una cosa da rifare a mano.
+
+L'attrezzo **non ricalcola niente per conto suo**: referenzia il progetto del prodotto e
+chiama `LibreriaPrompt.Sigilla`, cioè lo stesso codice con cui il caricatore verifica le
+impronte. È il punto: se il sigillo e il caricatore le calcolassero ognuno a modo suo,
+prima o poi divergerebbero, e il pool risulterebbe modificato senza esserlo — un allarme
+falso che si insegue per ore. Dopo aver scritto il manifest lo **rilegge** aprendo il
+pool: un sigillo mai riletto è una promessa non verificata.
+
+```bash
+cd strumenti/sigilla-pool
+"/mnt/c/Program Files/dotnet/dotnet.exe" build SigillaPool.vbproj -c Release
+bin/Release/net10.0-windows/SigillaPool.exe "$(wslpath -w ../../VB.NET/src/TrovaLavoro/prompt-pool)" 1.04
+```
+
+Il percorso del pool va passato **alla maniera di Windows** (`wslpath -w`): è un exe
+Windows, e un `/mnt/c/…` lo prenderebbe per un percorso relativo inesistente. La
+compilazione emette un `MSB3277` su `WindowsBase` — due versioni, una dal runtime e una
+da WebView2 — che riguarda solo questo attrezzo: l'eseguibile del prodotto compila senza
+avvisi. *(Nato il 2026-08-14, col bump a Pool 1.04 di T6.)*
 
 ## Perché esiste `avvia-demo.bat`
 

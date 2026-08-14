@@ -27,6 +27,33 @@ La non-regressione contro il prototipo (cap. 14, T2) è passata su questa versio
 prompt del confronto costruito dal pool è identico carattere per carattere a quello che
 il prototipo costruisce nel codice.
 
+## Pool 1.04 — 2026-08-14
+
+**Il primo bump che aggiunge prompt invece di correggerne.** Entrano i due prompt nuovi
+di T6, e nessuno dei quindici esistenti è stato toccato: le loro impronte nel manifest
+sono le stesse di 1.03, e chi confronta i due manifest lo vede subito.
+
+- **`generazione/email_candidatura.md`** — oggetto e corpo dell'email di candidatura
+  (cap. 07.1). La sua fonte di fatti è **la lettera già generata**, non il profilo: non
+  scrive una lettera nuova, la accorcia. È una catena di derivazioni — profilo → lettera →
+  email — e ogni anello stringe invece di aggiungere, che è il modo di far valere
+  l'anti-invenzione anche dove il profilo non arriva più. Due regole nate dal mestiere e
+  non dallo schema: il rimando agli allegati si scrive **solo se ci sono allegati** (un
+  «trovi in allegato il CV» senza CV è un'email che si smentisce da sola), e la firma
+  ricopia i contatti dalla lettera, saltando quelli vuoti invece di inventarli.
+- **`profilo/classifica_documenti.md`** — smista i file di una cartella in `cv`,
+  `attestato`, `lettera`, `altro`, e dice quale CV sembra il più recente (cap. 05.2).
+  Serve agli **allegati suggeriti** dell'email. Tre scelte da annotare: l'assaggio è
+  parziale per costruzione, quindi il prompt deve poter dire «non basta» invece di
+  indovinare (e allora la categoria è `altro`, detto nel motivo); i nomi dei file vanno
+  ricopiati **identici**, perché è con quelli che il programma ritrova i file su disco; e
+  il motivo descrive la **forma** del documento, mai il contenuto — una classificazione
+  che riporta indirizzi e codici fiscali nel campo «motivo» li porta a video e nei log.
+
+Il modello: `email_candidatura` chiede **ragionamento** come gli altri prompt di
+generazione — è il testo che l'azienda legge per primo — mentre `classifica_documenti` è
+**estrazione**, perché smistare non è ragionare.
+
 ## Pool 1.03 — 2026-08-10
 
 **Il primo bump di T4, e non riguarda cosa i prompt dicono ma quanto possono scrivere** —

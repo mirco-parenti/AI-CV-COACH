@@ -1,0 +1,4 @@
+# Artefatti di compilazione dell'attrezzo. Come per la soluzione VB.NET, nel repo sta il
+# sorgente e non il compilato: chi lo vuole usare lo ricompila in due secondi.
+bin/
+obj/

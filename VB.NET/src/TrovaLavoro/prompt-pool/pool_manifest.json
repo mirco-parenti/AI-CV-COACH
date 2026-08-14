@@ -1,7 +1,7 @@
 {
   "formato": 1,
-  "versione_pool": "1.03",
-  "data": "2026-08-10",
+  "versione_pool": "1.04",
+  "data": "2026-08-14",
   "file": [
     {
       "percorso": "annuncio/analisi_annuncio.md",
@@ -24,8 +24,16 @@
       "sha256": "68b83ee3b901734cf0fe53f6afbaedd11bde0207e403a238f67afc88b18eff7d"
     },
     {
+      "percorso": "generazione/email_candidatura.md",
+      "sha256": "c239b398e5adf6df1e21e2454febd415e59c7afab3f5a8778bee46bb88e160eb"
+    },
+    {
       "percorso": "generazione/lettera.it.md",
       "sha256": "f9b2d25569b8668710b17c3124937808d528d2ca0e930832ca2191e0da8617f7"
+    },
+    {
+      "percorso": "profilo/classifica_documenti.md",
+      "sha256": "71b149a927bdccdf98dacc83a28cdf0513411d10903d44b61af504836b867250"
     },
     {
       "percorso": "profilo/competenze.md",
