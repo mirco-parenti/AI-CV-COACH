@@ -84,7 +84,7 @@ segnare un promemoria di follow-up?»).
 Il registro è anche parte del racconto del progetto: per Mirco documenta nero su
 bianco l'uso reale del prodotto nella sua ricerca di lavoro. Per questo
 l'esportazione del registro in un riepilogo leggibile (CSV/markdown) è prevista fin
-dal primo rilascio.
+dal primo rilascio — **fatta il 2026-08-14**, v. più sotto.
 
 ### Com'è stato costruito (T5c, 2026-08-13)
 
@@ -112,6 +112,31 @@ dal primo rilascio.
 - **L'esportazione in CSV/markdown non è stata fatta qui** e sta in `in_sospeso.md`: è
   promessa per il primo rilascio, non per questa tappa, e a T5c avrebbe aggiunto una
   strada di uscita a dei dati che stavano ancora prendendo forma.
+
+### L'esportazione dell'elenco (2026-08-14)
+
+Il riepilogo promesso qui sopra, dalla Home: «Esporta l'elenco…» chiede dove scrivere e
+in quale forma. **Non è il backup** (cap. 11.4): quello è JSON e serve a tornare
+indietro, questo serve a raccontare — e va aperto da qualcun altro, che è ciò che
+detta ogni scelta qui sotto.
+
+- **Esce quel che si vede**, filtrato e ordinato come sullo schermo: chi ha appena
+  ristretto la coda si aspetta quel foglio lì. Perché la vista non si scambi per
+  l'archivio intero, il riepilogo leggibile porta in testa **cosa si sta guardando** —
+  data, filtri in vigore, «3 su 12». Il CSV no: una frase in cima non è più una tabella.
+- **Il CSV separa col punto e virgola** e comincia col segno d'ordine dei byte. Non è
+  pignoleria: Excel apre un `.csv` col separatore di elenco della lingua di Windows — in
+  italiano il punto e virgola — e senza quel segno legge l'UTF-8 con la tabella di
+  sistema, così «perché» diventa «perchÃ©» in ogni riga. Un file che si apre storto non
+  è un file esportato.
+- **Le date escono in forma ISO** (`2026-08-14 09:30`): `14/08/2026` lo legge in un modo
+  diverso ogni programma che lo apre, e per giunta l'ordine alfabetico dell'ISO è anche
+  quello cronologico.
+- **Il formato lo decide l'estensione del nome scelto**, non la voce del menù a tendina:
+  chi scrive `riepilogo.md` a mano vuole un markdown, qualunque cosa dicesse il filtro
+  quando ha cominciato a scrivere.
+- **Le stelle mancanti restano vuote, mai zero**: zero stelle vuol dire «confrontata, e
+  non vale niente», che è un'altra cosa da «non ancora confrontata».
 
 ### Il filtro per stelle (2026-08-14)
 

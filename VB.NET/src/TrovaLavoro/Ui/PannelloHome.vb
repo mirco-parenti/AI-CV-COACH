@@ -548,6 +548,93 @@ Public Class PannelloHome
         RaiseEvent ProfiloRichiesto(Me, EventArgs.Empty)
     End Sub
 
+    ''' <summary>
+    ''' Porta l'elenco fuori dall'applicazione (cap. 07.3). Esce <b>quel che si vede</b>,
+    ''' nell'ordine in cui lo si vede: chi ha appena filtrato e ordinato la coda si aspetta
+    ''' quel foglio lì, non tutto il registro rimescolato. Che sia una vista e non
+    ''' l'archivio intero lo dice il file stesso, in testa (v. <see cref="EsportazioneRegistro"/>).
+    ''' </summary>
+    Private Sub btnEsportaRegistro_Click(sender As Object, e As EventArgs) Handles btnEsportaRegistro.Click
+
+        Dim voci As List(Of VoceRegistro) = Ordinate(Filtrate()).ToList()
+        If voci.Count = 0 Then Return
+
+        Using scelta As New SaveFileDialog()
+
+            scelta.Title = "Esporta l'elenco delle candidature"
+            scelta.Filter = "Foglio di calcolo (*.csv)|*.csv|Riepilogo leggibile (*.md)|*.md"
+            scelta.FilterIndex = 1
+            scelta.FileName = $"candidature-{Date.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.csv"
+            scelta.AddExtension = True
+
+            If scelta.ShowDialog(Me) <> DialogResult.OK Then Return
+
+            ' Il formato lo decide l'estensione del file, non la voce scelta nel menù: chi
+            ' scrive «riepilogo.md» a mano vuole un markdown, qualunque cosa dicesse il
+            ' filtro quando ha cominciato a scrivere.
+            Dim formato As FormatoEsportazione =
+                If(Path.GetExtension(scelta.FileName).Equals(".md", StringComparison.OrdinalIgnoreCase),
+                   FormatoEsportazione.Markdown, FormatoEsportazione.Csv)
+
+            Try
+                Scrivi(scelta.FileName, EsportazioneRegistro.Componi(voci, formato, CosaSiStaGuardando(voci.Count)))
+
+                RaccontaLoStato($"Elenco esportato: {voci.Count} " &
+                                $"{If(voci.Count = 1, "candidatura", "candidature")} in «{scelta.FileName}».",
+                                StileApp.TestoSecondario)
+
+            Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                       TypeOf ex Is UnauthorizedAccessException OrElse
+                                       TypeOf ex Is NotSupportedException
+
+                RaccontaLoStato($"Non sono riuscita a scrivere «{scelta.FileName}»: {ex.Message}",
+                                StileApp.Pericolo)
+            End Try
+
+        End Using
+
+    End Sub
+
+    ''' <summary>
+    ''' Scrive il riepilogo. Il CSV vuole il <b>segno d'ordine dei byte</b> in testa:
+    ''' senza, Excel legge un file UTF-8 con la tabella caratteri di sistema e «perché»
+    ''' diventa «perchÃ©» in ogni riga. Il markdown no — lì il segno sarebbe solo un
+    ''' carattere strano prima del titolo.
+    ''' </summary>
+    Private Shared Sub Scrivi(percorso As String, testo As String)
+
+        Dim conSegno As Boolean = Not percorso.EndsWith(EsportazioneRegistro.Estensione(FormatoEsportazione.Markdown),
+                                                        StringComparison.OrdinalIgnoreCase)
+
+        File.WriteAllText(percorso, testo, New System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier:=conSegno))
+
+    End Sub
+
+    ''' <summary>
+    ''' Cosa si sta guardando, detto in una riga: la data, i filtri in vigore e quante
+    ''' candidature sono finite nel foglio. Va in testa al riepilogo leggibile, perché un
+    ''' elenco senza il suo perimetro, riletto fra sei mesi, si scambia per l'elenco intero.
+    ''' </summary>
+    Private Function CosaSiStaGuardando(quante As Integer) As String
+
+        Dim pezzi As New List(Of String) From {
+            $"Esportato il {Date.Now.ToString("d MMMM yyyy", CultureInfo.CurrentCulture)}"}
+
+        If cboMostra.SelectedIndex <> FiltroTutte Then
+            pezzi.Add($"stato: {cboMostra.SelectedItem}")
+        End If
+
+        If StelleMinime IsNot Nothing Then
+            pezzi.Add($"stelle: {cboStelle.SelectedItem}")
+        End If
+
+        Dim intero As Integer = If(_registro Is Nothing, quante, _registro.Voci.Count)
+        pezzi.Add($"{quante} su {intero}")
+
+        Return String.Join(" · ", pezzi)
+
+    End Function
+
     Private Sub btnNuovaRicerca_Click(sender As Object, e As EventArgs) Handles btnNuovaRicerca.Click
         RaiseEvent RicercaRichiesta(Me, EventArgs.Empty)
     End Sub
@@ -578,7 +665,7 @@ Public Class PannelloHome
 
         If _comandi Is Nothing Then
             _comandi = New FasciaDeiComandi(pnlAzioni)
-            _comandi.ASinistra(btnApriCandidatura, btnAggiornaProfilo)
+            _comandi.ASinistra(btnApriCandidatura, btnAggiornaProfilo, btnEsportaRegistro)
             _comandi.ADestra(btnNuovaRicerca)
         End If
 
@@ -623,6 +710,7 @@ Public Class PannelloHome
         StileApp.VestiBottone(btnApriCandidatura, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnApriProfilo, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnAggiornaProfilo, LivelloBottone.Esplorativo)
+        StileApp.VestiBottone(btnEsportaRegistro, LivelloBottone.Esplorativo)
 
     End Sub
 
@@ -672,6 +760,11 @@ Public Class PannelloHome
         btnApriCandidatura.Enabled = VoceScelta IsNot Nothing
         btnApriProfilo.Enabled = _contesto IsNot Nothing
         btnNuovaRicerca.Enabled = _contesto IsNot Nothing
+
+        ' Si esporta quel che si vede: con la coda vuota — nessuna candidatura, o un filtro
+        ' che non lascia passare niente — non c'è niente da esportare, e un bottone acceso
+        ' che produce un file vuoto è peggio di uno spento che dice perché.
+        btnEsportaRegistro.Enabled = lvwCoda.Items.Count > 0
 
     End Sub
 

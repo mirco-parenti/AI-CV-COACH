@@ -1,4 +1,4 @@
-<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class PannelloHome
     Inherits System.Windows.Forms.UserControl
 
@@ -42,6 +42,7 @@ Partial Class PannelloHome
         Me.btnApriCandidatura = New System.Windows.Forms.Button()
         Me.btnNuovaRicerca = New System.Windows.Forms.Button()
         Me.btnAggiornaProfilo = New System.Windows.Forms.Button()
+        Me.btnEsportaRegistro = New System.Windows.Forms.Button()
         Me.lblStatoHome = New System.Windows.Forms.Label()
         Me.pnlIntestazione.SuspendLayout()
         Me.pnlProfiloInSintesi.SuspendLayout()
@@ -253,6 +254,7 @@ Partial Class PannelloHome
         Me.pnlAzioni.Controls.Add(Me.btnApriCandidatura)
         Me.pnlAzioni.Controls.Add(Me.btnNuovaRicerca)
         Me.pnlAzioni.Controls.Add(Me.btnAggiornaProfilo)
+        Me.pnlAzioni.Controls.Add(Me.btnEsportaRegistro)
         Me.pnlAzioni.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.pnlAzioni.Location = New System.Drawing.Point(14, 682)
         Me.pnlAzioni.Name = "pnlAzioni"
@@ -282,6 +284,14 @@ Partial Class PannelloHome
         Me.btnAggiornaProfilo.Size = New System.Drawing.Size(160, 32)
         Me.btnAggiornaProfilo.TabIndex = 2
         Me.btnAggiornaProfilo.Text = "Aggiorna profilo"
+        '
+        'btnEsportaRegistro
+        '
+        Me.btnEsportaRegistro.Location = New System.Drawing.Point(534, 12)
+        Me.btnEsportaRegistro.Name = "btnEsportaRegistro"
+        Me.btnEsportaRegistro.Size = New System.Drawing.Size(170, 32)
+        Me.btnEsportaRegistro.TabIndex = 3
+        Me.btnEsportaRegistro.Text = "Esporta l'elenco…"
         '
         'lblStatoHome
         '
@@ -342,6 +352,7 @@ Partial Class PannelloHome
     Friend WithEvents btnApriCandidatura As System.Windows.Forms.Button
     Friend WithEvents btnNuovaRicerca As System.Windows.Forms.Button
     Friend WithEvents btnAggiornaProfilo As System.Windows.Forms.Button
+    Friend WithEvents btnEsportaRegistro As System.Windows.Forms.Button
     Friend WithEvents lblStatoHome As System.Windows.Forms.Label
 
 End Class

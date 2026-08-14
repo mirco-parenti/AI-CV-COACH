@@ -7,6 +7,6 @@
 Public Module Versione
 
     ''' <summary>Numero di versione mostrato nell'interfaccia e nell'eseguibile.</summary>
-    Public Const Numero As String = "0.3.021"
+    Public Const Numero As String = "0.3.022"
 
 End Module
