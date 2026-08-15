@@ -155,6 +155,16 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   finestra aperta» — poi la catena di comandi prosegue lo stesso, perché l'attrezzo ha
   risposto: è l'applicazione a non essere pronta, non il server a essere caduto. **Prima
   di guidare l'applicazione si chiede `controlli`** e si guarda se risponde.
+- **`controlli` torna vuoto anche quando l'applicazione è vivissima.** *(2026-08-15, il
+  collaudo di T7a.)* La risposta «nessun controllo: l'applicazione è aperta?» è una
+  **domanda**, non una diagnosi, e va letta così: capita mentre l'albero UI Automation è
+  momentaneamente irraggiungibile — la WebView2 di P3 che si sta inizializzando, o un
+  pannello che si ricostruisce dopo un'attesa dell'AI. È successo tre volte in un giro
+  solo, e ogni volta la chiamata **subito dopo** ha elencato i controlli regolarmente.
+  Perciò non è la prova che qualcosa sia andato storto e **non si riavvia niente**: si
+  chiede `stato_app` — che legge il processo, non l'albero — e se il processo c'è si
+  richiama `controlli`. La cosa da non fare è credere alla domanda e rifare l'avvio, che
+  sull'applicazione vera vuol dire perdere quel che non era ancora stato salvato.
 - **Un pezzo di parola non è una somiglianza.** Il ripiego «per contenuto» di `clic`
   prendeva il primo nome che *conteneva* il testo cercato: «Cerca», col pannello Profilo
   davanti, trovava il bottone di navigazione «🔍 Ri**cerca**» e ci spostava. Il 2026-08-12

@@ -80,16 +80,23 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Da T6 — le email di candidatura (2026-08-14, alla chiusura)
 
-- **Il destinatario proposto dall'annuncio.** Il cap. 07.1 promette: «se l'annuncio conteneva
-  un indirizzo, viene proposto». Oggi il campo è **sempre vuoto**, e non per prudenza: il
-  prompt `analisi_annuncio` non estrae nessun recapito, quindi non c'è niente da proporre.
-  Metà della promessa è mantenuta (il programma non inventa mai un indirizzo), l'altra metà
-  no. Costa un campo nell'analisi e un bump di pool. *(cap. 07.1; pool `analisi_annuncio`.)*
 - **La porta «qui c'è tutto» del profilo.** Il cap. 05.2 descrive una cartella che serve a
   **due** cose: proporre gli attestati da allegare (fatto a T6) e trovare da sé il CV da cui
   costruire il profilo. La classificazione dice già quale CV sembra il più recente e il dato
   si salva in `documenti.json`, ma **non lo legge nessuno**: l'import di un CV passa ancora
   dalla scelta di un file singolo. *(cap. 05.2; `RaccoltaDocumenti.CvPiuRecente`.)*
+- **Uscendo da P7 con la barra in alto, la bozza si perde** *(emerso il 2026-08-15, dentro
+  il collaudo di T7a)*. `SalvaLaBozza` è appesa a tre momenti — preparare l'`.eml`,
+  «L'ho spedita» e il bottone **«◀ Torna ai documenti»**, che ha pure il commento giusto
+  («uscendo si salva quel che c'è: il destinatario scritto a metà e le spunte sono lavoro
+  dell'utente»). Ma dalla barra di navigazione in cima si esce da P7 **senza passare di
+  lì**, e `FormPrincipale` al cambio pannello non salva niente: si perdono il destinatario
+  scritto a mano, le spunte degli allegati e il messaggio riscritto — che è costato una
+  chiamata all'AI. Peggio, la perdita è **silenziosa**: riaprendo, P7 riprende `email.json`
+  e mostra la bozza vecchia come se fosse l'ultima. Verificato due volte, nel codice e sul
+  file (rimasto indietro di tre minuti dopo un «Fallo riscrivere» e un giro dalla Home).
+  L'intenzione c'era già: manca una delle due uscite. *(cap. 07.1; `PannelloEmail`,
+  `SalvaLaBozza`.)*
 - **Lo stato «esito», il follow-up e il destinatario nel registro.** Il cap. 07.3 assegnava
   a T6 tre cose oltre all'invio, e T6 ne ha portata una sola. Restano: lo stato **`esito`**
   (in attesa · colloquio · rifiutata · assunto 🎉), che nello schema c'è ma dall'interfaccia
@@ -97,6 +104,18 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   **destinatario nella voce di registro**, che oggi vive nella bozza `email.json` della
   candidatura e non nell'indice. Sono tre passi del racconto «a che punto sono», e vanno
   fatti entro la 1.0. *(cap. 07.3; cap. 14, T9.)*
+
+## Da T7 — multilingua e qualità (2026-08-15, alla chiusura di T7a)
+
+- **Il 📄 CV-1 base non si può chiedere in inglese.** La lingua di T7a viaggia
+  dall'annuncio ai documenti, e il CV-1 base un annuncio non ce l'ha: nasce dal solo
+  profilo, e la sua unica porta — il bottone «Genera 📄 CV-1 base» di P2 — non chiede
+  niente e non passa nessuna lingua, così `GeneraCvBaseAsync` resta sul suo predefinito
+  `it`. Sotto è tutto pronto e inutilizzato: `cv_base.en.md` è nel **Pool 1.06** e il
+  motore accetta già il parametro; manca solo il modo di dirglielo, che starebbe in P2
+  accanto al bottone. La tendina di P6 non serve a questo: lì cambiare lingua **rigenera
+  una candidatura**, e il CV base non è una candidatura — infatti su di lui è spenta.
+  *(cap. 03, tabella dei pannelli, P2; cap. 10.3; pool `generazione/cv_base.en`.)*
 
 ## Da revisione adversariale (2026-08-09)
 
@@ -115,6 +134,20 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Chiuse
 
+- ✅ **Il destinatario proposto dall'annuncio** *(aperta il 2026-08-14 da T6, chiusa il
+  2026-08-15 da T7a)*. Il campo era sempre vuoto perché non c'era niente da proporre: il
+  **Pool 1.06** ha insegnato ad `analisi_annuncio` il campo **`contatto {email,
+  riferimento}`**, con l'ordine di ricopiare alla lettera e **mai dedurre** — un indirizzo
+  non si ricava dal sito dell'azienda né dal nome di chi firma, e se l'annuncio non lo
+  scrive i due campi restano vuoti. In P7 `ProponiIlDestinatario` lo mette nella casella
+  **solo al primo arrivo**, mai sopra una bozza ripresa (lì il destinatario è già passato
+  per le mani dell'utente, e sostituirglielo sarebbe cancellargli una decisione), e **dice
+  da dove viene**, con una barra e un tooltip che si azzerano appena l'utente ci mette
+  mano. Si propone **solo l'`email`**: il `riferimento` — la persona, l'ufficio, il codice
+  della posizione — si estrae ma non si propone, perché nella casella del destinatario
+  darebbe un'email che non parte. Le due metà della promessa del cap. 07.1 sono ora
+  mantenute entrambe: quello che l'annuncio dice viene proposto, quello che non dice non si
+  inventa. *(cap. 07.1; pool CHANGELOG 1.06; `VistaAnnuncio.IndirizzoPerCandidarsi`.)*
 - ✅ **L'`.eml` aperto in un programma di posta vero e spedito da lì** *(aperta e chiusa il
   2026-08-14, la sera stessa della tappa)*. Mirco ha percorso il giro sui **dati veri**: la
   candidatura a Delta Sistemi preparata dall'applicazione, aperta nel **nuovo Outlook** —
