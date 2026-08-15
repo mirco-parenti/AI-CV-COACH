@@ -189,9 +189,13 @@ Public Class PannelloEmail
         Racconta("Sto scrivendo il messaggio…", StileApp.TestoSecondario)
 
         Try
+            ' L'email si scrive nella lingua della candidatura, che è quella in cui la
+            ' lettera è già scritta: la fonte è la stessa che consulta P6, così le due
+            ' schermate non possono raccontare due lingue diverse (cap. 10.1).
             Dim proposta = Await _compositore.ComponiAsync(
                 _candidatura.Lettera, _candidatura.Annuncio,
-                _bozza.AllegatiScelti().Select(Function(a) a.Nome).ToList(), _annulla.Token)
+                _bozza.AllegatiScelti().Select(Function(a) a.Nome).ToList(), _annulla.Token,
+                LinguaDocumenti.PerDocumenti(_candidatura.Lingua))
 
             Dim scritta As BozzaEmail = BozzaEmail.DallaProposta(proposta)
 

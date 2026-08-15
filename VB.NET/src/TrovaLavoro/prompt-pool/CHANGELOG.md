@@ -27,6 +27,49 @@ La non-regressione contro il prototipo (cap. 14, T2) è passata su questa versio
 prompt del confronto costruito dal pool è identico carattere per carattere a quello che
 il prototipo costruisce nel codice.
 
+## Pool 1.07 — 2026-08-15
+
+**L'ultimo anello della catena della lingua.** Il collaudo reale di T7a — un annuncio
+inglese pescato da un portale e portato fino ai file — ha trovato la candidatura tutta in
+inglese e l'**email a metà del guado**: corpo inglese, oggetto italiano («Candidatura per
+External Warehouse Manager — Mirco Parenti»). Il Pool 1.06 aveva insegnato l'inglese ai
+tre documenti e si era dimenticato del quarto testo che l'utente manda davvero.
+
+- **`generazione/email_candidatura.it.md`** — è il prompt di prima, **rinominato**: il
+  contenuto non cambia di un carattere (resta versione 1.1) e cambia solo il nome, perché
+  da qui in poi ha un gemello. Il caricatore ripiegherebbe da sé sul file senza lingua
+  (cap. 04.6), ma nel pool `cv_base`, `cv_mirato` e `lettera` hanno tutti la coppia
+  esplicita: un solo modo di dire la stessa cosa vale il fastidio della rinomina.
+- **`generazione/email_candidatura.en.md`** (nuovo) — scritto in inglese come i tre di
+  1.06, stesse cinque sezioni e stesse regole anti-invenzione. L'oggetto prende la forma
+  **«Application for \<role\> — \<name\>»**, la più neutra sul mercato europeo e coerente
+  con il `CV` (non *Resume*) scelto nelle etichette. Due cose che l'inglese si porta e
+  l'italiano no: un'email ha **attachments, non enclosures** — «attached», mai «enclosed»
+  — e i **nomi propri arrivano già resi dalla lettera**, con le sue glosse fra parentesi,
+  quindi qui non si ritraducono e soprattutto non si gonfiano. La lettera ha già scelto la
+  resa modesta (cap. 10.3); l'email che la accorcia non deve disfare quella scelta.
+
+*Perché non è bastata una riga in più nel prompt unico.* Dire «scrivi nella lingua della
+lettera» sarebbe costato un file solo, ma avrebbe messo la regola della lingua in **due
+posti** — ed è esattamente l'errore che T7a aveva già trovato e chiuso sulle etichette
+stampate, dove due copie della stessa regola erano **già divergenti**. La lingua si decide
+in un posto solo (`Motore/LinguaDocumenti`) e da lì viaggia: fino al Pool 1.06 arrivava a
+P6 e si fermava, adesso arriva anche a P7.
+
+*Perché l'oggetto ha disobbedito e il corpo no.* Il prompt italiano la regola ce l'aveva
+già — sezione 3: «nella stessa lingua della lettera» — e infatti il **corpo** l'ha seguita,
+uscendo in inglese. A non seguirla è stata la **formula dell'oggetto**, che la sezione 1
+detta parola per parola in italiano: fra una regola generale e una forma concreta da
+imitare, vince la forma. È la stessa lezione del **Pool 1.05**, dove un esempio che dava
+del tu all'azienda aveva battuto la regola che lo vietava, due sezioni più su. Una regola
+sulla lingua non basta finché nello stesso prompt c'è un modello scritto in una lingua sola.
+
+*Cosa questo bump non tocca:* nessun altro prompt. E resta da dire perché il banco non
+poteva vederlo prima: i collaudi coi finti non caricano nessun prompt, quindi il testo che
+parte davvero non lo guarda nessuno. Da qui i tre collaudi nuovi di
+`CollaudiCompositoreEmail`, che leggono il messaggio spedito all'API invece della lingua
+dichiarata.
+
 ## Pool 1.06 — 2026-08-15
 
 **Il pool impara l'inglese** (T7a, cap. 10). Entrano le tre varianti `en` dei prompt di

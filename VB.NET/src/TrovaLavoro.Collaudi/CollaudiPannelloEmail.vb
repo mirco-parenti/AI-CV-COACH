@@ -155,6 +155,46 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function LEmailSiScriveNellaLinguaDellaCandidatura() As Task
+
+            ' L'ultimo anello della catena della lingua (cap. 10.1): la candidatura è in
+            ' inglese, la lettera da cui l'email nasce pure, e l'email deve seguirle. Il
+            ' collaudo reale di T7a l'ha trovata ferma qui — oggetto italiano sopra un
+            ' corpo inglese — perché la lingua a P7 non arrivava proprio.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    candidatura.Lingua = "en"
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.AreEqual("en", compositore.LingueChieste.Single(),
+                                    "la lingua della candidatura è arrivata al compositore")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaCandidaturaItalianaChiedeLEmailInItaliano() As Task
+
+            ' Il gemello del collaudo di sopra: senza di lui «arriva la lingua» sarebbe
+            ' dimostrato da un solo caso, e una lingua incollata a "en" lo passerebbe.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.AreEqual("it", compositore.LingueChieste.Single(),
+                                    "la lingua di casa, che è quella della candidatura")
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Async Function UnaBozzaRipresaTieneIlSuoDestinatario() As Task
 
             ' Se l'utente aveva già scritto (o corretto) il destinatario, riaprire la

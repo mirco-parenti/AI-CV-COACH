@@ -29,9 +29,15 @@ Namespace Ai
         ''' che non parte si smentisce da sola.
         ''' </param>
         ''' <param name="annulla">Il gettone del pulsante Annulla (cap. 02.6).</param>
+        ''' <param name="lingua">
+        ''' La lingua dell'email: <c>it</c> o <c>en</c> (cap. 10). È la stessa della
+        ''' candidatura, e quindi della lettera da cui l'email nasce: un oggetto italiano
+        ''' sopra un corpo inglese è l'ibrido che il collaudo di T7a ha trovato.
+        ''' </param>
         Function ComponiAsync(lettera As JsonNode, annuncio As JsonNode,
                               allegati As IEnumerable(Of String),
-                              Optional annulla As CancellationToken = Nothing) As Task(Of JsonNode)
+                              Optional annulla As CancellationToken = Nothing,
+                              Optional lingua As String = "it") As Task(Of JsonNode)
 
     End Interface
 
@@ -61,7 +67,8 @@ Namespace Ai
         ''' <inheritdoc/>
         Public Function ComponiAsync(lettera As JsonNode, annuncio As JsonNode,
                                      allegati As IEnumerable(Of String),
-                                     Optional annulla As CancellationToken = Nothing) _
+                                     Optional annulla As CancellationToken = Nothing,
+                                     Optional lingua As String = "it") _
                                      As Task(Of JsonNode) Implements ICompositoreEmail.ComponiAsync
 
             Esigi(lettera, "la lettera", Etichetta)
@@ -72,7 +79,7 @@ Namespace Ai
                     {SegnapostoLettera, LibreriaPrompt.ComeNelPrompt(lettera)},
                     {SegnapostoAnnuncio, LibreriaPrompt.ComeNelPrompt(annuncio)},
                     {SegnapostoAllegati, LibreriaPrompt.ComeNelPrompt(ComeElenco(allegati))}},
-                annulla)
+                annulla, lingua)
 
         End Function
 

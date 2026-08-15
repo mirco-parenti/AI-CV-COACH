@@ -188,6 +188,11 @@ End Class
 ''' gli sono stati nominati: è la promessa del cap. 07.1 — il messaggio nomina quello che
 ''' parte davvero — e senza guardarli non si potrebbe verificare.
 ''' </summary>
+''' <remarks>
+''' <b>Annota anche la lingua</b>, per la stessa ragione di <see cref="GeneratoreFinto"/>:
+''' l'email è l'ultimo anello della catena della lingua, ed è quello dove il collaudo reale
+''' di T7a l'ha trovata ferma per strada — oggetto italiano sopra un corpo inglese.
+''' </remarks>
 Friend Class CompositoreFinto
     Inherits MestiereFinto
     Implements ICompositoreEmail
@@ -195,12 +200,17 @@ Friend Class CompositoreFinto
     ''' <summary>Gli elenchi di allegati ricevuti, uno per chiamata.</summary>
     Public ReadOnly Property AllegatiNominati As New List(Of List(Of String))
 
+    ''' <summary>Le lingue chieste, una per chiamata e nell'ordine in cui sono arrivate.</summary>
+    Friend ReadOnly Property LingueChieste As New List(Of String)
+
     Public Function ComponiAsync(lettera As JsonNode, annuncio As JsonNode,
                                  allegati As IEnumerable(Of String),
-                                 Optional annulla As CancellationToken = Nothing) _
+                                 Optional annulla As CancellationToken = Nothing,
+                                 Optional lingua As String = "it") _
                                  As Task(Of JsonNode) Implements ICompositoreEmail.ComponiAsync
 
         AllegatiNominati.Add(If(allegati Is Nothing, New List(Of String), allegati.ToList()))
+        LingueChieste.Add(lingua)
 
         Return Prossima("email", lettera, annuncio)
 

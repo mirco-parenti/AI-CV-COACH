@@ -72,7 +72,8 @@ prompt-pool/
 │   ├── cv_mirato.en.md         🎯 CV-2 (inglese) ✚
 │   ├── lettera.it.md           ✉️ lettera (italiano)
 │   ├── lettera.en.md           ✉️ lettera (inglese) ✚
-│   └── email_candidatura.md    ✚ oggetto + corpo email dalla lettera (parametrico per lingua)
+│   ├── email_candidatura.it.md ✚ oggetto + corpo email dalla lettera (italiano)
+│   └── email_candidatura.en.md ✚ oggetto + corpo email dalla lettera (inglese)
 ├── brainstorm/
 │   ├── brainstorm.md           ✚ conversazione ancorata a profilo+annuncio+giudizi
 │   └── appunti_di_mira.md      ✚ distilla dal brainstorm gli appunti confermabili

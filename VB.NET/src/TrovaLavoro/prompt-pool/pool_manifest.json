@@ -1,6 +1,6 @@
 {
   "formato": 1,
-  "versione_pool": "1.06",
+  "versione_pool": "1.07",
   "data": "2026-08-15",
   "file": [
     {
@@ -32,7 +32,11 @@
       "sha256": "68b83ee3b901734cf0fe53f6afbaedd11bde0207e403a238f67afc88b18eff7d"
     },
     {
-      "percorso": "generazione/email_candidatura.md",
+      "percorso": "generazione/email_candidatura.en.md",
+      "sha256": "202313fc54e97b8da583ac6861272e3f7a1522225050a9b9fd22912b54fad7b3"
+    },
+    {
+      "percorso": "generazione/email_candidatura.it.md",
       "sha256": "76e4348c55233254f8274ce0f2d3941a1aee52db96ac76c6ccafe76054375b1a"
     },
     {

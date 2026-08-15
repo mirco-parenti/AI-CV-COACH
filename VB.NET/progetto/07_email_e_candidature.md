@@ -13,7 +13,10 @@ Email (P7) prepara la bozza:
 - **Oggetto e corpo**: il prompt `email_candidatura` li ricava dalla ✉️ lettera già
   generata — l'email è la versione breve e diretta della lettera, nella stessa lingua,
   con il rimando esplicito agli allegati. Passa anche lei dalla rifinitura anti-slop
-  (cap. 08).
+  (cap. 08). *Dal **Pool 1.07** (2026-08-15) «nella stessa lingua» non è più solo una
+  raccomandazione dentro il prompt: sono due varianti `.it`/`.en` come per gli altri
+  documenti, scelte dalla lingua della candidatura (cap. 10.4). Il collaudo reale di T7a
+  aveva trovato l'oggetto italiano sopra un corpo inglese.*
 - **Allegati**: proposti automaticamente — il CV generato (PDF di regola, DOCX a
   scelta), la lettera come allegato se l'utente la vuole separata dal corpo, più gli
   **attestati** pertinenti dalla cartella documenti (cap. 05.2), da spuntare.

@@ -61,14 +61,23 @@ tutto il resto.
 
 - La rifinitura anti-slop (cap. 08) riceve la lingua come parametro: i tic da
   correggere in inglese hanno la loro lista dedicata.
-- L'email di candidatura (cap. 07) segue la lingua dei documenti, oggetto compreso:
-  il suo prompt è unico e **parametrico per lingua**, come la rifinitura (non ha
-  varianti `.it`/`.en`).
-  *Costruito a T6 (2026-08-14), quel «parametrico» è risultato ancora più semplice: il
-  prompt non riceve nessun parametro di lingua — scrive «nella stessa lingua della
+- L'email di candidatura (cap. 07) segue la lingua dei documenti, oggetto compreso.
+  *Costruito a T6 (2026-08-14), quel «parametrico» era risultato ancora più semplice: il
+  prompt non riceveva nessun parametro di lingua — scriveva «nella stessa lingua della
   lettera», che è l'unica cosa che ha davanti. La lingua sta già nel contenuto, e
   chiederla a parte avrebbe creato un secondo posto da tenere d'accordo col primo. Da
   provare quando T7 porterà i documenti in inglese: l'email dovrà seguirli da sé.*
+  *La prova è arrivata col collaudo reale di T7a (2026-08-15) e ha risposto **a metà**,
+  che è il modo più istruttivo di rispondere: il **corpo** ha seguito la lettera ed è
+  uscito in inglese, l'**oggetto** no — «Candidatura per External Warehouse Manager». La
+  regola generale c'era ed è stata battuta dalla **forma concreta**, perché la sezione 1
+  di quel prompt dettava l'oggetto parola per parola in italiano. È la stessa cosa vista
+  al Pool 1.05, dove un esempio aveva battuto la regola che lo vietava. Da **Pool 1.07**
+  l'email ha quindi le sue due varianti `.it`/`.en` come gli altri documenti, e riceve la
+  lingua lungo la catena (`ICompositoreEmail.ComponiAsync` → P7, che la legge dalla
+  candidatura come fa P6). Resta vero il timore che aveva ispirato la scelta di T6 — due
+  posti divergono — ma il posto è **uno solo lo stesso**: `Motore/LinguaDocumenti`, da cui
+  la lingua parte; quello che è cambiato è fin dove arriva.*
 - I nomi dei file generati dichiarano la lingua quando è inglese
   (`CV_Mirco_Parenti_EN_...`, cap. 05.6).
 
