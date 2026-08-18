@@ -48,6 +48,10 @@ Namespace Dati
         Public Const FileAnnuncio As String = "annuncio.json"
         Public Const FileGiudizi As String = "giudizi.json"
         Public Const FileMitigazioni As String = "mitigazioni.json"
+
+        ''' <summary>Gli appunti di mira confermati nel brainstorming (T7c).</summary>
+        Public Const FileAppunti As String = "appunti.json"
+
         Public Const FileCv As String = "cv.json"
         Public Const FileLettera As String = "lettera.json"
 
@@ -88,6 +92,7 @@ Namespace Dati
             Scrivi(cartella, FileAnnuncio, opportunita.Annuncio)
             Scrivi(cartella, FileGiudizi, opportunita.Confronto)
             Scrivi(cartella, FileMitigazioni, opportunita.Mitigazioni)
+            Scrivi(cartella, FileAppunti, opportunita.Appunti)
             Scrivi(cartella, FileCv, opportunita.Cv)
             Scrivi(cartella, FileLettera, opportunita.Lettera)
             Scrivi(cartella, FileEmail, opportunita.Email)
@@ -202,6 +207,7 @@ Namespace Dati
                 .Annuncio = Leggi(cartella, FileAnnuncio),
                 .Confronto = Leggi(cartella, FileGiudizi),
                 .Mitigazioni = Leggi(cartella, FileMitigazioni),
+                .Appunti = Leggi(cartella, FileAppunti),
                 .Cv = Leggi(cartella, FileCv),
                 .Lettera = Leggi(cartella, FileLettera),
                 .Email = Leggi(cartella, FileEmail)}

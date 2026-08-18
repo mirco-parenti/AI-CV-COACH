@@ -102,6 +102,18 @@ Namespace Motore
         Public ReadOnly Property Rifinitura As Motore.Rifinitura
 
         ''' <summary>
+        ''' Chi ragiona sull'opportunità e ne distilla gli appunti di mira (T7c,
+        ''' cap. 12 A6); <c>Nothing</c> senza AI o senza pool.
+        ''' </summary>
+        ''' <remarks>
+        ''' Sta qui e non nella <see cref="Pipeline"/> per la stessa ragione dell'email: la
+        ''' fila di T4 si percorre da sé, e una conversazione non appartiene a una fila —
+        ''' comincia quando l'utente vuole, dura quanto vuole lui e può anche non produrre
+        ''' niente.
+        ''' </remarks>
+        Public ReadOnly Property Brainstorm As IBrainstormatore
+
+        ''' <summary>
         ''' Le candidature su disco: c'è sempre, anche senza AI — le opportunità già
         ''' generate si riaprono comunque (cap. 12.7).
         ''' </summary>
@@ -354,6 +366,10 @@ Namespace Motore
             ' perché è lì che serve — gli attestati da allegare — ma non appartiene a
             ' quella fila più di quanto ci appartenga il compositore.
             _Classificatore = New ClassificatoreDocumenti(Libreria, Client)
+
+            ' Chi ragiona sull'opportunità (T7c): fuori dalla pipeline, come l'email, e
+            ' per lo stesso motivo — una conversazione la comincia l'utente.
+            _Brainstorm = New Brainstormatore(Libreria, Client)
 
         End Sub
 

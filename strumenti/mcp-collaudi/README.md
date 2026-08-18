@@ -171,6 +171,22 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   chiede `stato_app` — che legge il processo, non l'albero — e se il processo c'è si
   richiama `controlli`. La cosa da non fare è credere alla domanda e rifare l'avvio, che
   sull'applicazione vera vuol dire perdere quel che non era ancora stato salvato.
+- **`cartella_dati` guarda sempre la cartella predefinita.** *(2026-08-18, il collaudo di
+  T7c.)* L'applicazione avviata con `dati` scrive nella cartella usa-e-getta — lo dicono il
+  titolo della finestra e la fascia in fondo — ma `cartella_dati` continua a elencare
+  `%AppData%\TrovaLavoro`. Chi legge la sua risposta si vede davanti i file dei **dati
+  veri** e li scambia per quelli della prova: è il modo più diretto di credere che una
+  prova abbia funzionato quando ha scritto altrove, o di allarmarsi perché «i file di
+  prima sono ancora lì». Finché l'attrezzo non impara la cartella scelta, dopo un
+  `avvia_app` con `dati` i file si guardano da bash nella cartella che si è indicata.
+- **In P5 la casella di risposta prende il nome dell'ultima bolla.** *(2026-08-18.)* È
+  l'etichetta che si spaccia per la casella, vista dalla chat: nell'albero UIA la casella
+  non ha nome suo e si porta dietro quello del testo che la precede — che in una
+  conversazione è l'intera ultima risposta dell'AI, anche mezza pagina. Perciò `scrivi`
+  vuole un pezzo di *quella*, non «La tua risposta…». E c'è un seguito: se quel pezzo
+  contiene un **apostrofo**, la casella non si trova più — l'apostrofo non sopravvive al
+  passaggio degli argomenti (v. sopra). Si sceglie un tratto della bolla che ne sia privo:
+  è l'unica cosa che serve sapere, e fa risparmiare un quarto d'ora.
 - **Un pezzo di parola non è una somiglianza.** Il ripiego «per contenuto» di `clic`
   prendeva il primo nome che *conteneva* il testo cercato: «Cerca», col pannello Profilo
   davanti, trovava il bottone di navigazione «🔍 Ri**cerca**» e ci spostava. Il 2026-08-12

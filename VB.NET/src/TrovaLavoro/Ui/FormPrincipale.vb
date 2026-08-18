@@ -270,6 +270,42 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
+    ''' Dalla scheda dell'opportunità al ragionamento (cap. 12, A6). Vale la stessa regola
+    ''' dei documenti — il bottone della barra resta quello della candidatura — con una
+    ''' differenza: P5 è un pannello che ha già un altro mestiere, e ci si entra dicendogli
+    ''' quale dei due sta facendo adesso.
+    ''' </summary>
+    Private Async Sub pnlOpportunita_BrainstormRichiesto(sender As Object, e As EventArgs) _
+        Handles pnlOpportunita.BrainstormRichiesto
+
+        Dim candidatura As Opportunita = pnlOpportunita.Candidatura
+        If candidatura Is Nothing Then Return
+
+        MostraPannello(pnlDialogo, btnCandidatura)
+        Await pnlDialogo.ApriIlBrainstormingAsync(candidatura)
+
+    End Sub
+
+    ''' <summary>Dal ragionamento si torna alla candidatura, che è da dove si è venuti.</summary>
+    Private Sub pnlDialogo_TornaAllaCandidatura(sender As Object, e As EventArgs) _
+        Handles pnlDialogo.TornaAllaCandidatura
+
+        MostraPannello(pnlOpportunita, btnCandidatura)
+
+    End Sub
+
+    ''' <summary>
+    ''' Gli appunti sono stati confermati e sono su disco: si torna alla candidatura, dove
+    ''' adesso c'è qualcosa che prima non c'era.
+    ''' </summary>
+    Private Sub pnlDialogo_AppuntiConfermati(sender As Object, e As EventArgs) _
+        Handles pnlDialogo.AppuntiConfermati
+
+        MostraPannello(pnlOpportunita, btnCandidatura)
+
+    End Sub
+
+    ''' <summary>
     ''' Dai documenti all'email (cap. 12, A8). Come per i documenti, il bottone della barra
     ''' resta quello della candidatura: P7 non è un'altra destinazione, è l'ultimo passo
     ''' dello stesso flusso — quello in cui il programma si ferma e passa la parola al

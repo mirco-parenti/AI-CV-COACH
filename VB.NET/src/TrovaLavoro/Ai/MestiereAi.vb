@@ -169,6 +169,46 @@ Namespace Ai
         End Function
 
         ''' <summary>
+        ''' La fila per un mestiere che <b>conversa</b>: il prompt del pool diventa il
+        ''' primo messaggio — quello che porta il contesto — e sopra ci si appoggiano i
+        ''' turni già scambiati. La risposta arriva a pezzi e insieme si restituisce
+        ''' intera.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Non estrae nessun JSON, perché qui l'uscita è prosa da leggere: il
+        ''' prompt lo dichiara col suo <c>uscita: testo</c>.</para>
+        ''' <para>Il contesto sta nel <b>primo</b> messaggio e non si ripete a ogni turno:
+        ''' profilo, annuncio e giudizi sono le stesse cose per tutta la conversazione, e
+        ''' rimandarle ogni volta sarebbe solo un conto più salato (cap. 02.5).</para>
+        ''' </remarks>
+        ''' <param name="battute">I turni già scambiati, dal più vecchio al più recente.</param>
+        ''' <param name="pezzo">Dove consegnare ogni pezzo di risposta appena arriva.</param>
+        Protected Async Function EseguiInStreamingAsync(idPrompt As String, etichetta As String,
+                                                        valori As IDictionary(Of String, String),
+                                                        battute As IReadOnlyList(Of TurnoChat),
+                                                        pezzo As Action(Of String),
+                                                        Optional annulla As CancellationToken = Nothing) _
+                                                        As Task(Of String)
+
+            Dim prompt As Prompt = CaricaPrompt(idPrompt)
+            Dim testo As String = Riempi(prompt, etichetta, valori)
+
+            Dim turni As New List(Of TurnoChat) From {TurnoChat.DallUtente(testo)}
+            If battute IsNot Nothing Then turni.AddRange(battute)
+
+            Dim uscita As RispostaAi
+            Try
+                uscita = Await Client.ChiediInStreamingAsync(prompt, turni, pezzo, annulla).
+                    ConfigureAwait(False)
+            Catch ex As ArgumentException
+                Throw ErroreDiPool(prompt.Id, ex)
+            End Try
+
+            Return uscita.Testo
+
+        End Function
+
+        ''' <summary>
         ''' Si ferma prima di chiamare l'AI se manca un artefatto d'ingresso.
         ''' </summary>
         ''' <remarks>

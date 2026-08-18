@@ -81,6 +81,12 @@ Public Class PannelloOpportunita
     Public Event DocumentiRichiesti As EventHandler
 
     ''' <summary>
+    ''' L'utente vuole ragionare su questa candidatura prima di generare: la finestra
+    ''' porta in vista P5, in modalità brainstorming (T7c, cap. 12 A6).
+    ''' </summary>
+    Public Event BrainstormRichiesto As EventHandler
+
+    ''' <summary>
     ''' L'AI ha cominciato o finito di lavorare: «mentre l'AI lavora non si esce» vale
     ''' anche per la barra di navigazione, che questo pannello non può spegnere da sé
     ''' (cap. 02.6).
@@ -96,7 +102,7 @@ Public Class PannelloOpportunita
         AddHandler Me.Disposed, Sub() _suggerimenti.Dispose()
 
         VestiIBottoni()
-        DichiaraLeTappeCheMancano()
+        SpiegaIlRagionamento()
         MostraLaValutazione(Nothing)
         AggiornaComandi()
 
@@ -637,6 +643,10 @@ Public Class PannelloOpportunita
         RaiseEvent DocumentiRichiesti(Me, EventArgs.Empty)
     End Sub
 
+    Private Sub btnBrainstorm_Click(sender As Object, e As EventArgs) Handles btnBrainstorm.Click
+        RaiseEvent BrainstormRichiesto(Me, EventArgs.Empty)
+    End Sub
+
     ''' <summary>
     ''' Scarta la candidatura in mostra (cap. 07.3): la dà per chiusa, senza cancellare
     ''' niente. Si chiede conferma prima — è una decisione che non si disfa, e la regola
@@ -728,15 +738,19 @@ Public Class PannelloOpportunita
     End Sub
 
     ''' <summary>
-    ''' I bottoni delle tappe che verranno restano visibili e spenti, con scritto quando
-    ''' arrivano (cap. 03.8): chi guarda l'applicazione a metà strada deve capire dove sta
-    ''' andando.
+    ''' Cosa fa il bottone del ragionamento.
     ''' </summary>
-    Private Sub DichiaraLeTappeCheMancano()
+    ''' <remarks>
+    ''' Qui stava <c>DichiaraLeTappeCheMancano</c>, che teneva il bottone spento dicendo
+    ''' con quale tappa sarebbe arrivato (cap. 03.8). La tappa è arrivata — T7c — e al
+    ''' posto della promessa c'è la spiegazione di cosa succede premendolo.
+    ''' </remarks>
+    Private Sub SpiegaIlRagionamento()
 
-        btnBrainstorm.Enabled = False
         _suggerimenti.SetToolTip(btnBrainstorm,
-                                 "Il ragionamento sull'opportunità, con gli appunti di mira, arriva con la tappa T7.")
+                                 "Ragiona con l'AI su questa candidatura: cosa mettere davanti e come " &
+                                 "nominare quello che manca. Quel che decidete diventa gli appunti che " &
+                                 "guideranno 🎯 CV mirato e ✉️ lettera.")
 
     End Sub
 
@@ -866,6 +880,14 @@ Public Class PannelloOpportunita
         btnGeneraDocumenti.Enabled = Not occupato AndAlso
                                      _opportunita IsNot Nothing AndAlso _opportunita.Confrontata AndAlso
                                      _opportunita.Stato <> StatoOpportunita.Scartata
+
+        ' Ragionare ha senso quando c'è già un confronto: prima non ci sarebbe niente di
+        ' cui parlare, e il prompt vuole i giudizi (cap. 12, A6.2). Qui l'AI serve davvero
+        ' — a differenza dei documenti, che si possono riaprire anche senza — e su una
+        ' candidatura scartata si tace, per la stessa ragione per cui non le si scrive un CV.
+        btnBrainstorm.Enabled = Not occupato AndAlso conAi AndAlso
+                                _opportunita IsNot Nothing AndAlso _opportunita.Confrontata AndAlso
+                                _opportunita.Stato <> StatoOpportunita.Scartata
 
         ' Scartare si può finché c'è ancora una strada per lo scarto: è la macchina degli
         ' stati a dirlo (cap. 07.3), non un elenco di casi scritto qui.

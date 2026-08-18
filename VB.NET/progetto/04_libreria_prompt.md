@@ -75,7 +75,7 @@ prompt-pool/
 │   ├── email_candidatura.it.md ✚ oggetto + corpo email dalla lettera (italiano)
 │   └── email_candidatura.en.md ✚ oggetto + corpo email dalla lettera (inglese)
 ├── brainstorm/
-│   ├── brainstorm.md           ✚ conversazione ancorata a profilo+annuncio+giudizi
+│   ├── brainstorm.md           ✚ conversazione ancorata a profilo+annuncio+giudizi+ponti
 │   └── appunti_di_mira.md      ✚ distilla dal brainstorm gli appunti confermabili
 └── rifinitura/
     ├── umanizzazione_sintesi.it.md   ✚ il sommario del CV (italiano)
@@ -90,6 +90,18 @@ prompt-pool/
 prompt invece dell'unico `umanizzazione.md` previsto qui: sono tre forme di prosa
 incompatibili fra loro, e un prompt solo avrebbe lasciato al modello la scelta di quale
 imitare — l'errore del Pool 1.05 e del 1.07. Il perché disteso è nel cap. 08.6.*
+
+*La cartella `brainstorm/` è nata col **Pool 1.10** (T7c, 2026-08-18), con due differenze
+rispetto a com'era prevista qui. La prima: `brainstorm` riceve **anche le mitigazioni**, non
+solo profilo, annuncio e giudizi — nel codice i ponti si costruiscono al passo 2 della
+pipeline, quindi quando la conversazione comincia esistono già, e un appunto che dica «usa
+questo ponte» senza vederli non potrebbe esistere (cap. 12, A6.2). La seconda: è il primo
+prompt del pool che **non chiede una cosa sola**. Il suo testo è il **primo messaggio** di
+una conversazione che cresce — il contesto sta lì e non si ripete a ogni turno — e la sua
+uscita è `testo`, non JSON. Con lo stesso bump `cv_mirato` e `lettera`, in tutte e due le
+lingue, guadagnano il segnaposto **`APPUNTI`**: gli appunti confermati orientano l'enfasi
+come già fanno annuncio e giudizi, e come loro **non sono una fonte di fatti**. Quella regola
+è scritta in tutti e quattro nella forma concreta, non nella generale.*
 
 `✚` = prompt nuovo della fase VB.NET; gli altri migrano dal prototipo. I prompt nuovi
 si progettano nel dettaglio (testo completo) **prima** dell'implementazione, con lo
@@ -211,7 +223,7 @@ Compiti, in ordine:
 | Dove vive un prompt | duplicato in `prompt_design.md` + `server.js` | **solo** nel pool |
 | Regola di allineamento | sync char-by-char tra i due doppioni | non serve più; al suo posto: validazione manifest + segnaposto |
 | Scelta del modello | costanti nel server | metadato `modello` + configurazione |
-| Testo dei prompt | 15 prompt validati | **identici** alla migrazione (Pool 1.00), salvo adattamento segnaposto; nuovi prompt ✚ progettati con lo stesso metodo. Dal **Pool 1.01** `importa_cv` diverge di proposito, dal **Pool 1.02** anche i sette turni del profilo, e dal **Pool 1.03** `analisi_annuncio`, che estrae anche il nome dell'azienda (v. `CHANGELOG.md`): su quei prompt il prototipo non è più il metro, è il termine di paragone. Il metro carattere-per-carattere resta su `confronto` e `mitigazione`. Il **Pool 1.04** (2026-08-14) è il primo bump che **aggiunge** invece di correggere — i due prompt di T6, `email_candidatura` e `classifica_documenti` — e non tocca nessuno dei quindici: le loro impronte restano quelle di 1.03, e chi confronta i due manifest lo vede subito. Il **Pool 1.05**, poche ore dopo, corregge il primo dei due su una lezione che vale oltre il suo caso: **l'esempio pesa più della regola**, e se i due si contraddicono vince l'esempio. Con T7 il pool cresce in una direzione che il prototipo non aveva: **1.06** e **1.07** gli insegnano l'inglese (le varianti `.en` dei tre documenti, poi dell'email), **1.08** apre `rifinitura/`, e **1.09** ne corregge i tre difetti che solo l'AI vera poteva mostrare. Quella lezione del 1.05 è tornata due volte, sempre più precisa: a 1.07 nella forma «fra una regola e una **forma da imitare** vince la forma», a 1.09 in quella più generale — fra due istruzioni che si contraddicono vince **quella che parla del testo intero**, non la più specifica |
+| Testo dei prompt | 15 prompt validati | **identici** alla migrazione (Pool 1.00), salvo adattamento segnaposto; nuovi prompt ✚ progettati con lo stesso metodo. Dal **Pool 1.01** `importa_cv` diverge di proposito, dal **Pool 1.02** anche i sette turni del profilo, e dal **Pool 1.03** `analisi_annuncio`, che estrae anche il nome dell'azienda (v. `CHANGELOG.md`): su quei prompt il prototipo non è più il metro, è il termine di paragone. Il metro carattere-per-carattere resta su `confronto` e `mitigazione`. Il **Pool 1.04** (2026-08-14) è il primo bump che **aggiunge** invece di correggere — i due prompt di T6, `email_candidatura` e `classifica_documenti` — e non tocca nessuno dei quindici: le loro impronte restano quelle di 1.03, e chi confronta i due manifest lo vede subito. Il **Pool 1.05**, poche ore dopo, corregge il primo dei due su una lezione che vale oltre il suo caso: **l'esempio pesa più della regola**, e se i due si contraddicono vince l'esempio. Con T7 il pool cresce in una direzione che il prototipo non aveva: **1.06** e **1.07** gli insegnano l'inglese (le varianti `.en` dei tre documenti, poi dell'email), **1.08** apre `rifinitura/`, e **1.09** ne corregge i tre difetti che solo l'AI vera poteva mostrare. Quella lezione del 1.05 è tornata due volte, sempre più precisa: a 1.07 nella forma «fra una regola e una **forma da imitare** vince la forma», a 1.09 in quella più generale — fra due istruzioni che si contraddicono vince **quella che parla del testo intero**, non la più specifica. Il **1.10** apre `brainstorm/` e fa una cosa che il prototipo non aveva mai fatto: un prompt che è il **primo messaggio di una conversazione**, con uscita a testo e la risposta consegnata a pezzi (cap. 02.5) |
 | Limiti di token | costanti `MAX_TOKENS_*` nel server | metadato `max_token` di ogni prompt, e dal **Pool 1.03** dimensionato sul contenuto invece che sul suo (cap. 04.4): il banco verifica che non scendano sotto quelli del prototipo, non che coincidano |
 | Documentazione | `prompt_design.md` (prompt + note di design) | il pool **è** la documentazione dei prompt; le note di design restano nel diario e nei capitoli di questo progetto |
 

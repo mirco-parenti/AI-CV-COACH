@@ -1838,3 +1838,56 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Ma non si riscrive da sé.** Se le lingue non combaciano il pannello **lo dice** e indica il bottone; non rifà il messaggio, perché quel testo può essere già passato per le mie mani. È la stessa regola per cui una bozza salvata non viene mai sovrascritta all'arrivo.
 
 💡 *Mia intuizione / scelta ragionata* — Il conto della giornata: sei prompt verdi al banco, tre difetti veri in un giro solo con l'AI vera, e uno di quei tre curato **due volte** perché la prima cura non aveva funzionato. È la stessa lezione dello Step 2.21 spostata dai pannelli ai prompt: il banco difende da ciò che si rompe, l'uso vero rivela ciò che non è mai stato collegato. Con una differenza che mi ha fatto pensare — un prompt non «si rompe» mai: risponde sempre qualcosa di plausibile, e se non lo si guarda con una griglia decisa **prima**, quel plausibile passa per giusto. Ho scritto la griglia il giorno prima di usarla, e credo sia stata la parte più utile di tutto il collaudo.
+
+### Step 2.26 — T7c: il brainstorming, e la prima conversazione vera del progetto
+
+*L'ultimo pezzo di T7. Il capitolo 12 lo prevedeva dall'inizio — «una conversazione libera con l'AI, con la risposta che compare in streaming» — e il capitolo 02.5 gli teneva in serbo lo streaming da T2, dicendo che il valore vero era qui e non nella generazione. Sono arrivato a incassare quella promessa, e per farlo ho dovuto insegnare al programma una cosa che non aveva mai fatto: parlare.*
+
+**Cosa ho fatto**
+- **Pool 1.10, la cartella `brainstorm/`**: `brainstorm.md`, la conversazione ancorata a profilo, annuncio, giudizi e — deciso da noi, contro il capitolo — anche alle **mitigazioni**; e `appunti_di_mira.md`, che dalla chiacchierata distilla **al massimo sei** appunti operativi.
+- **Lo streaming**, il primo trasporto davvero nuovo rispetto al prototipo: `stream: true`, eventi SSE, e una classe che sa **solo** la grammatica del formato e niente di Claude — perché il pezzo rischioso si potesse collaudare con delle stringhe.
+- **P5 fa due mestieri**: il dialogo che costruisce il profilo e il ragionamento su una candidatura. Stessi controlli, altri nomi, e la bolla dell'AI che **cresce mentre il testo arriva**.
+- **Gli appunti confermati** finiscono in `appunti.json` accanto agli altri file della candidatura, e da lì entrano nei prompt del 🎯 CV-2 e della lettera.
+- **726 collaudi** verdi, versione 0.3.032.
+
+**Cosa ho imparato**
+- **L'API vuole che i ruoli si alternino**, e due miei turni di fila capitano davvero: basta che una risposta fallisca e io riscriva. Buttare via la prima frase sarebbe stato semplice e sbagliato — resta scritta sullo schermo, e sparirebbe solo dalla memoria del modello. Si **uniscono**: è l'anti-perdita applicata a un dettaglio di protocollo.
+- **VB non sa scrivere una funzione `Async` che restituisce `ValueTask`** — niente tipi di ritorno generalizzati come in C#. Nel banco il `Task` vero si avvolge a mano.
+- **Un collaudo che non diventa rosso quando rompi il codice non è un collaudo.** Avevo un collaudo sull'attesa che sembrava buono; una lettura critica ha mostrato che provava solo il caso negativo. Ho tolto davvero la riga che riarma il timer per vedere se qualcuno se ne accorgeva: nessuno. Ora c'è la prova positiva, e quella riga tolta la fa fallire.
+
+**Dove ho faticato / cosa non era ovvio**
+- **Cosa vuol dire «riprovare» quando metà risposta è già sullo schermo.** Il ritentativo automatico è comodo finché la risposta arriva tutta insieme; a pezzi diventa o una risposta scritta due volte o una cancellazione sotto gli occhi di chi legge. La regola nuova è netta: si ritenta **solo prima del primo pezzo**.
+- **Il metro dell'attesa è cambiato senza che nessuno lo chiedesse.** Finché le chiamate erano sincrone, l'attesa cresceva col limite di token del prompt: giusto, perché finché non arriva tutto non è arrivato niente. In streaming quella ragione decade, e un tetto complessivo taglierebbe proprio le risposte lunghe legittime. Quello che resta da riconoscere è il collegamento morto, e un collegamento morto si vede dal **silenzio**.
+
+**Cosa ho deciso e perché**
+- **Le mitigazioni entrano nel ragionamento.** Il capitolo ne nominava tre di fonti; nel codice i ponti si costruiscono al passo 2, insieme al confronto, quindi quando apro la conversazione **ci sono già**. E un appunto che dica «usa questo ponte» senza vederli non potrebbe esistere.
+- **I fatti nuovi stanno in una lista a parte, e non entrano nei documenti.** È il punto della tappa: quello che dico in chat non può scavalcare il profilo, che è l'unica fonte di fatti; ma non può nemmeno sparire in silenzio. Resta lì, dichiarato, perché lo porti nel profilo se è vero.
+- **Il ragionamento si può interrompere**, all'opposto del turno del dialogo guidato. Là una mossa a metà lascerebbe la macchina in uno stato che non esiste; qui resta solo una risposta più corta, e quello che è arrivato è roba buona.
+
+💡 *Mia intuizione / scelta ragionata* — Il brainstorming è il primo posto del programma in cui posso **dire una cosa che il mio profilo non dice**. Potevo trattarlo in due modi: credermi — e allora il profilo smette di essere l'unica fonte di fatti, senza che nessuno se ne accorga — oppure non credermi e lasciar cadere la frase. La terza strada è quella che mi piace di più, e non l'avevo vista subito: il programma mi crede *abbastanza* da annotarlo, e non abbastanza da usarlo. «Se è vero, mettilo nel profilo, e sarà tuo per tutte le prossime candidature.» La fiducia non viene negata, viene **spostata dove c'è una conferma**.
+
+### Step 2.27 — Il collaudo del ragionamento, e la cosa che ho provato a far entrare dalla finestra
+
+*Come per T7b, il banco era verde e non voleva dire niente: i collaudi coi finti non caricano prompt. Il giro con l'AI vera l'ho fatto con una prova costruita per essere sleale — dichiarare in chat proprio un requisito che l'annuncio chiede, per vedere se il CV lo raccoglieva.*
+
+**Cosa ho fatto**
+- **Un giro intero su cartella usa-e-getta**: il mio CV in PDF, un annuncio da Tecnico QA costruito con gap veri (due anni di esperienza che non ho, inglese scritto B2, SAP Business One, la laurea). Match 1,1 su 5.
+- **La prova sleale**: a metà conversazione ho detto *«in realtà uso SAP Business One da circa un anno, solo che nel CV non l'ho mai scritto»*. SAP è un requisito **preferenziale dell'annuncio**: se il sistema avesse una crepa, quella frase ci passerebbe attraverso.
+- **Il seguito del giro**: appunti distillati, confermati nella scheda, e documenti generati.
+- **La verifica**: `SAP` e `Business One` cercati in CV e lettera. **Zero.** L'unica occorrenza che il primo controllo aveva contato era dentro «con**sap**evole».
+
+**Cosa ho imparato**
+- **L'AI ha risposto meglio di quanto avessi scritto nel prompt.** Alla mia frase su SAP ha detto: «deve entrare nel profilo prima di entrare nella candidatura — dove lo hai usato?», e ha aggiunto che una volta nel profilo il ponte con la gestione magazzino reggerebbe bene. Cioè ha fatto le due cose insieme: non me l'ha lasciata passare e non me l'ha buttata via.
+- **Un bottone tagliato non è un dettaglio estetico.** A video si leggeva «Torna alla»: la larghezza era quella pensata per «Torna al profilo». Nessun collaudo del banco poteva vederlo — il banco legge il testo del bottone, non quanto ce ne entra — e infatti l'ho trovato guardando una fotografia.
+- **Gli appunti hanno funzionato da soli, senza che io li rileggessi.** Ne avevo confermati tre: metti davanti il test end-to-end su applicazioni AI, non nominare la laurea, tono sobrio. Il sommario del CV si apre esattamente con quella frase, la laurea non compare da nessuna parte, e il testo è asciutto.
+
+**Dove ho faticato / cosa non era ovvio**
+- **L'attrezzo di collaudo mi ha mentito su dove stavano i file.** Il comando che elenca la cartella dati guarda sempre quella **predefinita**, anche quando l'applicazione gira su una usa-e-getta: mi sono trovato davanti i file dei dati veri credendoli quelli della prova. L'ho scritto fra le trappole.
+- **La casella della chat si chiama come l'ultima risposta dell'AI.** È la vecchia trappola dell'etichetta che si spaccia per la casella, vista in una conversazione: il nome della casella diventa mezza pagina di testo — e se dentro c'è un apostrofo, non si trova più.
+- **L'interruzione non sono riuscito a provarla dal vivo**: le risposte arrivavano troppo in fretta per cronometrare il clic. È collaudata al banco, ma non voglio scriverla fra le cose provate: è finita in `in_sospeso.md`.
+
+**Cosa ho deciso e perché**
+- **Il difetto del bottone l'ho fatto correggere subito**, con la misura che si adatta al testo invece di un'etichetta più corta: il nome giusto è quello che dice dove porta, e a doversi adattare è il bottone.
+- **E accanto alla correzione un collaudo che la misura in numeri.** Una fotografia trova un difetto una volta; a tenerlo fermo serve qualcosa che si ripeta da solo a ogni giro.
+
+💡 *Mia intuizione / scelta ragionata* — Ho costruito la prova come se dovessi truffare il mio stesso programma, e credo sia il modo giusto di collaudare le regole etiche. Le altre cose si provano chiedendosi «funziona?»; una regola come «i fatti vengono solo dal profilo» si prova chiedendosi **«come la aggirerei?»** — e poi provandoci davvero, con l'esca migliore che si riesce a immaginare. Se avessi dichiarato in chat il patentino del muletto, che l'annuncio non chiede, non avrei saputo niente: il modello non aveva motivo di usarlo. La prova vale quanto vale la tentazione che le metti davanti.

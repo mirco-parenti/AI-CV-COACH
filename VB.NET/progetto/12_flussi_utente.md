@@ -102,6 +102,24 @@ opportunità sono esaurite.
    alla generazione; la conversazione integrale invece non si conserva (v. cap. 15.4).
    I fatti restano quelli del profilo: gli appunti orientano, non aggiungono.
 
+*Costruito a **T7c** (2026-08-18), con quattro precisazioni che il flusso qui sopra non
+aveva.* **Al punto 1**: non ci sono opportunità «marcate»: il ragionamento si apre su una
+candidatura **confrontata** (il bottone di P4 si accende lì), che è la stessa scelta fatta a
+T5c quando dei tre bottoni previsti ne è rimasto uno solo. E ad aprire la conversazione è
+**l'AI**, con due o tre appigli concreti e il nodo che pesa di più: una chat che si apre
+vuota non dice a nessuno da dove cominciare. **Al punto 2**: le fonti sono **quattro**, non
+tre — ci sono anche le **mitigazioni**, che a quel punto della pipeline esistono già (cap.
+04.3). E il contesto viaggia **una volta sola**, nel primo messaggio: a ripetersi sono i
+turni, non gli artefatti. **Al punto 3**: gli appunti sono **al massimo sei**, tipizzati
+(`enfasi` · `mitigazione` · `tono` · `evitare`), e ognuno porta la frase da cui nasce, così
+nella scheda si riconosce cosa si sta confermando; la scheda li fa spuntare, riscrivere o
+togliere uno per uno. **Al punto 4**, la cosa che il flusso non poteva prevedere: parlando,
+l'utente dichiara cose che nel profilo **non ci sono**. Non entrano nei documenti — sarebbe
+il profilo scavalcato dalla porta di servizio — e non spariscono: finiscono in un elenco
+**a parte**, mostrato con la ragione («se è vero, aggiungilo al profilo e sarà tuo per tutte
+le prossime candidature»). È l'anti-perdita del campo `altrove`, spostata dalla costruzione
+del profilo alla conversazione su una candidatura.
+
 **A7. Generazione dei documenti (F4)**
 1. L'app propone la **lingua** dell'output (rilevata dall'annuncio, modificabile).
 2. Genera 🎯 CV-2 mirato e ✉️ lettera (con mitigazioni, se esistono), li mostra

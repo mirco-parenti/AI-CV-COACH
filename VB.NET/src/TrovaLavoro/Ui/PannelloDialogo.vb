@@ -1,20 +1,44 @@
 ﻿Imports System.Drawing
 Imports System.Linq
+Imports System.Text.Json.Nodes
+Imports System.Threading
 Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports TrovaLavoro.Ai
 Imports TrovaLavoro.Motore
 
+''' <summary>Per cosa il pannello della conversazione è in uso adesso (cap. 03, P5).</summary>
+Public Enum ModoDialogo
+
+    ''' <summary>Il dialogo guidato che costruisce il profilo (T3, cap. 12 flusso B).</summary>
+    Profilo
+
+    ''' <summary>Il ragionamento su una candidatura (T7c, cap. 12 A6).</summary>
+    Brainstorming
+
+End Enum
+
 ''' <summary>
-''' Pannello P5 — il dialogo guidato (cap. 03.6; cap. 12, flusso B): la conversazione
-''' che costruisce il profilo da zero, per chi un CV non ce l'ha.
+''' Pannello P5 — la conversazione (cap. 03.6). Un pannello solo per <b>due</b> mestieri
+''' diversi: il dialogo guidato che costruisce il profilo da zero (cap. 12, flusso B) e
+''' il ragionamento su una candidatura, con gli appunti di mira (cap. 12, A6).
 ''' </summary>
 ''' <remarks>
-''' <para>Qui dentro non c'è <b>nessuna</b> regola del dialogo: l'ordine dei turni, le
-''' schede di conferma, l'anti-perdita e il riepilogo stanno tutti in
-''' <see cref="DialogoProfilo"/>, che è collaudato senza interfaccia. Questo pannello fa
-''' due sole cose — disegna la <see cref="Mossa"/> che riceve e riporta indietro quello
-''' che l'utente scrive o sceglie.</para>
+''' <para>Qui dentro non c'è <b>nessuna</b> regola delle due conversazioni: l'ordine dei
+''' turni, le schede di conferma, l'anti-perdita e il riepilogo stanno in
+''' <see cref="DialogoProfilo"/>, e la conduzione del ragionamento in
+''' <see cref="Motore.Brainstorming"/> — tutti e due collaudati senza interfaccia. Questo
+''' pannello fa due sole cose: disegna quello che riceve e riporta indietro quello che
+''' l'utente scrive o sceglie.</para>
+''' <para><b>Le due modalità non si mescolano</b> (v. <see cref="ModoDialogo"/>): i
+''' controlli sono gli stessi — bolle, casella, i tre bottoni in fondo — ma cambiano nome
+''' e destinazione, e in ogni momento ne è viva una sola. Ricostruire un secondo pannello
+''' gemello per una chat che è identica in tutto tranne le etichette sarebbe stato un
+''' doppione da tenere allineato per sempre.</para>
+''' <para><b>Solo il ragionamento arriva in streaming</b> (cap. 02.5): là la bolla
+''' dell'assistente cresce sotto gli occhi mentre il testo arriva, e si può interrompere.
+''' I turni del dialogo guidato no — sono corti, e una mossa a metà lascerebbe la
+''' macchina in uno stato che non esiste (cap. 02.6).</para>
 ''' <para>La conversazione è l'unica parte dell'interfaccia che nasce a runtime, perché
 ''' non si sa quante bolle avrà. I <b>bottoni delle scelte</b> invece no: sono tre, fissi
 ''' nel designer, perché le mosse non ne offrono mai di più (cap. 03.1, punto 6). A
@@ -75,6 +99,32 @@ Public Class PannelloDialogo
     ''' <summary>Se il profilo di questo dialogo è già stato consegnato alla scheda P2.</summary>
     Private _consegnato As Boolean
 
+    ''' <summary>Per quale dei due mestieri il pannello è in uso adesso.</summary>
+    Private _modo As ModoDialogo = ModoDialogo.Profilo
+
+    ''' <summary>Il ragionamento in corso; <c>Nothing</c> in modalità profilo.</summary>
+    Private _brainstorming As Motore.Brainstorming
+
+    ''' <summary>
+    ''' Il gettone con cui si interrompe il turno in streaming; <c>Nothing</c> quando non
+    ''' c'è niente in volo.
+    ''' </summary>
+    Private _annulla As CancellationTokenSource
+
+    ''' <summary>
+    ''' La riga di testo della bolla che sta crescendo mentre l'AI scrive, e il suo
+    ''' contenitore da rimettere in forma a ogni pezzo.
+    ''' </summary>
+    Private _rigaViva As Label
+    Private _bollaViva As Panel
+
+    ''' <summary>
+    ''' Quanto erano larghi nel disegno i due bottoni che cambiano nome col mestiere del
+    ''' pannello: è il minimo sotto cui non si scende quando il testo è più corto.
+    ''' </summary>
+    Private _larghezzaUscita As Integer
+    Private _larghezzaConclusione As Integer
+
     ''' <summary>Chiede alla finestra di riportare in vista la scheda del profilo.</summary>
     Public Event TornaAlProfilo As EventHandler
 
@@ -91,9 +141,24 @@ Public Class PannelloDialogo
     ''' </summary>
     Public Event LavoroAiCambiato As EventHandler
 
+    ''' <summary>
+    ''' Chiede alla finestra di riportare in vista la candidatura di cui si stava
+    ''' ragionando. È il gemello di <see cref="TornaAlProfilo"/> per l'altra modalità.
+    ''' </summary>
+    Public Event TornaAllaCandidatura As EventHandler
+
+    ''' <summary>
+    ''' Gli appunti di mira sono stati confermati e salvati con la candidatura: la
+    ''' finestra riporti l'utente lì, dove adesso c'è qualcosa di nuovo.
+    ''' </summary>
+    Public Event AppuntiConfermati As EventHandler
+
     Public Sub New()
 
         InitializeComponent()
+
+        _larghezzaUscita = btnTornaAlProfilo.Width
+        _larghezzaConclusione = btnPortaNelProfilo.Width
 
         VestiIBottoni()
         AggiornaComandi()
@@ -178,6 +243,10 @@ Public Class PannelloDialogo
     ''' </param>
     Public Async Function ApriIlDialogoAsync(Optional strutturatore As IStrutturatoreTurni = Nothing) As Task
 
+        ' Si torna al dialogo del profilo: se il pannello stava ragionando su una
+        ' candidatura, da qui in poi non lo fa più.
+        PassaAlModo(ModoDialogo.Profilo)
+
         If _dialogo IsNot Nothing Then Return
 
         Dim chiStruttura As IStrutturatoreTurni = If(strutturatore, _contesto?.Strutturatore)
@@ -228,6 +297,11 @@ Public Class PannelloDialogo
         _mossa = Nothing
         _consegnato = False
 
+        ' Anche il ragionamento se ne va: era appoggiato a quel profilo, ed era lui
+        ' l'unica fonte di fatti su cui stavamo ragionando.
+        _brainstorming = Nothing
+        PassaAlModo(ModoDialogo.Profilo)
+
         SvuotaLaConversazione()
         RaccontaLoStato("Il profilo è stato eliminato: qui non è rimasto niente di quel racconto.",
                         StileApp.TestoSecondario)
@@ -235,7 +309,424 @@ Public Class PannelloDialogo
 
     End Sub
 
+    ' ==================================================================
+    ' Il ragionamento su una candidatura (T7c)
+    ' ==================================================================
+
+    ''' <summary>La candidatura di cui si sta ragionando; <c>Nothing</c> in modalità profilo.</summary>
+    Public ReadOnly Property CandidaturaInEsame As Opportunita
+        Get
+            Return _brainstorming?.Candidatura
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Apre il ragionamento su una candidatura, o <b>riprende</b> quello già cominciato
+    ''' sulla stessa: uscire e rientrare non azzera niente, come nel dialogo guidato.
+    ''' </summary>
+    ''' <remarks>
+    ''' Su una candidatura <b>diversa</b> si ricomincia da capo, ma non di nascosto: la
+    ''' conversazione di prima riguardava un altro annuncio e non serve più, però era
+    ''' lavoro dell'utente e va chiesto prima di buttarlo.
+    ''' </remarks>
+    ''' <param name="candidatura">L'opportunità da mettere sul tavolo, già confrontata.</param>
+    ''' <param name="mestiere">
+    ''' Chi parla con l'AI. Di norma si omette e si usa quello del motore; il banco passa
+    ''' qui il suo finto e fa girare il ragionamento senza rete.
+    ''' </param>
+    Public Async Function ApriIlBrainstormingAsync(candidatura As Opportunita,
+                                                   Optional mestiere As IBrainstormatore = Nothing) As Task
+
+        If candidatura Is Nothing Then Throw New ArgumentNullException(NameOf(candidatura))
+
+        Dim chiRagiona As IBrainstormatore = If(mestiere, _contesto?.Brainstorm)
+        If chiRagiona Is Nothing Then
+            PassaAlModo(ModoDialogo.Brainstorming)
+            RaccontaLoStato(
+                $"Per ragionare su una candidatura serve la chiave API ({ClientClaude.NomeVariabileChiave}).",
+                StileApp.Pericolo)
+            Return
+        End If
+
+        ' Già aperto su questa candidatura: si riprende dov'era.
+        If _brainstorming IsNot Nothing AndAlso _brainstorming.Candidatura Is candidatura Then
+            PassaAlModo(ModoDialogo.Brainstorming)
+            Return
+        End If
+
+        If _brainstorming IsNot Nothing AndAlso _brainstorming.Cominciato Then
+            Dim risposta As DialogResult = MessageBox.Show(
+                $"Stavamo ragionando su «{_brainstorming.Candidatura.Titolo}»." & vbLf &
+                "Se passiamo a questa candidatura, quella conversazione si chiude.",
+                NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2)
+
+            If risposta <> DialogResult.Yes Then Return
+        End If
+
+        PassaAlModo(ModoDialogo.Brainstorming)
+
+        _brainstorming = New Motore.Brainstorming(chiRagiona, candidatura, ProfiloPerIlRagionamento())
+
+        SvuotaLaConversazione()
+        AggiungiIlCartelloDellaCandidatura(candidatura)
+
+        ' Apre l'AI, con quello che vede: una chat vuota non dice da dove cominciare.
+        Await UnTurnoDiRagionamentoAsync(Function(annulla, pezzo) _brainstorming.ApriAsync(pezzo, annulla)).
+            ConfigureAwait(True)
+
+    End Function
+
+    ''' <summary>
+    ''' Il profilo da mettere sul tavolo del ragionamento: quello salvato su disco, che è
+    ''' l'unica fonte di fatti (cap. 02).
+    ''' </summary>
+    Private Function ProfiloPerIlRagionamento() As JsonNode
+
+        Return _contesto?.Archivio.Carica()?.VersoJson()
+
+    End Function
+
+    ''' <summary>
+    ''' Butta il ragionamento e ne apre uno nuovo sulla stessa candidatura.
+    ''' </summary>
+    Private Async Function RicominciaIlRagionamentoAsync() As Task
+
+        Dim candidatura As Opportunita = _brainstorming?.Candidatura
+        If candidatura Is Nothing Then Return
+
+        _brainstorming = Nothing
+
+        Await ApriIlBrainstormingAsync(candidatura).ConfigureAwait(True)
+
+    End Function
+
+    ''' <summary>
+    ''' Fa fare un turno al ragionamento mentre la bolla dell'assistente cresce a video.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Qui l'attesa <b>si può interrompere</b>, all'opposto del turno del dialogo
+    ''' guidato (cap. 02.6): là una mossa a metà lascerebbe la macchina in uno stato che
+    ''' non esiste, qui resta solo una risposta più corta — e il testo già arrivato è roba
+    ''' buona, che rimane dov'è.</para>
+    ''' <para>Un errore non butta via niente: si dice in una bolla e la conversazione
+    ''' resta in piedi, pronta a riprovare.</para>
+    ''' </remarks>
+    Private Async Function UnTurnoDiRagionamentoAsync(
+        passo As Func(Of CancellationToken, Action(Of String), Task)) As Task
+
+        Occupato(True)
+        IniziaLaBollaViva()
+
+        Using gettone As New CancellationTokenSource()
+
+            _annulla = gettone
+
+            Try
+                Await passo(gettone.Token, AddressOf PezzoArrivato).ConfigureAwait(True)
+
+            Catch ex As OperationCanceledException
+                ' L'ha fermata l'utente: quel che era arrivato resta, e si dice che è
+                ' rimasto a metà — una risposta troncata che non lo dichiara è peggio di
+                ' nessuna risposta.
+                ChiudiLaBollaViva()
+                AggiungiBollaAssistente("(interrotto)")
+
+            Catch ex As ErroreAi
+                ChiudiLaBollaViva()
+                AggiungiBollaAssistente(ex.Message)
+                AggiungiBollaAssistente("Riprova pure: quello che ci siamo detti è ancora qui.")
+
+            Finally
+                _annulla = Nothing
+                ChiudiLaBollaViva()
+                Occupato(False)
+            End Try
+
+        End Using
+
+    End Function
+
+    ''' <summary>Ferma il turno in corso, se ce n'è uno.</summary>
+    Public Sub Interrompi()
+
+        _annulla?.Cancel()
+
+    End Sub
+
+    ''' <summary>
+    ''' Manda al ragionamento quello che c'è nella casella. È il gemello di
+    ''' <see cref="InviaLaRispostaAsync"/> per l'altra modalità, e come quello il banco lo
+    ''' chiama direttamente.
+    ''' </summary>
+    Public Async Function InviaAlRagionamentoAsync() As Task
+
+        If _occupato OrElse _brainstorming Is Nothing Then Return
+
+        Dim testo As String = txtRisposta.Text.Trim()
+        If testo = "" Then Return
+
+        txtRisposta.Clear()
+        AggiungiBollaUtente(testo)
+
+        Await UnTurnoDiRagionamentoAsync(
+            Function(annulla, pezzo) _brainstorming.RispondiAsync(testo, pezzo, annulla)).ConfigureAwait(True)
+
+    End Function
+
+    ''' <summary>
+    ''' Distilla gli appunti, li fa confermare e — se l'utente conferma — li salva con la
+    ''' candidatura (cap. 12, A6.3-4).
+    ''' </summary>
+    Public Async Function TrasformaInAppuntiAsync() As Task
+
+        Dim distillati As AppuntiDiMira = Await DistillaGliAppuntiAsync().ConfigureAwait(True)
+        If distillati Is Nothing Then Return
+
+        Dim scelti As AppuntiDiMira = FinestraAppunti.Chiedi(FindForm(), distillati)
+        If scelti Is Nothing Then Return
+
+        ConfermaGliAppunti(scelti)
+
+    End Function
+
+    ''' <summary>
+    ''' Chiede all'AI di distillare gli appunti dalla conversazione.
+    ''' </summary>
+    ''' <remarks>
+    ''' Sta in un metodo pubblico, staccato dalla finestra di conferma che gli va dietro,
+    ''' perché è l'unico modo di collaudarlo: una finestra modale il banco non la sa
+    ''' chiudere (v. <see cref="FinestraAppunti.RiscriviLAppunto"/>, che è lo stesso
+    ''' problema visto dall'altra parte).
+    ''' </remarks>
+    ''' <returns>
+    ''' Gli appunti proposti, oppure <c>Nothing</c> se non c'è niente da confermare —
+    ''' perché la conversazione non ha prodotto niente di operativo, o perché la chiamata
+    ''' è andata storta. In tutti e due i casi l'utente l'ha già letto in una bolla.
+    ''' </returns>
+    Public Async Function DistillaGliAppuntiAsync() As Task(Of AppuntiDiMira)
+
+        If _occupato OrElse _brainstorming Is Nothing OrElse Not _brainstorming.SiPuoDistillare Then
+            Return Nothing
+        End If
+
+        Occupato(True)
+        RaccontaLoStato("Sto rileggendo quello che ci siamo detti…", StileApp.TestoSecondario)
+
+        Dim distillati As AppuntiDiMira
+
+        Try
+            distillati = Await _brainstorming.AppuntiAsync().ConfigureAwait(True)
+
+        Catch ex As ErroreAi
+            AggiungiBollaAssistente(ex.Message)
+            Return Nothing
+
+        Finally
+            Occupato(False)
+        End Try
+
+        If distillati Is Nothing OrElse distillati.Vuoti Then
+            AggiungiBollaAssistente(
+                "Da questa conversazione non è venuto fuori niente di operativo da annotare. " &
+                "Continuiamo pure a ragionare, oppure vai avanti così: i documenti si scrivono lo stesso.")
+            Return Nothing
+        End If
+
+        Return distillati
+
+    End Function
+
+    ''' <summary>
+    ''' Scrive gli appunti confermati nella cartella della candidatura e lo racconta.
+    ''' </summary>
+    Public Sub ConfermaGliAppunti(scelti As AppuntiDiMira)
+
+        Dim candidatura As Opportunita = _brainstorming.Candidatura
+        candidatura.Appunti = scelti.VersoJson()
+
+        Try
+            _contesto?.Opportunita.Salva(candidatura)
+
+        Catch ex As Exception When TypeOf ex Is IO.IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            AggiungiBollaAssistente($"Non sono riuscita a salvare gli appunti: {ex.Message}")
+            Return
+        End Try
+
+        Dim quanti As Integer = scelti.Appunti.Count
+        AggiungiBollaAssistente(
+            If(quanti = 1, "Ho annotato un appunto per questa candidatura.",
+                           $"Ho annotato {quanti} appunti per questa candidatura.") &
+            " Guideranno la scrittura del 🎯 CV mirato e della ✉️ lettera quando li genererai.")
+
+        RaiseEvent AppuntiConfermati(Me, EventArgs.Empty)
+
+    End Sub
+
+    ''' <summary>
+    ''' Il cartello che apre la conversazione: di quale candidatura si sta parlando. Senza,
+    ''' due ragionamenti su due annunci diversi si somiglierebbero troppo.
+    ''' </summary>
+    Private Sub AggiungiIlCartelloDellaCandidatura(candidatura As Opportunita)
+
+        Dim scheda As New Scheda With {.Titolo = candidatura.Titolo}
+        scheda.Righe.Add(New RigaScheda With {.Etichetta = "Azienda", .Valore = candidatura.Azienda})
+
+        If candidatura.Match IsNot Nothing Then
+            scheda.Righe.Add(New RigaScheda With {
+                .Etichetta = "Match", .Valore = $"{candidatura.Match.Stelle:0.0} su 5"})
+        End If
+
+        AggiungiScheda(scheda)
+
+    End Sub
+
+    ' ==================================================================
+    ' La bolla che cresce mentre l'AI scrive
+    ' ==================================================================
+
+    ''' <summary>
+    ''' Apre una bolla dell'assistente vuota, pronta a riempirsi pezzo per pezzo.
+    ''' </summary>
+    Private Sub IniziaLaBollaViva()
+
+        AggiungiBollaAssistente("")
+
+        _bollaViva = TryCast(flpConversazione.Controls(flpConversazione.Controls.Count - 1), Panel)
+        _rigaViva = _bollaViva?.Controls.OfType(Of Panel)().FirstOrDefault()?.
+            Controls.OfType(Of Panel)().FirstOrDefault()?.
+            Controls.OfType(Of Label)().FirstOrDefault()
+
+    End Sub
+
+    ''' <summary>
+    ''' Un pezzo di risposta è arrivato.
+    ''' </summary>
+    ''' <remarks>
+    ''' Arriva dal thread che legge il flusso, non da quello della finestra: toccare un
+    ''' controllo da lì è il modo classico di far cadere un'interfaccia Windows Forms, e
+    ''' per questo il pezzo si fa riportare a casa prima di comparire.
+    ''' </remarks>
+    Private Sub PezzoArrivato(pezzo As String)
+
+        If InvokeRequired Then
+            BeginInvoke(New Action(Of String)(AddressOf PezzoArrivato), pezzo)
+            Return
+        End If
+
+        CresciLaBolla(pezzo)
+
+    End Sub
+
+    ''' <summary>Allunga la bolla viva e tiene la conversazione in fondo.</summary>
+    Private Sub CresciLaBolla(pezzo As String)
+
+        If _rigaViva Is Nothing OrElse String.IsNullOrEmpty(pezzo) Then Return
+
+        _rigaViva.Text &= pezzo
+
+        DisponiBolla(_bollaViva)
+        ScorriInFondo()
+
+    End Sub
+
+    ''' <summary>
+    ''' Chiude la bolla viva. Se non ci è arrivato dentro niente — un errore prima del
+    ''' primo pezzo — la toglie: una bolla vuota a video è un fantasma.
+    ''' </summary>
+    Private Sub ChiudiLaBollaViva()
+
+        If _bollaViva IsNot Nothing AndAlso String.IsNullOrEmpty(_rigaViva?.Text) Then
+            flpConversazione.Controls.Remove(_bollaViva)
+            _bollaViva.Dispose()
+        End If
+
+        _bollaViva = Nothing
+        _rigaViva = Nothing
+
+    End Sub
+
+    ''' <summary>
+    ''' Passa il pannello da un mestiere all'altro: cambiano i titoli, i nomi dei bottoni
+    ''' e dove portano. Quello che non è di questo modo si spegne e si dimentica.
+    ''' </summary>
+    Private Sub PassaAlModo(modo As ModoDialogo)
+
+        _modo = modo
+
+        If modo = ModoDialogo.Brainstorming Then
+
+            lblTitolo.Text = "Ragioniamo su questa candidatura"
+            lblSottotitolo.Text =
+                "Ho davanti il tuo profilo, l'annuncio e il confronto già fatto. Decidiamo cosa mettere " &
+                "davanti e come nominare quello che manca: i fatti restano quelli del tuo profilo."
+
+            btnTornaAlProfilo.Text = "Torna alla candidatura"
+            btnPortaNelProfilo.Text = "Trasforma in appunti"
+            txtRisposta.PlaceholderText = "Scrivi quello che pensi…"
+
+            NascondiLeScelte()
+            AdattaAlTesto()
+
+        Else
+
+            lblTitolo.Text = "Costruiamo il tuo profilo"
+            lblSottotitolo.Text =
+                "Un argomento alla volta: rispondi con parole tue, e prima di registrare qualcosa " &
+                "ti mostro cosa ho capito."
+
+            btnTornaAlProfilo.Text = "Torna al profilo"
+            btnPortaNelProfilo.Text = "Porta nel profilo"
+            txtRisposta.PlaceholderText = "La tua risposta…"
+
+            AdattaAlTesto()
+
+        End If
+
+        AggiornaComandi()
+
+    End Sub
+
+    ''' <summary>
+    ''' Dà ai due bottoni che cambiano nome la larghezza che il loro testo chiede, senza
+    ''' scendere sotto quella del disegno.
+    ''' </summary>
+    ''' <remarks>
+    ''' Trovato guardando l'applicazione in faccia nel collaudo di T7c: «Torna alla
+    ''' candidatura» non sta dove stava «Torna al profilo», e a video si leggeva «Torna
+    ''' alla». Un bottone tagliato a metà non è un dettaglio estetico — è un comando che
+    ''' non dice più dove porta, e nessun collaudo del banco poteva accorgersene, perché
+    ''' il banco vede il testo del bottone, non quanto ne entra.
+    ''' </remarks>
+    Private Sub AdattaAlTesto()
+
+        btnTornaAlProfilo.Width = Math.Max(_larghezzaUscita, btnTornaAlProfilo.PreferredSize.Width)
+        btnPortaNelProfilo.Width = Math.Max(_larghezzaConclusione, btnPortaNelProfilo.PreferredSize.Width)
+
+        DisponiLeAzioni()
+
+    End Sub
+
     Private Async Sub btnRicomincia_Click(sender As Object, e As EventArgs) Handles btnRicomincia.Click
+
+        If _modo = ModoDialogo.Brainstorming Then
+
+            ' Anche qui quello che si butta è lavoro dell'utente, e gli appunti già
+            ' confermati non lo mettono al riparo: sono l'esito di quello che si è detto
+            ' fin qui, non della conversazione che ricomincerebbe.
+            If _brainstorming IsNot Nothing AndAlso _brainstorming.Cominciato Then
+                Dim conferma As DialogResult = MessageBox.Show(
+                    "Vuoi ricominciare il ragionamento da capo?" & vbLf &
+                    "Quello che ci siamo detti finora va perso.",
+                    NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2)
+
+                If conferma <> DialogResult.Yes Then Return
+            End If
+
+            Await RicominciaIlRagionamentoAsync()
+            Return
+
+        End If
 
         ' Quello che si butta è il racconto dell'utente: si chiede sempre — tranne
         ' quando il racconto è finito e già consegnato alla scheda: lì è al sicuro, e
@@ -325,7 +816,16 @@ Public Class PannelloDialogo
         _occupato = inCorso
         Cursor = If(inCorso, Cursors.AppStarting, Cursors.Default)
 
-        If inCorso Then RaccontaLoStato("Sto leggendo la tua risposta…", StileApp.TestoSecondario)
+        If inCorso Then
+            RaccontaLoStato(If(_modo = ModoDialogo.Brainstorming,
+                               "Sto pensando… puoi fermarmi quando vuoi.",
+                               "Sto leggendo la tua risposta…"),
+                            StileApp.TestoSecondario)
+        ElseIf _modo = ModoDialogo.Brainstorming Then
+            RaccontaLoStato(
+                "Questa conversazione non si conserva: quello che resta sono gli appunti che confermi.",
+                StileApp.TestoSecondario)
+        End If
 
         AggiornaComandi()
         RaiseEvent LavoroAiCambiato(Me, EventArgs.Empty)
@@ -486,8 +986,26 @@ Public Class PannelloDialogo
 
     End Sub
 
+    ''' <summary>
+    ''' Il bottone in fondo alla casella: manda quello che si è scritto, e durante un
+    ''' turno del ragionamento diventa invece il modo di fermarlo.
+    ''' </summary>
     Private Async Sub btnInvia_Click(sender As Object, e As EventArgs) Handles btnInvia.Click
+
+        If _modo = ModoDialogo.Brainstorming Then
+
+            If _occupato Then
+                Interrompi()
+                Return
+            End If
+
+            Await InviaAlRagionamentoAsync()
+            Return
+
+        End If
+
         Await InviaLaRispostaAsync()
+
     End Sub
 
     ''' <summary>
@@ -500,6 +1018,11 @@ Public Class PannelloDialogo
 
         ' Senza questo la casella multilinea si prende comunque il suo a capo.
         e.SuppressKeyPress = True
+
+        If _modo = ModoDialogo.Brainstorming Then
+            Await InviaAlRagionamentoAsync()
+            Return
+        End If
 
         Await InviaLaRispostaAsync()
 
@@ -713,12 +1236,26 @@ Public Class PannelloDialogo
     ' Consegnare il profilo, tornare indietro
     ' ==================================================================
 
-    Private Sub btnPortaNelProfilo_Click(sender As Object, e As EventArgs) Handles btnPortaNelProfilo.Click
+    Private Async Sub btnPortaNelProfilo_Click(sender As Object, e As EventArgs) Handles btnPortaNelProfilo.Click
+
+        If _modo = ModoDialogo.Brainstorming Then
+            Await TrasformaInAppuntiAsync()
+            Return
+        End If
+
         RaiseEvent ProfiloPronto(Me, EventArgs.Empty)
+
     End Sub
 
     Private Sub btnTornaAlProfilo_Click(sender As Object, e As EventArgs) Handles btnTornaAlProfilo.Click
+
+        If _modo = ModoDialogo.Brainstorming Then
+            RaiseEvent TornaAllaCandidatura(Me, EventArgs.Empty)
+            Return
+        End If
+
         RaiseEvent TornaAlProfilo(Me, EventArgs.Empty)
+
     End Sub
 
     ' ==================================================================
@@ -791,6 +1328,11 @@ Public Class PannelloDialogo
     ''' </summary>
     Private Sub AggiornaComandi()
 
+        If _modo = ModoDialogo.Brainstorming Then
+            AggiornaIComandiDelRagionamento()
+            Return
+        End If
+
         Dim conDialogo As Boolean = _dialogo IsNot Nothing
         Dim chiedeUnaRisposta As Boolean = conDialogo AndAlso _mossa IsNot Nothing AndAlso
                                            _mossa.Tipo = TipoMossa.ChiediRisposta
@@ -820,6 +1362,40 @@ Public Class PannelloDialogo
         btnRicomincia.Enabled = conDialogo AndAlso Not _occupato
 
         btnPortaNelProfilo.Enabled = conDialogo AndAlso _dialogo.Finito AndAlso Not _occupato
+
+    End Sub
+
+    ''' <summary>
+    ''' Che cosa si può fare adesso nel ragionamento. Le domande sono le stesse dell'altra
+    ''' modalità — c'è una conversazione, l'AI sta lavorando — più una: si è già detto
+    ''' abbastanza da poterne distillare qualcosa?
+    ''' </summary>
+    Private Sub AggiornaIComandiDelRagionamento()
+
+        Dim conConversazione As Boolean = _brainstorming IsNot Nothing
+
+        ' Qui si scrive sempre: non ci sono turni che aspettano un bottone, è una chat.
+        pnlRisposta.Visible = conConversazione
+        txtRisposta.Visible = conConversazione
+        btnInvia.Visible = conConversazione
+
+        txtRisposta.ReadOnly = _occupato
+        txtRisposta.BackColor = If(_occupato, StileApp.SfondoBase, StileApp.SfondoContenuto)
+
+        ' Mentre l'AI scrive il bottone non si spegne: diventa il modo di fermarla. È la
+        ' differenza che lo streaming si porta dietro — c'è qualcosa da interrompere,
+        ' perché c'è qualcosa che sta già comparendo (cap. 02.6).
+        btnInvia.Enabled = True
+        btnInvia.Text = If(_occupato, "Interrompi", "Invia")
+        StileApp.VestiBottone(btnInvia, If(_occupato, LivelloBottone.Attenzione, LivelloBottone.AzionePrincipale))
+
+        btnTornaAlProfilo.Enabled = Not _occupato
+        btnRicomincia.Enabled = conConversazione AndAlso Not _occupato
+
+        ' Senza almeno una battuta dell'utente non c'è niente da distillare: il prompt
+        ' risponderebbe una lista vuota, e sarebbe un'attesa pagata per un nulla di fatto.
+        btnPortaNelProfilo.Enabled = conConversazione AndAlso Not _occupato AndAlso
+                                     _brainstorming.SiPuoDistillare
 
     End Sub
 

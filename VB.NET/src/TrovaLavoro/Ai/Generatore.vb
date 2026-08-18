@@ -42,9 +42,16 @@ Namespace Ai
         ''' <param name="giudizi">La lista dei giudizi dell'anello 3.</param>
         ''' <param name="annulla">Il gettone del pulsante Annulla (cap. 02.6).</param>
         ''' <param name="lingua">La lingua del documento: <c>it</c> o <c>en</c> (cap. 10).</param>
+        ''' <param name="appunti">
+        ''' Gli appunti di mira del brainstorming (T7c): dicono cosa mettere in risalto,
+        ''' <b>non</b> aggiungono fatti. Facoltativi — chi genera senza aver ragionato è il
+        ''' caso normale, non un errore — e in coda alla firma per non spostare i parametri
+        ''' che chi chiama passa già per posizione.
+        ''' </param>
         Function GeneraCvMiratoAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
                                      Optional annulla As CancellationToken = Nothing,
-                                     Optional lingua As String = "it") As Task(Of JsonNode)
+                                     Optional lingua As String = "it",
+                                     Optional appunti As JsonNode = Nothing) As Task(Of JsonNode)
 
         ''' <summary>
         ''' Genera la <b>lettera</b> di presentazione, coerente col CV mirato e onesta sui
@@ -61,10 +68,12 @@ Namespace Ai
         ''' </param>
         ''' <param name="annulla">Il gettone del pulsante Annulla (cap. 02.6).</param>
         ''' <param name="lingua">La lingua del documento: <c>it</c> o <c>en</c> (cap. 10).</param>
+        ''' <param name="appunti">Gli appunti di mira (T7c), come per il CV mirato.</param>
         Function GeneraLetteraAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
                                     cv As JsonNode, mitigazioni As JsonNode,
                                     Optional annulla As CancellationToken = Nothing,
-                                    Optional lingua As String = "it") As Task(Of JsonNode)
+                                    Optional lingua As String = "it",
+                                    Optional appunti As JsonNode = Nothing) As Task(Of JsonNode)
 
     End Interface
 
@@ -88,6 +97,7 @@ Namespace Ai
         Public Const SegnapostoGiudizi As String = "GIUDIZI"
         Public Const SegnapostoCv As String = "CV"
         Public Const SegnapostoMitigazioni As String = "MITIGAZIONI"
+        Public Const SegnapostoAppunti As String = "APPUNTI"
 
         ''' <summary>Come si chiamano i tre lavori nei messaggi all'utente.</summary>
         Private Const EtichettaCvBase As String = "la generazione del CV base"
@@ -117,7 +127,8 @@ Namespace Ai
         ''' <inheritdoc/>
         Public Function GeneraCvMiratoAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
                                             Optional annulla As CancellationToken = Nothing,
-                                            Optional lingua As String = "it") _
+                                            Optional lingua As String = "it",
+                                            Optional appunti As JsonNode = Nothing) _
                                             As Task(Of JsonNode) Implements IGeneratore.GeneraCvMiratoAsync
 
             Esigi(profilo, "il profilo", EtichettaCvMirato)
@@ -128,7 +139,8 @@ Namespace Ai
                 New Dictionary(Of String, String) From {
                     {SegnapostoProfilo, LibreriaPrompt.ComeNelPrompt(profilo)},
                     {SegnapostoAnnuncio, LibreriaPrompt.ComeNelPrompt(annuncio)},
-                    {SegnapostoGiudizi, LibreriaPrompt.ComeNelPrompt(giudizi)}}, annulla, lingua)
+                    {SegnapostoGiudizi, LibreriaPrompt.ComeNelPrompt(giudizi)},
+                    {SegnapostoAppunti, LibreriaPrompt.ComeNelPrompt(SenzaAppunti(appunti))}}, annulla, lingua)
 
         End Function
 
@@ -136,7 +148,8 @@ Namespace Ai
         Public Function GeneraLetteraAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
                                            cv As JsonNode, mitigazioni As JsonNode,
                                            Optional annulla As CancellationToken = Nothing,
-                                           Optional lingua As String = "it") _
+                                           Optional lingua As String = "it",
+                                           Optional appunti As JsonNode = Nothing) _
                                            As Task(Of JsonNode) Implements IGeneratore.GeneraLetteraAsync
 
             Esigi(profilo, "il profilo", EtichettaLettera)
@@ -154,8 +167,23 @@ Namespace Ai
                     {SegnapostoAnnuncio, LibreriaPrompt.ComeNelPrompt(annuncio)},
                     {SegnapostoGiudizi, LibreriaPrompt.ComeNelPrompt(giudizi)},
                     {SegnapostoCv, LibreriaPrompt.ComeNelPrompt(cv)},
-                    {SegnapostoMitigazioni, LibreriaPrompt.ComeNelPrompt(If(mitigazioni, New JsonArray()))}},
+                    {SegnapostoMitigazioni, LibreriaPrompt.ComeNelPrompt(If(mitigazioni, New JsonArray()))},
+                    {SegnapostoAppunti, LibreriaPrompt.ComeNelPrompt(SenzaAppunti(appunti))}},
                 annulla, lingua)
+
+        End Function
+
+        ''' <summary>
+        ''' Gli appunti quando non ce ne sono: una lista vuota, non un buco.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il segnaposto dichiarato dal prompt <b>va sempre riempito</b>, o il caricatore
+        ''' si ferma (cap. 04.4) — e generare senza aver ragionato è il caso normale, non
+        ''' un errore. È lo stesso trattamento delle mitigazioni.
+        ''' </remarks>
+        Private Shared Function SenzaAppunti(appunti As JsonNode) As JsonNode
+
+            Return If(appunti, New JsonArray())
 
         End Function
 

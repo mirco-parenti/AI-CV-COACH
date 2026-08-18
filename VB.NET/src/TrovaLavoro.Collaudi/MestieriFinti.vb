@@ -126,6 +126,13 @@ Friend Class GeneratoreFinto
     ''' <summary>Le lingue chieste, una per chiamata e nell'ordine in cui sono arrivate.</summary>
     Friend ReadOnly Property LingueChieste As New List(Of String)
 
+    ''' <summary>
+    ''' Gli appunti di mira arrivati a ogni chiamata (T7c), per la stessa ragione delle
+    ''' lingue: un finto non carica prompt, e senza annotarli nessuno si accorgerebbe se
+    ''' si fermassero per strada fra la cartella della candidatura e la richiesta.
+    ''' </summary>
+    Friend ReadOnly Property AppuntiVisti As New List(Of JsonNode)
+
     Public Function GeneraCvBaseAsync(profilo As JsonNode,
                                       Optional annulla As CancellationToken = Nothing,
                                       Optional lingua As String = "it") _
@@ -138,10 +145,12 @@ Friend Class GeneratoreFinto
 
     Public Function GeneraCvMiratoAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
                                         Optional annulla As CancellationToken = Nothing,
-                                        Optional lingua As String = "it") _
+                                        Optional lingua As String = "it",
+                                        Optional appunti As JsonNode = Nothing) _
                                         As Task(Of JsonNode) Implements IGeneratore.GeneraCvMiratoAsync
 
         LingueChieste.Add(lingua)
+        AppuntiVisti.Add(appunti)
         Return Prossima("cv_mirato", profilo, annuncio, giudizi)
 
     End Function
@@ -149,10 +158,12 @@ Friend Class GeneratoreFinto
     Public Function GeneraLetteraAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
                                        cv As JsonNode, mitigazioni As JsonNode,
                                        Optional annulla As CancellationToken = Nothing,
-                                       Optional lingua As String = "it") _
+                                       Optional lingua As String = "it",
+                                       Optional appunti As JsonNode = Nothing) _
                                        As Task(Of JsonNode) Implements IGeneratore.GeneraLetteraAsync
 
         LingueChieste.Add(lingua)
+        AppuntiVisti.Add(appunti)
         Return Prossima("lettera", profilo, annuncio, giudizi, cv, mitigazioni)
 
     End Function
@@ -298,6 +309,93 @@ Friend Class RifinitoreFinto
         Next
 
         Return Task.FromResult(Of IReadOnlyDictionary(Of String, String))(esito)
+
+    End Function
+
+End Class
+
+''' <summary>
+''' Il brainstormatore, finto: risponde quello che il collaudo gli ha messo in bocca e
+''' annota che cosa gli è stato dato da guardare.
+''' </summary>
+''' <remarks>
+''' <para><b>Consegna la risposta a pezzi</b>, parola per parola, cosa che nessun altro
+''' finto fa: è l'unico modo di collaudare senza rete che la bolla di P5 cresca davvero
+''' mentre l'AI scrive. Un finto che restituisse tutto in fondo lascerebbe verde anche un
+''' pannello che aspetta la fine e poi stampa.</para>
+''' <para><b>Annota le battute che riceve</b> per la stessa ragione per cui il generatore
+''' annota la lingua: un finto non manda niente all'API, e senza contarle nessuno si
+''' accorgerebbe se la conversazione si fermasse per strada invece di crescere.</para>
+''' </remarks>
+Friend Class BrainstormatoreFinto
+    Inherits MestiereFinto
+    Implements IBrainstormatore
+
+    Private ReadOnly _dette As New Queue(Of Object)
+
+    ''' <summary>Quante battute aveva la conversazione a ogni chiamata, nell'ordine.</summary>
+    Public ReadOnly Property BattuteViste As New List(Of Integer)
+
+    ''' <summary>L'ultima trascrizione mandata a distillare.</summary>
+    Public Property UltimaConversazione As String
+
+    ''' <summary>Le mitigazioni che si è visto passare, per controllare che arrivino.</summary>
+    Public ReadOnly Property MitigazioniViste As New List(Of JsonNode)
+
+    ''' <summary>Prepara la prossima risposta parlata (forma fluente).</summary>
+    Public Function Dira(testo As String) As BrainstormatoreFinto
+        _dette.Enqueue(testo)
+        Return Me
+    End Function
+
+    ''' <summary>Prepara un errore al posto della prossima risposta parlata.</summary>
+    Public Function FalliraParlando(errore As Exception) As BrainstormatoreFinto
+        _dette.Enqueue(errore)
+        Return Me
+    End Function
+
+    Public Function ConversaAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
+                                  mitigazioni As JsonNode, battute As IReadOnlyList(Of TurnoChat),
+                                  pezzo As Action(Of String),
+                                  Optional annulla As CancellationToken = Nothing) _
+                                  As Task(Of String) Implements IBrainstormatore.ConversaAsync
+
+        Chiamate.Add(New Chiamata With {
+            .Lavoro = "conversazione", .Ingressi = {profilo, annuncio, giudizi, mitigazioni}})
+
+        BattuteViste.Add(If(battute?.Count, 0))
+        MitigazioniViste.Add(mitigazioni)
+
+        If _dette.Count = 0 Then
+            Throw New InvalidOperationException(
+                "Il collaudo non ha preparato nessuna risposta per la conversazione.")
+        End If
+
+        Dim preparata As Object = _dette.Dequeue()
+
+        Dim errore As Exception = TryCast(preparata, Exception)
+        If errore IsNot Nothing Then Throw errore
+
+        Dim testo As String = CStr(preparata)
+
+        ' A pezzi come il flusso vero: le parole arrivano una alla volta, con il loro
+        ' spazio attaccato, così rimesse in fila danno esattamente il testo di partenza.
+        Dim parole As String() = testo.Split(" "c)
+        For i As Integer = 0 To parole.Length - 1
+            annulla.ThrowIfCancellationRequested()
+            pezzo?.Invoke(If(i < parole.Length - 1, parole(i) & " ", parole(i)))
+        Next
+
+        Return Task.FromResult(testo)
+
+    End Function
+
+    Public Function AppuntiAsync(conversazione As String,
+                                 Optional annulla As CancellationToken = Nothing) _
+                                 As Task(Of JsonNode) Implements IBrainstormatore.AppuntiAsync
+
+        UltimaConversazione = conversazione
+        Return Prossima("appunti")
 
     End Function
 

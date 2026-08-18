@@ -22,6 +22,13 @@ annuncio (IT o EN) ──► analisi ──► campo `lingua` nell'Annuncio JSON
 Il **brainstorming** (P5) resta sempre in italiano: è una conversazione con l'utente,
 non un documento per l'azienda.
 
+*Realizzato a **T7c** (2026-08-18), e con una conseguenza che valeva la pena scrivere: in
+italiano restano anche gli **appunti di mira** che ne escono, compresi quelli che finiranno
+nei prompt di un CV inglese. Non è una svista — un appunto è un'**istruzione a chi scrive**,
+non testo da ricopiare, e tradurlo vorrebbe dire tradurre due volte la stessa decisione. I
+due prompt `.en` lo dichiarano, con le stesse parole che già usavano per il profilo e per i
+ponti: sono in italiano e ci restano.*
+
 ## 10.2 Come si realizza
 
 - Il prompt `analisi_annuncio` guadagna un campo in uscita: `lingua` (`"it"` / `"en"`;

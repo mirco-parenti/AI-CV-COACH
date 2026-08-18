@@ -1,3 +1,4 @@
+Imports System.IO
 Imports System.Net.Http
 Imports System.Text
 Imports System.Text.Json
@@ -66,6 +67,54 @@ Namespace Ai
 
     End Class
 
+    ''' <summary>
+    ''' Un turno di conversazione, come lo vuole l'API: chi parla e cosa dice.
+    ''' </summary>
+    ''' <remarks>
+    ''' Serve dal brainstorming in poi (T7c). Prima di allora nel progetto non c'erano
+    ''' conversazioni vere: anche il dialogo guidato del profilo è fatto di turni
+    ''' <b>indipendenti</b> — sette chiamate che non si ricordano l'una dell'altra, con
+    ''' la memoria tenuta dal programma (cap. 02.5). Il brainstorming invece è una
+    ''' chiacchierata sola che cresce, e va mandata come tale.
+    ''' </remarks>
+    Public Class TurnoChat
+
+        ''' <summary>Chi parla: <c>user</c> oppure <c>assistant</c>.</summary>
+        Public Property Ruolo As String
+
+        ''' <summary>
+        ''' Cosa dice: una stringa per il testo, un elenco di blocchi per i PDF.
+        ''' L'API accetta entrambe le forme.
+        ''' </summary>
+        Public Property Contenuto As JsonNode
+
+        ''' <summary>
+        ''' Il contenuto come testo, quando è testo; vuoto quando è un elenco di blocchi.
+        ''' </summary>
+        Public ReadOnly Property Testo As String
+            Get
+                Return If(TryCast(Contenuto, JsonValue)?.ToString(), String.Empty)
+            End Get
+        End Property
+
+        ''' <summary>Il ruolo di chi scrive all'AI.</summary>
+        Public Const Utente As String = "user"
+
+        ''' <summary>Il ruolo dell'AI.</summary>
+        Public Const Assistente As String = "assistant"
+
+        ''' <summary>Un turno dell'utente, dal suo testo.</summary>
+        Public Shared Function DallUtente(testo As String) As TurnoChat
+            Return New TurnoChat With {.Ruolo = Utente, .Contenuto = JsonValue.Create(If(testo, String.Empty))}
+        End Function
+
+        ''' <summary>Un turno dell'assistente, dal testo che aveva risposto.</summary>
+        Public Shared Function DallAssistente(testo As String) As TurnoChat
+            Return New TurnoChat With {.Ruolo = Assistente, .Contenuto = JsonValue.Create(If(testo, String.Empty))}
+        End Function
+
+    End Class
+
     ''' <summary>Quello che l'AI ha risposto, già sbucciato.</summary>
     Public Class RispostaAi
 
@@ -90,9 +139,12 @@ Namespace Ai
     ''' messaggio <c>user</c> col prompt già riempito.
     ''' </summary>
     ''' <remarks>
-    ''' <para>A T2 sono <b>solo chiamate sincrone</b>: le risposte stanno fra i 1500 e i
-    ''' 4000 token e si aspettano bene con un indicatore. Lo streaming arriva con T4/T7,
-    ''' quando ci sarà un pannello che lo mostra man mano.</para>
+    ''' <para>A T2 erano <b>solo chiamate sincrone</b>: le risposte stanno fra i 1500 e i
+    ''' 4000 token e si aspettano bene con un indicatore. Con <b>T7c</b> arriva anche lo
+    ''' streaming (<see cref="ChiediInStreamingAsync"/>), perché finalmente c'è un
+    ''' pannello che lo mostra man mano: il brainstorming. Le due strade convivono e la
+    ''' sincrona <b>non è cambiata</b> — chi non ha niente da mostrare mentre aspetta non
+    ''' ha niente da guadagnare, e la non-regressione resta appoggiata a lei.</para>
     ''' <para>Nessuna memoria lato modello: ogni chiamata è autonoma, il contesto lo
     ''' manda il programma.</para>
     ''' </remarks>
@@ -119,6 +171,7 @@ Namespace Ai
         Public Const TokenDiRiferimento As Integer = 4000
         Private Shared ReadOnly PausaPredefinita As TimeSpan = TimeSpan.FromSeconds(2)
         Private Shared ReadOnly PausaMassima As TimeSpan = TimeSpan.FromSeconds(30)
+        Private Shared ReadOnly SilenzioPredefinito As TimeSpan = TimeSpan.FromSeconds(30)
 
         Private ReadOnly _http As HttpClient
         Private ReadOnly _chiave As String
@@ -136,6 +189,21 @@ Namespace Ai
 
         ''' <summary>Quanto si aspetta prima dell'unico ritentativo.</summary>
         Public Property Pausa As TimeSpan
+
+        ''' <summary>
+        ''' In streaming, quanto silenzio si sopporta <b>fra un pezzo e l'altro</b> prima
+        ''' di dichiarare scaduta l'attesa.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il metro cambia insieme al trasporto. Per una chiamata sincrona conta il
+        ''' tempo totale, e cresce col limite del prompt (<see cref="AttesaPer"/>): finché
+        ''' non arriva tutto non è arrivato niente. In streaming quella ragione decade —
+        ''' se il testo sta comparendo, la chiamata sta funzionando, per lunga che sia la
+        ''' risposta — e un tetto complessivo taglierebbe proprio le risposte lunghe
+        ''' legittime. Quello che resta da riconoscere è il collegamento morto, e un
+        ''' collegamento morto si vede dal <b>silenzio</b>. *(Deciso a T7c.)*
+        ''' </remarks>
+        Public Property SilenzioMassimo As TimeSpan
 
         ''' <param name="chiave">La chiave API.</param>
         ''' <param name="modelli">La mappa dei modelli; se omessa, i predefiniti.</param>
@@ -164,6 +232,7 @@ Namespace Ai
 
             TempoMassimo = AttesaPredefinita
             Pausa = PausaPredefinita
+            SilenzioMassimo = SilenzioPredefinito
 
         End Sub
 
@@ -197,8 +266,33 @@ Namespace Ai
         Public Shared Function CorpoRichiesta(modello As ModelloConcreto, maxToken As Integer,
                                               contenuto As JsonNode) As JsonObject
 
-            If modello Is Nothing Then Throw New ArgumentNullException(NameOf(modello))
             If contenuto Is Nothing Then Throw New ArgumentNullException(NameOf(contenuto))
+
+            Return CorpoRichiesta(modello, maxToken,
+                                  {New TurnoChat With {.Ruolo = TurnoChat.Utente, .Contenuto = contenuto}})
+
+        End Function
+
+        ''' <summary>
+        ''' Il corpo JSON di una <b>conversazione</b>: gli stessi campi di sempre, con
+        ''' più di un messaggio e — se lo si chiede — la richiesta di rispondere man
+        ''' mano invece che tutto alla fine.
+        ''' </summary>
+        ''' <remarks>
+        ''' Con un turno solo e <paramref name="flusso"/> spento il JSON prodotto è
+        ''' <b>identico carattere per carattere</b> a quello di prima, e a dirlo non è
+        ''' questo commento ma <c>IlCorpoEQuelloDelPrototipo</c>, che gli sta addosso dal
+        ''' T2. Era la condizione per aggiungere lo streaming senza rimettere in gioco la
+        ''' non-regressione: la strada nuova si affianca alla vecchia, non la riscrive.
+        ''' </remarks>
+        ''' <param name="turni">La conversazione, dal più vecchio al più recente.</param>
+        ''' <param name="flusso">Se chiedere la risposta a pezzi (eventi SSE).</param>
+        Public Shared Function CorpoRichiesta(modello As ModelloConcreto, maxToken As Integer,
+                                              turni As IReadOnlyList(Of TurnoChat),
+                                              Optional flusso As Boolean = False) As JsonObject
+
+            If modello Is Nothing Then Throw New ArgumentNullException(NameOf(modello))
+            If turni Is Nothing Then Throw New ArgumentNullException(NameOf(turni))
             If String.IsNullOrWhiteSpace(modello.Id) Then
                 Throw New ArgumentException("Il modello non ha un identificativo.", NameOf(modello))
             End If
@@ -206,13 +300,28 @@ Namespace Ai
                 Throw New ArgumentOutOfRangeException(NameOf(maxToken),
                     "Il limite di token deve essere positivo: il prompt lo dichiara nei suoi metadati.")
             End If
+            If turni.Count = 0 Then
+                Throw New ArgumentException("Una richiesta senza messaggi non esiste.", NameOf(turni))
+            End If
+
+            Dim messaggi As New JsonArray()
+            For Each turno As TurnoChat In turni
+                If turno Is Nothing OrElse turno.Contenuto Is Nothing Then
+                    Throw New ArgumentException("Un turno della conversazione è vuoto.", NameOf(turni))
+                End If
+                messaggi.Add(New JsonObject From {
+                    {"role", If(turno.Ruolo, TurnoChat.Utente)},
+                    {"content", turno.Contenuto}})
+            Next
 
             Dim corpo As New JsonObject From {
                 {"model", modello.Id},
                 {"max_tokens", maxToken},
-                {"messages", New JsonArray(New JsonObject From {
-                    {"role", "user"},
-                    {"content", contenuto}})}}
+                {"messages", messaggi}}
+
+            ' Lo streaming si dichiara solo quando serve: tacere lascia il corpo delle
+            ' chiamate sincrone esattamente com'era.
+            If flusso Then corpo("stream") = True
 
             ' Il ragionamento si dichiara solo quando la configurazione lo chiede: a
             ' modello spento di suo, tacere tiene la richiesta identica a quella del
@@ -352,6 +461,319 @@ Namespace Ai
 
         End Function
 
+        ''' <summary>
+        ''' Chiede all'AI e consegna la risposta <b>man mano che arriva</b>: ogni pezzo di
+        ''' testo passa per <paramref name="pezzo"/> appena il flusso lo porta, e alla
+        ''' fine si restituisce la risposta intera come in una chiamata normale.
+        ''' </summary>
+        ''' <remarks>
+        ''' Serve dove c'è qualcosa da guardare mentre l'AI scrive, cioè il brainstorming
+        ''' (cap. 02.5): sulla generazione, che produce JSON, un tracciato che si srotola
+        ''' non direbbe niente a nessuno.
+        ''' </remarks>
+        ''' <param name="livello">Il livello dichiarato dal prompt: "semplice" o "ragionamento".</param>
+        ''' <param name="turni">La conversazione, dal più vecchio al più recente.</param>
+        ''' <param name="maxToken">Il limite di token della risposta, dai metadati del prompt.</param>
+        ''' <param name="pezzo">Dove consegnare ogni pezzo di testo appena arriva.</param>
+        ''' <param name="annulla">Il gettone di chi interrompe.</param>
+        Public Async Function ChiediInStreamingAsync(livello As String, turni As IReadOnlyList(Of TurnoChat),
+                                                     maxToken As Integer, pezzo As Action(Of String),
+                                                     Optional annulla As CancellationToken = Nothing) As Task(Of RispostaAi)
+
+            Dim modello As ModelloConcreto = ModelliInUso.PerLivello(livello)
+            Dim testoCorpo As String = CorpoRichiesta(modello, maxToken, turni, flusso:=True).ToJsonString()
+
+            ' Quanti pezzi sono già comparsi sotto gli occhi di chi legge: da questo
+            ' dipende se un inciampo si può ancora ritentare in silenzio.
+            Dim arrivati As Integer = 0
+            Dim consegna As Action(Of String) =
+                Sub(testo)
+                    arrivati += 1
+                    pezzo?.Invoke(testo)
+                End Sub
+
+            Dim primoErrore As ErroreAi = Nothing
+
+            For tentativo As Integer = 1 To 2
+
+                If tentativo > 1 Then
+                    Await Task.Delay(QuantoAspettare(primoErrore), annulla).ConfigureAwait(False)
+                End If
+
+                Try
+                    Return Await UnFlussoAsync(testoCorpo, consegna, annulla).ConfigureAwait(False)
+
+                    ' Il ritentativo automatico vale finché non è comparso niente. Dopo il
+                    ' primo pezzo di testo riprovare vorrebbe dire o scrivere due volte la
+                    ' risposta, o cancellare sotto gli occhi dell'utente qualcosa che stava
+                    ' leggendo: meglio l'errore com'è, accanto a quel che era arrivato.
+                    ' *(Deciso a T7c.)*
+                Catch ex As ErroreAi When ex.Ritentabile AndAlso tentativo = 1 AndAlso arrivati = 0
+                    primoErrore = ex
+                End Try
+
+            Next
+
+            Throw primoErrore
+
+        End Function
+
+        ''' <summary>
+        ''' Come sopra, ma con livello e limite di token presi dai metadati del prompt
+        ''' (cap. 04). Il primo turno è il prompt già riempito; quelli dopo sono la
+        ''' conversazione che ci è cresciuta sopra.
+        ''' </summary>
+        Public Function ChiediInStreamingAsync(prompt As Prompt, turni As IReadOnlyList(Of TurnoChat),
+                                               pezzo As Action(Of String),
+                                               Optional annulla As CancellationToken = Nothing) As Task(Of RispostaAi)
+
+            If prompt Is Nothing Then Throw New ArgumentNullException(NameOf(prompt))
+
+            Return ChiediInStreamingAsync(prompt.Modello, turni, prompt.MaxToken, pezzo, annulla)
+
+        End Function
+
+        ''' <summary>Un singolo tentativo di flusso: prepara, manda, legge man mano.</summary>
+        Private Async Function UnFlussoAsync(testoCorpo As String, consegna As Action(Of String),
+                                             annulla As CancellationToken) As Task(Of RispostaAi)
+
+            Using richiesta As New HttpRequestMessage(HttpMethod.Post, Indirizzo)
+
+                richiesta.Content = New StringContent(testoCorpo, New UTF8Encoding(False), "application/json")
+                richiesta.Headers.Add("x-api-key", _chiave)
+                richiesta.Headers.Add("anthropic-version", VersioneApi)
+
+                Using scadenza As CancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(annulla)
+
+                    ' L'attesa si riarma a ogni pezzo che arriva (v. LeggiIlFlussoAsync):
+                    ' quello che si sorveglia è il silenzio, non la durata.
+                    scadenza.CancelAfter(SilenzioMassimo)
+
+                    Dim risposta As HttpResponseMessage
+                    Try
+                        risposta = Await _http.SendAsync(richiesta, HttpCompletionOption.ResponseHeadersRead,
+                                                         scadenza.Token).ConfigureAwait(False)
+                    Catch ex As OperationCanceledException When Not annulla.IsCancellationRequested
+                        Throw ErroreDiAttesa(SilenzioMassimo, ex)
+                    Catch ex As HttpRequestException
+                        Throw ErroreDiRete(ex)
+                    End Try
+
+                    Using risposta
+
+                        If Not risposta.IsSuccessStatusCode Then
+                            ' Un errore non arriva mai in forma di eventi: è una risposta
+                            ' normale, e si legge e si classifica come tutte le altre.
+                            Dim corpo As String
+                            Try
+                                corpo = Await risposta.Content.
+                                    ReadAsStringAsync(scadenza.Token).ConfigureAwait(False)
+                            Catch ex As IOException
+                                Throw ErroreDiRete(ex)
+                            End Try
+                            Throw ErroreDaStato(risposta, corpo)
+                        End If
+
+                        Return Await LeggiIlFlussoAsync(risposta, consegna, scadenza, annulla).ConfigureAwait(False)
+
+                    End Using
+
+                End Using
+            End Using
+
+        End Function
+
+        ''' <summary>
+        ''' Srotola il flusso: ogni evento è un pezzo di risposta, un dato di servizio o
+        ''' la fine. Il testo si accumula e insieme si consegna, così chi guarda lo vede
+        ''' comparire e chi chiama alla fine ha comunque la risposta intera.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para><b>La protezione della rete qui è scritta apposta.</b> Nella chiamata
+        ''' sincrona il corpo scende tutto dentro <c>SendAsync</c> e una caduta a metà
+        ''' lettura è coperta di riflesso (v. <see cref="UnTentativoAsync"/>); leggendo a
+        ''' pezzi il collegamento può spezzarsi proprio qui, ed è per questo che
+        ''' <c>ResponseHeadersRead</c> vive solo su questa strada.</para>
+        ''' <para><b>Una risposta troncata non è un errore, qui.</b> Nella chiamata
+        ''' sincrona il troncamento fa fallire tutto, perché quello che resta è un JSON
+        ''' monco da dare in pasto a un estrattore. In una conversazione invece il testo
+        ''' arrivato è già sotto gli occhi dell'utente e si legge benissimo: il motivo
+        ''' della fine si porta a casa in <see cref="RispostaAi.MotivoFine"/> e a dirlo è
+        ''' il pannello. *(Deciso a T7c, conseguenza della regola sul ritentativo.)*</para>
+        ''' </remarks>
+        Private Async Function LeggiIlFlussoAsync(risposta As HttpResponseMessage, consegna As Action(Of String),
+                                                  scadenza As CancellationTokenSource,
+                                                  annulla As CancellationToken) As Task(Of RispostaAi)
+
+            Dim testo As New StringBuilder()
+            Dim esito As New RispostaAi()
+            Dim finito As Boolean = False
+
+            Try
+                Using flusso As Stream = Await risposta.Content.
+                    ReadAsStreamAsync(scadenza.Token).ConfigureAwait(False)
+
+                    Using lettore As New LettoreSse(flusso)
+
+                        Dim evento As EventoSse = Await lettore.ProssimoAsync(scadenza.Token).ConfigureAwait(False)
+
+                        While evento IsNot Nothing
+
+                            ' Ogni evento è un segno di vita: l'attesa riparte da capo.
+                            ' Vale anche per i ping, che è ciò per cui esistono. Ne segue
+                            ' che un server che pingasse in eterno senza mai finire terrebbe
+                            ' aperta la conversazione: a chiuderla resta l'utente, che qui
+                            ' il pulsante per interrompere ce l'ha (cap. 02.6).
+                            scadenza.CancelAfter(SilenzioMassimo)
+
+                            If InterpretaEvento(evento, testo, esito, consegna) Then
+                                finito = True
+                                Exit While
+                            End If
+
+                            evento = Await lettore.ProssimoAsync(scadenza.Token).ConfigureAwait(False)
+
+                        End While
+
+                    End Using
+                End Using
+
+            Catch ex As OperationCanceledException When Not annulla.IsCancellationRequested
+                Throw ErroreDiAttesa(SilenzioMassimo, ex)
+            Catch ex As IOException
+                Throw ErroreDiRete(ex)
+            Catch ex As HttpRequestException
+                Throw ErroreDiRete(ex)
+            End Try
+
+            ' Il flusso è finito senza che l'AI dicesse «ho finito»: il collegamento si è
+            ' spezzato mentre scriveva.
+            If Not finito Then
+                Throw New ErroreAi(CausaErroreAi.Rete,
+                    "Il collegamento con l'AI si è interrotto mentre stava scrivendo.")
+            End If
+
+            esito.Testo = testo.ToString()
+
+            ' Un rifiuto non porta testo: lì l'errore è tutta la risposta.
+            If String.Equals(esito.MotivoFine, "refusal", StringComparison.Ordinal) AndAlso
+               esito.Testo.Length = 0 Then
+                Throw New ErroreAi(CausaErroreAi.Rifiuto,
+                    "Il modello si è rifiutato di rispondere a questa richiesta.")
+            End If
+
+            Return esito
+
+        End Function
+
+        ''' <summary>
+        ''' Cosa fare di un evento. Restituisce <c>True</c> quando l'AI ha dichiarato di
+        ''' aver finito, e allora il flusso si chiude.
+        ''' </summary>
+        Private Shared Function InterpretaEvento(evento As EventoSse, testo As StringBuilder,
+                                                 esito As RispostaAi, consegna As Action(Of String)) As Boolean
+
+            ' Il «ping» tiene viva la connessione e non porta niente da leggere.
+            If String.Equals(evento.Nome, "ping", StringComparison.Ordinal) OrElse
+               String.IsNullOrEmpty(evento.Dati) Then Return False
+
+            Dim dati As JsonObject
+            Try
+                dati = TryCast(JsonNode.Parse(evento.Dati), JsonObject)
+            Catch ex As JsonException
+                Throw New ErroreAi(CausaErroreAi.RispostaInattesa,
+                    "L'AI ha mandato un evento che non è JSON.", ex)
+            End Try
+
+            If dati Is Nothing Then Return False
+
+            Select Case evento.Nome
+
+                Case "error"
+                    Throw ErroreDaEvento(dati)
+
+                Case "message_start"
+                    Dim messaggio As JsonObject = TryCast(dati("message"), JsonObject)
+                    If messaggio IsNot Nothing Then
+                        esito.Modello = TryCast(messaggio("model"), JsonValue)?.ToString()
+                        esito.TokenIngresso = Intero(TryCast(messaggio("usage"), JsonObject), "input_tokens")
+                    End If
+
+                Case "content_block_delta"
+                    Dim delta As JsonObject = TryCast(dati("delta"), JsonObject)
+                    If delta Is Nothing Then Return False
+
+                    ' Col ragionamento acceso arrivano anche i pezzi del ragionamento:
+                    ' non sono la risposta e non si mostrano — lo stesso criterio con cui
+                    ' PrimoTesto salta quel blocco nella chiamata sincrona.
+                    If Not String.Equals(TryCast(delta("type"), JsonValue)?.ToString(), "text_delta",
+                                         StringComparison.Ordinal) Then Return False
+
+                    Dim scritto As String = TryCast(delta("text"), JsonValue)?.ToString()
+                    If String.IsNullOrEmpty(scritto) Then Return False
+
+                    testo.Append(scritto)
+                    consegna(scritto)
+
+                Case "message_delta"
+                    Dim delta As JsonObject = TryCast(dati("delta"), JsonObject)
+                    If delta IsNot Nothing Then
+                        Dim motivo As String = TryCast(delta("stop_reason"), JsonValue)?.ToString()
+                        If Not String.IsNullOrEmpty(motivo) Then esito.MotivoFine = motivo
+                    End If
+                    ' I token in uscita si sanno solo alla fine: l'API li conta qui. Si
+                    ' scrivono solo se il conteggio c'è davvero: un secondo message_delta
+                    ' senza «usage» azzererebbe un numero già buono.
+                    Dim conteggio As JsonObject = TryCast(dati("usage"), JsonObject)
+                    If conteggio IsNot Nothing Then
+                        esito.TokenUscita = Intero(conteggio, "output_tokens")
+                    End If
+
+                Case "message_stop"
+                    Return True
+
+            End Select
+
+            Return False
+
+        End Function
+
+        ''' <summary>
+        ''' Traduce un errore arrivato <b>dentro</b> il flusso. Ha le stesse cause di
+        ''' quelli che arrivano come stato HTTP, perché per chi legge sono la stessa cosa:
+        ''' cambia solo il momento in cui l'API se ne accorge.
+        ''' </summary>
+        Private Shared Function ErroreDaEvento(dati As JsonObject) As ErroreAi
+
+            Dim errore As JsonObject = TryCast(dati("error"), JsonObject)
+            Dim tipo As String = If(TryCast(errore?("type"), JsonValue)?.ToString(), String.Empty)
+            Dim dettaglio As String = Sintesi(If(TryCast(errore?("message"), JsonValue)?.ToString(), String.Empty))
+
+            Select Case tipo
+
+                Case "overloaded_error", "api_error"
+                    Return New ErroreAi(CausaErroreAi.Servizio,
+                        $"L'AI ha un problema temporaneo.{dettaglio}")
+
+                Case "rate_limit_error"
+                    Return New ErroreAi(CausaErroreAi.Limite,
+                        $"Troppe richieste all'AI in poco tempo.{dettaglio}")
+
+                Case "authentication_error", "permission_error"
+                    Return New ErroreAi(CausaErroreAi.Chiave,
+                        $"L'AI ha rifiutato la chiave API.{dettaglio}")
+
+                Case "invalid_request_error"
+                    Return New ErroreAi(CausaErroreAi.Richiesta,
+                        $"L'AI ha rifiutato la richiesta.{dettaglio}")
+
+            End Select
+
+            Return New ErroreAi(CausaErroreAi.Servizio,
+                $"L'AI ha interrotto la risposta con un errore.{dettaglio}")
+
+        End Function
+
         ''' <summary>Un singolo tentativo: prepara, manda, classifica.</summary>
         ''' <param name="attesa">Il tempo concesso a questa chiamata (v. <see cref="AttesaPer"/>).</param>
         Private Async Function UnTentativoAsync(testoCorpo As String, attesa As TimeSpan,
@@ -388,6 +810,10 @@ Namespace Ai
                         ' protezione andrà aggiunta: a ricordarlo c'è
                         ' UnaRispostaCheSiSpezzaInLetturaEUnaCadutaDiRete, che diventa
                         ' rosso appena quella riga cambia.
+                        ' *T7c: quel giorno è arrivato, ma su un'altra strada.* Lo
+                        ' streaming ha il suo ResponseHeadersRead e la sua protezione
+                        ' scritta apposta (LeggiIlFlussoAsync); qui non è cambiato nulla,
+                        ' e il collaudo sentinella continua a sorvegliare questa riga.
                         Dim testo As String = Await risposta.Content.
                             ReadAsStringAsync(scadenza.Token).ConfigureAwait(False)
 

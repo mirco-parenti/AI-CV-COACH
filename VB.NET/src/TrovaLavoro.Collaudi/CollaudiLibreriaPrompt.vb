@@ -26,8 +26,8 @@ Namespace Ai
             Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
 
             Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "origine")
-            Assert.AreEqual("1.09", libreria.Versione, "versione del pool")
-            Assert.AreEqual("Pool 1.09 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
+            Assert.AreEqual("1.10", libreria.Versione, "versione del pool")
+            Assert.AreEqual("Pool 1.10 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
         End Sub
 
         <TestMethod>
@@ -170,8 +170,16 @@ Namespace Ai
             ' L'import da CV chiede più spazio: produce il profilo intero.
             Assert.AreEqual(16000, libreria.Carica("importa_cv").MaxToken, "importa_cv: max_token")
 
-            ' La lettera è quella con più dati iniettati.
-            Assert.HasCount(5, libreria.Carica("lettera").Segnaposto, "lettera: segnaposto")
+            ' La lettera è quella con più dati iniettati: profilo, annuncio, giudizi, CV,
+            ' mitigazioni e — da T7c — gli appunti di mira.
+            Assert.HasCount(6, libreria.Carica("lettera").Segnaposto, "lettera: segnaposto")
+
+            ' Il CV mirato riceve gli stessi appunti, che nel CV base invece non hanno
+            ' senso: quello nasce dal solo profilo, e appunti di mira su cosa non c'è
+            ' nemmeno un annuncio da mirare.
+            Assert.Contains("APPUNTI", libreria.Carica("cv_mirato").Segnaposto, "cv_mirato: gli appunti")
+            Assert.DoesNotContain("APPUNTI", libreria.Carica("cv_base").Segnaposto,
+                                  "cv_base: nessun annuncio, nessuna mira")
         End Sub
 
         <TestMethod>
@@ -254,7 +262,7 @@ Namespace Ai
                 Dim libreria = LibreriaPrompt.Apri(cartella)
 
                 Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "deve ripiegare sull'integrato")
-                Assert.AreEqual("1.09", libreria.Versione, "con la versione dell'integrato")
+                Assert.AreEqual("1.10", libreria.Versione, "con la versione dell'integrato")
                 Assert.IsNotNull(libreria.Avviso, "e deve dire perché")
                 Assert.Contains("manca.md", libreria.Avviso, "l'avviso deve nominare il file mancante")
             Finally

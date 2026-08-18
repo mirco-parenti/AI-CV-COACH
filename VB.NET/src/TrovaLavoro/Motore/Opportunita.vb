@@ -43,6 +43,20 @@ Namespace Motore
         ''' <summary>I ponti onesti sui gap. Una lista vuota è un esito legittimo.</summary>
         Public Property Mitigazioni As JsonNode
 
+        ''' <summary>
+        ''' Gli appunti di mira confermati dall'utente nel brainstorming (T7c, cap. 12
+        ''' A6.4): <c>{ "appunti": [ { "tipo", "testo", "da" } ], "fatti_nuovi": [ … ] }</c>.
+        ''' <c>Nothing</c> finché non se n'è mai parlato.
+        ''' </summary>
+        ''' <remarks>
+        ''' Orientano la generazione e non aggiungono fatti: al prompt del 🎯 CV mirato e
+        ''' a quello della lettera arriva la sola lista <c>appunti</c>, mai i
+        ''' <c>fatti_nuovi</c> — quelli sono cose dette in chat che nel profilo non
+        ''' risultano, e nei documenti non devono entrare da questa porta
+        ''' (<see cref="AppuntiDiMira"/>).
+        ''' </remarks>
+        Public Property Appunti As JsonNode
+
         ''' <summary>Il 🎯 CV mirato su questo annuncio.</summary>
         Public Property Cv As JsonNode
 

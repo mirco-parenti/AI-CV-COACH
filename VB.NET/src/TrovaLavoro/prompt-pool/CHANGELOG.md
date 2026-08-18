@@ -27,6 +27,45 @@ La non-regressione contro il prototipo (cap. 14, T2) è passata su questa versio
 prompt del confronto costruito dal pool è identico carattere per carattere a quello che
 il prototipo costruisce nel codice.
 
+## Pool 1.10 — 2026-08-18
+
+**Il brainstorming (T7c).** Il pool impara a *conversare*: fino a qui ogni prompt chiedeva
+una cosa sola e finiva lì — anche i sette turni del dialogo guidato, che sono sette
+chiamate indipendenti. Qui invece c'è una chiacchierata che cresce, e il prompt è il suo
+primo messaggio.
+
+- **`brainstorm/brainstorm.md`** ✚ — la conversazione ancorata: `PROFILO`, `ANNUNCIO`,
+  `GIUDIZI` e **`MITIGAZIONI`**. Le mitigazioni sono un'aggiunta rispetto al cap. 12, che
+  ne nominava tre: nel codice i ponti si costruiscono al passo 2 insieme al confronto,
+  quindi quando la conversazione comincia **ci sono già** — e un appunto che dica «usa
+  questo ponte» sarebbe impossibile senza vederli. Uscita **testo**, non JSON: qui si
+  parla. Tre cose che il prompt cabla: si ragiona solo su *questa* candidatura, un fatto
+  nuovo dichiarato in chat si manda al profilo invece di darlo per acquisito, e l'AI
+  **apre lei** con due o tre appigli concreti — una chat che si apre vuota non dice a
+  nessuno da dove cominciare.
+- **`brainstorm/appunti_di_mira.md`** ✚ — distilla dalla conversazione **al massimo sei**
+  appunti operativi (`enfasi` · `mitigazione` · `tono` · `evitare`), ognuno con il campo
+  `da` che dice a cosa si appoggia: un appunto senza appoggio non si scrive. La lista
+  vuota è un esito legittimo, come per `mitigazione`. E i **`fatti_nuovi`** stanno in una
+  lista a parte: è il punto del prompt. Quello che l'utente racconta in chat e che nel
+  profilo non c'è non può entrare nei documenti dagli appunti — scavalcherebbe il profilo,
+  che è l'unica fonte di fatti — ma non può nemmeno sparire in silenzio. Le due bussole
+  del prodotto messe insieme, lo stesso mestiere del campo `altrove` nei turni.
+
+**E i quattro prompt che scrivono ricevono gli appunti** — `cv_mirato` e `lettera`, in
+tutte e due le lingue: segnaposto `APPUNTI` nuovo, blocco `<appunti>` in fondo. La regola
+che porta il peso è scritta in tutti e quattro, nella sezione anti-invenzione, e nella
+forma concreta che il Pool 1.05 ha insegnato a preferire alla regola generale:
+
+> Un appunto che chiedesse di dire che sai usare il muletto, quando nel profilo il muletto
+> non c'è, non va eseguito in quella parte: il muletto non entra nel CV. Non è
+> disubbidienza — quella cosa, se è vera, deve prima entrare nel profilo.
+
+Gli appunti restano **in italiano** anche quando il documento è inglese: sono istruzioni a
+chi scrive, non testo da ricopiare, e i due prompt `.en` lo dicono — come già dicevano del
+profilo e dei ponti. La lista vuota è il caso normale, ed è dichiarata tale: chi genera
+senza aver ragionato non deve leggere un buco.
+
 ## Pool 1.09 — 2026-08-18
 
 **Quel che l'AI vera ha trovato nell'anti-slop.** Il Pool 1.08 era verde al banco, ma i

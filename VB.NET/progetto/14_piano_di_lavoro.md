@@ -426,7 +426,7 @@ due pannelli, l'altro era il banco stesso.
 **1.05**. Restano indietro, dichiarate: il destinatario proposto dall'annuncio, la porta
 «qui c'è tutto» del profilo, lo stato `esito` col follow-up. **T7 può iniziare.**
 
-### T7 — Multilingua e qualità (F4 completo)
+### T7 — Multilingua e qualità (F4 completo) — ✔ **CHIUSA il 2026-08-18**
 Varianti `en` dei prompt di generazione; campo `lingua` nell'analisi; prompt di
 rifinitura anti-slop con prima/dopo in P6; brainstorming (P5) con streaming e appunti
 di mira.
@@ -440,7 +440,10 @@ dietro il **Pool 1.07** (l'email impara l'inglese, oggetto compreso). **T7b — 
 (2026-08-18): la cartella `rifinitura/` del pool, **tre prompt in due lingue** invece
 dell'unico previsto (cap. 08.6), la passata dentro la pipeline — che passa da quattro a sei
 passi — e la casella del prima/dopo in P6, che era lì spenta da T4. **T7c — il
-brainstorming** (`brainstorm` + `appunti_di_mira`, P5, streaming SSE): da fare.
+brainstorming** (2026-08-18): i due prompt nuovi `brainstorm` e `appunti_di_mira`
+(**Pool 1.10**), lo **streaming SSE** che il cap. 02.5 teneva in serbo da T2, P5 che
+guadagna una seconda modalità, e gli appunti confermati che entrano nei prompt di
+`cv_mirato` e `lettera` in due lingue.
 
 *Il collaudo di T7b (2026-08-18).* Il capitolo chiedeva «lettura critica dei testi
 prodotti»: è stata fatta con una **griglia decisa prima** di guardare i risultati — grado
@@ -455,10 +458,23 @@ riprova non aveva funzionato affatto (cap. 08.7). Lo stesso giro ha stanato un d
 fuori dall'anti-slop, corretto subito: la bozza dell'email non sapeva in che lingua era
 nata, e dopo un cambio di lingua P7 la riproponeva in silenzio (cap. 07.1).
 
-**Fatto:** **663 collaudi verdi** senza rete (erano 599 a fine T6), versione **0.3.031**,
-Pool **1.09**. Restano indietro, dichiarate in `in_sospeso.md`: la modifica a mano dei testi
-in P6, l'interruttore della rifinitura (P8, T9), il prima/dopo dell'email e la lettura a
-video del prima/dopo fino in fondo. **Resta T7c.**
+*Il collaudo di T7c (2026-08-18).* Costruito per essere **sleale**: a metà conversazione si
+è dichiarato di usare SAP Business One, che è un requisito *preferenziale dell'annuncio* —
+l'esca migliore possibile per una regola che dice «i fatti vengono solo dal profilo». L'AI
+ha risposto che quella cosa «deve entrare nel profilo prima di entrare nella candidatura»,
+l'ha messa fra i **fatti nuovi**, e nei documenti generati non compare: zero occorrenze in
+CV e lettera. I tre appunti confermati hanno funzionato tutti — il sommario si apre con
+l'esperienza che si era chiesto di mettere davanti, la laurea non è nominata da nessuna
+parte, il tono è asciutto. Un difetto trovato **guardando** e non misurando: l'etichetta
+nuova di un bottone non ci stava nella sua misura e a video si leggeva a metà; corretta, e
+accompagnata da un collaudo che la misura in numeri. Non provata dal vivo l'interruzione di
+un turno (è al banco): in `in_sospeso.md`.
+
+**Fatto:** **726 collaudi verdi** senza rete (erano 599 a fine T6), versione **0.3.032**,
+Pool **1.10**. Restano indietro, dichiarate in `in_sospeso.md`: la modifica a mano dei testi
+in P6, l'interruttore della rifinitura (P8, T9), il prima/dopo dell'email, la lettura a
+video del prima/dopo fino in fondo e l'interruzione del turno provata dal vivo.
+**T7 è chiusa.**
 
 ### T8 — Il server MCP (F8)
 Modalità `--mcp` su stdio; i tool del cap. 09; lucchetto di scrittura.

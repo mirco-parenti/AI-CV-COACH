@@ -174,9 +174,15 @@ Namespace Motore
             ' testi che non sono mai stati uno la rifinitura dell'altro.
             opportunita.PrimaDellaRifinitura = Nothing
 
+            ' Gli appunti di mira, se il brainstorming ce n'è stato (T7c, cap. 12 A6.4):
+            ' orientano l'enfasi come fanno annuncio e giudizi, e come loro non aggiungono
+            ' un solo fatto. I «fatti nuovi» detti in chat restano fuori — li toglie
+            ' AppuntiDiMira, che è il posto dove quella regola è scritta una volta sola.
+            Dim appunti As JsonNode = AppuntiDiMira.PerIlPrompt(opportunita.Appunti)
+
             Annuncia(avanzamento, 3, "Scrivo il CV mirato")
             opportunita.Cv = Await _generatore.GeneraCvMiratoAsync(
-                profiloJson, opportunita.Annuncio, giudizi, annulla, lingua).ConfigureAwait(False)
+                profiloJson, opportunita.Annuncio, giudizi, annulla, lingua, appunti).ConfigureAwait(False)
 
             Await RifinisciAsync(opportunita, "cv", 4, "Rifinisco il CV",
                                  Function() _rifinitura.DelCvAsync(opportunita.Cv, lingua, annulla),
@@ -188,7 +194,7 @@ Namespace Motore
             Annuncia(avanzamento, If(ConRifinitura, 5, 4), "Scrivo la lettera")
             opportunita.Lettera = Await _generatore.GeneraLetteraAsync(
                 profiloJson, opportunita.Annuncio, giudizi, opportunita.Cv,
-                ElencoMitigazioni(opportunita.Mitigazioni), annulla, lingua).ConfigureAwait(False)
+                ElencoMitigazioni(opportunita.Mitigazioni), annulla, lingua, appunti).ConfigureAwait(False)
 
             Await RifinisciAsync(opportunita, "lettera", 6, "Rifinisco la lettera",
                                  Function() _rifinitura.DellaLetteraAsync(opportunita.Lettera, lingua, annulla),

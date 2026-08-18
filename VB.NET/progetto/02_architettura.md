@@ -49,7 +49,7 @@ artefatti JSON ben definiti. Quelli ereditati:
 | **Profilo JSON** | dialogo guidato, import CV (da file o dalla pagina aperta nel browser), aggiornamento periodico | tutto il resto (unica *fonte di fatti*) |
 | **Annuncio JSON** | analisi annuncio (da cattura WebView2, link o testo incollato) | confronto, generazione (come *segnale di mira*) |
 | **Giudizi + punteggio** | confronto (AI) + CalcoloMatch (codice) | scheda match, mitigazione, generazione |
-| **Mitigazioni JSON** | mitigazione (può essere lista vuota) | solo la ✉️ lettera |
+| **Mitigazioni JSON** | mitigazione (può essere lista vuota) | la ✉️ lettera e — da T7c — il **brainstorming**, che senza vedere i ponti non potrebbe farne scegliere uno |
 | **CV JSON** (base/mirato) | generazione | scrittura DOCX/PDF, lettera (riferimento di coerenza) |
 | **Lettera JSON** | generazione | corpo email, allegato |
 
@@ -151,6 +151,15 @@ ogni modulo abbia **un compito solo**:
     posto. La divisione non è simmetria: al modello arrivano **solo i campi-prosa**, quindi
     nomi, aziende e date non entrano nella richiesta e non possono tornarne cambiati. Chi
     decide cosa mandare appartiene al motore; chi lo manda, all'AI.
+  - *A T7c (2026-08-18) l'ottavo, e con la stessa divisione in due* — `Ai/Brainstormatore`
+    porta i due prompt del ragionamento (la conversazione e la distillazione degli appunti),
+    e `Motore/Brainstorming` tiene la **conversazione**: sa che il contesto viaggia una
+    volta sola nel primo messaggio, che i turni si alternano, e che due battute dell'utente
+    di fila si **uniscono** invece di perdersi. Accanto nasce `Motore/AppuntiDiMira`, che è
+    il posto dove sta scritta una volta sola la regola più importante della tappa: ai prompt
+    che scrivono arrivano gli appunti e **mai** i fatti dichiarati in chat. Nel trasporto
+    compare anche `Ai/FlussoSse`, che sa solo la grammatica degli eventi e niente di Claude
+    (cap. 02.5).
 - **`Documenti/`** — lettura (PDF via API con blocco `document`, DOCX/TXT/MD in
   locale), scrittura (DOCX e PDF), scansione e classificazione della cartella
   documenti (cap. 05).
@@ -272,13 +281,32 @@ i tool MCP).
   cartella dati, la variabile d'ambiente di sempre. Il file viene prima perché è la volontà
   più recente dell'utente; perché la precedenza non diventi una sorpresa muta, la
   provenienza finisce nel resoconto d'avvio con la chiave **mascherata** (cap. 11.3).
-- **Sincrono, per ora**: tutte le chiamate sono **sincrone**. Le risposte stanno fra i
-  1500 e i 4000 token e si aspettano bene con un indicatore, quindi lo streaming a T2
-  non pagherebbe la sua complessità. Lo **streaming** (`stream: true`, eventi SSE) arriva
+- **Sincrono, salvo dove si guarda**: quasi tutte le chiamate sono **sincrone**. Le risposte
+  stanno fra i 1500 e i 4000 token e si aspettano bene con un indicatore, quindi lo streaming
+  a T2 non pagherebbe la sua complessità. Lo **streaming** (`stream: true`, eventi SSE) arriva
   con **T4/T7**, dove serve davvero — generazione e brainstorming, cioè i punti in cui il
   testo lungo compare man mano e l'attesa percepita crolla — e si aggiunge quando c'è un
   pannello che lo mostra. È l'unica vera novità di trasporto rispetto al prototipo.
   *Deciso il 2026-08-10, aprendo T4: lo streaming va **tutto a T7**, e T4 resta sincrona.*
+  *Arrivato a **T7c** (2026-08-18), e su una sola strada: il **ragionamento** sulla
+  candidatura (cap. 12, A6), che è l'unico posto dove qualcuno legge mentre l'AI scrive.*
+  La grammatica del formato vive in una classe che non sa niente di Claude
+  (`Ai/FlussoSse.vb`), così il pezzo più delicato si collauda con delle stringhe; il
+  significato degli eventi lo dà il client. Con lo streaming nascono anche le **conversazioni
+  vere** (`TurnoChat`): fino a T7b ogni chiamata mandava un solo messaggio `user`, e perfino i
+  sette turni del dialogo guidato sono chiamate indipendenti. Tre regole nuove, tutte
+  conseguenze del guardare mentre arriva:
+  - **il ritentativo automatico vale solo prima del primo pezzo.** Dopo, riprovare vorrebbe
+    dire scrivere due volte la risposta o cancellare sotto gli occhi di chi legge: l'errore
+    arriva com'è, accanto a quello che era arrivato;
+  - **l'attesa si misura sul silenzio**, non sulla durata. La proporzione col `max_token`
+    (v. sotto) serviva perché finché non arriva tutto non è arrivato niente; se il testo
+    compare, la chiamata sta funzionando per lunga che sia, e un tetto complessivo taglierebbe
+    proprio le risposte lunghe legittime. Quel che resta da riconoscere è il collegamento
+    morto, e un collegamento morto si vede dal silenzio fra un evento e l'altro;
+  - **una risposta troncata, in chat, non è un errore.** Sincrona lo è — lascia un JSON monco
+    da dare a un estrattore; qui il testo arrivato si legge, e il motivo della fine si porta a
+    casa perché lo dica il pannello.
   La ragione sta in **cosa** scorrerebbe. La generazione di T4 non produce prosa: produce
   **JSON strutturato**, e un JSON che si srotola a video con le sue graffe e le sue
   virgolette non dice nulla a chi guarda — non è un CV che si scrive sotto gli occhi, è
@@ -317,6 +345,14 @@ attesa e pulsante Annulla (che annulla la richiesta, non lo stato già salvato).
 Annullare a metà lascerebbe la macchina a mosse in uno stato che non esiste — la risposta
 consegnata ma la mossa mai ricevuta — e per un'attesa di un paio di secondi non vale il
 prezzo. L'import di un CV, che dura molto di più, l'Annulla ce l'ha.
+
+*E un'eccezione all'eccezione, decisa a **T7c** (2026-08-18)*: nello stesso pannello, il
+**ragionamento** su una candidatura **si interrompe**. La ragione dell'eccezione di T3c era
+la macchina a mosse, non il pannello: qui non c'è nessuna mossa da ricevere, e interrompere
+lascia solo una risposta più corta — con il testo già arrivato che resta dov'è, dichiarato
+interrotto. È anche l'unica attesa del programma che si guarda mentre passa, e un'attesa che
+si guarda va potuta fermare. Il bottone non è nuovo: durante il turno «Invia» **diventa**
+«Interrompi», perché è lo stesso posto dove la mano sta già.
 Un'operazione per volta per opportunità: niente code parallele nascoste, il flusso
 resta comprensibile.
 

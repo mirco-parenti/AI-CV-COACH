@@ -479,6 +479,76 @@ Namespace Motore
         End Function
 
         <TestMethod>
+        Public Async Function GliAppuntiDiMiraArrivanoAiDueDocumenti() As Task
+
+            ' Il filo di T7c, gemello di quello della lingua: gli appunti confermati nel
+            ' brainstorming vivono nella cartella della candidatura, e senza un finto che
+            ' se ne accorga nessuno vedrebbe se si fermassero prima della richiesta.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara("{""intestazione"": {}}").Dara("{""corpo"": ""…""}")
+
+            ' La forma fluente di «Dara» restituisce il tipo base: qui il confrontatore
+            ' serve col suo tipo, e le due cose si scrivono su righe separate.
+            Dim confrontatore As New ConfrontatoreFinto
+            confrontatore.Dara(ConfrontoPieno)
+
+            Dim pipeline As PipelineCandidatura = PipelineDiProva(
+                New AnalizzatoreFinto, confrontatore, generatore)
+
+            Dim opportunita As Opportunita = Await GiaConfrontataAsync(pipeline)
+            opportunita.Appunti = JsonNode.Parse(
+                "{""appunti"":[{""tipo"":""enfasi"",""testo"":""Metti davanti il magazzino"",""da"":""la chat""}]," &
+                """fatti_nuovi"":[""ho il patentino del muletto""]}")
+
+            Await pipeline.GeneraAsync(opportunita, ProfiloDiProva())
+
+            Assert.HasCount(2, generatore.AppuntiVisti, "il CV mirato e la lettera")
+
+            For Each visti As JsonNode In generatore.AppuntiVisti
+
+                Dim comeArrivano As String = visti.ToJsonString()
+
+                Assert.Contains("magazzino", comeArrivano, "l'appunto arriva")
+
+                ' La regola che tiene in piedi tutto: quello che l'utente ha detto in chat
+                ' e che nel profilo non c'è NON entra nei documenti da questa porta.
+                Assert.DoesNotContain("patentino", comeArrivano, "il fatto nuovo no")
+
+                ' E nemmeno la frase da cui l'appunto nasce: serve all'utente per
+                ' riconoscerlo nella scheda, a chi scrive il CV metterebbe solo davanti
+                ' pezzi di conversazione da cui pescare.
+                Assert.DoesNotContain("la chat", comeArrivano, "né la sua provenienza")
+
+            Next
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SenzaBrainstormingSiGeneraComeSempre() As Task
+
+            ' Il caso normale: chi non ha ragionato non ha appunti, e non è un errore —
+            ' al prompt arriva una lista vuota, non un buco.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara("{""intestazione"": {}}").Dara("{""corpo"": ""…""}")
+
+            ' La forma fluente di «Dara» restituisce il tipo base: qui il confrontatore
+            ' serve col suo tipo, e le due cose si scrivono su righe separate.
+            Dim confrontatore As New ConfrontatoreFinto
+            confrontatore.Dara(ConfrontoPieno)
+
+            Dim pipeline As PipelineCandidatura = PipelineDiProva(
+                New AnalizzatoreFinto, confrontatore, generatore)
+
+            Await pipeline.GeneraAsync(Await GiaConfrontataAsync(pipeline), ProfiloDiProva())
+
+            For Each visti As JsonNode In generatore.AppuntiVisti
+                Assert.IsNotNull(visti, "gli appunti non arrivano mai come niente")
+                Assert.AreEqual("[]", visti.ToJsonString(), "ma come lista vuota")
+            Next
+
+        End Function
+
+        <TestMethod>
         Public Async Function CambiareLinguaERigenerareScriveNellaLinguaNuova() As Task
 
             ' P6 lascia cambiare la lingua proposta (cap. 10.1), e da lì si rigenera. La

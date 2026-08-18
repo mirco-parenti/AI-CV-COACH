@@ -132,6 +132,15 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   la casella del confronto vive in P6, e in P7 l'utente ha davanti una casella che può già
   riscrivere. Se un giorno servirà, il posto è la bozza (`email.json`). *(cap. 07.1;
   cap. 08.6.)*
+- **L'interruzione di un turno provata dal vivo** *(2026-08-18, dal collaudo di T7c)*. Il
+  bottone «Interrompi» c'è, il gettone arriva fino al flusso e il banco lo collauda
+  (`InterrompereNonEUnErrore`, più `ChiInterrompeIlBrainstormingNonRiceveUnErrore` sul
+  client): quello che non è riuscito è premerlo **davvero mentre l'AI scrive**. Le risposte
+  del ragionamento arrivano in pochi secondi e lo strumento di collaudo non sa aspettare una
+  condizione — si alternano `clic` e `controlli`, e in mezzo il turno è già finito. Serve
+  una risposta abbastanza lunga da dare il tempo, oppure un `aspetta_che` nello strumento.
+  Finché non è fatto, l'interruzione è **provata al banco ma non sul campo**, e va detto
+  così. *(cap. 02.6; `strumenti/mcp-collaudi/`, «quel che ancora non sa fare».)*
 - **Il prima/dopo letto a video fino in fondo** *(2026-08-18, dal collaudo di T7b)*. Nel
   giro con l'AI vera la sezione si è vista comparire in coda alla colonna — «PRIMA DELLA
   RIFINITURA», col nome del campo cambiato — ma i due testi *Prima* e *Dopo* stanno **sotto

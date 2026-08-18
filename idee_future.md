@@ -162,7 +162,13 @@ motivo, o rifiniture che farebbero salire l'app di classe.
   valgono il prezzo» (Step 2.6); la revisione ha mostrato il caso brutto: su rete degradata
   un turno può tenere P5 bloccato fino a ~4 minuti (timeout 120 s × 2 tentativi) senza via
   d'uscita. Serve il gettone d'annullo come l'import. *(2026-08-09 — revisione adversariale;
-  è la prima voce «per un'app di classe superiore» del resoconto.)*
+  è la prima voce «per un'app di classe superiore» del resoconto.)* **Aggiornata a T7c
+  (2026-08-18)**: nello stesso pannello, il **ragionamento** su una candidatura si interrompe
+  — c'è il gettone, il bottone «Interrompi» e il testo già arrivato che resta. Quella metà è
+  fatta, e non per gentilezza: là si interrompe una risposta, qui si interromperebbe una
+  **mossa** della macchina del dialogo, che resterebbe in uno stato che non esiste (cap. 02.6).
+  Il meccanismo però adesso c'è ed è collaudato: chi riprenderà questa voce non deve
+  inventarlo, deve decidere cosa fare della mossa a metà.
 - **Guardia anti-injection su `confronto`, `mitigazione` e `trascrizione_pdf`** — il Pool
   1.02 la mette nei sette turni del dialogo; su `confronto` e `mitigazione` romperebbe la
   parità carattere per carattere col prototipo, che è il metro della non-regressione: è una

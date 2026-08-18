@@ -1,11 +1,19 @@
 {
   "formato": 1,
-  "versione_pool": "1.09",
+  "versione_pool": "1.10",
   "data": "2026-08-18",
   "file": [
     {
       "percorso": "annuncio/analisi_annuncio.md",
       "sha256": "b0a88aadb5cf27ffe1529a903cd52e54c97e48b44074276baec279e3171d407b"
+    },
+    {
+      "percorso": "brainstorm/appunti_di_mira.md",
+      "sha256": "3a53dc0146640a241825ebc399994458878a600e84bb03bfc5795c1acc9a00b4"
+    },
+    {
+      "percorso": "brainstorm/brainstorm.md",
+      "sha256": "9f27ead466553af22ec341751ca1e2b7f365d48c0869c50de1e157424db105e9"
     },
     {
       "percorso": "confronto/confronto.md",
@@ -25,11 +33,11 @@
     },
     {
       "percorso": "generazione/cv_mirato.en.md",
-      "sha256": "fdcc05d9698cf77819e4d96862748480e43557150646a6caf5157de6d5519017"
+      "sha256": "cd7d4b0ce5d730259c520104a16b10dc0ba42ae5dff7942e1645f3545b9bb872"
     },
     {
       "percorso": "generazione/cv_mirato.it.md",
-      "sha256": "68b83ee3b901734cf0fe53f6afbaedd11bde0207e403a238f67afc88b18eff7d"
+      "sha256": "598e469b4e4862f5c77795c4f3b5f639df20f08c253bae9cf259bda84a12aa49"
     },
     {
       "percorso": "generazione/email_candidatura.en.md",
@@ -41,11 +49,11 @@
     },
     {
       "percorso": "generazione/lettera.en.md",
-      "sha256": "da5889fd6968421857495b6e3c4546ab1c4fd99ec047bb0a62be9485848155d9"
+      "sha256": "f8d8eb4b3c548393fe22c104d3395c4c68a239d58f9a3ccadf76555ca2bd06ed"
     },
     {
       "percorso": "generazione/lettera.it.md",
-      "sha256": "f9b2d25569b8668710b17c3124937808d528d2ca0e930832ca2191e0da8617f7"
+      "sha256": "3e467318da2f483370c6c788cd97ff77fab596604c3d77480a084fbbc6619f9d"
     },
     {
       "percorso": "profilo/classifica_documenti.md",

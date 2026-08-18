@@ -456,6 +456,113 @@ Namespace Ui
         End Function
 
         ' ==================================================================
+        ' Il bottone del ragionamento (T7c)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function SenzaUnConfrontoIlRagionamentoRestaSpento() As Task
+
+            ' Prima di analizzare non c'è ancora niente su cui ragionare: il prompt del
+            ' brainstorming vuole i giudizi (cap. 12, A6.2).
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto)
+                    Assert.IsFalse(Bottone(pannello, "btnBrainstorm").Enabled,
+                                   "niente ancora da confrontare")
+
+                    Await Task.CompletedTask
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function DopoUnConfrontoRiuscitoSiPuoRagionare() As Task
+
+            ' A giudizi in mano il ragionamento ha di che partire (cap. 12, A5→A6).
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto)
+                    Await IncollaEAnalizzaAsync(pannello, TestoIncollato)
+
+                    Assert.IsTrue(Bottone(pannello, "btnBrainstorm").Enabled,
+                                  "il confronto c'è, si può ragionare")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SenzaAiIlRagionamentoRestaSpentoAncheAConfrontoFatto() As Task
+
+            ' «Genera documenti» si riapre anche senza rete: i documenti stanno già nel
+            ' confronto scritto su disco. Ragionare invece è un giro nuovo dall'AI — qui
+            ' serve davvero, a differenza della riapertura dei documenti — e senza
+            ' pipeline quel giro non si può fare, anche col confronto già completo.
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Await IncollaEAnalizzaAsync(pannello, TestoIncollato)
+                    Dim dove As String = pannello.Candidatura.Cartella
+
+                    Using senzaAi As New PannelloOpportunita()
+                        senzaAi.CreateControl()
+                        senzaAi.Collega(contesto, pipeline:=Nothing)
+
+                        senzaAi.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                        Assert.IsTrue(Bottone(senzaAi, "btnGeneraDocumenti").Enabled,
+                                      "i documenti si riaprono anche senza rete")
+                        Assert.IsFalse(Bottone(senzaAi, "btnBrainstorm").Enabled,
+                                       "ma ragionare chiede una chiamata vera all'AI")
+                    End Using
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SuUnaCandidaturaScartataNonSiRagionaPiu() As Task
+
+            ' Lo scarto è un capolinea (cap. 07.3): sulla stessa candidatura per cui non
+            ' si scrive più un CV non ha senso nemmeno ragionare.
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Await IncollaEAnalizzaAsync(pannello, TestoIncollato)
+                    Assert.IsTrue(Bottone(pannello, "btnBrainstorm").Enabled, "prima si può ragionare")
+
+                    Dim candidatura As Opportunita = pannello.Candidatura
+                    candidatura.Avanza(StatoOpportunita.Scartata)
+                    pannello.RiapriLaCandidatura(candidatura)
+
+                    Assert.IsFalse(Bottone(pannello, "btnBrainstorm").Enabled, "poi non più")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlBottoneBrainstormChiedeAllaFinestraDiRagionare() As Task
+
+            ' Il pannello non conosce P5: dice solo che vuole ragionare, ed è la finestra
+            ' a portarci in vista.
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto)
+                    Await IncollaEAnalizzaAsync(pannello, TestoIncollato)
+
+                    Dim chiesto As Integer = 0
+                    AddHandler pannello.BrainstormRichiesto, Sub(mittente, argomenti) chiesto += 1
+
+                    Bottone(pannello, "btnBrainstorm").PerformClick()
+
+                    Assert.AreEqual(1, chiesto, "il pannello ha chiesto di ragionare")
+                End Function)
+
+        End Function
+
+        ' ==================================================================
         ' Lo spazio del logo
         ' ==================================================================
 
