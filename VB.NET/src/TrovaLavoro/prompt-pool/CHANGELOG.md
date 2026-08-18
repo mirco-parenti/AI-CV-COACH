@@ -27,6 +27,42 @@ La non-regressione contro il prototipo (cap. 14, T2) è passata su questa versio
 prompt del confronto costruito dal pool è identico carattere per carattere a quello che
 il prototipo costruisce nel codice.
 
+## Pool 1.11 — 2026-08-18
+
+**Il titolo di ruolo si traduce (coda di T7d).** In un CV inglese generato dal profilo
+vero, in mezzo a ruoli già inglesi, ne era rimasto uno in italiano: *Direttore Operativo*.
+Il primo sospetto — «il prompt ordina di ricopiare i titoli perché sono fatti» — era
+sbagliato: il prompt voleva tradurli. Lo dice la regola anti-upgrade, che nomina
+espressamente il **ruolo** («a qualification, a language level or **a role** must not come
+out more senior in English»), e lo dice l'elenco dei nomi propri, dove i ruoli **non
+compaiono**.
+
+A vincere è stata una parola sola, accanto al campo: *«**Copy** ruolo, azienda and durata
+(fact fields)»*. Due righe più sotto, le competenze hanno il loro rimando («copy the list
+of skills from the profile, **translated as section 3 explains**») e la formazione pure
+(«following the rule on proper names»); il ruolo no. È la **terza volta** che questo pool
+incontra la stessa legge — Pool 1.05 (l'esempio che batte la regola), Pool 1.07 (la formula
+che batte la regola) e ora: **un'istruzione concreta accanto al campo batte una regola
+generale in un'altra sezione**, anche quando la regola generale è più recente, più lunga e
+scritta in maiuscolo. La cura, perciò, non aggiunge una regola nuova: **rimette il rimando
+dov'era stato dimenticato**, nella forma che il prompt usa già per gli altri due campi.
+
+- **`generazione/cv_base.en.md`** ✎ e **`generazione/cv_mirato.en.md`** ✎ — sul campo
+  `esperienze_professionali`: azienda e durata si ricopiano, il **ruolo si traduce** come
+  spiega la sezione 3, con l'esempio concreto (*Direttore Operativo* → *Operations
+  Director*) e il suo divieto altrettanto concreto (**mai** un titolo più alto tipo *COO*),
+  perché la regola anti-upgrade vale qui esattamente come sui titoli di studio. Un ruolo
+  già scritto in inglese resta com'è.
+- Nella sezione 3 dei due prompt, mezza riga che chiude il confine prima che si apra:
+  **i titoli di ruolo non sono nomi propri** — descrivono una funzione. Il confine è il
+  campo, e questo il modello lo può applicare senza doverlo giudicare: `ruolo` si traduce,
+  `formazione.titolo` no (è un titolo di studio, ha valore legale e resta in italiano con
+  la glossa fra parentesi).
+
+**Non** toccata `lettera.en.md`: lì i ruoli compaiono dentro la prosa, dove vale la regola
+generale, e non c'è nessun «Copy» accanto a un campo che le remi contro. Un prompt che non
+ha il difetto non si tocca per simmetria.
+
 ## Pool 1.10 — 2026-08-18
 
 **Il brainstorming (T7c).** Il pool impara a *conversare*: fino a qui ogni prompt chiedeva

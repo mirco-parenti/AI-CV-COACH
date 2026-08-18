@@ -1917,3 +1917,28 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Il bottone «Genera 📄 CV-1 base» continua a chiamarsi così** anche adesso che, se il CV c'è, non genera niente. È la stessa scelta di «Genera CV + lettera» in P4: quel bottone è **la porta** dei documenti, e a rifarli c'è «Rigenera», che lo dichiara e lo chiede.
 
 💡 *Mia intuizione / scelta ragionata* — Questa volta il lavoro non è nato da un piano, ma da un'impressione mia rimasta in sospeso: *mi pare che ieri fossero spenti*. La cosa giusta non è stata credermi né archiviare la cosa, ma **andare a guardare** — sui miei dati, copiati in una cartella usa-e-getta perché una prova non deve mai avere il potere di rovinare quello che sta provando. In dieci minuti ho avuto la risposta, ed era un difetto più profondo di quello che pensavo di cercare. Le impressioni degli utenti, anche quando l'utente sono io e sono vaghe, valgono più di quanto sembrino: ci vuole solo qualcosa che le trasformi in fatti prima che diventino opinioni.
+
+### Step 2.29 — Pool 1.11: la parola «Copy», e la terza volta che imparo la stessa legge
+
+*Il CV-1 in inglese era appena uscito bene, ma leggendolo mi è saltato all'occhio un «Direttore Operativo» in mezzo a sette ruoli già inglesi. Sembrava un dettaglio da niente. Era invece la terza comparsa di un difetto che questo progetto ha già pagato due volte.*
+
+**Cosa ho fatto**
+- **Ho chiesto la diagnosi prima della cura**, e ha smentito la prima spiegazione che ci eravamo dati («il prompt ricopia i titoli perché sono fatti»). Non è così: il prompt li vuole tradurre. La regola contro le promozioni nella traduzione nomina espressamente *a role*, e l'elenco dei nomi propri — dove restano aziende, enti e titoli di studio — **i ruoli non li elenca**.
+- **Il colpevole era una parola**: accanto al campo c'era «**Copy** ruolo, azienda and durata». Due righe più sotto, le competenze hanno «copy… *translated as section 3 explains*» e la formazione «*following the rule on proper names*». Sul ruolo il rimando mancava.
+- **Pool 1.11**: due file corretti (`cv_base.en`, `cv_mirato.en`), rito del bump completo, impronte verificate anche con un calcolo indipendente — 29 su 29, e nel manifest sono cambiate esattamente le due dei file toccati.
+- **Riprovato con l'AI vera**, come mi ha insegnato il 1.09: *Direttore Operativo* → **Operations Director**, e i **sette ruoli già inglesi restituiti identici**.
+
+**Cosa ho imparato**
+- **Fra un'istruzione concreta accanto al campo e una regola generale in un'altra sezione, vince la concreta.** È la stessa legge del Pool 1.05 (l'esempio batte la regola) e del 1.07 (la formula batte la regola), qui nella forma più asciutta che abbia visto: a battere due sezioni di regole è bastata **una parola**, scritta nel posto dove il modello guarda mentre riempie quel campo.
+- **Il confine giusto non è un giudizio, è un campo.** «Traduci i ruoli ma non i titoli di studio» detto così obbliga il modello a decidere caso per caso; detto come `ruolo` sì / `formazione.titolo` no, è una regola che si applica da sola. E ha una ragione vera sotto: un ruolo descrive una funzione, un titolo di studio è un nome e ha valore legale.
+- **Il rischio non era la traduzione, era la riscrittura.** Il pericolo di dire «traduci» era che il modello si mettesse a riformulare anche i sette ruoli già in inglese. Non è successo, ma è la cosa che sono andato a controllare per prima.
+
+**Dove ho faticato / cosa non era ovvio**
+- **La prima diagnosi era sbagliata e suonava benissimo.** «Il prompt ricopia i titoli perché sono fatti, ed è anti-invenzione applicata bene» è una frase coerente, che spiega quello che si vede — e non era vera. L'ho scoperto solo andando a leggere le righe vere del prompt, tutte, invece di fidarmi della spiegazione.
+- **Decidere cosa *non* toccare.** `lettera.en.md` nomina i ruoli anche lei, e la tentazione di correggerla per simmetria era forte. Sono andato a guardare: lì l'unico «Copy» riguarda la firma, e la regola generale non ha nessuno che le remi contro. Un prompt che non ha il difetto non si tocca.
+
+**Cosa ho deciso e perché**
+- **Nessuna regola nuova nei prompt**, solo il rimando rimesso dov'era stato dimenticato, nella forma che quei file usano già per gli altri due campi. Aggiungere una regola in fondo avrebbe creato un quarto posto in cui la stessa cosa è scritta — e prima o poi due di quei posti si sarebbero contraddetti.
+- **La traduzione secca**, senza l'originale fra parentesi: quella glossa la teniamo per i titoli di studio, dove serve a spiegare senza gonfiare. Su ogni riga di esperienza sarebbe stata solo zavorra.
+
+💡 *Mia intuizione / scelta ragionata* — La cosa che porto via non è la correzione, è **dove** era il difetto. Quando un prompt sbaglia, il riflesso è aggiungere una regola più forte, più in alto, in maiuscolo: l'ho fatto anch'io a T7b, e non aveva funzionato. Invece il posto da guardare è **l'istruzione più vicina al campo che sta scrivendo** — perché è lì che il modello ha gli occhi in quel momento. Tre volte su tre, in questo progetto, il colpevole stava lì: un esempio, una formula, e adesso un verbo. Sto cominciando a pensare che rileggere un prompt significhi esattamente questo: non ripassare le regole, ma controllare che ogni campo dica da solo la cosa giusta.

@@ -487,9 +487,21 @@ rimasta inchiodata all'italiano), alle etichette e alla sigla del nome file. Pro
 vivo su una copia dei dati veri: rientro senza attesa, poi il CV-1 riscritto in inglese ed
 esportato in `CV_..._EN_2026-08-18.docx` con «Work experience» dentro.
 
+*La coda della coda: **Pool 1.11** (2026-08-18).* Il primo CV-1 inglese vero ha mostrato
+un titolo di ruolo rimasto in italiano in mezzo a sette già inglesi. Il prompt voleva
+tradurlo — la regola anti-upgrade nomina il ruolo, l'elenco dei nomi propri non lo elenca —
+ma accanto al campo c'era «**Copy** ruolo, azienda and durata» senza il rimando alla
+traduzione che competenze e formazione avevano. È la **terza** volta che il pool impara la
+stessa legge (1.05, 1.07, 1.11), ed è la formulazione più asciutta: *fra un'istruzione
+concreta accanto al campo e una regola generale in un'altra sezione, vince la concreta.*
+Corretti `cv_base.en` e `cv_mirato.en`, **non** `lettera.en` (lì non c'è nessun «Copy» che
+rema contro: un prompt che non ha il difetto non si tocca per simmetria). Riprovato con
+l'AI vera, come insegna il 1.09: *Direttore Operativo* → **Operations Director**, nessun
+salto a *COO*, e i **sette ruoli già inglesi restituiti identici** — che era il rischio
+vero, cioè che «traduci» diventasse «riscrivi».
+
 **Fatto:** **736 collaudi verdi** senza rete (erano 599 a fine T6, 726 a fine T7c),
-versione **0.3.032**, Pool **1.10** — invariato, perché `cv_base.en.md` era già lì dal
-Pool 1.06 e i prompt non sono stati toccati. Restano indietro, dichiarate in
+versione **0.3.032**, Pool **1.11**. Restano indietro, dichiarate in
 `in_sospeso.md`: la modifica a mano dei testi in P6, l'interruttore della rifinitura
 (P8, T9), il prima/dopo dell'email, la lettura a video del prima/dopo fino in fondo e
 l'interruzione del turno provata dal vivo.

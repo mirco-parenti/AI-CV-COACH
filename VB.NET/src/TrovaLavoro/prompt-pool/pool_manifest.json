@@ -1,6 +1,6 @@
 {
   "formato": 1,
-  "versione_pool": "1.10",
+  "versione_pool": "1.11",
   "data": "2026-08-18",
   "file": [
     {
@@ -25,7 +25,7 @@
     },
     {
       "percorso": "generazione/cv_base.en.md",
-      "sha256": "d9150a75ebda1f369ef23a30248e4175c60cbee52a50739b3074bb91c91077cd"
+      "sha256": "34390e05bf0b6e9a980fab6571bd0a6d6a38f394b76123e2aa6c5ed49f1ce025"
     },
     {
       "percorso": "generazione/cv_base.it.md",
@@ -33,7 +33,7 @@
     },
     {
       "percorso": "generazione/cv_mirato.en.md",
-      "sha256": "cd7d4b0ce5d730259c520104a16b10dc0ba42ae5dff7942e1645f3545b9bb872"
+      "sha256": "9ea81dc3ce69b4193dd37e96c41374019f2a4ff9dd21ab11ac83a1da8d418ebc"
     },
     {
       "percorso": "generazione/cv_mirato.it.md",

@@ -69,9 +69,23 @@ nei prompt `.en`:
    diploma in electronics)* — una descrizione, non una promozione).
 4. **Recapiti e date**: formati adattati alla lingua (date inglesi, prefisso
    internazionale nel telefono se presente nel profilo).
+5. **Il titolo di ruolo si traduce, il titolo di studio no** *(Pool 1.11, 2026-08-18)*.
+   Un ruolo descrive una **funzione** — «Direttore Operativo» → *Operations Director* — e
+   il punto 2 lo tiene a terra: mai *COO*, che sarebbe una promozione. Un titolo di studio
+   è un **nome**, spesso con valore legale, e ricade nel punto 3. Il confine è il campo, e
+   così il modello lo applica senza doverlo giudicare: `ruolo` si traduce,
+   `formazione.titolo` resta. Un ruolo già scritto in inglese nel profilo non si tocca.
 
 L'utente vede sempre il risultato in anteprima (P6) e resta l'ultimo giudice, come per
 tutto il resto.
+
+*Il punto 5 è arrivato tardi e per una ragione che vale la pena tenere a mente: la regola
+c'era già — il punto 2 nomina espressamente il ruolo, e il punto 3 fra i nomi propri non lo
+elenca — ma accanto al campo, nella sezione 1 dei due prompt, c'era scritto «**Copy** ruolo,
+azienda and durata», senza il rimando alla sezione della traduzione che le competenze e la
+formazione avevano. Ha vinto quella parola. È la terza volta (Pool 1.05, 1.07, 1.11): **fra
+un'istruzione concreta accanto al campo e una regola generale in un'altra sezione, vince la
+concreta**. Quando si rilegge un prompt, conviene cominciare da lì.*
 
 ## 10.4 Rifinitura e email
 
