@@ -17,13 +17,12 @@ Namespace Dati
     ''' (cap. 11.4), e un indice pieno di percorsi assoluti smetterebbe di valere il
     ''' giorno in cui quei percorsi cambiano. Il percorso lo ricompone chi legge, che la
     ''' radice ce l'ha.</para>
-    ''' <para>Cosa <b>non</b> c'è ancora: il destinatario e l'esito della candidatura, che
-    ''' il cap. 07.3 elenca insieme a questi. Erano assegnati a T6, che ha portato l'invio
-    ''' ma non loro (v. <c>in_sospeso.md</c>): il destinatario oggi vive nella bozza
-    ''' <c>email.json</c> della candidatura, l'esito è uno stato che dall'interfaccia non
-    ''' si raggiunge. Resta vero il motivo per cui non è un debito grave — questo file si
-    ''' rigenera dalle cartelle, quindi chi scriverà quei dati aggiungerà qui una colonna e
-    ''' l'indice si ricostruirà da sé, senza migrare niente.</para>
+    ''' <para>Cosa <b>non</b> c'è ancora: l'esito della candidatura, che il cap. 07.3
+    ''' elenca insieme a questi ed è uno stato che dall'interfaccia non si raggiunge (v.
+    ''' <c>in_sospeso.md</c>). Resta vero il motivo per cui non è un debito grave — questo
+    ''' file si rigenera dalle cartelle, quindi chi scriverà quel dato aggiungerà qui una
+    ''' colonna e l'indice si ricostruirà da sé, senza migrare niente. È esattamente com'è
+    ''' andata per il <see cref="Destinatario"/>, che era nella stessa condizione.</para>
     ''' </remarks>
     Public Class VoceRegistro
 
@@ -46,6 +45,19 @@ Namespace Dati
 
         ''' <summary>La lingua dei documenti.</summary>
         Public Property Lingua As String
+
+        ''' <summary>
+        ''' A chi è stata mandata la candidatura; vuoto finché l'email non è stata
+        ''' preparata (cap. 07.3).
+        ''' </summary>
+        ''' <remarks>
+        ''' Lo si ricopia qui dalla bozza <c>email.json</c> della cartella. Ce ne fosse una
+        ''' copia sola, per leggere «a chi ho scritto?» bisognerebbe aprire una candidatura
+        ''' alla volta — e l'indice esiste proprio per rispondere senza aprire niente. La
+        ''' bozza resta la fonte: il valore lo digita l'utente, e da qui non si scrive mai
+        ''' all'indietro.
+        ''' </remarks>
+        Public Property Destinatario As String
 
         ''' <summary>
         ''' Le stelle del match; <c>Nothing</c> se non è stato calcolato — un'opportunità
@@ -78,6 +90,7 @@ Namespace Dati
                 .Fonte = opportunita.Fonte,
                 .Link = opportunita.Link,
                 .Lingua = opportunita.Lingua,
+                .Destinatario = DestinatarioDellaBozza(opportunita.Email),
                 .Stelle = opportunita.Match?.Stelle,
                 .GateEliminatorio = opportunita.Match IsNot Nothing AndAlso opportunita.Match.GateEliminatorio,
                 .Creata = opportunita.Creata,
@@ -88,6 +101,21 @@ Namespace Dati
             Next
 
             Return voce
+
+        End Function
+
+        ''' <summary>
+        ''' Il destinatario scritto nella bozza dell'email, se c'è una bozza e se l'utente
+        ''' l'ha già compilato.
+        ''' </summary>
+        ''' <remarks>
+        ''' La bozza arriva qui come JSON grezzo — è così che l'opportunità la tiene, senza
+        ''' interpretarla — quindi il campo si legge alla maniera dei campi: quello che non
+        ''' c'è o non è testo vale come «non ancora scritto», non come un guasto.
+        ''' </remarks>
+        Private Shared Function DestinatarioDellaBozza(bozza As JsonNode) As String
+
+            Return CampiJson.Testo(TryCast(bozza, JsonObject), "destinatario")
 
         End Function
 
@@ -103,6 +131,7 @@ Namespace Dati
                 {"fonte", Fonte},
                 {"link", Link},
                 {"lingua", Lingua},
+                {"destinatario", Destinatario},
                 {"stelle", Stelle},
                 {"gate_eliminatorio", GateEliminatorio},
                 {"creata", CampiJson.Quando(Creata)},
@@ -131,6 +160,7 @@ Namespace Dati
                 .Fonte = CampiJson.Testo(scritta, "fonte"),
                 .Link = CampiJson.Testo(scritta, "link"),
                 .Lingua = CampiJson.Testo(scritta, "lingua"),
+                .Destinatario = CampiJson.Testo(scritta, "destinatario"),
                 .Stelle = CampiJson.Numero(scritta, "stelle"),
                 .GateEliminatorio = CampiJson.Vero(scritta, "gate_eliminatorio"),
                 .Creata = CampiJson.Istante(scritta, "creata"),

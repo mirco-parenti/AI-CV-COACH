@@ -344,7 +344,17 @@ Friend Class BrainstormatoreFinto
 
     ''' <summary>Prepara la prossima risposta parlata (forma fluente).</summary>
     Public Function Dira(testo As String) As BrainstormatoreFinto
-        _dette.Enqueue(testo)
+        _dette.Enqueue(New RispostaAi With {.Testo = testo, .MotivoFine = "end_turn"})
+        Return Me
+    End Function
+
+    ''' <summary>
+    ''' Prepara una risposta che si ferma contro il tetto dei token: il testo arriva, ma
+    ''' il modello non ha finito la frase.
+    ''' </summary>
+    Public Function DiraTroncando(testo As String) As BrainstormatoreFinto
+        _dette.Enqueue(New RispostaAi With {
+            .Testo = testo, .MotivoFine = RispostaAi.MotivoTroncata})
         Return Me
     End Function
 
@@ -358,7 +368,7 @@ Friend Class BrainstormatoreFinto
                                   mitigazioni As JsonNode, battute As IReadOnlyList(Of TurnoChat),
                                   pezzo As Action(Of String),
                                   Optional annulla As CancellationToken = Nothing) _
-                                  As Task(Of String) Implements IBrainstormatore.ConversaAsync
+                                  As Task(Of RispostaAi) Implements IBrainstormatore.ConversaAsync
 
         Chiamate.Add(New Chiamata With {
             .Lavoro = "conversazione", .Ingressi = {profilo, annuncio, giudizi, mitigazioni}})
@@ -376,17 +386,17 @@ Friend Class BrainstormatoreFinto
         Dim errore As Exception = TryCast(preparata, Exception)
         If errore IsNot Nothing Then Throw errore
 
-        Dim testo As String = CStr(preparata)
+        Dim esito As RispostaAi = DirectCast(preparata, RispostaAi)
 
         ' A pezzi come il flusso vero: le parole arrivano una alla volta, con il loro
         ' spazio attaccato, così rimesse in fila danno esattamente il testo di partenza.
-        Dim parole As String() = testo.Split(" "c)
+        Dim parole As String() = esito.Testo.Split(" "c)
         For i As Integer = 0 To parole.Length - 1
             annulla.ThrowIfCancellationRequested()
             pezzo?.Invoke(If(i < parole.Length - 1, parole(i) & " ", parole(i)))
         Next
 
-        Return Task.FromResult(testo)
+        Return Task.FromResult(esito)
 
     End Function
 

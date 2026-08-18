@@ -65,6 +65,19 @@ Namespace Motore
         End Property
 
         ''' <summary>
+        ''' Se l'ultimo turno si è fermato contro il tetto dei token invece di finire la
+        ''' frase. Chi mostra la conversazione la legge appena il turno è tornato.
+        ''' </summary>
+        ''' <remarks>
+        ''' Qui un troncamento non è un errore — il testo arrivato è buono e resta dov'è
+        ''' (cap. 02.5) — ma non dirlo lo sarebbe: una risposta che si interrompe a metà
+        ''' frase senza dichiararlo sembra una risposta finita, e chi legge crede che l'AI
+        ''' non avesse altro da dire. È la stessa regola per cui l'interruzione dell'utente
+        ''' lascia un «(interrotto)» a video.
+        ''' </remarks>
+        Public ReadOnly Property UltimoTurnoTroncato As Boolean
+
+        ''' <summary>
         ''' Se c'è qualcosa da distillare: serve che l'utente abbia detto la sua. Un'AI
         ''' che ha solo aperto non ha prodotto nessuna decisione, e distillare il nulla
         ''' costerebbe una chiamata per farsi rispondere una lista vuota.
@@ -112,13 +125,17 @@ Namespace Motore
         Private Async Function UnTurnoAsync(pezzo As Action(Of String),
                                             annulla As CancellationToken) As Task
 
-            Dim risposta As String = Await _mestiere.ConversaAsync(
+            Dim risposta As RispostaAi = Await _mestiere.ConversaAsync(
                 _profilo, Candidatura.Annuncio, Candidatura.Confronto, Candidatura.Mitigazioni,
                 _battute, pezzo, annulla).ConfigureAwait(False)
 
-            If String.IsNullOrWhiteSpace(risposta) Then Return
+            ' Si aggiorna anche quando il turno non porta testo: quello di prima è finito
+            ' comunque, e lasciare acceso il suo avviso lo appiccicherebbe al turno dopo.
+            _UltimoTurnoTroncato = If(risposta?.Troncata, False)
 
-            _battute.Add(TurnoChat.DallAssistente(risposta.Trim()))
+            If String.IsNullOrWhiteSpace(risposta?.Testo) Then Return
+
+            _battute.Add(TurnoChat.DallAssistente(risposta.Testo.Trim()))
 
         End Function
 

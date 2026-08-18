@@ -424,6 +424,14 @@ Public Class PannelloDialogo
             Try
                 Await passo(gettone.Token, AddressOf PezzoArrivato).ConfigureAwait(True)
 
+                ' Il gemello del «(interrotto)» qui sotto: là a fermare la frase è stato
+                ' l'utente, qui il tetto dei token del prompt. In tutt'e due i casi quello
+                ' che è arrivato resta a video, e in tutt'e due va detto che manca il resto.
+                If If(_brainstorming?.UltimoTurnoTroncato, False) Then
+                    ChiudiLaBollaViva()
+                    AggiungiBollaAssistente("(fermata qui: ha raggiunto il limite di lunghezza)")
+                End If
+
             Catch ex As OperationCanceledException
                 ' L'ha fermata l'utente: quel che era arrivato resta, e si dice che è
                 ' rimasto a metà — una risposta troncata che non lo dichiara è peggio di

@@ -22,6 +22,8 @@
 #   { "azione": "riga" }                                        # senza «testo»: le elenca
 #   { "azione": "rispondi",    "bottone": "No" }                # finestra di messaggio
 #   { "azione": "rispondi" }                                    # senza: legge e elenca
+#   { "azione": "aspetta",     "nome": "Analizza", "stato": "acceso" }
+#   { "azione": "aspetta",     "nome": "Analizza", "stato": "spento", "timeout_ms": 30000, "intervallo_ms": 500 }
 
 param([Parameter(Mandatory = $true)][string]$Argomenti)
 
@@ -989,6 +991,87 @@ switch ($azione) {
             Write-Output "Ho premuto «$($scelto.Testo)», ma «$titolo» è ancora aperta."
             exit 1
         }
+    }
+
+    "aspetta" {
+
+        # Il ramo «stato di un controllo» di aspetta_che. Il loop sta **qui dentro**, in
+        # un'unica invocazione di PowerShell: rifare il giro powershell.exe a ogni tentativo
+        # costerebbe centinaia di ms a colpo, e per un'attesa di qualche secondo sarebbe più
+        # tempo speso ad accendere PowerShell che ad aspettare davvero.
+        #
+        # Attenzione, ed è scritto anche nel README: un bottone come «Rigenera» è acceso SIA
+        # PRIMA SIA DOPO il clic. Aspettare qui il suo stato «acceso» si soddisfa subito,
+        # senza che il lavoro sia finito — non è un difetto di questa azione, è la domanda
+        # sbagliata. Per aspettare la fine di un lavoro AI la strada affidabile è il ramo
+        # «file» di aspetta_che (lato server, puro Node), oppure aspettare prima che il
+        # bottone si SPENGA e poi che si riaccenda.
+
+        $nome = [string]$scelte.nome
+        $statoVoluto = [string]$scelte.stato
+        $timeoutMs = if ($scelte.timeout_ms) { [int]$scelte.timeout_ms } else { 60000 }
+        $intervalloMs = if ($scelte.intervallo_ms) { [int]$scelte.intervallo_ms } else { 1000 }
+
+        if ($statoVoluto -ne "acceso" -and $statoVoluto -ne "spento") {
+            Write-Output "Lo stato aspettato dev'essere «acceso» o «spento», non «$statoVoluto»."
+            exit 1
+        }
+
+        # Gli stessi tipi che elenca «elenca»: aspetta_che deve poter aspettare lo stato di
+        # qualunque controllo che «controlli» sa mostrare.
+        $tipiControllo = @("Button", "Edit", "Tab", "TabItem", "List", "Table", "ComboBox", "CheckBox", "DataItem")
+
+        $cronometro = [System.Diagnostics.Stopwatch]::StartNew()
+        $assentiDiFila = 0
+
+        # Quanti giri a vuoto si concedono prima di dire «non esiste» invece di continuare
+        # ad aspettare: almeno 5, o quanti servono a coprire circa 3 secondi con
+        # l'intervallo scelto. Serve alla trappola dell'albero UI Automation momentaneamente
+        # irraggiungibile (v. README, «controlli torna vuoto anche quando l'applicazione è
+        # vivissima»): un giro a vuoto isolato non è la prova che il controllo non esista, e
+        # non deve far uscire con un «non trovato» fuorviante. Ma non ha nemmeno senso
+        # aspettare il timeout intero per un nome sbagliato: dopo la soglia, ci si arrende.
+        $sogliaAssenti = [Math]::Max(5, [Math]::Ceiling(3000 / $intervalloMs))
+
+        while ($cronometro.ElapsedMilliseconds -lt $timeoutMs) {
+
+            $elemento = $null
+            try {
+                $elemento = Trova $nome $tipiControllo
+            } catch {
+                # Sotto try per lo stesso motivo del giro a vuoto: l'albero può risultare
+                # irraggiungibile per un istante, e non è un guasto di questa azione.
+                $elemento = $null
+            }
+
+            if (-not $elemento) {
+                $assentiDiFila++
+                if ($assentiDiFila -ge $sogliaAssenti) {
+                    Write-Output ("Non ho trovato il controllo «$nome» in $assentiDiFila tentativi (circa " +
+                        "$([Math]::Round($cronometro.Elapsed.TotalSeconds, 1)) secondi): controlla il nome " +
+                        "(con «controlli» lo si vede), non ha senso continuare ad aspettare.")
+                    exit 1
+                }
+                Start-Sleep -Milliseconds $intervalloMs
+                continue
+            }
+
+            $assentiDiFila = 0
+            $statoAttuale = if ($elemento.Current.IsEnabled) { "acceso" } else { "spento" }
+
+            if ($statoAttuale -eq $statoVoluto) {
+                DiSeEraUnRipiego $nome
+                $secondi = [Math]::Round($cronometro.Elapsed.TotalSeconds, 1)
+                Write-Output "Condizione soddisfatta dopo $secondi secondi: «$($elemento.Current.Name)» è $statoAttuale."
+                exit 0
+            }
+
+            Start-Sleep -Milliseconds $intervalloMs
+        }
+
+        $secondi = [Math]::Round($cronometro.Elapsed.TotalSeconds, 1)
+        Write-Output "TIMEOUT: dopo $secondi secondi «$nome» non ha raggiunto lo stato «$statoVoluto»."
+        exit 1
     }
 
     "ridimensiona" {

@@ -295,20 +295,8 @@ giudice per la prima volta.
   ponti in italiano. Nella **batteria** però non è entrato: `CollaudiConfrontoReale` ha
   ancora i suoi due casi, entrambi italiani. Aggiungerne un terzo in inglese costa un file
   di caso e nessuna riga di codice, e renderebbe ripetibile quello che oggi si rifà a mano.
-- **Un `aspetta_che` per lo strumento di collaudo** — oggi, per sapere se una chiamata all'AI
-  è finita, si alternano `clic` e `controlli` a mano. Un attrezzo che aspetti una condizione
-  («finché quel bottone non si riaccende», con un tetto di tempo) renderebbe i giri lunghi
-  scrivibili in una riga sola. *(2026-08-10 — emersa percorrendo il giro completo di T4c.)*
-  **Il caso peggiore è arrivato** *(2026-08-12)*: una catena di comandi lanciata senza
-  aspettare che l'applicazione fosse pronta è finita sui controlli sbagliati, e ha scritto in
-  una casella del profilo vero. Il rimedio immediato è stato stringere la ricerca dei
-  controlli (adesso vuole una parola intera); l'attesa vera resta da fare.
-  **E il collaudo di T7b ha detto anche su cosa dovrà aspettare** *(2026-08-18)*: non su un
-  bottone. «Rigenera» è acceso sia prima sia dopo, e per un giro intero si è creduto di
-  guardare i testi nuovi mentre erano ancora i vecchi. Nemmeno la data del file basta —
-  l'applicazione risalva la cartella anche solo cambiando lingua. La condizione giusta è il
-  **contenuto** di un file, quindi un `aspetta_che` utile deve saper attendere che un file
-  cambi davvero, non che un controllo torni premibile.
+- ~~**Un `aspetta_che` per lo strumento di collaudo**~~ — **realizzato il 2026-08-18**
+  (vedi «Realizzate»).
 - ~~**Un attrezzo per rispondere alle finestre di messaggio**~~ — **realizzato a T5c**
   (vedi «Realizzate»).
 - **Rispondere anche alla finestra di scelta di una cartella** — lo strumento sa pilotare
@@ -333,6 +321,18 @@ giudice per la prima volta.
 
 Idee del backlog ormai costruite. Si tengono qui (con il puntatore a dove sono narrate o
 implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
+- ✅ **Un `aspetta_che` per lo strumento di collaudo** — l'attrezzo aspetta una condizione
+  invece di far alternare `clic` e `controlli` a mano, con un tetto di tempo e un esito che
+  distingue in chiaro «soddisfatta dopo N secondi» da «TIMEOUT». Ha **due modalità**, e la
+  seconda è quella che conta: lo **stato di un controllo** (acceso/spento) e il **contenuto
+  di un file** (che compaia, che cambi, che contenga una stringa). Il backlog l'aveva
+  previsto — «la condizione giusta è il contenuto di un file, non un controllo che torna
+  premibile» — e il motivo è rimasto vero: «Rigenera» è acceso sia prima sia dopo il clic,
+  quindi aspettarne lo stato si soddisfa subito senza che il lavoro sia finito. È scritto
+  nella descrizione dell'attrezzo e nelle trappole del suo README, perché è il modo naturale
+  di usarlo male. Il ciclo gira **dentro** una sola invocazione di PowerShell: avviarlo a
+  ogni tentativo costerebbe più dell'attesa stessa. *(2026-08-18; nata a T4c, maturata a
+  T7b; `strumenti/mcp-collaudi/README.md`.)*
 - ✅ **Mitigazione e sintesi (2.2.4)** — bridging argomentativo onesto fra anello 3 e anello 4
   (dai gap del match → argomenti di equivalenza funzionale ancorati al profilo). Prompt +
   schema in `prompt_design.md`, cablata in `server.js` (endpoint `/mitiga`) e `index.html`; la

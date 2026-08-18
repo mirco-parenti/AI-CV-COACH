@@ -34,18 +34,22 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Da T2 — il motore e il pool (2026-08-07)
 
-- **La coda del salto a Sonnet 5** *(riscritta il 2026-08-18: il salto è fatto, questo è
-  ciò che si è portato dietro).* Il predefinito è Sonnet 5 con l'interruttore del
-  ragionamento dichiarato spento, e la batteria è verde. Restano due cose. La prima:
-  Sonnet 5 conta i token in modo diverso e a parità di testo ne usa **~30% in più**,
-  mentre i `max_token` del pool sono ancora quelli tarati su Sonnet 4.6 — i più stretti
-  (`email_candidatura` e `umanizzazione_sintesi` a 1500, `umanizzazione_frasi` a 2500)
-  sono i primi che potrebbero non bastare. Non si è ritoccato nulla a scatola chiusa
-  perché il codice un troncamento lo **grida** invece di subirlo (`ClientClaude`, causa
-  `Troncata`): si alza il tetto di quello che si lamenta, non di tutti per prudenza. La
-  seconda: il salto va **misurato dal vivo** sui casi reali, come si era detto — il
-  prototipo resta un termine di paragone, non più un metro a parità di modello.
-  *(cap. 02.5; cap. 15, voce 6.)*
+- **La coda del salto a Sonnet 5** *(riscritta il 2026-08-18 alla chiusura del salto, e di
+  nuovo lo stesso giorno: adesso i numeri si possono guardare, restano da guardare).* Il
+  predefinito è Sonnet 5 con l'interruttore del ragionamento dichiarato spento, e la
+  batteria è verde. Sonnet 5 conta i token in modo diverso e a parità di testo ne usa
+  **~30% in più**, mentre i `max_token` del pool sono ancora quelli tarati su Sonnet 4.6 —
+  i più stretti (`email_candidatura` e `umanizzazione_sintesi` a 1500, `umanizzazione_frasi`
+  a 2500) sono i primi che potrebbero non bastare, e la verifica ha confermato che girano
+  **tutti e tre sul livello ragionamento**, cioè proprio sul modello che è cambiato.
+  Non si ritocca nulla a scatola chiusa: si alza il tetto di quello che si lamenta, non di
+  tutti per prudenza. Quel che mancava era il modo di sapere **chi sta per lamentarsi**, e
+  adesso c'è — ogni chiamata lascia una riga in `chiamate_ai.csv` (cartella dati) con il
+  prompt, il tetto dichiarato, i token consumati e **la percentuale del tetto**: si ordina
+  per quella colonna e si vede chi è in bilico prima che si tronchi. Resta da fare la cosa
+  per cui il diario esiste: **un giro d'uso vero, e poi leggere i numeri** — in particolare
+  sui tre prompt stretti, che nessun collaudo reale esercita ancora.
+  *(cap. 02.5; cap. 15, voce 6; `Ai/DiarioChiamate.vb`, `Dati/DiarioChiamateSuFile.vb`.)*
 
 ## Da T3 — il profilo (2026-08-07 · integrata alla chiusura, 2026-08-09)
 
@@ -91,25 +95,20 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   costruire il profilo. La classificazione dice già quale CV sembra il più recente e il dato
   si salva in `documenti.json`, ma **non lo legge nessuno**: l'import di un CV passa ancora
   dalla scelta di un file singolo. *(cap. 05.2; `RaccoltaDocumenti.CvPiuRecente`.)*
-- **Uscendo da P7 con la barra in alto, la bozza si perde** *(emerso il 2026-08-15, dentro
-  il collaudo di T7a)*. `SalvaLaBozza` è appesa a tre momenti — preparare l'`.eml`,
-  «L'ho spedita» e il bottone **«◀ Torna ai documenti»**, che ha pure il commento giusto
-  («uscendo si salva quel che c'è: il destinatario scritto a metà e le spunte sono lavoro
-  dell'utente»). Ma dalla barra di navigazione in cima si esce da P7 **senza passare di
-  lì**, e `FormPrincipale` al cambio pannello non salva niente: si perdono il destinatario
-  scritto a mano, le spunte degli allegati e il messaggio riscritto — che è costato una
-  chiamata all'AI. Peggio, la perdita è **silenziosa**: riaprendo, P7 riprende `email.json`
-  e mostra la bozza vecchia come se fosse l'ultima. Verificato due volte, nel codice e sul
-  file (rimasto indietro di tre minuti dopo un «Fallo riscrivere» e un giro dalla Home).
-  L'intenzione c'era già: manca una delle due uscite. *(cap. 07.1; `PannelloEmail`,
-  `SalvaLaBozza`.)*
-- **Lo stato «esito», il follow-up e il destinatario nel registro.** Il cap. 07.3 assegnava
-  a T6 tre cose oltre all'invio, e T6 ne ha portata una sola. Restano: lo stato **`esito`**
-  (in attesa · colloquio · rifiutata · assunto 🎉), che nello schema c'è ma dall'interfaccia
-  non si raggiunge; il **promemoria di follow-up** per le candidature ferme da giorni; e il
-  **destinatario nella voce di registro**, che oggi vive nella bozza `email.json` della
-  candidatura e non nell'indice. Sono tre passi del racconto «a che punto sono», e vanno
-  fatti entro la 1.0. *(cap. 07.3; cap. 14, T9.)*
+- **Lo stato «esito» e il follow-up** *(ridotta il 2026-08-18: delle tre cose, il
+  destinatario è in «Chiuse»)*. Il cap. 07.3 assegnava a T6 tre cose oltre all'invio, e T6
+  ne ha portata una sola. Restano: lo stato **`esito`** (in attesa · colloquio · rifiutata ·
+  assunto 🎉), che nello schema c'è ma dall'interfaccia non si raggiunge; e il **promemoria
+  di follow-up** per le candidature ferme da giorni. Sono due passi del racconto «a che
+  punto sono», e vanno fatti entro la 1.0. Quel che si è imparato guardandoli da vicino:
+  i quattro valori dell'esito **non esistono in codice**, sono una riga di commento in
+  `StatoOpportunita.vb` — servono un tipo nuovo, un punto d'ingresso nell'interfaccia che
+  non c'è mai stato, e una sotto-macchina a stati dentro uno stato oggi terminale. Il
+  follow-up invece è **il più economico dei due e non dipende dall'altro**: le date stanno
+  già in `DateStati`, non serve nessun campo nuovo, e finché l'esito non c'è «nessun esito
+  registrato» coincide con «stato = inviata». Manca però una decisione che il progetto non
+  ha mai preso: **dopo quanti giorni**. *(cap. 07.3; cap. 14, T9; cap. 15.3 — il promemoria
+  è passivo, il testo del sollecito lo scrive l'utente.)*
 
 ## Da T7 — multilingua e qualità (2026-08-15, alla chiusura di T7a)
 
@@ -129,15 +128,21 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   la casella del confronto vive in P6, e in P7 l'utente ha davanti una casella che può già
   riscrivere. Se un giorno servirà, il posto è la bozza (`email.json`). *(cap. 07.1;
   cap. 08.6.)*
-- **L'interruzione di un turno provata dal vivo** *(2026-08-18, dal collaudo di T7c)*. Il
-  bottone «Interrompi» c'è, il gettone arriva fino al flusso e il banco lo collauda
+- **L'interruzione di un turno provata dal vivo** *(2026-08-18, dal collaudo di T7c;
+  aggiornata lo stesso giorno: l'ostacolo che la teneva ferma non c'è più)*. Il bottone
+  «Interrompi» c'è, il gettone arriva fino al flusso e il banco lo collauda
   (`InterrompereNonEUnErrore`, più `ChiInterrompeIlBrainstormingNonRiceveUnErrore` sul
   client): quello che non è riuscito è premerlo **davvero mentre l'AI scrive**. Le risposte
-  del ragionamento arrivano in pochi secondi e lo strumento di collaudo non sa aspettare una
-  condizione — si alternano `clic` e `controlli`, e in mezzo il turno è già finito. Serve
-  una risposta abbastanza lunga da dare il tempo, oppure un `aspetta_che` nello strumento.
-  Finché non è fatto, l'interruzione è **provata al banco ma non sul campo**, e va detto
-  così. *(cap. 02.6; `strumenti/mcp-collaudi/`, «quel che ancora non sa fare».)*
+  del ragionamento arrivano in pochi secondi e lo strumento di collaudo non sapeva aspettare
+  una condizione — si alternavano `clic` e `controlli`, e in mezzo il turno era già finito.
+  **L'`aspetta_che` adesso c'è** (aspetta che un controllo si accenda o si spenga, o che un
+  file compaia o cambi), quindi la strada è aperta: resta da percorrerla, con una domanda
+  che tiri fuori una risposta abbastanza lunga da dare il tempo di premere. Attenzione alla
+  trappola documentata: aspettare che un bottone sia «acceso» non vuol dire che il lavoro sia
+  cominciato o finito — per il ragionamento conviene aspettare che «Interrompi» si accenda,
+  che è il segnale vero che l'AI ha preso la parola. Finché non è fatto, l'interruzione è
+  **provata al banco ma non sul campo**, e va detto così.
+  *(cap. 02.6; `strumenti/mcp-collaudi/`.)*
 - **Il prima/dopo letto a video fino in fondo** *(2026-08-18, dal collaudo di T7b)*. Nel
   giro con l'AI vera la sezione si è vista comparire in coda alla colonna — «PRIMA DELLA
   RIFINITURA», col nome del campo cambiato — ma i due testi *Prima* e *Dopo* stanno **sotto
@@ -149,17 +154,20 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Da T7d — il 📄 CV-1 base riletto e in inglese (2026-08-18, alla chiusura)
 
-- **Il cambio di lingua che fallisce a metà, provato dal vivo.** Cambiando la lingua del
-  📄 CV-1 base il pannello butta il testo di prima *prima* di rigenerare — così un errore
-  dell'AI non lascia a video un CV italiano impaginato sotto «Work experience» — ma quel
-  ramo **non è stato percorso davvero**: la conferma apre una finestra di dialogo, e una
-  finestra dentro il banco lo bloccherebbe invece di farlo fallire. È chiuso ragionando e
-  per costruzione (l'azzeramento è nello stesso metodo della conferma), non per prova. Si
-  verifica in due minuti con lo strumento di collaudo **togliendo la chiave API** e
-  cambiando lingua su un CV che c'è: deve restare la colonna vuota col motivo, e
-  «Rigenera» acceso. Gemella dell'interruzione del turno qui sopra, e per la stessa
-  ragione: quel che passa da una finestra modale il banco non lo sa guidare.
-  *(cap. 03.6; `PannelloDocumenti.CambiaLinguaDelCvBaseAsync`.)*
+*Chiusa lo stesso giorno: il cambio di lingua che fallisce a metà è stato percorso dal vivo
+ed è in «Chiuse», insieme alla correzione della ricetta con cui si prova.*
+
+## Da questa passata sulle voci in sospeso (2026-08-18)
+
+- **Un collaudo che cede quando la macchina è carica.**
+  `UnaRispostaLungaMaVivaNonScadeMai` (`CollaudiClientClaude`) è fallito una volta su una
+  passata intera lanciata mentre la macchina compilava dell'altro, ed è tornato verde da
+  solo tre volte di fila subito dopo, e poi su due passate complete. Non è una regressione —
+  non c'entra niente con quello che si stava toccando — ma è un **collaudo che misura il
+  tempo**, e un collaudo che dipende dal carico prima o poi mente in tutt'e due i modi:
+  oggi ha gridato al lupo, domani potrebbe tacere su un guasto vero. Va guardato con calma e
+  reso insensibile al carico, o dichiarato tale. *(`CollaudiClientClaude`, l'attesa e il
+  silenzio massimo; cap. 02.5.)*
 
 ## Da revisione adversariale (2026-08-09)
 
@@ -178,6 +186,85 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Chiuse
 
+- ✅ **Il cambio di lingua che fallisce a metà, provato dal vivo** *(aperta il 2026-08-18 da
+  T7d, chiusa lo stesso giorno)*. Era chiusa «ragionando e per costruzione», non per prova:
+  cambiando la lingua del 📄 CV-1 base il pannello butta il testo di prima *prima* di
+  rigenerare, così un errore dell'AI non lascia a video un CV italiano impaginato sotto
+  «Work experience» — ma quel ramo nessuno l'aveva percorso. Adesso sì, e il comportamento è
+  quello promesso: colonna **«Il CV non è ancora stato scritto.»**, il motivo scritto in
+  chiaro, **«Rigenera» acceso**, la tendina rimasta su «Inglese». Il caso brutto non si è
+  verificato. In più, il `cv_base.json` su disco è risultato **identico byte per byte** a
+  prima del tentativo: il fallimento non lo tocca, perché si scrive solo nel ramo riuscito.
+  **Attenzione, la ricetta scritta in questa voce era sbagliata**: «togliendo la chiave API»
+  non funziona — senza chiave `AiDisponibile` resta falso, «Genera 📄 CV-1 base» non si
+  accende e a P6 non ci si arriva nemmeno, quindi non si fallisce a metà, si resta fuori.
+  La prova buona vuole una chiave **presente ma non valida**: il motore si monta, la chiamata
+  parte davvero e l'API la rifiuta (401). Vale per ogni prova futura dei rami «l'AI
+  fallisce». Fatta su dati fabbricati in una cartella usa-e-getta, senza toccare quelli veri.
+  *(cap. 03.6; `PannelloDocumenti.CambiaLinguaDelCvBaseAsync`.)*
+- ✅ **Uscendo da P7 con la barra in alto, la bozza si perde** *(aperta il 2026-08-15 dentro
+  il collaudo di T7a, chiusa il 2026-08-18)*. `SalvaLaBozza` era appesa a tre momenti —
+  preparare l'`.eml`, «L'ho spedita» e il bottone «◀ Torna ai documenti» — ma dalla barra di
+  navigazione in cima si usciva **senza passare di lì**, e si perdevano il destinatario
+  scritto a mano, le spunte degli allegati e il messaggio riscritto, che era costato una
+  chiamata all'AI. La perdita era **silenziosa**: riaprendo, P7 rileggeva `email.json` e
+  mostrava la bozza vecchia come se fosse l'ultima. Guardando dove metterci mano è venuto
+  fuori che il buco non era di P7: **un aggancio d'uscita non esisteva affatto**, e
+  `IPannelloArea` parlava solo di geometria. Adesso c'è — `IPannelloCheSalvaUscendo`, che
+  `FormPrincipale` interpella a ogni cambio di pannello, prima di nasconderlo — e per ora la
+  implementa **solo P7**, che era l'unico caso costoso. Non salva mentre l'AI lavora e non
+  solleva mai: qui si sta cambiando pannello, e un disco pieno non deve inchiodare la
+  navigazione. *(cap. 07.1; `Ui/IPannelloCheSalvaUscendo.vb`; `FormPrincipale.SalvaChiEsce`.)*
+  **Nota per chi verrà**: lo stesso buco resta **latente** in P2 (le correzioni al profilo),
+  P5 e P4 (l'annuncio incollato e non ancora analizzato). Non è stato chiuso lì perché
+  nessuna voce lo chiedeva e perché quei pannelli hanno già le loro guardie alla chiusura
+  della finestra — ma l'aggancio è pronto e basta implementarlo.
+- ✅ **Una candidatura ereditava il messaggio di quella di prima** *(trovata e chiusa il
+  2026-08-18, dalla revisione dell'aggancio d'uscita qui sopra)*. P7 si riusa da una
+  candidatura all'altra, e la bozza in memoria si riempie in due modi soli: ripresa dal
+  disco o scritta dall'AI. Ma la scrittura ha **due uscite anticipate legittime** — manca la
+  chiave, manca la lettera — e nessuna delle due toccava la bozza: oggetto e corpo restavano
+  quelli della candidatura precedente, **visibili a video sotto il nome di questa**. Bastava
+  poi un salvataggio perché finissero nel suo `email.json`. Il difetto esisteva già — anche
+  «◀ Torna ai documenti» salvava incondizionatamente — ma l'aggancio d'uscita appena aggiunto
+  ne allargava la bocca a *qualunque* clic sulla barra, e conveniva chiuderlo subito. Ora il
+  pannello ripulisce la bozza e le caselle all'arrivo, accanto alle righe che già ripulivano
+  il destinatario per lo stesso motivo. Il collaudo che lo copre è stato **verificato al
+  contrario**: tolta la correzione, la seconda candidatura si ritrova 81 caratteri di corpo
+  che non sono suoi. *(cap. 07.1; `PannelloEmail.MostraLaCandidaturaAsync`.)*
+- ✅ **Un troncamento che nessuno dichiarava, nel brainstorming** *(aperta e chiusa il
+  2026-08-18, trovata mentre si guardava la coda del salto a Sonnet 5)*. Sulla strada
+  sincrona un troncamento è un errore e si vede; in streaming — per scelta, giusta — non lo
+  è, perché il testo arrivato è già sotto gli occhi di chi legge, e il commento del client
+  diceva «il motivo della fine si porta a casa in `RispostaAi.MotivoFine` e **a dirlo è il
+  pannello**». Solo che il pannello non poteva saperlo: `MestiereAi.EseguiInStreamingAsync`
+  restituiva il solo `Testo` e il motivo moriva lì. Risultato: la conversazione poteva
+  fermarsi **a metà frase** senza che nulla lo dichiarasse, e chi legge credeva che l'AI non
+  avesse altro da dire — proprio mentre il cambio di modello rendeva i tetti più stretti. Il
+  principio era già scritto nel pannello, dieci righe più su, per l'interruzione dell'utente:
+  «una risposta troncata che non lo dichiara è peggio di nessuna risposta». Ora vale per
+  tutt'e due: accanto a «(interrotto)» c'è «(fermata qui: ha raggiunto il limite di
+  lunghezza)». *(cap. 02.5; `RispostaAi.Troncata`; `Brainstorming.UltimoTurnoTroncato`.)*
+- ✅ **Il destinatario nella voce di registro** *(aperta il 2026-08-14 da T6, chiusa il
+  2026-08-18)*. Era una delle tre cose che il cap. 07.3 assegnava a T6 e che T6 non ha
+  portato: il destinatario viveva solo nella bozza `email.json` della candidatura, così per
+  sapere «a chi ho scritto?» bisognava aprire una candidatura alla volta — mentre l'indice
+  esiste proprio per rispondere senza aprire niente. È bastato un campo, perché
+  `VoceRegistro.Da` è il **punto unico** da cui passano sia l'annotazione sia la
+  rigenerazione dalle cartelle: i tre pannelli che annotano non sono stati toccati. La bozza
+  resta la fonte — il valore lo digita l'utente e da qui non si scrive mai all'indietro — e
+  le voci vecchie si ricostruiscono da sé, senza migrare niente, esattamente come il commento
+  in cima al file aveva previsto. *(cap. 07.3; `Dati/Registro.vb`.)*
+- ✅ **Lo strumento di collaudo non sapeva aspettare** *(aperta il 2026-08-18 da T7c, chiusa
+  lo stesso giorno)*. Non c'era un `aspetta_che`: si alternavano `clic` e `controlli`, e le
+  cose veloci passavano in mezzo senza farsi vedere. Adesso c'è, in due modalità — lo
+  **stato di un controllo** (acceso/spento) e il **contenuto di un file** (che compaia, che
+  cambi, che contenga una stringa) — perché una sola non bastava: la trappola, pagata prima
+  di scriverlo, è che un bottone come «Rigenera» è acceso **sia prima sia dopo** il clic, e
+  aspettarne lo stato si soddisfa subito senza che il lavoro sia finito. Per aspettare la
+  fine di un lavoro AI la strada onesta è il file che quel lavoro produce. Il ciclo gira
+  **dentro** una sola invocazione di PowerShell, perché avviarlo a ogni tentativo costerebbe
+  più dell'attesa. *(`strumenti/mcp-collaudi/README.md`.)*
 - ✅ **Il 📄 CV-1 base non si può chiedere in inglese** *(aperta il 2026-08-15 da T7a,
   chiusa il 2026-08-18 da T7d)*. La porta era data per persa in P2, «accanto al bottone»,
   perché la tendina di P6 rigenerava *una candidatura* e il CV-1 base non ne ha una. È

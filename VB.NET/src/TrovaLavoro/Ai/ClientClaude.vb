@@ -118,11 +118,32 @@ Namespace Ai
     ''' <summary>Quello che l'AI ha risposto, già sbucciato.</summary>
     Public Class RispostaAi
 
+        ''' <summary>
+        ''' Il motivo di fine che l'API dà alla risposta tagliata dal tetto dei token.
+        ''' </summary>
+        Public Const MotivoTroncata As String = "max_tokens"
+
         ''' <summary>Il testo prodotto dal modello: JSON da estrarre, o prosa.</summary>
         Public Property Testo As String
 
         ''' <summary>Il motivo per cui il modello ha smesso di scrivere.</summary>
         Public Property MotivoFine As String
+
+        ''' <summary>
+        ''' Vero se il modello ha smesso perché ha toccato il tetto dei token, e quindi
+        ''' quello che ha scritto è monco.
+        ''' </summary>
+        ''' <remarks>
+        ''' Sulla strada sincrona un troncamento è un errore e non arriva mai fin qui
+        ''' (v. <see cref="ClientClaude.InterpretaRisposta"/>); in streaming invece è un
+        ''' esito legittimo, perché il testo è già sotto gli occhi di chi legge — e allora
+        ''' questa è la domanda che il pannello deve poter fare.
+        ''' </remarks>
+        Public ReadOnly Property Troncata As Boolean
+            Get
+                Return String.Equals(MotivoFine, MotivoTroncata, StringComparison.Ordinal)
+            End Get
+        End Property
 
         ''' <summary>Il modello che ha risposto davvero, come lo dichiara l'API.</summary>
         Public Property Modello As String
@@ -150,6 +171,20 @@ Namespace Ai
     ''' </remarks>
     Public Class ClientClaude
         Implements IDisposable
+
+        ''' <summary>
+        ''' Dove annotare quanto è costata ogni chiamata, se qualcuno tiene il conto
+        ''' (<see cref="IDiarioChiamate"/>). <c>Nothing</c> è legittimo: il diario è
+        ''' diagnostica, non una parte del funzionamento.
+        ''' </summary>
+        ''' <remarks>
+        ''' Sta sul client e non nel costruttore dei mestieri perché il client ce l'hanno
+        ''' già tutti: appenderlo qui li raggiunge tutti insieme senza toccare sei
+        ''' costruttori. A scriverci però non è il client — è <see cref="MestiereAi"/>, che
+        ''' è l'unico posto dove il prompt (col suo tetto e il suo nome) e la risposta (coi
+        ''' suoi token) si trovano nella stessa riga.
+        ''' </remarks>
+        Public Property Diario As IDiarioChiamate
 
         ''' <summary>L'indirizzo dell'API dei messaggi.</summary>
         Public Const Indirizzo As String = "https://api.anthropic.com/v1/messages"
@@ -359,7 +394,7 @@ Namespace Ai
             ' Prima il motivo della fine, poi il testo. Una risposta troncata il testo
             ' ce l'ha — solo che è monco: passarlo avanti significa scoprirlo dopo, a
             ' valle, sotto forma di JSON invalido senza sapere perché.
-            If String.Equals(motivoFine, "max_tokens", StringComparison.Ordinal) Then
+            If String.Equals(motivoFine, RispostaAi.MotivoTroncata, StringComparison.Ordinal) Then
                 Throw New ErroreAi(CausaErroreAi.Troncata,
                     "La risposta si è fermata contro il limite di token ed è incompleta. " &
                     "Alza il limite del prompt, oppure accorcia il testo in ingresso.")

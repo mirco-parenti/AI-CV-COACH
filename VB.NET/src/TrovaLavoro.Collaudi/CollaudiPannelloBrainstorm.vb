@@ -234,6 +234,54 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function UnaRispostaTroncataLoDiceAVideo() As Task
+            ' Il gemello di «(interrotto)»: là a fermare la frase è stato l'utente, qui il
+            ' tetto dei token del prompt. Il testo arrivato è buono e resta — ma tacere che
+            ' manca il resto lo farebbe sembrare una risposta finita, e chi legge crederebbe
+            ' che l'AI non avesse altro da dire.
+            Dim finto As New BrainstormatoreFinto()
+            finto.Dira("apro io")
+            finto.DiraTroncando("Il muletto lo puoi girare così, però")
+
+            Await ConRagionamentoApertoAsync(finto,
+                Async Function(pannello, contesto)
+
+                    Casella(pannello).Text = "una domanda"
+                    Await pannello.InviaAlRagionamentoAsync()
+
+                    Assert.Contains("Il muletto lo puoi girare così, però", Conversazione(pannello),
+                                    "quel che è arrivato resta a video")
+                    Assert.Contains("limite di lunghezza", Conversazione(pannello),
+                                    "e si dice perché si è fermata lì")
+                    Assert.DoesNotContain("Riprova pure", Conversazione(pannello),
+                                          "ma non è un errore da riprovare")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaRispostaInteraNonDiceNiente() As Task
+            ' L'altra metà della prova: l'avviso non deve comparire quando non serve, o
+            ' diventerebbe rumore che nessuno legge più.
+            Dim finto As New BrainstormatoreFinto()
+            finto.Dira("apro io")
+            finto.Dira("Il muletto lo puoi girare così, e basta.")
+
+            Await ConRagionamentoApertoAsync(finto,
+                Async Function(pannello, contesto)
+
+                    Casella(pannello).Text = "una domanda"
+                    Await pannello.InviaAlRagionamentoAsync()
+
+                    Assert.DoesNotContain("limite di lunghezza", Conversazione(pannello),
+                                          "la frase è finita da sé: niente da dichiarare")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Async Function TornandoAlProfiloIlPannelloRidiventaQuelloDiPrima() As Task
             ' Un pannello solo per due mestieri: passando dall'uno all'altro non devono
             ' restare in giro le etichette sbagliate.

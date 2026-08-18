@@ -327,6 +327,13 @@ Namespace Motore
             End If
 
             _Client = New ClientClaude(chiaveInUso, Modelli)
+
+            ' Il conto di quanto costa ogni chiamata e di quanto sfiora il tetto del suo
+            ' prompt: serve a ritarare i max_token sui numeri veri invece che a naso
+            ' (cap. 02.5). È diagnostica, non funzionamento — se il file non si lascia
+            ' scrivere non se ne accorge nessuno, ed è giusto così.
+            _Client.Diario = New DiarioChiamateSuFile(Cartella)
+
             Nota($"Modelli in uso: {Modelli.ModelloSemplice.Id} per le estrazioni, " &
                  $"{Modelli.ModelloRagionamento.Id} per il ragionamento.")
 

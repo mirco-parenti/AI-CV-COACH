@@ -31,11 +31,15 @@ Namespace Ai
         ''' </param>
         ''' <param name="pezzo">Dove consegnare ogni pezzo di risposta appena arriva.</param>
         ''' <param name="annulla">Il gettone di chi interrompe (cap. 02.6).</param>
-        ''' <returns>Il testo intero del turno, a flusso finito.</returns>
+        ''' <returns>
+        ''' Il turno intero a flusso finito, col <b>motivo</b> per cui è finito: una
+        ''' risposta che ha toccato il tetto dei token si legge lo stesso, ma chi la
+        ''' mostra deve poterlo dichiarare (<see cref="RispostaAi.Troncata"/>).
+        ''' </returns>
         Function ConversaAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
                               mitigazioni As JsonNode, battute As IReadOnlyList(Of TurnoChat),
                               pezzo As Action(Of String),
-                              Optional annulla As CancellationToken = Nothing) As Task(Of String)
+                              Optional annulla As CancellationToken = Nothing) As Task(Of RispostaAi)
 
         ''' <summary>
         ''' Distilla dalla conversazione gli appunti confermabili, e a parte i fatti che
@@ -96,7 +100,7 @@ Namespace Ai
                                       mitigazioni As JsonNode, battute As IReadOnlyList(Of TurnoChat),
                                       pezzo As Action(Of String),
                                       Optional annulla As CancellationToken = Nothing) _
-                                      As Task(Of String) Implements IBrainstormatore.ConversaAsync
+                                      As Task(Of RispostaAi) Implements IBrainstormatore.ConversaAsync
 
             Esigi(profilo, "il profilo", EtichettaConversazione)
             Esigi(annuncio, "l'annuncio", EtichettaConversazione)

@@ -98,6 +98,27 @@ Namespace Dati
         End Property
 
         ''' <summary>
+        ''' Il conto di quanto è costata ogni chiamata all'AI, e di quanto è andata vicina
+        ''' al tetto di token del suo prompt (cap. 02.5).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È l'unico file di questa mappa che <b>non è dati dell'utente</b>: non
+        ''' contiene niente di suo, non serve all'applicazione per funzionare e cancellarlo
+        ''' non perde nulla. Serve a noi, per ritarare i <c>max_token</c> del pool guardando
+        ''' i numeri veri invece di indovinarli — e per accorgersi che un tetto sta per
+        ''' diventare stretto <b>prima</b> che una risposta si tronchi, non dopo.</para>
+        ''' <para>Perché sia servito: col passaggio a Sonnet 5 la stessa risposta conta
+        ''' circa un terzo di token in più, e i tetti del pool erano tarati sul modello di
+        ''' prima. Senza questo file l'unico modo di scoprire chi non ci stava più era
+        ''' aspettare che si rompesse *(2026-08-18)*.</para>
+        ''' </remarks>
+        Public ReadOnly Property FileChiamateAi As String
+            Get
+                Return Path.Combine(Radice, "chiamate_ai.csv")
+            End Get
+        End Property
+
+        ''' <summary>
         ''' I portali e le ricerche salvate (cap. 06.3, cap. 11.1). È il primo file di
         ''' questa mappa che tiene insieme <b>dati di prodotto</b> — la tabella dei
         ''' portali — e <b>roba dell'utente</b>: le ricerche che si è messo da parte.

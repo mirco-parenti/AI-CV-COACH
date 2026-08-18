@@ -66,6 +66,7 @@ comando **uccide sé stesso** prima di arrivare al server.
 | `rispondi_finestra` | Risponde a una finestra di messaggio premendo il bottone per nome («Sì», «No», «OK»). Senza il bottone **legge cosa chiede** e quali scelte dà, così si sa cosa si sta per confermare. |
 | `scegli_file` | Risponde alla finestra di scelta file che l'applicazione ha aperto: il file da prendere (anche in forma `/mnt/c/…`), oppure `annulla`. |
 | `cartella_dati` | Cosa l'applicazione ha scritto su disco: profilo, storico, opportunità, documenti. |
+| `aspetta_che` | Aspetta una condizione invece di alternare `clic` e `controlli` a mano. Due modalità: lo **stato** di un controllo (`nome` + `stato` «acceso»/«spento», con il loop dentro un'unica PowerShell) oppure il **contenuto** di un file (`file`, con `contiene` o senza — basta che compaia o cambi), puro Node. |
 
 Con questi, il **giro completo** si percorre senza mani: importare un CV, salvare il
 profilo, incollare un annuncio, analizzarlo, generare CV e lettera, esportarli. È stato
@@ -79,8 +80,6 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
 
 ## Quel che ancora non sa fare
 
-- **Le attese.** Non c'è un `aspetta_che` (che il bottone si accenda, che l'attesa
-  finisca): per ora si alterna `clic` e `controlli`.
 - **Il contenuto delle caselle di testo non si legge.** L'elenco dice la voce dei menù,
   ma non cosa c'è scritto in una casella: per leggere l'indirizzo del browser serve
   ancora una fotografia.
@@ -279,3 +278,18 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   scritta del suggerimento, che a prima vista sembra un guasto dell'attrezzo. Non lo è, ed
   è cugina della trappola qui sopra sulla finestra sbagliata: si riprende con
   `schermo_intero`, oppure si aspetta che il suggerimento sparisca.
+- **Aspettare lo stato di «Rigenera» non è aspettare che rigeneri.** *(2026-08-18, nascita
+  di `aspetta_che`.)* È la stessa storia di sopra («Aspettare un bottone non è aspettare
+  che il lavoro finisca»), ma vale la pena ripeterla qui perché ora c'è un attrezzo apposta
+  e la tentazione di usarlo male è più vicina: un bottone come «Rigenera» è **acceso sia
+  prima sia dopo** il clic, quindi `aspetta_che nome=Rigenera stato=acceso` si soddisfa
+  **subito**, nell'istante stesso in cui parte — e chi legge l'esito («condizione
+  soddisfatta dopo 0,3 secondi») ci crede, mentre il lavoro AI è appena cominciato. La
+  strada affidabile per aspettare la **fine** di un lavoro AI è la modalità «file» di
+  `aspetta_che`, puntata sul documento che quel lavoro produce (`contiene`, o anche senza:
+  basta che cambi rispetto a com'era prima); non basta nemmeno guardare la **data** del
+  file, perché l'applicazione può risalvare l'intera cartella per un motivo che non ha
+  niente a che fare col lavoro appena finito (cambiare lingua dalla tendina, per dirne
+  una). In alternativa, se non c'è un file comodo da guardare, si aspetta **due volte**: prima
+  che il bottone si **spenga** (`stato=spento`), poi che si **riaccenda** (`stato=acceso`)
+  — è il solo modo di usare la modalità «controllo» senza raccontarsi una bugia.

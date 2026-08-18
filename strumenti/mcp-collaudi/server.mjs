@@ -469,6 +469,94 @@ const ATTREZZI = [
   },
 
   {
+    name: "aspetta_che",
+    description:
+      "Aspetta che una condizione si avveri, invece di alternare «clic» e «controlli» a mano. Due " +
+      "modalità, alternative fra loro: (A) lo STATO di un controllo — «nome» (come per «clic») più " +
+      "«stato» («acceso» o «spento») — oppure (B) il CONTENUTO di un file — «file», con «contiene» " +
+      "(una stringa che deve comparire) oppure senza (basta che il file compaia, o cambi rispetto a " +
+      "come si presentava quando l'attesa è partita). Attenzione: un bottone come «Rigenera» è acceso " +
+      "SIA PRIMA SIA DOPO il clic — aspettarne lo stato «acceso» si soddisfa subito, senza che il " +
+      "lavoro sia finito. Per aspettare la fine di un lavoro AI la strada affidabile è il ramo (B) sul " +
+      "file che quel lavoro produce, oppure aspettare prima che il bottone si SPENGA e poi che si " +
+      "riaccenda.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        nome: {
+          type: "string",
+          description: "Modalità (A): l'etichetta del controllo da aspettare, anche parziale, come per «clic».",
+        },
+        stato: {
+          type: "string",
+          enum: ["acceso", "spento"],
+          description: "Modalità (A): lo stato da aspettare per «nome».",
+        },
+        file: {
+          type: "string",
+          description:
+            "Modalità (B): il percorso del file da aspettare. Si può dare alla maniera di WSL (/mnt/c/…) " +
+            "o alla maniera Windows: viene tradotto.",
+        },
+        contiene: {
+          type: "string",
+          description: "Modalità (B): una stringa che deve comparire nel file. Senza, basta che il file compaia o cambi.",
+        },
+        timeout_ms: {
+          type: "number",
+          description: "Quanto aspettare al massimo, in millisecondi (predefinito 60000).",
+        },
+        intervallo_ms: {
+          type: "number",
+          description: "Ogni quanto ricontrollare, in millisecondi (predefinito 1000).",
+        },
+      },
+      additionalProperties: false,
+    },
+    async esegui({ nome, stato, file, contiene, timeout_ms = 60_000, intervallo_ms = 1_000 }) {
+      const modalitaControllo = nome !== undefined || stato !== undefined;
+      const modalitaFile = file !== undefined;
+
+      if (modalitaControllo && modalitaFile) {
+        return testo(
+          "«aspetta_che» vuole UNA modalità sola: o «nome»+«stato» (lo stato di un controllo), o " +
+            "«file» (il contenuto di un file) — non insieme.",
+          true
+        );
+      }
+
+      if (modalitaControllo) {
+        if (!nome || !stato) {
+          return testo("La modalità «controllo» vuole sia «nome» sia «stato» («acceso» o «spento»).", true);
+        }
+        if (stato !== "acceso" && stato !== "spento") {
+          return testo(`Lo stato dev'essere «acceso» o «spento», non «${stato}».`, true);
+        }
+
+        // Il timeout del sottoprocesso dev'essere più largo del timeout_ms chiesto: il loop
+        // vero gira dentro PowerShell (un giro a comando costerebbe centinaia di ms), e se
+        // Node lo uccide alla pari del timeout interno lo fa fuori tempo massimo, prima che
+        // PowerShell abbia avuto modo di riferire da sé il proprio TIMEOUT.
+        return testo(
+          await interfaccia(
+            { azione: "aspetta", nome, stato, timeout_ms, intervallo_ms },
+            { timeoutMs: timeout_ms + 30_000 }
+          )
+        );
+      }
+
+      if (modalitaFile) {
+        return await aspettaFile({ file, contiene, timeoutMs: timeout_ms, intervalloMs: intervallo_ms });
+      }
+
+      return testo(
+        "Serve o «nome»+«stato» (aspetta lo stato di un controllo), o «file» (aspetta il contenuto di un file).",
+        true
+      );
+    },
+  },
+
+  {
     name: "cartella_dati",
     description:
       "Elenca cosa l'applicazione ha scritto nella cartella dati (profilo, storico, opportunità, " +
@@ -500,7 +588,7 @@ const ATTREZZI = [
  * arrivava allo script come un'etichetta vuota, e la casella «non si trovava». Un file
  * regge apostrofi, accenti e testi con gli a capo senza che nessuno debba proteggerli.
  */
-async function interfaccia(scelte) {
+async function interfaccia(scelte, { timeoutMs = 60_000 } = {}) {
   const script = join(QUI, "interfaccia.ps1");
   const scriptWindows = (await esegui(`wslpath -w "${script}"`)).uscita.trim();
 
@@ -516,7 +604,7 @@ async function interfaccia(scelte) {
     // senza questo Set-Clipboard non riempie niente senza nemmeno lamentarsi.
     const esito = await esegui(
       `powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File "${scriptWindows}" -Argomenti '${scelteWindows}' 2>&1`,
-      { timeoutMs: 60_000 }
+      { timeoutMs }
     );
 
     return (esito.uscita + esito.errori).trimEnd();
@@ -524,6 +612,70 @@ async function interfaccia(scelte) {
   } finally {
     await unlink(scelteQui).catch(() => {});
   }
+}
+
+/**
+ * Aspetta il contenuto di un file: puro Node (readFile/existsSync), nessun PowerShell —
+ * qui non c'è un controllo da interrogare, solo un file che l'applicazione scrive su
+ * disco. Senza «contiene» basta che il file compaia (non c'era quando l'attesa è
+ * partita) o cambi rispetto a com'era allora: è la misura onesta per aspettare la fine
+ * di un lavoro AI, dove un bottone come «Rigenera» da solo mente — è acceso sia prima
+ * sia dopo, e perfino la data del file non basta, perché l'applicazione risalva la
+ * cartella intera anche solo cambiando lingua (v. README, «Aspettare un bottone non è
+ * aspettare che il lavoro finisca»).
+ */
+async function aspettaFile({ file, contiene, timeoutMs, intervalloMs }) {
+  const percorso = file.startsWith("/")
+    ? file
+    : (await esegui(`wslpath -u "${file}"`)).uscita.trim() || file;
+
+  const partenza = Date.now();
+  const iniziale = existsSync(percorso) ? await leggiSicuro(percorso) : null;
+
+  while (Date.now() - partenza < timeoutMs) {
+    if (existsSync(percorso)) {
+      const attuale = await leggiSicuro(percorso);
+
+      if (contiene) {
+        if (attuale !== null && attuale.includes(contiene)) {
+          return testo(
+            `Condizione soddisfatta dopo ${secondiTrascorsi(partenza)} secondi: «${file}» contiene «${contiene}».`
+          );
+        }
+      } else if (iniziale === null) {
+        return testo(
+          `Condizione soddisfatta dopo ${secondiTrascorsi(partenza)} secondi: il file «${file}» è comparso.`
+        );
+      } else if (attuale !== null && attuale !== iniziale) {
+        return testo(
+          `Condizione soddisfatta dopo ${secondiTrascorsi(partenza)} secondi: il file «${file}» è cambiato.`
+        );
+      }
+    }
+
+    await attendi(intervalloMs);
+  }
+
+  const motivo = contiene
+    ? `non contiene ancora «${contiene}»`
+    : iniziale === null
+      ? "non è ancora comparso"
+      : "non è ancora cambiato rispetto a com'era all'inizio dell'attesa";
+
+  return testo(`TIMEOUT: dopo ${secondiTrascorsi(partenza)} secondi «${file}» ${motivo}.`);
+}
+
+/** Legge un file senza far cadere l'attesa se in quell'istante è a metà scrittura. */
+async function leggiSicuro(percorso) {
+  try {
+    return await readFile(percorso, "utf8");
+  } catch {
+    return null;
+  }
+}
+
+function secondiTrascorsi(partenza) {
+  return ((Date.now() - partenza) / 1000).toFixed(1);
 }
 
 /** Il nome utente Windows, per trovare %APPDATA% da WSL. */

@@ -26,7 +26,7 @@ Imports TrovaLavoro.Motore
 ''' domani non deve voler dire ricominciare.</para>
 ''' </remarks>
 Public Class PannelloEmail
-    Implements IPannelloArea
+    Implements IPannelloArea, IPannelloCheSalvaUscendo
 
     ''' <summary>Sotto questa altezza la fascia delle azioni non scende: i bottoni ci devono stare.</summary>
     Private Const AltezzaMinimaAzioni As Integer = 60
@@ -146,6 +146,21 @@ Public Class PannelloEmail
         ' destinatario di prima non vale per questa.
         _destinatarioVieneDallAnnuncio = False
         _suggerimenti.SetToolTip(txtDestinatario, Nothing)
+
+        ' E nemmeno quello che le si era scritto. Sotto, la bozza si riempie in due modi
+        ' soli — ripresa dal disco, oppure scritta dall'AI — e ScriviLaBozzaAsync ha due
+        ' uscite anticipate legittime: manca la chiave, manca la lettera. In quei due casi,
+        ' senza questa riga, oggetto e corpo resterebbero quelli della candidatura di
+        ' prima: visibili a video sotto il nome di questa, e scritti nel suo email.json al
+        ' primo salvataggio. Gli allegati non servono qui: RiempiGliAllegati li rifà.
+        _bozza = New BozzaEmail()
+
+        Riempiendo(
+            Sub()
+                txtDestinatario.Text = ""
+                txtOggetto.Text = ""
+                txtCorpo.Text = ""
+            End Sub)
 
         RiempiGliAllegati()
 
@@ -834,6 +849,39 @@ Public Class PannelloEmail
         ' lavoro dell'utente, e nessuno gliel'ha chiesto di confermarlo.
         SalvaLaBozza()
         RaiseEvent TornaAiDocumenti(Me, EventArgs.Empty)
+
+    End Sub
+
+    ''' <summary>
+    ''' Dalla barra di navigazione in cima si esce da qui senza passare dal bottone qui
+    ''' sopra: la bozza si salva lo stesso (<see cref="IPannelloCheSalvaUscendo"/>).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Vale la stessa ragione del bottone — destinatario, spunte e messaggio
+    ''' riscritto sono lavoro dell'utente — con un'aggravante: da lì la perdita era
+    ''' <b>silenziosa</b>, e rientrando P7 rileggeva <c>email.json</c> mostrando la bozza
+    ''' vecchia come se fosse l'ultima. Il messaggio riscritto, poi, era costato una
+    ''' chiamata all'AI.</para>
+    ''' <para>Mentre l'AI scrive non si salva: quello che c'è in memoria è una bozza a
+    ''' metà, e metterla su disco sopra quella buona sarebbe peggio del male. Non dovrebbe
+    ''' potersi verificare — la barra è spenta finché il lavoro è in corso — ma questo
+    ''' metodo non può contare su chi lo chiama.</para>
+    ''' <para>Non solleva mai: qui si sta cambiando pannello, e un disco che non si lascia
+    ''' scrivere non deve inchiodare la navigazione. Si dice nella fascia di stato, dove il
+    ''' pannello dice le altre cose che non gli riescono.</para>
+    ''' </remarks>
+    Private Sub SalvaUscendo() Implements IPannelloCheSalvaUscendo.SalvaUscendo
+
+        If AiAlLavoro Then Return
+
+        Try
+            SalvaLaBozza()
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+
+            Racconta($"Non sono riuscita a salvare la bozza: {ex.Message}", StileApp.Pericolo)
+        End Try
 
     End Sub
 

@@ -508,6 +508,137 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function UscireDallaBarraInCimaSalvaLaBozzaComeIlBottone() As Task
+
+            ' Difetto visto sull'applicazione vera il 2026-08-18: la bozza si salvava
+            ' uscendo da «◀ Torna ai documenti», ma dalla barra di navigazione in cima si
+            ' lasciava P7 senza passare di lì — e destinatario, spunte e messaggio
+            ' riscritto (costato una chiamata all'AI) sparivano in silenzio. Peggio:
+            ' rientrando, P7 rileggeva email.json e mostrava la bozza vecchia come se fosse
+            ' l'ultima. Qui si chiama l'aggancio che la finestra usa a ogni cambio pannello.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ScriviDocumenti(candidatura, "CV_Luca_Rossi.pdf")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    Casella(pannello, "txtDestinatario").Text = "lavoro@rossi.it"
+                    Casella(pannello, "txtCorpo").Text = "Riscritto a mano da me."
+
+                    DirectCast(pannello, IPannelloCheSalvaUscendo).SalvaUscendo()
+
+                    Dim riletta As Opportunita = contesto.Opportunita.Carica(candidatura.Cartella)
+                    Dim bozza As BozzaEmail = BozzaEmail.DaJson(riletta.Email)
+
+                    Assert.IsNotNull(bozza, "la bozza è su disco anche senza premere il bottone")
+                    Assert.AreEqual("lavoro@rossi.it", bozza.Destinatario, "il destinatario scritto a mano")
+                    Assert.Contains("Riscritto a mano da me.", bozza.Corpo, "e il messaggio riscritto")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UscireDueVolteDiFilaNonFaDanno() As Task
+
+            ' L'aggancio si chiama a ogni uscita, e i bottoni propri del pannello salvano
+            ' comunque per conto loro: le due strade si sovrappongono per costruzione, e
+            ' devono poterlo fare senza che la seconda rovini quel che ha fatto la prima.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ScriviDocumenti(candidatura, "CV_Luca_Rossi.pdf")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    Casella(pannello, "txtDestinatario").Text = "lavoro@rossi.it"
+
+                    Dim uscita As IPannelloCheSalvaUscendo = DirectCast(pannello, IPannelloCheSalvaUscendo)
+                    uscita.SalvaUscendo()
+                    uscita.SalvaUscendo()
+
+                    Dim bozza As BozzaEmail = BozzaEmail.DaJson(
+                        contesto.Opportunita.Carica(candidatura.Cartella).Email)
+
+                    Assert.AreEqual("lavoro@rossi.it", bozza.Destinatario, "la bozza è quella")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaCandidaturaNonEreditaIlMessaggioDiQuellaDiPrima() As Task
+
+            ' Trovato dalla revisione del 2026-08-18, guardando l'aggancio d'uscita qui
+            ' sopra. Il pannello si riusa da una candidatura all'altra, e la bozza in
+            ' memoria si riempie in due modi soli: ripresa dal disco, o scritta dall'AI.
+            ' Ma la scrittura ha due uscite anticipate legittime — manca la chiave, manca
+            ' la lettera — e in quei casi la bozza restava quella di prima: bastava
+            ' cambiare pannello perché finisse nell'email.json della candidatura sbagliata.
+            ' Qui la seconda candidatura non ha lettera, che è il caso più facile da avere.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ScriviDocumenti(candidatura, "CV_Luca_Rossi.pdf")
+
+                    ' La prima: le si scrive il messaggio e lo si salva.
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    Casella(pannello, "txtDestinatario").Text = "prima@rossi.it"
+                    DirectCast(pannello, IPannelloCheSalvaUscendo).SalvaUscendo()
+
+                    Assert.Contains("mi candido per la posizione",
+                                    BozzaEmail.DaJson(
+                                        contesto.Opportunita.Carica(candidatura.Cartella).Email).Corpo,
+                                    "la prima ha il suo messaggio")
+
+                    ' La seconda: senza lettera, l'email non si può scrivere.
+                    Dim senzaLettera As New Opportunita With {
+                        .Annuncio = JsonNode.Parse(AnnuncioLetto),
+                        .Creata = New Date(2026, 8, 11)}
+                    senzaLettera.Avanza(StatoOpportunita.Interessante, senzaLettera.Creata)
+                    senzaLettera.Avanza(StatoOpportunita.Generata, senzaLettera.Creata)
+                    contesto.Opportunita.Salva(senzaLettera)
+
+                    Await pannello.MostraLaCandidaturaAsync(senzaLettera)
+
+                    Assert.IsEmpty(Casella(pannello, "txtCorpo").Text,
+                                   "a video non deve restare il messaggio dell'altra")
+
+                    ' Ed è qui che prima si faceva il danno: uscendo dalla barra.
+                    DirectCast(pannello, IPannelloCheSalvaUscendo).SalvaUscendo()
+
+                    Dim sua As BozzaEmail = BozzaEmail.DaJson(
+                        contesto.Opportunita.Carica(senzaLettera.Cartella).Email)
+
+                    Assert.IsEmpty(If(sua?.Corpo, ""), "e nemmeno nel suo email.json")
+                    Assert.IsEmpty(If(sua?.Destinatario, ""), "né il destinatario dell'altra")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SenzaCandidaturaUscireNonScriveNiente() As Task
+
+            ' Si entra in P7 e si esce subito, senza che ci sia una candidatura aperta:
+            ' non c'è niente da salvare, e non deve succedere niente.
+            Dim compositore As New CompositoreFinto
+
+            Await ConPannelloAsync(compositore,
+                Function(pannello, contesto, candidatura)
+                    DirectCast(pannello, IPannelloCheSalvaUscendo).SalvaUscendo()
+
+                    Assert.IsNull(contesto.Opportunita.Carica(candidatura.Cartella).Email,
+                                  "nessuna bozza inventata dal nulla")
+                    Assert.IsEmpty(compositore.Chiamate, "e nessuna chiamata all'AI")
+                    Return Task.CompletedTask
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Async Function DichiararlaSpeditaLaPortaAInviataConLaData() As Task
 
             Dim compositore As New CompositoreFinto

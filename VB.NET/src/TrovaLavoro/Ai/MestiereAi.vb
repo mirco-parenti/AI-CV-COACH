@@ -139,14 +139,37 @@ Namespace Ai
                                              Optional annulla As CancellationToken = Nothing) _
                                              As Task(Of RispostaAi)
 
+            Dim uscita As RispostaAi
             Try
-                Return Await Client.ChiediAsync(prompt.Modello, contenuto, prompt.MaxToken, annulla).
+                uscita = Await Client.ChiediAsync(prompt.Modello, contenuto, prompt.MaxToken, annulla).
                     ConfigureAwait(False)
             Catch ex As ArgumentException
                 Throw ErroreDiPool(prompt.Id, ex)
             End Try
 
+            Annota(prompt, uscita)
+            Return uscita
+
         End Function
+
+        ''' <summary>
+        ''' Segna nel diario quanto è costata la chiamata e quanto è andata vicina al tetto
+        ''' del prompt, se qualcuno tiene il conto.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È qui e non nel client perché qui — e solo qui — il prompt e la risposta
+        ''' stanno nella stessa riga: il client riceve un livello e un numero, e non saprebbe
+        ''' dire <b>quale</b> prompt del pool andare a ritoccare.</para>
+        ''' <para>Si annota solo quello che è arrivato. Una chiamata fallita non ha token da
+        ''' contare, e una troncata solleva prima di tornare qui: quella la si riconosce dal
+        ''' fatto che il tetto risulterà toccato dalle righe che <b>le stanno intorno</b>,
+        ''' ed è esattamente il segnale che questo diario esiste per dare in anticipo.</para>
+        ''' </remarks>
+        Private Sub Annota(prompt As Prompt, uscita As RispostaAi)
+
+            Client.Diario?.Annota(prompt.Id, prompt.MaxToken, uscita)
+
+        End Sub
 
         ''' <summary>
         ''' Sbuccia il JSON dalla risposta.
@@ -180,15 +203,22 @@ Namespace Ai
         ''' <para>Il contesto sta nel <b>primo</b> messaggio e non si ripete a ogni turno:
         ''' profilo, annuncio e giudizi sono le stesse cose per tutta la conversazione, e
         ''' rimandarle ogni volta sarebbe solo un conto più salato (cap. 02.5).</para>
+        ''' <para><b>Torna la risposta intera, non solo il testo.</b> Qui un troncamento
+        ''' non è un errore (v. <see cref="ClientClaude.ChiediInStreamingAsync"/>): il
+        ''' testo arrivato è già a video e si legge. Ma allora l'unico che può dirlo è il
+        ''' pannello, e per dirlo deve saperlo — se qui si restituisse il solo
+        ''' <c>Testo</c>, <see cref="RispostaAi.MotivoFine"/> morirebbe in questa riga e
+        ''' la conversazione si fermerebbe a metà frase senza che nessuno lo dichiari.</para>
         ''' </remarks>
         ''' <param name="battute">I turni già scambiati, dal più vecchio al più recente.</param>
         ''' <param name="pezzo">Dove consegnare ogni pezzo di risposta appena arriva.</param>
+        ''' <returns>La risposta intera: il testo del turno e il motivo per cui è finito.</returns>
         Protected Async Function EseguiInStreamingAsync(idPrompt As String, etichetta As String,
                                                         valori As IDictionary(Of String, String),
                                                         battute As IReadOnlyList(Of TurnoChat),
                                                         pezzo As Action(Of String),
                                                         Optional annulla As CancellationToken = Nothing) _
-                                                        As Task(Of String)
+                                                        As Task(Of RispostaAi)
 
             Dim prompt As Prompt = CaricaPrompt(idPrompt)
             Dim testo As String = Riempi(prompt, etichetta, valori)
@@ -204,7 +234,8 @@ Namespace Ai
                 Throw ErroreDiPool(prompt.Id, ex)
             End Try
 
-            Return uscita.Testo
+            Annota(prompt, uscita)
+            Return uscita
 
         End Function
 

@@ -128,6 +128,8 @@ Public Class FormPrincipale
     ''' </summary>
     Private Sub MostraPannello(pannello As Control, bottone As Button)
 
+        SalvaChiEsce(pannello)
+
         For Each figlio As Control In pnlAreaCentrale.Controls
             figlio.Visible = (figlio Is pannello)
         Next
@@ -140,6 +142,32 @@ Public Class FormPrincipale
         Next
 
         pnlLogo.BringToFront()
+
+    End Sub
+
+    ''' <summary>
+    ''' Dà al pannello che si sta lasciando l'occasione di mettere al sicuro quello che
+    ''' l'utente gli ha scritto dentro (<see cref="IPannelloCheSalvaUscendo"/>).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Passa di qui <b>ogni</b> cambio di pannello, compresi quelli che partono
+    ''' dalla barra in cima: è il buco che faceva perdere la bozza dell'email uscendo da P7
+    ''' senza toccare il suo «◀ Torna ai documenti» *(2026-08-18)*. I bottoni propri dei
+    ''' pannelli continuano a salvare per conto loro — chiamarlo due volte non fa danno,
+    ''' ed è meglio di affidarsi a un solo dei due passaggi.</para>
+    ''' <para>Non tocca il pannello che sta per essere mostrato: entrando non c'è ancora
+    ''' niente da salvare, e chiamarlo lì scriverebbe sopra il disco un contenuto appena
+    ''' letto dal disco.</para>
+    ''' </remarks>
+    Private Sub SalvaChiEsce(entrante As Control)
+
+        For Each figlio As Control In pnlAreaCentrale.Controls
+
+            If figlio Is entrante OrElse Not figlio.Visible Then Continue For
+
+            TryCast(figlio, IPannelloCheSalvaUscendo)?.SalvaUscendo()
+
+        Next
 
     End Sub
 

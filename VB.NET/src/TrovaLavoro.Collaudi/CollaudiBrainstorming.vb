@@ -180,6 +180,41 @@ Namespace Motore
 
         End Function
 
+        <TestMethod>
+        Public Async Function UnTurnoTroncatoTieneIlTestoELoDichiara() As Task
+            ' In streaming il troncamento non è un errore — quel che è arrivato è buono e
+            ' resta — ma dev'essere dichiarabile: senza questo, la frase si interrompe a
+            ' metà e chi legge crede che l'AI non avesse altro da dire.
+            Dim finto As New BrainstormatoreFinto()
+            finto.DiraTroncando("Reggi bene sui tre anni di magazzino, però il muletto")
+
+            Dim ragionamento As New Brainstorming(finto, Candidatura(), Profilo())
+            Await ragionamento.ApriAsync(Nothing)
+
+            Assert.IsTrue(ragionamento.UltimoTurnoTroncato, "il turno si è fermato contro il tetto")
+            Assert.HasCount(1, ragionamento.Battute, "e il testo arrivato resta in conversazione")
+            Assert.AreEqual("Reggi bene sui tre anni di magazzino, però il muletto",
+                            ragionamento.Battute(0).Testo, "per intero, com'era arrivato")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LAvvisoDelTroncamentoNonSiAppiccicaAlTurnoDopo() As Task
+            ' Un avviso rimasto acceso da un turno all'altro direbbe una bugia sul turno
+            ' nuovo, che invece è finito per conto suo.
+            Dim finto As New BrainstormatoreFinto()
+            finto.DiraTroncando("mi fermo qui perché").Dira("ecco, adesso finisco la frase.")
+
+            Dim ragionamento As New Brainstorming(finto, Candidatura(), Profilo())
+            Await ragionamento.ApriAsync(Nothing)
+            Assert.IsTrue(ragionamento.UltimoTurnoTroncato, "il primo turno era troncato")
+
+            Await ragionamento.RispondiAsync("va' avanti", Nothing)
+
+            Assert.IsFalse(ragionamento.UltimoTurnoTroncato, "il secondo no, e l'avviso si spegne")
+
+        End Function
+
     End Class
 
     ''' <summary>

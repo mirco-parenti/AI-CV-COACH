@@ -330,6 +330,46 @@ Namespace Dati
             Assert.Throws(Of JsonException)(Function() Registro.DaJson("[1, 2, 3]"))
         End Sub
 
+        <TestMethod>
+        Public Sub IlDestinatarioDellaBozzaArrivaNellIndice()
+            ' Cap. 07.3: l'indice deve saper rispondere «a chi ho scritto?» senza far
+            ' aprire una candidatura alla volta. Il valore resta quello della bozza — qui
+            ' si ricopia soltanto.
+            ConArchivioTemporaneo(
+                Sub(indice, candidature, cartella)
+                    ' Attenzione al nome: in VB una locale che si chiama come la funzione
+                    ' che la contiene la copre, e la chiamata viene letta come
+                    ' un'indicizzazione (trappola già pagata in ContestoApp.MontaAi).
+                    Dim daMandare As Opportunita = Candidatura("Rossi S.p.A.")
+                    daMandare.Email = JsonNode.Parse(
+                        "{""destinatario"": ""lavoro@rossi.it"", ""oggetto"": ""Candidatura""}")
+                    candidature.Salva(daMandare)
+
+                    Assert.AreEqual("lavoro@rossi.it", indice.Carica().Voci.Single().Destinatario,
+                                    "il destinatario arriva dalla bozza")
+
+                    ' E sopravvive al giro su disco, che è la ragione per cui sta nell'indice.
+                    indice.Salva(indice.Carica())
+                    Dim riletto As Registro = Registro.DaJson(File.ReadAllText(cartella.FileRegistro))
+
+                    Assert.AreEqual("lavoro@rossi.it", riletto.Voci.Single().Destinatario,
+                                    "e si rilegge dal file")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaBozzaIlDestinatarioRestaVuotoSenzaLamentarsi()
+            ' Una candidatura si passeggia a lungo prima di avere un'email: finché la
+            ' bozza non c'è il campo è vuoto, e non è un guasto da segnalare.
+            ConArchivioTemporaneo(
+                Sub(indice, candidature, cartella)
+                    candidature.Salva(Candidatura("Bianchi S.r.l."))
+
+                    Assert.IsNull(indice.Carica().Voci.Single().Destinatario,
+                                  "nessuna bozza, nessun destinatario")
+                End Sub)
+        End Sub
+
     End Class
 
 End Namespace
