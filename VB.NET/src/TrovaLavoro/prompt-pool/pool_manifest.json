@@ -1,6 +1,6 @@
 {
   "formato": 1,
-  "versione_pool": "1.08",
+  "versione_pool": "1.09",
   "data": "2026-08-18",
   "file": [
     {
@@ -89,19 +89,19 @@
     },
     {
       "percorso": "rifinitura/umanizzazione_frasi.en.md",
-      "sha256": "865f39ef682f465369e7963229726f2989788597ab0f30b25defb0597dc40502"
+      "sha256": "25a5272410815c4d7ca723cce428d6c2079ecef486b6d6ae1611cac73e2c19f9"
     },
     {
       "percorso": "rifinitura/umanizzazione_frasi.it.md",
-      "sha256": "9dd21418e414ae4a0ff3ad00662b5accbe244d8b4654cad34c39018d58602b02"
+      "sha256": "89894c311db3efe323a2808ff8caa01b67804eb2ac374d5c220c6a1c13d1ee8d"
     },
     {
       "percorso": "rifinitura/umanizzazione_prosa.en.md",
-      "sha256": "c1899e9af0af594c33d1d4396b7958094b43f79c1da9aa15477cfc275a89c3c6"
+      "sha256": "df2f4edd4c1bef06128ec08b5b677860310d433722691e5a0959a66cbb33a111"
     },
     {
       "percorso": "rifinitura/umanizzazione_prosa.it.md",
-      "sha256": "3ac37ef1a801464db4d454ac4c6fb1f4ca1a23ad46d781b6c5e39dc2c7ac0a85"
+      "sha256": "71e94c225e327c863b4492f6ec956fd9ff2a15187fa24cf6dd11e74155640649"
     },
     {
       "percorso": "rifinitura/umanizzazione_sintesi.en.md",

@@ -1728,3 +1728,113 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Ho buttato il registro invece di riscriverlo a mano.** Modificare un file dell'utente per aggiustare un mio errore sarebbe stato peggio del difetto: l'indice è dichiaratamente rigenerabile, e ho usato quella porta.
 
 💡 *Mia intuizione / scelta ragionata* — Il conto della serata: 598 collaudi automatici verdi, due difetti veri trovati in venti minuti di uso vero. Non è una critica al banco — quei due erano fuori dalla sua portata per costruzione: uno viveva nel dialogo fra due pannelli che il banco prova separatamente, l'altro **era** il banco. È la conferma di una cosa che sospettavo da T4: il collaudo automatico difende da ciò che si rompe, l'uso vero rivela ciò che non è mai stato collegato. Servono tutti e due, e il secondo lo può fare solo chi il programma lo usa per il suo lavoro — cioè io.
+
+### Step 2.22 — T7a: la lingua che viaggia dall'annuncio fino alla pagina stampata
+
+*Ho aperto T7 il 15 agosto e l'ho spezzata in tre: la lingua (T7a), l'anti-slop (T7b), il brainstorming (T7c). La prima è quella che sembrava più grossa e si è rivelata la più corta, perché quasi tutti gli anelli erano già mezzi costruiti da tappe precedenti — solo che nessuno li aveva mai collegati.*
+
+**Cosa ho fatto**
+- **La catena intera**: l'annuncio dichiara la sua lingua, l'opportunità se la porta dietro, il generatore chiede al pool quella variante, l'impaginazione intitola le sezioni in quella lingua e il nome del file la scrive in sigla.
+- **Un posto solo che decide**: `LinguaDocumenti`. Vuoto è italiano, `it` è italiano, tutto il resto è inglese; e una **terza lingua** viene dichiarata come tale, così P6 può dire che l'inglese è un ripiego e non una scelta.
+- **Pool 1.06**: le tre varianti inglesi di `cv_base`, `cv_mirato` e `lettera`, che non sono traduzioni e non contengono nessun «traduci»; e `analisi_annuncio` guadagna due campi in uscita, `lingua` e `contatto`.
+- **Il destinatario dall'annuncio**, che chiude un debito di T6: se l'annuncio scrive un indirizzo per esteso, P7 lo propone — nella casella dove scriverei io, cancellabile come se l'avessi scritto io, e **solo al primo arrivo**, mai sopra una bozza ripresa.
+- **La tendina di P6 si sveglia**: cambiare lingua chiede conferma e riscrive i documenti, invece di essere un'impostazione silenziosa.
+- Da 599 a **623 collaudi** verdi, poi 628 con la coda del giorno dopo.
+
+**Cosa ho imparato**
+- **Una regola scritta due volte è già una regola divergente.** Le etichette stampate nei documenti erano costanti italiane: un CV inglese sarebbe uscito con «Esperienze professionali» sopra del testo inglese — un documento finito a metà che *nessun collaudo sui prompt avrebbe mai preso*, perché il pool il suo lavoro l'aveva fatto. E quando ho messo la regola della lingua accanto a quella delle etichette, le due copie **non dicevano già la stessa cosa**: un annuncio tedesco andava in inglese per il pool e in italiano per le etichette.
+- **La lingua si legge nell'annuncio, non nell'interfaccia.** Un annuncio italiano per un posto a Dublino resta italiano, e un annuncio inglese dentro un portale con l'interfaccia italiana resta inglese. Conta il testo.
+- **Il vuoto deve cadere sull'italiano.** Le candidature nate prima di T7 il campo `lingua` non ce l'hanno: se il vuoto valesse «inglese», il programma le riscriverebbe tutte all'indietro. È lo stesso ragionamento che T5c aveva applicato agli stati.
+
+**Dove ho faticato / cosa non era ovvio**
+- **Quanto era già lì.** `LibreriaPrompt.Carica` sceglieva varianti di lingua **da T2**, senza aver mai avuto niente fra cui scegliere; `NomiDocumenti` sapeva già scrivere `EN`; `Opportunita.Lingua` era già salvata e già nel registro. La tappa è stata più «collegare» che «costruire», e riconoscerlo mi è costato un giro di lettura dei capitoli.
+- **La tendina dice «Inglese», non «English».** Sembra un dettaglio e invece è la regola dell'interfaccia: il programma parla **una lingua sola** con me, anche quando scrive documenti in un'altra.
+
+**Cosa ho deciso e perché**
+- **Il profilo resta uno, e resta in italiano.** Le rese inglesi vivono nei documenti generati. Un secondo profilo da tenere allineato sarebbe stato una seconda verità, e nel giro di due tappe avrebbe cominciato a divergere.
+- **Vietato l'upgrade nella traduzione**, scritto dentro i prompt inglesi con la sua tentazione accanto: la resa generosa va rifiutata **soprattutto** quando è quella che combacerebbe con un requisito dell'annuncio. Un'invenzione fatta in traduzione è pur sempre un'invenzione.
+- **Le chiavi del JSON restano italiane.** Le legge il programma, non chi riceve il CV: tradurle avrebbe rotto impaginazione, archivi e anteprime senza cambiare niente per il lettore.
+
+💡 *Mia intuizione / scelta ragionata* — Il pezzo che mi porto è che **la lingua non è un'impostazione, è un dato del caso**. Se fosse stata una preferenza mia in un menù, il programma avrebbe dovuto chiedermela ogni volta e io avrei dovuto saperla; essendo un attributo dell'annuncio, la sa lui e me la propone, e io devo solo poter dire di no. Le cose che il programma può dedurre dal materiale non dovrebbero mai diventare domande.
+
+### Step 2.23 — Il collaudo di T7a, e l'oggetto che parlava ancora italiano
+
+*Un annuncio inglese vero, pescato da un portale e portato fino ai file. Volevo vedere se la catena reggeva dall'inizio alla fine, e ho scelto il caso più scomodo che sapevo costruire: un annuncio in inglese dentro una pagina con l'interfaccia italiana, che conteneva anche un secondo annuncio in italiano.*
+
+**Cosa ho fatto**
+- **Indeed col filtro *Lingua delle offerte = English***, e ne è uscito un *External Warehouse Manager* da Fedrigoni, a Caponago. Match 0,8 su 5 — basso, ma non era quello che stavo misurando.
+- **Il giro intero su una cartella usa-e-getta**, dati veri mai toccati: cattura, analisi, confronto, generazione, esportazione in DOCX e PDF.
+- **Quello che ha retto**: `lingua: "en"` presa dall'annuncio e non dall'interfaccia; il confronto **fra due lingue** (requisiti in inglese, lettura d'insieme e ponti in italiano, la lingua di chi legge); 🎯 CV-2 e lettera **scritti in inglese, non tradotti**; le etichette *Work experience / Other experience / Skills / Education* nei documenti veri; la tendina provata **in tutte e due le direzioni**, perché rispondendo No rimette la lingua di prima invece di lasciare un pannello che ne dichiara una e mostra documenti scritti in un'altra.
+- **Due cose non provate, e l'ho scritto**: `Driving licence`, perché il mio profilo la patente non la dichiara e quella riga non si stampa mai; e il destinatario dall'annuncio, perché quell'annuncio un indirizzo non lo pubblica — il campo è restato **vuoto**, che è la promessa mantenuta, non tradita.
+- **Pool 1.07** subito dopo, per il difetto che il giro ha trovato.
+
+**Cosa ho imparato**
+- **`Cover letter` non era sparita: era nei metadati.** L'ho cercata nel corpo del documento e non c'era. Sta in `dc:title` e in `/Title`, dove il progetto aveva deciso di metterla, ed è lì che va cercata.
+- **L'unico italiano rimasto nel CV inglese era giusto che restasse**: il **nome proprio di un corso**, tenuto in originale con la glossa inglese fra parentesi. È esattamente il comportamento che il prompt chiede, e vederlo capitare da solo vale più di un collaudo.
+- **Il banco non poteva vedere il difetto dell'email.** I collaudi coi finti **non caricano nessun prompt**: guardano la lingua dichiarata, non il testo che parte davvero. Da lì i tre collaudi nuovi che leggono il messaggio spedito all'API.
+
+**Dove ho faticato / cosa non era ovvio**
+- **La diagnosi giusta è arrivata alla seconda.** L'email era a metà del guado — corpo inglese, oggetto italiano — e la prima spiegazione che mi ero dato era imprecisa. Il prompt italiano la regola ce l'aveva, sezione 3: «nella stessa lingua della lettera», e il **corpo l'ha seguita**. A disobbedire è stata la **formula dell'oggetto**, che la sezione 1 detta parola per parola in italiano.
+- **Rinominare un prompt rompe il pool integrato** finché non lo si risigilla: il manifest *è* l'elenco dei file attesi. E il bump ancora la versione in **tre** punti dei collaudi della libreria, non due.
+
+**Cosa ho deciso e perché**
+- **Il rimedio pieno, non la riga in più.** Potevo scrivere «scrivi nella lingua della lettera» e cavarmela con un file solo. Avrei però messo la regola della lingua in **due posti** — ed è l'errore che T7a aveva appena finito di correggere sulle etichette, dove le due copie erano già divergenti. La lingua si decide in un posto solo e da lì viaggia: fino a 1.06 arrivava a P6 e si fermava, adesso arriva anche a P7.
+- **Il difetto della bozza persa uscendo da P7 l'ho annotato, non corretto.** Toccava il disegno del pannello ed era fuori dal mandato di quella sera; l'ho messo in `in_sospeso.md` sotto T6.
+
+💡 *Mia intuizione / scelta ragionata* — La lezione l'avevo già pagata col Pool 1.05, dove un esempio che dava del tu all'azienda aveva battuto la regola che lo vietava due sezioni più su. Qui è tornata identica sotto un altro vestito: **fra una regola generale e una forma concreta da imitare, vince la forma**. Comincio a pensare che sia la cosa più importante che ho imparato sui prompt in tutto il progetto — e che quando ne rileggo uno, il posto da guardare per primo non siano le regole ma gli esempi, perché sono quelli che il modello copia davvero.
+
+### Step 2.24 — T7b: l'anti-slop, e perché i prompt sono tre e non uno
+
+*La cartella `rifinitura/` era nel progetto dal capitolo 04.3 ed era rimasta vuota per sei tappe. Il capitolo ne prevedeva **un** prompt; facendo l'inventario dei campi da rifinire ne ho trovati tre, e incompatibili fra loro.*
+
+**Cosa ho fatto**
+- **Pool 1.08, tre prompt in due lingue**: `umanizzazione_sintesi` per il sommario del CV, `umanizzazione_frasi` per le descrizioni delle esperienze — che sono **frasi nominali** e devono restarlo — e `umanizzazione_prosa` per il corpo di lettera ed email.
+- **La rifinitura dentro la pipeline**, subito dopo ogni documento: da quattro passi a **sei**. Così la lettera riceve un CV **già rifinito** e i due non raccontano la stessa storia con parole diverse.
+- **Il «prima» si conserva accanto al documento, mai dentro**: il 🎯 CV-2 finisce nel prompt della lettera e la lettera in quello dell'email, e un campo di servizio viaggerebbe con loro.
+- **In P6 la casella che stava lì spenta da T4** accende finalmente il prima/dopo, campo per campo.
+- **659 collaudi** verdi, versione 0.3.030.
+
+**Cosa ho imparato**
+- **Su una frase nominale «varia la lunghezza dei periodi» è l'istruzione sbagliata**: la trasformerebbe in una frase. È stato l'argomento che ha deciso i tre prompt — le tre forme non si possono servire con le stesse parole.
+- **L'anti-invenzione conviene renderla strutturale prima che scritta.** Al modello arrivano **solo i campi-prosa**: nomi, aziende, date, competenze e titoli non entrano nella richiesta, e quel che non entra non può tornare cambiato. La regola smette di essere una promessa dentro un prompt e diventa una proprietà della chiamata.
+- **In VB una variabile locale che si chiama come una funzione la copre**, e la chiamata viene letta come indicizzazione. L'ho ripagata due volte in un pomeriggio (`campi`/`Campi`, `casella`/`Casella`).
+
+**Dove ho faticato / cosa non era ovvio**
+- **Il prezzo dei tre prompt è una chiamata in più sul CV** — sommario e descrizioni sono due generi diversi, quindi due chiamate. L'ho scelto sapendo il costo, perché l'alternativa era un prompt unico che conteneva tutte e tre le forme e lasciava al modello la scelta di quale imitare: cioè l'errore già pagato col Pool 1.05 e col 1.07.
+- **Nessun documento deve poter uscire peggio di com'è entrato.** Un pezzo dimenticato, uno vuoto, un id inventato, una risposta illeggibile: in ogni caso resta il testo originale. E una rifinitura che fallisce non fa fallire la generazione — l'annullamento invece deve passare, perché non è un inciampo dell'AI, sono io che ho premuto Annulla.
+
+**Cosa ho deciso e perché**
+- **Umanizzare tutti e quattro i testi, ma ciascuno nel modo consono al suo genere.** Era la domanda di partenza e la risposta ovvia («uno solo, il più visibile») avrebbe lasciato fuori proprio la lettera, che è il testo che l'azienda legge per primo.
+- **Fuori di proposito**: apertura, chiusura e firma della lettera, e l'oggetto dell'email. Non sono slop, sono le formule che un lettore si aspetta — e l'oggetto è quello che il Pool 1.07 aveva appena dettato parola per parola in due lingue.
+- **La casella di P6 è una casella di vista, non un interruttore.** La rifinitura si fa sempre; quella spunta decide solo se mostrarmi cos'è cambiato. L'interruttore vero appartiene alle Impostazioni, che sono di T9, e l'ho scritto fra le cose in sospeso.
+
+💡 *Mia intuizione / scelta ragionata* — Mi ha colpito che la guardia più forte di tutta la tappa non sia una frase di prompt ma **una scelta su cosa mandare**. Potevo spedire il documento intero e scrivere «non toccare i nomi e le date»: sarebbe stato più semplice, avrebbe funzionato quasi sempre, e quel «quasi» sarebbe stato invisibile finché un giorno non avesse cambiato un'azienda. Mandando solo i campi-prosa, quel giorno non può arrivare. Le regole che si possono rendere impossibili da violare non vanno scritte: vanno costruite.
+
+### Step 2.25 — Il collaudo dell'anti-slop, e la regola che perdeva contro il permesso
+
+*T7b era verde al banco. Ma i collaudi coi finti non caricano prompt — l'ho imparato a T7a — quindi quanto valessero davvero quei sei testi non lo sapeva nessuno. Il 18 agosto ho fatto il giro con l'AI vera, in italiano e in inglese, con una griglia di lettura decisa prima di guardare i risultati.*
+
+**Cosa ho fatto**
+- **Un giro intero su cartella usa-e-getta**: profilo importato dal mio CV in PDF, un annuncio italiano incollato a mano e costruito con **gap veri** (patentino del muletto, SAP, inglese scritto B2, due anni di esperienza che non ho). Match 1,5 su 5.
+- **La lettura campo per campo**, prima a occhio e poi con un confronto parola per parola fatto a macchina: due controlli indipendenti, confrontati fra loro.
+- **Quello che ha retto**: nessun grado mai rafforzato in nessuno dei nove campi cambiati, nessun fatto nuovo, le frasi nominali rimaste nominali, **quattro descrizioni su cinque restituite identiche**, i gap onesti sempre espliciti — e in inglese perfino **spostati in evidenza**, da subordinata concessiva a proposizione principale. Un refuso della generazione («la mia inglese») è stato pure corretto.
+- **Tre difetti trovati**, curati nel **Pool 1.09** e **riprovati con l'AI** invece che dati per buoni.
+- **Il difetto di P7 corretto**: la bozza dell'email ora porta con sé la lingua in cui è nata.
+- **663 collaudi** verdi, versione 0.3.031.
+
+**Cosa ho imparato**
+- **Rafforzare una regola non serve se a batterla è un permesso.** Le lineette lunghe venivano tolte a metà; ho irrobustito la riga che le vieta e al giro dopo la lettera è tornata **identica, con tutte e sei al loro posto**. Il problema non era la regola ma dove stava: a vincere era il **permesso di non cambiare** — «se il testo è già naturale restituiscilo identico» — che parla del **testo intero**, mentre l'elenco dei tic parla di un dettaglio. Fra due istruzioni che si contraddicono, vince quella che parla di tutto. La cura vera è stata scrivere l'eccezione dentro il permesso: un testo con una lineetta usata come pausa non è mai «già naturale».
+- **Una lista di parole vietate può cancellare un fatto.** «End-to-end» era finito fra i riempitivi inglesi, e nel mio CV è diventato «Testing of AI applications»: ma *end-to-end testing* è un tipo preciso di test, non aria. In italiano non era successo, perché quella lista non lo conteneva. Adesso in tutte e due c'è la regola che mancava: un termine del mestiere è un fatto.
+- **Riformulare non è riassumere, e il modello non lo sa da sé.** Nella lettera italiana era sparita una proposizione intera — quella che legava la mia esperienza al gestionale che non conosco. Il divieto di togliere c'era già, ma generico: ci ho messo accanto la forma concreta, cioè l'esempio.
+
+**Dove ho faticato / cosa non era ovvio**
+- **«Genera CV + lettera» su una candidatura già generata non rigenera niente**: apre P6 e mostra quelli che ci sono. Ho creduto per un giro intero di aver provato i prompt nuovi, e stavo guardando i vecchi risultati. Me ne sono accorto dai **timestamp dei file**, non dallo schermo.
+- **Aspettare che un bottone si riaccenda non è aspettare che il lavoro finisca.** Ho dovuto aspettare che cambiasse il **contenuto** del file della lettera: l'app risalva la cartella anche solo cambiando lingua, quindi nemmeno la data del file bastava.
+- **Distinguere «non ha voluto cambiare» da «non ci è riuscita» dall'esterno non si può.** Quando la lettera è tornata identica ho dovuto leggere il codice della pipeline per sapere che un fallimento me lo direbbe. È un'informazione che ho dovuto cercare, e l'ho annotata.
+
+**Cosa ho deciso e perché**
+- **Le cure vanno nel prompt, non nel codice.** Tutti e tre i difetti erano difetti di istruzioni, e il posto delle istruzioni è il pool: versione nuova, impronte rigenerate, changelog che racconta anche il tentativo fallito — perché il tentativo fallito è la parte che insegna.
+- **Il difetto di P7 l'ho fatto correggere subito**, invece di annotarlo come il suo gemello di T7a: erano quindici righe, non toccava il disegno, e lasciava il programma a dire una cosa falsa — mostrava un'email italiana per una candidatura inglese, in silenzio.
+- **Ma non si riscrive da sé.** Se le lingue non combaciano il pannello **lo dice** e indica il bottone; non rifà il messaggio, perché quel testo può essere già passato per le mie mani. È la stessa regola per cui una bozza salvata non viene mai sovrascritta all'arrivo.
+
+💡 *Mia intuizione / scelta ragionata* — Il conto della giornata: sei prompt verdi al banco, tre difetti veri in un giro solo con l'AI vera, e uno di quei tre curato **due volte** perché la prima cura non aveva funzionato. È la stessa lezione dello Step 2.21 spostata dai pannelli ai prompt: il banco difende da ciò che si rompe, l'uso vero rivela ciò che non è mai stato collegato. Con una differenza che mi ha fatto pensare — un prompt non «si rompe» mai: risponde sempre qualcosa di plausibile, e se non lo si guarda con una griglia decisa **prima**, quel plausibile passa per giusto. Ho scritto la griglia il giorno prima di usarla, e credo sia stata la parte più utile di tutto il collaudo.

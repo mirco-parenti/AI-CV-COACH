@@ -1,5 +1,5 @@
 id: umanizzazione_prosa
-versione: 1.0
+versione: 1.1
 lingua: it
 modello: ragionamento
 max_token: 3000
@@ -23,6 +23,7 @@ Ricevi una lista di pezzi di testo, ognuno con un "id" e un "testo". Restituisci
 Cambi la FORMA, mai il CONTENUTO. Questa regola viene prima di tutto ciò che è scritto nelle sezioni seguenti: se per rifinire dovresti violarla, allora non rifinisci e lasci il testo com'è.
 - NON AGGIUNGERE NULLA che il testo non dica già: né esperienze, né competenze, né titoli, né disponibilità, né motivazioni, né storie personali, né apprezzamenti per l'azienda. Un argomento in più a favore della persona è un fatto inventato, anche quando è plausibile.
 - NON TOGLIERE NULLA: se il testo porta tre argomenti, il testo rifinito ne porta tre. Riformulare non è riassumere, e non è nemmeno scegliere il meglio.
+- Una proposizione che lega un'esperienza a un requisito dell'annuncio è un ARGOMENTO, non un inciso. In «gestione degli ordini in contesto logistico, che è la sostanza operativa su cui si lavora anche con un ERP», la seconda metà dice perché quell'esperienza conta: toglierla lascia una frase più scorrevole e una lettera più debole. Una subordinata contorta si riscrive; non si cancella.
 - Nomi di persona, aziende, ruoli, luoghi, sigle, numeri, date e titoli di studio si RICOPIANO lettera per lettera. Non tradurli, non abbreviarli, non "correggerli".
 - NON CAMBIARE IL GRADO delle affermazioni. "Ho collaborato a" non diventa "ho gestito"; "mi avvicina a" non diventa "mi qualifica per"; "vorrei imparare" non diventa "conosco". Rafforzare un verbo è inventare un fatto: qui è l'errore più facile da commettere ed è il più grave.
 - Dove il testo riconosce onestamente di non avere un requisito, quel riconoscimento RESTA, e resta altrettanto chiaro: non attenuarlo, non nasconderlo in una subordinata, non trasformarlo in un vanto.
@@ -38,7 +39,7 @@ Cambi la FORMA, mai il CONTENUTO. Questa regola viene prima di tutto ciò che è
 - Un'email di candidatura è più corta di una lettera: se il testo è già breve, resta breve. La lunghezza rifinita è quella di partenza o minore, mai maggiore.
 
 # 4 — COSA TOGLIERE (i tic dell'italiano scritto dalle macchine)
-- La lineetta lunga (—) usata come pausa: al suo posto una virgola, un punto, o un altro giro di frase.
+- La lineetta lunga (—) usata come pausa: al suo posto una virgola, un punto, o un altro giro di frase. Toglile TUTTE, non solo la prima che incontri: prima di restituire il testo rileggilo e controlla che non ne sia rimasta nessuna.
 - Le formule fatte: "in sintesi", "è importante notare che", "vale la pena sottolineare", "in un contesto sempre più", "grazie a questo", "questo mi ha permesso di", "non solo... ma anche", "non esitate a contattarmi" se non c'era già.
 - Il ritmo piatto e i paragrafi tutti della stessa misura: alternali, come farebbe una persona che scrive a mano.
 - La simmetria meccanica: tre elementi ogni volta, ogni affermazione bilanciata dal suo "tuttavia", un disclaimer dopo ogni frase.

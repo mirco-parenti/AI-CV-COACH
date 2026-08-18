@@ -81,6 +81,19 @@ Namespace Motore
         Public Property Oggetto As String = ""
         Public Property Corpo As String = ""
 
+        ''' <summary>
+        ''' La lingua in cui l'AI ha scritto questo messaggio (cap. 10.1); vuota per le
+        ''' bozze salvate prima che la si annotasse.
+        ''' </summary>
+        ''' <remarks>
+        ''' Si conserva perché la lingua della candidatura può cambiare <b>dopo</b>: chi
+        ''' rigenera i documenti in inglese dalla tendina di P6 si ritroverebbe l'email
+        ''' italiana di ieri, ripresa in silenzio come se fosse quella giusta. Senza questo
+        ''' campo non c'è modo di accorgersene, perché una bozza è solo testo e il testo non
+        ''' dichiara in che lingua è.
+        ''' </remarks>
+        Public Property Lingua As String = ""
+
         ''' <summary>I file candidati a partire, spuntati o no.</summary>
         Public ReadOnly Property Allegati As New List(Of AllegatoScelto)
 
@@ -129,6 +142,7 @@ Namespace Motore
                 {"destinatario", Destinatario},
                 {"oggetto", Oggetto},
                 {"corpo", Corpo},
+                {"lingua", Lingua},
                 {"allegati", elenco}}
 
         End Function
@@ -145,7 +159,8 @@ Namespace Motore
             Dim bozza As New BozzaEmail With {
                 .Destinatario = If(CampiJson.Testo(oggetto, "destinatario"), ""),
                 .Oggetto = If(CampiJson.Testo(oggetto, "oggetto"), ""),
-                .Corpo = If(CampiJson.Testo(oggetto, "corpo"), "")}
+                .Corpo = If(CampiJson.Testo(oggetto, "corpo"), ""),
+                .Lingua = If(CampiJson.Testo(oggetto, "lingua"), "")}
 
             Dim elenco As JsonArray = TryCast(oggetto("allegati"), JsonArray)
             If elenco IsNot Nothing Then

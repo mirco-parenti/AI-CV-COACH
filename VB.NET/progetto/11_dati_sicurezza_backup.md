@@ -26,7 +26,10 @@ TrovaLavoro\
 │       ├── annuncio.json · giudizi.json · mitigazioni.json
 │       ├── appunti.json   (esito confermato del brainstorming)
 │       ├── cv.json · lettera.json
-│       ├── stato.json     (stato, date, lingua, versione profilo, fonte e link)
+│       ├── email.json     (la bozza dell'email: destinatario, oggetto, corpo,
+│       │                   allegati spuntati e la lingua in cui è nata — cap. 07.1)
+│       ├── stato.json     (stato, date, lingua, versione profilo, fonte e link,
+│       │                   e i testi di **prima** della rifinitura — cap. 08.6)
 │       └── out\           (i file prodotti: .docx .pdf .eml)
 ├── registro.json          l'indice delle candidature: comodo, ma rigenerabile
 ├── webview2\              profilo di navigazione del browser integrato

@@ -124,3 +124,37 @@ arriverebbe insieme a loro.
 mano** campo per campo in P6 (le tre caselle sono `ReadOnly`: è disegno di P6, non
 anti-slop) e l'**interruttore** per disattivare la rifinitura, che vive nelle Impostazioni
 P8 di T9. Fino ad allora la rifinitura è sempre attiva, e la via d'uscita è il prima/dopo.
+
+## 8.7 Cosa ha insegnato l'AI vera (collaudo di T7b, 2026-08-18)
+
+I sei prompt erano verdi al banco, ma **i collaudi coi finti non caricano prompt**: quanto
+valessero si è visto solo con un giro intero nelle due lingue (il racconto è nel diario,
+Step 2.25; le correzioni nel CHANGELOG del pool, Pool 1.09). Il grosso ha retto — nessun
+grado rafforzato, nessun fatto nuovo, frasi nominali intatte, gap onesti al loro posto, e
+**quattro descrizioni su cinque restituite identiche**, che è la prova che il «permesso di
+non cambiare» funziona. Restano tre regole di progettazione, che valgono oltre questi
+prompt:
+
+1. **Accanto a un divieto generale serve la forma concreta di ciò che vieta.** «Non
+   togliere nulla» non ha impedito che sparisse la proposizione che legava un'esperienza al
+   requisito scoperto: era un divieto astratto contro una frase contorta, e ha perso. Con
+   l'esempio accanto — *una proposizione che lega un'esperienza a un requisito è un
+   argomento, non un inciso* — ha tenuto. È la lezione del Pool 1.05 e del 1.07 applicata
+   ai divieti invece che alle formule.
+2. **Una lista di parole vietate può cancellare un fatto.** `end-to-end` era finito fra i
+   riempitivi inglesi, e in un CV tecnico è un termine preciso: la rifinitura l'ha tolto e
+   il documento ha detto meno di prima. Ogni elenco di «parole da togliere» va ora letto
+   con la domanda che manca(va): *questa parola, in un mestiere, potrebbe essere un fatto?*
+   La regola sta ora scritta in tutte e due le lingue.
+3. **Fra due istruzioni che si contraddicono vince quella che parla del testo intero.** Le
+   lineette lunghe venivano tolte a metà; rafforzare la regola che le vieta **non è
+   bastato** — a batterla era il *permesso di non cambiare*, che riguarda tutto il testo,
+   mentre l'elenco dei tic riguarda un dettaglio. La cura è stata scrivere l'eccezione
+   dentro il permesso. Da qui la regola pratica: quando un prompt concede qualcosa in
+   generale e vieta qualcosa in particolare, le due cose vanno messe **nello stesso posto**,
+   o la concessione vince.
+
+*E una regola di metodo, che vale per il pool intero:* una cura a un prompt **non è fatta
+finché non è riprovata con l'AI vera**. La terza delle tre qui sopra sembrava chiusa dopo la
+prima correzione, e non lo era: la riprova ha mostrato la lettera tornata identica, con
+tutte le lineette al loro posto.

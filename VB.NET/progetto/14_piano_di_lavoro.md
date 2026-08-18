@@ -442,6 +442,24 @@ dell'unico previsto (cap. 08.6), la passata dentro la pipeline — che passa da 
 passi — e la casella del prima/dopo in P6, che era lì spenta da T4. **T7c — il
 brainstorming** (`brainstorm` + `appunti_di_mira`, P5, streaming SSE): da fare.
 
+*Il collaudo di T7b (2026-08-18).* Il capitolo chiedeva «lettura critica dei testi
+prodotti»: è stata fatta con una **griglia decisa prima** di guardare i risultati — grado
+rafforzato, fatti comparsi, cose sparite, forma nominale, gap attenuati, formule rotte,
+refusi, cambiamenti dove non servivano — su un giro intero **nelle due lingue**, con un
+annuncio costruito apposta con requisiti scoperti. Ha retto la sostanza: nessun grado
+rafforzato, nessun fatto inventato, gap onesti al loro posto (in inglese perfino resi più
+espliciti), frasi nominali intatte, e quattro descrizioni su cinque **restituite identiche**.
+Sono usciti **tre difetti dei prompt**, curati nel **Pool 1.09** e — regola nuova, imparata
+qui — **riprovati con l'AI**, non dati per chiusi: la cura sulle lineette lunghe alla prima
+riprova non aveva funzionato affatto (cap. 08.7). Lo stesso giro ha stanato un difetto d'uso
+fuori dall'anti-slop, corretto subito: la bozza dell'email non sapeva in che lingua era
+nata, e dopo un cambio di lingua P7 la riproponeva in silenzio (cap. 07.1).
+
+**Fatto:** **663 collaudi verdi** senza rete (erano 599 a fine T6), versione **0.3.031**,
+Pool **1.09**. Restano indietro, dichiarate in `in_sospeso.md`: la modifica a mano dei testi
+in P6, l'interruttore della rifinitura (P8, T9), il prima/dopo dell'email e la lettura a
+video del prima/dopo fino in fondo. **Resta T7c.**
+
 ### T8 — Il server MCP (F8)
 Modalità `--mcp` su stdio; i tool del cap. 09; lucchetto di scrittura.
 **Collaudo:** da Claude Desktop/Code: `tools/list` corretto, un confronto e una

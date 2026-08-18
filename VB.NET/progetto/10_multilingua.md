@@ -83,6 +83,12 @@ tutto il resto.
   candidatura come fa P6). Resta vero il timore che aveva ispirato la scelta di T6 — due
   posti divergono — ma il posto è **uno solo lo stesso**: `Motore/LinguaDocumenti`, da cui
   la lingua parte; quello che è cambiato è fin dove arriva.*
+  *Un ultimo tratto, dal collaudo di T7b (2026-08-18): la lingua non basta che **arrivi**
+  a P7, deve anche **restarci scritta**. Una bozza salvata è un testo, e un testo non
+  dichiara in che lingua è: cambiando la tendina di P6 il giorno dopo, P7 riprendeva
+  l'email vecchia senza potersi accorgere di niente. Da qui il campo `lingua` in
+  `email.json` (cap. 07.1): la lingua di un documento va conservata **insieme al
+  documento**, o al primo cambio di idea dell'utente le due cose si separano in silenzio.*
 - I nomi dei file generati dichiarano la lingua quando è inglese
   (`CV_Mirco_Parenti_EN_...`, cap. 05.6).
 

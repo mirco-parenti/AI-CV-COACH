@@ -144,6 +144,13 @@ ogni modulo abbia **un compito solo**:
     Nessuno dei due sta nella pipeline di T4, e non è una dimenticanza: la fila si percorre
     da sé fino ai documenti, mentre da lì in poi decide l'utente — a chi mandare, quali
     allegati, se spedire.
+  - *A T7b (2026-08-18) ne arriva un settimo, e stavolta in due pezzi* —
+    `Ai/Rifinitore` è il mestiere che parla con l'AI (tre prompt, uno per genere di prosa,
+    cap. 08.2), e `Motore/Rifinitura` è l'unico posto che sa **quali** campi di un documento
+    sono prosa e di che genere: estrae quelli, li manda a rifinire e rimette i testi al loro
+    posto. La divisione non è simmetria: al modello arrivano **solo i campi-prosa**, quindi
+    nomi, aziende e date non entrano nella richiesta e non possono tornarne cambiati. Chi
+    decide cosa mandare appartiene al motore; chi lo manda, all'AI.
 - **`Documenti/`** — lettura (PDF via API con blocco `document`, DOCX/TXT/MD in
   locale), scrittura (DOCX e PDF), scansione e classificazione della cartella
   documenti (cap. 05).

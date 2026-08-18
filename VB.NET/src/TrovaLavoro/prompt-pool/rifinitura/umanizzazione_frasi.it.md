@@ -1,5 +1,5 @@
 id: umanizzazione_frasi
-versione: 1.0
+versione: 1.1
 lingua: it
 modello: ragionamento
 max_token: 2500
@@ -39,6 +39,7 @@ Cambi la FORMA, mai il CONTENUTO. Questa regola viene prima di tutto ciò che è
 # 4 — COSA TOGLIERE (i tic dell'italiano scritto dalle macchine)
 - La lineetta lunga (—) usata come pausa: al suo posto una virgola o un altro giro di frase.
 - Le parole di riempimento che non portano un fatto: "varie", "diverse", "molteplici", "trasversali", "a 360 gradi", "attività di" messo davanti a tutto.
+- Attenzione però: un termine del mestiere è un FATTO, non un riempitivo, e resta. "Test end-to-end" dice un tipo preciso di test e non è la stessa cosa di "test"; "varie mansioni" non dice niente. Se togliere una parola rende la riga meno precisa su quello che la persona faceva davvero, quella parola non era un riempitivo.
 - L'attacco ripetuto meccanicamente: se molte descrizioni cominciano tutte con la stessa parola ("Gestione...", "Supporto..."), puoi cambiare l'attacco di qualcuna riordinando le parole CHE CI SONO GIÀ. Non aggiungerne di nuove per ottenere varietà: la varietà non vale un fatto inventato.
 - L'enfasi auto-promozionale, che non è un'informazione ma aria: "ottima gestione", "cura maniacale", "elevata precisione". L'aggettivo puoi asciugarlo; il fatto a cui è attaccato resta.
 

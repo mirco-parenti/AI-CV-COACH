@@ -84,6 +84,12 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
 - **Il contenuto delle caselle di testo non si legge.** L'elenco dice la voce dei menù,
   ma non cosa c'è scritto in una casella: per leggere l'indirizzo del browser serve
   ancora una fotografia.
+- **Non sa scorrere dentro una casella.** *(2026-08-18, il collaudo di T7b.)* Quel che sta
+  sotto la piega non si vede e non si legge: il prima/dopo della rifinitura in P6 compare in
+  **coda** alle colonne, e della sezione si è potuta fotografare solo l'intestazione. Il
+  confronto campo per campo è stato fatto sui file JSON — che è la fonte giusta per i
+  contenuti — ma «si legge bene?» resta una domanda a cui questo attrezzo non sa rispondere,
+  e infatti è rimasta in `in_sospeso.md`.
 - **Le fotografie non si confrontano fra loro.** Non c'è un «com'era prima»: due
   schermate della stessa finestra si guardano una dopo l'altra, e a dire se qualcosa si è
   spostato è l'occhio di chi legge. Per i difetti di geometria conviene perciò accompagnare
@@ -236,3 +242,24 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   del progetto ed è un avanzo del giro di prima. Si chiude dal nome, perché il nome ce
   l'ha solo lui: `taskkill.exe /F /IM testhost.exe`, e poi si rifà il banco. Vale anche
   fra una sessione e l'altra — il processo sopravvive alla chiusura di chi l'ha lanciato.
+- **Aspettare un bottone non è aspettare che il lavoro finisca.** *(2026-08-18, il collaudo
+  di T7b.)* Un giro intero di generazione è stato letto sui **testi vecchi** credendoli
+  nuovi, per due errori che si sommano. Il primo: **«Genera CV + lettera» su una candidatura
+  già generata non rigenera niente** — apre P6 e mostra i documenti che ci sono; a rifarli è
+  «Rigenera», con la sua conferma. Il secondo: «Rigenera» è **acceso prima e dopo**, quindi
+  un'attesa che guarda quel bottone finisce subito e sembra riuscita. Nemmeno la **data del
+  file** basta, perché l'applicazione risalva la cartella intera anche solo cambiando lingua
+  dalla tendina: il file cambia data senza cambiare contenuto. L'unica condizione onesta è
+  il **contenuto** — si legge `lettera.json` e si aspetta che il testo non sia più quello di
+  prima. È anche la misura giusta per il futuro `aspetta_che` (`idee_future.md`).
+- **`scrivi` perde gli a capo.** *(2026-08-18.)* Un testo su più righe — un annuncio
+  incollato in P4 — arriva nella casella **tutto attaccato**: «S.r.l.Sede di lavoro».
+  All'analisi dell'AI non è importato (l'annuncio è stato letto giusto lo stesso), ma se
+  quel che si sta provando dipende dalla forma del testo, questa è una differenza fra ciò
+  che si crede di aver incollato e ciò che c'è davvero nella casella.
+- **La fotografia può ritrarre un suggerimento.** *(2026-08-18.)* Subito dopo aver premuto
+  una casella che ha un tooltip, la finestra in primo piano del processo **è il tooltip**:
+  `schermata` ha restituito due volte di fila un'immagine di 412×25 px con dentro la
+  scritta del suggerimento, che a prima vista sembra un guasto dell'attrezzo. Non lo è, ed
+  è cugina della trappola qui sopra sulla finestra sbagliata: si riprende con
+  `schermo_intero`, oppure si aspetta che il suggerimento sparisca.

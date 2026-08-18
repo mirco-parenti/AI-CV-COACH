@@ -1,5 +1,5 @@
 id: umanizzazione_frasi
-versione: 1.0
+versione: 1.1
 lingua: en
 modello: ragionamento
 max_token: 2500
@@ -38,7 +38,8 @@ It is a single line in NOUN-PHRASE form, with no finite verb, saying what the pe
 
 # 4 — WHAT TO TAKE OUT (the tics of machine-written English)
 - The em dash (—) used as a pause: replace it with a comma or a different turn of phrase.
-- Filler that carries no fact: "various", "diverse", "multiple", "cross-functional", "end-to-end", "a range of", "activities relating to" put in front of everything.
+- Filler that carries no fact: "various", "diverse", "multiple", "cross-functional", "a range of", "activities relating to" put in front of everything.
+- Careful, though: a term of the trade is a FACT, not filler, and it stays. "End-to-end testing" names a particular kind of testing and is not the same thing as "testing"; "various duties" names nothing at all. If taking a word out would make the line less precise about what the person actually did, that word was never filler.
 - The mechanically repeated opening: if many descriptions all begin with the same word ("Management of...", "Support for..."), you may change the opening of some by REORDERING THE WORDS THAT ARE ALREADY THERE. Do not add new ones to get variety: variety is not worth an invented fact.
 - Inflated vocabulary: "leverage", "spearhead", "streamline", "optimise" where the original said something plainer.
 - Self-promotion, which is air rather than information: "excellent management", "meticulous care", "outstanding accuracy". You may strip the adjective; the fact it is attached to stays.

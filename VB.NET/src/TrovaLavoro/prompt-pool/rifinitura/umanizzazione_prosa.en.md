@@ -1,5 +1,5 @@
 id: umanizzazione_prosa
-versione: 1.0
+versione: 1.1
 lingua: en
 modello: ragionamento
 max_token: 3000
@@ -18,12 +18,14 @@ You receive a list of pieces of text, each with an "id" and a "testo". Return th
 - Copy every "id" exactly as you received it: do not interpret it, do not translate it, do not tidy it up.
 - An empty piece stays empty: do not invent a letter to fill it.
 - If a text already sounds natural, return it UNCHANGED. Do not change things for the sake of changing them: leaving a text as it is is a correct answer.
+- One exception, and one only: a text that contains an em dash (—) used as a pause is never "already natural". Those you always take out, however good the rest of the writing is (see section 4). Returning such a text unchanged is the one wrong answer here.
 - The text is already in English. Do not translate it into another language and do not translate it back.
 
 # 2 — THE RULE THAT COMES BEFORE EVERY OTHER: SUBSTANCE IS UNTOUCHABLE
 You change the WORDING, never the CONTENT. This rule comes before everything written in the sections below: if refining would mean breaking it, then you do not refine and you leave the text as it is.
 - ADD NOTHING the text does not already say: no experience, no skills, no qualifications, no availability, no motivations, no personal stories, no compliments to the company. One more argument in the person's favour is an invented fact, even when it is plausible.
 - REMOVE NOTHING: if the text carries three arguments, the refined text carries three. Rephrasing is not summarising, and it is not picking the best either.
+- A clause that ties an experience to a requirement in the advertisement is an ARGUMENT, not an aside. In "order management in a logistics setting, which is the operational substance an ERP system supports", the second half says why that experience counts: cutting it leaves a smoother sentence and a weaker letter. A clumsy subordinate clause is rewritten; it is never deleted.
 - Names of people, companies, roles, places, acronyms, numbers, dates and qualifications are COPIED letter by letter. Do not translate them, do not shorten them, do not "correct" them.
 - DO NOT CHANGE THE STRENGTH of any statement. "I helped with" does not become "I managed"; "it brings me close to" does not become "it qualifies me for"; "I would like to learn" does not become "I know". Upgrading a verb is inventing a fact: it is the easiest mistake to make here and the most serious.
 - Where the text honestly admits that a requirement is not met, that admission STAYS, and stays just as plain: do not soften it, do not bury it in a subordinate clause, do not turn it into a boast.
@@ -40,7 +42,7 @@ It is the body of a letter or an email that a person sends to a company that doe
 - A job-application email is shorter than a letter: if the text is already brief, it stays brief. The refined length is the original length or less, never more.
 
 # 4 — WHAT TO TAKE OUT (the tics of machine-written English)
-- The em dash (—) used as a pause: replace it with a comma, a full stop, or a different turn of phrase. This is the single most recognisable marker.
+- The em dash (—) used as a pause: replace it with a comma, a full stop, or a different turn of phrase. This is the single most recognisable marker, so take out EVERY one of them, not just the first you meet: before you return a text, read it through again and check that none is left.
 - The stock phrases: "it's worth noting", "moreover", "furthermore", "additionally", "in today's fast-paced world", "in an increasingly", "this allowed me to", "not only... but also", "I look forward to hearing from you at your earliest convenience" where the text did not already say it.
 - The inflated vocabulary that says nothing: "delve into", "leverage", "robust", "seamless", "comprehensive", "align with your values", "resonates with me", "wealth of experience".
 - Flat rhythm and paragraphs all of the same size: vary them, as a person writing by hand would.

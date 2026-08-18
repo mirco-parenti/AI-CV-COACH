@@ -37,6 +37,16 @@ Email (P7) prepara la bozza:
 - **Delle spunte si fida, dei file no.** Riaprendo, l'elenco degli allegati si rifà dai
   file che ci sono *adesso* su disco e dalla bozza si riprendono solo le spunte: un
   documento cancellato nel frattempo non torna in vita perché un elenco lo nominava.
+- **La bozza porta con sé la lingua in cui è nata** *(dal 2026-08-18, collaudo di T7b)*.
+  In `email.json` accanto al testo c'è il campo `lingua`, scritto quando l'AI compone. Serve
+  perché la lingua della candidatura può cambiare **dopo**: chi rigenera i documenti in
+  inglese dalla tendina di P6 (cap. 10.4) si ritrovava l'email italiana del giorno prima,
+  ripresa in silenzio con l'aria di essere quella giusta — e un testo, da solo, non dichiara
+  in che lingua è. Quando le due lingue non combaciano, P7 **lo dice** e indica «Fallo
+  riscrivere»; **non riscrive da sé**, perché il messaggio può essere già passato per le mani
+  dell'utente, ed è la stessa ragione per cui una bozza salvata non viene mai sovrascritta
+  all'arrivo. Una bozza più vecchia del campo non ce l'ha: allora non si sa, e non sapere
+  non è un buon motivo per mandare a rifare un lavoro che magari andava bene.
 - **Il PDF si spunta da solo, il DOCX no.** È il formato che si apre uguale dappertutto ed
   è quello che si manda a un'azienda; il DOCX resta lì, spento, per gli annunci che lo
   chiedono espressamente.

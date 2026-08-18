@@ -344,6 +344,100 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function UnaBozzaInUnAltraLinguaLoDiceInveceDiTacere() As Task
+
+            ' Chi cambia la tendina di P6 dopo aver già preparato l'email si ritrova
+            ' documenti inglesi e la bozza italiana di prima. Riprenderla in silenzio la
+            ' farebbe passare per quella giusta: si riprende lo stesso, perché è lavoro
+            ' dell'utente, ma dicendo com'è e dov'è il bottone che la rifà.
+            Dim compositore As New CompositoreFinto
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    candidatura.Lingua = "en"
+                    candidatura.Email = JsonNode.Parse(
+                        "{""destinatario"": ""lavoro@rossi.it"", ""oggetto"": ""Candidatura""," &
+                        """corpo"": ""Buongiorno."", ""lingua"": ""it"", ""allegati"": []}")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.Contains("Fallo riscrivere", Etichetta(pannello, "lblStatoEmail").Text,
+                                    "dice dov'è il bottone che la rifà")
+                    Assert.AreEqual("Buongiorno.", Casella(pannello, "txtCorpo").Text,
+                                    "il messaggio di ieri resta lì: rifarlo lo decide l'utente")
+                    Assert.IsEmpty(compositore.Chiamate, "e l'AI non parte da sé")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaBozzaNellaStessaLinguaSiRiprendeSenzaAllarmi() As Task
+
+            ' Il gemello del collaudo qui sopra: quando le lingue combaciano non c'è niente
+            ' da dire, e dirlo sarebbe un falso allarme.
+            Dim compositore As New CompositoreFinto
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    candidatura.Lingua = "en"
+                    candidatura.Email = JsonNode.Parse(
+                        "{""destinatario"": ""lavoro@rossi.it"", ""oggetto"": ""Application""," &
+                        """corpo"": ""Dear Sir or Madam,"", ""lingua"": ""en"", ""allegati"": []}")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.Contains("da dove l'avevi lasciata", Etichetta(pannello, "lblStatoEmail").Text)
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaBozzaVecchiaSenzaLinguaNonSiFaPassarePerSbagliata() As Task
+
+            ' Le bozze salvate prima che la lingua si annotasse non ce l'hanno: allora non
+            ' si sa, e non sapere non è un motivo per mandare l'utente a rifare un lavoro
+            ' che magari andava bene (è la regola del vuoto, cap. 10.1).
+            Dim compositore As New CompositoreFinto
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    candidatura.Lingua = "en"
+                    candidatura.Email = JsonNode.Parse(
+                        "{""destinatario"": ""lavoro@rossi.it"", ""oggetto"": ""Candidatura""," &
+                        """corpo"": ""Buongiorno."", ""allegati"": []}")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.Contains("da dove l'avevi lasciata", Etichetta(pannello, "lblStatoEmail").Text)
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaBozzaSiRicordaInCheLinguaEStataScritta() As Task
+
+            ' Senza questo campo su disco, domani non c'è modo di accorgersi che la lingua
+            ' è cambiata: un testo non dichiara da sé in che lingua è.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    candidatura.Lingua = "en"
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    Casella(pannello, "txtDestinatario").Text = "lavoro@rossi.it"
+                    pannello.PreparaIlMessaggio()
+
+                    Dim riletta As Opportunita = contesto.Opportunita.Carica(candidatura.Cartella)
+                    Dim bozza As BozzaEmail = BozzaEmail.DaJson(riletta.Email)
+
+                    Assert.AreEqual("en", bozza.Lingua, "la lingua con cui l'AI l'ha scritta")
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Async Function SenzaMessaggioNonSiPuoPreparareNienteEMenoCheMaiSpedire() As Task
 
             Dim compositore As New CompositoreFinto

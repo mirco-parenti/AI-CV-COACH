@@ -153,7 +153,17 @@ Public Class PannelloEmail
 
         If salvata IsNot Nothing Then
             RiprendiLaBozza(salvata)
-            Racconta("Bozza ripresa da dove l'avevi lasciata.", StileApp.TestoSecondario)
+
+            If InUnAltraLingua(salvata) Then
+                Racconta("Questa bozza è in " & LinguaDocumenti.Nome(salvata.Lingua).ToLowerInvariant() &
+                         ", ma i documenti adesso sono in " &
+                         LinguaDocumenti.Nome(_candidatura.Lingua).ToLowerInvariant() &
+                         ": premi «Fallo riscrivere» per rifare il messaggio nella loro lingua.",
+                         StileApp.Pericolo)
+            Else
+                Racconta("Bozza ripresa da dove l'avevi lasciata.", StileApp.TestoSecondario)
+            End If
+
             AggiornaComandi()
             Return
         End If
@@ -164,6 +174,28 @@ Public Class PannelloEmail
         ProponiIlDestinatario()
 
         Await ScriviLaBozzaAsync()
+
+    End Function
+
+    ''' <summary>
+    ''' Vero quando la bozza salvata è in una lingua e i documenti della candidatura in
+    ''' un'altra: succede cambiando la tendina di P6 dopo aver già preparato l'email.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Non la si riscrive da sé: il messaggio può essere passato per le mani
+    ''' dell'utente, e rifarglielo senza chiedere sarebbe cancellargli il lavoro — la stessa
+    ''' ragione per cui una bozza salvata non viene mai sovrascritta all'arrivo. Si dice
+    ''' com'è, e il bottone per rifarla è lì accanto.</para>
+    ''' <para>Una bozza scritta prima che la lingua si annotasse non ce l'ha: allora non si
+    ''' sa, e non sapere non è un buon motivo per allarmare.</para>
+    ''' </remarks>
+    Private Function InUnAltraLingua(salvata As BozzaEmail) As Boolean
+
+        If salvata Is Nothing OrElse String.IsNullOrWhiteSpace(salvata.Lingua) Then Return False
+        If _candidatura Is Nothing Then Return False
+
+        Return LinguaDocumenti.PerDocumenti(salvata.Lingua) <>
+               LinguaDocumenti.PerDocumenti(_candidatura.Lingua)
 
     End Function
 
@@ -241,6 +273,10 @@ Public Class PannelloEmail
             _bozza.Oggetto = scritta.Oggetto
             _bozza.Corpo = scritta.Corpo
 
+            ' La lingua si annota adesso, insieme al testo che l'ha usata: è quella che
+            ' domani dirà se questa bozza vale ancora per i documenti che ci sono.
+            _bozza.Lingua = lingua
+
             ' Il destinatario non si tocca: non viene dall'AI, e se l'utente l'ha già
             ' scritto riscriverlo sarebbe cancellargli il lavoro.
             Racconta("Messaggio scritto. Rileggilo: è quello che l'azienda legge per primo." &
@@ -305,6 +341,7 @@ Public Class PannelloEmail
         _bozza.Destinatario = salvata.Destinatario
         _bozza.Oggetto = salvata.Oggetto
         _bozza.Corpo = salvata.Corpo
+        _bozza.Lingua = salvata.Lingua
 
         For Each allegato As AllegatoScelto In _bozza.Allegati
             Dim scelto As AllegatoScelto = salvata.Allegati.FirstOrDefault(

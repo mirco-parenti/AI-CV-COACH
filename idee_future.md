@@ -251,6 +251,19 @@ documenti dell'utente.
   debito, e sta anche in `in_sospeso.md` perché quella porta il capitolo la promette.
   *(2026-08-14 — emersa chiudendo T6.)*
 
+Idee emerse **collaudando T7b** *(2026-08-18)*: la passata anti-slop provata con l'AI vera.
+- **Una rifinitura che non ha cambiato niente e una che non ci è riuscita si somigliano
+  troppo.** Se il modello restituisce il testo identico — che è una risposta **giusta**, e i
+  prompt la dichiarano tale — nello `stato.json` non compare nulla, esattamente come quando
+  la chiamata è fallita e la pipeline ha tenuto il testo grezzo. Il passo di avanzamento lo
+  dice («non ci sono riuscita, tengo il testo com'è»), ma è un messaggio che passa e se ne
+  va: chi guarda dopo non lo trova più. Nel collaudo è costato una mezz'ora di dubbio, e ha
+  richiesto di leggere il codice della pipeline per escludere il guasto. Il rimedio piccolo
+  è annotare l'esito accanto al «prima» (rifinito / invariato / non riuscito); quello grande
+  è mostrarlo in P6 accanto alla casella del prima/dopo. Nessuno dei due è urgente finché la
+  rifinitura non fallisce quasi mai — ma il giorno che fallisse spesso, oggi non lo si
+  vedrebbe. *(2026-08-18 — emersa dal collaudo di T7b; cap. 08.4.)*
+
 ## Collaudi e non-regressione (Fase VB.NET)
 
 Idee emerse **costruendo la batteria di T2** (cap. 14), quando il prototipo ha fatto da
@@ -270,6 +283,12 @@ giudice per la prima volta.
   cap. 10.2 lo dà come caso di collaudo del multilingua, ma i due casi reali di T2 sono
   entrambi in italiano. Da aggiungere quando arriverà T7, dove serve davvero.
   *(2026-08-07 — emersa a T2, rimandata alla tappa che la riguarda.)*
+  **T7 è arrivata e il caso è stato percorso, ma a mano** *(2026-08-15)*: il collaudo di
+  tappa di T7a ha portato un annuncio inglese vero (Fedrigoni, da Indeed) contro il profilo
+  italiano, e il comportamento è quello voluto — requisiti in inglese, lettura d'insieme e
+  ponti in italiano. Nella **batteria** però non è entrato: `CollaudiConfrontoReale` ha
+  ancora i suoi due casi, entrambi italiani. Aggiungerne un terzo in inglese costa un file
+  di caso e nessuna riga di codice, e renderebbe ripetibile quello che oggi si rifà a mano.
 - **Un `aspetta_che` per lo strumento di collaudo** — oggi, per sapere se una chiamata all'AI
   è finita, si alternano `clic` e `controlli` a mano. Un attrezzo che aspetti una condizione
   («finché quel bottone non si riaccende», con un tetto di tempo) renderebbe i giri lunghi
@@ -278,6 +297,12 @@ giudice per la prima volta.
   aspettare che l'applicazione fosse pronta è finita sui controlli sbagliati, e ha scritto in
   una casella del profilo vero. Il rimedio immediato è stato stringere la ricerca dei
   controlli (adesso vuole una parola intera); l'attesa vera resta da fare.
+  **E il collaudo di T7b ha detto anche su cosa dovrà aspettare** *(2026-08-18)*: non su un
+  bottone. «Rigenera» è acceso sia prima sia dopo, e per un giro intero si è creduto di
+  guardare i testi nuovi mentre erano ancora i vecchi. Nemmeno la data del file basta —
+  l'applicazione risalva la cartella anche solo cambiando lingua. La condizione giusta è il
+  **contenuto** di un file, quindi un `aspetta_che` utile deve saper attendere che un file
+  cambi davvero, non che un controllo torni premibile.
 - ~~**Un attrezzo per rispondere alle finestre di messaggio**~~ — **realizzato a T5c**
   (vedi «Realizzate»).
 - **Rispondere anche alla finestra di scelta di una cartella** — lo strumento sa pilotare

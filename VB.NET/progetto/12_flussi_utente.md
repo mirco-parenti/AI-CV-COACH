@@ -127,7 +127,12 @@ opportunità sono esaurite.
 
 *Com'è venuto (T6, 2026-08-14).* Il punto 1 è vero a metà, e la metà mancante è
 dichiarata: il **destinatario resta vuoto** anche quando l'annuncio ne conterrebbe uno,
-perché l'analisi non estrae recapiti (sta in `in_sospeso.md`). Gli **attestati della
+perché l'analisi non estrae recapiti (sta in `in_sospeso.md`). *Metà colmata a T7a
+(2026-08-15): `analisi_annuncio` estrae il **contatto** e P7 lo propone — nella casella,
+modificabile, e solo al primo arrivo — dicendo da dove viene. Resta vero il resto della
+promessa: se l'annuncio un indirizzo non lo scrive, il campo resta vuoto, perché non si
+deduce da un dominio né dal nome di chi firma (cap. 07.1). Provato dal vivo il 2026-08-18
+su un annuncio che l'indirizzo ce l'aveva.* Gli **attestati della
 cartella documenti** ci sono, e arrivano spenti (cap. 07.1). Prima del punto 1 c'è un
 passo che il flusso non prevedeva: la **cartella documenti va indicata una volta**, dal
 bottone «Documenti da allegare…» di P7 — è configurazione, e quando ci saranno le
@@ -232,6 +237,10 @@ Per l'utente evoluto che lavora con Claude Desktop / Claude Code:
   destinatario, oggetto, corpo e spunte degli allegati. È l'unico punto di una candidatura
   in cui l'utente scrive parole sue, quindi è anche quello in cui «riprendere da dove si
   era rimasti» conta di più — e rientrando l'AI non riscrive sopra: propone solo quando
-  non c'è ancora niente.*
+  non c'è ancora niente.* *Con T7b (2026-08-18) si aggiunge il rovescio della medaglia:
+  riprendere una cosa che nel frattempo **non vale più** è una forma di vicolo cieco. Se i
+  documenti sono stati rigenerati in un'altra lingua, la bozza si riprende lo stesso — è
+  lavoro dell'utente — ma il pannello **dice** che è rimasta indietro, invece di mostrarla
+  come se fosse quella giusta (cap. 07.1).*
 - **Onestà visibile**: stelle, ⛔ eliminatori e avvisi di soglia non si nascondono mai;
   sono il valore del prodotto, non un fastidio da minimizzare.

@@ -132,6 +132,14 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   la casella del confronto vive in P6, e in P7 l'utente ha davanti una casella che può già
   riscrivere. Se un giorno servirà, il posto è la bozza (`email.json`). *(cap. 07.1;
   cap. 08.6.)*
+- **Il prima/dopo letto a video fino in fondo** *(2026-08-18, dal collaudo di T7b)*. Nel
+  giro con l'AI vera la sezione si è vista comparire in coda alla colonna — «PRIMA DELLA
+  RIFINITURA», col nome del campo cambiato — ma i due testi *Prima* e *Dopo* stanno **sotto
+  la piega**, e lo strumento di collaudo non sa scorrere dentro una casella: il confronto
+  campo per campo è stato letto sui file JSON, non sullo schermo. Quello che manca non è il
+  meccanismo (i dati ci sono e sono giusti) ma la verifica che **si legga bene**: a capo,
+  larghezza, ordine dei campi, e cosa succede quando i campi cambiati sono molti. È una
+  guardata di dieci minuti da fare a mano. *(cap. 08.4; `strumenti/mcp-collaudi/`.)*
 
 ## Da revisione adversariale (2026-08-09)
 

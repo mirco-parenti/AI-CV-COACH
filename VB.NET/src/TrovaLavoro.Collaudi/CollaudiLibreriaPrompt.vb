@@ -26,8 +26,8 @@ Namespace Ai
             Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
 
             Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "origine")
-            Assert.AreEqual("1.08", libreria.Versione, "versione del pool")
-            Assert.AreEqual("Pool 1.08 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
+            Assert.AreEqual("1.09", libreria.Versione, "versione del pool")
+            Assert.AreEqual("Pool 1.09 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
         End Sub
 
         <TestMethod>
@@ -254,7 +254,7 @@ Namespace Ai
                 Dim libreria = LibreriaPrompt.Apri(cartella)
 
                 Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "deve ripiegare sull'integrato")
-                Assert.AreEqual("1.08", libreria.Versione, "con la versione dell'integrato")
+                Assert.AreEqual("1.09", libreria.Versione, "con la versione dell'integrato")
                 Assert.IsNotNull(libreria.Avviso, "e deve dire perché")
                 Assert.Contains("manca.md", libreria.Avviso, "l'avviso deve nominare il file mancante")
             Finally

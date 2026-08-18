@@ -27,6 +27,51 @@ La non-regressione contro il prototipo (cap. 14, T2) è passata su questa versio
 prompt del confronto costruito dal pool è identico carattere per carattere a quello che
 il prototipo costruisce nel codice.
 
+## Pool 1.09 — 2026-08-18
+
+**Quel che l'AI vera ha trovato nell'anti-slop.** Il Pool 1.08 era verde al banco, ma i
+finti non caricano prompt: quanto valessero davvero i sei testi si è visto solo facendo un
+giro intero con l'AI, in italiano e in inglese, sul CV di prova e su un annuncio con
+requisiti scoperti. Il grosso ha retto — nessun grado rafforzato, nessun fatto nuovo,
+frasi nominali intatte, gap onesti al loro posto, quattro descrizioni su cinque restituite
+identiche — e tre difetti sono usciti. Si curano dove vanno curati: nel prompt.
+
+- **`umanizzazione_prosa`** (`.it` / `.en`), sezione 2 — *l'argomento cancellato*. Nella
+  lettera italiana è sparita una proposizione intera: «gestione degli ordini in contesto
+  logistico, ~~che rappresenta la sostanza operativa su cui si lavora anche con un ERP~~».
+  Era il ponte verso il requisito che il candidato **non** ha, cioè l'argomento che più
+  serviva. La regola «non togliere nulla» c'era già, ma era generale: adesso accanto c'è
+  la **forma concreta** — una proposizione che lega un'esperienza a un requisito
+  dell'annuncio è un argomento, non un inciso, e una subordinata contorta si riscrive
+  invece di cancellarla. È la stessa medicina del Pool 1.05 e del Pool 1.07: fra una
+  regola e un esempio da imitare, vince l'esempio.
+- **`umanizzazione_frasi`** (`.en`, e per simmetria `.it`), sezione 4 — *«end-to-end» non
+  è un riempitivo*. Il prompt inglese lo elencava fra i filler, e nel CV vero è diventato
+  «Testing of AI applications»: un'informazione persa, perché *end-to-end testing* è un
+  tipo preciso di test, non aria. Esce dalla lista ed entra la regola che mancava: **un
+  termine del mestiere è un fatto**, e se togliendo una parola la riga diventa meno precisa
+  su quello che la persona faceva, quella parola non era un riempitivo. In italiano non era
+  successo (la lista `.it` non lo conteneva), ma «test end-to-end» si scrive anche lì, e
+  l'avvertenza vale in tutte e due le lingue.
+- **`umanizzazione_prosa.en`**, sezioni 4 **e 1** — *le lineette lunghe tolte a metà*. Il
+  prompt le chiama «the single most recognisable marker», e su tre coppie ne è stata tolta
+  **una**. La riga della sezione 4 adesso dice che vanno tolte **tutte**, con la rilettura
+  prima di restituire il testo. Non è bastato: al giro di prova successivo la lettera è
+  tornata **identica**, con tutte e sei le lineette al loro posto. Il motivo non era la
+  regola, era dove stava — a batterla era il **permesso di non cambiare** della sezione 1,
+  che il modello applica per primo perché riguarda l'intero testo. Così il permesso si è
+  preso la sua unica eccezione, scritta lì dove vive: *un testo con una lineetta lunga usata
+  come pausa non è mai «già naturale»*, e restituirlo intatto è l'unica risposta sbagliata.
+  È di nuovo la lezione delle forme che vincono sulle regole, vista da un'altra parte: fra
+  due istruzioni che si contraddicono, vince quella che parla del testo intero.
+
+*Un dubbio risolto dai dati.* La rifinitura ha anche **corretto un refuso** del testo
+generato («la mia inglese» → «il mio inglese») e, in inglese, ha spostato il gap sui due
+anni da subordinata concessiva a proposizione principale: più esposto di prima, che è
+esattamente ciò che la sezione 2 chiede. Nessuna delle due si tocca.
+
+Gli altri ventitré prompt non sono toccati: le loro impronte restano quelle di 1.08.
+
 ## Pool 1.08 — 2026-08-18
 
 **L'anti-slop entra nel pool.** Nasce la cartella `rifinitura/`, promessa dal cap. 04.3
