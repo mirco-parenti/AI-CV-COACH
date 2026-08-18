@@ -470,10 +470,29 @@ nuova di un bottone non ci stava nella sua misura e a video si leggeva a metà; 
 accompagnata da un collaudo che la misura in numeri. Non provata dal vivo l'interruzione di
 un turno (è al banco): in `in_sospeso.md`.
 
-**Fatto:** **726 collaudi verdi** senza rete (erano 599 a fine T6), versione **0.3.032**,
-Pool **1.10**. Restano indietro, dichiarate in `in_sospeso.md`: la modifica a mano dei testi
-in P6, l'interruttore della rifinitura (P8, T9), il prima/dopo dell'email, la lettura a
-video del prima/dopo fino in fondo e l'interruzione del turno provata dal vivo.
+*La coda: **T7d — il 📄 CV-1 base** (2026-08-18).* Non era in programma: è nata da
+un'impressione di Mirco — «ieri ho premuto Esporta e mi pare fosse spento» — verificata
+sull'applicazione vera prima di discuterne. Era spento davvero, e il motivo stava sotto la
+lingua: il CV-1 base viveva nella **sola memoria del pannello**, così ogni visita a P6 ne
+generava uno nuovo e l'unico modo di riesportare quello di ieri era rifarlo — senza AI,
+niente affatto. `ArchivioProfilo.CaricaCvBase` esisteva dal primo giorno, completo e
+collaudato: **a chiamarlo erano soltanto i collaudi**, e la promessa del cap. 11.1 («l'app
+dice che è di una versione precedente») non poteva essere mantenuta perché quella versione
+non arrivava mai a video. Fatto: P6 ripesca il CV-1 base e racconta di dove viene; la
+tendina della lingua si accende **anche su di lui** — cadeva la premessa che la teneva
+spenta, non la regola — e con essa si chiude la coda di T7a, senza aggiungere nessun
+controllo nuovo all'interfaccia; `cv_base.json` annota la lingua (i file di prima valgono
+italiano) e quella lingua arriva fino al prompt `.en`, alla rifinitura anti-slop (che era
+rimasta inchiodata all'italiano), alle etichette e alla sigla del nome file. Provato dal
+vivo su una copia dei dati veri: rientro senza attesa, poi il CV-1 riscritto in inglese ed
+esportato in `CV_..._EN_2026-08-18.docx` con «Work experience» dentro.
+
+**Fatto:** **736 collaudi verdi** senza rete (erano 599 a fine T6, 726 a fine T7c),
+versione **0.3.032**, Pool **1.10** — invariato, perché `cv_base.en.md` era già lì dal
+Pool 1.06 e i prompt non sono stati toccati. Restano indietro, dichiarate in
+`in_sospeso.md`: la modifica a mano dei testi in P6, l'interruttore della rifinitura
+(P8, T9), il prima/dopo dell'email, la lettura a video del prima/dopo fino in fondo e
+l'interruzione del turno provata dal vivo.
 **T7 è chiusa.**
 
 ### T8 — Il server MCP (F8)

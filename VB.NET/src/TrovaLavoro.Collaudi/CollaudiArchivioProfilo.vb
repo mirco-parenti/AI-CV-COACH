@@ -5,6 +5,7 @@ Imports System.Text.Json
 Imports System.Text.RegularExpressions
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro.Dati
+Imports TrovaLavoro.Motore
 
 Namespace Dati
 
@@ -52,6 +53,43 @@ Namespace Dati
                     Assert.AreEqual(versione, riletto.VersioneProfilo, "e la versione da cui è nato")
                     Assert.IsGreaterThan(New Date(2026, 1, 1), riletto.Generato,
                                          "con la data di generazione, non quella vuota")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub IlCvBaseSiPortaDietroLaSuaLingua()
+            ' T7d: rileggendolo bisogna poter impaginare e riesportare il CV con le
+            ' etichette della lingua in cui è scritto, e indovinarla dal testo non è un
+            ' mestiere di questo strato (cap. 10.3).
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim versione As String = archivio.Salva(ProfiloDiProva())
+
+                    archivio.SalvaCvBase(
+                        Text.Json.Nodes.JsonNode.Parse("{""intestazione"": {""nome"": ""Luca Ferrari""}}"),
+                        versione, Nothing, "en")
+
+                    Assert.AreEqual("en", archivio.CaricaCvBase().Lingua, "la lingua è annotata nel file")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub UnCvBaseNatoPrimaDiT7dNonDiceLaLingua()
+            ' I file scritti prima il campo non ce l'hanno, e nessuno di essi era in
+            ' inglese: la lingua torna vuota e il ripiego lo fa chi legge, una volta sola,
+            ' in LinguaDocumenti — come per le candidature di prima di T7a.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Directory.CreateDirectory(Path.GetDirectoryName(cartella.FileCvBase))
+                    File.WriteAllText(cartella.FileCvBase,
+                        "{""versione_profilo"": ""2026-08-01_120000"", ""generato"": ""2026-08-01 12:00:00""," &
+                        """cv"": {""intestazione"": {""nome"": ""Luca Ferrari""}}}")
+
+                    Dim riletto As CvBase = archivio.CaricaCvBase()
+
+                    Assert.IsNull(riletto.Lingua, "il campo non c'era")
+                    Assert.AreEqual("it", LinguaDocumenti.PerDocumenti(riletto.Lingua),
+                                    "e per chi legge quel vuoto è italiano, non inglese")
                 End Sub)
         End Sub
 

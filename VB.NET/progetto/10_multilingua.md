@@ -22,6 +22,15 @@ annuncio (IT o EN) ──► analisi ──► campo `lingua` nell'Annuncio JSON
 Il **brainstorming** (P5) resta sempre in italiano: è una conversazione con l'utente,
 non un documento per l'azienda.
 
+Il 📄 **CV-1 base** è l'eccezione che completa la regola, e a **T7d** (2026-08-18) ha
+avuto la sua lingua: un annuncio non ce l'ha — nasce dal solo profilo — quindi la sua
+lingua non può venire da lì. La sceglie l'utente nella stessa tendina di P6, e vive
+**dentro `cv_base.json`** (cap. 11.1), che è la sua unica casa. Detta meglio: la lingua è
+una proprietà **del documento**; per CV-2, lettera ed email quel documento appartiene a
+una candidatura e la lingua sta con lei, per il CV-1 base sta con lui. Fino a T7c la
+tendina su di lui restava spenta, perché cambiarla voleva dire rigenerare *una
+candidatura*: è caduta la premessa, non la regola.
+
 *Realizzato a **T7c** (2026-08-18), e con una conseguenza che valeva la pena scrivere: in
 italiano restano anche gli **appunti di mira** che ne escono, compresi quelli che finiranno
 nei prompt di un CV inglese. Non è una svista — un appunto è un'**istruzione a chi scrive**,

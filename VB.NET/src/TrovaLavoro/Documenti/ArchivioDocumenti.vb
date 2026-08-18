@@ -64,19 +64,26 @@ Namespace Documenti
         ''' <param name="cv">Il CV base JSON.</param>
         ''' <param name="quando">Il giorno da mettere nel nome; oggi, se non si dice.</param>
         ''' <param name="formati">Quali file scrivere; tutti e due, se non si dice.</param>
+        ''' <param name="lingua">
+        ''' In che lingua è scritto (T7d). Vale qui la stessa regola della candidatura: una
+        ''' lingua sola decide le etichette stampate <b>e</b> la sigla nel nome, o si
+        ''' otterrebbe un <c>CV_..._EN_</c> con «Formazione» dentro (cap. 10.4, cap. 05.6).
+        ''' </param>
         Public Function ScriviCvBaseAsync(cv As JsonNode,
                                           Optional quando As Date = Nothing,
-                                          Optional formati As FormatiDocumento = FormatiDocumento.Entrambi) _
+                                          Optional formati As FormatiDocumento = FormatiDocumento.Entrambi,
+                                          Optional lingua As String = Nothing) _
                                           As Task(Of IReadOnlyList(Of String))
 
             If cv Is Nothing Then Throw New ArgumentNullException(NameOf(cv))
 
-            Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(cv)
+            Dim scritta As String = LinguaDocumenti.PerDocumenti(lingua)
+            Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(cv, scritta)
             Dim giorno As Date = If(quando = Nothing, Date.Today, quando)
 
             ' Nessuna azienda: il CV base non nasce da un annuncio, e il suo nome lo dice
             ' non nominandone nessuna (cap. 05.6).
-            Dim nome As String = NomiDocumenti.Cv(DiChiE(pagina), String.Empty, giorno)
+            Dim nome As String = NomiDocumenti.Cv(DiChiE(pagina), String.Empty, giorno, scritta)
 
             Return ScriviAsync(_cartella.CartellaOutProfilo,
                                New List(Of Lavoro) From {New Lavoro(pagina, nome)}, formati)

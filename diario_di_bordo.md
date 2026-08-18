@@ -1891,3 +1891,29 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **E accanto alla correzione un collaudo che la misura in numeri.** Una fotografia trova un difetto una volta; a tenerlo fermo serve qualcosa che si ripeta da solo a ogni giro.
 
 💡 *Mia intuizione / scelta ragionata* — Ho costruito la prova come se dovessi truffare il mio stesso programma, e credo sia il modo giusto di collaudare le regole etiche. Le altre cose si provano chiedendosi «funziona?»; una regola come «i fatti vengono solo dal profilo» si prova chiedendosi **«come la aggirerei?»** — e poi provandoci davvero, con l'esca migliore che si riesce a immaginare. Se avessi dichiarato in chat il patentino del muletto, che l'annuncio non chiede, non avrei saputo niente: il modello non aveva motivo di usarlo. La prova vale quanto vale la tentazione che le metti davanti.
+
+### Step 2.28 — T7d: il CV-1 che rinasceva ogni volta, e la porta che era già in casa
+
+*Volevo ripartire dalla coda di T7 — il 📄 CV-1 base in inglese — ma prima ho chiesto di controllare una cosa che mi era rimasta in mente: il giorno prima avevo cliccato «Esporta PDF» e mi era sembrato spento. Era spento davvero, e il motivo si è rivelato più grosso della lingua.*
+
+**Cosa ho fatto**
+- **Ho fatto verificare il sospetto invece di raccontarlo**: applicazione compilata da `main` e avviata su una **copia usa-e-getta dei miei dati veri**. Su una candidatura riaperta i due bottoni erano accesi; premendo «Genera 📄 CV-1 base», con il `cv_base.json` di ieri lì sul disco, l'applicazione **l'ha rigenerato**: 45 secondi con tutto spento.
+- **La diagnosi**: il CV-1 base viveva **solo nella memoria del pannello**. Il metodo per rileggerlo dal disco esisteva già — `CaricaCvBase` — e a chiamarlo erano **soltanto i collaudi**.
+- **La cura, una sola per due problemi**: P6 ora **ripesca** il CV-1 base invece di rifarlo, e quando lo mostra dice di quando è; e siccome adesso quel pannello è casa sua come lo è di una candidatura, la **tendina della lingua** si accende anche su di lui. La coda di T7 si è chiusa lì, senza aggiungere un solo controllo nuovo all'interfaccia.
+- **Il giro vero, in fondo**: rientro senza attesa, tendina su «Inglese», conferma, e un CV-1 **scritto in inglese** — esportato in `CV_Riccardo_Parenti_EN_2026-08-18.docx`, con dentro «Work experience» e «Skills», accanto all'italiano di ieri rimasto intatto. 736 collaudi automatici, tutti verdi.
+
+**Cosa ho imparato**
+- **Un metodo che non chiama nessuno è un difetto che aspetta.** `CaricaCvBase` era scritto, collaudato e documentato: il capitolo 11.1 prometteva perfino che l'app avrebbe detto «questo CV è di una versione precedente». Non poteva dirlo mai, perché quella versione precedente non arrivava mai a video. Il banco era verde e la promessa era vuota.
+- **Il difetto vero non era la lingua.** Ero partito per il CV-1 in inglese; il problema serio era che un documento già scritto e approvato non si poteva **riavere** senza pagarne un altro. Senza chiave API non si poteva affatto.
+- **«Rientrare non rigenera» era scritto in cima al pannello** e valeva per metà. Le regole che valgono per un caso e non per il suo gemello si notano solo quando qualcuno usa il gemello.
+
+**Dove ho faticato / cosa non era ovvio**
+- **Due collaudi sono diventati rossi, e avevano ragione loro.** Facendo sapere al pannello *quale strada* sta percorrendo, la colonna del CV ha smesso di restare muta quando il documento non c'è. In un caso era un miglioramento (senza chiave, la colonna dice che un CV non c'è invece di sembrare non caricata); nell'altro era una bugia — a profilo eliminato avrebbe detto «non è ancora stato scritto» di un CV che era stato scritto eccome. Ho corretto il codice per il secondo e il collaudo per il primo.
+- **Un caso che il banco non può vedere**: cambiando lingua, se la riscrittura fallisse resterebbe a video il testo vecchio sotto le etichette della lingua nuova. La conferma di quel comando apre una finestra, e una finestra in un collaudo automatico blocca tutto: quel pezzo l'ho chiuso ragionando, non provandolo.
+
+**Cosa ho deciso e perché**
+- **Il CV-1 base di ieri non si rigenera di nascosto**, nemmeno quando il profilo è cambiato: il pannello lo dice e lascia scegliere. Quel CV potrebbe essere quello che ho già spedito.
+- **La lingua sta nel `cv_base.json`**, non in un'impostazione a parte: è una proprietà del documento, come per le candidature — solo che il suo padrone è il profilo e non un annuncio.
+- **Il bottone «Genera 📄 CV-1 base» continua a chiamarsi così** anche adesso che, se il CV c'è, non genera niente. È la stessa scelta di «Genera CV + lettera» in P4: quel bottone è **la porta** dei documenti, e a rifarli c'è «Rigenera», che lo dichiara e lo chiede.
+
+💡 *Mia intuizione / scelta ragionata* — Questa volta il lavoro non è nato da un piano, ma da un'impressione mia rimasta in sospeso: *mi pare che ieri fossero spenti*. La cosa giusta non è stata credermi né archiviare la cosa, ma **andare a guardare** — sui miei dati, copiati in una cartella usa-e-getta perché una prova non deve mai avere il potere di rovinare quello che sta provando. In dieci minuti ho avuto la risposta, ed era un difetto più profondo di quello che pensavo di cercare. Le impressioni degli utenti, anche quando l'utente sono io e sono vaghe, valgono più di quanto sembrino: ci vuole solo qualcosa che le trasformi in fatti prima che diventino opinioni.

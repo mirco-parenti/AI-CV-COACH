@@ -24,6 +24,13 @@ Namespace Dati
         Public Property Generato As Date
 
         ''' <summary>
+        ''' In che lingua è scritto (T7d, cap. 10.3). Vuota nei file nati prima, e chi la
+        ''' legge la fa passare da <c>LinguaDocumenti.PerDocumenti</c>: la regola per cui
+        ''' una lingua non dichiarata è italiano sta lì, in un posto solo.
+        ''' </summary>
+        Public Property Lingua As String
+
+        ''' <summary>
         ''' Com'erano i suoi campi-prosa <b>prima</b> della rifinitura anti-slop (T7b,
         ''' cap. 08.4), o <c>Nothing</c> se non ne è cambiato nessuno. Sta nell'involucro
         ''' e non dentro il CV, come per una candidatura: il documento resta il documento.
@@ -224,9 +231,15 @@ Namespace Dati
         ''' </remarks>
         ''' <param name="cv">Il CV generato.</param>
         ''' <param name="versioneProfilo">Il nome della versione da cui è nato.</param>
+        ''' <param name="lingua">
+        ''' In che lingua è scritto (T7d). Si annota sempre, anche quando è l'italiano:
+        ''' rileggendolo bisogna poter impaginare e riesportare il CV con le etichette
+        ''' della sua lingua, e indovinarlo dal testo non è un mestiere di questo strato.
+        ''' </param>
         ''' <returns>Il percorso del file scritto.</returns>
         Public Function SalvaCvBase(cv As JsonNode, versioneProfilo As String,
-                                    Optional primaDellaRifinitura As JsonNode = Nothing) As String
+                                    Optional primaDellaRifinitura As JsonNode = Nothing,
+                                    Optional lingua As String = Nothing) As String
 
             If cv Is Nothing Then Throw New ArgumentNullException(NameOf(cv))
 
@@ -235,6 +248,7 @@ Namespace Dati
             Dim involucro As New JsonObject From {
                 {"versione_profilo", versioneProfilo},
                 {"generato", Date.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)},
+                {"lingua", lingua},
                 {"cv", cv.DeepClone()}}
 
             ' Da T7b, e solo quando c'è stato davvero un cambiamento da raccontare.
@@ -280,6 +294,7 @@ Namespace Dati
                 .Cv = cv,
                 .VersioneProfilo = Campo(involucro, "versione_profilo"),
                 .Generato = generato,
+                .Lingua = Campo(involucro, "lingua"),
                 .PrimaDellaRifinitura = prima}
 
         End Function

@@ -207,6 +207,101 @@ Namespace Ui
 
         End Function
 
+        <TestMethod>
+        Public Async Function RientrareSulCvBaseNonLoRigenera() As Task
+
+            ' T7d: l'altra metà di RientrareNonRigeneraNiente. Fino a T7c il 📄 CV base era
+            ' l'unico documento a rinascere a ogni visita — un'altra attesa, altri token, e
+            ' un testo diverso da quello che l'utente aveva già letto ed esportato.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Await pannello.MostraIlCvBaseAsync()
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.AreEqual("cv_base", generatore.LavoriChiesti(), "una chiamata sola, non due")
+                    Assert.Contains("Il ritratto del profilo.", Casella(pannello, "txtCv").Text,
+                                    "e a video c'è sempre il suo CV")
+                    Assert.Contains("l'ho scritto", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "col pannello che dice di quando è")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SenzaAiIlCvBaseGiaScrittoSiRileggeESiEsporta() As Task
+
+            ' Il difetto che ha fatto nascere T7d: il cv_base.json stava su disco e i due
+            ' bottoni d'esportazione erano spenti, perché l'unica strada per rivederlo
+            ' passava dall'AI. Un documento già scritto si riesporta anche senza rete.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    GiaScritto(contesto, "it")
+
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.Contains("Il ritratto del profilo.", Casella(pannello, "txtCv").Text,
+                                    "il CV di ieri è a video senza aver chiamato nessuno")
+                    Assert.IsTrue(Bottone(pannello, "btnEsportaDocx").Enabled, "e si può esportare")
+                    Assert.IsTrue(Bottone(pannello, "btnEsportaPdf").Enabled, "in tutti e due i formati")
+                    Assert.DoesNotContain("chiave API", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                          "senza lamentarsi di una chiave che qui non serve")
+
+                    Await pannello.EsportaAsync(FormatiDocumento.Docx)
+
+                    Assert.HasCount(1, Directory.GetFiles(contesto.Cartella.CartellaOutProfilo, "*.docx"),
+                                    "e il file esce davvero")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnCvBaseDiUnProfiloVecchioLoDiceInveceDiRifarsi() As Task
+
+            ' La promessa scritta sopra Dati.CvBase: «poter dire che è di una versione
+            ' precedente invece di rigenerarlo di soppiatto». Quel CV potrebbe essere
+            ' quello che l'utente ha già spedito: la scelta di rifarlo è sua.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    contesto.Archivio.SalvaCvBase(JsonNode.Parse(CvBase), "2026-01-01_000000")
+
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Dim stato As String = Etichetta(pannello, "lblStatoDocumenti").Text
+                    Assert.Contains("hai cambiato il profilo", stato, "il pannello lo dice")
+                    Assert.Contains("Rigenera", stato, "e dice come si rimedia")
+                    Assert.Contains("Il ritratto del profilo.", Casella(pannello, "txtCv").Text,
+                                    "intanto il CV che c'è resta a video")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlCvBaseInIngleseEsceColNomeELeEtichetteDellaSuaLingua() As Task
+
+            ' Cap. 10.4 e cap. 05.6: una lingua sola decide le etichette stampate e la
+            ' sigla nel nome, o si otterrebbe un CV_..._EN_ con «Formazione» dentro.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    GiaScritto(contesto, "en")
+
+                    Await pannello.MostraIlCvBaseAsync()
+                    Await pannello.EsportaAsync(FormatiDocumento.Docx)
+
+                    Dim nome As String = Path.GetFileName(
+                        Directory.GetFiles(contesto.Cartella.CartellaOutProfilo, "*.docx").Single())
+
+                    Assert.Contains("EN", nome, "la sigla della lingua è nel nome del file")
+                End Function)
+
+        End Function
+
         ' ==================================================================
         ' La rifinitura anti-slop e il suo prima/dopo (T7b, cap. 08.4)
         ' ==================================================================
@@ -392,7 +487,11 @@ Namespace Ui
                     Dim stato As Label = Etichetta(pannello, "lblStatoDocumenti")
                     Assert.Contains("chiave API", stato.Text, "lo dice")
                     Assert.AreEqual(StileApp.Pericolo, stato.ForeColor, "col colore di chi non può funzionare")
-                    Assert.IsEmpty(Casella(pannello, "txtCv").Text, "e niente CV")
+
+                    ' Da T7d la colonna non resta muta: si è sulla strada del CV base, e
+                    ' quella strada dice a che punto è invece di sembrare non caricata.
+                    Assert.Contains("non è ancora stato scritto", Casella(pannello, "txtCv").Text,
+                                    "e al posto del CV c'è scritto che un CV non c'è")
                 End Function)
 
         End Function
@@ -404,7 +503,10 @@ Namespace Ui
             ' progetto, e lo mostra spegnendo, non nascondendo.
             Using pannello As New PannelloDocumenti()
 
-                Assert.IsFalse(Scelta(pannello, "cmbLingua").Enabled, "la lingua arriva con T7")
+                ' Da T7d nemmeno la tendina è più «quel che arriverà»: è spenta perché su
+                ' un pannello vuoto non c'è nessun documento a cui quella lingua appartenga.
+                Assert.IsFalse(Scelta(pannello, "cmbLingua").Enabled,
+                               "niente lingua, che senza documenti non ha padrone")
                 ' Da T7b la casella non è più «quel che arriverà»: è spenta perché su un
                 ' pannello vuoto non c'è nessun prima/dopo da guardare.
                 Assert.IsFalse(Casella(Of CheckBox)(pannello, "chkRifinitura").Enabled,
@@ -537,11 +639,10 @@ Namespace Ui
         End Function
 
         <TestMethod>
-        Public Async Function IlCvBaseNonHaUnaLinguaDaScegliere() As Task
+        Public Async Function IlCvBaseNasceNellaLinguaDiCasa() As Task
 
-            ' Cap. 10.1: la lingua è una proprietà della candidatura. Il 📄 CV base non
-            ' nasce da un annuncio e non si genera da questo pannello, quindi la tendina
-            ' resta spenta — col suo motivo, non muta (cap. 03.8).
+            ' L'italiano resta il predefinito: chi non tocca niente ottiene quello che ha
+            ' sempre ottenuto (cap. 10.1).
             Dim generatore As New GeneratoreFinto
             generatore.Dara(CvBase)
 
@@ -550,9 +651,102 @@ Namespace Ui
                 Async Function(pannello, contesto, documenti)
                     Await pannello.MostraIlCvBaseAsync()
 
-                    Assert.IsFalse(Scelta(pannello, "cmbLingua").Enabled, "la tendina è spenta")
                     Assert.AreEqual("it", generatore.LingueChieste.Single(),
-                                    "e il CV base si scrive nella lingua di casa")
+                                    "il CV base si scrive nella lingua di casa")
+                    Assert.AreEqual("Italiano", Scelta(pannello, "cmbLingua").Text, "e la tendina lo dice")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SulCvBaseLaLinguaSiPuoScegliere() As Task
+
+            ' T7d, cap. 10.3: la lingua si sceglie su un documento, e il 📄 CV base è un
+            ' documento. Fino a T7c la tendina era spenta su di lui, perché cambiarla
+            ' voleva dire rigenerare *una candidatura* — che il CV base non ha.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.IsTrue(Scelta(pannello, "cmbLingua").Enabled,
+                                  "sul CV base la tendina è accesa come su una candidatura")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaTendinaSegueLaLinguaDelCvBaseSalvato() As Task
+
+            ' Riaprendolo, il CV base va impaginato con le etichette della sua lingua: è la
+            ' stessa pagina di blocchi che finirà nei file, e mostrarla in italiano
+            ' significherebbe scoprire l'errore solo aprendo il DOCX (cap. 10.4).
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    GiaScritto(contesto, "en")
+
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.AreEqual("Inglese", Scelta(pannello, "cmbLingua").Text,
+                                    "la tendina dice la lingua del CV che si sta guardando")
+                    Assert.Contains("Skills", Casella(pannello, "txtCv").Text,
+                                    "e le etichette dell'anteprima parlano inglese")
+                    Assert.DoesNotContain("Competenze", Casella(pannello, "txtCv").Text,
+                                          "senza nessuna etichetta italiana rimasta")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlCvBaseSiRiscriveNellaLinguaCheHa() As Task
+
+            ' «Rigenera» non cambia lingua da sé: riscrive quello che c'è, com'era —
+            ' altrimenti un CV inglese tornerebbe italiano al primo ripensamento.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    GiaScritto(contesto, "en")
+
+                    Await pannello.MostraIlCvBaseAsync()
+                    Assert.IsEmpty(generatore.LingueChieste, "riaprendolo non si è generato niente")
+
+                    Await pannello.RigeneraAsync()
+
+                    Assert.AreEqual("en", generatore.LingueChieste.Single(),
+                                    "e riscrivendolo si resta in inglese")
+                    Assert.AreEqual("en", contesto.Archivio.CaricaCvBase().Lingua,
+                                    "col file che continua a dirlo")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        <Timeout(15000)>
+        Public Async Function SenzaCvBaseCambiareLinguaNonChiedeNiente() As Task
+
+            ' Il gemello di SenzaDocumentiCambiareLinguaNonChiedeNiente, dall'altra parte:
+            ' non c'è nessun testo da sostituire, quindi non c'è niente da chiedere. Il
+            ' tetto di tempo è la rete di sicurezza — una conferma aperta qui bloccherebbe
+            ' il banco intero invece di farlo fallire.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+
+                    ' Senza generatore la generazione non parte: il pannello resta sulla
+                    ' strada del CV base senza averne uno, che è il caso da provare.
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Scelta(pannello, "cmbLingua").SelectedIndex = 1
+
+                    Assert.Contains("sarà in inglese", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "si prende nota per la prossima volta, e lo si dice")
                 End Function)
 
         End Function
@@ -583,6 +777,17 @@ Namespace Ui
                 End Function)
 
         End Function
+
+        ''' <summary>
+        ''' Un 📄 CV base già scritto su disco, nella lingua data e sull'ultima versione di
+        ''' profilo: è il caso in cui P6 lo ripesca invece di rigenerarlo (T7d).
+        ''' </summary>
+        Private Shared Sub GiaScritto(contesto As ContestoApp, lingua As String)
+
+            contesto.Archivio.SalvaCvBase(JsonNode.Parse(CvBase),
+                                          contesto.Archivio.Versioni().LastOrDefault(), Nothing, lingua)
+
+        End Sub
 
         ''' <summary>
         ''' Una candidatura con i documenti già scritti, nella lingua data: è il caso in

@@ -1,4 +1,5 @@
 ﻿Imports System.Drawing
+Imports System.Globalization
 Imports System.IO
 Imports System.Linq
 Imports System.Text
@@ -18,18 +19,20 @@ Imports TrovaLavoro.Motore
 ''' perché quello un annuncio non ce l'ha.
 ''' </summary>
 ''' <remarks>
-''' <para><b>Intero nella struttura, parziale nelle funzioni</b> (cap. 03.6): anteprime ed
-''' esportazioni funzionano; la scelta della lingua e il prima/dopo dell'anti-slop sono
-''' lì spenti — arrivano con T7. «Prepara email» era spento allo stesso modo fino a T6,
-''' che l'ha acceso. Chi guarda l'applicazione a metà strada deve vedere dove sta
-''' andando.</para>
+''' <para><b>Nato intero nella struttura, riempito una tappa alla volta</b> (cap. 03.6):
+''' anteprime ed esportazioni funzionavano dal primo giorno, «Prepara email» si è acceso
+''' con T6, la scelta della lingua e il prima/dopo dell'anti-slop con T7. Chi guarda
+''' l'applicazione a metà strada deve vedere dove sta andando, e i comandi che ancora non
+''' fanno niente si mostrano spenti, non nascosti.</para>
 ''' <para><b>Le anteprime passano dalla pagina di blocchi</b>, non dal JSON: le stampanti
 ''' sono tre — DOCX, PDF e questa, a video — e leggono tutte lo stesso modello (cap. 05.3).
 ''' Se l'anteprima leggesse il JSON per conto suo, mostrerebbe un documento che i file non
 ''' contengono, proprio dove l'utente controlla.</para>
 ''' <para><b>Rientrare non rigenera.</b> Un'opportunità che ha già i suoi documenti li
 ''' mostra e basta: rifarli costa un'attesa e dei token, e li cambierebbe sotto il naso di
-''' chi li aveva già letti. A rifarli è «Rigenera», che lo dichiara.</para>
+''' chi li aveva già letti. A rifarli è «Rigenera», che lo dichiara. Da T7d la regola vale
+''' anche per il 📄 CV base, che fino ad allora era l'unico documento a rinascere a ogni
+''' visita — e l'unico che, senza AI, non si potesse più riesportare.</para>
 ''' </remarks>
 Public Class PannelloDocumenti
     Implements IPannelloArea
@@ -70,6 +73,26 @@ Public Class PannelloDocumenti
 
     ''' <summary>Il 📄 CV base in mostra; <c>Nothing</c> se si sta guardando una candidatura.</summary>
     Private _cvBase As JsonNode
+
+    ''' <summary>
+    ''' Se il pannello sta sulla strada del 📄 CV base, anche quando un CV ancora non c'è
+    ''' — lo si sta aspettando, o la generazione è andata storta.
+    ''' </summary>
+    ''' <remarks>
+    ''' Prima bastava guardare <c>_cvBase</c>, e non bastava davvero: nell'attesa i due
+    ''' campi sono <b>tutti e due</b> vuoti, e il pannello non sapeva più dire quale dei
+    ''' due documenti stesse arrivando — così intitolava «🎯 CV mirato» la colonna di un
+    ''' CV base, e teneva spento il «Rigenera» che era l'unico modo di riprovare dopo un
+    ''' errore. La strada percorsa è un dato suo, e va tenuto (T7d).
+    ''' </remarks>
+    Private _sulCvBase As Boolean
+
+    ''' <summary>
+    ''' In che lingua è — o sarà — il 📄 CV base (T7d, cap. 10.3). Per una candidatura la
+    ''' lingua è dell'opportunità e viaggia con lei; il CV base un'opportunità non ce l'ha,
+    ''' e la sua lingua sta nel <c>cv_base.json</c> da cui si rilegge.
+    ''' </summary>
+    Private _linguaCvBase As String = LinguaDocumenti.Italiano
 
     ''' <summary>
     ''' Com'erano i testi del 📄 CV base prima della rifinitura (T7b, cap. 08.4). Per una
@@ -177,6 +200,11 @@ Public Class PannelloDocumenti
 
         If AiAlLavoro OrElse _cvBase Is Nothing Then Return
 
+        ' Si lascia anche la <i>strada</i> del CV base, non solo il documento: restando su
+        ' di essa la colonna direbbe «non è ancora stato scritto» — che è falso, era
+        ' scritto — proprio mentre lo stato racconta che è stato eliminato. Qui non c'è
+        ' più niente da guardare, e il pannello torna vuoto.
+        _sulCvBase = False
         _cvBase = Nothing
         _primaDelCvBase = Nothing
         Mostra()
@@ -199,6 +227,7 @@ Public Class PannelloDocumenti
         If AiAlLavoro Then Return
 
         _candidatura = candidatura
+        _sulCvBase = False
         _cvBase = Nothing
         _primaDelCvBase = Nothing
 
@@ -216,18 +245,112 @@ Public Class PannelloDocumenti
     End Function
 
     ''' <summary>
-    ''' Genera e mostra il 📄 CV base: dal solo profilo, senza alcun annuncio. È la strada
-    ''' che arriva dalla scheda P2 (cap. 12.2, punto 5).
+    ''' Mostra il 📄 CV base, generandolo se non ce n'è ancora uno: dal solo profilo, senza
+    ''' alcun annuncio. È la strada che arriva dalla scheda P2 (cap. 12.2, punto 5).
     ''' </summary>
+    ''' <remarks>
+    ''' <b>Rientrare non rigenera</b>, qui come per una candidatura (v. in testa alla
+    ''' classe). Fino a T7d questa metà della regola non c'era: il CV base viveva nella sola
+    ''' memoria del pannello, così ogni rientro ne riscriveva uno nuovo — un'altra attesa,
+    ''' altri token, e un testo diverso da quello che l'utente aveva già approvato ed
+    ''' esportato. Il <c>cv_base.json</c> stava lì accanto dal primo giorno.
+    ''' </remarks>
     Public Async Function MostraIlCvBaseAsync() As Task
 
         If AiAlLavoro Then Return
 
         _candidatura = Nothing
+        _sulCvBase = True
         _cvBase = Nothing
         _primaDelCvBase = Nothing
+        _linguaCvBase = LinguaDocumenti.Italiano
 
         Mostra()
+
+        If RipescaIlCvBase() Then Return
+
+        Await GeneraIlCvBaseAsync().ConfigureAwait(True)
+
+    End Function
+
+    ''' <summary>
+    ''' Mette in mostra il 📄 CV base già scritto, se ce n'è uno, senza chiamare l'AI.
+    ''' </summary>
+    ''' <returns>
+    ''' Vero se il pannello ha già di che mostrare — o di che spiegare — e non c'è niente
+    ''' da generare.
+    ''' </returns>
+    Private Function RipescaIlCvBase() As Boolean
+
+        If _contesto Is Nothing OrElse Not _contesto.Archivio.Esiste Then Return False
+
+        Dim salvato As Dati.CvBase
+
+        Try
+            salvato = _contesto.Archivio.CaricaCvBase()
+
+        Catch ex As Exception When TypeOf ex Is JsonException OrElse TypeOf ex Is IOException _
+                                   OrElse TypeOf ex Is UnauthorizedAccessException
+            ' Come per il profilo (cap. 11.1): un file che non si lascia leggere si
+            ' dichiara, non si scavalca in silenzio rigenerando — chi legge deve sapere
+            ' che su disco c'era qualcosa.
+            RaccontaLoStato($"Il 📄 CV base c'è ma non si lascia leggere: {ex.Message}" & vbLf &
+                            "Con «Rigenera» lo riscrivo da capo.", StileApp.Pericolo)
+            Return True
+        End Try
+
+        If salvato Is Nothing OrElse salvato.Cv Is Nothing Then Return False
+
+        _cvBase = salvato.Cv
+        _primaDelCvBase = salvato.PrimaDellaRifinitura
+        _linguaCvBase = LinguaDocumenti.PerDocumenti(salvato.Lingua)
+
+        Mostra()
+        RaccontaLoStato(DaDoveViene(salvato), StileApp.TestoSecondario)
+
+        Return True
+
+    End Function
+
+    ''' <summary>
+    ''' Di quale profilo è il ritratto il CV che si sta guardando, e di quando.
+    ''' </summary>
+    ''' <remarks>
+    ''' Se il profilo è cambiato dopo, il pannello lo <b>dice</b> invece di rigenerare di
+    ''' soppiatto: è la promessa scritta sopra <see cref="Dati.CvBase"/>, ed è la scelta
+    ''' dell'utente: quel CV potrebbe essere quello che ha già spedito.
+    ''' </remarks>
+    Private Function DaDoveViene(salvato As Dati.CvBase) As String
+
+        Dim quando As String = If(salvato.Generato = Nothing, "prima d'ora",
+                                  "il " & salvato.Generato.ToString("d MMMM yyyy",
+                                                                    CultureInfo.CurrentCulture))
+
+        Dim testo As String = $"Questo 📄 CV base l'ho scritto {quando}{InQuestaLingua()}."
+
+        If ProfiloCambiatoDopo(salvato.VersioneProfilo) Then
+            Return testo & vbLf &
+                   "Da allora hai cambiato il profilo: con «Rigenera» lo riscrivo su quello di oggi."
+        End If
+
+        Return testo & vbLf & "Puoi esportarlo così com'è, o riscriverlo con «Rigenera»."
+
+    End Function
+
+    ''' <summary>Se il profilo ha avuto altre versioni dopo quella da cui nacque il CV.</summary>
+    Private Function ProfiloCambiatoDopo(versioneDelCv As String) As Boolean
+
+        If String.IsNullOrEmpty(versioneDelCv) Then Return False
+
+        Dim ultima As String = _contesto.Archivio.Versioni().LastOrDefault()
+        If String.IsNullOrEmpty(ultima) Then Return False
+
+        Return Not String.Equals(ultima, versioneDelCv, StringComparison.Ordinal)
+
+    End Function
+
+    ''' <summary>Scrive il 📄 CV base da capo, nella lingua scelta.</summary>
+    Private Async Function GeneraIlCvBaseAsync() As Task
 
         If _generatore Is Nothing Then
             RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
@@ -243,10 +366,10 @@ Public Class PannelloDocumenti
             LavoroInCorso(True)
 
             Try
-                RaccontaLoStato("Scrivo il tuo 📄 CV base…", StileApp.TestoSecondario)
+                RaccontaLoStato($"Scrivo il tuo 📄 CV base{InQuestaLingua()}…", StileApp.TestoSecondario)
 
                 _cvBase = Await _generatore.GeneraCvBaseAsync(
-                    JsonNode.Parse(profilo.ComeTesto()), filo.Token).ConfigureAwait(True)
+                    JsonNode.Parse(profilo.ComeTesto()), filo.Token, _linguaCvBase).ConfigureAwait(True)
 
                 _primaDelCvBase = Await RifinisciIlCvBaseAsync(filo.Token).ConfigureAwait(True)
 
@@ -265,6 +388,16 @@ Public Class PannelloDocumenti
             End Try
 
         End Using
+
+    End Function
+
+    ''' <summary>
+    ''' «in inglese» quando lo è, niente quando è la lingua di casa: l'italiano è il
+    ''' predefinito e dirlo ogni volta sarebbe rumore.
+    ''' </summary>
+    Private Function InQuestaLingua() As String
+
+        Return If(_linguaCvBase = LinguaDocumenti.Inglese, " in inglese", String.Empty)
 
     End Function
 
@@ -368,8 +501,11 @@ Public Class PannelloDocumenti
         RaccontaLoStato("Rifinisco il testo del 📄 CV base…", StileApp.TestoSecondario)
 
         Try
+            ' Nella lingua del CV, non in quella di casa: l'anti-slop ha le sue varianti
+            ' (cap. 04.6), e passargli l'italiano su un testo inglese vorrebbe dire
+            ' correggere una prosa con le regole di un'altra lingua.
             Return Await _rifinitura.DelCvAsync(
-                _cvBase, LinguaDocumenti.Italiano, annulla).ConfigureAwait(True)
+                _cvBase, _linguaCvBase, annulla).ConfigureAwait(True)
 
         Catch ex As ErroreAi
             Return Nothing
@@ -382,8 +518,8 @@ Public Class PannelloDocumenti
 
         Try
             _contesto.Archivio.SalvaCvBase(_cvBase, _contesto.Archivio.Versioni().LastOrDefault(),
-                                           _primaDelCvBase)
-            Return "Il 📄 CV base è pronto ed è salvato col tuo profilo." & vbLf &
+                                           _primaDelCvBase, _linguaCvBase)
+            Return $"Il 📄 CV base è pronto{InQuestaLingua()} ed è salvato col tuo profilo." & vbLf &
                    "Esportalo in DOCX o PDF quando ti va bene."
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse
@@ -449,7 +585,7 @@ Public Class PannelloDocumenti
     Private Function ScriviAsync(formati As FormatiDocumento) As Task(Of IReadOnlyList(Of String))
 
         If _cvBase IsNot Nothing Then
-            Return _documenti.ScriviCvBaseAsync(_cvBase, Nothing, formati)
+            Return _documenti.ScriviCvBaseAsync(_cvBase, Nothing, formati, _linguaCvBase)
         End If
 
         ' Senza cartella non c'è un «dove»: l'opportunità arriva qui già salvata da P4, ma
@@ -483,11 +619,15 @@ Public Class PannelloDocumenti
         ' stato.
         btnTornaIndietro.Text = If(_candidatura Is Nothing, "Torna al profilo", "Torna all'opportunità")
 
-        If _cvBase IsNot Nothing Then
+        ' Il nome della colonna si decide dalla strada percorsa, non dal fatto che il
+        ' documento sia già arrivato: nell'attesa non c'è ancora niente da mostrare, ma si
+        ' sa benissimo quale dei due si sta aspettando.
+        If _sulCvBase Then
             lblCv.Text = "📄 CV base"
+            AllestisciLaTendina(_linguaCvBase)
             txtAnnuncio.Text = "Il 📄 CV base non nasce da un annuncio: è il ritratto del tuo profilo."
             txtCv.Text = Anteprima(_cvBase,
-                                   Function(d) Impaginazione.PaginaCv(d),
+                                   Function(d) Impaginazione.PaginaCv(d, _linguaCvBase),
                                    "Il CV non è ancora stato scritto.",
                                    _primaDelCvBase)
             txtLettera.Text = "La lettera si scrive su un annuncio: qui non ce n'è uno."
@@ -613,7 +753,7 @@ Public Class PannelloDocumenti
     ''' <summary>Se c'è una rifinitura da poter mostrare in questo momento.</summary>
     Private Function CEUnPrimaDaMostrare() As Boolean
 
-        If _cvBase IsNot Nothing Then Return _primaDelCvBase IsNot Nothing
+        If _sulCvBase Then Return _primaDelCvBase IsNot Nothing
 
         Return _candidatura IsNot Nothing AndAlso _candidatura.PrimaDellaRifinitura IsNot Nothing
 
@@ -670,10 +810,14 @@ Public Class PannelloDocumenti
 
         If AiAlLavoro Then Return
 
-        If _cvBase IsNot Nothing OrElse _candidatura Is Nothing Then
-            Await MostraIlCvBaseAsync().ConfigureAwait(True)
+        ' Rigenerare il CV base vuol dire riscriverlo: si va dritti alla generazione,
+        ' senza ripescare da disco quello che si sta buttando.
+        If _sulCvBase Then
+            Await GeneraIlCvBaseAsync().ConfigureAwait(True)
             Return
         End If
+
+        If _candidatura Is Nothing Then Return
 
         ' I documenti di prima si buttano adesso: se la generazione fallisce a metà, il
         ' pannello non deve mostrare un CV vecchio accanto a una lettera nuova.
@@ -704,6 +848,14 @@ Public Class PannelloDocumenti
                                                      Handles cmbLingua.SelectedIndexChanged
 
         If _tendinaInAllestimento Then Return
+
+        ' Il 📄 CV base ha la stessa regola, con un padrone diverso: la sua lingua non sta
+        ' in un'opportunità — che non ha — ma nel suo cv_base.json (T7d, cap. 10.3).
+        If _sulCvBase Then
+            Await CambiaLinguaDelCvBaseAsync(LinguaDallaTendina()).ConfigureAwait(True)
+            Return
+        End If
+
         If _candidatura Is Nothing Then Return
 
         Dim scelta As String = LinguaDallaTendina()
@@ -738,6 +890,54 @@ Public Class PannelloDocumenti
         Await RigeneraAsync().ConfigureAwait(True)
 
     End Sub
+
+    ''' <summary>
+    ''' La lingua del 📄 CV base è cambiata: lo si riscrive (T7d, cap. 10.3).
+    ''' </summary>
+    ''' <remarks>
+    ''' Non c'è niente da mettere per iscritto prima della generazione, ed è la differenza
+    ''' con la candidatura: là la lingua è un dato dell'opportunità, che vive su disco e
+    ''' compare nel registro anche prima che i documenti esistano; qui vive dentro il
+    ''' <c>cv_base.json</c>, e senza un CV quel file non c'è. Una scelta presa e non ancora
+    ''' usata resta di questa sessione — non c'è nessun posto onesto in cui scriverla.
+    ''' </remarks>
+    Private Async Function CambiaLinguaDelCvBaseAsync(scelta As String) As Task
+
+        If scelta = _linguaCvBase Then Return
+
+        Dim nome As String = LinguaDocumenti.Nome(scelta).ToLowerInvariant()
+
+        ' Niente da sostituire, niente da chiedere: si prende nota per la prossima volta.
+        If _cvBase Is Nothing Then
+            _linguaCvBase = scelta
+            RaccontaLoStato($"Quando lo scriverò, sarà in {nome}.", StileApp.TestoSecondario)
+            Return
+        End If
+
+        If MessageBox.Show(
+            $"Vuoi che riscriva il 📄 CV base in {nome}?" & vbLf &
+            "Il testo che vedi adesso viene sostituito.",
+            NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then
+
+            ' Come per la candidatura: rifiutando, la tendina torna dov'era, o
+            ' racconterebbe un CV che non esiste.
+            AllestisciLaTendina(_linguaCvBase)
+            Return
+
+        End If
+
+        ' Il CV di prima si butta adesso, come fa la candidatura: se la generazione va
+        ' storta a metà, il pannello non deve restare con un testo italiano impaginato
+        ' sotto «Work experience» — e la conferma ha appena detto che viene sostituito.
+        _linguaCvBase = scelta
+        _cvBase = Nothing
+        _primaDelCvBase = Nothing
+        Mostra()
+
+        Await GeneraIlCvBaseAsync().ConfigureAwait(True)
+
+    End Function
 
     ''' <summary>
     ''' Mette per iscritto la lingua scelta, subito.
@@ -845,7 +1045,8 @@ Public Class PannelloDocumenti
     Private Sub DichiaraLeTappeCheMancano()
 
         ' La lingua non sta più qui: T7 è arrivata, e la tendina la accende
-        ' AggiornaComandi quando c'è una candidatura a cui appartenga.
+        ' AggiornaComandi quando c'è un documento a cui appartenga — una candidatura, o
+        ' il 📄 CV base da T7d.
         cmbLingua.SelectedIndex = 0
 
         ' Nemmeno il prima/dopo della rifinitura: T7b è arrivata, e la casella la accende
@@ -896,27 +1097,32 @@ Public Class PannelloDocumenti
         btnEsportaDocx.Enabled = conDocumento AndAlso Not occupato
         btnEsportaPdf.Enabled = conDocumento AndAlso Not occupato
 
+        ' Anche dopo una generazione andata storta: è da qui che si riprova, e un
+        ' «Rigenera» spento lascerebbe come unica via il ritorno al profilo.
         btnRigenera.Enabled = Not occupato AndAlso
-                              (_cvBase IsNot Nothing OrElse _candidatura IsNot Nothing) AndAlso
+                              (_sulCvBase OrElse _candidatura IsNot Nothing) AndAlso
                               (_pipeline IsNot Nothing OrElse _generatore IsNot Nothing)
 
         btnTornaIndietro.Enabled = Not occupato
 
-        ' La lingua è una proprietà della candidatura (cap. 10.1): il 📄 CV base non ne ha
-        ' una da scegliere qui, perché non nasce da un annuncio e non si genera da questo
-        ' pannello. Il pool la variante inglese ce l'ha, ma la porta per chiederla starebbe
-        ' in P2, dove il CV base si genera (v. «in_sospeso.md»).
-        cmbLingua.Enabled = Not occupato AndAlso _candidatura IsNot Nothing
+        ' La lingua si sceglie su un documento, e i documenti sono due (T7d, cap. 10.3):
+        ' quelli della candidatura, dove la lingua è dell'opportunità, e il 📄 CV base,
+        ' dove è sua e sta nel cv_base.json. Su un pannello vuoto non c'è né l'una né
+        ' l'altro, e la tendina resta spenta.
+        cmbLingua.Enabled = Not occupato AndAlso (_sulCvBase OrElse _candidatura IsNot Nothing)
         lblLingua.Enabled = cmbLingua.Enabled
 
-        If _candidatura IsNot Nothing Then
+        _suggerimenti.SetToolTip(lblLingua, Nothing)
+
+        If _sulCvBase Then
+            _suggerimenti.SetToolTip(cmbLingua,
+                "La lingua del 📄 CV base. Cambiandola lo riscrivo: il tuo profilo resta com'è.")
+        ElseIf _candidatura IsNot Nothing Then
             _suggerimenti.SetToolTip(cmbLingua,
                 "La lingua di CV e lettera. Cambiandola li riscrivo: il tuo profilo resta com'è.")
-            _suggerimenti.SetToolTip(lblLingua, Nothing)
         Else
             _suggerimenti.SetToolTip(cmbLingua,
-                "Il 📄 CV base segue la lingua del profilo: la lingua si sceglie su una candidatura.")
-            _suggerimenti.SetToolTip(lblLingua, Nothing)
+                "La lingua si sceglie su un documento: prima aprine uno.")
         End If
 
         ' Il prima/dopo si può guardare solo dove c'è (cap. 08.4). La casella non si

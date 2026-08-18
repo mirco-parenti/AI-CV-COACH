@@ -185,6 +185,9 @@ portato su desktop:
    c'era, a racconto completo no.*
 5. Da lì si può già generare il 📄 CV-1 base (senza alcun annuncio) o proseguire con il
    Flusso A dal punto A3.
+   *(T7d, 2026-08-18: dalla seconda volta in poi quel bottone non genera più — porta in P6
+   e **mostra** il CV-1 base che c'è, con la sua lingua e la data in cui è nato. A rifarlo
+   c'è «Rigenera», e a scriverlo in un'altra lingua la tendina, che lo chiede prima.)*
 
 ## 12.3 Flusso C — Annuncio da link (F2)
 

@@ -180,7 +180,11 @@ due uscite una accanto all'altra a verificarlo (cap. 14).
 - Nomi parlanti e stabili: `CV_Mirco_Parenti_<Azienda>_<AAAA-MM-GG>.docx` (e `.pdf`),
   `Lettera_<Azienda>_<AAAA-MM-GG>.docx`. In inglese se l'output è in inglese
   (`CV_Mirco_Parenti_EN_…`). Il CV base, che un'azienda non ce l'ha, la lascia fuori dal
-  nome: `CV_Mirco_Parenti_<AAAA-MM-GG>.docx`.
+  nome: `CV_Mirco_Parenti_<AAAA-MM-GG>.docx`. *La sigla della lingua vale **anche per lui**
+  da T7d (2026-08-18), da quando la lingua si può scegliere: `CV_Mirco_Parenti_EN_…`. Non è
+  un dettaglio di ordine — è ciò che impedisce alla versione inglese di sovrascrivere
+  l'italiana dello stesso giorno, e in una cartella dove i due CV convivono dice a colpo
+  d'occhio quale si sta per allegare.*
 - Un bottone «Apri cartella» accanto a ogni documento generato: l'utente deve sempre
   poter mettere le mani sui suoi file.
 - **Si scrive solo il formato che si chiede** *(2026-08-10, T4c)*: P6 ha due bottoni

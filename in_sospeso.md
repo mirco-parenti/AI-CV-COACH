@@ -107,15 +107,6 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Da T7 — multilingua e qualità (2026-08-15, alla chiusura di T7a)
 
-- **Il 📄 CV-1 base non si può chiedere in inglese.** La lingua di T7a viaggia
-  dall'annuncio ai documenti, e il CV-1 base un annuncio non ce l'ha: nasce dal solo
-  profilo, e la sua unica porta — il bottone «Genera 📄 CV-1 base» di P2 — non chiede
-  niente e non passa nessuna lingua, così `GeneraCvBaseAsync` resta sul suo predefinito
-  `it`. Sotto è tutto pronto e inutilizzato: `cv_base.en.md` è nel **Pool 1.06** e il
-  motore accetta già il parametro; manca solo il modo di dirglielo, che starebbe in P2
-  accanto al bottone. La tendina di P6 non serve a questo: lì cambiare lingua **rigenera
-  una candidatura**, e il CV base non è una candidatura — infatti su di lui è spenta.
-  *(cap. 03, tabella dei pannelli, P2; cap. 10.3; pool `generazione/cv_base.en`.)*
 - **La modifica a mano dei testi in P6** (2026-08-18, alla chiusura di T7b). Il cap. 8.4
   promette che davanti al prima/dopo l'utente possa «accettare, modificare a mano o
   tornare alla versione non rifinita»: il prima/dopo c'è, la modifica a mano no — le tre
@@ -167,6 +158,25 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Chiuse
 
+- ✅ **Il 📄 CV-1 base non si può chiedere in inglese** *(aperta il 2026-08-15 da T7a,
+  chiusa il 2026-08-18 da T7d)*. La porta era data per persa in P2, «accanto al bottone»,
+  perché la tendina di P6 rigenerava *una candidatura* e il CV-1 base non ne ha una. È
+  caduta la premessa, non la regola: da quando P6 **rilegge** il CV-1 base dal suo
+  `cv_base.json` invece di rigenerarlo a ogni visita, quel pannello è la sua casa come lo
+  è di una candidatura, e la tendina ci sta senza aggiungere nessun controllo altrove.
+  Cambiarla chiede conferma e lo riscrive; la lingua scelta viaggia fino in fondo —
+  prompt `.en`, rifinitura anti-slop nella lingua giusta (era **inchiodata all'italiano**),
+  etichette dell'anteprima, etichette del DOCX/PDF e sigla `_EN_` nel nome del file. Provato
+  sui dati veri: `CV_..._EN_2026-08-18.docx` con «Work experience» dentro, accanto
+  all'italiano di ieri che è rimasto dov'era. *(cap. 10.1; cap. 03, tabella dei pannelli,
+  P6; cap. 11.1; pool `generazione/cv_base.en`.)*
+- ✅ **I bottoni d'esportazione spenti su un CV-1 base che esisteva** *(aperta e chiusa il
+  2026-08-18 da T7d)*. Nata da una prova di Mirco — «ho cliccato e non erano abilitati» — e
+  confermata dal vivo: il `cv_base.json` era su disco dal giorno prima e **non lo rileggeva
+  nessuno** (`ArchivioProfilo.CaricaCvBase` esisteva, la chiamavano solo i collaudi), così
+  l'unica strada per riesportarlo passava da una rigenerazione — 45 secondi, altri token, e
+  un testo diverso da quello già approvato. Senza AI non si poteva affatto. Ora «rientrare
+  non rigenera» vale per tutti e due i documenti. *(cap. 03.6; cap. 11.1.)*
 - ✅ **Il destinatario proposto dall'annuncio** *(aperta il 2026-08-14 da T6, chiusa il
   2026-08-15 da T7a)*. Il campo era sempre vuoto perché non c'era niente da proporre: il
   **Pool 1.06** ha insegnato ad `analisi_annuncio` il campo **`contatto {email,

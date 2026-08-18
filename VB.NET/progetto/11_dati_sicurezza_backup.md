@@ -83,7 +83,14 @@ TrovaLavoro\
   opportunità. Come `stato.json`, anche `cv_base.json` annota **da quale versione di
   profilo** è nato: se il profilo poi cambia, il CV base non viene cancellato di
   nascosto né aggiornato di soppiatto — resta lì e l'app dice che è di una versione
-  precedente, lasciando a chi legge la scelta se rigenerarlo.
+  precedente, lasciando a chi legge la scelta se rigenerarlo. *(La promessa è **mantenuta
+  da T7d**, 2026-08-18: fino a T7c il file veniva scritto e non riletto da nessuno, e
+  ogni visita a P6 ne generava uno nuovo — così quella versione precedente non si vedeva
+  mai, perché non arrivava mai a video.)* Dalla stessa tappa `cv_base.json` annota anche
+  **in che lingua** è scritto: senza, riaprendolo lo si impaginerebbe con le etichette
+  della lingua sbagliata, e indovinarla dal testo non è un mestiere dell'archivio. I file
+  nati prima il campo non ce l'hanno e valgono **italiano**, con la stessa regola delle
+  candidature di prima di T7a (cap. 10.1).
 - **Un profilo corrotto si mette in salvo, mai in pericolo** *(2026-08-09, revisione
   adversariale)*: se `profilo.json` non si legge, l'app ne copia **subito** una fotografia
   (`profilo.rotto-<data>.json`) prima che qualunque «Salva» possa sovrascriverlo, e il
