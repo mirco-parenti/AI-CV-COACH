@@ -141,6 +141,20 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   larghezza, ordine dei campi, e cosa succede quando i campi cambiati sono molti. È una
   guardata di dieci minuti da fare a mano. *(cap. 08.4; `strumenti/mcp-collaudi/`.)*
 
+## Da T7d — il 📄 CV-1 base riletto e in inglese (2026-08-18, alla chiusura)
+
+- **Il cambio di lingua che fallisce a metà, provato dal vivo.** Cambiando la lingua del
+  📄 CV-1 base il pannello butta il testo di prima *prima* di rigenerare — così un errore
+  dell'AI non lascia a video un CV italiano impaginato sotto «Work experience» — ma quel
+  ramo **non è stato percorso davvero**: la conferma apre una finestra di dialogo, e una
+  finestra dentro il banco lo bloccherebbe invece di farlo fallire. È chiuso ragionando e
+  per costruzione (l'azzeramento è nello stesso metodo della conferma), non per prova. Si
+  verifica in due minuti con lo strumento di collaudo **togliendo la chiave API** e
+  cambiando lingua su un CV che c'è: deve restare la colonna vuota col motivo, e
+  «Rigenera» acceso. Gemella dell'interruzione del turno qui sopra, e per la stessa
+  ragione: quel che passa da una finestra modale il banco non lo sa guidare.
+  *(cap. 03.6; `PannelloDocumenti.CambiaLinguaDelCvBaseAsync`.)*
+
 ## Da revisione adversariale (2026-08-09)
 
 - **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:

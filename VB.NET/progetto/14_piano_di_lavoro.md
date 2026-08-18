@@ -500,7 +500,7 @@ l'AI vera, come insegna il 1.09: *Direttore Operativo* → **Operations Director
 salto a *COO*, e i **sette ruoli già inglesi restituiti identici** — che era il rischio
 vero, cioè che «traduci» diventasse «riscrivi».
 
-**Fatto:** **736 collaudi verdi** senza rete (erano 599 a fine T6, 726 a fine T7c),
+**Fatto:** **737 collaudi verdi** senza rete (erano 599 a fine T6, 726 a fine T7c),
 versione **0.3.032**, Pool **1.11**. Restano indietro, dichiarate in
 `in_sospeso.md`: la modifica a mano dei testi in P6, l'interruttore della rifinitura
 (P8, T9), il prima/dopo dell'email, la lettura a video del prima/dopo fino in fondo e

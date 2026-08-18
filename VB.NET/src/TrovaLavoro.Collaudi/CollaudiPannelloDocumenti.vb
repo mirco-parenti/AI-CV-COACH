@@ -260,6 +260,36 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function UnCvBaseIlleggibileSiDichiaraInveceDiRigenerarsi() As Task
+
+            ' La stessa promessa del profilo (cap. 11.1), dall'altra parte: un file che non
+            ' si lascia leggere si dichiara. Rigenerare qui sarebbe il modo più elegante di
+            ' nascondere la notizia — a video comparirebbe un CV nuovo di zecca, e che su
+            ' disco ce ne fosse un altro, danneggiato, non lo saprebbe più nessuno.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    File.WriteAllText(contesto.Cartella.FileCvBase, "{ questo non è JSON")
+
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.AreEqual("", generatore.LavoriChiesti(), "l'AI non è stata chiamata")
+
+                    Dim stato As Label = Etichetta(pannello, "lblStatoDocumenti")
+                    Assert.Contains("non si lascia leggere", stato.Text, "il pannello lo dice")
+                    Assert.AreEqual(StileApp.Pericolo, stato.ForeColor,
+                                    "col colore di chi non può funzionare")
+
+                    Assert.IsTrue(Bottone(pannello, "btnRigenera").Enabled,
+                                  "e da qui si può riprovare, che è l'unica via d'uscita")
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Async Function UnCvBaseDiUnProfiloVecchioLoDiceInveceDiRifarsi() As Task
 
             ' La promessa scritta sopra Dati.CvBase: «poter dire che è di una versione
