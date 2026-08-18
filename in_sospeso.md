@@ -34,12 +34,18 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Da T2 — il motore e il pool (2026-08-07)
 
-- **Il salto a Sonnet 5, il «secondo esperimento».** Il modello di prodotto per il
-  ragionamento è Sonnet 5, ma il predefinito di oggi è **Sonnet 4.6**, lo stesso del
-  prototipo, perché la non-regressione si misura a parità di modello. Il salto si fa da
-  `modelli.json` senza ricompilare, e va **misurato da solo**: porta con sé
-  l'interruttore del ragionamento esteso, che lì va acceso, e un conteggio dei token
-  diverso (~+30% a parità di testo). *(cap. 02.5; cap. 15, voce 6.)*
+- **La coda del salto a Sonnet 5** *(riscritta il 2026-08-18: il salto è fatto, questo è
+  ciò che si è portato dietro).* Il predefinito è Sonnet 5 con l'interruttore del
+  ragionamento dichiarato spento, e la batteria è verde. Restano due cose. La prima:
+  Sonnet 5 conta i token in modo diverso e a parità di testo ne usa **~30% in più**,
+  mentre i `max_token` del pool sono ancora quelli tarati su Sonnet 4.6 — i più stretti
+  (`email_candidatura` e `umanizzazione_sintesi` a 1500, `umanizzazione_frasi` a 2500)
+  sono i primi che potrebbero non bastare. Non si è ritoccato nulla a scatola chiusa
+  perché il codice un troncamento lo **grida** invece di subirlo (`ClientClaude`, causa
+  `Troncata`): si alza il tetto di quello che si lamenta, non di tutti per prudenza. La
+  seconda: il salto va **misurato dal vivo** sui casi reali, come si era detto — il
+  prototipo resta un termine di paragone, non più un metro a parità di modello.
+  *(cap. 02.5; cap. 15, voce 6.)*
 
 ## Da T3 — il profilo (2026-08-07 · integrata alla chiusura, 2026-08-09)
 

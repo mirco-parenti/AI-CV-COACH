@@ -33,7 +33,7 @@ Namespace Ai
 
         ''' <summary>Una risposta dell'API che porta il testo indicato.</summary>
         Private Shared Function RispostaCon(testo As String) As String
-            Return "{""model"":""claude-sonnet-4-6"",""stop_reason"":""end_turn""," &
+            Return "{""model"":""claude-sonnet-5"",""stop_reason"":""end_turn""," &
                    """content"":[{""type"":""text"",""text"":" &
                    JsonValue.Create(testo).ToJsonString() & "}]," &
                    """usage"":{""input_tokens"":10,""output_tokens"":5}}"
@@ -76,7 +76,7 @@ Namespace Ai
             Assert.DoesNotContain("<annuncio>", testo, "nessun annuncio: è il CV base")
             Assert.DoesNotContain("{{PROFILO}}", testo, "nessun segnaposto rimasto")
 
-            Assert.AreEqual("claude-sonnet-4-6", corpo("model").ToString(), "il livello di ragionamento")
+            Assert.AreEqual("claude-sonnet-5", corpo("model").ToString(), "il livello di ragionamento")
             Assert.AreEqual(16000, CInt(corpo("max_tokens").GetValue(Of Integer)()), "il limite del prompt")
 
         End Function

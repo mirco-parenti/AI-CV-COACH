@@ -24,7 +24,7 @@ Namespace Ai
     Public Class CollaudiRifinitore
 
         Private Shared Function RispostaCon(testo As String) As String
-            Return "{""model"":""claude-sonnet-4-6"",""stop_reason"":""end_turn""," &
+            Return "{""model"":""claude-sonnet-5"",""stop_reason"":""end_turn""," &
                    """content"":[{""type"":""text"",""text"":" &
                    JsonValue.Create(testo).ToJsonString() & "}]," &
                    """usage"":{""input_tokens"":10,""output_tokens"":5}}"

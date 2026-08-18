@@ -6,54 +6,68 @@ Namespace Ai
 
     ''' <summary>
     ''' Collaudi della mappa livello → modello (cap. 02.5). Verificano che i
-    ''' predefiniti siano quelli con cui si fa il confronto col prototipo, che il file
-    ''' basti a cambiare modello senza ricompilare, che un file rotto non impedisca
-    ''' l'avvio e che un livello sconosciuto si fermi subito.
+    ''' predefiniti siano quelli di prodotto, che il file basti a cambiare modello
+    ''' senza ricompilare, che un file rotto non impedisca l'avvio e che un livello
+    ''' sconosciuto si fermi subito.
     ''' </summary>
     <TestClass>
     Public Class CollaudiModelli
 
         <TestMethod>
-        Public Sub PredefinitiAParitaColPrototipo()
-            ' La batteria di T2 confronta la nuova app col prototipo a parità di
-            ' modello: gli identificativi devono essere gli stessi di server.js.
+        Public Sub PredefinitiDiProdotto()
+            ' Haiku 4.5 per le estrazioni — lo stesso del prototipo, ed è tuttora
+            ' l'ultimo della sua fascia — e Sonnet 5 per il ragionamento, che a Sonnet
+            ' 4.6 succede fra i modelli correnti.
             Dim m As Modelli = Modelli.Predefiniti()
 
-            Assert.AreEqual("claude-haiku-4-5", m.ModelloSemplice.Id, "MODEL_SEMPLICE")
-            Assert.AreEqual("claude-sonnet-4-6", m.ModelloRagionamento.Id, "MODEL_RAGIONAMENTO")
+            Assert.AreEqual("claude-haiku-4-5", m.ModelloSemplice.Id, "livello semplice")
+            Assert.AreEqual("claude-sonnet-5", m.ModelloRagionamento.Id, "livello di ragionamento")
             Assert.AreEqual(OrigineModelli.Predefinita, m.Origine, "origine")
         End Sub
 
         <TestMethod>
-        Public Sub PredefinitiNonDichiaranoIlRagionamento()
-            ' Su Sonnet 4.6 il ragionamento è già spento: dichiararlo aggiungerebbe
-            ' una differenza fra la nostra richiesta e quella del prototipo, proprio
-            ' nel collaudo che serve a isolare le differenze di codice.
+        Public Sub SoloIlRagionamentoDichiaraLInterruttore()
+            ' Sul livello semplice si tace: Haiku 4.5 è quello del prototipo e tacere
+            ' tiene la richiesta identica alla sua. Sul ragionamento invece si dichiara
+            ' spento, perché Sonnet 5 lo accenderebbe di suo e max_tokens limita
+            ' ragionamento e risposta insieme.
             Dim m As Modelli = Modelli.Predefiniti()
 
-            Assert.IsFalse(m.ModelloSemplice.RagionamentoEsteso.HasValue, "semplice")
-            Assert.IsFalse(m.ModelloRagionamento.RagionamentoEsteso.HasValue, "ragionamento")
+            Assert.IsFalse(m.ModelloSemplice.RagionamentoEsteso.HasValue, "semplice: non si dichiara")
+            Assert.IsTrue(m.ModelloRagionamento.RagionamentoEsteso.HasValue, "ragionamento: si dichiara")
+            Assert.IsFalse(m.ModelloRagionamento.RagionamentoEsteso.Value, "ed è spento")
         End Sub
 
         <TestMethod>
         Public Sub LaFormaBreveCambiaUnModelloSolo()
-            ' Il secondo esperimento è una riga: si sposta il ragionamento su Sonnet 5
-            ' e il livello semplice resta dov'era.
-            Dim m As Modelli = Modelli.DaJson("{ ""ragionamento"": ""claude-sonnet-5"" }")
+            ' Una riga sposta il ragionamento — qui all'indietro, sul modello del
+            ' prototipo — e il livello semplice resta dov'era.
+            Dim m As Modelli = Modelli.DaJson("{ ""ragionamento"": ""claude-sonnet-4-6"" }")
 
-            Assert.AreEqual("claude-sonnet-5", m.ModelloRagionamento.Id, "ragionamento")
+            Assert.AreEqual("claude-sonnet-4-6", m.ModelloRagionamento.Id, "ragionamento")
             Assert.AreEqual("claude-haiku-4-5", m.ModelloSemplice.Id, "semplice: resta il predefinito")
             Assert.AreEqual(OrigineModelli.File, m.Origine, "origine")
         End Sub
 
         <TestMethod>
+        Public Sub LaFormaBreveNonPortaLInterruttoreDelPredefinito()
+            ' La forma breve dichiara un identificativo e basta: l'interruttore del
+            ' predefinito non deve sopravvivergli, o si spegnerebbe il ragionamento di
+            ' un modello scelto apposta per usarlo.
+            Dim m As Modelli = Modelli.DaJson("{ ""ragionamento"": ""claude-opus-4-8"" }")
+
+            Assert.AreEqual("claude-opus-4-8", m.ModelloRagionamento.Id, "identificativo")
+            Assert.IsFalse(m.ModelloRagionamento.RagionamentoEsteso.HasValue, "niente interruttore")
+        End Sub
+
+        <TestMethod>
         Public Sub LaFormaEstesaPortaAncheLInterruttore()
             Dim m As Modelli = Modelli.DaJson(
-                "{ ""ragionamento"": { ""id"": ""claude-sonnet-5"", ""ragionamento_esteso"": false } }")
+                "{ ""ragionamento"": { ""id"": ""claude-sonnet-5"", ""ragionamento_esteso"": true } }")
 
             Assert.AreEqual("claude-sonnet-5", m.ModelloRagionamento.Id, "identificativo")
             Assert.IsTrue(m.ModelloRagionamento.RagionamentoEsteso.HasValue, "l'interruttore è dichiarato")
-            Assert.IsFalse(m.ModelloRagionamento.RagionamentoEsteso.Value, "ed è spento")
+            Assert.IsTrue(m.ModelloRagionamento.RagionamentoEsteso.Value, "ed è acceso")
         End Sub
 
         <TestMethod>
@@ -62,7 +76,7 @@ Namespace Ai
 
             Assert.AreEqual(OrigineModelli.Predefinita, m.Origine, "origine")
             Assert.IsNotNull(m.Avviso, "l'avviso per il log deve esserci")
-            Assert.AreEqual("claude-sonnet-4-6", m.ModelloRagionamento.Id, "deve valere il predefinito")
+            Assert.AreEqual("claude-sonnet-5", m.ModelloRagionamento.Id, "deve valere il predefinito")
         End Sub
 
         <TestMethod>
@@ -88,7 +102,7 @@ Namespace Ai
             Dim m As Modelli = Modelli.Predefiniti()
 
             Assert.AreEqual("claude-haiku-4-5", m.PerLivello("  Semplice ").Id, "spazi e maiuscole")
-            Assert.AreEqual("claude-sonnet-4-6", m.PerLivello("ragionamento").Id, "ragionamento")
+            Assert.AreEqual("claude-sonnet-5", m.PerLivello("ragionamento").Id, "ragionamento")
         End Sub
 
         <TestMethod>

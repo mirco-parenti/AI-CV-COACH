@@ -243,25 +243,29 @@ i tool MCP).
   parte è identico carattere per carattere al suo (cap. 14).*
 - **Modelli**: due livelli come nel prototipo — `MODELLO_SEMPLICE` (estrazioni:
   **Claude Haiku 4.5**, `claude-haiku-4-5`) e `MODELLO_RAGIONAMENTO` (confronto,
-  mitigazione, generazione, brainstorming). Il modello di prodotto per il ragionamento è
-  **Claude Sonnet 5** (`claude-sonnet-5`), scelto il 2026-08-05 riverificando il listino
-  (cap. 15, voce 6): succede a Sonnet 4.6 allo stesso prezzo. Ci si arriva però **in due
-  tempi**. La batteria di non-regressione di T2 gira su **Sonnet 4.6**
-  (`claude-sonnet-4-6`), lo stesso del prototipo: **a parità di modello** una differenza
-  nei risultati è una differenza di *codice*, che è esattamente ciò che quel collaudo
-  deve misurare — ed è **passata il 2026-08-07**, con i due confronti reali che danno le
-  stesse stelle da una parte e dall'altra. Il salto a Sonnet 5 è il **secondo
-  esperimento** e si misura da solo, dopo; quando l'avrà superato diventerà lui il
-  predefinito.
+  mitigazione, generazione, brainstorming: **Claude Sonnet 5**, `claude-sonnet-5`). Ci si
+  è arrivati **in due tempi**, come previsto. Primo tempo: la batteria di non-regressione
+  di T2 è girata su **Sonnet 4.6** (`claude-sonnet-4-6`), lo stesso del prototipo, perché
+  **a parità di modello** una differenza nei risultati è una differenza di *codice* — ed
+  è **passata il 2026-08-07**, con i due confronti reali che danno le stesse stelle da una
+  parte e dall'altra. Secondo tempo, **il 2026-08-18**: Sonnet 4.6 è passato fra i modelli
+  superati del listino e Sonnet 5 è diventato il predefinito compilato, con l'interruttore
+  del ragionamento dichiarato spento (voce sotto). Costa anche meno: $2/$10 per MTok
+  contro $3/$15. Sul livello semplice invece non si è mosso nulla — **Haiku 4.5 è tuttora
+  l'ultimo della sua fascia**, non esiste un Haiku più recente a cui salire.
+  Da qui in avanti il prototipo resta congelato su Sonnet 4.6: sul ragionamento non è più
+  un metro a parità di modello, ma un **termine di paragone** (cap. 04.7).
 - **I nomi dei modelli non sono cablati nel codice**: i prompt dichiarano un *livello*
   ("semplice" o "ragionamento", cap. 04) e la mappa livello → modello vive in
   `modelli.json` nella cartella dati, gemello di `taratura.json` — predefiniti dentro il
   programma, file che li scavalca, ripiego dichiarato se il file è illeggibile. Cambiare
-  modello, o fare il secondo esperimento, costa **una riga**, non una nuova build.
-- **L'interruttore del ragionamento esteso.** Sonnet 4.6 lo tiene spento di suo e il
-  prototipo non ne parla affatto: finché si resta lì la richiesta **non dichiara nulla**,
+  modello — in avanti come all'indietro, ed è così che si è fatto il secondo tempo —
+  costa **una riga**, non una nuova build.
+- **L'interruttore del ragionamento esteso.** Haiku 4.5 lo tiene spento di suo e il
+  prototipo non ne parla affatto: sul livello semplice la richiesta **non dichiara nulla**,
   e così resta identica a quella del prototipo. Su Sonnet 5 il valore predefinito è
-  opposto, e lì l'interruttore va acceso (`thinking: {"type": "disabled"}`), perché
+  opposto, e lì l'interruttore è dichiarato — **spento** (`thinking: {"type": "disabled"}`,
+  ed è l'unico campo per cui la richiesta del ragionamento diverge dalla sua) — perché
   **`max_tokens` limita ragionamento e risposta insieme**: i nostri limiti — 1500–4000
   fino al Pool 1.02, **4000–32000 dal Pool 1.03** (cap. 04.4) — sono cuciti addosso alla
   sola risposta, quindi passare a Sonnet 5 senza spegnerlo tronca le risposte **senza

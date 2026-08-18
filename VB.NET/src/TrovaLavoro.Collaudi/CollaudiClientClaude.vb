@@ -23,7 +23,7 @@ Namespace Ai
 
         ''' <summary>Una risposta come quella vera, ridotta all'osso.</summary>
         Private Shared Function Buona() As String
-            Return "{""model"":""claude-sonnet-4-6"",""stop_reason"":""end_turn""," &
+            Return "{""model"":""claude-sonnet-5"",""stop_reason"":""end_turn""," &
                    """content"":[{""type"":""text"",""text"":""{\""nome\"":\""Mirco\""}""}]," &
                    """usage"":{""input_tokens"":120,""output_tokens"":42}}"
         End Function
@@ -49,7 +49,7 @@ Namespace Ai
         ''' <summary>L'evento con cui il messaggio comincia: modello e token in ingresso.</summary>
         Private Shared Function Apertura() As String
             Return Evento("message_start",
-                          "{""type"":""message_start"",""message"":{""model"":""claude-sonnet-4-6""," &
+                          "{""type"":""message_start"",""message"":{""model"":""claude-sonnet-5""," &
                           """usage"":{""input_tokens"":120}}}")
         End Function
 
@@ -96,8 +96,8 @@ Namespace Ai
 
         <TestMethod>
         Public Sub SenzaInterruttoreNonSiParlaDiRagionamento()
-            ' Su Sonnet 4.6 il ragionamento è già spento: tacere tiene la richiesta
-            ' identica a quella del prototipo.
+            ' È il caso del livello semplice e del prototipo: dove il modello tiene il
+            ' ragionamento spento di suo, tacere lascia la richiesta identica alla sua.
             Dim corpo As JsonObject = ClientClaude.CorpoRichiesta(
                 New ModelloConcreto With {.Id = "claude-sonnet-4-6"}, 1500, JsonValue.Create("ciao"))
 
@@ -107,8 +107,9 @@ Namespace Ai
 
         <TestMethod>
         Public Sub ConLInterruttoreSpentoSiDichiaraSpento()
-            ' È l'interruttore da accendere al salto su Sonnet 5, dove il ragionamento
-            ' è attivo di default e max_tokens limita ragionamento e risposta insieme.
+            ' È l'interruttore che il livello di ragionamento dichiara da quando è su
+            ' Sonnet 5, dove il ragionamento è attivo di default e max_tokens limita
+            ' ragionamento e risposta insieme.
             Dim corpo As JsonObject = ClientClaude.CorpoRichiesta(
                 New ModelloConcreto With {.Id = "claude-sonnet-5", .RagionamentoEsteso = False},
                 4000, JsonValue.Create("ciao"))
@@ -158,15 +159,15 @@ Namespace Ai
 
             Assert.AreEqual("{""nome"":""Mirco""}", r.Testo, "il testo del modello")
             Assert.AreEqual("end_turn", r.MotivoFine, "motivo della fine")
-            Assert.AreEqual("claude-sonnet-4-6", r.Modello, "modello che ha risposto")
+            Assert.AreEqual("claude-sonnet-5", r.Modello, "modello che ha risposto")
             Assert.AreEqual(120, r.TokenIngresso, "token in ingresso")
             Assert.AreEqual(42, r.TokenUscita, "token in uscita")
         End Sub
 
         <TestMethod>
         Public Sub UnaRispostaTroncataLoDiceInChiaro()
-            ' Il rischio del salto a Sonnet 5: la risposta si ferma contro il limite e
-            ' arriva monca. Senza questo controllo si scoprirebbe a valle, come JSON
+            ' Il rischio che Sonnet 5 si porta dietro: la risposta si ferma contro il
+            ' limite e arriva monca. Senza questo controllo si scoprirebbe a valle, come JSON
             ' invalido, senza sapere perché.
             Dim troncata As String =
                 "{""stop_reason"":""max_tokens"",""content"":[{""type"":""text"",""text"":""{\""nome\"": ""}]}"
@@ -230,7 +231,7 @@ Namespace Ai
 
             Assert.AreEqual("chiave-di-prova", finta.UltimaChiave, "x-api-key")
             Assert.AreEqual(ClientClaude.VersioneApi, finta.UltimaVersione, "anthropic-version")
-            Assert.Contains("""model"":""claude-sonnet-4-6""", finta.UltimoCorpo,
+            Assert.Contains("""model"":""claude-sonnet-5""", finta.UltimoCorpo,
                             "deve usare il modello del livello richiesto")
         End Function
 
@@ -434,11 +435,11 @@ Namespace Ai
         <TestMethod>
         Public Sub UnaConversazioneMetteITurniInFilaEChiedeIlFlusso()
             Dim corpo As JsonObject = ClientClaude.CorpoRichiesta(
-                New ModelloConcreto With {.Id = "claude-sonnet-4-6"}, 2000,
+                New ModelloConcreto With {.Id = "claude-sonnet-5"}, 2000,
                 Conversazione("il contesto", "apro io", "e io rispondo"), flusso:=True)
 
             Assert.AreEqual(
-                "{""model"":""claude-sonnet-4-6"",""max_tokens"":2000,""messages"":[" &
+                "{""model"":""claude-sonnet-5"",""max_tokens"":2000,""messages"":[" &
                 "{""role"":""user"",""content"":""il contesto""}," &
                 "{""role"":""assistant"",""content"":""apro io""}," &
                 "{""role"":""user"",""content"":""e io rispondo""}],""stream"":true}",
@@ -474,7 +475,7 @@ Namespace Ai
                 Assert.AreEqual("Guardando ", visti(0), "il primo appena arrivato")
                 Assert.AreEqual("Guardando il tuo profilo", r.Testo, "e alla fine il testo intero")
                 Assert.AreEqual("end_turn", r.MotivoFine, "motivo della fine")
-                Assert.AreEqual("claude-sonnet-4-6", r.Modello, "modello che ha risposto")
+                Assert.AreEqual("claude-sonnet-5", r.Modello, "modello che ha risposto")
                 Assert.AreEqual(120, r.TokenIngresso, "token in ingresso")
                 Assert.AreEqual(42, r.TokenUscita, "token in uscita")
             End Using
@@ -738,7 +739,7 @@ Namespace Ai
         Public Sub UnaConversazioneVuotaNonSiManda()
             Assert.Throws(Of ArgumentException)(
                 Sub() ClientClaude.CorpoRichiesta(
-                    New ModelloConcreto With {.Id = "claude-sonnet-4-6"}, 2000,
+                    New ModelloConcreto With {.Id = "claude-sonnet-5"}, 2000,
                     New List(Of TurnoChat)()),
                 "una richiesta senza messaggi doveva sollevare")
         End Sub

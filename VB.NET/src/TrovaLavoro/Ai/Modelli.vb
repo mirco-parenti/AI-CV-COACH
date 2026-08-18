@@ -73,21 +73,29 @@ Namespace Ai
         Public Property Avviso As String
 
         ''' <summary>
-        ''' I modelli predefiniti. Sono quelli del prototipo — Haiku 4.5 per le
-        ''' estrazioni, Sonnet 4.6 per il ragionamento — perché la batteria di
-        ''' non-regressione di T2 confronta la nuova app col prototipo <b>a parità di
-        ''' modello</b>: così una differenza nei risultati è una differenza di codice,
-        ''' non del modello sotto.
+        ''' I modelli predefiniti: <b>Haiku 4.5</b> per le estrazioni e <b>Sonnet 5</b>
+        ''' per il ragionamento (cap. 02.5, cap. 15 voce 6). Haiku 4.5 è tuttora
+        ''' l'ultimo della sua fascia — il salto riguarda il solo ragionamento, dove
+        ''' Sonnet 4.6 è passato fra i modelli superati e Sonnet 5 gli succede a un
+        ''' prezzo più basso.
         ''' </summary>
         ''' <remarks>
-        ''' Il modello di prodotto resta <b>Sonnet 5</b> (cap. 15, voce 6): il salto è
-        ''' il secondo esperimento, si fa da <c>modelli.json</c> senza ricompilare, e
-        ''' quando avrà superato il confronto diventerà lui il predefinito.
+        ''' Sul ragionamento il predefinito <b>non è più quello del prototipo</b>, che
+        ''' resta congelato su Sonnet 4.6: da qui in avanti la batteria di T2 non misura
+        ''' più una parità di modello, e una differenza nei risultati può venire tanto
+        ''' dal codice quanto dal modello sotto. È il passo che il cap. 02.5 chiamava
+        ''' «il secondo esperimento», fatto. Il livello semplice invece la parità la
+        ''' conserva: Haiku 4.5 è lo stesso da entrambe le parti.
+        ''' L'interruttore del ragionamento è dichiarato <b>spento</b> di proposito:
+        ''' Sonnet 5 lo terrebbe acceso di suo e <c>max_tokens</c> limita ragionamento e
+        ''' risposta insieme, così i limiti del pool — cuciti addosso alla sola risposta
+        ''' — troncherebbero senza errore.
         ''' </remarks>
         Public Shared Function Predefiniti() As Modelli
             Return New Modelli With {
                 .ModelloSemplice = New ModelloConcreto With {.Id = "claude-haiku-4-5"},
-                .ModelloRagionamento = New ModelloConcreto With {.Id = "claude-sonnet-4-6"},
+                .ModelloRagionamento = New ModelloConcreto With {.Id = "claude-sonnet-5",
+                                                                 .RagionamentoEsteso = False},
                 .Origine = OrigineModelli.Predefinita
             }
         End Function

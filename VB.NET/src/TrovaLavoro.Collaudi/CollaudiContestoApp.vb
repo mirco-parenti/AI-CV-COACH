@@ -176,17 +176,18 @@ Namespace Motore
         Public Sub IModelliDelFileArrivanoFinoAlClient()
             ' È la ragione per cui questa classe esiste: prima di lei modelli.json era un
             ' file che solo i collaudi aprivano, e ritoccarlo non aveva alcun effetto
-            ' sull'applicazione. Il secondo esperimento (cap. 02.5) si fa così.
+            ' sull'applicazione. Qui il file riporta il ragionamento sul modello del
+            ' prototipo: cambiare modello — in avanti o all'indietro — resta una riga.
             Dim radice As String = CartellaTemporanea()
             Directory.CreateDirectory(radice)
             Try
                 File.WriteAllText(Path.Combine(radice, "modelli.json"),
-                                  "{ ""ragionamento"": ""claude-sonnet-5"" }")
+                                  "{ ""ragionamento"": ""claude-sonnet-4-6"" }")
 
                 Using contesto As ContestoApp = Monta(radice)
                     Assert.AreEqual(OrigineModelli.File, contesto.Modelli.Origine, "origine")
-                    Assert.AreEqual("claude-sonnet-5", contesto.Modelli.ModelloRagionamento.Id, "nel contesto")
-                    Assert.AreEqual("claude-sonnet-5", contesto.Client.ModelliInUso.ModelloRagionamento.Id,
+                    Assert.AreEqual("claude-sonnet-4-6", contesto.Modelli.ModelloRagionamento.Id, "nel contesto")
+                    Assert.AreEqual("claude-sonnet-4-6", contesto.Client.ModelliInUso.ModelloRagionamento.Id,
                                     "e dentro il client che farà le chiamate")
                     Assert.IsNull(contesto.Avviso, "un file valido non è un avviso")
                 End Using
