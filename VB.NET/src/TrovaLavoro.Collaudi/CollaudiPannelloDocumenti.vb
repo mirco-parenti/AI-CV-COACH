@@ -207,6 +207,103 @@ Namespace Ui
 
         End Function
 
+        ' ==================================================================
+        ' La rifinitura anti-slop e il suo prima/dopo (T7b, cap. 08.4)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function IlCvBasePassaDallaRifinituraECiSiRicordaComEra() As Task
+
+            ' Il 📄 CV base non passa dalla pipeline: nasce qui, e qui deve passare
+            ' dall'anti-slop come gli altri documenti.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Dim rifinitore As RifinitoreFinto = New RifinitoreFinto().
+                Dara("sommario", "Il ritratto del profilo, riscritto.")
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.AreEqual("sommario", rifinitore.Passate.Single().Id(),
+                                    "il sommario è partito, e i campi-fatto no")
+
+                    Assert.Contains("Il ritratto del profilo, riscritto.",
+                                    Casella(pannello, "txtCv").Text, "a video c'è il testo rifinito")
+
+                    Dim salvato As TrovaLavoro.Dati.CvBase = contesto.Archivio.CaricaCvBase()
+                    Assert.AreEqual("Il ritratto del profilo.",
+                                    salvato.PrimaDellaRifinitura("sommario").GetValue(Of String)(),
+                                    "e nel file, accanto al CV, com'era prima")
+                End Function,
+                rifinitore)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaCasellaSiAccendeSoloDoveCEQualcosaDaConfrontare() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim spunta As CheckBox = Casella(Of CheckBox)(pannello, "chkRifinitura")
+
+                    ' Senza rifinitore montato la generazione non rifinisce niente.
+                    Await pannello.MostraIlCvBaseAsync()
+                    Assert.IsFalse(spunta.Enabled, "niente è cambiato: niente da guardare")
+
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.Cv = JsonNode.Parse(CvMirato)
+                    candidatura.Lettera = JsonNode.Parse(Lettera)
+                    candidatura.PrimaDellaRifinitura = JsonNode.Parse(
+                        "{""cv"": {""sommario"": ""Quattro anni — di magazzino.""}}")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    Assert.IsTrue(spunta.Enabled, "qui invece un prima c'è, e si può guardare")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SpuntandoLaCasellaCompareIlPrimaDopoAccantoAlDocumento() As Task
+
+            ' Il confronto sta in coda e non al posto dell'anteprima: il documento vero è
+            ' quello sopra, e serve a controllare che la rifinitura non abbia cambiato un
+            ' fatto (cap. 08.4).
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.Cv = JsonNode.Parse(CvMirato)
+                    candidatura.Lettera = JsonNode.Parse(Lettera)
+                    candidatura.PrimaDellaRifinitura = JsonNode.Parse(
+                        "{""cv"": {""sommario"": ""Quattro anni — di magazzino.""}," &
+                        """lettera"": {""corpo"": ""Ho quattro anni — di magazzino.""}}")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim cv As TextBox = Casella(pannello, "txtCv")
+                    Assert.DoesNotContain("PRIMA DELLA RIFINITURA", cv.Text,
+                                          "a casella spenta si legge il documento e basta")
+
+                    Casella(Of CheckBox)(pannello, "chkRifinitura").Checked = True
+
+                    Assert.Contains("Quattro anni di magazzino.", cv.Text, "il documento resta sopra")
+                    Assert.Contains("PRIMA DELLA RIFINITURA", cv.Text, "e sotto arriva il confronto")
+                    Assert.Contains("Sommario", cv.Text, "col nome del campo in italiano")
+                    Assert.Contains("Quattro anni — di magazzino.", cv.Text, "e com'era, lineetta compresa")
+
+                    Assert.Contains("Corpo della lettera", Casella(pannello, "txtLettera").Text,
+                                    "anche la lettera ha il suo")
+                End Function)
+
+        End Function
+
         <TestMethod>
         Public Async Function IlBottoneDelRitornoDiceDoveRiporta() As Task
 
@@ -308,7 +405,10 @@ Namespace Ui
             Using pannello As New PannelloDocumenti()
 
                 Assert.IsFalse(Scelta(pannello, "cmbLingua").Enabled, "la lingua arriva con T7")
-                Assert.IsFalse(Casella(Of CheckBox)(pannello, "chkRifinitura").Enabled, "l'anti-slop pure")
+                ' Da T7b la casella non è più «quel che arriverà»: è spenta perché su un
+                ' pannello vuoto non c'è nessun prima/dopo da guardare.
+                Assert.IsFalse(Casella(Of CheckBox)(pannello, "chkRifinitura").Enabled,
+                               "e niente prima/dopo, che senza documenti non esiste")
                 Assert.IsFalse(Bottone(pannello, "btnPreparaEmail").Enabled, "l'email arriva con T6")
 
                 Assert.AreEqual(LivelloBottone.AzionePrincipale,
@@ -508,7 +608,8 @@ Namespace Ui
         ''' </summary>
         Private Shared Async Function ConPannelloAsync(
                 generatore As GeneratoreFinto,
-                prova As Func(Of PannelloDocumenti, ContestoApp, ArchivioDocumenti, Task)) As Task
+                prova As Func(Of PannelloDocumenti, ContestoApp, ArchivioDocumenti, Task),
+                Optional rifinitore As RifinitoreFinto = Nothing) As Task
 
             Dim radice As String = Path.Combine(
                 Path.GetTempPath(), "pannello-documenti-" & Guid.NewGuid().ToString("N"))
@@ -522,12 +623,19 @@ Namespace Ui
                     Dim documenti As New ArchivioDocumenti(contesto.Cartella)
                     Dim pipeline As PipelineCandidatura = Nothing
 
+                    ' Senza chiave il contesto non monta l'AI, e con lei nemmeno la
+                    ' rifinitura: chi la vuole collaudare passa la sua, come fa col
+                    ' generatore (T7b).
+                    Dim rifinitura As Rifinitura =
+                        If(rifinitore Is Nothing, Nothing, New Rifinitura(rifinitore))
+
                     If generatore IsNot Nothing Then
-                        pipeline = New PipelineCandidatura(New AnalizzatoreFinto, New ConfrontatoreFinto, generatore)
+                        pipeline = New PipelineCandidatura(New AnalizzatoreFinto, New ConfrontatoreFinto,
+                                                           generatore, Nothing, rifinitura)
                     End If
 
                     pannello.CreateControl()
-                    pannello.Collega(contesto, documenti, pipeline, generatore)
+                    pannello.Collega(contesto, documenti, pipeline, generatore, rifinitura)
 
                     Await prova(pannello, contesto, documenti)
                 End Using

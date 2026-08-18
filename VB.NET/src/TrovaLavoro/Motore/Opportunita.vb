@@ -50,6 +50,21 @@ Namespace Motore
         Public Property Lettera As JsonNode
 
         ''' <summary>
+        ''' Com'erano i testi <b>prima</b> della rifinitura anti-slop (T7b, cap. 08.4):
+        ''' <c>{ "cv": { "sommario": "…" }, "lettera": { "corpo": "…" } }</c>. Solo i campi
+        ''' davvero cambiati, e <c>Nothing</c> se non ne è cambiato nessuno.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Sta qui e non dentro i documenti per una ragione precisa: il 🎯 CV mirato
+        ''' viene passato al prompt della lettera e la lettera a quello dell'email, e un
+        ''' campo di servizio scritto dentro il documento finirebbe dritto in quelle
+        ''' richieste, dove non ha niente da fare.</para>
+        ''' <para>Si conservano i testi di prima e non i documenti interi: è ciò che serve
+        ''' al prima/dopo di P6 e a tornare indietro, e pesa una frazione.</para>
+        ''' </remarks>
+        Public Property PrimaDellaRifinitura As JsonNode
+
+        ''' <summary>
         ''' La bozza dell'email: destinatario, oggetto, corpo e allegati scelti (T6,
         ''' cap. 07.1). È l'ultima cosa che l'utente <b>tocca a mano</b> prima di uscire
         ''' dal programma, e per questo si salva: senza, riaprire la candidatura domani

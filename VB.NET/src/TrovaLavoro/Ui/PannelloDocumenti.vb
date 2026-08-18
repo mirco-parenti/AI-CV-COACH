@@ -1,6 +1,7 @@
 ﻿Imports System.Drawing
 Imports System.IO
 Imports System.Linq
+Imports System.Text
 Imports System.Text.Json
 Imports System.Text.Json.Nodes
 Imports System.Threading
@@ -55,6 +56,9 @@ Public Class PannelloDocumenti
     Private _pipeline As PipelineCandidatura
     Private _generatore As IGeneratore
 
+    ''' <summary>La passata anti-slop sul 📄 CV base; <c>Nothing</c> quando l'AI non c'è.</summary>
+    Private _rifinitura As Rifinitura
+
     ''' <summary>
     ''' Chi mette i documenti al loro posto. Lo costruisce la finestra, non il motore: si
     ''' porta dietro la stampante PDF, che vive sul thread dell'interfaccia.
@@ -66,6 +70,14 @@ Public Class PannelloDocumenti
 
     ''' <summary>Il 📄 CV base in mostra; <c>Nothing</c> se si sta guardando una candidatura.</summary>
     Private _cvBase As JsonNode
+
+    ''' <summary>
+    ''' Com'erano i testi del 📄 CV base prima della rifinitura (T7b, cap. 08.4). Per una
+    ''' candidatura la stessa cosa vive nell'opportunità, che si salva e si riapre; qui sta
+    ''' in memoria perché il CV base in questo pannello non si rilegge mai — o lo si è
+    ''' appena generato, o non c'è.
+    ''' </summary>
+    Private _primaDelCvBase As JsonNode
 
     ''' <summary>
     ''' Vero mentre è il pannello a muovere la tendina della lingua, non l'utente.
@@ -118,9 +130,14 @@ Public Class PannelloDocumenti
     ''' </param>
     ''' <param name="pipeline">Chi genera i documenti di una candidatura; il banco passa la sua.</param>
     ''' <param name="generatore">Chi scrive il 📄 CV base, che dalla pipeline non passa.</param>
+    ''' <param name="rifinitura">
+    ''' La passata anti-slop sul 📄 CV base (cap. 08): per i documenti di una candidatura
+    ''' ci pensa la pipeline, questo è l'unico testo che nasce qui.
+    ''' </param>
     Public Sub Collega(contesto As ContestoApp, documenti As ArchivioDocumenti,
                        Optional pipeline As PipelineCandidatura = Nothing,
-                       Optional generatore As IGeneratore = Nothing)
+                       Optional generatore As IGeneratore = Nothing,
+                       Optional rifinitura As Rifinitura = Nothing)
 
         If contesto Is Nothing Then Throw New ArgumentNullException(NameOf(contesto))
         If documenti Is Nothing Then Throw New ArgumentNullException(NameOf(documenti))
@@ -129,6 +146,7 @@ Public Class PannelloDocumenti
         _documenti = documenti
         _pipeline = If(pipeline, contesto.Pipeline)
         _generatore = If(generatore, contesto.Generatore)
+        _rifinitura = If(rifinitura, contesto.Rifinitura)
 
         AggiornaComandi()
 
@@ -160,6 +178,7 @@ Public Class PannelloDocumenti
         If AiAlLavoro OrElse _cvBase Is Nothing Then Return
 
         _cvBase = Nothing
+        _primaDelCvBase = Nothing
         Mostra()
         RaccontaLoStato("Il profilo è stato eliminato: il 📄 CV base che era qui non c'è più.",
                         StileApp.TestoSecondario)
@@ -181,6 +200,7 @@ Public Class PannelloDocumenti
 
         _candidatura = candidatura
         _cvBase = Nothing
+        _primaDelCvBase = Nothing
 
         Mostra()
 
@@ -205,6 +225,7 @@ Public Class PannelloDocumenti
 
         _candidatura = Nothing
         _cvBase = Nothing
+        _primaDelCvBase = Nothing
 
         Mostra()
 
@@ -226,6 +247,8 @@ Public Class PannelloDocumenti
 
                 _cvBase = Await _generatore.GeneraCvBaseAsync(
                     JsonNode.Parse(profilo.ComeTesto()), filo.Token).ConfigureAwait(True)
+
+                _primaDelCvBase = Await RifinisciIlCvBaseAsync(filo.Token).ConfigureAwait(True)
 
                 Mostra()
                 RaccontaLoStato(ArchiviaIlCvBase(), StileApp.TestoSecondario)
@@ -329,11 +352,37 @@ Public Class PannelloDocumenti
 
     End Sub
 
+    ''' <summary>
+    ''' La passata anti-slop sul 📄 CV base (cap. 08), che dalla pipeline non passa.
+    ''' </summary>
+    ''' <remarks>
+    ''' Stessa regola che vale dentro la fila di una candidatura: un inciampo della
+    ''' rifinitura non butta via un CV già scritto. Resta quello grezzo, che è buono — solo
+    ''' non rifinito. L'annullamento invece passa: è l'utente che ha chiesto di smettere.
+    ''' </remarks>
+    ''' <returns>I testi di prima, o <c>Nothing</c> se non è cambiato niente.</returns>
+    Private Async Function RifinisciIlCvBaseAsync(annulla As CancellationToken) As Task(Of JsonNode)
+
+        If _rifinitura Is Nothing Then Return Nothing
+
+        RaccontaLoStato("Rifinisco il testo del 📄 CV base…", StileApp.TestoSecondario)
+
+        Try
+            Return Await _rifinitura.DelCvAsync(
+                _cvBase, LinguaDocumenti.Italiano, annulla).ConfigureAwait(True)
+
+        Catch ex As ErroreAi
+            Return Nothing
+        End Try
+
+    End Function
+
     ''' <summary>Scrive il 📄 CV base accanto al profilo, annotando da quale versione nasce.</summary>
     Private Function ArchiviaIlCvBase() As String
 
         Try
-            _contesto.Archivio.SalvaCvBase(_cvBase, _contesto.Archivio.Versioni().LastOrDefault())
+            _contesto.Archivio.SalvaCvBase(_cvBase, _contesto.Archivio.Versioni().LastOrDefault(),
+                                           _primaDelCvBase)
             Return "Il 📄 CV base è pronto ed è salvato col tuo profilo." & vbLf &
                    "Esportalo in DOCX o PDF quando ti va bene."
 
@@ -437,7 +486,10 @@ Public Class PannelloDocumenti
         If _cvBase IsNot Nothing Then
             lblCv.Text = "📄 CV base"
             txtAnnuncio.Text = "Il 📄 CV base non nasce da un annuncio: è il ritratto del tuo profilo."
-            txtCv.Text = ScrittoreTesto.Componi(Impaginazione.PaginaCv(_cvBase))
+            txtCv.Text = Anteprima(_cvBase,
+                                   Function(d) Impaginazione.PaginaCv(d),
+                                   "Il CV non è ancora stato scritto.",
+                                   _primaDelCvBase)
             txtLettera.Text = "La lettera si scrive su un annuncio: qui non ce n'è uno."
             AggiornaComandi()
             Return
@@ -464,10 +516,12 @@ Public Class PannelloDocumenti
         ' sbagliate vorrebbe dire scoprire l'errore solo aprendo il file.
         txtCv.Text = Anteprima(_candidatura.Cv,
                                Function(d) Impaginazione.PaginaCv(d, lingua),
-                               "Il CV non è ancora stato scritto.")
+                               "Il CV non è ancora stato scritto.",
+                               PrimaDi("cv"))
         txtLettera.Text = Anteprima(_candidatura.Lettera,
                                     Function(d) Impaginazione.PaginaLettera(d, lingua),
-                                    "La lettera non è ancora stata scritta.")
+                                    "La lettera non è ancora stata scritta.",
+                                    PrimaDi("lettera"))
 
         AggiornaComandi()
 
@@ -496,13 +550,72 @@ Public Class PannelloDocumenti
 
     End Function
 
-    ''' <summary>Un documento come si legge, o il motivo per cui non c'è ancora.</summary>
-    Private Shared Function Anteprima(documento As JsonNode,
-                                      impagina As Func(Of JsonNode, PaginaDocumento),
-                                      seManca As String) As String
+    ''' <summary>
+    ''' Un documento come si legge, o il motivo per cui non c'è ancora. Con la casella
+    ''' spuntata, in coda arriva il prima/dopo della rifinitura (cap. 08.4).
+    ''' </summary>
+    Private Function Anteprima(documento As JsonNode,
+                               impagina As Func(Of JsonNode, PaginaDocumento),
+                               seManca As String,
+                               Optional prima As JsonNode = Nothing) As String
 
         If documento Is Nothing Then Return seManca
-        Return ScrittoreTesto.Componi(impagina(documento))
+
+        Dim testo As String = ScrittoreTesto.Componi(impagina(documento))
+        If Not chkRifinitura.Checked Then Return testo
+
+        Return ConIlPrimaDopo(testo, documento, prima)
+
+    End Function
+
+    ''' <summary>
+    ''' Attacca al documento l'elenco dei campi che la rifinitura ha cambiato, con com'era
+    ''' e com'è.
+    ''' </summary>
+    ''' <remarks>
+    ''' Sta in coda e non al posto dell'anteprima perché il documento vero è quello: il
+    ''' confronto serve a controllare che la rifinitura non abbia cambiato un fatto (è la
+    ''' regola pratica del cap. 08.4), non a sostituire ciò che si sta leggendo.
+    ''' </remarks>
+    Private Shared Function ConIlPrimaDopo(anteprima As String, documento As JsonNode,
+                                           prima As JsonNode) As String
+
+        Dim cambiati As List(Of Rifinitura.CampoRifinito) = Rifinitura.Confronta(documento, prima)
+        If cambiati.Count = 0 Then Return anteprima
+
+        Dim testo As New StringBuilder(anteprima)
+
+        testo.AppendLine().AppendLine(New String("─"c, 30)).AppendLine("PRIMA DELLA RIFINITURA")
+
+        For Each campo As Rifinitura.CampoRifinito In cambiati
+            testo.AppendLine().
+                  AppendLine($"▸ {campo.Etichetta}").
+                  AppendLine().AppendLine("Prima:").AppendLine(campo.Prima).
+                  AppendLine().AppendLine("Dopo:").AppendLine(campo.Dopo)
+        Next
+
+        Return testo.ToString()
+
+    End Function
+
+    ''' <summary>I testi di prima di uno dei due documenti della candidatura.</summary>
+    Private Function PrimaDi(quale As String) As JsonNode
+
+        If _candidatura Is Nothing Then Return Nothing
+
+        Dim tutti As JsonObject = TryCast(_candidatura.PrimaDellaRifinitura, JsonObject)
+        If tutti Is Nothing Then Return Nothing
+
+        Return CampiJson.Nodo(tutti, quale)
+
+    End Function
+
+    ''' <summary>Se c'è una rifinitura da poter mostrare in questo momento.</summary>
+    Private Function CEUnPrimaDaMostrare() As Boolean
+
+        If _cvBase IsNot Nothing Then Return _primaDelCvBase IsNot Nothing
+
+        Return _candidatura IsNot Nothing AndAlso _candidatura.PrimaDellaRifinitura IsNot Nothing
 
     End Function
 
@@ -566,6 +679,7 @@ Public Class PannelloDocumenti
         ' pannello non deve mostrare un CV vecchio accanto a una lettera nuova.
         _candidatura.Cv = Nothing
         _candidatura.Lettera = Nothing
+        _candidatura.PrimaDellaRifinitura = Nothing
         Mostra()
 
         Await GeneraLaCandidaturaAsync().ConfigureAwait(True)
@@ -652,6 +766,15 @@ Public Class PannelloDocumenti
 
     End Sub
 
+    ''' <summary>
+    ''' La casella del prima/dopo: cambia <b>solo quel che si legge</b>, non i documenti né
+    ''' quel che si esporta (cap. 08.4). Nei file va sempre il testo rifinito.
+    ''' </summary>
+    Private Sub chkRifinitura_CheckedChanged(sender As Object, e As EventArgs) _
+                                             Handles chkRifinitura.CheckedChanged
+        Mostra()
+    End Sub
+
     Private Async Sub btnEsportaDocx_Click(sender As Object, e As EventArgs) Handles btnEsportaDocx.Click
         Await EsportaAsync(FormatiDocumento.Docx)
     End Sub
@@ -725,9 +848,8 @@ Public Class PannelloDocumenti
         ' AggiornaComandi quando c'è una candidatura a cui appartenga.
         cmbLingua.SelectedIndex = 0
 
-        chkRifinitura.Enabled = False
-        _suggerimenti.SetToolTip(chkRifinitura,
-                                 "La rifinitura anti-slop, col prima/dopo, arriva con la tappa T7.")
+        ' Nemmeno il prima/dopo della rifinitura: T7b è arrivata, e la casella la accende
+        ' AggiornaComandi quando c'è un confronto da mostrare.
 
         ' «Prepara email» non sta più qui: T6 è arrivata, e il bottone lo accende
         ' AggiornaComandi quando c'è una candidatura con la sua lettera.
@@ -795,6 +917,24 @@ Public Class PannelloDocumenti
             _suggerimenti.SetToolTip(cmbLingua,
                 "Il 📄 CV base segue la lingua del profilo: la lingua si sceglie su una candidatura.")
             _suggerimenti.SetToolTip(lblLingua, Nothing)
+        End If
+
+        ' Il prima/dopo si può guardare solo dove c'è (cap. 08.4). La casella non si
+        ' despunta da sola quando non c'è niente: toglierle la spunta qui vorrebbe dire
+        ' rientrare in Mostra da dentro Mostra, e con la rifinitura assente l'anteprima non
+        ' ci mette nulla in coda comunque.
+        Dim conPrimaDopo As Boolean = CEUnPrimaDaMostrare()
+        chkRifinitura.Enabled = conPrimaDopo AndAlso Not occupato
+
+        If conPrimaDopo Then
+            _suggerimenti.SetToolTip(chkRifinitura,
+                "Mostra com'erano i testi prima della rifinitura anti-slop, campo per campo.")
+        ElseIf conDocumento Then
+            _suggerimenti.SetToolTip(chkRifinitura,
+                "Non c'è niente da confrontare: la rifinitura non ha cambiato nessun testo.")
+        Else
+            _suggerimenti.SetToolTip(chkRifinitura,
+                "Prima genera i documenti: il prima/dopo si guarda su un testo scritto.")
         End If
 
         ' L'email nasce dalla lettera (cap. 07.1): senza, non c'è niente da scrivere. E il

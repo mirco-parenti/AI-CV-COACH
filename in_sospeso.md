@@ -116,6 +116,22 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   accanto al bottone. La tendina di P6 non serve a questo: lì cambiare lingua **rigenera
   una candidatura**, e il CV base non è una candidatura — infatti su di lui è spenta.
   *(cap. 03, tabella dei pannelli, P2; cap. 10.3; pool `generazione/cv_base.en`.)*
+- **La modifica a mano dei testi in P6** (2026-08-18, alla chiusura di T7b). Il cap. 8.4
+  promette che davanti al prima/dopo l'utente possa «accettare, modificare a mano o
+  tornare alla versione non rifinita»: il prima/dopo c'è, la modifica a mano no — le tre
+  caselle di P6 sono `ReadOnly`, e renderle scrivibili vuol dire decidere che cosa
+  succede al documento salvato, agli export e alla rigenerazione. È **disegno di P6**, non
+  anti-slop, e apparteneva a T7b solo per vicinanza. *(cap. 08.4; cap. 08.6; cap. 03.6.)*
+- **L'interruttore della rifinitura** (2026-08-18). Il cap. 8.4 la dà per disattivabile
+  dalle Impostazioni: quelle sono il pannello **P8, di T9**, e fino ad allora la
+  rifinitura è sempre attiva. Non è un buco pericoloso — la via d'uscita è il prima/dopo,
+  e una rifinitura che fallisce lascia comunque il testo grezzo — ma è una promessa del
+  capitolo non ancora mantenuta. *(cap. 08.4; cap. 03, tabella dei pannelli, P8.)*
+- **Il prima/dopo dell'email in P7** (2026-08-18). Il corpo del messaggio passa
+  dall'anti-slop come gli altri testi, ma com'era prima non si conserva e non si mostra:
+  la casella del confronto vive in P6, e in P7 l'utente ha davanti una casella che può già
+  riscrivere. Se un giorno servirà, il posto è la bozza (`email.json`). *(cap. 07.1;
+  cap. 08.6.)*
 
 ## Da revisione adversariale (2026-08-09)
 

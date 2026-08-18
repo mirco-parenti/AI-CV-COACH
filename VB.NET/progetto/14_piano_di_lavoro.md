@@ -433,6 +433,15 @@ di mira.
 **Collaudo:** candidatura completa su un annuncio in inglese; lettura critica dei
 testi prodotti (nessun tic da AI, nessun fatto inventato, nessun errore introdotto).
 
+*Spezzata in tre, come già T3.* **T7a — la lingua** (2026-08-15): varianti `en` dei tre
+prompt di generazione, campo `lingua` nell'analisi, tendina in P6, etichette dei documenti
+tradotte; chiusa col collaudo reale su un annuncio Indeed in inglese, che ha lasciato
+dietro il **Pool 1.07** (l'email impara l'inglese, oggetto compreso). **T7b — l'anti-slop**
+(2026-08-18): la cartella `rifinitura/` del pool, **tre prompt in due lingue** invece
+dell'unico previsto (cap. 08.6), la passata dentro la pipeline — che passa da quattro a sei
+passi — e la casella del prima/dopo in P6, che era lì spenta da T4. **T7c — il
+brainstorming** (`brainstorm` + `appunti_di_mira`, P5, streaming SSE): da fare.
+
 ### T8 — Il server MCP (F8)
 Modalità `--mcp` su stdio; i tool del cap. 09; lucchetto di scrittura.
 **Collaudo:** da Claude Desktop/Code: `tools/list` corretto, un confronto e una

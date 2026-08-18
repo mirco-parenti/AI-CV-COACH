@@ -217,3 +217,88 @@ Friend Class CompositoreFinto
     End Function
 
 End Class
+
+''' <summary>
+''' Il rifinitore anti-slop, finto (T7b): restituisce i testi che il collaudo ha
+''' preparato, e annota <b>che cosa gli è stato chiesto</b> — i pezzi, il genere e la
+''' lingua.
+''' </summary>
+''' <remarks>
+''' <para>Non eredita da <see cref="MestiereFinto"/> come gli altri: quelli rispondono con
+''' un artefatto JSON, questo con una mappa di testi, e la fila delle risposte preparate
+''' non gli servirebbe a niente.</para>
+''' <para>Il suo valore sta in ciò che <b>annota</b>. Che la rifinitura non tocchi i
+''' campi-fatto non è una promessa scritta in un prompt: è che quei campi nella richiesta
+''' non entrano — e l'unico modo di verificarlo è guardare che cosa parte.</para>
+''' <para>Di suo <b>non cambia niente</b>: chi non prepara una risposta per un id si
+''' ritrova il testo di partenza, esattamente come fa il rifinitore vero davanti a un'AI
+''' che ha deciso di non toccare nulla.</para>
+''' </remarks>
+Friend Class RifinitoreFinto
+    Implements IRifinitore
+
+    ''' <summary>Una passata chiesta: con quali pezzi, di che genere, in che lingua.</summary>
+    Friend Class Passata
+        Public Property Genere As GenereProsa
+        Public Property Lingua As String
+        Public Property Pezzi As IReadOnlyList(Of PezzoDiProsa)
+
+        ''' <summary>Gli id chiesti, in fila: com'è comodo leggerli in un Assert.</summary>
+        Public Function Id() As String
+            Return String.Join(", ", Pezzi.Select(Function(p) p.Id))
+        End Function
+    End Class
+
+    ''' <summary>Tutte le passate chieste, nell'ordine.</summary>
+    Public ReadOnly Property Passate As New List(Of Passata)
+
+    ''' <summary>Cosa rispondere, per id. Un id senza risposta torna com'era.</summary>
+    Private ReadOnly _risposte As New Dictionary(Of String, String)(StringComparer.Ordinal)
+
+    ''' <summary>Un errore da sollevare invece di rifinire.</summary>
+    Public Property Fallira As Exception
+
+    ''' <summary>Prepara il testo rifinito di un id (forma fluente: si concatenano).</summary>
+    Public Function Dara(id As String, testo As String) As RifinitoreFinto
+        _risposte(id) = testo
+        Return Me
+    End Function
+
+    ''' <summary>I generi chiesti finora, in ordine, come una sola stringa leggibile.</summary>
+    Public Function GeneriChiesti() As String
+        Return String.Join(" → ", Passate.Select(Function(p) p.Genere.ToString()))
+    End Function
+
+    Public Function RifinisciAsync(pezzi As IEnumerable(Of PezzoDiProsa), genere As GenereProsa,
+                                   Optional annulla As CancellationToken = Nothing,
+                                   Optional lingua As String = "it") _
+                                   As Task(Of IReadOnlyDictionary(Of String, String)) _
+                                   Implements IRifinitore.RifinisciAsync
+
+        Dim daFare As List(Of PezzoDiProsa) = If(pezzi, Enumerable.Empty(Of PezzoDiProsa)()).
+            Where(Function(p) p IsNot Nothing AndAlso
+                              Not String.IsNullOrWhiteSpace(p.Id) AndAlso
+                              Not String.IsNullOrWhiteSpace(p.Testo)).
+            ToList()
+
+        ' Come il vero: niente da rifinire, nessuna chiamata. Un finto che si annotasse
+        ' anche le passate a vuoto farebbe contare al collaudo attese che non esistono.
+        Dim esito As New Dictionary(Of String, String)(StringComparer.Ordinal)
+        If daFare.Count = 0 Then
+            Return Task.FromResult(Of IReadOnlyDictionary(Of String, String))(esito)
+        End If
+
+        Passate.Add(New Passata With {.Genere = genere, .Lingua = lingua, .Pezzi = daFare})
+
+        If Fallira IsNot Nothing Then Throw Fallira
+
+        For Each pezzo As PezzoDiProsa In daFare
+            Dim rifinito As String = Nothing
+            esito(pezzo.Id) = If(_risposte.TryGetValue(pezzo.Id, rifinito), rifinito, pezzo.Testo)
+        Next
+
+        Return Task.FromResult(Of IReadOnlyDictionary(Of String, String))(esito)
+
+    End Function
+
+End Class

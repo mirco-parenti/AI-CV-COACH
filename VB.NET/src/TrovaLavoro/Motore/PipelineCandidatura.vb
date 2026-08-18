@@ -41,22 +41,34 @@ Namespace Motore
     ''' </remarks>
     Public Class PipelineCandidatura
 
-        ''' <summary>I passi che l'avanzamento conta: la mitigazione sta dentro il confronto.</summary>
-        Public Const PassiTotali As Integer = 4
+        ''' <summary>
+        ''' I passi che l'avanzamento conta: la mitigazione sta dentro il confronto, e
+        ''' ciascuno dei due documenti conta due passi — scriverlo e rifinirlo (T7b).
+        ''' </summary>
+        Public Const PassiTotali As Integer = 6
+
+        ''' <summary>I passi quando la rifinitura non c'è: i due documenti si scrivono e basta.</summary>
+        Public Const PassiSenzaRifinitura As Integer = 4
 
         Private ReadOnly _analizzatore As IAnalizzatoreAnnuncio
         Private ReadOnly _confrontatore As IConfrontatore
         Private ReadOnly _generatore As IGeneratore
+        Private ReadOnly _rifinitura As Rifinitura
         Private ReadOnly _taratura As Taratura
 
         ''' <param name="analizzatore">Il mestiere che struttura l'annuncio.</param>
         ''' <param name="confrontatore">Il mestiere che giudica e mitiga.</param>
         ''' <param name="generatore">Il mestiere che scrive i documenti.</param>
         ''' <param name="taratura">I numeri del calcolo; se omessa, quelli di prodotto.</param>
+        ''' <param name="rifinitura">
+        ''' La passata anti-slop (cap. 08). Se manca, i documenti restano come l'AI li ha
+        ''' scritti: la fila funziona uguale, un gradino più in basso.
+        ''' </param>
         Public Sub New(analizzatore As IAnalizzatoreAnnuncio,
                        confrontatore As IConfrontatore,
                        generatore As IGeneratore,
-                       Optional taratura As Taratura = Nothing)
+                       Optional taratura As Taratura = Nothing,
+                       Optional rifinitura As Rifinitura = Nothing)
 
             If analizzatore Is Nothing Then Throw New ArgumentNullException(NameOf(analizzatore))
             If confrontatore Is Nothing Then Throw New ArgumentNullException(NameOf(confrontatore))
@@ -66,6 +78,7 @@ Namespace Motore
             _confrontatore = confrontatore
             _generatore = generatore
             _taratura = taratura
+            _rifinitura = rifinitura
 
         End Sub
 
@@ -156,14 +169,30 @@ Namespace Motore
             ' rigenerare i documenti dopo un ripensamento li rifà nella lingua nuova.
             Dim lingua As String = LinguaDocumenti.PerDocumenti(opportunita.Lingua)
 
+            ' Si riparte da zero: quel che si sta per scrivere non ha ancora un «prima», e
+            ' tenersi quello dei documenti di ieri farebbe raccontare a P6 un confronto fra
+            ' testi che non sono mai stati uno la rifinitura dell'altro.
+            opportunita.PrimaDellaRifinitura = Nothing
+
             Annuncia(avanzamento, 3, "Scrivo il CV mirato")
             opportunita.Cv = Await _generatore.GeneraCvMiratoAsync(
                 profiloJson, opportunita.Annuncio, giudizi, annulla, lingua).ConfigureAwait(False)
 
-            Annuncia(avanzamento, 4, "Scrivo la lettera")
+            Await RifinisciAsync(opportunita, "cv", 4, "Rifinisco il CV",
+                                 Function() _rifinitura.DelCvAsync(opportunita.Cv, lingua, annulla),
+                                 avanzamento).ConfigureAwait(False)
+
+            ' La lettera riceve il CV **già rifinito**: le serve come riferimento di
+            ' coerenza, e dargli quello grezzo vorrebbe dire farle raccontare la stessa
+            ' storia con parole che nel CV non ci sono più.
+            Annuncia(avanzamento, If(ConRifinitura, 5, 4), "Scrivo la lettera")
             opportunita.Lettera = Await _generatore.GeneraLetteraAsync(
                 profiloJson, opportunita.Annuncio, giudizi, opportunita.Cv,
                 ElencoMitigazioni(opportunita.Mitigazioni), annulla, lingua).ConfigureAwait(False)
+
+            Await RifinisciAsync(opportunita, "lettera", 6, "Rifinisco la lettera",
+                                 Function() _rifinitura.DellaLetteraAsync(opportunita.Lettera, lingua, annulla),
+                                 avanzamento).ConfigureAwait(False)
 
             ' I documenti ci sono: la candidatura è «generata» (cap. 07.3). Rigenerarli
             ' non è un passaggio nuovo, e la data resta quella della prima volta.
@@ -172,6 +201,64 @@ Namespace Motore
             End If
 
         End Function
+
+        ''' <summary>
+        ''' Una passata di rifinitura su un documento appena scritto (cap. 08), con la sua
+        ''' regola d'oro: <b>non può far fallire la generazione</b>.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>La rifinitura è un miglioramento facoltativo: se l'AI inciampa proprio lì,
+        ''' il documento che resta è quello che ha appena finito di scrivere — buono, solo
+        ''' non rifinito. Far cadere l'intera candidatura per questo vorrebbe dire buttare
+        ''' via un CV già pronto e chiedere all'utente di rifare tutto da capo, altre
+        ''' attese comprese.</para>
+        ''' <para>L'annullamento invece passa: <see cref="OperationCanceledException"/> non
+        ''' è un inciampo dell'AI, è l'utente che ha premuto Annulla, e assorbirlo qui
+        ''' vorrebbe dire continuare a lavorare dopo che ha chiesto di smettere.</para>
+        ''' </remarks>
+        ''' <param name="quale">Sotto quale nome il «prima» va annotato: <c>cv</c> o <c>lettera</c>.</param>
+        ''' <param name="passata">Il lavoro vero; si costruisce solo se la rifinitura c'è.</param>
+        Private Async Function RifinisciAsync(opportunita As Opportunita, quale As String,
+                                              passo As Integer, cosa As String,
+                                              passata As Func(Of Task(Of JsonObject)),
+                                              avanzamento As IProgress(Of AvanzamentoPipeline)) As Task
+
+            If _rifinitura Is Nothing Then Return
+
+            Annuncia(avanzamento, passo, cosa)
+
+            Try
+                Annota(opportunita, quale, Await passata().ConfigureAwait(False))
+
+            Catch ex As ErroreAi
+                ' Non si tace: il passo dice cos'è successo, e il documento resta grezzo.
+                Annuncia(avanzamento, passo, $"{cosa}: non ci sono riuscita, tengo il testo com'è")
+            End Try
+
+        End Function
+
+        ''' <summary>Mette il «prima» di un documento accanto a quello degli altri.</summary>
+        Private Shared Sub Annota(opportunita As Opportunita, quale As String, prima As JsonObject)
+
+            If prima Is Nothing Then Return
+
+            Dim tutti As JsonObject = TryCast(opportunita.PrimaDellaRifinitura, JsonObject)
+
+            If tutti Is Nothing Then
+                tutti = New JsonObject()
+                opportunita.PrimaDellaRifinitura = tutti
+            End If
+
+            tutti(quale) = prima
+
+        End Sub
+
+        ''' <summary>Se questa fila ha una passata anti-slop montata.</summary>
+        Private ReadOnly Property ConRifinitura As Boolean
+            Get
+                Return _rifinitura IsNot Nothing
+            End Get
+        End Property
 
         ''' <summary>
         ''' Tutti i passi in fila, per chi li vuole in un colpo solo.
@@ -289,11 +376,15 @@ Namespace Motore
 
         End Sub
 
-        Private Shared Sub Annuncia(avanzamento As IProgress(Of AvanzamentoPipeline),
-                                    passo As Integer, cosa As String)
+        Private Sub Annuncia(avanzamento As IProgress(Of AvanzamentoPipeline),
+                             passo As Integer, cosa As String)
 
+            ' Il totale dipende da com'è montata la fila: annunciare «4 di 6» a chi la
+            ' rifinitura non ce l'ha vorrebbe dire promettere due passi che non arriveranno.
             avanzamento?.Report(New AvanzamentoPipeline With {
-                .Passo = passo, .Totale = PassiTotali, .Cosa = cosa})
+                .Passo = passo,
+                .Totale = If(ConRifinitura, PassiTotali, PassiSenzaRifinitura),
+                .Cosa = cosa})
 
         End Sub
 

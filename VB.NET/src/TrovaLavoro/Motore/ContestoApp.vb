@@ -91,6 +91,17 @@ Namespace Motore
         Public ReadOnly Property Email As ICompositoreEmail
 
         ''' <summary>
+        ''' La passata anti-slop (T7b, cap. 08); <c>Nothing</c> senza AI o senza pool.
+        ''' </summary>
+        ''' <remarks>
+        ''' Lavora dentro la <see cref="Pipeline"/> per i documenti di una candidatura, ed
+        ''' è esposta qui per gli altri due testi che da quella fila non passano: il 📄 CV
+        ''' base, che nasce dal solo profilo, e il corpo dell'email, che nasce in P7 dopo
+        ''' che l'utente ha scelto gli allegati.
+        ''' </remarks>
+        Public ReadOnly Property Rifinitura As Motore.Rifinitura
+
+        ''' <summary>
         ''' Le candidature su disco: c'è sempre, anche senza AI — le opportunità già
         ''' generate si riaprono comunque (cap. 12.7).
         ''' </summary>
@@ -321,11 +332,17 @@ Namespace Motore
             ' proprietà, e in VB una cosa che si chiama come un'altra la copre.
             _Generatore = New Ai.Generatore(Libreria, Client)
 
+            ' La rifinitura anti-slop (cap. 08): per la stessa ragione del generatore il
+            ' tipo si scrive qualificato, perché la proprietà che la tiene si chiama come
+            ' lui. Nasce prima della pipeline perché è la pipeline a riceverla.
+            _Rifinitura = New Motore.Rifinitura(New Rifinitore(Libreria, Client))
+
             _Pipeline = New PipelineCandidatura(
                 New AnalizzatoreAnnuncio(Libreria, Client),
                 New Confrontatore(Libreria, Client),
                 _Generatore,
-                Taratura)
+                Taratura,
+                _Rifinitura)
 
             ' L'email sta fuori dalla pipeline e non è una dimenticanza: la fila di T4
             ' arriva ai documenti, e da lì in poi decide l'utente — quali allegati, a chi,

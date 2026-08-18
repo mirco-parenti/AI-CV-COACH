@@ -26,8 +26,8 @@ Namespace Ai
             Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
 
             Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "origine")
-            Assert.AreEqual("1.07", libreria.Versione, "versione del pool")
-            Assert.AreEqual("Pool 1.07 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
+            Assert.AreEqual("1.08", libreria.Versione, "versione del pool")
+            Assert.AreEqual("Pool 1.08 (integrato)", libreria.Etichetta, "etichetta accanto al logo")
         End Sub
 
         <TestMethod>
@@ -61,6 +61,38 @@ Namespace Ai
             Assert.AreEqual("semplice", documenti.Modello, "documenti: smistare non è ragionare")
             Assert.AreEqual("json", documenti.Uscita, "documenti: uscita")
             CollectionAssert.AreEqual({"DOCUMENTI"}, documenti.Segnaposto.ToArray(), "documenti: segnaposto")
+        End Sub
+
+        <TestMethod>
+        Public Sub ITrePromptDiRifinituraSiCaricanoNelleDueLingue()
+
+            ' Il Pool 1.08 apre la cartella `rifinitura/`, promessa dal cap. 04.3 e rimasta
+            ' vuota fino a T7b. Tre prompt e non uno: sono tre forme diverse — un sommario,
+            ' una frase nominale, un paragrafo — e un prompt solo lascerebbe al modello la
+            ' scelta di quale imitare, che è l'errore del Pool 1.05 e del 1.07.
+            Dim libreria = LibreriaPrompt.Apri(Path.Combine(Path.GetTempPath(), "pool-inesistente"))
+
+            For Each id As String In {"umanizzazione_sintesi", "umanizzazione_frasi", "umanizzazione_prosa"}
+
+                Dim italiano = libreria.Carica(id, "it")
+                Dim inglese = libreria.Carica(id, "en")
+
+                Assert.AreEqual(id, italiano.Id, $"«{id}»: l'id dichiarato")
+                Assert.AreEqual("ragionamento", italiano.Modello,
+                                $"«{id}»: riscrivere uno stile non è un'estrazione")
+                Assert.AreEqual("json", italiano.Uscita, $"«{id}»: uscita")
+
+                CollectionAssert.AreEqual({"PEZZI"}, italiano.Segnaposto.ToArray(),
+                                          $"«{id}»: un segnaposto solo, e sono i testi — nessuna fonte di fatti")
+                CollectionAssert.AreEqual(italiano.Segnaposto.ToArray(), inglese.Segnaposto.ToArray(),
+                                          $"«{id}»: gli stessi segnaposto nelle due lingue")
+
+                Assert.AreNotEqual(italiano.Corpo, inglese.Corpo,
+                                   $"«{id}»: l'inglese ha i suoi tic, non è la copia dell'italiano")
+                Assert.AreEqual(italiano.MaxToken, inglese.MaxToken, $"«{id}»: lo stesso tetto")
+
+            Next
+
         End Sub
 
         <TestMethod>
@@ -222,7 +254,7 @@ Namespace Ai
                 Dim libreria = LibreriaPrompt.Apri(cartella)
 
                 Assert.AreEqual(OriginePool.Integrato, libreria.Origine, "deve ripiegare sull'integrato")
-                Assert.AreEqual("1.07", libreria.Versione, "con la versione dell'integrato")
+                Assert.AreEqual("1.08", libreria.Versione, "con la versione dell'integrato")
                 Assert.IsNotNull(libreria.Avviso, "e deve dire perché")
                 Assert.Contains("manca.md", libreria.Avviso, "l'avviso deve nominare il file mancante")
             Finally

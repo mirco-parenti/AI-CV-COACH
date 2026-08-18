@@ -27,6 +27,59 @@ La non-regressione contro il prototipo (cap. 14, T2) è passata su questa versio
 prompt del confronto costruito dal pool è identico carattere per carattere a quello che
 il prototipo costruisce nel codice.
 
+## Pool 1.08 — 2026-08-18
+
+**L'anti-slop entra nel pool.** Nasce la cartella `rifinitura/`, promessa dal cap. 04.3
+fin dall'inizio e rimasta vuota fino a T7b: **tre prompt in due lingue**, la passata che
+cambia come un testo suona senza toccare quello che dice (cap. 08).
+
+- **`rifinitura/umanizzazione_sintesi`** (`.it` / `.en`) — il sommario del CV: poche frasi
+  in prima persona, che restano poche e restano in prima persona.
+- **`rifinitura/umanizzazione_frasi`** (`.it` / `.en`) — le descrizioni delle esperienze,
+  che sono **frasi nominali** («Servizio ai tavoli e gestione della cassa») e tali devono
+  restare: qui il prompt dice esplicitamente che il caso normale è non cambiare quasi
+  nulla.
+- **`rifinitura/umanizzazione_prosa`** (`.it` / `.en`) — il corpo della lettera e quello
+  dell'email: l'unico dei tre dove la rifinitura ha spazio vero, dentro i paragrafi.
+
+*Perché tre prompt e non uno.* Un prompt solo avrebbe contenuto tutte e tre le forme, e
+avrebbe lasciato al modello una scelta da fare: quale imitare. È il punto esatto in cui il
+**Pool 1.05** e il **Pool 1.07** hanno sbagliato — fra una regola generale e una forma
+concreta da imitare, vince la forma. Qui ogni prompt ne contiene una sola, così non c'è
+niente da scegliere. Si paga con una chiamata in più sul CV (sommario e descrizioni sono
+due generi diversi) ed è stata una decisione presa sapendo il prezzo.
+
+*Come ci sta dentro l'anti-invenzione.* La sezione 2 di tutti e sei si dichiara
+**sovraordinata a ogni regola di stile**: «se per rifinire dovresti violarla, allora non
+rifinisci e lasci il testo com'è». Sotto di lei: non aggiungere, non togliere, ricopiare i
+fatti lettera per lettera, e soprattutto **non cambiare il grado** delle affermazioni —
+«ho collaborato a» che diventa «ho gestito» è un fatto inventato, ed è l'errore che un
+umanizzatore commette più volentieri di qualsiasi altro. Nella prosa c'è una guardia in
+più: dove il testo **riconosce onestamente un gap**, quel riconoscimento resta, e resta
+altrettanto chiaro — le mitigazioni del cap. 08 non si annacquano in una subordinata.
+
+*Il permesso di non cambiare.* Tutti e sei dicono che restituire un testo identico è una
+risposta giusta. Senza quella riga un modello cambia comunque qualcosa, perché gli è stato
+chiesto di lavorare.
+
+*Cosa non entra nella richiesta.* Solo i campi-prosa: nomi, aziende, date, competenze e
+titoli **non vengono nemmeno mandati**. La regola «i campi-fatto non si toccano» smette
+così di essere una promessa scritta in un prompt e diventa una proprietà di come è fatta
+la chiamata (`Motore/Rifinitura`).
+
+*Cosa resta fuori di proposito.* L'apertura, la chiusura e la firma della lettera, e
+l'oggetto dell'email: non sono slop, sono le formule che un lettore si aspetta — e
+l'oggetto in particolare è quello che il **Pool 1.07** ha appena dettato parola per parola
+in due lingue. In inglese la faccenda è più stretta ancora, e il prompt lo dice: `Dear Sir
+or Madam` e `Yours faithfully` sono una **coppia obbligata**, e sostituirne una con un
+«Best regards» più amichevole la romperebbe. Sempre l'inglese si porta la sua guardia
+tipica: i *power verb* da CV — `spearheaded`, `orchestrated`, `drove` — che rivendicano
+quello che l'originale non diceva.
+
+Nessuno dei ventuno prompt esistenti è toccato: come il **Pool 1.04**, questo bump
+**aggiunge** invece di correggere, e chi confronta i due manifest lo vede subito — le
+impronte di prima sono tutte quelle di 1.07.
+
 ## Pool 1.07 — 2026-08-15
 
 **L'ultimo anello della catena della lingua.** Il collaudo reale di T7a — un annuncio

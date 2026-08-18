@@ -237,6 +237,13 @@ Namespace Dati
                 {"fonte", o.Fonte},
                 {"link", o.Link}}
 
+            ' Da T7b. Il campo c'è solo quando la rifinitura ha davvero cambiato qualcosa:
+            ' scriverlo vuoto direbbe «è stata fatta e non ha toccato niente» esattamente
+            ' come non scriverlo, e un file si legge meglio senza righe che non raccontano.
+            If o.PrimaDellaRifinitura IsNot Nothing Then
+                scritto("rifinitura") = o.PrimaDellaRifinitura.DeepClone()
+            End If
+
             If o.Match IsNot Nothing Then
                 scritto("match") = New JsonObject From {
                     {"match_finale", o.Match.MatchFinale},
@@ -285,6 +292,11 @@ Namespace Dati
             ' riapre senza fonte né link, che è esattamente com'era.
             o.Fonte = CampiJson.Testo(stato, "fonte")
             o.Link = CampiJson.Testo(stato, "link")
+
+            ' Da T7b. Nelle cartelle scritte prima non c'è, e va benissimo: vuol dire una
+            ' candidatura i cui documenti non sono passati dalla rifinitura, che è
+            ' esattamente com'era.
+            o.PrimaDellaRifinitura = CampiJson.Nodo(stato, "rifinitura")
 
             Dim match As JsonObject = TryCast(CampiJson.Nodo(stato, "match"), JsonObject)
             If match Is Nothing Then Return

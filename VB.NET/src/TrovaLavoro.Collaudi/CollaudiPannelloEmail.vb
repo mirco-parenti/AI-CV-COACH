@@ -7,6 +7,7 @@ Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro
+Imports TrovaLavoro.Ai
 Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Documenti
 Imports TrovaLavoro.Motore
@@ -44,6 +45,57 @@ Namespace Ui
         Private Const EmailScritta As String =
             "{""tipo"": ""email_candidatura"", ""oggetto"": ""Candidatura per Magazziniere — Luca Ferrari""," &
             """corpo"": ""Spettabile Azienda,\nmi candido per la posizione.\nCordiali saluti,\nLuca Ferrari""}"
+
+        <TestMethod>
+        Public Async Function IlCorpoPassaDallAntiSlopMaLOggettoNo() As Task
+
+            ' T7b, cap. 07.1. L'email nasce da una lettera già rifinita, ma il corpo lo
+            ' riscrive l'AI da capo e i tic rientrano dalla finestra. L'oggetto invece è una
+            ' formula dettata parola per parola dal prompt (Pool 1.07): rifinirla vorrebbe
+            ' dire disfarla.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Dim rifinitore As RifinitoreFinto = New RifinitoreFinto().
+                Dara("corpo", "Spettabile Azienda," & vbLf & "mi candido, e le scrivo perché…")
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.HasCount(1, rifinitore.Passate, "una passata sola")
+                    Assert.AreEqual("corpo", rifinitore.Passate(0).Id(), "e sul corpo, non sull'oggetto")
+                    Assert.AreEqual(GenereProsa.Prosa, rifinitore.Passate(0).Genere,
+                                    "un'email è prosa distesa, come la lettera")
+
+                    Assert.Contains("le scrivo perché", Casella(pannello, "txtCorpo").Text,
+                                    "nella casella c'è il corpo rifinito")
+                    Assert.AreEqual("Candidatura per Magazziniere — Luca Ferrari",
+                                    Casella(pannello, "txtOggetto").Text, "e l'oggetto è quello di prima")
+                End Function,
+                rifinitore)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaRifinituraDellEmailSegueLaLinguaDellaCandidatura() As Task
+
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Dim rifinitore As New RifinitoreFinto()
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    candidatura.Lingua = "en"
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.AreEqual("en", rifinitore.Passate.Single().Lingua,
+                                    "un corpo inglese ripulito dai tic italiani sarebbe il guado di T7a")
+                End Function,
+                rifinitore)
+
+        End Function
 
         <TestMethod>
         Public Async Function IlMessaggioNasceDallaLettera() As Task
@@ -563,7 +615,8 @@ Namespace Ui
 
         Private Shared Async Function ConPannelloAsync(
                 compositore As CompositoreFinto,
-                prova As Func(Of PannelloEmail, ContestoApp, Opportunita, Task)) As Task
+                prova As Func(Of PannelloEmail, ContestoApp, Opportunita, Task),
+                Optional rifinitore As RifinitoreFinto = Nothing) As Task
 
             Dim radice As String = Path.Combine(
                 Path.GetTempPath(), "pannello-email-" & Guid.NewGuid().ToString("N"))
@@ -575,7 +628,8 @@ Namespace Ui
                     contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
 
                     pannello.CreateControl()
-                    pannello.Collega(contesto, compositore)
+                    pannello.Collega(contesto, compositore, Nothing,
+                                     If(rifinitore Is Nothing, Nothing, New Rifinitura(rifinitore)))
 
                     Await prova(pannello, contesto, Generata(contesto))
                 End Using

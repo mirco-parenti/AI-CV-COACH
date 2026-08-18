@@ -106,8 +106,11 @@ opportunità sono esaurite.
 1. L'app propone la **lingua** dell'output (rilevata dall'annuncio, modificabile).
 2. Genera 🎯 CV-2 mirato e ✉️ lettera (con mitigazioni, se esistono), li mostra
    affiancati all'annuncio per il controllo.
-3. La prosa (sommario, lettera) passa la **rifinitura anti-slop** (cap. 08); l'utente
-   vede il prima/dopo e può intervenire a mano su ogni campo.
+3. La prosa (sommario, descrizioni, lettera) passa la **rifinitura anti-slop** (cap. 08);
+   l'utente vede il prima/dopo e può intervenire a mano su ogni campo. *A T7b
+   (2026-08-18) la rifinitura c'è e avviene dentro la generazione, subito dopo ogni
+   documento — i passi diventano sei — e il prima/dopo si guarda spuntando la casella in
+   P6; l'intervento **a mano** campo per campo è rimandato (`in_sospeso.md`).*
 4. Alla conferma, l'app produce i file: **DOCX e/o PDF** del CV, testo della lettera
    (nel corpo email e/o come allegato).
 

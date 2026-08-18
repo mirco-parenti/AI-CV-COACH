@@ -23,6 +23,13 @@ Namespace Dati
         ''' <summary>Quando è stato generato.</summary>
         Public Property Generato As Date
 
+        ''' <summary>
+        ''' Com'erano i suoi campi-prosa <b>prima</b> della rifinitura anti-slop (T7b,
+        ''' cap. 08.4), o <c>Nothing</c> se non ne è cambiato nessuno. Sta nell'involucro
+        ''' e non dentro il CV, come per una candidatura: il documento resta il documento.
+        ''' </summary>
+        Public Property PrimaDellaRifinitura As JsonNode
+
     End Class
 
     ''' <summary>
@@ -218,7 +225,8 @@ Namespace Dati
         ''' <param name="cv">Il CV generato.</param>
         ''' <param name="versioneProfilo">Il nome della versione da cui è nato.</param>
         ''' <returns>Il percorso del file scritto.</returns>
-        Public Function SalvaCvBase(cv As JsonNode, versioneProfilo As String) As String
+        Public Function SalvaCvBase(cv As JsonNode, versioneProfilo As String,
+                                    Optional primaDellaRifinitura As JsonNode = Nothing) As String
 
             If cv Is Nothing Then Throw New ArgumentNullException(NameOf(cv))
 
@@ -228,6 +236,11 @@ Namespace Dati
                 {"versione_profilo", versioneProfilo},
                 {"generato", Date.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)},
                 {"cv", cv.DeepClone()}}
+
+            ' Da T7b, e solo quando c'è stato davvero un cambiamento da raccontare.
+            If primaDellaRifinitura IsNot Nothing Then
+                involucro("rifinitura") = primaDellaRifinitura.DeepClone()
+            End If
 
             ScriviInModoAtomico(_cartella.FileCvBase, involucro.ToJsonString(FormatoLeggibile))
 
@@ -258,10 +271,16 @@ Namespace Dati
             Dim cv As JsonNode = Nothing
             involucro.TryGetPropertyValue("cv", cv)
 
+            ' Da T7b: nei file scritti prima non c'è, ed è giusto così — quel CV dalla
+            ' rifinitura non ci è mai passato.
+            Dim prima As JsonNode = Nothing
+            involucro.TryGetPropertyValue("rifinitura", prima)
+
             Return New CvBase With {
                 .Cv = cv,
                 .VersioneProfilo = Campo(involucro, "versione_profilo"),
-                .Generato = generato}
+                .Generato = generato,
+                .PrimaDellaRifinitura = prima}
 
         End Function
 

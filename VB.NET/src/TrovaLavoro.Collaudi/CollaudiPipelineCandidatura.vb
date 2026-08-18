@@ -76,6 +76,154 @@ Namespace Motore
 
         End Function
 
+        ''' <summary>La stessa pipeline, con la passata anti-slop montata (T7b).</summary>
+        Private Shared Function PipelineConRifinitura(generatore As GeneratoreFinto,
+                                                      rifinitore As RifinitoreFinto) As PipelineCandidatura
+
+            Dim confrontatore As New ConfrontatoreFinto
+            confrontatore.Dara(ConfrontoPieno)
+
+            Return New PipelineCandidatura(New AnalizzatoreFinto, confrontatore, generatore,
+                                           Nothing, New Rifinitura(rifinitore))
+
+        End Function
+
+        ''' <summary>Un'opportunità già confrontata, pronta per la generazione.</summary>
+        Private Shared Async Function GiaConfrontataAsync(pipeline As PipelineCandidatura) As Task(Of Opportunita)
+
+            Dim opportunita As New Opportunita With {.Annuncio = JsonNode.Parse(AnnuncioJson)}
+            Await pipeline.ConfrontaAsync(opportunita, ProfiloDiProva())
+            Return opportunita
+
+        End Function
+
+        <TestMethod>
+        Public Async Function OgniDocumentoPassaDallaRifinituraAppenaScritto() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara("{""sommario"": ""Ho un — sommario""}").
+                       Dara("{""corpo"": ""Un corpo — con lineetta""}")
+
+            Dim rifinitore As New RifinitoreFinto()
+            Dim pipeline As PipelineCandidatura = PipelineConRifinitura(generatore, rifinitore)
+
+            Await pipeline.GeneraAsync(Await GiaConfrontataAsync(pipeline), ProfiloDiProva())
+
+            Assert.AreEqual("Sintesi → Prosa", rifinitore.GeneriChiesti(),
+                            "il sommario del CV e poi il corpo della lettera")
+
+            ' Le descrizioni non compaiono perché questo CV non ne ha: niente da rifinire,
+            ' nessuna chiamata (v. CollaudiRifinitore).
+            Assert.AreEqual("sommario", rifinitore.Passate(0).Id(), "prima il CV")
+            Assert.AreEqual("corpo", rifinitore.Passate(1).Id(), "poi la lettera")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaLetteraRiceveIlCvGiaRifinito() As Task
+
+            ' La lettera usa il CV come riferimento di coerenza: dargli quello grezzo
+            ' vorrebbe dire farle raccontare la stessa storia con parole che nel CV non ci
+            ' sono più.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara("{""sommario"": ""Ho un — sommario""}").Dara("{""corpo"": ""…""}")
+
+            Dim rifinitore As RifinitoreFinto = New RifinitoreFinto().
+                Dara("sommario", "Ho un sommario, senza lineetta")
+
+            Dim pipeline As PipelineCandidatura = PipelineConRifinitura(generatore, rifinitore)
+
+            Await pipeline.GeneraAsync(Await GiaConfrontataAsync(pipeline), ProfiloDiProva())
+
+            Dim cvVistoDallaLettera As JsonNode = generatore.Chiamate.Last().Ingressi(3)
+
+            Assert.Contains("senza lineetta", cvVistoDallaLettera.ToJsonString(),
+                            "alla lettera arriva il CV rifinito")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlPrimaSiAnnotaDocumentoPerDocumento() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara("{""sommario"": ""com'era il sommario""}").
+                       Dara("{""corpo"": ""com'era il corpo""}")
+
+            Dim rifinitore As RifinitoreFinto = New RifinitoreFinto().
+                Dara("sommario", "adesso il sommario").
+                Dara("corpo", "adesso il corpo")
+
+            Dim pipeline As PipelineCandidatura = PipelineConRifinitura(generatore, rifinitore)
+            Dim opportunita As Opportunita = Await GiaConfrontataAsync(pipeline)
+
+            Await pipeline.GeneraAsync(opportunita, ProfiloDiProva())
+
+            Dim prima As JsonNode = opportunita.PrimaDellaRifinitura
+
+            Assert.AreEqual("com'era il sommario", prima("cv")("sommario").GetValue(Of String)(),
+                            "il prima del CV")
+            Assert.AreEqual("com'era il corpo", prima("lettera")("corpo").GetValue(Of String)(),
+                            "e quello della lettera, ciascuno sotto il suo nome")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaRifinituraCheInciampaNonButtaViaIDocumenti() As Task
+
+            ' La rifinitura è un miglioramento facoltativo (cap. 08): far cadere l'intera
+            ' candidatura per un suo inciampo vorrebbe dire buttare via un CV già pronto e
+            ' chiedere all'utente di rifare tutto, altre attese comprese.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara("{""sommario"": ""un sommario""}").Dara("{""corpo"": ""un corpo""}")
+
+            Dim rifinitore As New RifinitoreFinto With {
+                .Fallira = New TrovaLavoro.Ai.ErroreAi(
+                    TrovaLavoro.Ai.CausaErroreAi.Rete, "la rete è caduta")}
+
+            Dim pipeline As PipelineCandidatura = PipelineConRifinitura(generatore, rifinitore)
+            Dim opportunita As Opportunita = Await GiaConfrontataAsync(pipeline)
+
+            Await pipeline.GeneraAsync(opportunita, ProfiloDiProva())
+
+            Assert.IsNotNull(opportunita.Cv, "il CV c'è comunque")
+            Assert.IsNotNull(opportunita.Lettera, "e la lettera pure: la fila non si è fermata")
+            Assert.IsNull(opportunita.PrimaDellaRifinitura, "nessun prima, perché non è cambiato niente")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlContoDeiPassiDipendeDaComEMontataLaFila() As Task
+
+            ' Con la rifinitura i passi sono sei — scrivere e rifinire, per due documenti —
+            ' e senza sono quattro. Promettere sei passi a chi ne farà quattro lascerebbe
+            ' l'attesa a metà per sempre.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara("{""sommario"": ""un sommario""}").Dara("{""corpo"": ""un corpo""}")
+
+            Dim conRifinitura As New SpiaAvanzamento
+            Dim pipeline As PipelineCandidatura = PipelineConRifinitura(generatore, New RifinitoreFinto())
+            Await pipeline.GeneraAsync(Await GiaConfrontataAsync(pipeline), ProfiloDiProva(), conRifinitura)
+
+            Assert.IsTrue(conRifinitura.Visti.All(Function(v) v.EndsWith(" di 6)")),
+                          $"sei passi in tutto: {String.Join(" · ", conRifinitura.Visti)}")
+            Assert.Contains("Rifinisco il CV (4 di 6)", conRifinitura.Visti,
+                            "e la rifinitura del CV è il quarto")
+
+            Dim altroGeneratore As New GeneratoreFinto
+            altroGeneratore.Dara("{""sommario"": ""un sommario""}").Dara("{""corpo"": ""un corpo""}")
+
+            Dim confrontatore As New ConfrontatoreFinto
+            confrontatore.Dara(ConfrontoPieno)
+
+            Dim senza As New SpiaAvanzamento
+            Dim spoglia As PipelineCandidatura = PipelineDiProva(New AnalizzatoreFinto, confrontatore, altroGeneratore)
+            Await spoglia.GeneraAsync(Await GiaConfrontataAsync(spoglia), ProfiloDiProva(), senza)
+
+            Assert.IsTrue(senza.Visti.All(Function(v) v.EndsWith(" di 4)")),
+                          $"e quattro senza: {String.Join(" · ", senza.Visti)}")
+
+        End Function
+
         <TestMethod>
         Public Async Function SenzaGapLaMitigazioneNonSiChiede() As Task
 

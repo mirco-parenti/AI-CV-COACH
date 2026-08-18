@@ -47,6 +47,9 @@ Public Class PannelloEmail
     ''' <summary>Chi riconosce i documenti della cartella; <c>Nothing</c> quando l'AI non c'è.</summary>
     Private _classificatore As IClassificatoreDocumenti
 
+    ''' <summary>La passata anti-slop (cap. 08); <c>Nothing</c> quando l'AI non c'è.</summary>
+    Private _rifinitura As Rifinitura
+
     ''' <summary>La candidatura a cui l'email appartiene; <c>Nothing</c> finché non ne arriva una.</summary>
     Private _candidatura As Opportunita
 
@@ -100,12 +103,14 @@ Public Class PannelloEmail
     ''' norma è quello del contesto, il banco passa il suo.
     ''' </param>
     Public Sub Collega(contesto As ContestoApp, Optional compositore As ICompositoreEmail = Nothing,
-                       Optional classificatore As IClassificatoreDocumenti = Nothing)
+                       Optional classificatore As IClassificatoreDocumenti = Nothing,
+                       Optional rifinitura As Rifinitura = Nothing)
 
         If contesto Is Nothing Then Throw New ArgumentNullException(NameOf(contesto))
         _contesto = contesto
         _compositore = If(compositore, contesto.Email)
         _classificatore = If(classificatore, contesto.Classificatore)
+        _rifinitura = If(rifinitura, contesto.Rifinitura)
 
         AggiornaComandi()
 
@@ -163,6 +168,26 @@ Public Class PannelloEmail
     End Function
 
     ''' <summary>
+    ''' La passata anti-slop sul corpo del messaggio (cap. 08), che come altrove non può
+    ''' far fallire quel che è già scritto: se inciampa, resta il testo del compositore.
+    ''' </summary>
+    Private Async Function RifinisciIlMessaggioAsync(corpo As String, lingua As String,
+                                                     annulla As CancellationToken) As Task(Of String)
+
+        If _rifinitura Is Nothing Then Return corpo
+
+        Racconta("Rifinisco il messaggio…", StileApp.TestoSecondario)
+
+        Try
+            Return Await _rifinitura.DelTestoAsync(corpo, lingua, annulla)
+
+        Catch ex As ErroreAi
+            Return corpo
+        End Try
+
+    End Function
+
+    ''' <summary>
     ''' Chiede all'AI oggetto e corpo, e li mette nei campi. Gli allegati spuntati fanno
     ''' parte della richiesta: il messaggio li nomina, e nominarne uno che non parte
     ''' sarebbe un'email che si smentisce da sola (cap. 07.1).
@@ -192,12 +217,20 @@ Public Class PannelloEmail
             ' L'email si scrive nella lingua della candidatura, che è quella in cui la
             ' lettera è già scritta: la fonte è la stessa che consulta P6, così le due
             ' schermate non possono raccontare due lingue diverse (cap. 10.1).
+            Dim lingua As String = LinguaDocumenti.PerDocumenti(_candidatura.Lingua)
+
             Dim proposta = Await _compositore.ComponiAsync(
                 _candidatura.Lettera, _candidatura.Annuncio,
                 _bozza.AllegatiScelti().Select(Function(a) a.Nome).ToList(), _annulla.Token,
-                LinguaDocumenti.PerDocumenti(_candidatura.Lingua))
+                lingua)
 
             Dim scritta As BozzaEmail = BozzaEmail.DallaProposta(proposta)
+
+            ' Anche il messaggio passa dall'anti-slop (cap. 07.1): nasce da una lettera già
+            ' rifinita, ma il corpo lo riscrive l'AI da capo, e i tic rientrano dalla
+            ' finestra. L'oggetto no: è una formula dettata parola per parola dal prompt
+            ' (Pool 1.07), e rifinirla vorrebbe dire disfarla.
+            scritta.Corpo = Await RifinisciIlMessaggioAsync(scritta.Corpo, lingua, _annulla.Token)
 
             Riempiendo(
                 Sub()

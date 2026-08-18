@@ -78,8 +78,18 @@ prompt-pool/
 │   ├── brainstorm.md           ✚ conversazione ancorata a profilo+annuncio+giudizi
 │   └── appunti_di_mira.md      ✚ distilla dal brainstorm gli appunti confermabili
 └── rifinitura/
-    └── umanizzazione.md        ✚ anti-slop (cap. 08), senza errori di battitura
+    ├── umanizzazione_sintesi.it.md   ✚ il sommario del CV (italiano)
+    ├── umanizzazione_sintesi.en.md   ✚ il sommario del CV (inglese)
+    ├── umanizzazione_frasi.it.md     ✚ le descrizioni delle esperienze (italiano)
+    ├── umanizzazione_frasi.en.md     ✚ le descrizioni delle esperienze (inglese)
+    ├── umanizzazione_prosa.it.md     ✚ corpo di lettera ed email (italiano)
+    └── umanizzazione_prosa.en.md     ✚ corpo di lettera ed email (inglese)
 ```
+
+*La cartella `rifinitura/` è nata col **Pool 1.08** (T7b, 2026-08-18) e porta **tre**
+prompt invece dell'unico `umanizzazione.md` previsto qui: sono tre forme di prosa
+incompatibili fra loro, e un prompt solo avrebbe lasciato al modello la scelta di quale
+imitare — l'errore del Pool 1.05 e del 1.07. Il perché disteso è nel cap. 08.6.*
 
 `✚` = prompt nuovo della fase VB.NET; gli altri migrano dal prototipo. I prompt nuovi
 si progettano nel dettaglio (testo completo) **prima** dell'implementazione, con lo

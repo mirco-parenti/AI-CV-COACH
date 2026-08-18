@@ -60,7 +60,12 @@ tutto il resto.
 ## 10.4 Rifinitura e email
 
 - La rifinitura anti-slop (cap. 08) riceve la lingua come parametro: i tic da
-  correggere in inglese hanno la loro lista dedicata.
+  correggere in inglese hanno la loro lista dedicata. *Costruita a T7b (2026-08-18), la
+  lingua non è finita in un parametro dentro il prompt ma nella **variante del prompt**
+  (`.it` / `.en`), come per i documenti dal Pool 1.06: i tic inglesi non sono i nostri
+  tradotti — `delve`, `moreover`, l'em dash — e l'inglese si porta due guardie che
+  l'italiano non ha, i **power verb** da CV (`spearheaded`, `drove`) e la **coppia
+  obbligata** `Dear Sir or Madam` / `Yours faithfully`.*
 - L'email di candidatura (cap. 07) segue la lingua dei documenti, oggetto compreso.
   *Costruito a T6 (2026-08-14), quel «parametrico» era risultato ancora più semplice: il
   prompt non riceveva nessun parametro di lingua — scriveva «nella stessa lingua della
