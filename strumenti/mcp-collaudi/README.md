@@ -293,3 +293,16 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   una). In alternativa, se non c'è un file comodo da guardare, si aspetta **due volte**: prima
   che il bottone si **spenga** (`stato=spento`), poi che si **riaccenda** (`stato=acceso`)
   — è il solo modo di usare la modalità «controllo» senza raccontarsi una bugia.
+- **Per far fallire l'AI non si toglie la chiave: se ne mette una finta.** *(2026-08-18,
+  provando dal vivo il cambio lingua del 📄 CV-1 base.)* Sembra ovvio che, per vedere cosa
+  succede quando una chiamata all'AI va male, basti avviare l'applicazione senza chiave. Non
+  funziona, e fa perdere un giro intero: senza chiave `ContestoApp.MontaAi` esce subito,
+  `AiDisponibile` resta falso e i bottoni che portano ai pannelli dell'AI restano **spenti**
+  — non si fallisce a metà, si **resta fuori**, e al pannello che si voleva guardare non ci
+  si arriva nemmeno. Serve una chiave **presente ma non valida** (una stringa qualunque:
+  `sk-ant-questa-chiave-non-esiste`): così il motore si monta, i pannelli si aprono, la
+  chiamata parte davvero e l'API la rifiuta con un 401 — che è esattamente il ramo
+  «l'AI fallisce» che si voleva percorrere. Attenzione, per una prova del genere l'attrezzo
+  `avvia_app` **non** va bene: carica sempre la chiave vera dal `.env` del prototipo, e
+  vanificherebbe la prova. L'exe si lancia a mano, con la variabile d'ambiente che si vuole
+  (ricordando `WSLENV`) e sempre con `--dati` su una cartella usa-e-getta.
