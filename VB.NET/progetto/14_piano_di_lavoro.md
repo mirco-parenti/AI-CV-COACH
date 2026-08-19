@@ -599,6 +599,29 @@ invariato; il lucchetto è stato **falsificato apposta**, rendendolo permissivo,
 collaudi sono caduti. Con questa gamba T8 è completa: resta il **collaudo di tappa**, che
 va fatto a mano da un client MCP vero ed è in `in_sospeso.md`.
 
+*Fra T8 e T9 — **una seconda passata su `in_sospeso.md`** (2026-08-19).* Stessa
+manutenzione della precedente (regola 13 del `CLAUDE.md`), in due giri, per **otto voci**
+chiuse. Il primo giro, offline: il **collaudo del silenzio** dello streaming, che oltre a
+cedere sotto carico era **cieco al guasto per cui era nato** — quattro pause da 120 ms per
+551 ms totali, meno del secondo di silenzio concesso, cosicché falsificando il client
+passava lo stesso; ora ventuno pause da 60 ms per 1260 ms contro 1000, ed è insieme più
+stabile e capace di diventare rosso. Poi il **PDF via MCP**, che questo capitolo dava per
+impossibile due paragrafi più su (cap. 09.3), e la **porta «qui c'è tutto»** del profilo,
+che propone per nome il CV più recente già riconosciuto dalla classificazione (cap. 05.2,
+cap. 03.6). Il secondo giro è costato **chiamate vere**, perché sono le domande a cui
+nessun collaudo senza rete risponde: il **«corso senza nome»**, archiviato come varianza
+«una volta su tre» e misurato invece **3 su 3** — a farlo perdere era il conflitto fra due
+regole del prompt, curato con una riga e l'ordine di lettura (**Pool 1.12**, cap. 04.7); i
+**tetti dei token** di Sonnet 5, aperti da T2 e chiusi da un giro completo di tredici
+chiamate — il più sollecitato è al **27,1%**, nessuno da alzare (cap. 02.5, cap. 04.4,
+cap. 15 voce 6); l'**interruzione** premuta finalmente mentre l'AI scriveva, a 3,9 s; il
+**prima/dopo** della rifinitura letto a video, con il suo limite dichiarato; e l'import del
+profilo provato su una **pagina che non è LinkedIn** (cap. 06.7). Cinque voci nuove, tutte
+minori, hanno preso il posto di quelle chiuse. Resta fuori quel che chiede una **macchina
+Windows con un client MCP vero** — il collaudo di tappa di T8 — insieme ai debiti di sempre
+che vogliono una seconda macchina. **817 collaudi verdi** (erano 812) più 15 reali,
+versione **0.3.035**, Pool **1.12**.
+
 ### T9 — Rifinitura e rilascio 1.0
 Backup/ripristino (F7); Impostazioni complete; pulizia dati; gestione errori rivista
 pannello per pannello; **collaudo generale condotto da Mirco su candidature reali**;

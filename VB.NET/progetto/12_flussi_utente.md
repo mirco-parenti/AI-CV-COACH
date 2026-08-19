@@ -237,6 +237,20 @@ Per l'utente evoluto che lavora con Claude Desktop / Claude Code:
 3. Le azioni che modificano il profilo **non sono esposte** nella prima versione del
    server MCP: restano nell'app, dove c'è la conferma visiva dell'utente (cap. 09.3).
 
+*Costruito a **T8** (2026-08-19), e il flusso qui sopra è rimasto quello che è: dodici tool
+— tre che leggono, sette che passano dall'AI, due che scrivono — sugli stessi prompt e sugli
+stessi mestieri dei pannelli. Tre precisazioni che la sceneggiatura non poteva contenere. La
+prima: il punto 2 immagina un client che orchestra più annunci di fila, e perché sia
+possibile senza diventare sordo il server serve **più richieste insieme** (cap. 09.2). La
+seconda: dal momento in cui una porta scrive, i dati hanno due scrittori, ed è nato il
+**lucchetto** del cap. 09.4 — se l'applicazione è aperta, i tool che scrivono rifiutano e
+dicono cosa fare, mentre lettura e generazione continuano. La terza: quel che esce da qui è
+**identico** a quel che esce dalla finestra, rifinitura anti-slop compresa, e i documenti
+escono in DOCX, in PDF o in tutti e due. Manca ancora un pezzo di questo flusso, ed è quello
+che nessun collaudo automatico può dare: percorrerlo con un **client MCP vero**, su una
+macchina Windows, con la configurazione in `claude_desktop_config.json` — sta in
+`in_sospeso.md`.*
+
 ## 12.7 Regole trasversali dei flussi
 
 - **Mai un vicolo cieco**: da ogni pannello si torna indietro senza perdere ciò che è

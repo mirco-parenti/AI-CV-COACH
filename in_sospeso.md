@@ -44,6 +44,7 @@ in «Chiuse».*
   trascritto dal PDF: provano le *strade di lettura*, non l'impaginazione di Word, che su
   questa postazione non c'è. Serve una macchina che ce l'abbia. *(cap. 05.1; cap. 14, T3,
   gamba A — il limite è dichiarato anche nel collaudo.)*
+
 ## Da T4 — la pipeline di candidatura (2026-08-10 · integrata alla chiusura, 2026-08-11)
 
 - **I documenti prodotti aperti in Word.** La gamba C del collaudo di tappa (cap. 14)
@@ -103,6 +104,7 @@ in «Chiuse».*
   la casella del confronto vive in P6, e in P7 l'utente ha davanti una casella che può già
   riscrivere. Se un giorno servirà, il posto è la bozza (`email.json`). *(cap. 07.1;
   cap. 08.6.)*
+
 ## Da T7d — il 📄 CV-1 base riletto e in inglese (2026-08-18, alla chiusura)
 
 *Chiusa lo stesso giorno: il cambio di lingua che fallisce a metà è stato percorso dal vivo
@@ -206,6 +208,7 @@ erano in nessun piano, e nessuna è grave.*
   disegno è fuori misura. Difetto vero, ma correggerlo alla cieca rischiava di rompere il
   layout **validato a video** in T3: serve uno schermo su cui verificare a 150%.
   *(cap. 03.5; segnalato dalla revisione, rimandato con motivo.)*
+
 ## Chiuse
 
 - ✅ **I `max_token` di Sonnet 5, misurati invece che temuti** *(aperta il 2026-08-07 da T2,

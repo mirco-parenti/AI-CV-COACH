@@ -162,6 +162,12 @@ dal primo rilascio — **fatta il 2026-08-14**, v. più sotto.
   fatti su disco, si **ricostruisce** dalle cartelle e si riscrive. Chi guarda l'elenco è
   anche chi lo tiene in riga. La conseguenza vale la regola: una cartella copiata a mano
   compare nell'elenco da sola, e una cancellata sparisce senza lasciare una voce fantasma.
+- **La macchina degli stati vale per chiunque scriva, non solo per i pannelli**
+  *(verificato a T8c, 2026-08-19)*. Vive dentro `Opportunita`, non nel pannello che la
+  usa, e questa è la ragione per cui ha fermato il tool `salva_opportunita` del server MCP
+  quando stava per registrare una candidatura «generata» senza il confronto da cui un CV
+  mirato nasce (cap. 09.3). Una regola messa dove passano tutti difende anche le porte che
+  ancora non esistono.
 - **Le candidature nate prima deducono il proprio stato dai file che hanno.** Le cartelle
   scritte da T4 e T5b non hanno il campo `stato` — nasce qui — e riscrivere all'indietro i
   file dell'utente per aggiungercelo sarebbe un'invasione: se ci sono i documenti è

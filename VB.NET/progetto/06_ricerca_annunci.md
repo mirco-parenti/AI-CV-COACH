@@ -214,3 +214,14 @@ quello costruito dal CV in PDF: dove differisce, differisce perché differiscono
 inventati**. La pagina portava con sé altre cinque persone con nome, ruolo e azienda, nei
 riquadri dei suggerimenti: nessuna è entrata nel profilo. E nemmeno «lingua del profilo:
 italiano», che è un'impostazione dell'interfaccia e non una lingua che si parla.
+
+*E provata anche dove il capitolo si limitava a prevederlo (2026-08-19)*: su una pagina
+che **non è LinkedIn**, un sito aziendale moderno a pagina unica. Lo scorrimento — che su
+LinkedIn aveva dovuto cercarsi il contenitore giusto — ha percorso la pagina fino al piè
+di pagina, e la strutturazione ha ricavato quel poco che una pagina del genere dice di una
+persona (nome, email, città, un ruolo) lasciando **vuoti** durata, tipo e telefono invece
+di inventarli. La previsione «legge altrettanto bene un sito personale» regge quindi anche
+sui fatti, non solo sul disegno. Ne è uscito un difetto minore, annotato fra le cose in
+sospeso: fra un blocco di testo e il successivo le parole si **incollano**
+(«Pubblica AmministrazioneDue suite specializzate»), perché il lettore concatena i nodi
+senza separatore — il modello se l'è cavata lo stesso, ma per fortuna, non per progetto.

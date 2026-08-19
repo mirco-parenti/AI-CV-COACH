@@ -216,6 +216,18 @@ ogni modulo abbia **un compito solo**:
   `LettoreDocumenti`, mentre `Documenti/` resta il posto di chi **scrive**.
 - **`Mcp/`** — il server MCP: traduce le richieste del protocollo in chiamate al
   motore (cap. 09).
+  *Nata a **T8** (2026-08-19), in tre gambe, e la divisione ricalca quella di sempre:*
+  `ProtocolloMcp` e `RichiestaMcp` sanno la grammatica del protocollo e niente del
+  prodotto; `CatalogoTool` dichiara i dodici strumenti e il loro schema; `ToolDiLettura`,
+  `ToolDiAi` e `ToolDiScrittura` sono i tre gruppi che chiamano il motore. `ServerMcp`
+  tiene il ciclo su stdio, ma il metodo che **risponde a un messaggio** sta fuori da quel
+  ciclo, così il banco può interrogarlo senza avviare un processo. Nessun pezzo di motore è
+  stato duplicato: quel che i tool fanno è comporre gli stessi mestieri che usano i
+  pannelli. *Accanto, in `Dati/`, nasce `LucchettoDati` (cap. 09.4), e in `Motore/` —
+  col pagamento dei debiti del 2026-08-19 — `FiloGrafico`, il filo STA con la pompa dei
+  messaggi che permette di stampare un PDF da un processo che finestre non ne ha: era una
+  classe del banco dai tempi di T4b, ed è passata al prodotto il giorno in cui è servita
+  anche a lui.*
 
 ## 2.4 Cosa migra dal prototipo, e come
 
@@ -342,7 +354,12 @@ i tool MCP).
   che a naso, e accorgersi che un tetto sta diventando stretto **prima** che una risposta si
   tronchi, non dopo. È nato dal cambio di modello — Sonnet 5 conta circa il 30% di token in
   più a parità di testo, e i tetti erano cuciti su Sonnet 4.6 — ma serve a ogni cambio che
-  verrà. Tre proprietà lo tengono innocuo: **non è un dato dell'utente** (nessun testo,
+  verrà. *Il primo verdetto è arrivato il **2026-08-19**, da un giro completo dentro
+  l'applicazione (tredici chiamate, dall'import del CV all'email): il tetto più sollecitato
+  è `email_candidatura` al **27,1%**, poi `umanizzazione_sintesi` al 25,0% e
+  `umanizzazione_frasi` al 18,2%, e ogni riga si chiude con `end_turn` — **nessun tetto da
+  alzare**, nessun troncamento. La misura ha quindi risparmiato la modifica che era nata per
+  giustificare, che è il modo migliore in cui può finire.* Tre proprietà lo tengono innocuo: **non è un dato dell'utente** (nessun testo,
   nessun profilo, nessuna risposta: solo nomi di prompt e numeri), **cancellarlo non perde
   niente**, e **non deve mai far fallire una chiamata** — se il file non si lascia scrivere
   si perde la riga e si tira dritto, perché una candidatura persa per non aver potuto
@@ -374,6 +391,13 @@ si guarda va potuta fermare. Il bottone non è nuovo: durante il turno «Invia»
 Un'operazione per volta per opportunità: niente code parallele nascoste, il flusso
 resta comprensibile.
 
+*Fuori dalla finestra la regola si rovescia, ed è voluto (**T8b**, 2026-08-19): il ciclo
+del server MCP serve **più richieste insieme**. Qui non c'è un utente che guarda un
+pannello per volta ma un client che può chiedere due cose e annullarne una, e un ciclo che
+aspettasse la fine di un `genera_cv` non sarebbe lento — sarebbe **sordo**, incapace di
+leggere il messaggio con cui gli si dice di smettere. Il prezzo è un solo scrittore
+sull'uscita, perché la riga è la cornice del messaggio (cap. 09.2).*
+
 *Aggiornamento del 2026-08-09 (revisione adversariale)*: l'eccezione regge nel caso
 normale ma ha un caso brutto — su rete degradata un turno può trattenere P5 fino a
 ~4 minuti (timeout 120 s × 2 tentativi) senza via d'uscita; l'annullabilità del turno è
@@ -385,7 +409,11 @@ concorrente.
 ## 2.7 Dove vive lo stato
 
 Tutto lo stato persistente sta nella **cartella dati** (cap. 11), in file JSON
-leggibili. L'app è l'unica a scriverli; niente database, niente registro di Windows
+leggibili. Fino a T8b l'app ne era l'unica scrittrice; *da **T8c** (2026-08-19) gli
+scrittori sono **due** — la finestra e il server MCP — ed è per questo che nasce il
+lucchetto del cap. 09.4: non per proteggere i byte, che si scrivono già in modo atomico,
+ma perché nessuno dei due riscriva sopra quel che l'altro ha cambiato senza che se ne
+accorga.* Niente database, niente registro di Windows
 (salvo l'associazione minima di configurazione se servisse). Chiudere l'app e riaprirla
 riporta esattamente dov'eravamo: lo stato in memoria è sempre ricostruibile dal disco.
 

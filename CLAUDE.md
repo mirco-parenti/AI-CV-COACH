@@ -97,6 +97,18 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    adesso. È aggiornato da "aggiorna-tutto"; in questo file ne resta solo il puntatore.
    Gemella della regola 7 e da tenere distinta: in `idee_future.md` un'idea può non
    farsi mai, qui una voce **va fatta**. *(Ratificata 2026-08-07.)*
+14. **Un collaudo si prova a farlo fallire prima di dirlo buono**: quando un collaudo
+   nasce per sorvegliare un meccanismo preciso, **falsifica apposta** ciò che deve
+   difendere — rompi il codice sotto — e guarda se diventa **rosso**. Un collaudo verde
+   dice che il codice fa quel che ti aspetti; solo un collaudo che hai **visto** diventare
+   rosso dice che si accorgerebbe del contrario. Vale soprattutto per i collaudi che
+   misurano una **proprietà** — concorrenza, esclusione, limiti di tempo — dove il caso
+   normale passa comunque e la prova può essere verde **per il motivo sbagliato**: allora
+   dichiara anche **quali** collaudi sono caduti falsificando, perché quelli rimasti verdi
+   coprono altro. *(Ratificata 2026-08-19, dopo tre casi in due giorni: il ciclo del
+   server reso di nuovo seriale (T8b), il lucchetto reso permissivo (T8c) e il client
+   dello streaming privato del riarmo del silenzio — dove il collaudo restò verde ed era
+   cieco.)*
 
 ## Contesto del progetto (fatti stabili + puntatori, niente stato copiato)
 
@@ -165,8 +177,10 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   conferma (leggendo prima cosa chiedono) e — dal 2026-08-18 — **aspettare che una
   condizione si avveri** invece di guardare a intervalli. Non parte da solo
   (`node strumenti/mcp-collaudi/server.mjs`) e **non** è il server MCP del prodotto, che è
-  il cap. 09 ed è di T8. Come si accende, cosa sa fare e le trappole già pagate stanno nel
-  suo `README.md`: **leggilo prima di usarlo**, sono ore risparmiate.
+  il cap. 09 ed è stato costruito a T8 *(2026-08-19)*: due server distinti, da non
+  confondere quando si parla di «MCP» in questo repo. Come si accende, cosa sa fare e le
+  trappole già pagate stanno nel suo `README.md`: **leggilo prima di usarlo**, sono ore
+  risparmiate.
 
 ## Modalità di aggiornamento per file (per «aggiorna-tutto»)
 

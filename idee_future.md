@@ -146,9 +146,15 @@ dichiarate «rimandate» (cap. 15.3-15.4): qui il puntatore, perché il backlog 
   aggiornamento manuale (si sostituisce l'exe). *(2026-08-05 — progetto VB.NET, cap. 13.8/15.3.)*
 - **Firma del codice** (certificato, per evitare l'avviso SmartScreen) — quando l'app
   circolerà oltre il portfolio. *(2026-08-05 — cap. 13.6/15.3.)*
-- **MCP: trasporto HTTP locale + tool di scrittura/invio con conferma** — la prima versione
-  espone via stdio solo lettura e generazione; email e modifica del profilo restano
-  nell'app. *(2026-08-05 — cap. 09/15.3.)*
+- **MCP: trasporto HTTP locale + invio con conferma** — la prima versione espone via stdio
+  solo lettura e generazione; email e modifica del profilo restano nell'app.
+  *(2026-08-05 — cap. 09/15.3.)* **Ridotta da T8c** *(2026-08-19)*: la metà «tool di
+  scrittura» è arrivata — `salva_opportunita` ed `esporta_documento` scrivono nella cartella
+  dati, sotto il lucchetto del cap. 09.4 — ma restano futuri i due pezzi veri di questa voce,
+  cioè il **trasporto HTTP locale** (oggi solo stdio) e l'**invio dell'email via MCP**, che
+  vorrebbe una conferma umana che su un canale senza interfaccia non si sa ancora dove
+  mettere. Anche la **modifica del profilo** resta fuori di proposito: da MCP il profilo si
+  legge e basta.
 - **Follow-up assistito delle candidature** — oggi solo promemoria passivo nel registro;
   la generazione dell'email di sollecito è da valutare. *(2026-08-05 — cap. 15.4.)*
 - **Multi-profilo nella stessa installazione** — il disegno è mono-profilo; da valutare
@@ -250,12 +256,8 @@ documenti dell'utente.
   risposta, non un file. Farlo vorrebbe dire una passata in più (o un campo in più nella
   classificazione) e una scelta di interfaccia — evidenziare, non spuntare da soli, perché
   l'ultima parola resta di chi si candida. *(2026-08-14 — emersa chiudendo T6; cap. 07.1.)*
-- **Il CV più recente della cartella, che nessuno usa ancora.** La classificazione dice già
-  quale dei CV trovati sembra il più aggiornato e il dato si salva, ma serve alla porta
-  «qui c'è tutto» del profilo (cap. 05.2), che a T6 non è stata costruita: l'import di un
-  CV passa ancora dalla scelta di un file singolo. È un'idea a metà fra il backlog e il
-  debito, e sta anche in `in_sospeso.md` perché quella porta il capitolo la promette.
-  *(2026-08-14 — emersa chiudendo T6.)*
+- ~~**Il CV più recente della cartella, che nessuno usa ancora**~~ — **realizzata il
+  2026-08-19** (vedi «Realizzate»).
 
 Idee emerse **collaudando T7b** *(2026-08-18)*: la passata anti-slop provata con l'AI vera.
 - **Una rifinitura che non ha cambiato niente e una che non ci è riuscita si somigliano
@@ -315,12 +317,25 @@ giudice per la prima volta.
   «il testo ci sta?». Oggi la verifica l'ho fatta guardando la finestra, che funziona ma non
   si ripete da sé. *(2026-08-14 — emersa rinominando i tre bottoni del Profilo, diario Step
   2.15: l'etichetta nuova del dialogo non entrava nei 200 px e i 465 collaudi non se ne sono
-  accorti.)*
+  accorti.)* **Il meccanismo è nato a T7c** *(2026-08-18)*, per lo stesso difetto visto una
+  seconda volta: `INomiNuoviCiStannoDentroILoroBottoni` confronta `PreferredSize.Width` con la
+  larghezza vera dei due bottoni del brainstorming. Resta l'idea com'era — **estenderlo a tutti
+  i pannelli**: oggi la misura c'è dove il difetto è stato visto, non dove potrebbe ripresentarsi.
 
 ## Realizzate
 
 Idee del backlog ormai costruite. Si tengono qui (con il puntatore a dove sono narrate o
 implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
+- ✅ **Il CV più recente della cartella, che nessuno usava** — la porta «qui c'è tutto» del
+  profilo (cap. 05.2) è aperta: premendo «IMPORTA CV DA UN FILE» il programma **propone per
+  nome** il CV che la classificazione aveva già indicato come il più aggiornato, e lascia tre
+  uscite — usalo, scelgo io un altro file, lascia stare. Il ragionamento c'era da T6 e il dato
+  pure, salvato in `documenti.json`: mancava **la riga che andasse a prenderlo**, ed è tutto
+  ciò che separava un lavoro fatto da un lavoro che arriva all'utente. Si propone e non si
+  prende, perché la conferma umana è il passo 4 del capitolo; e che quel file esista si guarda
+  **al momento di proporlo**, non quando lo si era classificato, perché nel frattempo può
+  essere stato spostato o buttato. *(2026-08-19, passata sui debiti prima di T9; diario Step
+  2.35; `RaccoltaDocumenti.PercorsoDelCvPiuRecente`, `PannelloProfilo.CvDaImportare`.)*
 - ✅ **Un `aspetta_che` per lo strumento di collaudo** — l'attrezzo aspetta una condizione
   invece di far alternare `clic` e `controlli` a mano, con un tetto di tempo e un esito che
   distingue in chiaro «soddisfatta dopo N secondi» da «TIMEOUT». Ha **due modalità**, e la

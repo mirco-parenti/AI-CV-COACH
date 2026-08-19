@@ -65,6 +65,11 @@ perde contro la forma.*
 - Regola pratica ereditata dal metodo del progetto: se il prima/dopo rivela che la
   rifinitura ha cambiato un fatto, è un difetto del prompt da correggere nel pool, non
   un caso da sistemare a mano in silenzio.
+- **La rifinitura non è una funzione del pannello** *(T8b, 2026-08-19)*: anche i documenti
+  chiesti dal **server MCP** ci passano, anti-slop compreso (cap. 09.3). Chi chiede da
+  fuori riceve gli stessi testi di chi preme il bottone — una differenza di qualità fra le
+  due porte non l'avrebbe dichiarata nessuno, e si sarebbe scoperta mesi dopo confrontando
+  due documenti senza capire perché uno è più piatto.
 
 ## 8.5 A monte: generare già sobrio
 

@@ -178,6 +178,15 @@ due uscite una accanto all'altra a verificarlo (cap. 14).
   giusto — che è esattamente ciò che il collaudo di 5.7 chiede. Il dettaglio della prova
   (dimensioni, single-file, versioni) sta nel cap. 13.3, dov'è il vincolo che rischiava
   di più.
+- **Quella finestra però non è il requisito vero** *(2026-08-19)*. La frase qui sopra
+  descrive come la stampa nasce dentro l'applicazione, e per tre tappe è stata letta come
+  una condizione: niente finestra, niente PDF — è il motivo per cui T8c aveva dichiarato
+  il PDF impossibile da MCP (cap. 09.3). Rimisurata, la condizione è un'altra: al motore
+  serve un **filo STA con la pompa dei messaggi**, cioè un thread che sappia rispondere ai
+  messaggi di Windows, e la finestra è solo il modo più comune di averne uno. La prova era
+  in casa da T4b — il banco stampa PDF veri da un processo di collaudo, che finestre non ne
+  apre. Quel filo vive ora nel motore (`Motore/FiloGrafico`) e lo usano tutti e tre: la
+  finestra, il banco e il server MCP.
 
 ## 5.6 Nomi e collocazione dei file generati
 
