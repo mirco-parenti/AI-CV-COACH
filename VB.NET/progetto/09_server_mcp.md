@@ -19,7 +19,7 @@ annuncio e dimmi se vale la pena candidarmi» — e Claude userà **la nostra pi
 > gli attrezzi per **provare** l'applicazione — compilare, far girare il banco, avviarla,
 > fotografarla, premerle i bottoni, sceglierle una voce da una tendina o una riga da un
 > elenco, risponderle quando chiede un file o una conferma. Questo capitolo
-> parla invece dei tool che l'applicazione **offre** ai client AI dell'utente (tappa T9).
+> parla invece dei tool che l'applicazione **offre** ai client AI dell'utente (tappa T8).
 > Uno serve a chi costruisce il programma, l'altro a chi lo usa.
 
 ## 9.2 Come si avvia

@@ -242,6 +242,9 @@ Per l'utente evoluto che lavora con Claude Desktop / Claude Code:
 - **Mai un vicolo cieco**: da ogni pannello si torna indietro senza perdere ciò che è
   stato fatto; le operazioni lunghe (chiamate AI) mostrano attesa e sono annullabili
   (con l'eccezione dichiarata del turno di dialogo, cap. 02.6).
+  *Dal 2026-08-18 «senza perdere ciò che è stato fatto» vale anche quando a farti uscire
+  è la **barra in cima**, che non passa dal pannello: da lì la bozza dell'email spariva in
+  silenzio, ed era un vicolo cieco travestito da scorciatoia (cap. 03.8).*
 - **La chiusura dichiara ciò che perderebbe** *(2026-08-09, revisione adversariale)*:
   chiudere l'app con un lavoro a metà — un dialogo non consegnato, un import in volo —
   non è vietato, ma non è mai silenzioso: l'app lo dice, e l'import in corso viene

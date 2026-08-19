@@ -180,6 +180,15 @@ dal primo rilascio — **fatta il 2026-08-14**, v. più sotto.
   schema c'è ma dall'interfaccia non si raggiunge, il **promemoria di follow-up**, e il
   **destinatario nella voce di registro** — oggi vive nella bozza `email.json` della
   candidatura, non nell'indice.)*
+  *(E aggiornamento del 2026-08-18: il **destinatario è entrato nell'indice**, ricopiato
+  dalla bozza `email.json` quando la voce si scrive e quando si ricostruisce dalle
+  cartelle. Sembra una duplicazione e non lo è: la bozza resta la fonte — il valore lo
+  digita l'utente, e da qui non si scrive mai all'indietro — mentre l'indice esiste
+  apposta per rispondere «a chi ho scritto?» **senza aprire** una candidatura alla volta.
+  È bastato un campo perché il punto in cui una voce nasce è uno solo, lo stesso per
+  l'annotazione e per la ricostruzione: è la prova pratica della regola qui sopra, cioè
+  che a questo indice si aggiunge una colonna senza migrare niente. Restano fuori lo stato
+  **`esito`** e il **promemoria di follow-up**.)*
 - **Chi cambia uno stato lo annota anche nell'indice** *(regola resa esplicita il
   2026-08-15, dopo un difetto)*. `registro.json` si fida di sé stesso finché **l'insieme
   delle cartelle** combacia: un cambiamento *dentro* una cartella non lo fa scattare, e

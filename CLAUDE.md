@@ -112,7 +112,10 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   `importa_cv`, dal **Pool 1.02** anche sui sette turni del profilo e dal **Pool 1.03** su
   `analisi_annuncio`, non è più il metro
   — è il termine di paragone, cap. 04.7; il metro carattere-per-carattere resta su
-  `confronto` e `mitigazione`): Node ≥ 20.12,
+  `confronto` e `mitigazione`, ma dal **2026-08-18** solo sul **testo che parte**: il
+  ragionamento dell'app è passato a Sonnet 5 mentre il prototipo resta congelato su
+  Sonnet 4.6, quindi sugli **esiti** una differenza può venire dal modello quanto dal
+  codice, e lì termine di paragone lo è ovunque): Node ≥ 20.12,
   **niente dipendenze npm**, chiave in
   `HTML+JS/.env` (`ANTHROPIC_API_KEY`, gitignored — il file va lì, perché il server
   cerca il `.env` nella cartella da cui parte). Avvio: `npm start` **dentro
@@ -159,9 +162,10 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   e che voce
   mostrano i menù, premerli, scrivere in una casella, scegliere una voce da una tendina o
   una riga da un elenco, rispondere alla finestra di scelta file e alle finestre di
-  conferma (leggendo prima cosa chiedono). Non parte da solo
+  conferma (leggendo prima cosa chiedono) e — dal 2026-08-18 — **aspettare che una
+  condizione si avveri** invece di guardare a intervalli. Non parte da solo
   (`node strumenti/mcp-collaudi/server.mjs`) e **non** è il server MCP del prodotto, che è
-  il cap. 09 ed è di T9. Come si accende, cosa sa fare e le trappole già pagate stanno nel
+  il cap. 09 ed è di T8. Come si accende, cosa sa fare e le trappole già pagate stanno nel
   suo `README.md`: **leggilo prima di usarlo**, sono ore risparmiate.
 
 ## Modalità di aggiornamento per file (per «aggiorna-tutto»)

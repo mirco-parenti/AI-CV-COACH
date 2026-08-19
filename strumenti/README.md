@@ -6,7 +6,7 @@ mai: com'è fatta l'applicazione mentre gira, e come la si mette in mano a qualc
 
 | Attrezzo | A cosa serve |
 |---|---|
-| [`mcp-collaudi/`](mcp-collaudi/README.md) | Il server MCP con cui l'assistente prova l'applicazione vera: la compila, fa girare il banco, la avvia, la fotografa e le preme i bottoni. **Il suo README si legge prima di usarlo**: sono ore risparmiate. |
+| [`mcp-collaudi/`](mcp-collaudi/README.md) | Il server MCP con cui l'assistente prova l'applicazione vera: la compila, fa girare il banco, la avvia, la fotografa, le preme i bottoni e — dal 2026-08-18 — **aspetta** che una condizione si avveri invece di guardare a intervalli. **Il suo README si legge prima di usarlo**: sono ore risparmiate. |
 | `avvia-demo.bat` | Apre TrovaLavoro con un doppio clic, per mostrarla a qualcuno senza passare da Claude Code. |
 | `sigilla-pool/` | Il **rito del bump** da riga di comando (cap. 04.5): rigenera le impronte del pool dei prompt e riscrive il manifest. |
 

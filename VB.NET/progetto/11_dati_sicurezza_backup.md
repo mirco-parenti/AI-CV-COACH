@@ -33,6 +33,7 @@ TrovaLavoro\
 │       └── out\           (i file prodotti: .docx .pdf .eml)
 ├── registro.json          l'indice delle candidature: comodo, ma rigenerabile
 ├── webview2\              profilo di navigazione del browser integrato
+├── chiamate_ai.csv        quanto è costata ogni chiamata all'AI (v. sotto)
 ├── log\app.log            log tecnico (senza segreti, v. 11.3)
 └── backup\                gli export JSON (v. 11.4)
 ```
@@ -118,6 +119,18 @@ TrovaLavoro\
   non si aprono, e un backup ripristinato su un altro PC troverà quel percorso senza
   senso. Dentro non ci sono copie di file: solo nomi (relativi alla cartella) con la loro
   categoria.
+- **L'unico file che non è dell'utente** *(2026-08-18)*: `chiamate_ai.csv`. Ogni chiamata
+  all'AI ci lascia una riga — quale prompt, il tetto di token che quel prompt dichiara,
+  quanti token sono andati e venuti, e la **percentuale del tetto** consumata — e serve a
+  **noi**, non al programma: è così che i `max_token` del pool si ritarano sui numeri veri
+  invece che a naso (cap. 02.5, cap. 04.4). Dentro non c'è niente di suo: nessun testo,
+  nessun campo del profilo, nessuna risposta. Da qui tre conseguenze volute:
+  **cancellarlo non perde niente** (l'applicazione funziona identica senza), **non fa mai
+  fallire una chiamata** — se il disco è pieno o il file è aperto altrove si perde la riga
+  e si tira dritto — e nel backup **non entra**, come non ci entrano il log e i segreti. È
+  anche l'unico file della cartella che non è JSON, e per un motivo: un CSV si apre in un
+  foglio di calcolo e si **ordina per una colonna**, che è esattamente il gesto per cui
+  esiste.
 - Formati **JSON con rientri**, leggibili in qualsiasi editor: l'utente è padrone dei
   suoi dati anche senza l'app. *Con un'eccezione, e si vede dal nome*: `segreti.bin` è
   l'unico file **non leggibile**, ed è il punto — gli altri sono dati dell'utente, quello

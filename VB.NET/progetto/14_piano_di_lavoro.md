@@ -507,6 +507,22 @@ versione **0.3.032**, Pool **1.11**. Restano indietro, dichiarate in
 l'interruzione del turno provata dal vivo.
 **T7 è chiusa.**
 
+*Fra T7 e T8 — **una passata su `in_sospeso.md`** (2026-08-18).* Non è una tappa e non ne
+prende il nome: è la manutenzione prevista dalla regola 13 del `CLAUDE.md`, cioè rileggere
+l'elenco di quel che è rimasto indietro e chiudere ciò che si può chiudere **da questa
+macchina**. Ne sono uscite sei voci: il turno del ragionamento che poteva fermarsi a metà
+frase senza dichiararlo (cap. 03.6, P5), il **diario dei consumi di token** che permette di
+ritarare i tetti sui numeri veri invece che a naso (`chiamate_ai.csv`, cap. 02.5 e 04.4),
+la bozza dell'email che si perdeva uscendo dalla **barra di navigazione** (cap. 03.8), il
+**destinatario** entrato nell'indice del registro (cap. 07.3), l'attesa di una condizione
+nello strumento di collaudo, e il cambio lingua fallito del 📄 CV-1 base percorso finalmente
+dal vivo. Una settima l'ha trovata la revisione del diff prima che uscisse, ed era la
+peggiore: una candidatura senza lettera **ereditava oggetto e corpo della precedente**, a
+video e su disco (cap. 03.8). Quel che chiede una **seconda macchina o una mano** — l'exe su
+un PC pulito, l'SDK sulla postazione del tutor, un `.docx` salvato davvero da Word, uno
+schermo al 150% — è rimasto aperto: nominare un debito non è pagarlo.
+**755 collaudi verdi** (erano 738), versione **0.3.032**, Pool **1.11** invariato.
+
 ### T8 — Il server MCP (F8)
 Modalità `--mcp` su stdio; i tool del cap. 09; lucchetto di scrittura.
 **Collaudo:** da Claude Desktop/Code: `tools/list` corretto, un confronto e una

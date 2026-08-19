@@ -49,7 +49,8 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   per quella colonna e si vede chi è in bilico prima che si tronchi. Resta da fare la cosa
   per cui il diario esiste: **un giro d'uso vero, e poi leggere i numeri** — in particolare
   sui tre prompt stretti, che nessun collaudo reale esercita ancora.
-  *(cap. 02.5; cap. 15, voce 6; `Ai/DiarioChiamate.vb`, `Dati/DiarioChiamateSuFile.vb`.)*
+  *(cap. 02.5; cap. 04.4; cap. 11.1; cap. 15, voce 6; `Ai/DiarioChiamate.vb`,
+  `Dati/DiarioChiamateSuFile.vb`.)*
 
 ## Da T3 — il profilo (2026-08-07 · integrata alla chiusura, 2026-08-09)
 

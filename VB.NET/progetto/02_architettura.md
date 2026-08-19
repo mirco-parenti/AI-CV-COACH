@@ -335,6 +335,20 @@ i tool MCP).
   subito, invece di lasciarlo scoprire a valle sotto forma di JSON invalido senza sapere
   perché. Le risposte JSON passano da `EstrattoreJson`; se il JSON resta invalido si
   mostra il testo grezzo in un riquadro «cosa ha risposto il modello», mai un crash.
+- **Quanto è costata ogni chiamata si annota** *(2026-08-18)*: ogni chiamata lascia una
+  riga in `chiamate_ai.csv` nella cartella dati (cap. 11.1) — quale prompt, il tetto che
+  quel prompt dichiara, i token andati e venuti, e la **percentuale del tetto** consumata.
+  Serve a una cosa sola: ritarare i `max_token` del pool (cap. 04.4) sui numeri veri invece
+  che a naso, e accorgersi che un tetto sta diventando stretto **prima** che una risposta si
+  tronchi, non dopo. È nato dal cambio di modello — Sonnet 5 conta circa il 30% di token in
+  più a parità di testo, e i tetti erano cuciti su Sonnet 4.6 — ma serve a ogni cambio che
+  verrà. Tre proprietà lo tengono innocuo: **non è un dato dell'utente** (nessun testo,
+  nessun profilo, nessuna risposta: solo nomi di prompt e numeri), **cancellarlo non perde
+  niente**, e **non deve mai far fallire una chiamata** — se il file non si lascia scrivere
+  si perde la riga e si tira dritto, perché una candidatura persa per non aver potuto
+  annotare quanto è costata sarebbe assurda. A scrivere non è il client ma il **mestiere**
+  (cap. 02.3, `Ai/`): è l'unico posto in cui il prompt — col suo nome e col suo tetto — e la
+  risposta — coi suoi token — si trovano nella stessa riga.
 - **Nessuna memoria lato modello**: come nel prototipo, ogni chiamata è autonoma; la
   memoria (profilo, conversazione di brainstorming) vive nel programma, che a ogni
   turno manda il contesto necessario.

@@ -1942,3 +1942,66 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **La traduzione secca**, senza l'originale fra parentesi: quella glossa la teniamo per i titoli di studio, dove serve a spiegare senza gonfiare. Su ogni riga di esperienza sarebbe stata solo zavorra.
 
 💡 *Mia intuizione / scelta ragionata* — La cosa che porto via non è la correzione, è **dove** era il difetto. Quando un prompt sbaglia, il riflesso è aggiungere una regola più forte, più in alto, in maiuscolo: l'ho fatto anch'io a T7b, e non aveva funzionato. Invece il posto da guardare è **l'istruzione più vicina al campo che sta scrivendo** — perché è lì che il modello ha gli occhi in quel momento. Tre volte su tre, in questo progetto, il colpevole stava lì: un esempio, una formula, e adesso un verbo. Sto cominciando a pensare che rileggere un prompt significhi esattamente questo: non ripassare le regole, ma controllare che ogni campo dica da solo la cosa giusta.
+
+### Step 2.30 — Il salto a Sonnet 5, e il giorno in cui il prototipo smette di essere un metro
+
+*Sonnet 4.6 è scivolato fra i modelli superati del listino, e il ragionamento della mia applicazione girava ancora lì. Pensavo di dover cambiare una stringa. Ho scoperto che stavo rinunciando alla cosa che difendo da T2: la parità col prototipo.*
+
+**Cosa ho fatto**
+- **Ho spostato il livello del ragionamento su `claude-sonnet-5`.** Sono **18 prompt su 29** — confronto, mitigazione, i quattro CV, le due lettere, le due email, la rifinitura, il brainstorming: tutto ciò che nel programma *pensa*. Costa anche meno di quello che sostituisce, **$2/$10 per MTok contro $3/$15**.
+- **Il livello semplice non l'ho toccato.** Haiku 4.5 è tuttora l'ultimo della sua fascia — non esiste un Haiku più recente a cui salire — e gli altri 11 prompt sono rimasti esattamente dov'erano.
+- **Ho dichiarato spento il ragionamento esteso** (`thinking: {"type": "disabled"}`). Non è una preferenza di stile: Sonnet 5 lo accenderebbe di suo, e **`max_tokens` limita ragionamento e risposta insieme**. I tetti del pool sono cuciti addosso alla sola risposta, quindi lasciarlo acceso avrebbe troncato le risposte **senza dirlo a nessuno**.
+- **La macchina per farlo c'era già**: l'interruttore a tre stati costruito a T2 proprio per questo giorno. Il cambio vero sta in **un punto solo** di `Modelli.vb` — l'identificativo nuovo e l'interruttore, nello stesso posto.
+- **Ho riscritto i due collaudi di parità invece di cancellarli.** Non dicono più «stesso modello del prototipo»; dicono «**il modello e l'interruttore sono l'unica cosa che diverge**, e i tetti di token non scendono sotto i suoi».
+- **Un collaudo nuovo**, perché adesso il predefinito si porta dietro un interruttore: la forma breve di `modelli.json` non deve trascinarselo addosso a un modello scelto **apposta** per ragionare.
+- **738 collaudi verdi.**
+
+**Cosa ho imparato**
+- **Cambiare modello non è cambiare una stringa.** Un modello arriva coi suoi valori predefiniti, e quelli non stanno scritti nel mio codice: stanno dall'altra parte. Sonnet 4.6 teneva il ragionamento spento da sé e la mia richiesta poteva tacere; su Sonnet 5 la stessa richiesta silenziosa vuol dire il contrario.
+- **Tacere e dire «no» non sono la stessa cosa**, ed è per questo che l'interruttore ha tre stati e non due. Sul livello semplice continuo a tacere, perché tacere tiene la richiesta identica a quella del prototipo; sul ragionamento adesso parlo.
+- **Un tetto di token è cucito addosso a un modello, non a un testo.** Sonnet 5 conta circa il 30% di token in più a parità di parole: i numeri scritti nei miei prompt sono giusti per il modello di prima, non per questo.
+- **La parità col prototipo era una misura a scadenza, non un valore.** Serviva a poter dire «se il risultato cambia, è colpa del mio codice». Il giorno in cui il modello sotto è diverso quella frase non si pronuncia più, e sul ragionamento il prototipo diventa un **termine di paragone** (cap. 04.7). Sul livello semplice invece la parità è viva: Haiku 4.5 sta da tutte e due le parti.
+
+**Dove ho faticato / cosa non era ovvio**
+- **Decidere quali collaudi *non* aggiornare.** Il riflesso era cercare `claude-sonnet-4-6` e sostituirlo ovunque, e sarebbe stato sbagliato due volte: i collaudi che descrivono il corpo della richiesta **del prototipo** devono continuare a nominarlo, perché è il loro mestiere; e quelli che provano che `modelli.json` scavalca il predefinito hanno bisogno di un modello **diverso** dal predefinito. Così il modello del prototipo ha cambiato ruolo — da predefinito a modello di prova — e nel collaudo della forma breve adesso si salta all'indietro invece che in avanti.
+- **Una batteria che si chiama «parità» e ammette una differenza va spiegata**, o fra un anno chi la legge penserà che sia stata annacquata per farla passare. Il commento in cima ora dice per esteso che cosa difende oggi e che cosa ha smesso di difendere.
+
+**Cosa ho deciso e perché**
+- **Nessun tetto alzato a occhio.** Del +30% sapevo, e la tentazione di aggiungere margine ovunque era forte; ma un margine a naso su 18 prompt sono 18 numeri inventati. L'applicazione un troncamento lo **grida** (`ClientClaude`, causa `Troncata`): si alza il tetto di chi si lamenta davvero. La voce resta aperta in `in_sospeso.md`.
+- **Predefinito compilato, non file.** Il salto potevo farlo scrivendo `modelli.json` e lasciando il codice com'era — ma quello è il posto degli esperimenti. Quando una scelta diventa il prodotto va dove il prodotto la porta con sé, anche su un PC che quel file non ce l'ha.
+
+💡 *Mia intuizione / scelta ragionata* — Questa giornata è costata una riga perché l'avevo pagata a T2. L'interruttore a tre stati l'avevo costruito allora, quando non serviva a niente: Sonnet 4.6 il ragionamento lo teneva spento da solo, e dichiararlo sarebbe stato codice morto. L'ho scritto lo stesso perché sapevo che il salto sarebbe arrivato — ed è l'unico tipo di lavoro in anticipo di cui mi fido: non indovinare *cosa* servirà, ma lasciare la porta aperta dove è **certo** che qualcuno busserà. Poi c'è la parte scomoda. Per undici giorni ho difeso la parità col prototipo come se fosse un pezzo del prodotto, e oggi l'ho lasciata andare senza rimpianti perché era un **attrezzo di misura**. Riconoscere il giorno in cui un attrezzo ha finito il suo lavoro è difficile quanto costruirlo: finché non arriva sembra prudenza tenerselo, e il giorno dopo è solo zavorra che ti impedisce di salire di modello.
+
+### Step 2.31 — Una passata sulle cose rimaste indietro, e il difetto che è saltato fuori chiudendone un altro
+
+*T7 era chiusa e T8 non era ancora cominciata: il momento buono per aprire `in_sospeso.md` e chiedermi, voce per voce, se qualcosa si potesse chiudere adesso. Ne sono uscite sei. La settima non era in lista: l'ha trovata la revisione del lavoro appena fatto, ed era la peggiore di tutte.*
+
+**Cosa ho fatto**
+- **Ho riletto l'elenco con una sola domanda**: questa la posso chiudere **da questa macchina**? Le voci che vogliono un secondo PC, l'SDK del tutor, un `.docx` salvato davvero da Word o uno schermo al 150% le ho lasciate dov'erano — nominare un debito non è pagarlo.
+- **Il ragionamento poteva fermarsi a metà frase senza dirlo.** Sulla strada sincrona un troncamento è un errore e si grida; in streaming no, ed è giusto, perché il testo è già sotto gli occhi di chi legge. Ma il motivo della fine moriva in una riga: `MestiereAi` restituiva il solo testo. Ora torna la risposta intera e il pannello scrive «(fermata qui: ha raggiunto il limite di lunghezza)», gemello del «(interrotto)» che già seguiva le interruzioni mie.
+- **I tetti dei token adesso si misurano.** Ogni chiamata lascia una riga in `chiamate_ai.csv` nella cartella dati: quale prompt, il tetto dichiarato, i token spesi e la **percentuale del tetto** consumata. Si ordina per quella colonna e il prompt in difficoltà è la prima riga.
+- **Uscire da P7 dalla barra in cima non perde più la bozza.** Il destinatario scritto a mano, le spunte degli allegati e un corpo riscritto — che era costato una chiamata all'AI — li salvava solo il bottone del pannello. Adesso c'è un aggancio d'uscita (`IPannelloCheSalvaUscendo`) che la finestra principale chiede prima di nascondere qualunque pannello.
+- **E quell'aggancio ha scoperchiato qualcosa di peggio**, che una revisione indipendente del diff ha visto prima che uscisse: una candidatura senza lettera si teneva **oggetto e corpo di quella di prima**, a video sotto il suo nome e poi scritti nel suo `email.json`.
+- **Il destinatario è entrato nell'indice del registro**, così «a chi ho scritto?» non chiede più di aprire le candidature una per una.
+- **Due voci che aspettavano il banco, non il codice**: lo strumento di collaudo ha imparato ad **aspettare una condizione**, e il cambio lingua fallito del 📄 CV-1 base l'ho finalmente percorso dal vivo.
+- **Ho fatto girare tutto**: 755 collaudi verdi, erano 738.
+
+**Cosa ho imparato**
+- **Un difetto silenzioso è peggio di un errore.** La bozza persa uscendo dalla barra non diceva niente, e la volta dopo il pannello rileggeva il disco e mi mostrava la versione vecchia **come se fosse l'ultima**. Un errore lo vedo e reagisco; una perdita muta me la porto dietro credendo che vada tutto bene.
+- **Un campo lasciato com'era non è vuoto: è pieno della roba di qualcun altro.** Chi arriva su un soggetto nuovo deve azzerare **tutto** quello che riempirà a condizione, non solo i campi che sa già di dover cambiare.
+- **Per vedere l'AI fallire non si toglie la chiave: se ne mette una finta.** Senza chiave non si fallisce a metà — si resta fuori, i bottoni dei pannelli dell'AI restano spenti e al posto che volevo guardare non ci arrivo. La ricetta scritta nella voce di `in_sospeso.md` era sbagliata, e me ne sono accorto solo provandola.
+- **Misurare costa meno che indovinare.** I `max_token` del pool sono tarati su Sonnet 4.6 e i tre più stretti sono tutti di livello «ragionamento», cioè in pieno sul cambio di modello. Potevo alzarli a occhio; ho preferito costruire il modo di sapere **chi** sta per lamentarsi.
+
+**Dove ho faticato / cosa non era ovvio**
+- **La contaminazione fra candidature non l'ho vista scrivendo il codice.** Era lì da prima, ma il mio aggancio nuovo le ha allargato la bocca — da un bottone solo a **ogni** navigazione — e a stanarla è stata una rilettura del diff fatta con altri occhi. L'ho verificata come si deve: tolta la correzione, la seconda candidatura torna con 81 caratteri di corpo che non sono suoi.
+- **Capire di chi fosse il buco della bozza.** Sembrava un difetto di P7 e non lo era: un aggancio d'uscita **non esisteva affatto**, e `IPannelloArea` parlava solo di geometria. Lo stesso buco resta latente in P2, P5 e P4; adesso però l'aggancio c'è, e a loro basterà dichiararlo.
+- **Aspettare un bottone non è aspettare che il lavoro finisca**, e con l'attrezzo nuovo la tentazione è più vicina: «Rigenera» è acceso **sia prima sia dopo** il clic, quindi l'attesa si soddisfa in tre decimi di secondo mentre l'AI sta ancora scrivendo. La strada onesta è guardare il **file** che quel lavoro produce.
+
+**Cosa ho deciso e perché**
+- **Nessun tetto alzato oggi.** Prima i numeri di un giro d'uso vero, poi la ritaratura: la voce resta aperta in `in_sospeso.md`, ma adesso ha il suo strumento.
+- **Il diario dei consumi non deve mai far fallire una chiamata.** Se il file è aperto altrove o il disco è pieno si perde la riga e si tira dritto: una candidatura persa per non aver potuto annotare quanto è costata sarebbe assurda. E dentro non c'è niente di mio — nessun testo, nessun profilo — così cancellarlo non toglie nulla.
+- **L'aggancio d'uscita lo dichiara solo chi ha qualcosa da salvare**, oggi il solo P7. Un metodo vuoto ripetuto in sei pannelli non dice a nessuno chi lavora davvero.
+- **Il destinatario nell'indice si ricopia dalla bozza, e la bozza resta la fonte**: da lì non si scrive mai all'indietro. È anche la prova pratica che a quell'indice si aggiunge una colonna senza migrare niente, perché si ricostruisce da sé dalle cartelle.
+- **Ho aperto una voce nuova invece di chiuderne una in più**: un collaudo che misura il tempo è andato rosso una volta su macchina carica e verde a ogni altro giro. Non è una regressione, ma un collaudo che dipende dal carico prima o poi mente — e mente in tutte e due le direzioni.
+
+💡 *Mia intuizione / scelta ragionata* — Questa passata mi ha convinto che `in_sospeso.md` non è una lista di rimorsi: è un posto dove i difetti **maturano**. Alcune voci le avevo scritte giorni fa dandole per piccole, e rilette a freddo ne è uscita la vera gerarchia — la bozza persa in silenzio valeva molto più di due o tre cose che mi sembravano urgenti. E c'è un'altra cosa che porto via, più scomoda: **il difetto peggiore della giornata è saltato fuori mentre ne chiudevo un altro**, e non l'ho visto io. Correggere un difetto muove il terreno intorno, e proprio lì conviene guardare con occhi che non siano quelli che hanno appena scritto la correzione.
