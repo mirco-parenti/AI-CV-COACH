@@ -528,6 +528,30 @@ Modalità `--mcp` su stdio; i tool del cap. 09; lucchetto di scrittura.
 **Collaudo:** da Claude Desktop/Code: `tools/list` corretto, un confronto e una
 generazione via MCP con risultati identici a quelli dell'interfaccia.
 
+*Spezzata in tre gambe* (2026-08-19), come già T3 e T5: **T8a** il guscio — la modalità
+`--mcp`, il dialogo, i tool di sola lettura; **T8b** i tool che passano dall'AI; **T8c**
+quelli che scrivono, insieme al lucchetto della cartella dati.
+
+**T8a — il guscio (2026-08-19).** Prima di scrivere si è riletta la **specifica**, e ne è
+uscito il fatto che ha riscritto il capitolo: il **28 luglio 2026** MCP è diventato
+**senza stato** — niente più handshake `initialize`, la versione del protocollo dentro il
+`_meta` di ogni richiesta, `server/discover` obbligatorio — mentre il cap. 09 descriveva i
+tre passi canonici di prima. Il server è perciò **dual-era**: parla la revisione
+`2026-07-28` e quelle dell'handshake fino a `2025-11-25`, e riconosce quale a ogni
+messaggio senza ricordarsi niente (cap. 09.2). Fatto: `--mcp` in `ArgomentiAvvio` e la
+biforcazione in `Programma.Main` prima di ogni preparativo grafico; il ciclo su stdio in
+`Mcp/`, con `Rispondi` staccato dal ciclo così che il banco possa interrogarlo senza
+avviare un processo; i tre tool di lettura `leggi_profilo`, `leggi_registro`,
+`leggi_opportunita`. **Il nodo sciolto**: un `WinExe` non ha una console, e che i suoi
+flussi standard funzionino quando è il client a fornirli è ciò su cui poggia tutta la
+modalità — provato da `CollaudiServerMcpDalVivo`, che avvia l'**eseguibile vero** con le
+pipe e verifica che risponda, che su `stdout` non finisca nient'altro che protocollo e che
+si spenga da sé alla chiusura dell'ingresso. Nessun lucchetto qui, e non per rimandare: i
+tre tool leggono soltanto, e dopo un giro intero la cartella dati non risulta nemmeno
+creata. **780 collaudi verdi** (erano 755), versione **0.3.033**, Pool **1.11** invariato.
+Il collaudo di tappa dichiarato qui sopra — quello da un client MCP vero — resta da fare
+ed è in `in_sospeso.md`.
+
 ### T9 — Rifinitura e rilascio 1.0
 Backup/ripristino (F7); Impostazioni complete; pulizia dati; gestione errori rivista
 pannello per pannello; **collaudo generale condotto da Mirco su candidature reali**;

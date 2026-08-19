@@ -170,6 +170,24 @@ ed è in «Chiuse», insieme alla correzione della ricetta con cui si prova.*
   reso insensibile al carico, o dichiarato tale. *(`CollaudiClientClaude`, l'attesa e il
   silenzio massimo; cap. 02.5.)*
 
+## Da T8a — il guscio del server MCP (2026-08-19, alla chiusura)
+
+- **Il collaudo da un client MCP vero.** Il cap. 14 chiede, per T8, «da Claude
+  Desktop/Code: `tools/list` corretto». Il dialogo è provato in tutte e due le ere del
+  protocollo, e l'eseguibile vero è stato avviato con le pipe da un collaudo automatico —
+  ma chi gli parla è sempre il banco, che è scritto da noi e quindi non ci smentisce mai.
+  Un client vero fa cose che nessuno gli ha detto di fare: chiede la scoperta prima di
+  tutto, mostra i tool a un utente, decide da sé quando fidarsi. Serve la configurazione in
+  `claude_desktop_config.json` e una mano su una macchina Windows, quindi tocca a Mirco.
+  *Fino ad allora la modalità `--mcp` è dimostrata contro sé stessa, non contro il mondo.*
+  *(cap. 09.2; cap. 14, T8; `CollaudiServerMcpDalVivo`.)*
+- **La versione moderna del protocollo accettata è una sola.** Il server parla
+  `2026-07-28` e, per l'era dell'handshake, le quattro revisioni note fino a
+  `2025-11-25`. Quando ne uscirà una moderna nuova, un client che la chieda si sentirà
+  rispondere «non la parlo» con l'elenco di quelle buone — che è il comportamento giusto e
+  previsto dalla spec, ma è anche una data di scadenza da guardare, non un problema
+  risolto. *(cap. 09.2; `ProtocolloMcp.VersioniSupportate`.)*
+
 ## Da revisione adversariale (2026-08-09)
 
 - **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:

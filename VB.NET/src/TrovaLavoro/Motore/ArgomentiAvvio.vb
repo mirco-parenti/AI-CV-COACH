@@ -2,8 +2,9 @@ Namespace Motore
 
     ''' <summary>
     ''' Quel che l'applicazione accetta dalla riga di comando (cap. 11.1): la radice
-    ''' della cartella dati e la richiesta di ridigitare la chiave API. Il posto dove
-    ''' leggerle è questo, e non sparso fra <see cref="Programma"/> e la finestra.
+    ''' della cartella dati, la richiesta di ridigitare la chiave API e la modalità
+    ''' server MCP. Il posto dove leggerle è questo, e non sparso fra
+    ''' <see cref="Programma"/> e la finestra.
     ''' </summary>
     ''' <remarks>
     ''' <para><b>Nessun argomento è un errore fatale.</b> Un percorso storto, un'opzione
@@ -12,9 +13,12 @@ Namespace Motore
     ''' motore (<see cref="ContestoApp"/>) e per la stessa ragione — chi ha sbagliato a
     ''' scrivere ha bisogno di vedere l'applicazione dirglielo, non di vederla non
     ''' comparire (cap. 03.8).</para>
-    ''' <para>La riga di comando è destinata a crescere: T8 aggiungerà <c>--mcp</c>
-    ''' (cap. 09). Perciò l'ignoto si segnala e si scavalca, invece di far cadere l'avvio
-    ''' di tutto per una parola in più.</para>
+    ''' <para>La riga di comando è destinata a crescere — <c>--mcp</c> è arrivata a T8
+    ''' (cap. 09) proprio così — perciò l'ignoto si segnala e si scavalca, invece di far
+    ''' cadere l'avvio di tutto per una parola in più.</para>
+    ''' <para><b>Gli avvisi in modalità MCP non hanno una barra di stato</b>: chi legge
+    ''' questi argomenti in <c>--mcp</c> li scrive su <c>stderr</c>, mai su
+    ''' <c>stdout</c>, che lì appartiene al protocollo (cap. 09.2).</para>
     ''' </remarks>
     Public Class ArgomentiAvvio
 
@@ -28,6 +32,13 @@ Namespace Motore
         ''' file a mano.
         ''' </summary>
         Public Const OpzioneChiave As String = "--chiave"
+
+        ''' <summary>
+        ''' L'opzione con cui si chiede la modalità server MCP: <c>--mcp</c>,
+        ''' <b>senza valore</b> (cap. 09.2). In questa modalità non nasce nessuna
+        ''' finestra: il programma parla JSON-RPC su stdio con il client che l'ha avviato.
+        ''' </summary>
+        Public Const OpzioneMcp As String = "--mcp"
 
         Private ReadOnly _avvisi As New List(Of String)
 
@@ -47,6 +58,14 @@ Namespace Motore
         ''' lo decide qui.
         ''' </summary>
         Public ReadOnly Property ChiediLaChiave As Boolean
+
+        ''' <summary>
+        ''' Se si è chiesto di partire come server MCP invece che con le finestre
+        ''' (cap. 09). Chi decide che fare è <see cref="Programma"/>: qui si legge
+        ''' soltanto che l'utente — o meglio il client che ha avviato il processo —
+        ''' l'ha chiesto.
+        ''' </summary>
+        Public ReadOnly Property ModalitaMcp As Boolean
 
         ''' <summary>Cosa non si è potuto rispettare, in ordine; vuoto se è filato tutto liscio.</summary>
         Public ReadOnly Property Avvisi As IReadOnlyList(Of String)
@@ -98,6 +117,11 @@ Namespace Motore
 
                 If nome.Equals(OpzioneChiave, StringComparison.OrdinalIgnoreCase) Then
                     letti.PrendiLaRichiestaDellaChiave(valore)
+                    Continue While
+                End If
+
+                If nome.Equals(OpzioneMcp, StringComparison.OrdinalIgnoreCase) Then
+                    letti.PrendiLaModalitaMcp(valore)
                     Continue While
                 End If
 
@@ -172,6 +196,23 @@ Namespace Motore
             End If
 
             _ChiediLaChiave = True
+
+        End Sub
+
+        ''' <summary>
+        ''' Segna che si parte come server MCP. Come <c>--chiave</c>, l'opzione <b>non
+        ''' prende un valore</b>: il trasporto è stdio e non c'è niente da configurare —
+        ''' la cartella dati si dice con <c>--dati</c>, che vale in tutte e due le
+        ''' modalità. Un valore di troppo si scarta dicendolo, e l'avviso finirà su
+        ''' <c>stderr</c> come tutti gli altri.
+        ''' </summary>
+        Private Sub PrendiLaModalitaMcp(valore As String)
+
+            If valore IsNot Nothing Then
+                Avvisa($"L'argomento «{OpzioneMcp}» non vuole niente dopo di sé: ho ignorato quel che c'era.")
+            End If
+
+            _ModalitaMcp = True
 
         End Sub
 

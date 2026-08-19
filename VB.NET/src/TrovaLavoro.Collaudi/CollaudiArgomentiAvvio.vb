@@ -100,13 +100,25 @@ Namespace Motore
         <TestMethod>
         Public Sub IlPercorsoNonSiMangiaLOpzioneDopo()
             ' «--dati --mcp» non vuol dire che la cartella si chiami «--mcp»: vuol dire che
-            ' il percorso manca. Senza questa regola, l'opzione della tappa dopo verrebbe
-            ' inghiottita e nessuno se ne accorgerebbe.
+            ' il percorso manca. Il collaudo è nato quando «--mcp» era solo l'opzione della
+            ' tappa dopo, e da T8 dimostra più di prima: quel che veniva inghiottito adesso
+            ' arriva davvero a destinazione.
             Dim letti As ArgomentiAvvio = ArgomentiAvvio.Leggi({"--dati", "--mcp"})
 
             Assert.IsNull(letti.RadiceDati, "nessuna radice presa a sproposito")
+            Assert.IsTrue(letti.ModalitaMcp, "e l'opzione dopo è arrivata intera")
+            Assert.HasCount(1, letti.Avvisi, "una cosa sola da dire: il percorso che manca")
+        End Sub
+
+        <TestMethod>
+        Public Sub UnOpzioneSconosciutaDopoIlPercorsoNonSparisce()
+            ' La regola di sopra vale anche per ciò che non conosciamo: si scavalca e si
+            ' nomina, invece di finire nel silenzio come nome di una cartella.
+            Dim letti As ArgomentiAvvio = ArgomentiAvvio.Leggi({"--dati", "--zufolo"})
+
+            Assert.IsNull(letti.RadiceDati, "nessuna radice presa a sproposito")
             Assert.HasCount(2, letti.Avvisi, "due cose da dire: il percorso che manca e l'opzione ignota")
-            Assert.Contains("--mcp", letti.Avviso, "l'opzione dopo resta visibile")
+            Assert.Contains("--zufolo", letti.Avviso, "l'opzione dopo resta visibile")
         End Sub
 
         <TestMethod>
@@ -164,6 +176,37 @@ Namespace Motore
             Assert.IsNotNull(letti.Avviso, "l'argomento di troppo si dice")
             Assert.DoesNotContain("sk-ant-vera-0000", letti.Avviso, "ma non si scrive")
             Assert.Contains("chiave API", letti.Avviso, "si dice però cos'era")
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaChiederloNonSiPartUnServer()
+            ' La modalità che apre le finestre è quella di sempre: il server MCP si ha
+            ' solo chiedendolo (cap. 09.2).
+            Dim letti As ArgomentiAvvio = ArgomentiAvvio.Leggi({"--dati", Percorso})
+
+            Assert.IsFalse(letti.ModalitaMcp, "nessun server non richiesto")
+        End Sub
+
+        <TestMethod>
+        Public Sub LaModalitaServerSiChiedeENonVuoleNiente()
+            ' «--mcp» non prende un valore: il trasporto è stdio e non c'è niente da
+            ' configurare. La cartella dati si dice con «--dati», che vale in tutte e due
+            ' le modalità.
+            Dim letti As ArgomentiAvvio = ArgomentiAvvio.Leggi({"--mcp", "--dati", Percorso})
+
+            Assert.IsTrue(letti.ModalitaMcp, "il server è stato chiesto")
+            Assert.AreEqual(Percorso, letti.RadiceDati, "e la cartella dati vale anche qui")
+            Assert.IsNull(letti.Avviso, "senza niente da segnalare")
+        End Sub
+
+        <TestMethod>
+        Public Sub UnValoreDopoLaModalitaServerSiScartaDicendolo()
+            ' Come per la chiave: quel che non si può rispettare si dice, e non si fa
+            ' cadere l'avvio per una parola in più.
+            Dim letti As ArgomentiAvvio = ArgomentiAvvio.Leggi({"--mcp=stdio"})
+
+            Assert.IsTrue(letti.ModalitaMcp, "il server parte lo stesso")
+            Assert.IsNotNull(letti.Avviso, "dicendo che il valore è stato ignorato")
         End Sub
 
         <TestMethod>

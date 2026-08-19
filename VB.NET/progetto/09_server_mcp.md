@@ -43,10 +43,70 @@ annuncio e dimmi se vale la pena candidarmi» — e Claude userà **la nostra pi
 
 - Il percorso in `command` è semplicemente quello dove sta l'exe (che può essere una
   cartella qualsiasi — cap. 13.4).
-- Il protocollo è JSON-RPC 2.0 con i tre passi canonici (`initialize`,
-  `tools/list`, `tools/call`): il programma li implementa direttamente, senza
-  librerie aggiuntive — è scambio di messaggi JSON su stdio, alla portata del motore
-  che già maneggia JSON tutto il giorno.
+- Il protocollo è JSON-RPC 2.0, e il programma lo implementa direttamente, senza
+  librerie aggiuntive: è scambio di messaggi JSON su stdio, alla portata del motore che
+  già maneggia JSON tutto il giorno. **Quali** messaggi, però, dipende da con chi si
+  parla — la sezione qui sotto.
+- **Un messaggio per riga, e nessun a capo dentro**: è l'incorniciatura dello stdio, e
+  vale in entrambe le direzioni. Tutto UTF-8, il che sul nostro lato non è una formalità:
+  questo programma parla italiano, e con la codepage di sistema gli accenti uscirebbero
+  rotti dalla prima riga.
+- **Su stdout passano solo i messaggi del protocollo.** La spec non lascia margini: il
+  server *non deve* scrivere su stdout niente che non sia un messaggio MCP valido. Avvisi,
+  diagnostica ed errori vanno su **stderr**, che è esplicitamente il posto giusto per i
+  log e che i client raccolgono in un file a parte. Lì finiscono anche gli avvisi della
+  riga di comando (cap. 11.1), che senza barra di stato non avrebbero dove andare.
+- **Si esce quando stdin si chiude.** È il segnale di spegnimento primario e l'unico
+  portabile: il client chiude l'ingresso e aspetta che il processo termini. Un server che
+  non lo onora si fa ammazzare a forza, ed è un modo brutto di finire.
+
+### Le due ere del protocollo (2026-08-19)
+
+*Questa parte sostituisce quel che il capitolo diceva fino al 2026-08-18 — «i tre passi
+canonici `initialize`, `tools/list`, `tools/call`». Non era sbagliato quando è stato
+scritto: era il protocollo di allora.*
+
+Il **28 luglio 2026** MCP ha cambiato pelle. La revisione `2026-07-28` ha tolto
+l'handshake e ha reso il protocollo **senza stato**: non c'è più una sessione da aprire,
+ogni richiesta si autodescrive. Le due ere hanno un nome nella spec stessa — **legacy**
+(`2025-11-25` e precedenti, quelle con l'handshake) e **moderna** (`2026-07-28` e
+successive).
+
+| | **Legacy** (fino a `2025-11-25`) | **Moderna** (da `2026-07-28`) |
+|---|---|---|
+| Apertura | `initialize`, poi `notifications/initialized` | **nessuna**: si entra chiamando |
+| Versione del protocollo | negoziata una volta per sessione | dichiarata **a ogni richiesta**, in `_meta` |
+| Chi sei / cosa sai fare | scambiati nell'handshake | in `_meta` a ogni richiesta |
+| Scoperta | dalla risposta di `initialize` | `server/discover`, che i server **devono** implementare |
+| Forma del risultato | `result` | `result` con dentro `resultType` |
+
+**Il programma le parla tutte e due** (nella spec: un server *dual-era*). Non è
+abbondanza: la matrice di compatibilità dice che un client legacy davanti a un server solo
+moderno **fallisce e basta** — i client vecchi non hanno modo di saltare avanti — e che un
+client moderno davanti a un server solo legacy fallisce a sua volta. Scegliere un'era sola
+vuol dire scommettere su quale delle due parli il client che l'utente ha installato oggi,
+sapendo che fra sei mesi la risposta sarà diversa. Il costo della doppia porta è modesto e
+si paga una volta: **i tool sono identici nelle due ere** — `tools/list` e `tools/call`
+hanno lo stesso nome e la stessa forma — e cambia solo come si entra.
+
+**L'era si riconosce a ogni messaggio, senza ricordarsi niente**: se la richiesta porta la
+versione del protocollo in `_meta` è moderna, se arriva un `initialize` è legacy. È la
+strada che la spec descrive per i server dual-era, ed è anche l'unica onesta su un
+trasporto dove il processo non è una conversazione: il client può intrecciare sulla stessa
+pipe richieste che non c'entrano nulla fra loro.
+
+**Le risposte dei tool** portano il risultato due volte, ed è voluto: il JSON strutturato
+in `structuredContent`, per chi lo sa leggere, e lo stesso JSON serializzato in un blocco
+di testo, che è quel che la spec chiede per compatibilità.
+
+**Due specie di errore, e non vanno confuse.** Un tool che non esiste o una richiesta
+malformata sono **errori di protocollo** e tornano come errori JSON-RPC. Un tool che
+esiste ma non può fare il suo lavoro — la chiave API non c'è, l'opportunità chiesta non
+esiste, l'app tiene il lucchetto — risponde invece con un risultato normale marcato
+`isError`, il cui testo è scritto per essere **letto da chi ha chiamato**, che qui è un
+modello: così può correggersi da solo invece di limitarsi a riferire un guasto. È la
+stessa idea del messaggio onesto che l'applicazione applica già a video (cap. 03.8),
+spostata su un interlocutore diverso.
 
 ## 9.3 I tool esposti
 
@@ -98,7 +158,11 @@ Niente sincronizzazioni sofisticate: un solo scrittore alla volta, dichiarato.
 
 - **Solo locale**: il trasporto stdio non apre porte di rete; il server esiste solo
   come processo figlio del client sullo stesso PC. Un eventuale trasporto HTTP locale è
-  rimandato (cap. 15) e comunque nascerebbe legato a `localhost`.
+  rimandato (cap. 15) e comunque nascerebbe legato a `localhost`. È anche il motivo per
+  cui qui non c'è nessuna autenticazione da implementare: l'impalcatura di autorizzazione
+  di MCP riguarda i trasporti HTTP, e la spec dice espressamente che su stdio non si
+  applica — le credenziali si prendono dall'ambiente, che per noi vuol dire la chiave
+  cifrata nella configurazione.
 - **La chiave API resta dove sta**: cifrata nella configurazione dell'app (cap. 11).
   Il client MCP non la vede mai: chiama i tool, e sono i tool a usare la chiave.
 - **Stessi limiti etici**: i tool passano dagli stessi prompt del pool — anti-invenzione
