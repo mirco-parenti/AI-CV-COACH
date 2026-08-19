@@ -1,4 +1,5 @@
 Imports System.IO
+Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports System.Threading.Tasks
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
@@ -37,7 +38,9 @@ Namespace Mcp
                     Await prova(contesto)
                 End Using
             Finally
-                If Directory.Exists(radice) Then Directory.Delete(radice, recursive:=True)
+                ' Con pazienza: se il tool ha stampato un PDF, il motore del browser sta
+                ' ancora chiudendo i suoi processi e tiene il proprio lockfile.
+                If Directory.Exists(radice) Then CartelleDiProva.PortaVia(radice)
             End Try
 
         End Function
@@ -266,16 +269,94 @@ Namespace Mcp
                         New JsonObject From {{"annuncio", Annuncio()}, {"confronto", Confronto()},
                                              {"cv", Cv()}}))
 
+                    ' Il formato si chiede: senza, il predefinito è «entrambi» e questo
+                    ' collaudo accenderebbe il motore del browser, che è roba da collaudi
+                    ' «Reale» (v. IlPdfEsceAncheDaEsportaDocumento).
                     Dim esito As EsitoTool = Await Chiama(
                         contesto, CatalogoTool.EsportaDocumento,
-                        New JsonObject From {{"cartella", dove}})
+                        New JsonObject From {{"cartella", dove}, {"formati", "docx"}})
 
                     Assert.IsFalse(esito.Fallito, $"doveva riuscire: {esito.Spiegazione}")
 
                     Dim prodotti As JsonArray = TryCast(TryCast(esito.Dati, JsonObject)("documenti"), JsonArray)
                     Assert.HasCount(1, prodotti, "il CV, e non la lettera che non c'è")
                     StringAssert.EndsWith(prodotti(0).GetValue(Of String)(), ".docx",
-                                          "da qui escono DOCX: il PDF vuole la finestra")
+                                          "il DOCX, che è quel che è stato chiesto")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnFormatoCheNonEsisteSiDiceInvecediIndovinare() As Task
+            ' I formati sono tre e stanno nello schema del tool: uno che non c'è non si
+            ' interpreta con buon senso — «pdf/a» vorrà dire pdf? — perché indovinare qui
+            ' vuol dire consegnare un file diverso da quello chiesto senza dirlo.
+            Await ConMotore(
+                Async Function(contesto)
+                    Dim dove As String = CartellaDi(Await Chiama(
+                        contesto, CatalogoTool.SalvaOpportunita,
+                        New JsonObject From {{"annuncio", Annuncio()}, {"confronto", Confronto()},
+                                             {"cv", Cv()}}))
+
+                    Dim esito As EsitoTool = Await Chiama(
+                        contesto, CatalogoTool.EsportaDocumento,
+                        New JsonObject From {{"cartella", dove}, {"formati", "pdf/a"}})
+
+                    Assert.IsTrue(esito.Fallito, "un formato inventato non passa")
+                    StringAssert.Contains(esito.Spiegazione, "entrambi",
+                                          "e si dicono quelli che esistono")
+                End Function)
+
+        End Function
+
+        <TestMethod, TestCategory("Reale")>
+        Public Async Function IlPdfEsceAncheDaEsportaDocumento() As Task
+            ' La prova che dalla modalità --mcp escono anche i PDF (cap. 09.3, dal
+            ' 2026-08-19): il tool si chiama **senza** dire il formato, cioè come lo
+            ' chiamerebbe un client che non sa niente dei nostri predefiniti, e deve
+            ' tornare con tutti e due i documenti.
+            '
+            ' Sta fra i «Reale» per la stessa ragione di CollaudiStampaPdf: qui non si
+            ' spende un token e non si tocca la rete, ma serve la **macchina** — il motore
+            ' Edge/Chromium di Windows — e la batteria di tutti i giorni non deve
+            ' pretenderla per girare ovunque in sette secondi.
+            Await ConMotore(
+                Async Function(contesto)
+                    Dim dove As String = CartellaDi(Await Chiama(
+                        contesto, CatalogoTool.SalvaOpportunita,
+                        New JsonObject From {{"annuncio", Annuncio()}, {"confronto", Confronto()},
+                                             {"cv", Cv()}}))
+
+                    Dim esito As EsitoTool = Await Chiama(
+                        contesto, CatalogoTool.EsportaDocumento,
+                        New JsonObject From {{"cartella", dove}})
+
+                    Assert.IsFalse(esito.Fallito, $"doveva riuscire: {esito.Spiegazione}")
+
+                    Dim dati As JsonObject = TryCast(esito.Dati, JsonObject)
+                    Assert.AreEqual("entrambi", dati("formato").GetValue(Of String)(),
+                                    "senza chiedere niente si ottengono tutti e due")
+
+                    Dim prodotti As JsonArray = TryCast(dati("documenti"), JsonArray)
+                    Assert.HasCount(2, prodotti, "il CV in DOCX e lo stesso CV in PDF")
+
+                    Dim nomi As String() = prodotti.Select(Function(n) n.GetValue(Of String)()).ToArray()
+                    Assert.IsTrue(nomi.Any(Function(n) n.EndsWith(".docx", StringComparison.Ordinal)), "manca il DOCX")
+                    Assert.IsTrue(nomi.Any(Function(n) n.EndsWith(".pdf", StringComparison.Ordinal)), "manca il PDF")
+
+                    ' E non basta che il nome sia nell'elenco: il file dev'esserci ed
+                    ' essere un PDF vero.
+                    Dim fuori As String = Path.Combine(contesto.Cartella.CartellaOpportunita, dove, "out")
+                    For Each atteso As String In nomi
+                        Assert.IsTrue(File.Exists(Path.Combine(fuori, atteso)), $"manca il file «{atteso}»")
+                    Next
+
+                    Dim pdf As String = Path.Combine(fuori, nomi.First(Function(n) n.EndsWith(".pdf", StringComparison.Ordinal)))
+                    Using lettura As FileStream = File.OpenRead(pdf)
+                        Dim capo(3) As Byte
+                        lettura.ReadExactly(capo)
+                        Assert.AreEqual("%PDF", Text.Encoding.ASCII.GetString(capo), "non è un PDF")
+                    End Using
                 End Function)
 
         End Function

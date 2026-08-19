@@ -9,6 +9,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports Microsoft.Web.WebView2.Core
 Imports Microsoft.Web.WebView2.WinForms
 Imports TrovaLavoro.Documenti
+Imports TrovaLavoro.Motore
 Imports TrovaLavoro.Web
 
 Namespace Web
@@ -80,7 +81,7 @@ Namespace Web
                     Dim primo As CoreWebView2Environment = Nothing
                     Dim secondo As CoreWebView2Environment = Nothing
 
-                    ThreadInterfaccia.Esegui(
+                    FiloGrafico.Esegui(
                         Async Function() As Task
                             Dim motore As New MotoreBrowser(Path.Combine(cartella, "webview2"))
 
@@ -108,7 +109,7 @@ Namespace Web
                     Dim documento As String = Path.Combine(cartella, "CV.pdf")
                     Dim navigaAncora As Boolean = False
 
-                    ThreadInterfaccia.Esegui(
+                    FiloGrafico.Esegui(
                         Async Function() As Task
 
                             Dim motore As New MotoreBrowser(Path.Combine(cartella, "webview2"))

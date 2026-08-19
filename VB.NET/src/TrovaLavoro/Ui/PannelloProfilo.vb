@@ -881,7 +881,7 @@ Public Class PannelloProfilo
 
         If Not PossoSostituireIlProfilo("Importare un CV") Then Return
 
-        Dim percorso As String = ChiediIlFileDelCv()
+        Dim percorso As String = CvDaImportare()
         If percorso Is Nothing Then Return
 
         Dim nome As String = Path.GetFileName(percorso)
@@ -892,6 +892,47 @@ Public Class PannelloProfilo
             $"Profilo proposto da «{nome}».")
 
     End Sub
+
+    ''' <summary>
+    ''' Quale CV importare: quello che la cartella dei documenti ha già riconosciuto come il
+    ''' più recente — se c'è, e se chi guarda dice di sì — altrimenti quello che sceglie a
+    ''' mano. <c>Nothing</c> se rinuncia.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>È la porta <b>«qui c'è tutto»</b> del profilo (cap. 05.2), rimasta indietro da
+    ''' T6 e aperta il 2026-08-19: la classificazione quel CV lo indicava già, ma non lo
+    ''' leggeva nessuno.</para>
+    ''' <para><b>Si propone, non si prende.</b> Nel capitolo la conferma umana è il passo 4,
+    ''' e vale anche qui: chi nella cartella ha tre CV vecchi e uno nuovo dev'essere libero
+    ''' di rispondere «no, scelgo io» — e la macchina che indovina il più recente da nome e
+    ''' data qualche volta sbaglia.</para>
+    ''' </remarks>
+    Private Function CvDaImportare() As String
+
+        Dim trovato As String = Nothing
+        If _contesto IsNot Nothing AndAlso _contesto.Raccolta IsNot Nothing Then
+            trovato = _contesto.Raccolta.PercorsoDelCvPiuRecente()
+        End If
+
+        If trovato Is Nothing Then Return ChiediIlFileDelCv()
+
+        Dim risposta As DialogResult = MessageBox.Show(
+            "Nella cartella dei tuoi documenti c'è" & vbLf & vbLf &
+            Path.GetFileName(trovato) & vbLf & vbLf &
+            "e sembra il tuo CV più recente: lo uso per costruire il profilo?" & vbLf &
+            "Rispondendo «No» scegli tu il file.",
+            NomeProdotto, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question)
+
+        Select Case risposta
+            Case DialogResult.Yes
+                Return trovato
+            Case DialogResult.No
+                Return ChiediIlFileDelCv()
+            Case Else
+                Return Nothing
+        End Select
+
+    End Function
 
     ''' <summary>
     ''' L'altra strada per lo stesso mestiere: si va dove c'è il browser, e di lì si legge

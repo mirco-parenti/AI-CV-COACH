@@ -167,6 +167,31 @@ Namespace Dati
         End Function
 
         ''' <summary>
+        ''' Il percorso del CV che la classificazione ha indicato come il più recente
+        ''' (cap. 05.2, passo 3), se c'è ed è ancora al suo posto; <c>Nothing</c> altrimenti.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para><b>È la porta «qui c'è tutto» del profilo</b>, l'altra metà del mestiere di
+        ''' questa cartella <i>(chiusa il 2026-08-19)</i>: il CV più recente questa raccolta
+        ''' lo indicava da T6, ma non lo leggeva nessuno e chi importava un CV doveva
+        ''' ritrovarselo a mano fra i propri file.</para>
+        ''' <para><b>Che il file esista si guarda adesso</b>, non quando fu classificato: qui
+        ''' non c'è nessun file copiato, e fra la scansione e oggi quel CV può essere stato
+        ''' spostato o cancellato. Proporre di importare un file che non c'è più sarebbe
+        ''' peggio che non proporre niente.</para>
+        ''' </remarks>
+        Public Function PercorsoDelCvPiuRecente() As String
+
+            If Not CartellaUtilizzabile Then Return Nothing
+            If String.IsNullOrWhiteSpace(CvPiuRecente) Then Return Nothing
+            If Riconosciuto(CvPiuRecente) Is Nothing Then Return Nothing
+
+            Dim percorso As String = Path.Combine(Cartella, CvPiuRecente)
+            Return If(File.Exists(percorso), percorso, Nothing)
+
+        End Function
+
+        ''' <summary>
         ''' Gli attestati: quelli che si propongono come allegati di una candidatura
         ''' (cap. 07.1). In ordine di nome, come si vedono nella cartella.
         ''' </summary>

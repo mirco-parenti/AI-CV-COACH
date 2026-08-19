@@ -6,6 +6,7 @@ Imports System.Threading
 Imports System.Threading.Tasks
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro.Documenti
+Imports TrovaLavoro.Motore
 Imports TrovaLavoro.Web
 
 Namespace Documenti
@@ -70,29 +71,6 @@ Namespace Documenti
 
         End Sub
 
-        ''' <summary>
-        ''' Cancella la cartella, con pazienza. Il motore del browser chiude i suoi
-        ''' processi <b>dopo</b> che il controllo è stato smesso, e finché non ha finito
-        ''' tiene il proprio <c>lockfile</c>: cancellare al primo colpo fallisce, e
-        ''' l'errore coprirebbe l'esito vero del collaudo. Se dopo qualche tentativo la
-        ''' cartella resiste ancora si lascia dov'è — è la cartella temporanea di
-        ''' Windows, e un collaudo non deve fallire per le pulizie.
-        ''' </summary>
-        Private Shared Sub PortaVia(cartella As String)
-
-            For tentativo As Integer = 1 To 10
-                Try
-                    Directory.Delete(cartella, recursive:=True)
-                    Return
-                Catch ex As IOException
-                    Thread.Sleep(300)
-                Catch ex As UnauthorizedAccessException
-                    Thread.Sleep(300)
-                End Try
-            Next
-
-        End Sub
-
         <TestMethod, TestCategory("Reale")>
         Public Sub IlPdfEsceConTestoVeroEFontIncorporati()
 
@@ -102,7 +80,7 @@ Namespace Documenti
                     Dim documento As String = Path.Combine(cartella, "CV.pdf")
                     Dim lettera As String = Path.Combine(cartella, "Lettera.pdf")
 
-                    ThreadInterfaccia.Esegui(
+                    FiloGrafico.Esegui(
                         Async Function() As Task
                             Using stampante As New StampantePdf(
                                 New MotoreBrowser(Path.Combine(cartella, "webview2")))

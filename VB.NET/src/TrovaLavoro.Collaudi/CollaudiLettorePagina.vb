@@ -6,6 +6,7 @@ Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports Microsoft.Web.WebView2.Core
 Imports Microsoft.Web.WebView2.WinForms
+Imports TrovaLavoro.Motore
 Imports TrovaLavoro.Web
 
 Namespace Web
@@ -119,7 +120,7 @@ Namespace Web
             Directory.CreateDirectory(cartella)
 
             Try
-                ThreadInterfaccia.Esegui(
+                FiloGrafico.Esegui(
                     Async Function() As Task
 
                         Dim motore As New MotoreBrowser(Path.Combine(cartella, "webview2"))

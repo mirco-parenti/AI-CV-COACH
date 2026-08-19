@@ -619,23 +619,40 @@ Namespace Ai
             ' risposta che dura **più** del silenzio concesso deve arrivare in fondo,
             ' purché non taccia mai per tutto quel silenzio. Senza questo, il giorno in cui
             ' l'attesa tornasse a essere un tetto complessivo la batteria resterebbe verde.
+            '
+            ' Le proporzioni sono **molte pause corte**, e i due numeri servono a due cose
+            ' diverse. *(Rifatto il 2026-08-19: prima erano quattro pause da 120 ms, mezzo
+            ' secondo in tutto — cioè **meno** del silenzio concesso. Un tetto complessivo
+            ' le avrebbe lasciate passare, e il collaudo sarebbe rimasto verde proprio nel
+            ' caso da cui doveva difendere.)*
+            '   · il **totale** supera il tetto — ventun attese da 60 ms, un secondo e un
+            '     quarto contro un secondo concesso — ed è questo che rende il collaudo
+            '     capace di accorgersi del ritorno a un tetto complessivo;
+            '   · la **singola** pausa resta lontana dal tetto, 60 ms contro 1000, ed è
+            '     questo che lo tiene fermo quando la macchina è carica: la batteria gira
+            '     in parallelo, e un collaudo che misura il tempo o si dà spazio o diventa
+            '     ballerino — e uno ballerino non lo guarda più nessuno.
+            Const Quanti As Integer = 20
+
+            Dim testi As String() = Enumerable.Range(1, Quanti).
+                Select(Function(n) "pezzo" & n & If(n < Quanti, " ", "")).ToArray()
+
+            Dim eventi As New List(Of String) From {Apertura()}
+            eventi.AddRange(testi.Select(Function(t) Pezzo(t)))
+            eventi.Add(Chiusura())
+
             Dim finta As New ApiCheFluisce(New PassoFlusso With {
-                .Pezzi = {Apertura(), Pezzo("uno "), Pezzo("due "), Pezzo("tre"), Chiusura()},
-                .RitardoFraPezzi = TimeSpan.FromMilliseconds(120)})
+                .Pezzi = eventi.ToArray(),
+                .RitardoFraPezzi = TimeSpan.FromMilliseconds(60)})
 
             Using client As ClientClaude = ClientInAscolto(finta)
 
-                ' Quattro attese da 120 ms: mezzo secondo abbondante in tutto, contro un
-                ' secondo di silenzio concesso. Il margine è largo di proposito — la
-                ' batteria intera gira in parallelo, e una pausa da 120 ms su una macchina
-                ' occupata può allungarsi parecchio: un collaudo che misura il tempo o si
-                ' dà spazio o diventa ballerino, e uno ballerino non lo guarda più nessuno.
                 client.SilenzioMassimo = TimeSpan.FromMilliseconds(1000)
 
                 Dim r As RispostaAi = Await client.ChiediInStreamingAsync(
                     Modelli.Ragionamento, Conversazione("ciao"), 2000, Nothing)
 
-                Assert.AreEqual("uno due tre", r.Testo, "la risposta è arrivata tutta")
+                Assert.AreEqual(String.Concat(testi), r.Testo, "la risposta è arrivata tutta")
             End Using
         End Function
 

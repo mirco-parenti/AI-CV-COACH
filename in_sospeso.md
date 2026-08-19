@@ -91,11 +91,6 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Da T6 — le email di candidatura (2026-08-14, alla chiusura)
 
-- **La porta «qui c'è tutto» del profilo.** Il cap. 05.2 descrive una cartella che serve a
-  **due** cose: proporre gli attestati da allegare (fatto a T6) e trovare da sé il CV da cui
-  costruire il profilo. La classificazione dice già quale CV sembra il più recente e il dato
-  si salva in `documenti.json`, ma **non lo legge nessuno**: l'import di un CV passa ancora
-  dalla scelta di un file singolo. *(cap. 05.2; `RaccoltaDocumenti.CvPiuRecente`.)*
 - **Lo stato «esito» e il follow-up** *(ridotta il 2026-08-18: delle tre cose, il
   destinatario è in «Chiuse»)*. Il cap. 07.3 assegnava a T6 tre cose oltre all'invio, e T6
   ne ha portata una sola. Restano: lo stato **`esito`** (in attesa · colloquio · rifiutata ·
@@ -160,15 +155,8 @@ ed è in «Chiuse», insieme alla correzione della ricetta con cui si prova.*
 
 ## Da questa passata sulle voci in sospeso (2026-08-18)
 
-- **Un collaudo che cede quando la macchina è carica.**
-  `UnaRispostaLungaMaVivaNonScadeMai` (`CollaudiClientClaude`) è fallito una volta su una
-  passata intera lanciata mentre la macchina compilava dell'altro, ed è tornato verde da
-  solo tre volte di fila subito dopo, e poi su due passate complete. Non è una regressione —
-  non c'entra niente con quello che si stava toccando — ma è un **collaudo che misura il
-  tempo**, e un collaudo che dipende dal carico prima o poi mente in tutt'e due i modi:
-  oggi ha gridato al lupo, domani potrebbe tacere su un guasto vero. Va guardato con calma e
-  reso insensibile al carico, o dichiarato tale. *(`CollaudiClientClaude`, l'attesa e il
-  silenzio massimo; cap. 02.5.)*
+*Chiusa il 2026-08-19: il collaudo che cedeva sotto carico è in «Chiuse», e il difetto
+vero era un altro.*
 
 ## Da T8a — il guscio del server MCP (2026-08-19, alla chiusura)
 
@@ -213,13 +201,6 @@ ed è in «Chiuse», insieme alla correzione della ricetta con cui si prova.*
   sarebbe una promessa vuota, quindi il tool nasce con ciò che espone. Non è una
   dimenticanza da recuperare ma una dipendenza da rispettare, ed è mezz'ora di lavoro
   quando F7 c'è. *(cap. 09.3, nota «`esporta_backup` arriva con T9»; cap. 14, T9.)*
-- **Il PDF via MCP.** `esporta_documento` scrive i soli DOCX: il PDF si ottiene stampando
-  la pagina nel browser incorporato, che vuole una finestra, e in `--mcp` il programma
-  biforca prima di ogni preparativo grafico. Non è detto sia impossibile — una `Form`
-  invisibile con la sua pompa di messaggi potrebbe reggere — ma è WinForms dentro un
-  processo che non l'ha mai acceso, e va **provato** prima di prometterlo, non deciso a
-  tavolino. Se si prova e non regge, la voce si chiude dichiarando che il PDF resta
-  dell'applicazione. *(cap. 09.3, nota «Da qui non escono PDF»; `StampantePdf`.)*
 - **Il lucchetto visto da due processi veri.** Che il secondo che prova resti fuori è
   provato dal banco, ma dentro un solo processo: sono due `FileStream` sulla stessa
   cartella, non l'applicazione e un server MCP che si contendono davvero i dati. Il
@@ -245,6 +226,45 @@ ed è in «Chiuse», insieme alla correzione della ricetta con cui si prova.*
 
 ## Chiuse
 
+- ✅ **Un collaudo che cede quando la macchina è carica** *(aperta il 2026-08-18, chiusa il
+  2026-08-19)*. Guardandolo da vicino, `UnaRispostaLungaMaVivaNonScadeMai` aveva **due**
+  difetti e non uno. Il primo era quello segnalato: quattro pause da 120 ms contro un
+  secondo di silenzio concesso, un margine che una macchina satura si mangia. Il secondo
+  non lo sapeva nessuno: la risposta durava **551 ms in tutto, meno del tetto**, e questo
+  collaudo esiste apposta perché la batteria se ne accorga se un giorno l'attesa tornasse
+  un tetto complessivo — cosa che con quei numeri non sarebbe successa. Provato invece di
+  dedotto: **falsificando il client** (tolto il riarmo del silenzio a ogni pezzo) il vecchio
+  collaudo **passava lo stesso**. Ora le proporzioni sono rovesciate — ventun pause da
+  60 ms, 1260 ms contro 1000 concessi — ed è migliorato in tutt'e due le direzioni: il
+  margine per singola pausa passa da 8× a 16×, e contro lo stesso client falsificato adesso
+  diventa **rosso**. *(`CollaudiClientClaude`; cap. 02.5.)*
+- ✅ **Il PDF via MCP** *(aperta il 2026-08-19 con la chiusura di T8c, chiusa lo stesso
+  giorno)*. La voce diceva «non è detto sia impossibile, va provato»: provato, e regge. Quel
+  che il motore del browser pretende **non è una finestra visibile** — come diceva il
+  cap. 09 — ma un filo STA con la sua pompa di messaggi, e a smentire la frase è stato il
+  **banco di collaudo**, che stampa PDF veri da un processo di test dove finestre non ce n'è
+  nessuna. Quel filo è stato portato dai collaudi al prodotto (`FiloGrafico`, che il banco
+  adesso usa invece della sua copia), `esporta_documento` ha imparato il parametro
+  `formati` — `docx` · `pdf` · `entrambi`, e chi non lo dice li vuole tutti e due, come per i
+  testi rifiniti — e se il motore non c'è i DOCX si consegnano dicendo perché il PDF manca.
+  La prova che conta non è del banco: l'**eseguibile vero** avviato con `--mcp` ha scritto un
+  PDF da 26.865 byte, firma `%PDF`, ed è uscito pulito. *(cap. 09.3; `ToolDiScrittura`,
+  `Motore/FiloGrafico.vb`; collaudo «Reale» `IlPdfEsceAncheDaEsportaDocumento`.)*
+- ✅ **La porta «qui c'è tutto» del profilo** *(aperta il 2026-08-14 con la chiusura di T6,
+  chiusa il 2026-08-19)*. Delle due cose che la cartella documenti serve a fare, mancava la
+  prima: trovare da sé il CV da cui costruire il profilo. Il dato c'era già — la
+  classificazione indicava il più recente e lo salvava in `documenti.json` — ma non lo
+  leggeva nessuno, e chi importava un CV doveva ritrovarselo a mano. Adesso premendo
+  «IMPORTA CV DA UN FILE» il programma **lo propone per nome**, e lascia tre uscite: usalo,
+  scelgo io un altro file, lascia stare. Si propone e non si prende, perché il passo 4 del
+  capitolo è la conferma umana e la macchina che indovina il più recente da nome e data
+  qualche volta sbaglia; e che il file esista si guarda **al momento di proporlo**, perché
+  qui nessun file viene copiato e nel frattempo quel CV può essere stato spostato o buttato.
+  Nessun controllo nuovo nel pannello: il layout di P2 è quello validato a video a T3, e ha
+  già una voce aperta sui DPI. Provata dal vivo su una cartella usa-e-getta — la finestra
+  compare, «No» apre la scelta file, «Annulla» non fa niente; «Sì» no, perché avvia l'import
+  vero, che è una chiamata all'AI a pagamento. *(cap. 05.2; `RaccoltaDocumenti.PercorsoDelCvPiuRecente`,
+  `PannelloProfilo.CvDaImportare`.)*
 - ✅ **Il cambio di lingua che fallisce a metà, provato dal vivo** *(aperta il 2026-08-18 da
   T7d, chiusa lo stesso giorno)*. Era chiusa «ragionando e per costruzione», non per prova:
   cambiando la lingua del 📄 CV-1 base il pannello butta il testo di prima *prima* di

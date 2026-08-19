@@ -59,11 +59,20 @@ ripetere quando il contenuto cambia.
 
 ### Com'è stata costruita (T6, 2026-08-14)
 
-- **Costruita per gli allegati, non per il profilo.** Delle due cose che questa cartella
-  serve a fare, T6 ha fatto la seconda: gli attestati da allegare a un'email. La porta
-  «qui c'è tutto» del profilo — prendere da sé il CV più recente e importarlo — **non
-  c'è ancora**, anche se la classificazione quel CV lo indica già e il dato si salva. Sta
-  in `in_sospeso.md`, perché è una promessa di questo capitolo.
+- **Costruita per gli allegati, poi anche per il profilo.** Delle due cose che questa
+  cartella serve a fare, T6 aveva fatto la seconda: gli attestati da allegare a un'email.
+  La porta «qui c'è tutto» del profilo — prendere da sé il CV più recente e importarlo —
+  è arrivata il **2026-08-19**, chiudendo le cose rimaste indietro prima di T9. Fino a lì
+  la classificazione quel CV lo indicava e il dato si salvava in `documenti.json`, ma non
+  lo leggeva nessuno: chi importava un CV doveva ritrovarselo a mano fra i propri file.
+- **La porta si apre proponendo, non prendendo** *(2026-08-19)*. Premuto «IMPORTA CV DA UN
+  FILE», se la cartella è registrata e il CV riconosciuto è **ancora al suo posto**, il
+  programma lo propone per nome e lascia tre uscite: usalo, scelgo io un altro file,
+  lascia stare. È il passo 4 di questo capitolo — la conferma umana — applicato anche
+  qui: la macchina indovina il più recente da nome e data, e qualche volta sbaglia. Che il
+  file esista si guarda **al momento di proporlo** e non quando fu classificato, perché qui
+  nessun file viene copiato e nel frattempo quel CV può essere stato spostato o buttato:
+  in quel caso non si propone niente e si va alla scelta del file, come prima.
 - **Dei PDF non si assaggia il testo.** Il passo 2 vale per TXT, MD e DOCX, che si leggono
   dal disco; per un PDF servirebbe una **trascrizione dell'AI a file** (cap. 05.1), e in
   una cartella di documenti i PDF sono quasi tutto: quindici chiamate per smistare della

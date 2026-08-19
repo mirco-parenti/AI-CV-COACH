@@ -195,6 +195,96 @@ Namespace Dati
             End Try
         End Sub
 
+        ''' <summary>
+        ''' Una cartella vera con dentro dei file veri: qui non bastano i nomi, perché quel
+        ''' che si collauda è proprio se il file c'è ancora.
+        ''' </summary>
+        Private Shared Sub ConCartellaVera(prova As Action(Of String))
+
+            Dim cartella As String = Path.Combine(Path.GetTempPath(), "raccolta-" & Guid.NewGuid().ToString("N"))
+            Directory.CreateDirectory(cartella)
+
+            Try
+                prova(cartella)
+            Finally
+                CartelleDiProva.PortaVia(cartella)
+            End Try
+
+        End Sub
+
+        ''' <summary>Una raccolta su una cartella vera, col suo CV già riconosciuto.</summary>
+        Private Shared Function ConCvPiuRecente(cartella As String, nome As String) As RaccoltaDocumenti
+
+            File.WriteAllText(Path.Combine(cartella, nome), "un curriculum qualunque")
+
+            Dim raccolta As New RaccoltaDocumenti With {.Cartella = cartella}
+            raccolta.AllineaAiFile({New FileTrovato With {.Nome = nome,
+                                                          .Percorso = Path.Combine(cartella, nome)}})
+            raccolta.Riconosciuto(nome).Categoria = CategoriaDocumento.Cv
+            raccolta.CvPiuRecente = nome
+
+            Return raccolta
+
+        End Function
+
+        <TestMethod>
+        Public Sub IlCvPiuRecenteSiTrovaDaSolo()
+            ' La porta «qui c'è tutto» del profilo (cap. 05.2): il CV che la classificazione
+            ' ha indicato si ritrova col suo percorso intero, pronto per l'import, senza che
+            ' nessuno debba ricercarlo fra i propri file.
+            ConCartellaVera(
+                Sub(cartella)
+                    Dim raccolta As RaccoltaDocumenti = ConCvPiuRecente(cartella, "CV_2025.pdf")
+
+                    Assert.AreEqual(Path.Combine(cartella, "CV_2025.pdf"),
+                                    raccolta.PercorsoDelCvPiuRecente(), "il percorso intero")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub UnCvCancellatoDopoLaScansioneNonSiPropone()
+            ' Qui non c'è nessun file copiato: fra la classificazione e oggi quel CV può
+            ' essere stato spostato o buttato, e proporre di importare un file che non c'è
+            ' più è peggio che non proporre niente.
+            ConCartellaVera(
+                Sub(cartella)
+                    Dim raccolta As RaccoltaDocumenti = ConCvPiuRecente(cartella, "CV_2025.pdf")
+                    File.Delete(Path.Combine(cartella, "CV_2025.pdf"))
+
+                    Assert.IsNull(raccolta.PercorsoDelCvPiuRecente(), "il file non c'è più")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaUnCvRiconosciutoNonSiPropone()
+            ' Due modi di non avere niente da proporre, e sono diversi: nessuno ha mai detto
+            ' quale sia il più recente, oppure lo ha detto nominando un file che in questa
+            ' raccolta non esiste — che è quel che succederebbe se il nome se lo inventasse
+            ' una risposta dell'AI.
+            ConCartellaVera(
+                Sub(cartella)
+                    Dim raccolta As RaccoltaDocumenti = ConCvPiuRecente(cartella, "CV_2025.pdf")
+
+                    raccolta.CvPiuRecente = ""
+                    Assert.IsNull(raccolta.PercorsoDelCvPiuRecente(), "nessuno ha detto quale")
+
+                    raccolta.CvPiuRecente = "CV_inventato.pdf"
+                    Assert.IsNull(raccolta.PercorsoDelCvPiuRecente(), "e un nome mai classificato non vale")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaLaCartellaNonCEPortaDaAprire()
+            ' La cartella si sceglie una volta e resta registrata: se nel frattempo è stata
+            ' spostata o staccata (una chiavetta), la porta si chiude in silenzio invece di
+            ' proporre un percorso che non porta da nessuna parte.
+            Dim raccolta As New RaccoltaDocumenti With {
+                .Cartella = Path.Combine(Path.GetTempPath(), "cartella-che-non-ce-" & Guid.NewGuid().ToString("N")),
+                .CvPiuRecente = "CV.pdf"}
+
+            Assert.IsNull(raccolta.PercorsoDelCvPiuRecente(), "senza cartella non si propone niente")
+        End Sub
+
     End Class
 
 End Namespace

@@ -277,11 +277,13 @@ Namespace Mcp
 
             _definizioni.Add(New DefinizioneTool(
                 EsportaDocumento, "Impagina i documenti di una candidatura",
-                "Scrive in formato DOCX il CV e la lettera di una candidatura già salvata, " &
-                "nella sottocartella «out» di quella candidatura. Il PDF non si fa da qui: " &
-                "richiede il browser incorporato dell'applicazione, e si esporta dalla finestra.",
+                "Scrive il CV e la lettera di una candidatura già salvata nella sottocartella " &
+                "«out» di quella candidatura, in DOCX, in PDF o in tutti e due. Il PDF si " &
+                "stampa dal motore del browser di Windows: viene bene — testo vero, font " &
+                "incorporati — ma accenderlo costa qualche secondo, e chi ha fretta chiede «docx».",
                 Schema(New JsonObject From {
-                    {"cartella", Testo("Il nome della cartella dell'opportunità, come lo dà leggi_registro.")}},
+                    {"cartella", Testo("Il nome della cartella dell'opportunità, come lo dà leggi_registro.")},
+                    {"formati", Formato()}},
                     "cartella")))
 
         End Sub
@@ -437,6 +439,21 @@ Namespace Mcp
 
         Private Shared Function Lista(descrizione As String) As JsonObject
             Return New JsonObject From {{"type", "array"}, {"description", descrizione}}
+        End Function
+
+        ''' <summary>
+        ''' In che formato si vogliono i documenti impaginati. Chi non lo dice li vuole
+        ''' <b>tutti e due</b>: è la stessa regola dei testi rifiniti (cap. 09.3) — da qui
+        ''' dev'essere uscito quel che sarebbe uscito dalla finestra, dove i bottoni sono
+        ''' due e nessuno dei due è il predefinito.
+        ''' </summary>
+        Private Shared Function Formato() As JsonObject
+
+            Return New JsonObject From {
+                {"type", "string"},
+                {"enum", New JsonArray From {"docx", "pdf", "entrambi"}},
+                {"description", "Il formato dei documenti. Se si omette, entrambi."}}
+
         End Function
 
         ''' <summary>

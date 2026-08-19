@@ -142,7 +142,7 @@ Prima versione — tutti i tool leggono/scrivono la **stessa cartella dati** del
 | `genera_cv` | CV-1 o CV-2 in JSON, lingua a scelta, appunti di mira come parametro facoltativo | no |
 | `genera_lettera` | lettera in JSON, lingua a scelta | no |
 | `rifinisci_testo` | passata anti-slop su un testo di prosa | no |
-| `esporta_documento` | il CV e la lettera di una candidatura salvata → file DOCX nella sua cartella | sì (nuovi file) |
+| `esporta_documento` | il CV e la lettera di una candidatura salvata → file DOCX e/o PDF nella sua cartella | sì (nuovi file) |
 | `salva_opportunita` | mette in coda una candidatura: l'annuncio e quel che di essa è già stato prodotto | sì |
 | `esporta_backup` | scrive il backup JSON del profilo | sì (nuovo file) |
 
@@ -166,12 +166,21 @@ qualità fra le due porte non la dichiarerebbe nessuno, e si scoprirebbe mesi do
 confrontando due documenti senza capire perché uno dei due è più piatto. Chi vuole la
 passata su un testo suo ha `rifinisci_testo`, che è la stessa cosa offerta da sola.
 
-**Da qui non escono PDF, e `salva_opportunita` prende tutto** *(2026-08-19)*. Due cose che
-la tabella da sola non spiega. La prima: `esporta_documento` scrive **solo DOCX**, perché
-il PDF si ottiene stampando la pagina nel browser incorporato, che vuole una finestra — e
-in modalità `--mcp` il programma biforca prima di ogni preparativo grafico (§9.2). Il DOCX
-invece si compone scrivendo un file, e non ha bisogno di niente; chi vuole il PDF lo fa
-dall'applicazione, e il tool glielo dice. La seconda: `salva_opportunita` accetta
+**Da qui escono anche i PDF, e `salva_opportunita` prende tutto** *(2026-08-19; la prima
+metà riscritta lo stesso giorno)*. Due cose che la tabella da sola non spiega. La prima:
+`esporta_documento` scrive **DOCX, PDF o tutti e due**, e chi non dice il formato li ottiene
+tutti e due — la stessa regola dei testi rifiniti, cioè che da qui esca quel che sarebbe
+uscito dalla finestra. *Fino al pomeriggio del 2026-08-19 questo capitolo diceva l'opposto:
+«solo DOCX, perché il PDF si stampa nel browser incorporato, che vuole una finestra, e in
+`--mcp` il programma biforca prima di ogni preparativo grafico». La frase era imprecisa, e a
+smentirla è stato il **banco di collaudo**, che stampa PDF veri da un processo di test dove
+finestre non ce n'è nessuna: quel che il motore pretende non è una finestra visibile ma un
+**filo STA con la sua pompa di messaggi**, e quello si accende anche in modalità server
+(`FiloGrafico`, nato in T4b fra i collaudi e portato nel prodotto adesso). Il PDF è stato poi
+prodotto davvero dall'eseguibile vero avviato con `--mcp`.* Il prezzo resta, e va detto:
+accendere il motore del browser costa qualche secondo, e chi ha fretta chiede `docx`. Se il
+motore non c'è, i DOCX si consegnano lo stesso dicendo perché il PDF manca — chi aveva chiesto
+il solo PDF invece riceve un fallimento, perché è quello che è. La seconda: `salva_opportunita` accetta
 **l'annuncio e tutti gli artefatti** — confronto, mitigazioni, CV, lettera — e non il solo
 annuncio come diceva la prima stesura di questo capitolo. Con il solo annuncio, quel che i
 tool dell'AI producono non avrebbe dove andare: si potrebbe generare un CV via MCP senza

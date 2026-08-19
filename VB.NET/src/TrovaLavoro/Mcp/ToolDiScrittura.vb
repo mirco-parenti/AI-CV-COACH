@@ -5,6 +5,7 @@ Imports System.Threading.Tasks
 Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Documenti
 Imports TrovaLavoro.Motore
+Imports TrovaLavoro.Web
 
 Namespace Mcp
 
@@ -22,11 +23,13 @@ Namespace Mcp
     ''' parametri, che non costano niente, e solo quando c'è davvero qualcosa da scrivere
     ''' si va a bussare. Tenerlo mentre si guarda un JSON malformato vorrebbe dire fermare
     ''' l'applicazione dell'utente per un errore di chi ha chiamato.</para>
-    ''' <para><b>Niente PDF da qui</b>, e non è una dimenticanza: il PDF si ottiene
-    ''' stampando la pagina nel browser incorporato, che vuole una finestra — e in modalità
-    ''' <c>--mcp</c> il programma biforca prima di ogni preparativo grafico (cap. 09.2).
-    ''' Il DOCX invece si compone scrivendo un file, e non ha bisogno di niente. Chi vuole
-    ''' il PDF lo fa dall'applicazione, e il tool lo dice.</para>
+    ''' <para><b>Anche i PDF, dal 2026-08-19.</b> Fino a lì di qui uscivano i soli DOCX,
+    ''' perché il PDF si stampa nel browser incorporato «che vuole una finestra», e in
+    ''' modalità <c>--mcp</c> il programma biforca prima di ogni preparativo grafico
+    ''' (cap. 09.2). La frase era imprecisa: quel che il motore pretende non è una finestra
+    ''' visibile ma un filo STA con la sua pompa di messaggi, e quello si accende anche qui
+    ''' (v. <see cref="FiloGrafico"/>). A smentirla è stato il banco di collaudo, che stampa
+    ''' PDF veri da un processo di test dove finestre non ce n'è nessuna.</para>
     ''' </remarks>
     Public Class ToolDiScrittura
 
@@ -130,14 +133,30 @@ Namespace Mcp
         End Function
 
         ''' <summary>
-        ''' Impagina in DOCX il CV e la lettera di una candidatura già salvata.
+        ''' Impagina il CV e la lettera di una candidatura già salvata: DOCX, PDF o tutti
+        ''' e due.
         ''' </summary>
+        ''' <remarks>
+        ''' <para><b>Chi non dice il formato li vuole tutti e due</b>, ed è la stessa regola
+        ''' dei testi rifiniti (cap. 09.3): quel che esce da qui dev'essere quel che si
+        ''' otterrebbe dalla finestra, dove i due bottoni ci sono entrambi. Il prezzo lo paga
+        ''' chi chiede il PDF — accendere il motore del browser costa secondi — e per questo
+        ''' «docx» resta a portata di chi ha fretta.</para>
+        ''' <para><b>Il ripiego è onesto e non silenzioso</b>: se il motore non c'è o non si
+        ''' accende, i DOCX sono già sul disco e si consegnano dicendo perché il PDF manca.
+        ''' Chi aveva chiesto il solo PDF invece non riceve niente, ed è giusto che lo senta
+        ''' come un fallimento.</para>
+        ''' </remarks>
         Public Async Function EsportaDocumento(argomenti As JsonObject,
                                                annulla As CancellationToken) As Task(Of EsitoTool)
 
             Dim nome As String = Nothing
             Dim rifiuto As EsitoTool = ToolDiLettura.NomeDiCartellaAmmesso(
                 CampiJson.Testo(argomenti, "cartella"), nome)
+            If rifiuto IsNot Nothing Then Return rifiuto
+
+            Dim voluti As FormatiDocumento
+            rifiuto = FormatiAmmessi(CampiJson.Testo(argomenti, "formati"), voluti)
             If rifiuto IsNot Nothing Then Return rifiuto
 
             Dim dove As String = Path.Combine(_contesto.Cartella.CartellaOpportunita, nome)
@@ -162,22 +181,72 @@ Namespace Mcp
                             "candidatura con salva_opportunita.")
                     End If
 
-                    ' Senza stampante si scrivono i soli DOCX: è l'archivio stesso a dirlo,
-                    ' e qui è quel che vogliamo.
-                    Dim scritti As IReadOnlyList(Of String) = Await New ArchivioDocumenti(_contesto.Cartella).
-                        ScriviCandidaturaAsync(candidatura, FormatiDocumento.Docx).ConfigureAwait(False)
+                    Dim scritti As IReadOnlyList(Of String)
+                    Dim ripiego As String = Nothing
+
+                    If voluti = FormatiDocumento.Docx Then
+
+                        ' Senza stampante si scrivono i soli DOCX: è l'archivio stesso a
+                        ' dirlo, e qui è quel che ci hanno chiesto.
+                        scritti = Await New ArchivioDocumenti(_contesto.Cartella).
+                            ScriviCandidaturaAsync(candidatura, voluti).ConfigureAwait(False)
+
+                    Else
+
+                        Dim stampati As IReadOnlyList(Of String) = Nothing
+                        Dim guasto As ErroreStampa = Nothing
+
+                        ' Il motore del browser e la stampante nascono e muoiono **dentro**
+                        ' il filo: fuori di lì non sarebbero di nessuno (v. FiloGrafico, e
+                        ' MotoreBrowser sul perché di un thread solo).
+                        Await FiloGrafico.EseguiAsync(
+                            Async Function() As Task
+                                Try
+                                    Using stampante As New StampantePdf(
+                                        New MotoreBrowser(_contesto.Cartella.CartellaWebView2))
+
+                                        stampati = Await New ArchivioDocumenti(_contesto.Cartella, stampante).
+                                            ScriviCandidaturaAsync(candidatura, voluti).ConfigureAwait(True)
+
+                                    End Using
+                                Catch ex As ErroreStampa
+                                    guasto = ex
+                                End Try
+                            End Function).ConfigureAwait(False)
+
+                        If guasto Is Nothing Then
+                            scritti = stampati
+
+                        ElseIf voluti = FormatiDocumento.Pdf Then
+                            ' Chiedeva il solo PDF: non è rimasto niente da consegnare, e
+                            ' chiamarlo «riuscito» sarebbe una bugia gentile.
+                            Return EsitoTool.NonRiuscito(guasto.Message)
+
+                        Else
+                            ' I DOCX erano già scritti quando la stampa è caduta — l'archivio
+                            ' fa prima quelli — ma l'elenco se n'è andato con l'eccezione: si
+                            ' riscrivono per sapere **quali** sono. Costa un attimo, e vale un
+                            ' elenco esatto invece di uno indovinato.
+                            scritti = Await New ArchivioDocumenti(_contesto.Cartella).
+                                ScriviCandidaturaAsync(candidatura, FormatiDocumento.Docx).ConfigureAwait(False)
+                            ripiego = guasto.Message
+                        End If
+
+                    End If
 
                     Dim nomi As New JsonArray()
                     For Each prodotto As String In scritti
                         nomi.Add(Path.GetFileName(prodotto))
                     Next
 
-                    Return EsitoTool.Riuscito(New JsonObject From {
+                    Dim risposta As New JsonObject From {
                         {"cartella", nome},
                         {"documenti", nomi},
-                        {"formato", "docx"},
-                        {"nota", "Il PDF si esporta dall'applicazione: qui non c'è la finestra " &
-                                 "che serve a stamparlo."}})
+                        {"formato", NomeFormato(If(ripiego Is Nothing, voluti, FormatiDocumento.Docx))}}
+
+                    If ripiego IsNot Nothing Then risposta.Add("nota", ripiego)
+
+                    Return EsitoTool.Riuscito(risposta)
 
                 Catch ex As Exception When TypeOf ex Is IOException OrElse
                                            TypeOf ex Is UnauthorizedAccessException OrElse
@@ -187,6 +256,57 @@ Namespace Mcp
                 End Try
 
             End Using
+
+        End Function
+
+        ''' <summary>
+        ''' Quali formati vuole chi ha chiamato. <b>Chi non lo dice li vuole tutti e due</b>:
+        ''' il tool si chiama «impagina i documenti», e chi lo chiama senza aggiungere altro
+        ''' vuole i file finiti, gli stessi che gli darebbe la finestra.
+        ''' </summary>
+        ''' <returns>
+        ''' <c>Nothing</c> se la richiesta è buona — e allora <paramref name="formati"/> dice
+        ''' quali —, il rifiuto da consegnare se il nome del formato non esiste.
+        ''' </returns>
+        Private Shared Function FormatiAmmessi(chiesto As String,
+                                               ByRef formati As FormatiDocumento) As EsitoTool
+
+            formati = FormatiDocumento.Entrambi
+            If String.IsNullOrWhiteSpace(chiesto) Then Return Nothing
+
+            Select Case chiesto.Trim().ToLowerInvariant()
+
+                Case "docx"
+                    formati = FormatiDocumento.Docx
+
+                Case "pdf"
+                    formati = FormatiDocumento.Pdf
+
+                Case "entrambi"
+                    formati = FormatiDocumento.Entrambi
+
+                Case Else
+                    Return EsitoTool.NonRiuscito(
+                        $"Il formato «{chiesto}» non esiste. Si può chiedere «docx», «pdf» o " &
+                        "«entrambi» — e se non lo chiedi, entrambi.")
+
+            End Select
+
+            Return Nothing
+
+        End Function
+
+        ''' <summary>Come si chiama, nella risposta, quel che è stato scritto davvero.</summary>
+        Private Shared Function NomeFormato(formati As FormatiDocumento) As String
+
+            Select Case formati
+                Case FormatiDocumento.Docx
+                    Return "docx"
+                Case FormatiDocumento.Pdf
+                    Return "pdf"
+                Case Else
+                    Return "entrambi"
+            End Select
 
         End Function
 

@@ -588,7 +588,9 @@ lo spiega, l'applicazione avvisa e parte lo stesso. **Due cose sono cambiate ris
 capitolo**: `esporta_backup` non è di questa tappa — espone F7, che si costruisce a T9, e
 oggi nell'applicazione quel bottone è visibile e spento — e `esporta_documento` scrive i
 **soli DOCX**, perché il PDF si stampa dal browser incorporato, che vuole una finestra che
-in `--mcp` non esiste. `salva_opportunita` accetta **tutti** gli artefatti e non il solo
+in `--mcp` non esiste. *(La seconda è durata poco: il 2026-08-19, chiudendo le cose rimaste
+indietro prima di T9, si è visto che quella finestra non serve — basta un filo STA con la
+sua pompa di messaggi, e il PDF esce anche da qui. Vedi cap. 09.3.)* `salva_opportunita` accetta **tutti** gli artefatti e non il solo
 annuncio, altrimenti quel che i tool di T8b producono non avrebbe dove andare; le stelle
 però le **ricalcola il programma** dai giudizi, e dei documenti senza il confronto da cui
 nascono si rifiutano — la macchina degli stati (cap. 07.3) non ammette il salto da «nuova»
