@@ -188,6 +188,23 @@ ed è in «Chiuse», insieme alla correzione della ricetta con cui si prova.*
   previsto dalla spec, ma è anche una data di scadenza da guardare, non un problema
   risolto. *(cap. 09.2; `ProtocolloMcp.VersioniSupportate`.)*
 
+## Da T8b — i tool che passano dall'AI (2026-08-19, alla chiusura)
+
+- **Un confronto e una generazione veri via MCP, messi accanto a quelli della finestra.**
+  È la seconda metà del collaudo di tappa che il cap. 14 chiede per T8: non solo che
+  `tools/list` sia corretto, ma che i risultati siano **identici a quelli
+  dell'interfaccia**. Nessun collaudo automatico può farlo — chiamerebbe l'AI vera, a
+  pagamento e con esiti che cambiano — quindi serve una sessione a mano, con la chiave
+  configurata. È il gesto che chiude anche la voce qui sotto, e si fa insieme al collaudo
+  da un client vero rimasto da T8a. *(cap. 14, T8; cap. 09.3.)*
+- **Il diario dei consumi via MCP è verificato leggendo, non eseguendo.** Che ogni
+  chiamata dei sette tool annoti la sua riga in `chiamate_ai.csv` — e che alla prima la
+  cartella dati nasca — discende dal fatto che il diario è agganciato al client dell'AI nel
+  montaggio del motore, quindi vale per chiunque lo usi. È una deduzione dal codice, solida
+  ma non una prova: nessuna riga di quel file è mai stata scritta da una chiamata partita
+  dal server. Si chiude alla prima generazione vera. *(cap. 09.3, nota «Una riga di
+  diagnostica»; `ContestoApp.MontaAi`.)*
+
 ## Da revisione adversariale (2026-08-09)
 
 - **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:

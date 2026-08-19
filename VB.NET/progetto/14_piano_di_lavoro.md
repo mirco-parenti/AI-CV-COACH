@@ -552,6 +552,30 @@ creata. **780 collaudi verdi** (erano 755), versione **0.3.033**, Pool **1.11** 
 Il collaudo di tappa dichiarato qui sopra — quello da un client MCP vero — resta da fare
 ed è in `in_sospeso.md`.
 
+**T8b — i tool che passano dall'AI (2026-08-19).** Sette tool — `analizza_annuncio`,
+`confronta`, `mitiga`, `struttura_cv`, `genera_cv`, `genera_lettera`, `rifinisci_testo` —
+sugli stessi mestieri e sugli stessi prompt del pool che usa l'applicazione. Il **profilo
+si legge da disco** e non si passa come parametro, serializzato come lo serializza l'app:
+su `confronto` e `mitigazione` la parità col prototipo si misura carattere per carattere
+(cap. 04.7). **Quattro decisioni** hanno orientato la gamba (cap. 09.2 e 09.3): il ciclo
+serve **più richieste insieme**, perché uno che aspetta un `genera_cv` di minuti non è
+lento ma **sordo** — non leggerebbe nemmeno il `notifications/cancelled` che arriva
+proprio allora; i tool dell'AI **restano in vetrina anche senza chiave** e falliscono
+dicendo dove si mette; il **diario dei consumi** si tiene anche via MCP e si corregge il
+capitolo che marcava quei tool «non scrive dati»; i documenti passano **sempre**
+dall'anti-slop, perché il CV chiesto da un client dev'essere lo stesso che esce dalla
+finestra. Il ciclo di T8a è stato perciò **rifatto**, non esteso: lucchetto sull'uscita,
+mappa degli annullamenti, e alla chiusura dell'ingresso i lavori in volo si fermano invece
+di essere portati a termine. `confronta` non avvolge la fila di T4 — quel passo giudica,
+calcola e mitiga insieme, e fa avanzare lo stato dell'opportunità — ma la **ricompone** dai
+pezzi sotto, col punteggio che resta del programma e non del modello (cap. 09.5).
+**796 collaudi verdi** (erano 780), versione **0.3.034**, Pool **1.11** invariato. I tre
+collaudi del ciclo sono stati **falsificati apposta**, rendendolo di nuovo seriale, per
+verificare che parlassero davvero del parallelo. Resta da fare la parte del collaudo di
+tappa che chiede «un confronto e una generazione via MCP con risultati identici a quelli
+dell'interfaccia»: è in `in_sospeso.md`, perché nessun collaudo automatico chiama l'AI
+vera.
+
 ### T9 — Rifinitura e rilascio 1.0
 Backup/ripristino (F7); Impostazioni complete; pulizia dati; gestione errori rivista
 pannello per pannello; **collaudo generale condotto da Mirco su candidature reali**;

@@ -314,7 +314,13 @@ Namespace Motore
         ''' determinabile» non è una lacuna — non c'era modo di saperlo — e mitigarlo
         ''' sarebbe inventare.
         ''' </summary>
-        Private Shared Function CiSonoGap(giudizi As JsonArray) As Boolean
+        ''' <remarks>
+        ''' Visibile fuori dalla fila perché la usa anche il tool <c>mitiga</c> del server
+        ''' MCP (cap. 09.3), dove la mitigazione si chiede da sola invece che come secondo
+        ''' tempo del confronto. La regola su quando c'è qualcosa da mitigare dev'essere
+        ''' <b>una</b>: due copie finirebbero per rispondere diverso alla stessa domanda.
+        ''' </remarks>
+        Friend Shared Function CiSonoGap(giudizi As JsonArray) As Boolean
 
             If giudizi Is Nothing Then Return False
 
@@ -355,7 +361,8 @@ Namespace Motore
         End Function
 
         ''' <summary>La stima d'insieme dell'AI, da passare al calcolo.</summary>
-        Private Shared Function NumeroComplessivo(confronto As JsonNode) As JsonNode
+        ''' <remarks>Visibile fuori dalla fila per il tool <c>confronta</c>, come <see cref="CiSonoGap"/>.</remarks>
+        Friend Shared Function NumeroComplessivo(confronto As JsonNode) As JsonNode
 
             Dim oggetto As JsonObject = TryCast(confronto, JsonObject)
             If oggetto Is Nothing Then Return Nothing

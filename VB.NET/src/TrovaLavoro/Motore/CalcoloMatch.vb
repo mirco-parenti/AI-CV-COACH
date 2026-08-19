@@ -23,6 +23,31 @@ Namespace Motore
         Public Property GateEliminatorio As Boolean
         ''' <summary>La spiegazione da mostrare all'utente; <c>Nothing</c> se non serve.</summary>
         Public Property Nota As String
+
+        ''' <summary>
+        ''' Il punteggio in JSON: la forma con cui finisce su disco accanto
+        ''' all'opportunità, e la stessa che il server MCP consegna a chi ha chiesto un
+        ''' confronto (cap. 09.3).
+        ''' </summary>
+        ''' <remarks>
+        ''' Sta qui e non nei due posti che la usano perché è <b>una</b> forma: due
+        ''' copie diverginano al primo campo aggiunto, e allora il punteggio riletto da
+        ''' disco e quello appena calcolato smetterebbero di somigliarsi senza che
+        ''' nessuno se ne accorga.
+        ''' </remarks>
+        Public Function ComeJson() As JsonObject
+
+            Return New JsonObject From {
+                {"match_finale", MatchFinale},
+                {"stelle", Stelle},
+                {"score_base", ScoreBase},
+                {"numero_llm", NumeroLlm},
+                {"scarto_tagliato", ScartoTagliato},
+                {"gate_eliminatorio", GateEliminatorio},
+                {"nota", Nota}}
+
+        End Function
+
     End Class
 
     ''' <summary>

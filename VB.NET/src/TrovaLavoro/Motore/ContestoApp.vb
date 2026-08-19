@@ -85,6 +85,16 @@ Namespace Motore
         Public ReadOnly Property Generatore As IGeneratore
 
         ''' <summary>
+        ''' Chi giudica e chi mitiga; <c>Nothing</c> senza AI o senza pool. Sta qui per la
+        ''' stessa ragione del <see cref="Generatore"/>: è lo stesso mestiere che lavora
+        ''' dentro la <see cref="Pipeline"/>, ma il server MCP (cap. 09.3) espone
+        ''' <c>confronta</c> e <c>mitiga</c> come <b>due porte distinte</b>, e nessuna
+        ''' delle due percorre la fila — chi chiama da fuori decide da sé se e quando
+        ''' chiedere il secondo tempo.
+        ''' </summary>
+        Public ReadOnly Property Confrontatore As IConfrontatore
+
+        ''' <summary>
         ''' Chi scrive l'email di candidatura dalla lettera (T6, cap. 07.1);
         ''' <c>Nothing</c> senza AI o senza pool, come gli altri mestieri.
         ''' </summary>
@@ -356,9 +366,14 @@ Namespace Motore
             ' lui. Nasce prima della pipeline perché è la pipeline a riceverla.
             _Rifinitura = New Motore.Rifinitura(New Rifinitore(Libreria, Client))
 
+            ' Il confrontatore si tiene, invece di nascerci dentro la fila: il server MCP
+            ' lo chiama per conto suo. Il tipo si scrive qualificato per la solita ragione
+            ' — la proprietà che lo tiene si chiama come lui.
+            _Confrontatore = New Ai.Confrontatore(Libreria, Client)
+
             _Pipeline = New PipelineCandidatura(
                 New AnalizzatoreAnnuncio(Libreria, Client),
-                New Confrontatore(Libreria, Client),
+                _Confrontatore,
                 _Generatore,
                 Taratura,
                 _Rifinitura)

@@ -2,6 +2,7 @@ Imports System.IO
 Imports System.Text
 Imports System.Text.Json
 Imports System.Text.Json.Nodes
+Imports System.Threading.Tasks
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro.Mcp
 Imports TrovaLavoro.Motore
@@ -16,7 +17,7 @@ Namespace Mcp
     ''' cartella dati.
     ''' </summary>
     ''' <remarks>
-    ''' Il ciclo su stdio non serve: <see cref="ServerMcp.Rispondi"/> sta staccato
+    ''' Il ciclo su stdio non serve: <see cref="ServerMcp.RispondiAsync"/> sta staccato
     ''' apposta, e si interroga come una funzione qualunque. Che poi quel ciclo giri
     ''' davvero dentro l'eseguibile, con le pipe vere, lo prova
     ''' <c>CollaudiServerMcpDalVivo</c> — sono due domande diverse e vanno tenute
@@ -109,14 +110,14 @@ Namespace Mcp
 #Region "Le due ere"
 
         <TestMethod>
-        Public Sub UnClientVecchioApreConInitializeEVieneServito()
+        Public Async Function UnClientVecchioApreConInitializeEVieneServito() As Task
             ' L'era legacy: la versione si negozia una volta, e se è una che sappiamo
             ' parlare si risponde con la stessa — spostare il client altrove senza motivo
             ' lo costringerebbe a decidere se restare.
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
-                Dim risposta As String = Servitore(contesto).Rispondi(
+                Dim risposta As String = Await Servitore(contesto).RispondiAsync(
                     Richiesta("initialize", EraMcp.Legacy,
                               New JsonObject From {{"protocolVersion", "2025-11-25"}}))
 
@@ -128,16 +129,16 @@ Namespace Mcp
                                "l'era vecchia non conosce resultType e non deve vederselo arrivare")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub AUnaRevisioneVecchiaCheNonConosciamoSiRispondeConLaNostra()
+        Public Async Function AUnaRevisioneVecchiaCheNonConosciamoSiRispondeConLaNostra() As Task
             ' La regola dell'handshake: se non sappiamo parlare quella chiesta, si
             ' risponde con la più recente che conosciamo, e poi decide il client.
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
-                Dim risposta As String = Servitore(contesto).Rispondi(
+                Dim risposta As String = Await Servitore(contesto).RispondiAsync(
                     Richiesta("initialize", EraMcp.Legacy,
                               New JsonObject From {{"protocolVersion", "1.0.0"}}))
 
@@ -146,17 +147,17 @@ Namespace Mcp
                                 "la nostra, non la sua")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub UnClientNuovoEntraSenzaBussareEScopreLeDueEre()
+        Public Async Function UnClientNuovoEntraSenzaBussareEScopreLeDueEre() As Task
             ' L'era moderna: nessun handshake, si chiama e basta. E il server dichiara
             ' tutte le versioni che parla, che è ciò che rende visibile la doppia porta.
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
                 Dim esito As JsonObject = Risultato(
-                    Servitore(contesto).Rispondi(Richiesta("server/discover", EraMcp.Moderna)))
+                    Await Servitore(contesto).RispondiAsync(Richiesta("server/discover", EraMcp.Moderna)))
 
                 Assert.AreEqual("complete", esito("resultType").GetValue(Of String)(), "il tipo del risultato")
 
@@ -168,26 +169,26 @@ Namespace Mcp
                 Assert.IsNotNull(meta(ProtocolloMcp.ChiaveInfoServer), "chi siamo, nel meta")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub UnaVersioneCheNonParliamoTornaConLElencoDiQuelleCheParliamo()
+        Public Async Function UnaVersioneCheNonParliamoTornaConLElencoDiQuelleCheParliamo() As Task
             ' Senza l'elenco il client saprebbe solo di aver sbagliato, e non avrebbe
             ' modo di riprovare giusto.
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
-                Dim risposta As String = Servitore(contesto).Rispondi(
+                Dim risposta As String = Await Servitore(contesto).RispondiAsync(
                     Richiesta("tools/list", EraMcp.Moderna, versione:="1999-01-01"))
 
                 Assert.AreEqual(ProtocolloMcp.ErroreVersioneNonSupportata, CodiceErrore(risposta), "il codice giusto")
                 StringAssert.Contains(risposta, ProtocolloMcp.VersioneModerna, "e l'elenco di quelle buone")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub NellEraModernaLeCapacitaDelClientSonoObbligatorie()
+        Public Async Function NellEraModernaLeCapacitaDelClientSonoObbligatorie() As Task
             ' Una richiesta moderna senza capacità dichiarate è malformata, e la spec
             ' vuole che si dica con «parametri non validi».
             Dim radice As String = CartellaTemporanea()
@@ -202,44 +203,43 @@ Namespace Mcp
                             {ProtocolloMcp.ChiaveVersione, ProtocolloMcp.VersioneModerna}}}}}}
 
                 Assert.AreEqual(ProtocolloMcp.ErroreParametriNonValidi,
-                                CodiceErrore(Servitore(contesto).Rispondi(monca.ToJsonString())),
+                                CodiceErrore(Await Servitore(contesto).RispondiAsync(monca.ToJsonString())),
                                 "manca ciò che il client sa fare")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub AllEraVecchiaNonSiChiedeQuelCheNonPuoDare()
+        Public Async Function AllEraVecchiaNonSiChiedeQuelCheNonPuoDare() As Task
             ' Un client legacy non manda nessun _meta: pretenderlo vorrebbe dire
             ' rifiutare tutti i client di ieri.
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
                 Dim esito As JsonObject = Risultato(
-                    Servitore(contesto).Rispondi(Richiesta("tools/list", EraMcp.Legacy)))
+                    Await Servitore(contesto).RispondiAsync(Richiesta("tools/list", EraMcp.Legacy)))
 
                 Assert.IsNotNull(esito("tools"), "i tool ci sono lo stesso")
                 Assert.IsFalse(esito.ContainsKey("resultType"), "e la forma è quella di allora")
 
             End Using
-        End Sub
+        End Function
 
 #End Region
 
 #Region "La vetrina dei tool"
 
         <TestMethod>
-        Public Sub ITreToolDiLetturaSiPresentanoConLoroSchema()
+        Public Async Function IToolSiPresentanoConLoroSchemaENellOrdineDichiarato() As Task
             ' Cap. 09.3. Uno schema ci vuole sempre, anche per un tool che non chiede
-            ' niente: un tool senza parametri non è un tool senza schema.
+            ' niente: un tool senza parametri non è un tool senza schema. E l'ordine non
+            ' deve ballare — i client tengono la vetrina da parte.
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
                 Dim tool As JsonArray = TryCast(
-                    Risultato(Servitore(contesto).Rispondi(Richiesta("tools/list", EraMcp.Moderna)))("tools"),
+                    Risultato(Await Servitore(contesto).RispondiAsync(Richiesta("tools/list", EraMcp.Moderna)))("tools"),
                     JsonArray)
-
-                Assert.AreEqual(3, tool.Count, "tre tool a T8a")
 
                 Dim nomi As New List(Of String)
                 For Each t As JsonNode In tool
@@ -251,55 +251,59 @@ Namespace Mcp
 
                 CollectionAssert.AreEqual(
                     New List(Of String) From {CatalogoTool.LeggiProfilo, CatalogoTool.LeggiRegistro,
-                                              CatalogoTool.LeggiOpportunita},
-                    nomi, "nell'ordine dichiarato, che non deve ballare")
+                                              CatalogoTool.LeggiOpportunita,
+                                              CatalogoTool.AnalizzaAnnuncio, CatalogoTool.Confronta,
+                                              CatalogoTool.Mitiga, CatalogoTool.StrutturaCv,
+                                              CatalogoTool.GeneraCv, CatalogoTool.GeneraLettera,
+                                              CatalogoTool.RifinisciTesto},
+                    nomi, "i tre di lettura e i sette dell'AI, nell'ordine dichiarato")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub LElencoDeiToolSiPuoChiedereDueVolte()
+        Public Async Function LElencoDeiToolSiPuoChiedereDueVolte() As Task
             ' Un nodo JSON non sta in due alberi: se lo schema non si ricopiasse, la
             ' seconda richiesta troverebbe il nostro già appeso alla prima e scoppierebbe.
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
                 Dim server As ServerMcp = Servitore(contesto)
-                Dim primo As String = server.Rispondi(Richiesta("tools/list", EraMcp.Moderna))
-                Dim secondo As String = server.Rispondi(Richiesta("tools/list", EraMcp.Moderna))
+                Dim primo As String = Await server.RispondiAsync(Richiesta("tools/list", EraMcp.Moderna))
+                Dim secondo As String = Await server.RispondiAsync(Richiesta("tools/list", EraMcp.Moderna))
 
                 Assert.AreEqual(primo, secondo, "la stessa vetrina, due volte")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub UnToolCheNonEsisteEUnErroreDiProtocollo()
+        Public Async Function UnToolCheNonEsisteEUnErroreDiProtocollo() As Task
             ' Cap. 09.2: chi ha chiamato ha sbagliato la richiesta, non i parametri, e
             ' dirgli «riprova» non lo aiuterebbe.
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
-                Dim risposta As String = Servitore(contesto).Rispondi(
+                Dim risposta As String = Await Servitore(contesto).RispondiAsync(
                     Richiesta("tools/call", EraMcp.Moderna, New JsonObject From {{"name", "vola"}}))
 
                 Assert.AreEqual(ProtocolloMcp.ErroreParametriNonValidi, CodiceErrore(risposta), "errore JSON-RPC")
 
             End Using
-        End Sub
+        End Function
 
 #End Region
 
 #Region "I tool di lettura"
 
         <TestMethod>
-        Public Sub SenzaProfiloIlToolLoDiceInveceDiRompersi()
+        Public Async Function SenzaProfiloIlToolLoDiceInveceDiRompersi() As Task
             ' Un tool che non ce la fa risponde con un risultato normale marcato
             ' isError, il cui testo è scritto per essere letto da un modello.
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
-                Dim esito As JsonObject = Risultato(Servitore(contesto).Rispondi(
+                Dim esito As JsonObject = Risultato(Await Servitore(contesto).RispondiAsync(
                     Richiesta("tools/call", EraMcp.Moderna,
                               New JsonObject From {{"name", CatalogoTool.LeggiProfilo}})))
 
@@ -307,10 +311,10 @@ Namespace Mcp
                 StringAssert.Contains(esito("content").ToJsonString(), "profilo", "e ha detto cosa manca")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub IlProfiloSiConsegnaComEScrittoSuDisco()
+        Public Async Function IlProfiloSiConsegnaComEScrittoSuDisco() As Task
             ' Il file è la fonte: rileggerlo e riscriverlo attraverso le classi del
             ' motore mostrerebbe la nostra interpretazione invece dei fatti.
             Dim radice As String = CartellaTemporanea()
@@ -319,7 +323,7 @@ Namespace Mcp
                 Scrivi(contesto.Cartella.FileProfilo,
                        "{""nome"":""Mario Rossi"",""campo_che_non_conosciamo"":42}")
 
-                Dim esito As JsonObject = Risultato(Servitore(contesto).Rispondi(
+                Dim esito As JsonObject = Risultato(Await Servitore(contesto).RispondiAsync(
                     Richiesta("tools/call", EraMcp.Moderna,
                               New JsonObject From {{"name", CatalogoTool.LeggiProfilo}})))
 
@@ -334,16 +338,16 @@ Namespace Mcp
                                       "lo stesso JSON anche nel blocco di testo, per chi legge solo quello")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub IlRegistroRispondeAncheQuandoNonCeNessunaCandidatura()
+        Public Async Function IlRegistroRispondeAncheQuandoNonCeNessunaCandidatura() As Task
             ' L'indice si ricostruisce dalle cartelle: se non ce ne sono, la risposta
             ' giusta è un elenco vuoto, non un guasto.
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
-                Dim esito As JsonObject = Risultato(Servitore(contesto).Rispondi(
+                Dim esito As JsonObject = Risultato(Await Servitore(contesto).RispondiAsync(
                     Richiesta("tools/call", EraMcp.Moderna,
                               New JsonObject From {{"name", CatalogoTool.LeggiRegistro}})))
 
@@ -353,10 +357,10 @@ Namespace Mcp
                 Assert.AreEqual(0, voci.Count, "e l'elenco è vuoto")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub UnaCandidaturaSiConsegnaConTuttoQuelCheHaProdotto()
+        Public Async Function UnaCandidaturaSiConsegnaConTuttoQuelCheHaProdotto() As Task
             ' Cap. 09.3: «tutti gli artefatti». Si raccolgono i .json che ci sono,
             ' invece di chiedere per nome quelli che il programma conosce.
             Dim radice As String = CartellaTemporanea()
@@ -364,7 +368,7 @@ Namespace Mcp
 
                 PreparaLaCandidatura(contesto)
 
-                Dim esito As JsonObject = Risultato(Servitore(contesto).Rispondi(
+                Dim esito As JsonObject = Risultato(Await Servitore(contesto).RispondiAsync(
                     Richiesta("tools/call", EraMcp.Moderna,
                               New JsonObject From {{"name", CatalogoTool.LeggiOpportunita},
                                                    {"arguments", New JsonObject From {{"cartella", Candidatura}}}})))
@@ -384,14 +388,14 @@ Namespace Mcp
                                       "i documenti impaginati, per nome")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub UnaCandidaturaCheNonCESiDicePerNome()
+        Public Async Function UnaCandidaturaCheNonCESiDicePerNome() As Task
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
-                Dim esito As JsonObject = Risultato(Servitore(contesto).Rispondi(
+                Dim esito As JsonObject = Risultato(Await Servitore(contesto).RispondiAsync(
                     Richiesta("tools/call", EraMcp.Moderna,
                               New JsonObject From {{"name", CatalogoTool.LeggiOpportunita},
                                                    {"arguments", New JsonObject From {{"cartella", "mai-esistita"}}}})))
@@ -401,10 +405,36 @@ Namespace Mcp
                                       "e si dice dove trovare i nomi buoni")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub DaQuiNonSiEsceDallaCartellaDati()
+        Public Async Function UnToolDellAiSenzaChiaveFallisceMaNonEUnErroreDiProtocollo() As Task
+            ' La distinzione del cap. 09.2, sul tool più costoso che abbiamo: il tool
+            ' esiste — quindi niente «Unknown tool», che manderebbe il modello a cercare
+            ' un errore nel nome — e non può lavorare, quindi un risultato marcato, con
+            ' dentro la frase che dice cosa fare. Le due corsie non vanno scambiate.
+            Dim radice As String = CartellaTemporanea()
+            Using contesto As ContestoApp = ContestoApp.Monta(radice, "", PoolInesistente())
+
+                Dim risposta As String = Await Servitore(contesto).RispondiAsync(
+                    Richiesta("tools/call", EraMcp.Moderna,
+                              New JsonObject From {{"name", CatalogoTool.GeneraCv},
+                                                   {"arguments", New JsonObject()}}))
+
+                ' La variabile non si chiama «letta»: in VB le maiuscole non distinguono, e
+                ' si mangerebbe la funzione qui sopra diventando un indice sulla stringa.
+                Dim messaggio As JsonObject = Letta(risposta)
+                Assert.IsNull(messaggio("error"), "non è un errore JSON-RPC: il tool c'è")
+
+                Dim esito As JsonObject = Risultato(risposta)
+                Assert.IsTrue(esito("isError").GetValue(Of Boolean)(), "ma non ce l'ha fatta")
+                StringAssert.Contains(esito("content").ToJsonString(), "chiave API", "e dice perché")
+
+            End Using
+        End Function
+
+        <TestMethod>
+        Public Async Function DaQuiNonSiEsceDallaCartellaDati() As Task
             ' Qui arriva testo scritto da un modello, che può sbagliare e che qualcuno
             ' potrebbe aver istruito male: un nome è un nome (cap. 09.5).
             Dim radice As String = CartellaTemporanea()
@@ -413,7 +443,7 @@ Namespace Mcp
                 For Each tentativo As String In New String() {"..", "..\..\Windows", "C:\Windows",
                                                               Candidatura & "/../..", "sotto/cartella"}
 
-                    Dim esito As JsonObject = Risultato(Servitore(contesto).Rispondi(
+                    Dim esito As JsonObject = Risultato(Await Servitore(contesto).RispondiAsync(
                         Richiesta("tools/call", EraMcp.Moderna,
                                   New JsonObject From {{"name", CatalogoTool.LeggiOpportunita},
                                                        {"arguments", New JsonObject From {{"cartella", tentativo}}}})))
@@ -423,14 +453,14 @@ Namespace Mcp
                 Next
 
             End Using
-        End Sub
+        End Function
 
 #End Region
 
 #Region "Le regole del filo"
 
         <TestMethod>
-        Public Sub UnaRispostaStaSuUnaRigaSola()
+        Public Async Function UnaRispostaStaSuUnaRigaSola() As Task
             ' È la riga a separare un messaggio dal successivo: un a capo in mezzo
             ' spezzerebbe il messaggio in due, e il client leggerebbe due metà illeggibili.
             Dim radice As String = CartellaTemporanea()
@@ -439,9 +469,9 @@ Namespace Mcp
                 Scrivi(contesto.Cartella.FileProfilo, "{""nota"":""prima riga\nseconda riga""}")
 
                 Dim risposte As String() = {
-                    Servitore(contesto).Rispondi(Richiesta("tools/list", EraMcp.Moderna)),
-                    Servitore(contesto).Rispondi(Richiesta("server/discover", EraMcp.Moderna)),
-                    Servitore(contesto).Rispondi(Richiesta("tools/call", EraMcp.Moderna,
+                    Await Servitore(contesto).RispondiAsync(Richiesta("tools/list", EraMcp.Moderna)),
+                    Await Servitore(contesto).RispondiAsync(Richiesta("server/discover", EraMcp.Moderna)),
+                    Await Servitore(contesto).RispondiAsync(Richiesta("tools/call", EraMcp.Moderna,
                         New JsonObject From {{"name", CatalogoTool.LeggiProfilo}}))}
 
                 For Each risposta As String In risposte
@@ -452,10 +482,10 @@ Namespace Mcp
                 Next
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub AUnaNotificaNonSiRisponde()
+        Public Async Function AUnaNotificaNonSiRisponde() As Task
             ' Nemmeno per dire che non l'abbiamo capita: una notifica non ha
             ' identificativo, e una risposta senza destinatario confonderebbe il client.
             Dim radice As String = CartellaTemporanea()
@@ -463,46 +493,46 @@ Namespace Mcp
 
                 Dim server As ServerMcp = Servitore(contesto)
 
-                Assert.IsNull(server.Rispondi("{""jsonrpc"":""2.0"",""method"":""notifications/initialized""}"),
+                Assert.IsNull(Await server.RispondiAsync("{""jsonrpc"":""2.0"",""method"":""notifications/initialized""}"),
                               "il «sono pronto» dell'era vecchia")
-                Assert.IsNull(server.Rispondi("{""jsonrpc"":""2.0"",""method"":""notifications/cancelled""," &
+                Assert.IsNull(Await server.RispondiAsync("{""jsonrpc"":""2.0"",""method"":""notifications/cancelled""," &
                                               """params"":{""requestId"":1}}"),
                               "e il «lascia perdere»")
-                Assert.IsNull(server.Rispondi("{""jsonrpc"":""2.0"",""method"":""notifications/mai_sentita""}"),
+                Assert.IsNull(Await server.RispondiAsync("{""jsonrpc"":""2.0"",""method"":""notifications/mai_sentita""}"),
                               "e anche una che non conosciamo")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub UnaRigaCheNonEJsonNonUccideIlServer()
+        Public Async Function UnaRigaCheNonEJsonNonUccideIlServer() As Task
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
                 Dim server As ServerMcp = Servitore(contesto)
 
-                Assert.AreEqual(ProtocolloMcp.ErroreParse, CodiceErrore(server.Rispondi("{ questo non è JSON")),
+                Assert.AreEqual(ProtocolloMcp.ErroreParse, CodiceErrore(Await server.RispondiAsync("{ questo non è JSON")),
                                 "lo dice")
-                Assert.IsNotNull(Risultato(server.Rispondi(Richiesta("tools/list", EraMcp.Moderna))),
+                Assert.IsNotNull(Risultato(Await server.RispondiAsync(Richiesta("tools/list", EraMcp.Moderna))),
                                  "e subito dopo lavora come prima")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub UnMetodoCheNonConosciamoTornaMethodNotFound()
+        Public Async Function UnMetodoCheNonConosciamoTornaMethodNotFound() As Task
             Dim radice As String = CartellaTemporanea()
             Using contesto As ContestoApp = Monta(radice)
 
                 Assert.AreEqual(ProtocolloMcp.ErroreMetodoIgnoto,
-                                CodiceErrore(Servitore(contesto).Rispondi(Richiesta("balla/tango", EraMcp.Moderna))),
+                                CodiceErrore(Await Servitore(contesto).RispondiAsync(Richiesta("balla/tango", EraMcp.Moderna))),
                                 "il codice di «non so farlo»")
 
             End Using
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub LIdentificativoTornaIndietroComEArrivato()
+        Public Async Function LIdentificativoTornaIndietroComEArrivato() As Task
             ' JSON-RPC lo ammette testo o numero, e non si interpreta: è il client a
             ' doverlo riconoscere fra le risposte che gli arrivano.
             Dim radice As String = CartellaTemporanea()
@@ -510,16 +540,16 @@ Namespace Mcp
 
                 Dim server As ServerMcp = Servitore(contesto)
 
-                Dim idDiNumero As JsonObject = Letta(server.Rispondi(
+                Dim idDiNumero As JsonObject = Letta(Await server.RispondiAsync(
                     Richiesta("tools/list", EraMcp.Moderna, id:=JsonValue.Create(99))))
                 Assert.AreEqual(99, idDiNumero("id").GetValue(Of Integer)(), "il numero")
 
-                Dim idDiTesto As JsonObject = Letta(server.Rispondi(
+                Dim idDiTesto As JsonObject = Letta(Await server.RispondiAsync(
                     Richiesta("tools/list", EraMcp.Moderna, id:=JsonValue.Create("abc-1"))))
                 Assert.AreEqual("abc-1", idDiTesto("id").GetValue(Of String)(), "e il testo")
 
             End Using
-        End Sub
+        End Function
 
 #End Region
 

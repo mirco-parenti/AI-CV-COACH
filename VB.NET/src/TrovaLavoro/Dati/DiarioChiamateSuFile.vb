@@ -30,6 +30,22 @@ Namespace Dati
         ''' <summary>Lo stesso separatore dell'esportazione del registro.</summary>
         Private Const Separatore As String = ";"
 
+        ''' <summary>
+        ''' Il turno di parola per scrivere la riga. Serve da quando il server MCP
+        ''' (cap. 09) chiama l'AI più volte insieme: due annotazioni nello stesso istante
+        ''' si contenderebbero il file, una delle due prenderebbe un
+        ''' <see cref="IOException"/> e verrebbe inghiottita dalla rete qui sotto — che è
+        ''' giusta per un disco pieno e assurda per una gara con noi stessi. Perdere
+        ''' proprio le righe delle chiamate simultanee falserebbe la misura nel punto in
+        ''' cui serve di più, cioè quando il programma lavora al massimo.
+        ''' </summary>
+        ''' <remarks>
+        ''' È condiviso e non d'istanza: costa un'attesa impercettibile — si scrive una
+        ''' riga — e copre anche il caso di due contesti montati sulla stessa cartella
+        ''' dati, dove due istanze diverse guardano lo stesso file.
+        ''' </remarks>
+        Private Shared ReadOnly Lucchetto As New Object
+
         Private Shared ReadOnly Intestazioni As String() = {
             "quando", "prompt", "modello", "tetto", "token_ingresso",
             "token_uscita", "percentuale_del_tetto", "motivo_fine"}
@@ -54,15 +70,22 @@ Namespace Dati
             Try
                 Dim riga As String = String.Join(Separatore, Campi(idPrompt, tetto, uscita))
 
-                ' L'intestazione la scrive chi trova il file ancora inesistente: così non
-                ' serve nessun passo di preparazione, e un file cancellato a mano rinasce
-                ' completo invece che monco.
-                Dim testa As String = If(File.Exists(_percorso),
-                                         "",
-                                         String.Join(Separatore, Intestazioni) & Environment.NewLine)
+                SyncLock Lucchetto
 
-                Directory.CreateDirectory(Path.GetDirectoryName(_percorso))
-                File.AppendAllText(_percorso, testa & riga & Environment.NewLine, Encoding.UTF8)
+                    ' L'intestazione la scrive chi trova il file ancora inesistente: così
+                    ' non serve nessun passo di preparazione, e un file cancellato a mano
+                    ' rinasce completo invece che monco. La domanda sta dentro il turno di
+                    ' parola insieme alla scrittura: fuori, due chiamate simultanee
+                    ' troverebbero il file assente tutte e due e scriverebbero
+                    ' l'intestazione due volte.
+                    Dim testa As String = If(File.Exists(_percorso),
+                                             "",
+                                             String.Join(Separatore, Intestazioni) & Environment.NewLine)
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(_percorso))
+                    File.AppendAllText(_percorso, testa & riga & Environment.NewLine, Encoding.UTF8)
+
+                End SyncLock
 
             Catch ex As Exception When TypeOf ex Is IOException OrElse
                                        TypeOf ex Is UnauthorizedAccessException

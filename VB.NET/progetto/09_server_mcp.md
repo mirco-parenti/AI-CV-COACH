@@ -56,9 +56,27 @@ annuncio e dimmi se vale la pena candidarmi» — e Claude userà **la nostra pi
   diagnostica ed errori vanno su **stderr**, che è esplicitamente il posto giusto per i
   log e che i client raccolgono in un file a parte. Lì finiscono anche gli avvisi della
   riga di comando (cap. 11.1), che senza barra di stato non avrebbero dove andare.
-- **Si esce quando stdin si chiude.** È il segnale di spegnimento primario e l'unico
-  portabile: il client chiude l'ingresso e aspetta che il processo termini. Un server che
-  non lo onora si fa ammazzare a forza, ed è un modo brutto di finire.
+- **Più richieste insieme** *(2026-08-19)*. Il filo che legge non si ferma mai:
+  riconosce il messaggio, mette da parte il lavoro e torna ad ascoltare. Con i soli tool
+  di lettura la differenza non si sarebbe vista — si apre un file e si è già finito — ma
+  un `genera_cv` dura minuti, e un server che lo aspetta è un server **sordo**: non
+  sentirebbe nemmeno il «lascia perdere» che il client manda proprio mentre quel lavoro è
+  in corso. La conseguenza immediata è che **sull'uscita si scrive uno alla volta**: due
+  risposte che escono insieme si intreccerebbero a metà riga, e la riga è la cornice del
+  messaggio.
+- **Un lavoro si può ritirare.** Il client manda `notifications/cancelled` con
+  l'identificativo della richiesta, e quel lavoro si ferma dov'è. A una richiesta ritirata
+  **non si risponde**: chi ha annullato non aspetta più niente su quell'identificativo, e
+  mandargli un errore vorrebbe dire raccontargli un guasto che ha causato lui apposta. Un
+  annullamento che arriva quando il lavoro è già finito non è un guasto ma la normalità:
+  le due cose si sono incrociate sulla pipe.
+- **Si esce quando stdin si chiude, e quel che è in volo si annulla.** È il segnale di
+  spegnimento primario e l'unico portabile: il client chiude l'ingresso e aspetta che il
+  processo termini. Un server che non lo onora si fa ammazzare a forza, ed è un modo
+  brutto di finire. Da quel momento nessuna risposta ha più dove andare, quindi i lavori
+  ancora in corso si fermano invece di essere portati a termine: macinare un CV che
+  nessuno leggerà sarebbe solo un modo più lento di morire, e intanto la chiave
+  dell'utente continuerebbe a pagarlo.
 
 ### Le due ere del protocollo (2026-08-19)
 
@@ -127,6 +145,26 @@ Prima versione — tutti i tool leggono/scrivono la **stessa cartella dati** del
 | `esporta_documento` | CV/lettera JSON → file DOCX o PDF nella cartella dell'opportunità | sì (nuovi file) |
 | `salva_opportunita` | inserisce un annuncio analizzato nella coda | sì |
 | `esporta_backup` | scrive il backup JSON del profilo | sì (nuovo file) |
+
+**Una riga di diagnostica, e la cartella che nasce** *(2026-08-19)*. La colonna «scrive
+dati» parla dei **dati dell'utente** — profilo, registro, candidature, documenti — e per i
+sette tool che passano dall'AI resta «no»: nessuno di loro tocca niente di tutto ciò. Ogni
+chiamata all'AI però annota una riga in `chiamate_ai.csv` (cap. 11.1), esattamente come
+quando a chiamare è l'applicazione: quale prompt, quanto è costato, quanta parte del
+proprio tetto ha consumato. È **diagnostica, non roba dell'utente** (cap. 11.1, «l'unico
+file che non è dell'utente»), ed è la misura con cui si ritarano i `max_token` sui numeri
+veri invece che a naso — tanto più adesso che il livello di ragionamento è passato a
+Sonnet 5 (cap. 02.5). La conseguenza va detta perché è visibile: alla prima chiamata via
+MCP la **cartella dati nasce**, anche se prima non c'era. Il file si scrive in fondo e non
+si riscrive mai, quindi non è la scrittura che il lucchetto (§9.4) deve proteggere.
+
+**I documenti escono rifiniti** *(2026-08-19)*. `genera_cv` e `genera_lettera` fanno
+passare quel che hanno scritto dalla passata anti-slop (cap. 08), come fa la fila dentro
+l'applicazione. Costa una seconda chiamata, e si paga volentieri: il CV chiesto da un
+client MCP dev'essere **lo stesso** che si otterrebbe dalla finestra. Una differenza di
+qualità fra le due porte non la dichiarerebbe nessuno, e si scoprirebbe mesi dopo
+confrontando due documenti senza capire perché uno dei due è più piatto. Chi vuole la
+passata su un testo suo ha `rifinisci_testo`, che è la stessa cosa offerta da sola.
 
 **Fuori dalla prima versione, di proposito**: la modifica del profilo via MCP, azione
 irreversibile che resta nell'app dove c'è la conferma visiva dell'utente (livello 6 del

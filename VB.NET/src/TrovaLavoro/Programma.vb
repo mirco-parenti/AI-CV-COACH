@@ -83,7 +83,12 @@ Friend Module Programma
                 server.Annota(nota)
             Next
 
-            server.Servi()
+            ' Il punto d'ingresso di un programma Windows non è asincrono, e qui è
+            ' l'unico posto in cui l'attesa si fa a mano: si aspetta il ciclo del server,
+            ' che finisce quando il client chiude l'ingresso. Nessun rischio di stallo —
+            ' in un WinExe avviato così non c'è nessun contesto di sincronizzazione a cui
+            ' le continuazioni debbano tornare, perché non c'è nessuna finestra.
+            server.ServiAsync().GetAwaiter().GetResult()
 
         End Using
 

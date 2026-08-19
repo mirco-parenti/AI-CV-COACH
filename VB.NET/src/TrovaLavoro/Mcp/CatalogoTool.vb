@@ -1,4 +1,6 @@
 Imports System.Text.Json.Nodes
+Imports System.Threading
+Imports System.Threading.Tasks
 Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Motore
 
@@ -114,14 +116,18 @@ Namespace Mcp
     ''' <c>tools/list</c> e lo smistamento di <c>tools/call</c>.
     ''' </summary>
     ''' <remarks>
-    ''' <para>A T8a ci sono i tre di sola lettura. I tool che passano dall'AI arrivano con
-    ''' T8b e quelli che scrivono con T8c, insieme al lucchetto della cartella dati
-    ''' (cap. 09.4): finché non ci sono, il server non ha modo di toccare niente, ed è il
-    ''' motivo per cui questa prima tappa può fare a meno del lucchetto senza rischiare
-    ''' nulla.</para>
+    ''' <para>Ci sono i tre di sola lettura (T8a) e i sette che passano dall'AI (T8b).
+    ''' Quelli che <b>scrivono</b> arrivano con T8c, insieme al lucchetto della cartella
+    ''' dati (cap. 09.4): finché non ci sono, nessun tool cambia un file dell'utente, ed è
+    ''' il motivo per cui il lucchetto può ancora aspettare.</para>
+    ''' <para><b>I tool dell'AI restano in vetrina anche senza chiave</b>, e falliscono
+    ''' dicendo perché. Nasconderli sarebbe peggio: il client tiene l'elenco da parte e
+    ''' non gli abbiamo promesso nessun avviso di cambiamento, e un tool che sparisce si
+    ''' annuncia come «Unknown tool» — che a un modello dice «hai sbagliato nome», cioè lo
+    ''' manda a cercare l'errore dove non è.</para>
     ''' <para><b>L'ordine è quello di dichiarazione e non cambia</b>: la spec chiede un
     ''' elenco stabile, perché i client lo tengono da parte e i modelli lo si ritrova in
-    ''' testa alla conversazione.</para>
+    ''' testa alla conversazione. I nuovi si aggiungono in fondo.</para>
     ''' </remarks>
     Public Class CatalogoTool
 
@@ -129,12 +135,22 @@ Namespace Mcp
         Public Const LeggiRegistro As String = "leggi_registro"
         Public Const LeggiOpportunita As String = "leggi_opportunita"
 
+        Public Const AnalizzaAnnuncio As String = "analizza_annuncio"
+        Public Const Confronta As String = "confronta"
+        Public Const Mitiga As String = "mitiga"
+        Public Const StrutturaCv As String = "struttura_cv"
+        Public Const GeneraCv As String = "genera_cv"
+        Public Const GeneraLettera As String = "genera_lettera"
+        Public Const RifinisciTesto As String = "rifinisci_testo"
+
         Private ReadOnly _lettura As ToolDiLettura
+        Private ReadOnly _ai As ToolDiAi
         Private ReadOnly _definizioni As New List(Of DefinizioneTool)
 
         Public Sub New(contesto As ContestoApp)
 
             _lettura = New ToolDiLettura(contesto)
+            _ai = New ToolDiAi(contesto)
 
             _definizioni.Add(New DefinizioneTool(
                 LeggiProfilo, "Leggi il profilo",
@@ -164,6 +180,79 @@ Namespace Mcp
                     {"required", New JsonArray From {"cartella"}},
                     {"additionalProperties", False}}))
 
+            _definizioni.Add(New DefinizioneTool(
+                AnalizzaAnnuncio, "Analizza un annuncio",
+                "Legge il testo di un annuncio di lavoro e ne ricava la forma strutturata: " &
+                "azienda, ruolo, requisiti (segnalando quali sono eliminatori), sede, contratto, " &
+                "lingua. È il primo passo di ogni candidatura.",
+                Schema(New JsonObject From {
+                    {"testo", Testo("Il testo dell'annuncio, copiato dal portale.")}},
+                    "testo")))
+
+            _definizioni.Add(New DefinizioneTool(
+                Confronta, "Confronta il profilo con un annuncio",
+                "Mette il profilo salvato davanti a un annuncio e giudica requisito per requisito, " &
+                "poi calcola il punteggio in stelle. Attenzione: le stelle le calcola il programma " &
+                "dai giudizi, non il modello — non si possono negoziare a parole, e un requisito " &
+                "eliminatorio non soddisfatto impone comunque un tetto.",
+                Schema(New JsonObject From {
+                    {"annuncio", Oggetto("L'annuncio strutturato, come lo restituisce analizza_annuncio.")}},
+                    "annuncio")))
+
+            _definizioni.Add(New DefinizioneTool(
+                Mitiga, "Cerca le mitigazioni sui gap",
+                "Dai giudizi di un confronto ricava gli argomenti onesti da spendere sui punti " &
+                "deboli, usando solo fatti che il profilo dichiara. Una lista vuota è un esito " &
+                "legittimo: se un gap non ha nessun ponte onesto, tace invece di inventarne uno.",
+                Schema(New JsonObject From {
+                    {"giudizi", Lista("La lista dei giudizi: sta nel campo «giudizi» del confronto.")}},
+                    "giudizi")))
+
+            _definizioni.Add(New DefinizioneTool(
+                StrutturaCv, "Leggi un CV e proponi un profilo",
+                "Prende il testo di un CV e ne ricava una proposta di profilo strutturato. " &
+                "Non salva niente: sostituire il profilo è irreversibile e si fa " &
+                "dall'applicazione, dove l'utente vede cosa sta accettando.",
+                Schema(New JsonObject From {
+                    {"testo", Testo("Il testo del CV, trascritto o incollato.")}},
+                    "testo")))
+
+            _definizioni.Add(New DefinizioneTool(
+                GeneraCv, "Genera un CV",
+                "Scrive il CV a partire dal profilo salvato. Con «annuncio» e «giudizi» esce il CV " &
+                "mirato su quella posizione; senza, il CV base. In nessuno dei due casi aggiunge " &
+                "esperienze che il profilo non dichiara: mette in risalto, non inventa. Il testo " &
+                "esce già ripulito dalle formule vuote, come quello dell'applicazione.",
+                Schema(New JsonObject From {
+                    {"annuncio", Oggetto("L'annuncio strutturato. Ometterlo insieme a «giudizi» dà il CV base.")},
+                    {"giudizi", Lista("La lista dei giudizi che dà confronta. Va insieme ad «annuncio».")},
+                    {"appunti", Oggetto("Appunti su cosa mettere in risalto. Non aggiungono fatti.")},
+                    {"lingua", Lingua()}})))
+
+            _definizioni.Add(New DefinizioneTool(
+                GeneraLettera, "Genera la lettera di presentazione",
+                "Scrive la lettera di presentazione, coerente con il CV mirato già generato e " &
+                "onesta sui punti deboli che le mitigazioni sanno nominare. Il testo esce già " &
+                "ripulito dalle formule vuote.",
+                Schema(New JsonObject From {
+                    {"annuncio", Oggetto("L'annuncio strutturato.")},
+                    {"giudizi", Lista("La lista dei giudizi che dà confronta.")},
+                    {"cv", Oggetto("Il CV mirato già generato: la lettera deve raccontare la stessa storia.")},
+                    {"mitigazioni", Oggetto("Le mitigazioni, se ci sono. Senza, la lettera tace sui gap.")},
+                    {"appunti", Oggetto("Appunti su cosa mettere in risalto. Non aggiungono fatti.")},
+                    {"lingua", Lingua()}},
+                    "annuncio", "giudizi", "cv")))
+
+            _definizioni.Add(New DefinizioneTool(
+                RifinisciTesto, "Ripulisci un testo",
+                "Passa un testo di prosa al setaccio delle formule vuote e dei tic di scrittura " &
+                "automatica, senza cambiare i fatti che dice. Se non c'è niente da togliere, " &
+                "restituisce il testo com'era.",
+                Schema(New JsonObject From {
+                    {"testo", Testo("Il testo di prosa da ripulire.")},
+                    {"lingua", Lingua()}},
+                    "testo")))
+
         End Sub
 
         ''' <summary>I tool, nell'ordine in cui vanno elencati.</summary>
@@ -174,7 +263,7 @@ Namespace Mcp
         End Property
 
         ''' <summary>L'elenco pronto per <c>tools/list</c>.</summary>
-        Public Function Elenco() As JsonArray
+        Public Overridable Function Elenco() As JsonArray
 
             Dim elencati As New JsonArray()
 
@@ -191,7 +280,7 @@ Namespace Mcp
         ''' non un tool che non ce la fa: chi chiama ha sbagliato la richiesta, non i
         ''' parametri.
         ''' </summary>
-        Public Function Conosce(nome As String) As Boolean
+        Public Overridable Function Conosce(nome As String) As Boolean
 
             If nome Is Nothing Then Return False
 
@@ -207,7 +296,14 @@ Namespace Mcp
         ''' Esegue il tool. Chi chiama ha già verificato che esista con
         ''' <see cref="Conosce"/>.
         ''' </summary>
-        Public Function Esegui(nome As String, argomenti As JsonObject) As EsitoTool
+        ''' <param name="annulla">
+        ''' Il gettone con cui il client ritira la richiesta (cap. 09.2). I tre tool di
+        ''' lettura non lo guardano — leggono un file e hanno finito prima che serva —
+        ''' ma quelli che passano dall'AI sì, ed è il motivo per cui la firma lo porta.
+        ''' </param>
+        Public Overridable Async Function EseguiAsync(nome As String, argomenti As JsonObject,
+                                                     Optional annulla As CancellationToken = Nothing) _
+                                                     As Task(Of EsitoTool)
 
             Select Case nome
 
@@ -219,6 +315,27 @@ Namespace Mcp
 
                 Case LeggiOpportunita
                     Return _lettura.LeggiOpportunita(CampiJson.Testo(argomenti, "cartella"))
+
+                Case AnalizzaAnnuncio
+                    Return Await _ai.AnalizzaAnnuncio(argomenti, annulla).ConfigureAwait(False)
+
+                Case Confronta
+                    Return Await _ai.Confronta(argomenti, annulla).ConfigureAwait(False)
+
+                Case Mitiga
+                    Return Await _ai.Mitiga(argomenti, annulla).ConfigureAwait(False)
+
+                Case StrutturaCv
+                    Return Await _ai.StrutturaCv(argomenti, annulla).ConfigureAwait(False)
+
+                Case GeneraCv
+                    Return Await _ai.GeneraCv(argomenti, annulla).ConfigureAwait(False)
+
+                Case GeneraLettera
+                    Return Await _ai.GeneraLettera(argomenti, annulla).ConfigureAwait(False)
+
+                Case RifinisciTesto
+                    Return Await _ai.RifinisciTesto(argomenti, annulla).ConfigureAwait(False)
 
                 Case Else
                     ' Non ci si arriva passando da Conosce: se ci si arriva, è perché un
@@ -241,6 +358,61 @@ Namespace Mcp
             Return New JsonObject From {
                 {"type", "object"},
                 {"additionalProperties", False}}
+
+        End Function
+
+        ''' <summary>
+        ''' Lo schema di un tool con dei parametri. Si dichiara <b>chiuso</b> come quello
+        ''' senza: un campo in più che nessuno guarda è un malinteso che resta lì, e dirlo
+        ''' subito costa una riga.
+        ''' </summary>
+        ''' <param name="proprieta">I parametri, con la loro descrizione.</param>
+        ''' <param name="obbligatori">Quali non si possono omettere; nessuno, se non se ne passa.</param>
+        Private Shared Function Schema(proprieta As JsonObject, ParamArray obbligatori() As String) As JsonObject
+
+            Dim scritto As New JsonObject From {
+                {"type", "object"},
+                {"properties", proprieta},
+                {"additionalProperties", False}}
+
+            If obbligatori IsNot Nothing AndAlso obbligatori.Length > 0 Then
+
+                Dim elenco As New JsonArray()
+                For Each nome As String In obbligatori
+                    elenco.Add(nome)
+                Next
+
+                scritto("required") = elenco
+
+            End If
+
+            Return scritto
+
+        End Function
+
+        Private Shared Function Testo(descrizione As String) As JsonObject
+            Return New JsonObject From {{"type", "string"}, {"description", descrizione}}
+        End Function
+
+        Private Shared Function Oggetto(descrizione As String) As JsonObject
+            Return New JsonObject From {{"type", "object"}, {"description", descrizione}}
+        End Function
+
+        Private Shared Function Lista(descrizione As String) As JsonObject
+            Return New JsonObject From {{"type", "array"}, {"description", descrizione}}
+        End Function
+
+        ''' <summary>
+        ''' La lingua di un documento. Le due che il pool sa scrivere si dichiarano
+        ''' nell'elenco: un client che chiedesse il francese si sentirebbe rispondere in
+        ''' inglese, e vale la pena che lo sappia prima invece di scoprirlo dal risultato.
+        ''' </summary>
+        Private Shared Function Lingua() As JsonObject
+
+            Return New JsonObject From {
+                {"type", "string"},
+                {"enum", New JsonArray From {"it", "en"}},
+                {"description", "La lingua del documento. Se si omette, italiano."}}
 
         End Function
 

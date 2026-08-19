@@ -250,16 +250,7 @@ Namespace Dati
                 scritto("rifinitura") = o.PrimaDellaRifinitura.DeepClone()
             End If
 
-            If o.Match IsNot Nothing Then
-                scritto("match") = New JsonObject From {
-                    {"match_finale", o.Match.MatchFinale},
-                    {"stelle", o.Match.Stelle},
-                    {"score_base", o.Match.ScoreBase},
-                    {"numero_llm", o.Match.NumeroLlm},
-                    {"scarto_tagliato", o.Match.ScartoTagliato},
-                    {"gate_eliminatorio", o.Match.GateEliminatorio},
-                    {"nota", o.Match.Nota}}
-            End If
+            If o.Match IsNot Nothing Then scritto("match") = o.Match.ComeJson()
 
             Return scritto
 

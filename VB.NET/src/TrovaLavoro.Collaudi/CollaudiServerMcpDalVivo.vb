@@ -95,7 +95,7 @@ Namespace Mcp
                 Assert.AreEqual(2, vetrina("id").GetValue(Of Integer)(), "la notifica in mezzo non ha prodotto righe")
 
                 Dim tool As JsonArray = TryCast(TryCast(vetrina("result"), JsonObject)("tools"), JsonArray)
-                Assert.AreEqual(3, tool.Count, "i tre tool di T8a")
+                Assert.AreEqual(10, tool.Count, "i tre tool di lettura e i sette che passano dall'AI")
 
                 ' E adesso lo spegnimento, che è la parte che nessun collaudo di
                 ' scrivania può provare: si chiude l'ingresso e si aspetta che esca da sé.
@@ -104,6 +104,15 @@ Namespace Mcp
                 Assert.IsTrue(processo.WaitForExit(Pazienza),
                               "chiuso l'ingresso, il server deve uscire da solo invece di farsi ammazzare")
                 Assert.AreEqual(0, processo.ExitCode, "e uscire bene")
+
+                ' Un'attesa in più, e non è una ripetizione: l'attesa con la scadenza qui
+                ' sopra dice soltanto che il processo è morto, mentre il diario lo stiamo
+                ' leggendo a eventi, e quelli possono essere ancora per strada. Solo
+                ' l'attesa *senza* scadenza promette che i lettori asincroni abbiano
+                ' consegnato tutto. Senza, il diario si guarda mentre si sta ancora
+                ' riempiendo — e il collaudo passa o cade a seconda di quanto è carica la
+                ' macchina, che è il modo peggiore di fallire.
+                processo.WaitForExit()
 
                 ' Il resoconto del montaggio è finito nel diario, che è l'altra metà del
                 ' patto: su stdout solo protocollo, tutto il resto su stderr.

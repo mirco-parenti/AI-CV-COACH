@@ -241,9 +241,20 @@ Namespace Motore
         ''' <c>Nothing</c> se il confronto non c'è o non ha la forma attesa.
         ''' </summary>
         Public Function Giudizi() As JsonArray
+            Return GiudiziDi(Confronto)
+        End Function
 
-            If Confronto Is Nothing Then Return Nothing
-            Dim oggetto As JsonObject = TryCast(Confronto, JsonObject)
+        ''' <summary>
+        ''' La lista dei giudizi dentro un confronto qualunque, anche di un confronto che
+        ''' non appartiene a nessuna opportunità: è il caso del server MCP, dove
+        ''' <c>confronta</c> è una porta a sé e non il passo di una candidatura
+        ''' (cap. 09.3).
+        ''' </summary>
+        ''' <returns><c>Nothing</c> se il confronto non c'è o non ha la forma attesa.</returns>
+        Public Shared Function GiudiziDi(confronto As JsonNode) As JsonArray
+
+            If confronto Is Nothing Then Return Nothing
+            Dim oggetto As JsonObject = TryCast(confronto, JsonObject)
             If oggetto Is Nothing Then Return Nothing
 
             Dim voci As JsonNode = Nothing
