@@ -142,8 +142,8 @@ Prima versione — tutti i tool leggono/scrivono la **stessa cartella dati** del
 | `genera_cv` | CV-1 o CV-2 in JSON, lingua a scelta, appunti di mira come parametro facoltativo | no |
 | `genera_lettera` | lettera in JSON, lingua a scelta | no |
 | `rifinisci_testo` | passata anti-slop su un testo di prosa | no |
-| `esporta_documento` | CV/lettera JSON → file DOCX o PDF nella cartella dell'opportunità | sì (nuovi file) |
-| `salva_opportunita` | inserisce un annuncio analizzato nella coda | sì |
+| `esporta_documento` | il CV e la lettera di una candidatura salvata → file DOCX nella sua cartella | sì (nuovi file) |
+| `salva_opportunita` | mette in coda una candidatura: l'annuncio e quel che di essa è già stato prodotto | sì |
 | `esporta_backup` | scrive il backup JSON del profilo | sì (nuovo file) |
 
 **Una riga di diagnostica, e la cartella che nasce** *(2026-08-19)*. La colonna «scrive
@@ -165,6 +165,28 @@ client MCP dev'essere **lo stesso** che si otterrebbe dalla finestra. Una differ
 qualità fra le due porte non la dichiarerebbe nessuno, e si scoprirebbe mesi dopo
 confrontando due documenti senza capire perché uno dei due è più piatto. Chi vuole la
 passata su un testo suo ha `rifinisci_testo`, che è la stessa cosa offerta da sola.
+
+**Da qui non escono PDF, e `salva_opportunita` prende tutto** *(2026-08-19)*. Due cose che
+la tabella da sola non spiega. La prima: `esporta_documento` scrive **solo DOCX**, perché
+il PDF si ottiene stampando la pagina nel browser incorporato, che vuole una finestra — e
+in modalità `--mcp` il programma biforca prima di ogni preparativo grafico (§9.2). Il DOCX
+invece si compone scrivendo un file, e non ha bisogno di niente; chi vuole il PDF lo fa
+dall'applicazione, e il tool glielo dice. La seconda: `salva_opportunita` accetta
+**l'annuncio e tutti gli artefatti** — confronto, mitigazioni, CV, lettera — e non il solo
+annuncio come diceva la prima stesura di questo capitolo. Con il solo annuncio, quel che i
+tool dell'AI producono non avrebbe dove andare: si potrebbe generare un CV via MCP senza
+poterlo mettere da nessuna parte, e `esporta_documento` non avrebbe mai niente da
+impaginare. Due regole del prodotto valgono comunque, e sono il motivo per cui questo tool
+non è un semplice «scrivi quel che ti do»: le **stelle si ricalcolano** dai giudizi invece
+di accettarle da fuori (§9.5), e dei documenti **senza il confronto da cui nascono** si
+rifiutano — la macchina degli stati (cap. 07.3) non ammette il salto da «nuova» a
+«generata», e ha ragione: un 🎯 CV mirato nasce dai giudizi.
+
+**`esporta_backup` arriva con T9** *(2026-08-19)*. Non è un ripensamento: il backup e il
+ripristino sono la funzione F7, che si costruisce a T9 (cap. 14) — nell'applicazione il
+bottone è oggi visibile e spento, e lo dichiara. Esporre via MCP una funzione che non
+esiste ancora sarebbe una promessa vuota; il tool nasce lì, insieme a ciò che espone, ed è
+mezz'ora di lavoro quando quel giorno arriva. La voce è in `in_sospeso.md`.
 
 **Fuori dalla prima versione, di proposito**: la modifica del profilo via MCP, azione
 irreversibile che resta nell'app dove c'è la conferma visiva dell'utente (livello 6 del
@@ -191,6 +213,44 @@ Due processi che scrivono gli stessi file sono un problema classico. Regola semp
 - viceversa, l'app all'avvio segnala se un server MCP sta scrivendo.
 
 Niente sincronizzazioni sofisticate: un solo scrittore alla volta, dichiarato.
+
+### Com'è fatto, e perché così (2026-08-19)
+
+**Il pericolo vero non è la corsa sui byte.** Le scritture di questo programma sono già
+atomiche una per una (cap. 11.1): se due processi salvassero lo stesso file nello stesso
+istante, ne resterebbe uno dei due, intero. Il danno è un altro, e non lo segnalerebbe
+nessun file corrotto — l'applicazione tiene aperti in memoria un profilo o una
+candidatura, il server MCP li cambia sul disco sotto di lei, e al primo salvataggio
+l'applicazione riscrive sopra quel che non ha mai visto. È una **perdita silenziosa**, ed
+è la sola ragione per cui questo lucchetto esiste.
+
+**Il lucchetto è il file tenuto aperto in esclusiva, non il suo contenuto.** Dentro
+`dati.lock` non c'è niente: nessun numero di processo, nessuna ora. È una scelta e non
+una pigrizia — chi lo tiene lo dichiara al sistema operativo, e quando quel processo
+muore, comunque muoia (chiuso, in crash, ammazzato dal Gestione attività), è **Windows a
+rilasciarlo**. Un lucchetto scritto andrebbe invece *ripulito* da qualcuno, e prima o poi
+lascerebbe l'utente chiuso fuori dai propri dati per un file rimasto lì da un crash di tre
+settimane prima. Il file resta anche dopo il rilascio, vuoto: cancellarlo aprirebbe una
+gara con chi lo sta riaprendo in quel momento, e zero byte non danno fastidio a nessuno.
+
+**Chi lo prende, e per quanto, non è simmetrico** — perché non lo sono i due che scrivono:
+
+| | Quando lo prende | Per quanto |
+|---|---|---|
+| L'app con finestre | all'avvio, appena montato il motore | **tutta la sessione**: l'utente scrive quando gli pare, e fra un salvataggio e l'altro tiene comunque in mano dei dati che nessun altro deve muovere |
+| Il server MCP | quando un tool sta per scrivere, **dopo** aver controllato i parametri | **la sola scrittura**, poi lo rilascia: non ricorda niente fra una richiesta e l'altra, quindi non ha niente da proteggere nel frattempo |
+
+Il server lo prende il più tardi possibile di proposito: tenerlo mentre si guarda un JSON
+malformato vorrebbe dire fermare l'applicazione dell'utente per un errore di chi ha
+chiamato.
+
+**Se non si riesce a prenderlo, le due parti reagiscono diverso**, e anche questo segue da
+chi sono. Il server MCP **rifiuta la scrittura** e lo dice in modo che un modello possa
+farci qualcosa — che chiudere la finestra è la strada, e che i tool di lettura e quelli
+dell'AI continuano a funzionare. L'applicazione invece **parte lo stesso** e mette un
+avviso nella barra di stato: fermare l'utente sulla porta di casa sua sarebbe
+sproporzionato, ma se poi due salvataggi si accavallano deve poter dire che gliel'avevamo
+detto.
 
 ## 9.5 Sicurezza
 

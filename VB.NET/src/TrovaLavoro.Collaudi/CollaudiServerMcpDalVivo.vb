@@ -95,7 +95,8 @@ Namespace Mcp
                 Assert.AreEqual(2, vetrina("id").GetValue(Of Integer)(), "la notifica in mezzo non ha prodotto righe")
 
                 Dim tool As JsonArray = TryCast(TryCast(vetrina("result"), JsonObject)("tools"), JsonArray)
-                Assert.AreEqual(10, tool.Count, "i tre tool di lettura e i sette che passano dall'AI")
+                Assert.AreEqual(12, tool.Count,
+                                "i tre di lettura, i sette che passano dall'AI e i due che scrivono")
 
                 ' E adesso lo spegnimento, che è la parte che nessun collaudo di
                 ' scrivania può provare: si chiude l'ingresso e si aspetta che esca da sé.

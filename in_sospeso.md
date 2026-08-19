@@ -205,6 +205,29 @@ ed è in «Chiuse», insieme alla correzione della ricetta con cui si prova.*
   dal server. Si chiude alla prima generazione vera. *(cap. 09.3, nota «Una riga di
   diagnostica»; `ContestoApp.MontaAi`.)*
 
+## Da T8c — i tool che scrivono e il lucchetto (2026-08-19, alla chiusura)
+
+- **Il tool `esporta_backup`.** Il cap. 09.3 lo elenca dalla prima stesura, ma espone il
+  **backup del profilo**, che è la funzione F7 e si costruisce a **T9**: oggi nell'app quel
+  bottone è visibile e spento, e lo dichiara. Esporre via MCP una funzione che non esiste
+  sarebbe una promessa vuota, quindi il tool nasce con ciò che espone. Non è una
+  dimenticanza da recuperare ma una dipendenza da rispettare, ed è mezz'ora di lavoro
+  quando F7 c'è. *(cap. 09.3, nota «`esporta_backup` arriva con T9»; cap. 14, T9.)*
+- **Il PDF via MCP.** `esporta_documento` scrive i soli DOCX: il PDF si ottiene stampando
+  la pagina nel browser incorporato, che vuole una finestra, e in `--mcp` il programma
+  biforca prima di ogni preparativo grafico. Non è detto sia impossibile — una `Form`
+  invisibile con la sua pompa di messaggi potrebbe reggere — ma è WinForms dentro un
+  processo che non l'ha mai acceso, e va **provato** prima di prometterlo, non deciso a
+  tavolino. Se si prova e non regge, la voce si chiude dichiarando che il PDF resta
+  dell'applicazione. *(cap. 09.3, nota «Da qui non escono PDF»; `StampantePdf`.)*
+- **Il lucchetto visto da due processi veri.** Che il secondo che prova resti fuori è
+  provato dal banco, ma dentro un solo processo: sono due `FileStream` sulla stessa
+  cartella, non l'applicazione e un server MCP che si contendono davvero i dati. Il
+  meccanismo è quello del sistema operativo e non cambia, però il gesto che conta — aprire
+  l'app, chiedere a un client MCP di salvare, vedersi rispondere «chiudi la finestra» — non
+  è ancora stato fatto da nessuno. Si chiude insieme al collaudo di tappa di T8.
+  *(cap. 09.4; `CollaudiLucchettoDati`.)*
+
 ## Da revisione adversariale (2026-08-09)
 
 - **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:

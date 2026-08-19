@@ -34,6 +34,7 @@ TrovaLavoro\
 ├── registro.json          l'indice delle candidature: comodo, ma rigenerabile
 ├── webview2\              profilo di navigazione del browser integrato
 ├── chiamate_ai.csv        quanto è costata ogni chiamata all'AI (v. sotto)
+├── dati.lock              vuoto: dice che qualcuno sta scrivendo qui (v. sotto)
 ├── log\app.log            log tecnico (senza segreti, v. 11.3)
 └── backup\                gli export JSON (v. 11.4)
 ```
@@ -131,10 +132,20 @@ TrovaLavoro\
   anche l'unico file della cartella che non è JSON, e per un motivo: un CSV si apre in un
   foglio di calcolo e si **ordina per una colonna**, che è esattamente il gesto per cui
   esiste.
+- **Il file che non contiene niente** *(2026-08-19)*: `dati.lock`, il lucchetto di
+  scrittura (cap. 09.4). È vuoto per scelta, e non per pigrizia: quel che dichiara non è
+  scritto dentro, è il fatto stesso che un processo lo **tenga aperto in esclusiva**. Così
+  chi scrive lo dichiara al sistema operativo, e quando quel processo muore — chiuso, in
+  crash o ammazzato — è Windows a rilasciarlo. Un lucchetto con dentro un numero di
+  processo e un'ora andrebbe invece *ripulito* da qualcuno, e prima o poi lascerebbe
+  l'utente chiuso fuori dai propri dati per un file rimasto lì dopo un crash di tre
+  settimane prima. Resta sul disco anche a lucchetto libero, di zero byte:
+  cancellarlo aprirebbe una gara con chi lo sta riaprendo in quell'istante. Come
+  `chiamate_ai.csv`, **nel backup non entra**: non è un dato, è lo stato di un momento.
 - Formati **JSON con rientri**, leggibili in qualsiasi editor: l'utente è padrone dei
-  suoi dati anche senza l'app. *Con un'eccezione, e si vede dal nome*: `segreti.bin` è
+  suoi dati anche senza l'app. *Con due eccezioni, e si vedono dal nome*: `segreti.bin` è
   l'unico file **non leggibile**, ed è il punto — gli altri sono dati dell'utente, quello
-  è una credenziale (v. 11.3).
+  è una credenziale (v. 11.3) — e `dati.lock`, che non ha niente da leggere.
 
 ## 11.2 Cosa esce dal PC (e cosa no)
 

@@ -143,14 +143,19 @@ Namespace Mcp
         Public Const GeneraLettera As String = "genera_lettera"
         Public Const RifinisciTesto As String = "rifinisci_testo"
 
+        Public Const SalvaOpportunita As String = "salva_opportunita"
+        Public Const EsportaDocumento As String = "esporta_documento"
+
         Private ReadOnly _lettura As ToolDiLettura
         Private ReadOnly _ai As ToolDiAi
+        Private ReadOnly _scrittura As ToolDiScrittura
         Private ReadOnly _definizioni As New List(Of DefinizioneTool)
 
         Public Sub New(contesto As ContestoApp)
 
             _lettura = New ToolDiLettura(contesto)
             _ai = New ToolDiAi(contesto)
+            _scrittura = New ToolDiScrittura(contesto)
 
             _definizioni.Add(New DefinizioneTool(
                 LeggiProfilo, "Leggi il profilo",
@@ -253,6 +258,32 @@ Namespace Mcp
                     {"lingua", Lingua()}},
                     "testo")))
 
+            _definizioni.Add(New DefinizioneTool(
+                SalvaOpportunita, "Metti una candidatura nella coda",
+                "Salva una candidatura nella cartella dati: l'annuncio e tutto quello che di " &
+                "quella candidatura è già stato prodotto — confronto, mitigazioni, CV, lettera. " &
+                "Il punteggio in stelle non si accetta da fuori: se arriva un confronto, lo " &
+                "ricalcola il programma dai giudizi. Restituisce il nome della cartella, quello " &
+                "con cui poi si chiede leggi_opportunita o esporta_documento.",
+                Schema(New JsonObject From {
+                    {"annuncio", Oggetto("L'annuncio strutturato, come lo dà analizza_annuncio.")},
+                    {"confronto", Oggetto("Il confronto intero, come lo dà confronta nel campo «confronto».")},
+                    {"mitigazioni", Oggetto("Le mitigazioni, come le dà mitiga.")},
+                    {"appunti", Oggetto("Appunti di mira, se ce ne sono.")},
+                    {"cv", Oggetto("Il CV generato, come lo dà genera_cv nel campo «cv».")},
+                    {"lettera", Oggetto("La lettera generata, come la dà genera_lettera.")},
+                    {"lingua", Lingua()}},
+                    "annuncio")))
+
+            _definizioni.Add(New DefinizioneTool(
+                EsportaDocumento, "Impagina i documenti di una candidatura",
+                "Scrive in formato DOCX il CV e la lettera di una candidatura già salvata, " &
+                "nella sottocartella «out» di quella candidatura. Il PDF non si fa da qui: " &
+                "richiede il browser incorporato dell'applicazione, e si esporta dalla finestra.",
+                Schema(New JsonObject From {
+                    {"cartella", Testo("Il nome della cartella dell'opportunità, come lo dà leggi_registro.")}},
+                    "cartella")))
+
         End Sub
 
         ''' <summary>I tool, nell'ordine in cui vanno elencati.</summary>
@@ -336,6 +367,12 @@ Namespace Mcp
 
                 Case RifinisciTesto
                     Return Await _ai.RifinisciTesto(argomenti, annulla).ConfigureAwait(False)
+
+                Case SalvaOpportunita
+                    Return Await _scrittura.SalvaOpportunita(argomenti, annulla).ConfigureAwait(False)
+
+                Case EsportaDocumento
+                    Return Await _scrittura.EsportaDocumento(argomenti, annulla).ConfigureAwait(False)
 
                 Case Else
                     ' Non ci si arriva passando da Conosce: se ci si arriva, è perché un

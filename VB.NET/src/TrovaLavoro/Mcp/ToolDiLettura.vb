@@ -84,22 +84,9 @@ Namespace Mcp
         ''' </remarks>
         Public Function LeggiOpportunita(nome As String) As EsitoTool
 
-            If String.IsNullOrWhiteSpace(nome) Then
-                Return EsitoTool.NonRiuscito(
-                    "Manca il nome della cartella dell'opportunità: si trova nel campo " &
-                    "«cartella» di ogni voce di leggi_registro.")
-            End If
-
-            Dim chiesto As String = nome.Trim()
-
-            ' Qui arriva testo scritto da un modello, che può sbagliare e che qualcuno
-            ' potrebbe aver istruito male: un nome è un nome, non una strada per uscire
-            ' dalla cartella dati (cap. 09.5).
-            If chiesto <> Path.GetFileName(chiesto) OrElse chiesto = "." OrElse chiesto = ".." Then
-                Return EsitoTool.NonRiuscito(
-                    $"«{chiesto}» non è il nome di una cartella-opportunità: ci vuole il solo nome, " &
-                    "senza percorso.")
-            End If
+            Dim chiesto As String = Nothing
+            Dim rifiuto As EsitoTool = NomeDiCartellaAmmesso(nome, chiesto)
+            If rifiuto IsNot Nothing Then Return rifiuto
 
             Dim cartella As String = Path.Combine(_contesto.Cartella.CartellaOpportunita, chiesto)
 
@@ -148,6 +135,44 @@ Namespace Mcp
             Next
 
             Return elenco
+
+        End Function
+
+        ''' <summary>
+        ''' Controlla che quello che è arrivato sia il <b>nome</b> di una
+        ''' cartella-opportunità e non una strada per uscire dalla cartella dati
+        ''' (cap. 09.5).
+        ''' </summary>
+        ''' <param name="nome">Quello che ha scritto chi ha chiamato.</param>
+        ''' <param name="pulito">Il nome ripulito, se è ammesso.</param>
+        ''' <returns>La frase da rispondere, o <c>Nothing</c> se si può proseguire.</returns>
+        ''' <remarks>
+        ''' È visibile fuori di qui perché la stessa domanda se la fanno i tool che
+        ''' <b>scrivono</b> (T8c), e questa regola dev'essere una sola: due copie
+        ''' finirebbero per lasciar passare cose diverse, e quella più permissiva sarebbe
+        ''' proprio quella che scrive. Qui arriva testo composto da un modello, che può
+        ''' sbagliare e che qualcuno potrebbe aver istruito male.
+        ''' </remarks>
+        Friend Shared Function NomeDiCartellaAmmesso(nome As String, ByRef pulito As String) As EsitoTool
+
+            pulito = Nothing
+
+            If String.IsNullOrWhiteSpace(nome) Then
+                Return EsitoTool.NonRiuscito(
+                    "Manca il nome della cartella dell'opportunità: si trova nel campo " &
+                    "«cartella» di ogni voce di leggi_registro.")
+            End If
+
+            Dim chiesto As String = nome.Trim()
+
+            If chiesto <> Path.GetFileName(chiesto) OrElse chiesto = "." OrElse chiesto = ".." Then
+                Return EsitoTool.NonRiuscito(
+                    $"«{chiesto}» non è il nome di una cartella-opportunità: ci vuole il solo nome, " &
+                    "senza percorso.")
+            End If
+
+            pulito = chiesto
+            Return Nothing
 
         End Function
 

@@ -576,6 +576,27 @@ tappa che chiede «un confronto e una generazione via MCP con risultati identici
 dell'interfaccia»: è in `in_sospeso.md`, perché nessun collaudo automatico chiama l'AI
 vera.
 
+**T8c — i tool che scrivono, e il lucchetto (2026-08-19).** Due tool — `salva_opportunita`
+e `esporta_documento` — più il lucchetto della cartella dati (cap. 09.4), che fino a qui
+aveva potuto aspettare perché nessun tool toccava i file dell'utente. Il lucchetto è un
+`dati.lock` **tenuto aperto in esclusiva e vuoto**: chi lo tiene lo dichiara al sistema
+operativo, così un processo morto comunque non lascia dietro di sé un lucchetto da
+ripulire a mano. Lo prendono in modo **asimmetrico**, perché non lo sono i due che
+scrivono: l'applicazione all'avvio e per tutta la sessione, il server MCP per la sola
+durata di una scrittura. Chi resta fuori reagisce diverso: il server rifiuta di scrivere e
+lo spiega, l'applicazione avvisa e parte lo stesso. **Due cose sono cambiate rispetto al
+capitolo**: `esporta_backup` non è di questa tappa — espone F7, che si costruisce a T9, e
+oggi nell'applicazione quel bottone è visibile e spento — e `esporta_documento` scrive i
+**soli DOCX**, perché il PDF si stampa dal browser incorporato, che vuole una finestra che
+in `--mcp` non esiste. `salva_opportunita` accetta **tutti** gli artefatti e non il solo
+annuncio, altrimenti quel che i tool di T8b producono non avrebbe dove andare; le stelle
+però le **ricalcola il programma** dai giudizi, e dei documenti senza il confronto da cui
+nascono si rifiutano — la macchina degli stati (cap. 07.3) non ammette il salto da «nuova»
+a «generata». **812 collaudi verdi** (erano 796), versione **0.3.035**, Pool **1.11**
+invariato; il lucchetto è stato **falsificato apposta**, rendendolo permissivo, e tre
+collaudi sono caduti. Con questa gamba T8 è completa: resta il **collaudo di tappa**, che
+va fatto a mano da un client MCP vero ed è in `in_sospeso.md`.
+
 ### T9 — Rifinitura e rilascio 1.0
 Backup/ripristino (F7); Impostazioni complete; pulizia dati; gestione errori rivista
 pannello per pannello; **collaudo generale condotto da Mirco su candidature reali**;

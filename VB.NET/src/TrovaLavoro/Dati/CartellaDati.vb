@@ -237,6 +237,18 @@ Namespace Dati
         End Property
 
         ''' <summary>
+        ''' Il file con cui un processo dichiara che sta scrivendo qui (cap. 09.4). Non
+        ''' contiene niente: quel che conta è che qualcuno lo tenga aperto, e a dirlo è il
+        ''' sistema operativo — così un processo ucciso non lascia dietro di sé un
+        ''' lucchetto che nessuno può più togliere.
+        ''' </summary>
+        Public ReadOnly Property FileLucchetto As String
+            Get
+                Return Path.Combine(Radice, "dati.lock")
+            End Get
+        End Property
+
+        ''' <summary>
         ''' Crea le cartelle nominate qui sopra se non ci sono già. È l'unico punto che
         ''' le crea: chi scrive un file la chiama prima e non si preoccupa d'altro.
         ''' </summary>

@@ -1,5 +1,6 @@
 Imports System.Drawing
 Imports System.Windows.Forms
+Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Documenti
 Imports TrovaLavoro.Motore
 Imports TrovaLavoro.Web
@@ -64,12 +65,26 @@ Public Class FormPrincipale
     ''' </summary>
     Private _stampante As StampantePdf
 
+    ''' <summary>
+    ''' Il lucchetto di scrittura della cartella dati (cap. 09.4), preso all'avvio e
+    ''' tenuto per tutta la sessione: finché questa finestra è aperta, i tool del server
+    ''' MCP che scrivono rispondono «la cartella è in uso» invece di cambiare sotto i
+    ''' piedi dei dati che qui stanno in memoria. È <c>Nothing</c> se non si è riusciti a
+    ''' prenderlo — e allora è l'utente a essere avvisato, non il programma a fermarsi.
+    ''' </summary>
+    Private _lucchetto As LucchettoDati
+
     ''' <summary>Da quale pannello si è arrivati ai documenti, e con quale bottone della barra.</summary>
     Private _ritornoDaiDocumenti As Control
     Private _bottoneDelRitorno As Button
 
     Private Sub FormPrincipale_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         _contesto = ContestoApp.Monta(_argomenti.RadiceDati)
+
+        ' Il lucchetto prima di tutto, perché da qui in poi qualunque cosa può scrivere.
+        ' Non si rilascia alla rimonta del motore per la chiave: la cartella dati è la
+        ' stessa, e quel che stiamo dichiarando è la sessione, non il contesto.
+        _lucchetto = LucchettoDati.Prendi(_contesto.Cartella)
 
         ' Prima dei pannelli, perché una chiave data adesso rimonta il motore: collegarli
         ' a un contesto che sta per essere sostituito vorrebbe dire riaccenderli a mano
@@ -565,6 +580,10 @@ Public Class FormPrincipale
         ' finestra possiede oltre al contesto.
         _stampante?.Dispose()
         _contesto?.Dispose()
+
+        ' Il lucchetto per ultimo: finché c'è qualcosa da smaltire, questa sessione ha
+        ' ancora dei dati in mano.
+        _lucchetto?.Dispose()
     End Sub
 
     ''' <summary>
@@ -648,6 +667,15 @@ Public Class FormPrincipale
 
         If _argomenti.Avviso IsNot Nothing Then voci.Add(_argomenti.Avviso)
         If _contesto.Avviso IsNot Nothing Then voci.Add(_contesto.Avviso)
+
+        ' Il lucchetto in mano a qualcun altro vuol dire quasi sempre un server MCP che
+        ' sta scrivendo (cap. 09.4), o una seconda copia dell'applicazione. Si dice e si
+        ' tira dritto: fermare l'utente sarebbe sproporzionato, ma se poi due salvataggi
+        ' si accavallano deve sapere che gliel'avevamo detto.
+        If _lucchetto Is Nothing Then
+            voci.Add("La cartella dati è già in uso da un altro programma: attento a non " &
+                     "lavorare sugli stessi dati da due parti insieme.")
+        End If
 
         If voci.Count = 0 Then Return Nothing
         Return String.Join(" · ", voci)
