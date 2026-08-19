@@ -293,6 +293,20 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   una). In alternativa, se non c'è un file comodo da guardare, si aspetta **due volte**: prima
   che il bottone si **spenga** (`stato=spento`), poi che si **riaccenda** (`stato=acceso`)
   — è il solo modo di usare la modalità «controllo» senza raccontarsi una bugia.
+- **Premere «Interrompi» mentre l'AI scrive: l'attesa e il clic devono stare nello stesso
+  comando.** *(2026-08-19, chiudendo la voce rimasta da T7c.)* Qui l'attrezzo giusto è la
+  modalità «controllo» e non quella «file» — non c'è nessun file da guardare, e «Interrompi»
+  è uno dei rari bottoni che è acceso **solo** mentre il lavoro è in volo, quindi
+  `aspetta_che nome=Interrompi stato=acceso` dice la verità. Il punto è un altro: fra
+  l'`aspetta_che` che ritorna e il `clic` c'è la latenza di **due chiamate separate**, e una
+  risposta del ragionamento può essere finita in quel mezzo — al primo tentativo è andata
+  proprio così, il bottone era già tornato «Invia» e l'attrezzo ha risposto «non ho trovato
+  Interrompi». La ricetta che funziona: **una sola invocazione** che fa `aspetta_che` e
+  subito dopo `clic`, senza tornare indietro a chi la guida. E la domanda va scelta perché la
+  risposta duri: una che chieda un elenco lungo e ragionato compra i secondi che servono.
+  Riuscito così alla seconda prova, con il clic a **3,9 secondi** dall'invio, e l'esito è
+  quello promesso — il testo già arrivato resta a video, la bolla si marca «(interrotto)»,
+  nessun errore.
 - **Per far fallire l'AI non si toglie la chiave: se ne mette una finta.** *(2026-08-18,
   provando dal vivo il cambio lingua del 📄 CV-1 base.)* Sembra ovvio che, per vedere cosa
   succede quando una chiamata all'AI va male, basti avviare l'applicazione senza chiave. Non

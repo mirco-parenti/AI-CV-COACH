@@ -27,6 +27,37 @@ La non-regressione contro il prototipo (cap. 14, T2) è passata su questa versio
 prompt del confronto costruito dal pool è identico carattere per carattere a quello che
 il prototipo costruisce nel codice.
 
+## Pool 1.12 — 2026-08-19
+
+**Un accenno incompleto non è «niente da raccogliere»** (`profilo/contatti` 1.2 → 1.3).
+Nella traccia reale del dialogo guidato, Anna dice al turno dei contatti: *«Ah, e ho fatto
+anche un corso, ma non mi ricordo più né quale né dove»*. Quella frase spariva — non
+finiva in `formazione`, e nemmeno nel «lasciato fuori». Era annotata da tempo come varianza
+del modello, «una volta su tre»; misurata adesso, dopo il salto a Sonnet 5, era **tre volte
+su tre**: sistematica, non occasionale.
+
+L'istruzione non mancava. Il prompt dice già, per esteso, che *«un titolo, un diploma o un
+corso → formazione»*. A farla perdere era il **conflitto con la regola vicina**: davanti a
+un accenno che si auto-nega — c'è un corso, ma non so quale né dove — vinceva
+«non aggiungere e non inventare nulla», e il modello leggeva «qui non c'è materiale» invece
+di «c'è un accenno da passare avanti». Due regole giuste che si contendevano la stessa
+frase, e a perdere era l'anti-perdita.
+
+La cura è una riga, e non aggiunge nessun giudizio nuovo: dice che un accenno vale **anche
+quando è incompleto**, che non ricordare nome, ente o anno non è un motivo per scartare, e
+che a chiedere il resto — o a lasciarlo fuori dichiarandolo — sarà il turno di
+destinazione, che ha l'utente davanti. Sta **prima** della regola del non inventare, così
+l'ordine di lettura scioglie l'ambiguità invece di crearne un'altra.
+
+Verificata come era stato misurato il difetto: **tre giri su tre**, il corso instradato a
+`formazione` con le parole esatte dell'utente. Le altre tre trappole della traccia hanno
+continuato a comportarsi come prima, il conduttore è rimasto in passo, e il «lasciato
+fuori» ha continuato a scattare su ciò che gli tocca. Nessun cambiamento di schema.
+
+*Una conseguenza da segnare: adesso la traccia reale non ha più nessuna trappola che
+sfugga, ed è il rapporto stesso a dire che in quel caso va rinforzata — un collaudo che
+passa sempre smette di misurare. Sta in `in_sospeso.md`.*
+
 ## Pool 1.11 — 2026-08-18
 
 **Il titolo di ruolo si traduce (coda di T7d).** In un CV inglese generato dal profilo

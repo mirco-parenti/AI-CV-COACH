@@ -1,5 +1,5 @@
 id: contatti
-versione: 1.2
+versione: 1.3
 lingua: it
 modello: semplice
 max_token: 4000
@@ -35,6 +35,7 @@ Regole per "altrove":
 - In "altrove" va SOLO ciò che appartiene a una categoria DIVERSA dai contatti di questo turno.
 - Copia le parole dell'utente così come sono (verbatim), senza riscriverle né strutturarle: ci penserà il turno di destinazione.
 - Classifica ogni frammento in UNA sola categoria, la più calzante. Nel dubbio fra due: un titolo, un diploma o un corso → "formazione"; un patentino o un'abilitazione professionale (muletto, carrello elevatore, HACCP…) → "formazione"; un'attività svolta → l'esperienza giusta (formale o informale); un'abilità o una qualità dichiarata → "competenze".
+- Un accenno vale anche quando è INCOMPLETO. Se l'utente nomina qualcosa senza ricordarne il nome, l'ente o l'anno (per esempio: "ho fatto anche un corso, ma non mi ricordo quale né dove"), raccoglilo lo stesso in "altrove" con le sue parole. Non ricordare i dettagli non è un motivo per scartare: sarà il turno di destinazione, con l'utente davanti, a chiedergli il resto o a lasciarlo fuori dichiarandolo.
 - Non aggiungere e non inventare nulla. Se non c'è materiale per altre categorie, restituisci "altrove": {}.
 
 Formato della risposta:

@@ -1,7 +1,7 @@
 {
   "formato": 1,
-  "versione_pool": "1.11",
-  "data": "2026-08-18",
+  "versione_pool": "1.12",
+  "data": "2026-08-19",
   "file": [
     {
       "percorso": "annuncio/analisi_annuncio.md",
@@ -65,7 +65,7 @@
     },
     {
       "percorso": "profilo/contatti.md",
-      "sha256": "fdb0dca3dbdf80fa0f049274152e1e0da72b928b16d5886625a1b2f921dbb172"
+      "sha256": "53a4c5787fea84810c656e252f6cbe6e6795752cc3753f3b3938531367b384ac"
     },
     {
       "percorso": "profilo/esperienze_formali.md",

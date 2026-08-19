@@ -34,23 +34,8 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Da T2 — il motore e il pool (2026-08-07)
 
-- **La coda del salto a Sonnet 5** *(riscritta il 2026-08-18 alla chiusura del salto, e di
-  nuovo lo stesso giorno: adesso i numeri si possono guardare, restano da guardare).* Il
-  predefinito è Sonnet 5 con l'interruttore del ragionamento dichiarato spento, e la
-  batteria è verde. Sonnet 5 conta i token in modo diverso e a parità di testo ne usa
-  **~30% in più**, mentre i `max_token` del pool sono ancora quelli tarati su Sonnet 4.6 —
-  i più stretti (`email_candidatura` e `umanizzazione_sintesi` a 1500, `umanizzazione_frasi`
-  a 2500) sono i primi che potrebbero non bastare, e la verifica ha confermato che girano
-  **tutti e tre sul livello ragionamento**, cioè proprio sul modello che è cambiato.
-  Non si ritocca nulla a scatola chiusa: si alza il tetto di quello che si lamenta, non di
-  tutti per prudenza. Quel che mancava era il modo di sapere **chi sta per lamentarsi**, e
-  adesso c'è — ogni chiamata lascia una riga in `chiamate_ai.csv` (cartella dati) con il
-  prompt, il tetto dichiarato, i token consumati e **la percentuale del tetto**: si ordina
-  per quella colonna e si vede chi è in bilico prima che si tronchi. Resta da fare la cosa
-  per cui il diario esiste: **un giro d'uso vero, e poi leggere i numeri** — in particolare
-  sui tre prompt stretti, che nessun collaudo reale esercita ancora.
-  *(cap. 02.5; cap. 04.4; cap. 11.1; cap. 15, voce 6; `Ai/DiarioChiamate.vb`,
-  `Dati/DiarioChiamateSuFile.vb`.)*
+*Chiusa il 2026-08-19: i tetti dei `max_token` sono stati misurati su un giro vero e sono
+in «Chiuse».*
 
 ## Da T3 — il profilo (2026-08-07 · integrata alla chiusura, 2026-08-09)
 
@@ -77,13 +62,7 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
 
 ## Da T5d — il profilo dalla propria pagina (2026-08-14)
 
-- **Una pagina che non sia LinkedIn.** L'import legge «la pagina aperta», e sia la pagina
-  di casa sia il suggerimento del bottone promettono che vada bene anche «un altro sito che
-  racconti il tuo percorso»: provato però è stato **solo** su LinkedIn. Il dubbio non è la
-  strutturazione — quella non sa da dove venga il testo — ma lo **scorrimento**, che su
-  quella pagina ha dovuto cercarsi da solo il contenitore che scorre: un sito fatto in un
-  altro modo può scorrere in un altro modo. Serve una prova su una pagina «chi sono» vera.
-  *(cap. 06.7.)*
+*Chiusa il 2026-08-19: la pagina che non è LinkedIn è stata provata ed è in «Chiuse».*
 
 ## Da «Elimina profilo» (2026-08-14)
 
@@ -124,30 +103,6 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   la casella del confronto vive in P6, e in P7 l'utente ha davanti una casella che può già
   riscrivere. Se un giorno servirà, il posto è la bozza (`email.json`). *(cap. 07.1;
   cap. 08.6.)*
-- **L'interruzione di un turno provata dal vivo** *(2026-08-18, dal collaudo di T7c;
-  aggiornata lo stesso giorno: l'ostacolo che la teneva ferma non c'è più)*. Il bottone
-  «Interrompi» c'è, il gettone arriva fino al flusso e il banco lo collauda
-  (`InterrompereNonEUnErrore`, più `ChiInterrompeIlBrainstormingNonRiceveUnErrore` sul
-  client): quello che non è riuscito è premerlo **davvero mentre l'AI scrive**. Le risposte
-  del ragionamento arrivano in pochi secondi e lo strumento di collaudo non sapeva aspettare
-  una condizione — si alternavano `clic` e `controlli`, e in mezzo il turno era già finito.
-  **L'`aspetta_che` adesso c'è** (aspetta che un controllo si accenda o si spenga, o che un
-  file compaia o cambi), quindi la strada è aperta: resta da percorrerla, con una domanda
-  che tiri fuori una risposta abbastanza lunga da dare il tempo di premere. Attenzione alla
-  trappola documentata: aspettare che un bottone sia «acceso» non vuol dire che il lavoro sia
-  cominciato o finito — per il ragionamento conviene aspettare che «Interrompi» si accenda,
-  che è il segnale vero che l'AI ha preso la parola. Finché non è fatto, l'interruzione è
-  **provata al banco ma non sul campo**, e va detto così.
-  *(cap. 02.6; `strumenti/mcp-collaudi/`.)*
-- **Il prima/dopo letto a video fino in fondo** *(2026-08-18, dal collaudo di T7b)*. Nel
-  giro con l'AI vera la sezione si è vista comparire in coda alla colonna — «PRIMA DELLA
-  RIFINITURA», col nome del campo cambiato — ma i due testi *Prima* e *Dopo* stanno **sotto
-  la piega**, e lo strumento di collaudo non sa scorrere dentro una casella: il confronto
-  campo per campo è stato letto sui file JSON, non sullo schermo. Quello che manca non è il
-  meccanismo (i dati ci sono e sono giusti) ma la verifica che **si legga bene**: a capo,
-  larghezza, ordine dei campi, e cosa succede quando i campi cambiati sono molti. È una
-  guardata di dieci minuti da fare a mano. *(cap. 08.4; `strumenti/mcp-collaudi/`.)*
-
 ## Da T7d — il 📄 CV-1 base riletto e in inglese (2026-08-18, alla chiusura)
 
 *Chiusa lo stesso giorno: il cambio di lingua che fallisce a metà è stato percorso dal vivo
@@ -209,6 +164,41 @@ vero era un altro.*
   è ancora stato fatto da nessuno. Si chiude insieme al collaudo di tappa di T8.
   *(cap. 09.4; `CollaudiLucchettoDati`.)*
 
+## Da questa passata sui debiti prima di T9 (2026-08-19)
+
+*Le voci qui sotto sono nate guardando l'applicazione mentre si chiudevano altre cose: non
+erano in nessun piano, e nessuna è grave.*
+
+- **La traccia del dialogo reale non ha più nessuna trappola che sfugga.** Curato il «corso
+  senza nome» (Pool 1.12), tutte e quattro le trappole della traccia vengono instradate ogni
+  volta — ed è il rapporto stesso a dire che in quel caso «la traccia va rifatta»: un
+  collaudo che passa sempre smette di misurare. Serve una trappola nuova, più difficile di
+  quelle di adesso, scritta apposta per il modello di oggi. *(cap. 14, T3;
+  `CollaudiDialogoReale`; `casi/reale/dialogo_guidato.md`.)*
+- **Nel brainstorming il markdown si vede grezzo.** L'AI risponde con `**grassetto**` e
+  `## titoli`, e la chat di P5 mostra gli asterischi e i cancelletti così come sono. Non
+  rompe niente e il testo si capisce, ma è l'unico posto del programma in cui si vede la
+  scrittura di una macchina invece di un testo: gli appunti di mira che ne escono, invece,
+  sono già puliti. O si rende la bolla capace di leggerlo, o si dice al prompt di non
+  scriverlo. *(cap. 03.5; `PannelloDialogo`.)*
+- **La finestra a misura ridotta è da guardare col mouse.** Forzandola via API a 1366×768 —
+  sopra la `MinimumSize`, che è 1150×600 — il contenuto risulta tagliato e la barra di
+  navigazione sparisce. Ma il layout è tutto `Dock.Fill`, e ridimensionare via API una
+  finestra **massimizzata** è manovra che inganna (il README dello strumento ne elenca già
+  di simili): finché non si trascina il bordo con il mouse, non è un difetto, è
+  un'osservazione. Se si conferma, è roba della rifinitura di T9. *(cap. 03.4;
+  `FormPrincipale.Designer`.)*
+- **Le parole si incollano fra un blocco e l'altro della pagina letta.** Nel testo che l'app
+  ricava da una pagina web, la fine di un blocco e l'inizio del successivo finiscono
+  attaccate: «Pubblica AmministrazioneDue suite specializzate». Sul sito provato il modello
+  ha capito lo stesso, ma è fortuna, non progetto: basta un separatore fra i nodi di testo.
+  *(cap. 06.7; il lettore di pagina di T5a.)*
+- **Un 404 viene raccontato come un problema di rete.** Aprendo un indirizzo che il server
+  non ha, la fascia dice «La pagina non si è caricata. Controlla il collegamento a Internet»
+  — mentre il collegamento c'era e il server ha risposto benissimo, dicendo che quella
+  pagina non esiste. È il tipo di messaggio che manda l'utente a controllare il modem invece
+  che l'indirizzo. *(cap. 06.6; rientra nella revisione della gestione errori, T9.)*
+
 ## Da revisione adversariale (2026-08-09)
 
 - **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:
@@ -216,16 +206,61 @@ vero era un altro.*
   disegno è fuori misura. Difetto vero, ma correggerlo alla cieca rischiava di rompere il
   layout **validato a video** in T3: serve uno schermo su cui verificare a 150%.
   *(cap. 03.5; segnalato dalla revisione, rimandato con motivo.)*
-- **Il «corso senza nome» che una volta su tre sparisce.** Al turno contatti della traccia
-  reale, un corso citato di sfuggita non viene sempre ripescato: varianza del modello, non
-  regressione — l'istruzione nel prompt c'è già, e insistere con altre regole rischia di
-  peggiorare altro. Ma l'anti-perdita promette che nulla si perde in silenzio, quindi non è
-  archiviabile: va ripreso quando si rimetterà mano ai prompt del dialogo (o col salto di
-  modello, v. voce T2). *(casi/reale/dialogo_guidato.md; ricomparso una volta nel giro di
-  validazione del Pool 1.02.)*
-
 ## Chiuse
 
+- ✅ **I `max_token` di Sonnet 5, misurati invece che temuti** *(aperta il 2026-08-07 da T2,
+  riscritta più volte, chiusa il 2026-08-19)*. Sonnet 5 conta i token in modo diverso e a
+  parità di testo ne usa ~30% in più, mentre i tetti del pool erano tarati su Sonnet 4.6: i
+  tre più stretti — `email_candidatura` e `umanizzazione_sintesi` a 1500, `umanizzazione_frasi`
+  a 2500, tutti sul livello ragionamento — erano i sorvegliati speciali. Il diario dei consumi
+  esisteva apposta per rispondere, e mancava solo il giro d'uso vero che lo riempisse. Fatto:
+  un giro completo su cartella usa-e-getta, dall'import del CV all'email, **tredici chiamate**.
+  I tre sospettati sono davvero i primi tre della classifica, ma il peggiore usa poco più di
+  un quarto del suo tetto — `email_candidatura` **27,1%**, `umanizzazione_sintesi` **25,0%**,
+  `umanizzazione_frasi` **18,2%** — e ogni riga finisce con `end_turn`: **nessun tetto va
+  alzato**, nessun troncamento. Il limite del dato va detto: è un giro, con un CV e un
+  annuncio; un CV molto più ricco allungherebbe sintesi e frasi, ma con un margine di quasi
+  4× c'è spazio. *(cap. 02.5; cap. 04.4; `chiamate_ai.csv` nella cartella dati.)*
+- ✅ **L'interruzione di un turno provata dal vivo** *(aperta il 2026-08-18 dal collaudo di
+  T7c, chiusa il 2026-08-19)*. Il bottone c'era e il banco lo collaudava; quel che non era
+  mai riuscito era premerlo **mentre l'AI scrive**, perché le risposte del ragionamento
+  arrivano in pochi secondi. Riuscito al secondo tentativo, nel brainstorming: la ricetta è
+  una domanda che chieda un elenco lungo (compra i secondi), e soprattutto `aspetta_che` e
+  `clic` **nella stessa invocazione** — al primo tentativo, con le due chiamate separate, la
+  risposta era già finita nella latenza in mezzo. Premuto a **3,9 secondi** dall'invio, e
+  l'esito è quello promesso: la risposta si ferma a metà frase, il testo già arrivato
+  **resta a video**, la bolla si marca «(interrotto)», i comandi si riaccendono, nessun
+  errore. *(cap. 02.6; la trappola è scritta nel README di `strumenti/mcp-collaudi/`.)*
+- ✅ **Il prima/dopo della rifinitura letto a video** *(aperta il 2026-08-18 dal collaudo di
+  T7b, chiusa il 2026-08-19 con un limite dichiarato)*. Si legge bene: riga separatrice,
+  intestazione «PRIMA DELLA RIFINITURA», il nome del campo col triangolino, «Prima:» e il
+  testo. Nella colonna della lettera la sezione è interamente visibile a schermo pieno.
+  Resta fuori una domanda: nella colonna del CV la sezione sta più in basso, e lo strumento
+  di collaudo **non sa scorrere dentro una casella** — quindi «cosa succede quando i campi
+  cambiati sono molti» non è stato visto. Non riapre la voce: il meccanismo e i dati erano
+  già verificati sui JSON, e questa era la guardata alla forma. *(cap. 08.4; cap. 03.6.)*
+- ✅ **Una pagina che non sia LinkedIn** *(aperta il 2026-08-14 da T5d, chiusa il
+  2026-08-19)*. L'import legge «la pagina aperta» e il dubbio non era la strutturazione — che
+  non sa da dove venga il testo — ma lo **scorrimento**, che su LinkedIn aveva dovuto
+  cercarsi da solo il contenitore che scorre. Provata su un sito costruito in tutt'altro
+  modo, una one-page moderna: lo scorrimento ha percorso la pagina **fino in fondo**, e il
+  testo letto va dal menù in cima al piè di pagina con la versione del sito. La
+  strutturazione ha ricavato quel poco che una pagina aziendale dice di una persona — nome,
+  email, città, link, un ruolo — lasciando **vuoti** durata, tipo e telefono invece di
+  inventarli. Ne è uscita una voce nuova, minore: le parole si incollano fra un blocco e
+  l'altro. *(cap. 06.7.)*
+- ✅ **Il «corso senza nome» che una volta su tre spariva** *(aperta il 2026-08-09 dalla
+  revisione adversariale, chiusa il 2026-08-19 con il Pool 1.12)*. Era archiviata come
+  varianza del modello, con la riserva che l'anti-perdita promette che nulla sparisca in
+  silenzio. Misurata dopo il salto a Sonnet 5, la varianza non c'era più: **3 giri su 3**, la
+  frase «ho fatto anche un corso, ma non mi ricordo più né quale né dove» non veniva
+  instradata **né** dichiarata nel «lasciato fuori». La diagnosi ha cambiato bersaglio:
+  l'istruzione «un corso → formazione» nel prompt c'era già, per esteso; a farla perdere era
+  il **conflitto con la regola vicina** — davanti a un accenno che si auto-nega vinceva «non
+  aggiungere e non inventare nulla». La cura è una riga che dice che un accenno vale anche
+  quando è incompleto, messa **prima** di quella del non inventare. Riverificata come era
+  stata misurata: **3 su 3 ripescato**, le altre tre trappole intatte, il conduttore in
+  passo. *(`prompt-pool/CHANGELOG.md`, Pool 1.12; `profilo/contatti` 1.3.)*
 - ✅ **Un collaudo che cede quando la macchina è carica** *(aperta il 2026-08-18, chiusa il
   2026-08-19)*. Guardandolo da vicino, `UnaRispostaLungaMaVivaNonScadeMai` aveva **due**
   difetti e non uno. Il primo era quello segnalato: quattro pause da 120 ms contro un

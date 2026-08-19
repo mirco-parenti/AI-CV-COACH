@@ -2,7 +2,7 @@
 
 *Rapporto generato da `CollaudiDialogoReale`. Sta nel repo perché la persona è inventata: Anna Ricci non esiste, e la sua storia è scritta apposta perché l'anti-perdita e il «lasciato fuori» abbiano occasione di scattare.*
 
-- **Quando**: 2026-08-10 22:01
+- **Quando**: 2026-08-19 22:03
 - **Mosse del dialogo**: 25
 - **Chiamate all'AI**: 12
 - **Turni, in ordine di prima chiamata**: nome → contatti → patente → esperienze_formali → esperienze_informali → competenze → formazione
@@ -13,7 +13,7 @@
 
 | trappola | detta nel turno | attesa in | instradata a | reso conto |
 |---|---|---|---|---|
-| il corso senza nome | `contatti` | `formazione` | *(non instradata)* | — |
+| il corso senza nome | `contatti` | `formazione` | `formazione` | = |
 | il patentino del muletto | `patente` | `formazione` | `formazione` | = |
 | il posto fisso rifiutato | `competenze` | `esperienze_formali` | `esperienze_formali` | = |
 | il chiosco della sorella | `formazione` | `esperienze_informali` | `esperienze_informali` | = |
@@ -24,15 +24,16 @@
 
 | dal turno | verso | le parole dell'utente | reso conto |
 |---|---|---|---|
-| `patente` | `formazione` | Ho anche il patentino per il muletto | = |
-| `competenze` | `esperienze_formali` | offerta di un posto fisso in trattoria | = |
+| `contatti` | `formazione` | ho fatto anche un corso, ma non mi ricordo più né quale né dove | = |
+| `patente` | `formazione` | patentino per il muletto | = |
+| `competenze` | `esperienze_formali` | mi hanno anche offerto un posto fisso in trattoria | = |
 | `formazione` | `esperienze_informali` | per due estati ho aiutato mia sorella nel suo chiosco di piadine in spiaggia | = |
 
 ## Il «lasciato fuori»
 
 *Il gemello dell'anti-perdita: ciò che nessuna sezione sa accogliere si dichiara. Qui è una **segnalazione** e non un pass/fail — che scatti dipende da come il modello legge una frase, e pretenderlo darebbe un collaudo che lampeggia. Il suo pass/fail sta nel banco senza rete, dove il frammento che nessuno sa collocare è preparato a mano.*
 
-- Questo non sono riuscita a collocarlo in nessuna sezione, quindi lo lascio fuori: «offerta di un posto fisso in trattoria».
+- Questo non sono riuscita a collocarlo in nessuna sezione, quindi lo lascio fuori: «mi hanno anche offerto un posto fisso in trattoria».
 
 ## Il conduttore ha risposto alle domande giuste?
 
@@ -78,7 +79,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
     {
       "ruolo": "pulizie",
       "azienda": "supermercato Il Gabbiano di Forlì",
-      "durata": "dal 2016 al 2021",
+      "durata": "5 anni, dal 2016 al 2021",
       "cosa_facevo": "pulivo i reparti e gli uffici la mattina presto, prima dell'apertura",
       "tipo": ""
     },
@@ -94,20 +95,20 @@ Niente: il dialogo è andato come la traccia si aspettava.
     {
       "cosa_facevo": "cucino per duecento persone",
       "quando": "da tre anni",
-      "con_chi": "volontarie della sagra del mio paese"
+      "con_chi": "altre volontarie alla sagra del mio paese"
     },
     {
-      "cosa_facevo": "aiutato nel chiosco di piadine in spiaggia",
+      "cosa_facevo": "aiutato mia sorella nel suo chiosco di piadine in spiaggia",
       "quando": "due estati",
       "con_chi": "mia sorella"
     }
   ],
   "competenze": [
-    "Cucina per molte persone",
+    "Cucinare per tanta gente",
     "Velocità",
     "Precisione",
-    "Disponibilità ad alzarsi presto",
-    "Uso di lavapavimenti industriali"
+    "Alzarsi presto",
+    "Uso delle lavapavimenti industriali"
   ],
   "formazione": [
     {
@@ -179,7 +180,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > - Ruolo: pulizie
 > - Azienda: supermercato Il Gabbiano di Forlì
-> - Durata: dal 2016 al 2021
+> - Durata: 5 anni, dal 2016 al 2021
 > - Cosa facevo: pulivo i reparti e gli uffici la mattina presto, prima dell'apertura
 >
 
@@ -225,7 +226,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > - Cosa facevo: cucino per duecento persone
 > - Quando: da tre anni
-> - Con chi: volontarie della sagra del mio paese
+> - Con chi: altre volontarie alla sagra del mio paese
 >
 
 **Anna:** *[Sì, è giusto]*
@@ -247,11 +248,11 @@ Niente: il dialogo è andato come la traccia si aspettava.
 
 > Ecco cosa ho capito — le cose che sai fare:
 >
-> - Cucina per molte persone
+> - Cucinare per tanta gente
 > - Velocità
 > - Precisione
-> - Disponibilità ad alzarsi presto
-> - Uso di lavapavimenti industriali
+> - Alzarsi presto
+> - Uso delle lavapavimenti industriali
 >
 
 **Anna:** *[Ne aggiungo altre]*
@@ -263,11 +264,11 @@ Niente: il dialogo è andato come la traccia si aspettava.
 
 > Ecco cosa ho capito — le cose che sai fare:
 >
-> - Cucina per molte persone
+> - Cucinare per tanta gente
 > - Velocità
 > - Precisione
-> - Disponibilità ad alzarsi presto
-> - Uso di lavapavimenti industriali
+> - Alzarsi presto
+> - Uso delle lavapavimenti industriali
 >
 
 **Anna:** *[Confermiamo]*
@@ -279,7 +280,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > Prima avevi accennato a qualcosa che riguarda «studi e formazione», e l'avevo tenuto da parte. Vediamolo ora:
 >
-> *(le tue parole)* «Ho anche il patentino per il muletto»
+> *(le tue parole)* «ho fatto anche un corso, ma non mi ricordo più né quale né dove / patentino per il muletto»
 >
 > - Titolo: patentino per il muletto
 > - Istituto: (non specificata)
@@ -313,15 +314,15 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > Prima avevi accennato a qualcosa che riguarda «esperienze di lavoro», e l'avevo tenuto da parte. Vediamolo ora:
 >
-> Questo non sono riuscita a collocarlo in nessuna sezione, quindi lo lascio fuori: «offerta di un posto fisso in trattoria».
+> Questo non sono riuscita a collocarlo in nessuna sezione, quindi lo lascio fuori: «mi hanno anche offerto un posto fisso in trattoria».
 >
 > Prima di chiudere, recuperiamo una cosa che avevi accennato e non avevamo ancora registrato.
 >
 > Prima avevi accennato a qualcosa che riguarda «esperienze informali», e l'avevo tenuto da parte. Vediamolo ora:
 >
-> *(le tue parole)* «offerta di un posto fisso in trattoria / per due estati ho aiutato mia sorella nel suo chiosco di piadine in spiaggia»
+> *(le tue parole)* «mi hanno anche offerto un posto fisso in trattoria / per due estati ho aiutato mia sorella nel suo chiosco di piadine in spiaggia»
 >
-> - Cosa facevo: aiutato nel chiosco di piadine in spiaggia
+> - Cosa facevo: aiutato mia sorella nel suo chiosco di piadine in spiaggia
 > - Quando: due estati
 > - Con chi: mia sorella
 >
@@ -341,7 +342,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 > **Esperienze formali 1**
 > - Ruolo: pulizie
 > - Azienda: supermercato Il Gabbiano di Forlì
-> - Durata: dal 2016 al 2021
+> - Durata: 5 anni, dal 2016 al 2021
 > - Cosa facevo: pulivo i reparti e gli uffici la mattina presto, prima dell'apertura
 >
 > **Esperienze formali 2**
@@ -353,19 +354,19 @@ Niente: il dialogo è andato come la traccia si aspettava.
 > **Esperienze informali 1**
 > - Cosa facevo: cucino per duecento persone
 > - Quando: da tre anni
-> - Con chi: volontarie della sagra del mio paese
+> - Con chi: altre volontarie alla sagra del mio paese
 >
 > **Esperienze informali 2**
-> - Cosa facevo: aiutato nel chiosco di piadine in spiaggia
+> - Cosa facevo: aiutato mia sorella nel suo chiosco di piadine in spiaggia
 > - Quando: due estati
 > - Con chi: mia sorella
 >
 > **Competenze**
-> - Cucina per molte persone
+> - Cucinare per tanta gente
 > - Velocità
 > - Precisione
-> - Disponibilità ad alzarsi presto
-> - Uso di lavapavimenti industriali
+> - Alzarsi presto
+> - Uso delle lavapavimenti industriali
 >
 > **Formazione 1**
 > - Titolo: patentino per il muletto
