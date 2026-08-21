@@ -9,6 +9,7 @@ mai: com'è fatta l'applicazione mentre gira, e come la si mette in mano a qualc
 | [`mcp-collaudi/`](mcp-collaudi/README.md) | Il server MCP con cui l'assistente prova l'applicazione vera: la compila, fa girare il banco, la avvia, la fotografa, le preme i bottoni e — dal 2026-08-18 — **aspetta** che una condizione si avveri invece di guardare a intervalli. **Il suo README si legge prima di usarlo**: sono ore risparmiate. |
 | `avvia-demo.bat` | Apre TrovaLavoro con un doppio clic, per mostrarla a qualcuno senza passare da Claude Code. |
 | `sigilla-pool/` | Il **rito del bump** da riga di comando (cap. 04.5): rigenera le impronte del pool dei prompt e riscrive il manifest. |
+| [`collauda-copioni/`](collauda-copioni/README.md) | Il banco dei **copioni JavaScript** di `LettorePagina` — l'unico codice del prodotto che il banco VB non raggiunge, perché gira dentro la WebView. Li estrae dal sorgente, li compila e li prova su pagine finte. |
 
 ## Perché esiste `sigilla-pool/`
 
@@ -65,3 +66,26 @@ di aprire il vuoto.
 
 *(Nato il 2026-08-12, il giorno in cui l'applicazione è stata mostrata per la prima volta
 a qualcuno di fuori dal progetto.)*
+
+## Perché esiste `collauda-copioni/`
+
+Due pezzi del prodotto non girano nell'applicazione ma **dentro la WebView**: il copione
+che legge la pagina e quello che la scorre di un passo. Il banco VB non li vede — e
+nemmeno un compilatore, perché sono stringhe concatenate: un errore di sintassi si
+scopriva a runtime, con la cattura che torna vuota e il sospetto che cade sulla pagina
+sbagliata.
+
+Il difetto che ha fatto nascere l'attrezzo era di quelli che si notano per caso: la fine
+di un blocco attaccata all'inizio del successivo — «Pubblica AmministrazioneDue suite
+specializzate» — vista su un sito vero mentre si guardava altro. Su quel sito il modello
+aveva capito lo stesso, ed è proprio il motivo per cui una cosa così può restare in giro
+per mesi.
+
+```bash
+node strumenti/collauda-copioni/collauda-copioni.mjs
+```
+
+Non è un browser e non pretende di esserlo: i limiti di quel che può dire stanno scritti
+nel [suo README](collauda-copioni/README.md), insieme alla ragione per cui, se il sorgente
+cambia forma, l'attrezzo **si ferma** invece di continuare a dire «tutto bene».
+*(Nato a T9d, 2026-08-22.)*

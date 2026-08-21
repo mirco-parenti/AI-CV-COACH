@@ -77,6 +77,34 @@ Namespace Ui
 
         End Function
 
+        ''' <summary>
+        ''' Il gemello del caso di P6: rifinitura inciampata, messaggio grezzo, e la
+        ''' fascia che lo dice invece di lasciarlo credere rifinito (T9d).
+        ''' </summary>
+        <TestMethod>
+        Public Async Function SeLaRifinituraInciampaIlMessaggioRestaGrezzoELoDice() As Task
+
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Dim rifinitore As New RifinitoreFinto With {
+                .Fallira = New ErroreAi(CausaErroreAi.Servizio, "L'AI non risponde.")}
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.IsNotEmpty(Casella(pannello, "txtCorpo").Text,
+                                      "il messaggio c'è lo stesso, col testo del compositore")
+
+                    Assert.Contains("La rifinitura non è riuscita",
+                                    Etichetta(pannello, "lblStatoEmail").Text,
+                                    "detto con le stesse parole della pipeline")
+                End Function,
+                rifinitore)
+
+        End Function
+
         <TestMethod>
         Public Async Function LaRifinituraDellEmailSegueLaLinguaDellaCandidatura() As Task
 

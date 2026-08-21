@@ -213,6 +213,12 @@ Public Class PannelloRicerca
         Catch ex As Exception
             ' Qui il guasto arriva davvero: il cancello di T5a ha mostrato che accendere
             ' l'ambiente riesce quasi sempre, ed è l'accensione della vista a cadere.
+            '
+            ' La rete resta larga apposta, ed è stata riguardata a T9d: di là c'è WebView2,
+            ' codice che non è nostro e che cade in modi che non si finiscono di elencare,
+            ' e il cap. 03.8 chiede che il programma resti in piedi — non che indovini il
+            ' guasto. Restringerla qui non darebbe all'utente una parola in più: gli
+            ' toglierebbe il ripiego, che è la sola cosa che gli serve.
             FuoriUso($"Il browser integrato non si è avviato ({ex.Message}). Puoi comunque " &
                      "incollare il testo di un annuncio nel pannello Candidatura.")
             Return
@@ -593,7 +599,17 @@ Public Class PannelloRicerca
             Racconta("Leggo la pagina…")
             Return Await lettore.LeggiAsync().ConfigureAwait(True)
 
+        Catch ex As OperationCanceledException
+            ' Un'attesa interrotta non è una pagina illeggibile: raccontarla come tale
+            ' darebbe la colpa al sito per una cosa che ha chiesto l'utente. Ha la sua
+            ' porta, come in P2, P4, P6 e P7 — e la parola è la stessa (T9d).
+            Racconta("Lettura annullata: la pagina è rimasta com'era.")
+            Return Nothing
+
         Catch ex As Exception
+            ' La rete resta larga per la stessa ragione dell'accensione: di là c'è la
+            ' pagina di qualcun altro dentro un browser che non è nostro, e il ripiego
+            ' tiene in piedi il giro.
             Racconta($"Non sono riuscita a leggere questa pagina ({ex.Message}). " & ripiego)
             Return Nothing
 
@@ -734,15 +750,22 @@ Public Class PannelloRicerca
         MostraLIndirizzoCorrente()
     End Sub
 
+    ''' <summary>
+    ''' Finita la navigazione, la fascia dice com'è andata — e lo dice <b>guardando che
+    ''' cosa è successo davvero</b>: la frase la sceglie <see cref="EsitoNavigazione"/>
+    ''' (T9d).
+    ''' </summary>
     Private Sub AFineNavigazione(mittente As Object, argomenti As CoreWebView2NavigationCompletedEventArgs)
 
         MostraLIndirizzoCorrente()
         AggiornaComandi()
 
-        If argomenti.IsSuccess Then Return
+        Dim guaio As String = EsitoNavigazione.PercheNonSiEAperta(
+            argomenti.IsSuccess, argomenti.WebErrorStatus, argomenti.HttpStatusCode)
 
-        Racconta("La pagina non si è caricata. Controlla il collegamento a Internet, " &
-                 "o riprova con «⟳».")
+        If guaio Is Nothing Then Return
+
+        Racconta(guaio)
 
     End Sub
 

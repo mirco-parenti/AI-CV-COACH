@@ -103,6 +103,14 @@ Public Class PannelloDocumenti
     Private _primaDelCvBase As JsonNode
 
     ''' <summary>
+    ''' Vero quando l'anti-slop è inciampato e il 📄 CV base mostrato è quello grezzo:
+    ''' è il rovescio di <see cref="_primaDelCvBase"/>, che in quel caso resta
+    ''' <c>Nothing</c> — e senza dirlo, un prima/dopo che non compare sembrerebbe un CV
+    ''' che la rifinitura non ha avuto niente da correggere (cap. 08.4).
+    ''' </summary>
+    Private _ilCvBaseNonERifinito As Boolean
+
+    ''' <summary>
     ''' Vero mentre è il pannello a muovere la tendina della lingua, non l'utente.
     ''' </summary>
     ''' <remarks>
@@ -499,6 +507,8 @@ Public Class PannelloDocumenti
     ''' <returns>I testi di prima, o <c>Nothing</c> se non è cambiato niente.</returns>
     Private Async Function RifinisciIlCvBaseAsync(annulla As CancellationToken) As Task(Of JsonNode)
 
+        _ilCvBaseNonERifinito = False
+
         If _rifinitura Is Nothing Then Return Nothing
 
         RaccontaLoStato("Rifinisco il testo del 📄 CV base…", StileApp.TestoSecondario)
@@ -511,8 +521,23 @@ Public Class PannelloDocumenti
                 _cvBase, _linguaCvBase, annulla).ConfigureAwait(True)
 
         Catch ex As ErroreAi
+            ' Come nella pipeline (cap. 08.6): non si tace. Il CV c'è lo stesso, ed è
+            ' buono — solo non rifinito — ma a dirlo dev'essere lei, non il silenzio.
+            _ilCvBaseNonERifinito = True
             Return Nothing
         End Try
+
+    End Function
+
+    ''' <summary>
+    ''' La riga da aggiungere in coda al racconto quando l'anti-slop è inciampato, con
+    ''' le stesse parole della pipeline (cap. 08.6); vuota quando non c'è niente da dire.
+    ''' </summary>
+    Private Function LaRifinituraSeENonRiuscita() As String
+
+        If Not _ilCvBaseNonERifinito Then Return String.Empty
+
+        Return vbLf & "La rifinitura non è riuscita: tengo il testo com'è."
 
     End Function
 
@@ -523,11 +548,12 @@ Public Class PannelloDocumenti
             _contesto.Archivio.SalvaCvBase(_cvBase, _contesto.Archivio.Versioni().LastOrDefault(),
                                            _primaDelCvBase, _linguaCvBase)
             Return $"Il 📄 CV base è pronto{InQuestaLingua()} ed è salvato col tuo profilo." & vbLf &
-                   "Esportalo in DOCX o PDF quando ti va bene."
+                   "Esportalo in DOCX o PDF quando ti va bene." & LaRifinituraSeENonRiuscita()
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException
-            Return $"Il 📄 CV base è pronto, ma non sono riuscita a salvarlo ({ex.Message})."
+            Return $"Il 📄 CV base è pronto, ma non sono riuscita a salvarlo ({ex.Message})." &
+                   LaRifinituraSeENonRiuscita()
         End Try
 
     End Function

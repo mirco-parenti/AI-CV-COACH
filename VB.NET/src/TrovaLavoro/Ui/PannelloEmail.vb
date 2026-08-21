@@ -60,6 +60,13 @@ Public Class PannelloEmail
     ''' </summary>
     Private _destinatarioVieneDallAnnuncio As Boolean
 
+    ''' <summary>
+    ''' Vero quando l'anti-slop è inciampato e il corpo mostrato è quello grezzo del
+    ''' compositore: chi ha la rifinitura accesa deve sapere che questa volta non c'è
+    ''' stata, o crederebbe rifinito un testo che non lo è (cap. 08.4).
+    ''' </summary>
+    Private _ilCorpoNonERifinito As Boolean
+
     ''' <summary>La bozza mostrata adesso: cambia mentre si scrive, e si salva a ogni passo che conta.</summary>
     Private _bozza As New BozzaEmail
 
@@ -221,6 +228,8 @@ Public Class PannelloEmail
     Private Async Function RifinisciIlMessaggioAsync(corpo As String, lingua As String,
                                                      annulla As CancellationToken) As Task(Of String)
 
+        _ilCorpoNonERifinito = False
+
         If _rifinitura Is Nothing Then Return corpo
 
         Racconta("Rifinisco il messaggio…", StileApp.TestoSecondario)
@@ -229,6 +238,9 @@ Public Class PannelloEmail
             Return Await _rifinitura.DelTestoAsync(corpo, lingua, annulla)
 
         Catch ex As ErroreAi
+            ' Come nella pipeline (cap. 08.6): non si tace. Il messaggio c'è lo stesso,
+            ' ma è il testo grezzo, e chi legge deve saperlo.
+            _ilCorpoNonERifinito = True
             Return corpo
         End Try
 
@@ -297,6 +309,9 @@ Public Class PannelloEmail
             Racconta("Messaggio scritto. Rileggilo: è quello che l'azienda legge per primo." &
                      If(_destinatarioVieneDallAnnuncio,
                         vbLf & "Il destinatario l'ho preso dall'annuncio: controllalo prima di mandare.",
+                        "") &
+                     If(_ilCorpoNonERifinito,
+                        vbLf & "La rifinitura non è riuscita: tengo il testo com'è.",
                         ""),
                      StileApp.TestoSecondario)
 

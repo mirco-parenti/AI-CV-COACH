@@ -327,6 +327,31 @@ Namespace Ui
 
         End Function
 
+        ''' <summary>
+        ''' Un'attesa interrotta non è una pagina illeggibile: dirla così darebbe la colpa
+        ''' al sito per una cosa che ha chiesto l'utente (T9d).
+        ''' </summary>
+        <TestMethod>
+        Public Async Function UnaLetturaInterrottaNonDaLaColpaAllaPagina() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Guasto = New OperationCanceledException()}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Await pannello.CatturaAsync()
+
+                    Dim detto As String = Etichetta(pannello, "lblStatoRicerca").Text
+
+                    Assert.Contains("annullata", detto, "si dice com'è andata")
+                    Assert.DoesNotContain("Non sono riuscita a leggere", detto,
+                                          "e non si accusa la pagina, che non c'entra")
+
+                End Function)
+
+        End Function
+
         <TestMethod>
         Public Async Function UnaPaginaTroncataLoDichiara() As Task
 

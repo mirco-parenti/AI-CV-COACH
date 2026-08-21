@@ -67,6 +67,29 @@ Namespace Ui
 
         End Function
 
+        ''' <summary>
+        ''' Nella bolla non si vede la scrittura di una macchina (T9d): il finto consegna
+        ''' <b>parola per parola</b>, quindi i segni arrivano spezzati come dal vero, ed è
+        ''' il testo intero a doversi spianare.
+        ''' </summary>
+        <TestMethod>
+        Public Async Function NellaBollaNonSiVedonoGliAsterischi() As Task
+
+            Dim finto As New BrainstormatoreFinto()
+            finto.Dira("Il **CV** conta, e la *lettera* pure")
+
+            Await ConRagionamentoApertoAsync(finto,
+                Function(pannello, contesto)
+                    Dim dellAssistente As List(Of String) = Bolle(pannello, "bollaAssistente")
+
+                    Assert.AreEqual("Il CV conta, e la lettera pure", dellAssistente(0),
+                                    "il testo c'è tutto, i segni no")
+
+                    Return Task.CompletedTask
+                End Function)
+
+        End Function
+
         <TestMethod>
         Public Async Function IComandiCambianoMestiereConIlPannello() As Task
 

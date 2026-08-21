@@ -547,15 +547,28 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
-    ''' Apre o chiude le destinazioni raggiungibili. Le altre restano spente comunque: le
-    ''' spegne la tappa che ancora non è arrivata, e non tocca a questa guardia riaprirle.
+    ''' Apre o chiude le destinazioni della barra mentre l'AI lavora (cap. 02.6): si
+    ''' spegne <b>tutta</b>, e chi la compone è scritto in un posto solo —
+    ''' <see cref="BottoniDiNavigazione"/>.
     ''' </summary>
+    ''' <remarks>
+    ''' Fino a T9d i bottoni erano elencati qui a mano, ed erano quattro su cinque: il
+    ''' quinto restava fuori apposta, perché «⚙ Impostazioni» era spento sempre — P8 non
+    ''' esisteva ancora, e riaccenderlo qui avrebbe aperto una destinazione che non c'era.
+    ''' A T9b il pannello è nato e il bottone si è acceso, ma questo elenco è rimasto
+    ''' quello di prima: non era un bottone dimenticato, erano <b>due elenchi</b> della
+    ''' stessa cosa, e il secondo è invecchiato in silenzio. Da lì si esce in tre
+    ''' modi che una chiamata in volo non regge: i dati eliminati (che chiudono
+    ''' l'applicazione mentre una generazione ci scrive dentro, cap. 11.5), una chiave
+    ''' nuova (che smonta e rimonta il contesto sotto i piedi di chi lo sta usando,
+    ''' cap. 11.3) e la cartella dei documenti (che manda in P7 e avvia un secondo giro
+    ''' di AI, cap. 05.2).
+    ''' </remarks>
     Private Sub BarraDiNavigazione(libera As Boolean)
 
-        btnHome.Enabled = libera
-        btnProfilo.Enabled = libera
-        btnCandidatura.Enabled = libera
-        btnRicerca.Enabled = libera
+        For Each navigazione As Button In BottoniDiNavigazione()
+            navigazione.Enabled = libera
+        Next
 
     End Sub
 

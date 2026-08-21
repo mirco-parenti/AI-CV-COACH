@@ -367,6 +367,35 @@ Namespace Ui
 
         End Function
 
+        ''' <summary>
+        ''' Quando l'anti-slop inciampa il CV resta grezzo — ed è buono — ma la cosa si
+        ''' <b>dice</b>: la pipeline lo fa da T7b (cap. 08.6), qui fino a T9d si taceva.
+        ''' </summary>
+        <TestMethod>
+        Public Async Function SeLaRifinituraInciampaIlCvBaseRestaGrezzoELoDice() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Dim rifinitore As New RifinitoreFinto With {
+                .Fallira = New ErroreAi(CausaErroreAi.Servizio, "L'AI non risponde.")}
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.Contains("Il ritratto del profilo.", Casella(pannello, "txtCv").Text,
+                                    "il CV c'è lo stesso, col testo grezzo")
+
+                    Assert.Contains("La rifinitura non è riuscita",
+                                    Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "e chi ha l'anti-slop acceso non deve crederlo rifinito")
+                End Function,
+                rifinitore)
+
+        End Function
+
         <TestMethod>
         Public Async Function LaCasellaSiAccendeSoloDoveCEQualcosaDaConfrontare() As Task
 

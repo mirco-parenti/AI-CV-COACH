@@ -119,6 +119,14 @@ Public Class PannelloDialogo
     Private _bollaViva As Panel
 
     ''' <summary>
+    ''' La stessa risposta <b>com'è arrivata</b>, segni del Markdown compresi. A video ci
+    ''' va spianata (v. <see cref="ProsaDellAssistente"/>), ma la ripulitura vuole il testo
+    ''' intero: un <c>**</c> spezzato fra due pezzi, spianato pezzo per pezzo, non si
+    ''' riconoscerebbe mai. Perciò i pezzi si accumulano qui, e la bolla si riscrive.
+    ''' </summary>
+    Private _grezzoDellaBollaViva As String
+
+    ''' <summary>
     ''' Quanto erano larghi nel disegno i due bottoni che cambiano nome col mestiere del
     ''' pannello: è il minimo sotto cui non si scende quando il testo è più corto.
     ''' </summary>
@@ -600,6 +608,7 @@ Public Class PannelloDialogo
 
         AggiungiBollaAssistente("")
 
+        _grezzoDellaBollaViva = String.Empty
         _bollaViva = TryCast(flpConversazione.Controls(flpConversazione.Controls.Count - 1), Panel)
         _rigaViva = _bollaViva?.Controls.OfType(Of Panel)().FirstOrDefault()?.
             Controls.OfType(Of Panel)().FirstOrDefault()?.
@@ -631,7 +640,8 @@ Public Class PannelloDialogo
 
         If _rigaViva Is Nothing OrElse String.IsNullOrEmpty(pezzo) Then Return
 
-        _rigaViva.Text &= pezzo
+        _grezzoDellaBollaViva &= pezzo
+        _rigaViva.Text = ProsaDellAssistente.SenzaMarkdown(_grezzoDellaBollaViva)
 
         DisponiBolla(_bollaViva)
         ScorriInFondo()
@@ -644,13 +654,17 @@ Public Class PannelloDialogo
     ''' </summary>
     Private Sub ChiudiLaBollaViva()
 
-        If _bollaViva IsNot Nothing AndAlso String.IsNullOrEmpty(_rigaViva?.Text) Then
+        ' Si guarda il testo com'è arrivato e non quello a video: una risposta fatta di
+        ' soli segni — una riga orizzontale e nulla più — a video è vuota, ma qualcosa era
+        ' arrivato, e la bolla non è un fantasma da togliere.
+        If _bollaViva IsNot Nothing AndAlso String.IsNullOrEmpty(_grezzoDellaBollaViva) Then
             flpConversazione.Controls.Remove(_bollaViva)
             _bollaViva.Dispose()
         End If
 
         _bollaViva = Nothing
         _rigaViva = Nothing
+        _grezzoDellaBollaViva = Nothing
 
     End Sub
 

@@ -68,6 +68,16 @@ Namespace Web
     ''' la pagina va a capo; il secondo restituisce anche i menù nascosti, i banner mai
     ''' mostrati e le porzioni spente, che nell'annuncio non ci sono e che l'analisi
     ''' dovrebbe poi ignorare.</para>
+    ''' <para><b>Perché a pezzi e non tutto in un colpo</b> <i>(T9d)</i>. Chiedere
+    ''' <c>innerText</c> al solo <c>body</c> lasciava la fine di un blocco attaccata
+    ''' all'inizio del successivo — «Pubblica AmministrazioneDue suite specializzate» — e
+    ''' su quel sito il modello aveva capito lo stesso, per fortuna e non per progetto.
+    ''' Adesso si scende fino ai <b>blocchi foglia</b> (quelli che dentro non hanno altri
+    ''' blocchi) e si chiede <c>innerText</c> a ciascuno, unendo con un a capo: la fonte
+    ''' resta la stessa — coi suoi pregi — ma fra un pezzo e l'altro un confine c'è
+    ''' sempre. Quel che il foglio di stile spegne si salta prima di scendere, e i nodi di
+    ''' testo appesi direttamente a un contenitore di blocchi non si perdono: diventano un
+    ''' pezzo anche loro.</para>
     ''' <para><b>Il limite noto</b>: il testo dentro un <c>iframe</c> non ci arriva, perché
     ''' quella è un'altra pagina. Sui portali del primo rilascio la pagina di un singolo
     ''' annuncio non ne usa, ma un portale che cambiasse idea si riconoscerebbe subito —
@@ -249,7 +259,45 @@ Namespace Web
             Dim massimo As String = MassimoCaratteri.ToString(CultureInfo.InvariantCulture)
 
             Return "(function () {" &
-                   "  var t = document.body ? document.body.innerText : '';" &
+                   "  function visibile(e) {" &
+                   "    var s = window.getComputedStyle(e);" &
+                   "    return s && s.display !== 'none' && s.visibility !== 'hidden';" &
+                   "  }" &
+                   "  function bloccante(e) {" &
+                   "    var s = window.getComputedStyle(e);" &
+                   "    if (!s || !s.display) return false;" &
+                   "    return s.display.indexOf('inline') !== 0 && s.display !== 'contents';" &
+                   "  }" &
+                   "  function daSaltare(e) {" &
+                   "    var g = e.tagName;" &
+                   "    return g === 'SCRIPT' || g === 'STYLE' || g === 'NOSCRIPT' || g === 'TEMPLATE';" &
+                   "  }" &
+                   "  function raccogli(e, pezzi) {" &
+                   "    var figli = e.childNodes, dentroCiSonoBlocchi = false;" &
+                   "    for (var i = 0; i < figli.length; i++) {" &
+                   "      var n = figli[i];" &
+                   "      if (n.nodeType !== 1 || daSaltare(n) || !visibile(n)) continue;" &
+                   "      if (bloccante(n)) { dentroCiSonoBlocchi = true; break; }" &
+                   "    }" &
+                   "    if (!dentroCiSonoBlocchi) {" &
+                   "      var tutto = e.innerText;" &
+                   "      if (tutto && tutto.trim()) pezzi.push(tutto.trim());" &
+                   "      return;" &
+                   "    }" &
+                   "    for (var j = 0; j < figli.length; j++) {" &
+                   "      var f = figli[j];" &
+                   "      if (f.nodeType === 3) {" &
+                   "        var suo = f.nodeValue;" &
+                   "        if (suo && suo.trim()) pezzi.push(suo.trim());" &
+                   "        continue;" &
+                   "      }" &
+                   "      if (f.nodeType !== 1 || daSaltare(f) || !visibile(f)) continue;" &
+                   "      raccogli(f, pezzi);" &
+                   "    }" &
+                   "  }" &
+                   "  var pezzi = [];" &
+                   "  if (document.body) raccogli(document.body, pezzi);" &
+                   "  var t = pezzi.join('\n').replace(/\n{3,}/g, '\n\n');" &
                    "  return JSON.stringify({" &
                    "    titolo: document.title || ''," &
                    "    indirizzo: location.href || ''," &
