@@ -123,6 +123,24 @@ Namespace Dati
             Assert.AreEqual(".md", EsportazioneRegistro.Estensione(FormatoEsportazione.Markdown))
         End Sub
 
+        <TestMethod>
+        Public Sub NelRiepilogoLoStatoDiceComEAndata()
+
+            ' «Esce quel che si vede» (cap. 07.3): nella Home la colonna dice «Rifiutata»,
+            ' e chi apre il foglio deve leggere la stessa parola — «Con esito», da solo,
+            ' non racconta niente a chi non ha l'applicazione davanti.
+            Dim finita As VoceRegistro = Voce("Acme", "Magazziniere", 3.5)
+            finita.Stato = StatoOpportunita.Esito
+            finita.Esito = EsitoCandidatura.Rifiutata
+
+            Dim testo As String = EsportazioneRegistro.Componi(
+                {finita}, FormatoEsportazione.Csv)
+
+            Assert.Contains("Rifiutata", testo)
+            Assert.DoesNotContain("Con esito", testo)
+
+        End Sub
+
         Private Shared Function Voce(azienda As String, titolo As String, stelle As Double?) As VoceRegistro
 
             Return New VoceRegistro With {

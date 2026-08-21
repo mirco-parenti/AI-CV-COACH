@@ -48,7 +48,9 @@ dalla 15.2.*
   **promemoria passivo** del registro (07.3): ricorda le candidature ferme, il testo del
   sollecito lo scrive l'utente. L'estensione è già disegnata (un prompt `email_sollecito`
   che riusa il pannello Email P7 e l'anti-slop); si aggiunge dopo la 1.0 se il bisogno
-  si rivela frequente.
+  si rivela frequente. *Il promemoria passivo è stato costruito a **T9c** (2026-08-21),
+  con la soglia in giorni scelta dall'utente in P8: la metà rimandata resta quella
+  assistita, e questa voce non cambia — cambia solo che adesso ha su cosa attaccarsi.*
 - **Uscita `.msg`** *(dalla 15.2, voce 8)* — l'`.eml` con `X-Unsent` dà lo stesso
   risultato in Outlook senza automazione COM. Si riapre solo davanti a un caso d'uso
   che l'`.eml` non copra.

@@ -663,6 +663,235 @@ Namespace Ui
 
         End Function
 
+        ' ==================================================================
+        ' La riaperta che aspetta solo il confronto (T9c)
+        ' ==================================================================
+
+        ''' <summary>
+        ''' Una candidatura ferma al solo annuncio, come la scrive il server MCP: niente
+        ''' giudizi, niente stelle, stato «nuova» (cap. 09.3).
+        ''' </summary>
+        Private Shared Function SoloLAnnuncio() As Opportunita
+
+            Return New Opportunita With {
+                .Creata = New Date(2026, 8, 20, 9, 0, 0),
+                .Annuncio = System.Text.Json.Nodes.JsonNode.Parse(AnnuncioLetto)}
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaRiapertaSenzaGiudiziSiConfrontaSenzaRileggereLAnnuncio() As Task
+
+            ' Il vicolo cieco trovato dal collaudo di tappa di T8: si riapriva e non si
+            ' poteva proseguire. Adesso «Analizza» cambia mestiere.
+            Dim confrontatore As New ConfrontatoreFinto
+
+            Await ConPannelloAsync(
+                PipelineFinta(confrontatore:=confrontatore),
+                Async Function(pannello, contesto) As Task
+
+                    Dim dove As String = contesto.Opportunita.Salva(SoloLAnnuncio())
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                    Dim analizza As Button = Bottone(pannello, "btnAnalizza")
+                    Assert.AreEqual("Confronta", analizza.Text, "il bottone dice l'unico passo che manca")
+                    Assert.IsTrue(analizza.Enabled, "e si può premere con la casella vuota")
+
+                    Await pannello.ConfrontaLaRiapertaAsync()
+
+                    Assert.AreEqual("confronto → mitigazione", confrontatore.LavoriChiesti(),
+                                    "l'annuncio non si rilegge: era già strutturato")
+                    Assert.HasCount(2, Giudizi(pannello), "i giudizi arrivano a video")
+
+                    Dim riletta As Opportunita = contesto.Opportunita.Carica(dove)
+                    Assert.AreEqual(StatoOpportunita.Interessante, riletta.Stato,
+                                    "e la candidatura avanza nella sua cartella")
+                    Assert.IsTrue(riletta.Confrontata)
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnTestoIncollatoHaLaPrecedenzaSulConfronto() As Task
+
+            ' Chi scrive nella casella vuole leggere un annuncio nuovo, non ripescare
+            ' quello di prima: il bottone torna a essere «Analizza».
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Dim dove As String = contesto.Opportunita.Salva(SoloLAnnuncio())
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                    Casella(pannello, "txtAnnuncio").Text = TestoIncollato
+                    Assert.AreEqual("Analizza", Bottone(pannello, "btnAnalizza").Text)
+
+                    Casella(pannello, "txtAnnuncio").Text = ""
+                    Assert.AreEqual("Confronta", Bottone(pannello, "btnAnalizza").Text,
+                                    "svuotata la casella, torna quello che mancava")
+
+                    Await Task.CompletedTask
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SuUnaScartataSenzaGiudiziNonSiConfrontaPiu() As Task
+
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Dim persa As Opportunita = SoloLAnnuncio()
+                    persa.Avanza(StatoOpportunita.Scartata)
+                    Dim dove As String = contesto.Opportunita.Salva(persa)
+
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                    Assert.AreEqual("Analizza", Bottone(pannello, "btnAnalizza").Text,
+                                    "su una candidatura chiusa non si offre di proseguirla")
+                    Assert.IsFalse(Bottone(pannello, "btnAnalizza").Enabled)
+
+                    Await Task.CompletedTask
+
+                End Function)
+
+        End Function
+
+        ' ==================================================================
+        ' Com'è andata (T9c, cap. 07.3)
+        ' ==================================================================
+
+        ''' <summary>Una candidatura arrivata fino all'invio, come dopo P7.</summary>
+        Private Shared Function GiaSpedita() As Opportunita
+
+            Dim o As Opportunita = SoloLAnnuncio()
+            o.Confronto = System.Text.Json.Nodes.JsonNode.Parse(ConfrontoPieno)
+            o.Cv = System.Text.Json.Nodes.JsonNode.Parse("{""intestazione"": {}}")
+
+            o.Avanza(StatoOpportunita.Interessante, o.Creata.AddMinutes(2))
+            o.Avanza(StatoOpportunita.Generata, o.Creata.AddMinutes(9))
+            o.Avanza(StatoOpportunita.Inviata, o.Creata.AddMinutes(20))
+
+            Return o
+
+        End Function
+
+        <TestMethod>
+        Public Async Function ComEAndataSiSegnaSoloDopoAverSpedito() As Task
+
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Await IncollaEAnalizzaAsync(pannello, TestoIncollato)
+                    Assert.IsFalse(Bottone(pannello, "btnEsito").Enabled,
+                                   "prima dell'invio non c'è niente che possa essere andato in un modo")
+
+                    Dim dove As String = contesto.Opportunita.Salva(GiaSpedita())
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                    Assert.IsTrue(Bottone(pannello, "btnEsito").Enabled, "dopo sì")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LEsitoSegnatoFinisceSullaSchedaSulDiscoENellIndice() As Task
+
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Dim dove As String = contesto.Opportunita.Salva(GiaSpedita())
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                    pannello.SegnaLEsito(EsitoCandidatura.Colloquio)
+
+                    Assert.Contains("Colloquio", Etichetta(pannello, "lblStatoCandidatura").Text,
+                                    "la scheda dice com'è andata, non «con esito»")
+
+                    Assert.AreEqual(EsitoCandidatura.Colloquio,
+                                    contesto.Opportunita.Carica(dove).Esito,
+                                    "e la cartella se lo tiene")
+
+                    Assert.AreEqual(EsitoCandidatura.Colloquio,
+                                    contesto.Registro.Carica().Voci.Single().Esito,
+                                    "chi cambia uno stato lo annota anche nell'indice (cap. 07.3)")
+
+                    Await Task.CompletedTask
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaVoceSceltaNelMenuArrivaFinoAlDisco() As Task
+
+            ' Il filo fra la voce del menù e l'azione: è l'unico pezzo di questa strada che
+            ' nessun altro collaudo tocca, ed è anche l'unico che dal vivo non si può
+            ' provare — lo strumento di collaudo risponde «Premuto» e non succede niente
+            ' (2026-08-21). Qui la voce si preme davvero.
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Dim dove As String = contesto.Opportunita.Salva(GiaSpedita())
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                    Dim menu As ContextMenuStrip = pannello.MenuDegliEsiti()
+
+                    Dim voci As List(Of ToolStripMenuItem) =
+                        menu.Items.OfType(Of ToolStripMenuItem)().ToList()
+
+                    Assert.HasCount(4, voci, "l'attesa più i tre esiti")
+                    Assert.IsTrue(voci(0).Checked, "adesso è in attesa, e il menù lo dice")
+
+                    voci.Single(Function(v) v.Text = "Assunto 🎉").PerformClick()
+
+                    Assert.AreEqual(EsitoCandidatura.Assunto, contesto.Opportunita.Carica(dove).Esito)
+
+                    ' Riaperto, il menù sposta la spunta su quello che vale adesso.
+                    Assert.IsTrue(pannello.MenuDegliEsiti().Items.OfType(Of ToolStripMenuItem)().
+                                  Single(Function(v) v.Text = "Assunto 🎉").Checked)
+
+                    Await Task.CompletedTask
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LEsitoSiCorreggeESiTogliedallaStessaScheda() As Task
+
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Dim dove As String = contesto.Opportunita.Salva(GiaSpedita())
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                    pannello.SegnaLEsito(EsitoCandidatura.Rifiutata)
+                    pannello.SegnaLEsito(EsitoCandidatura.Assunto)
+                    Assert.AreEqual(EsitoCandidatura.Assunto, contesto.Opportunita.Carica(dove).Esito,
+                                    "una dichiarazione si corregge")
+
+                    pannello.SegnaLEsito(Nothing)
+                    Dim riletta As Opportunita = contesto.Opportunita.Carica(dove)
+                    Assert.AreEqual(StatoOpportunita.Inviata, riletta.Stato,
+                                    "e si toglie del tutto: torna in attesa")
+                    Assert.IsFalse(riletta.Esito.HasValue)
+                    Assert.Contains("Inviata", Etichetta(pannello, "lblStatoCandidatura").Text)
+
+                    Await Task.CompletedTask
+
+                End Function)
+
+        End Function
+
         ''' <summary>
         ''' Un pannello collegato a un motore vero — cartella dati temporanea, nessuna
         ''' chiave — con la pipeline finta che gli si vuol dare.

@@ -899,7 +899,12 @@ Public Class PannelloEmail
 
         _candidatura.Email = _bozza.ComeJson()
 
-        If avanzaAInviata AndAlso _candidatura.Stato <> StatoOpportunita.Inviata Then
+        ' Si avanza solo se la macchina degli stati lo consente, e non «se non è già
+        ' inviata»: da T9c una candidatura può essere andata **oltre** — ha un esito — e
+        ' ripremere «L'ho spedita» per rimandare la stessa email chiedeva un passo
+        ' all'indietro che non esiste (cap. 07.3). Chiederlo sollevava.
+        If avanzaAInviata AndAlso
+           StatiOpportunita.Consentita(_candidatura.Stato, StatoOpportunita.Inviata) Then
             _candidatura.Avanza(StatoOpportunita.Inviata, Date.Now)
         End If
 

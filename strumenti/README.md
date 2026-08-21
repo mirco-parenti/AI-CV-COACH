@@ -13,10 +13,16 @@ mai: com'è fatta l'applicazione mentre gira, e come la si mette in mano a qualc
 ## Perché esiste `sigilla-pool/`
 
 Ogni modifica a un prompt si chiude col bump (cap. 04.5): versione nuova, impronte
-rigenerate, changelog annotato. Il comando che rigenera le impronte è dichiarato dentro
-l'applicazione — Impostazioni → «Sigilla pool» — ma le **Impostazioni sono di T9**, e i
+rigenerate, changelog annotato. Il comando che rigenera le impronte era dichiarato dentro
+l'applicazione — Impostazioni → «Sigilla pool» — ma le **Impostazioni erano di T9**, e i
 prompt si toccano da T2. Fino ad allora il rito non aveva un attrezzo, e ogni bump era
 una cosa da rifare a mano.
+
+*E le Impostazioni, arrivate a **T9b** (2026-08-21), quel comando non l'hanno preso — non
+per fretta, ma perché lì non ci sta: il manifest vive nel repo accanto ai prompt, e un
+eseguibile distribuito sigillerebbe qualcosa che nessuno rileggerà mai (cap. 04.5). In P8
+è andata la sola **diagnosi** — la versione con l'asterisco e l'elenco dei file fuori
+impronta. Questo attrezzo non è più un anticipo: è la casa definitiva del sigillo.*
 
 L'attrezzo **non ricalcola niente per conto suo**: referenzia il progetto del prodotto e
 chiama `LibreriaPrompt.Sigilla`, cioè lo stesso codice con cui il caricatore verifica le

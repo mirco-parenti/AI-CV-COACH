@@ -142,6 +142,18 @@ Namespace Motore
         Public ReadOnly Property DateStati As New Dictionary(Of StatoOpportunita, Date)
 
         ''' <summary>
+        ''' Com'è finita, quando lo si sa (cap. 07.3); <c>Nothing</c> finché nessuno l'ha
+        ''' registrato — ed è il silenzio da cui il promemoria di follow-up capisce che
+        ''' quella candidatura sta ancora aspettando.
+        ''' </summary>
+        ''' <remarks>
+        ''' Ha senso solo dentro lo stato <see cref="StatoOpportunita.Esito"/>, e a
+        ''' tenerli d'accordo è <see cref="SegnaEsito"/>: come per lo stato, il valore si
+        ''' assegna direttamente solo quando lo si <b>rilegge</b> da disco.
+        ''' </remarks>
+        Public Property Esito As EsitoCandidatura?
+
+        ''' <summary>
         ''' Dove è stata scritta su disco; <c>Nothing</c> finché non lo è. Lo riempie
         ''' l'archivio, che è l'unico a sapere come si chiama la cartella.
         ''' </summary>
@@ -233,6 +245,56 @@ Namespace Motore
 
             Stato = nuovo
             DateStati(nuovo) = istante
+
+        End Sub
+
+        ''' <summary>
+        ''' Registra com'è finita, o toglie l'esito registrato per sbaglio (cap. 07.3).
+        ''' </summary>
+        ''' <param name="scelto">
+        ''' L'esito da segnare; <c>Nothing</c> per toglierlo, e allora la candidatura
+        ''' torna a essere <see cref="StatoOpportunita.Inviata"/>, cioè in attesa.
+        ''' </param>
+        ''' <param name="quando">L'istante in cui lo si registra; se omesso, adesso.</param>
+        ''' <remarks>
+        ''' <para><b>Perché non basta <see cref="Avanza"/>.</b> L'esito è la sola parte
+        ''' del ciclo di vita che si <b>corregge</b>: non è un fatto che il programma
+        ''' osserva, è una dichiarazione di chi si è candidato (cap. 07.3), e una
+        ''' dichiarazione sbagliata si rimangia. Perciò da qui si passa da «rifiutata» a
+        ''' «colloquio» e si torna anche indietro a «inviata», due strade che la macchina
+        ''' degli stati non prevede — e che non deve prevedere, perché per tutto il resto
+        ''' vale ancora che indietro non si torna.</para>
+        ''' <para><b>La data è quella dell'ultimo esito registrato</b>, ed è l'unica
+        ''' eccezione alla regola di <see cref="DateStati"/> (dove vale il primo
+        ''' ingresso): una candidatura entrata «in colloquio» a settembre e diventata
+        ''' «assunto» a novembre, raccontata con la data di settembre, direbbe una cosa
+        ''' falsa proprio nel punto in cui la storia è finita.</para>
+        ''' <para><b>Restare senza esito dove non ce n'era</b> non è un errore e non fa
+        ''' niente: è il caso di chi apre il menù e riconferma «in attesa».</para>
+        ''' </remarks>
+        Public Sub SegnaEsito(scelto As EsitoCandidatura?, Optional quando As Date = Nothing)
+
+            Dim istante As Date = If(quando = Nothing, Date.Now, quando)
+
+            If Not scelto.HasValue Then
+                If Stato <> StatoOpportunita.Esito Then Return
+
+                Stato = StatoOpportunita.Inviata
+                Esito = Nothing
+                DateStati.Remove(StatoOpportunita.Esito)
+                Return
+            End If
+
+            If Stato <> StatoOpportunita.Inviata AndAlso Stato <> StatoOpportunita.Esito Then
+                Throw New InvalidOperationException(
+                    $"Una candidatura «{StatiOpportunita.Nome(Stato)}» non ha ancora un esito: " &
+                    "prima va spedita (cap. 07.3).")
+            End If
+
+            If Stato = StatoOpportunita.Inviata Then Avanza(StatoOpportunita.Esito, istante)
+
+            Esito = scelto
+            DateStati(StatoOpportunita.Esito) = istante
 
         End Sub
 

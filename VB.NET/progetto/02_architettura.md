@@ -58,7 +58,7 @@ Artefatti **nuovi** della fase desktop:
 | Artefatto | Cos'è |
 |---|---|
 | **Preferenze di ricerca** | tipologie di lavoro, zona, contratto, parole chiave, ricerche salvate per portale |
-| **Opportunità** | annuncio + fonte/link + stato (`nuova → interessante → generata → inviata → esito`, con `scartata` che chiude la strada) + tutti gli artefatti prodotti per esso |
+| **Opportunità** | annuncio + fonte/link + stato (`nuova → interessante → generata → inviata → esito`, con `scartata` che chiude la strada) + tutti gli artefatti prodotti per esso. *Da **T9c** (2026-08-21) l'ultimo stato porta con sé **quale** esito — colloquio · rifiutata · assunto 🎉 — e la data dell'**ultima notizia**, che per lui non è quella del primo ingresso (cap. 07.3)* |
 | **Appunti di mira** | l'esito confermato del brainstorming (cosa enfatizzare, tono); orientano la generazione, non aggiungono fatti |
 | **Registro candidature** | vista d'insieme delle opportunità e dei loro stati, con date. *È l'unico artefatto **derivato**: si ricava dalle cartelle-opportunità e si può buttare senza perdere niente (cap. 07.3, cap. 11.1)* |
 | **Backup JSON** | profilo (+ storico candidature a scelta) esportabile e reimportabile |
@@ -122,6 +122,15 @@ ogni modulo abbia **un compito solo**:
     leggono in due (l'opportunità e il registro) e devono capirlo allo stesso modo. Il
     motore ci mette del suo solo dove c'è una decisione: `Opportunita.Avanza`, che rifiuta
     i passaggi che il ciclo di vita non prevede, e la pipeline che li fa scattare.*
+    *A **T9c** (2026-08-21) accanto ad `Avanza` nasce **`Opportunita.SegnaEsito`**, ed è
+    l'unico punto da cui il ciclo di vita **torna indietro**: un esito si corregge e si
+    toglie, perché è una dichiarazione dell'utente e non un fatto osservato (cap. 07.3).
+    Non è un buco nella macchina a stati — è una seconda porta, stretta e dichiarata,
+    con lo stesso mestiere di collo di bottiglia unico che `Avanza` ha per il resto,
+    server MCP compreso. Il valore vive in `Dati/EsitoCandidatura`, dove sta anche la
+    regola che tiene insieme i due campi che possono contraddirsi: stato ed esito si
+    scrivono e si rileggono insieme, e in caso di disaccordo vince la lettura
+    conservativa.*
 - **`Ai/`** —
   - `LibreriaPrompt`: carica i `.md` dal pool, ne legge i metadati, riempie i
     segnaposto (cap. 04);

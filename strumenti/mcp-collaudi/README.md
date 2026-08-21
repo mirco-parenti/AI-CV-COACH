@@ -80,6 +80,22 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
 
 ## Quel che ancora non sa fare
 
+- **Le voci di un menù contestuale non si premono.** *(2026-08-21, T9c.)* Il menù di
+  «Com'è andata…» in P4 si apre benissimo con `clic` sul bottone, le sue voci compaiono
+  nella fotografia — e `clic` su «Colloquio» risponde **«Premuto»** senza che succeda
+  niente: il menù resta aperto, la spunta dov'era, il disco intatto. Due volte di fila, e
+  nemmeno la tastiera aiuta, perché il fuoco non è dell'applicazione. Costa un'ora se non
+  lo si sa, perché tutto punta a un gestore che non parte — e invece parte: a dimostrarlo
+  è bastato un **clic vero del mouse** alle coordinate della voce, e l'esito è finito su
+  disco al primo colpo. Finché non gli si insegna: le voci si premono così
+  (`SetCursorPos` + `mouse_event` da PowerShell, coordinate lette sulla fotografia a
+  schermo intero), e il filo fra la voce e l'azione si copre nel **banco**, dove una
+  `ToolStripMenuItem` ha `PerformClick`.
+- **Il valore di un NumericUpDown non si legge né si scrive.** *(2026-08-21, T9c.)* La
+  casella dei giorni in P8 compare nell'elenco come due bottoni «SU» e «GIÙ», per giunta
+  marcati **SPENTI**, e il numero non si vede da nessuna parte: `scrivi` non ha dove
+  scrivere. Si fa come sopra — clic vero sulla casella e `SendKeys` per il valore — e si
+  verifica il risultato leggendo `impostazioni.json`, che è la fonte.
 - **I bottoni-scelta non compaiono nell'elenco.** *(2026-08-21, T9a.)* `controlli` cerca fra
   i tipi che servono — bottoni, caselle, tendine, liste, schede — e i **RadioButton** non
   sono fra quelli: la finestra di backup mostra le sue due scelte («solo il profilo» /

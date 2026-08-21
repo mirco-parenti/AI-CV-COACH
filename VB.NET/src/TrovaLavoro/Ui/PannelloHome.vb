@@ -59,6 +59,10 @@ Public Class PannelloHome
     ''' <summary>Sotto questa larghezza la colonna del ruolo non scende, per stretta che sia la finestra.</summary>
     Private Const LarghezzaMinimaRuolo As Integer = 260
 
+    ''' <summary>Quanto è alta la fascia dei filtri quando il promemoria non c'è, e quando c'è.</summary>
+    Private Const AltezzaFiltroDaSolo As Integer = 34
+    Private Const AltezzaFiltroConPromemoria As Integer = 56
+
     ' Le colonne della coda, nell'ordine in cui il designer le dichiara: servono a
     ' sapere per quale si sta ordinando.
     Private Const ColonnaMatch As Integer = 0
@@ -72,7 +76,8 @@ Public Class PannelloHome
     Private Const FiltroTutte As Integer = 0
     Private Const FiltroDaCompletare As Integer = 1
     Private Const FiltroGenerate As Integer = 2
-    Private Const FiltroScartate As Integer = 3
+    Private Const FiltroDaSollecitare As Integer = 3
+    Private Const FiltroScartate As Integer = 4
 
     ''' <summary>
     ''' La prima voce del filtro «Stelle»: quella che non filtra niente. Le altre non hanno
@@ -88,6 +93,21 @@ Public Class PannelloHome
 
     ''' <summary>L'indice come si è letto l'ultima volta; <c>Nothing</c> finché non si legge.</summary>
     Private _registro As Registro
+
+    ''' <summary>
+    ''' Le candidature che aspettano da troppo, com'erano al momento di disegnare la coda
+    ''' (cap. 07.3): in ordine di attesa, la più vecchia per prima.
+    ''' </summary>
+    ''' <remarks>
+    ''' Si calcolano <b>una volta sola</b> per giro di disegno, e non tre — una per il
+    ''' filtro, una per le righe da segnare, una per la riga del promemoria. Non è
+    ''' risparmio: è che quei tre conti devono dire la stessa cosa, e a mezzanotte in
+    ''' punto tre chiamate a <c>Date.Now</c> non la direbbero.
+    ''' </remarks>
+    Private _solleciti As New List(Of VoceRegistro)
+
+    ''' <summary>Le cartelle di <see cref="_solleciti"/>, per segnare le righe senza ricercare.</summary>
+    Private ReadOnly _daSollecitare As New HashSet(Of String)(StringComparer.Ordinal)
 
     ''' <summary>Per quale colonna è ordinata la coda, e in che verso.</summary>
     Private _ordinePer As Integer = ColonnaQuando
@@ -248,18 +268,116 @@ Public Class PannelloHome
     ''' <summary>Rifà le righe della coda: prima il filtro, poi l'ordine, poi il disegno.</summary>
     Private Sub RiempiLaCoda()
 
+        ' Prima di filtrare: il filtro «Da sollecitare» e le righe segnate guardano lo
+        ' stesso elenco, e va calcolato una volta sola (v. _solleciti).
+        RicalcolaISolleciti()
+
         lvwCoda.BeginUpdate()
         lvwCoda.Items.Clear()
 
         For Each voce As VoceRegistro In Ordinate(Filtrate())
-            lvwCoda.Items.Add(RigaDellaVoce(voce))
+            lvwCoda.Items.Add(RigaDellaVoce(voce, AttesaDaSegnalare(voce)))
         Next
 
         lvwCoda.EndUpdate()
 
         MostraIContatori(quanteSeNeVedono:=lvwCoda.Items.Count)
+        MostraIlPromemoria()
 
     End Sub
+
+    ''' <summary>
+    ''' Rifà l'elenco delle candidature ferme da troppo, con la soglia scelta nelle
+    ''' Impostazioni (cap. 07.3; cap. 11).
+    ''' </summary>
+    Private Sub RicalcolaISolleciti()
+
+        _solleciti = If(_registro Is Nothing,
+                        New List(Of VoceRegistro),
+                        _registro.DaSollecitare(GiorniDiFollowUp(), Date.Now))
+
+        _daSollecitare.Clear()
+        For Each voce As VoceRegistro In _solleciti
+            _daSollecitare.Add(voce.Cartella)
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Dopo quanti giorni di silenzio si ricorda una candidatura spedita; zero quando il
+    ''' promemoria è spento o le impostazioni non sono ancora arrivate.
+    ''' </summary>
+    Private Function GiorniDiFollowUp() As Integer
+
+        If _contesto Is Nothing OrElse _contesto.Impostazioni Is Nothing Then Return 0
+
+        Return _contesto.Impostazioni.GiorniFollowUp
+
+    End Function
+
+    ''' <summary>
+    ''' Da quanti giorni questa riga aspetta, se è una di quelle da sollecitare;
+    ''' <c>Nothing</c> per tutte le altre.
+    ''' </summary>
+    Private Function AttesaDaSegnalare(voce As VoceRegistro) As Integer?
+
+        If voce Is Nothing OrElse Not _daSollecitare.Contains(voce.Cartella) Then Return Nothing
+
+        Return voce.GiorniDiAttesa(Date.Now)
+
+    End Function
+
+    ''' <summary>
+    ''' La riga del promemoria di follow-up, sotto i contatori (cap. 07.3). Quando non c'è
+    ''' niente da ricordare <b>sparisce</b>, e la fascia dei filtri torna alta una riga:
+    ''' un avviso che occupa spazio anche da spento insegna a non guardarlo.
+    ''' </summary>
+    ''' <remarks>
+    ''' È <b>passivo</b> (cap. 15.3): dice quali aspettano, e il sollecito lo scrive
+    ''' l'utente. Manda al filtro invece di elencarle tutte, perché la coda è già lì
+    ''' sotto ed è il posto dove si guardano.
+    ''' </remarks>
+    Private Sub MostraIlPromemoria()
+
+        If _solleciti.Count = 0 Then
+            lblPromemoria.Visible = False
+            pnlFiltro.Height = AltezzaFiltroDaSolo
+            Return
+        End If
+
+        Dim giorni As Integer = GiorniDiFollowUp()
+        Dim piuVecchia As VoceRegistro = _solleciti(0)
+        Dim attesa As Integer = If(piuVecchia.GiorniDiAttesa(Date.Now), giorni)
+
+        If _solleciti.Count = 1 Then
+            lblPromemoria.Text = $"⏳ Una candidatura spedita aspetta una risposta da {attesa} giorni: " &
+                                 $"{DiChiParla(piuVecchia)}."
+        Else
+            lblPromemoria.Text = $"⏳ {_solleciti.Count} candidature spedite aspettano da più di {giorni} " &
+                                 $"giorni; la più vecchia da {attesa} ({DiChiParla(piuVecchia)}). " &
+                                 "Il filtro «Da sollecitare» le mostra tutte."
+        End If
+
+        lblPromemoria.Visible = True
+        pnlFiltro.Height = AltezzaFiltroConPromemoria
+
+    End Sub
+
+    ''' <summary>Come si nomina una candidatura in una frase: azienda e ruolo, se ci sono.</summary>
+    Private Shared Function DiChiParla(voce As VoceRegistro) As String
+
+        Dim azienda As String = If(String.IsNullOrWhiteSpace(voce.Azienda), Nothing, voce.Azienda.Trim())
+        Dim ruolo As String = If(String.IsNullOrWhiteSpace(voce.Titolo), Nothing, voce.Titolo.Trim())
+
+        If azienda IsNot Nothing AndAlso ruolo IsNot Nothing Then Return $"{azienda} — {ruolo}"
+        If azienda IsNot Nothing Then Return azienda
+        If ruolo IsNot Nothing Then Return ruolo
+
+        ' Un annuncio anonimo non ha né l'una né l'altro: resta il nome della cartella,
+        ' che è come l'utente la ritrova su disco.
+        Return voce.Cartella
+
+    End Function
 
     ''' <summary>
     ''' I contatori del cap. 07.3. Le <b>inviate</b> sono entrate con T6, che è la tappa
@@ -286,6 +404,7 @@ Public Class PannelloHome
             $"{daCompletare} da completare",
             Contate(_registro.Quante(StatoOpportunita.Generata), "generata", "generate"),
             Contate(_registro.Quante(StatoOpportunita.Inviata), "inviata", "inviate"),
+            $"{_registro.Quante(StatoOpportunita.Esito)} con esito",
             Contate(_registro.Quante(StatoOpportunita.Scartata), "scartata", "scartate")}
 
         If quanteSeNeVedono < _registro.Voci.Count Then
@@ -352,6 +471,11 @@ Public Class PannelloHome
             Case FiltroGenerate
                 Return _registro.Voci.Where(Function(v) v.Stato = StatoOpportunita.Generata)
 
+            Case FiltroDaSollecitare
+                ' Non si rifà il conto: è lo stesso elenco che ha già segnato le righe e
+                ' scritto la riga del promemoria (v. RicalcolaISolleciti).
+                Return _solleciti
+
             Case FiltroScartate
                 Return _registro.Voci.Where(Function(v) v.Stato = StatoOpportunita.Scartata)
 
@@ -402,6 +526,11 @@ Public Class PannelloHome
             Case ColonnaStato
                 esito = a.Stato.CompareTo(b.Stato)
 
+                ' Da T9c due candidature «con esito» non sono più la stessa cosa: a parità
+                ' di stato decide com'è finita, nell'ordine dell'enum — colloquio,
+                ' rifiutata, assunto.
+                If esito = 0 Then esito = Nullable.Compare(Of EsitoCandidatura)(a.Esito, b.Esito)
+
             Case ColonnaFonte
                 esito = String.Compare(a.Fonte, b.Fonte, StringComparison.CurrentCultureIgnoreCase)
 
@@ -420,17 +549,32 @@ Public Class PannelloHome
     ''' Una riga della coda. Le scartate si scrivono in grigio: restano nell'elenco —
     ''' scartare non è cancellare — ma non devono pesare sull'occhio come quelle vive.
     ''' </summary>
-    Private Shared Function RigaDellaVoce(voce As VoceRegistro) As ListViewItem
+    ''' <param name="giorniDiAttesa">
+    ''' Da quanti giorni questa candidatura aspetta, se è una di quelle da sollecitare;
+    ''' <c>Nothing</c> per tutte le altre (cap. 07.3).
+    ''' </param>
+    ''' <remarks>
+    ''' Da T9c la colonna «Stato» dice l'<b>esito</b> quando c'è — «Rifiutata», non «Con
+    ''' esito» — e per le candidature ferme aggiunge da quanto aspettano. Il colore le fa
+    ''' notare, ma è il numero a dire perché sono lì: un colore da solo si può leggere
+    ''' come «importante» tanto quanto «in ritardo».
+    ''' </remarks>
+    Private Shared Function RigaDellaVoce(voce As VoceRegistro, giorniDiAttesa As Integer?) As ListViewItem
+
+        Dim aCheStato As String = EsitiCandidatura.EtichettaDi(voce.Stato, voce.Esito)
+        If giorniDiAttesa.HasValue Then aCheStato &= $" · {giorniDiAttesa.Value} gg"
 
         Dim riga As New ListViewItem({
             MatchScritto(voce),
             If(String.IsNullOrWhiteSpace(voce.Azienda), "(azienda non dichiarata)", voce.Azienda),
             If(String.IsNullOrWhiteSpace(voce.Titolo), "(ruolo non dichiarato)", voce.Titolo),
-            StatiOpportunita.Etichetta(voce.Stato),
+            aCheStato,
             If(String.IsNullOrWhiteSpace(voce.Fonte), "incollato a mano", voce.Fonte),
             QuandoScritto(voce.Aggiornata)}) With {.Tag = voce}
 
         If voce.Stato = StatoOpportunita.Scartata Then riga.ForeColor = StileApp.TestoSecondario
+
+        If giorniDiAttesa.HasValue Then riga.ForeColor = StileApp.Informazione
 
         Return riga
 
@@ -722,7 +866,8 @@ Public Class PannelloHome
     ''' </summary>
     Private Sub RiempiIlFiltro()
 
-        cboMostra.Items.AddRange(New Object() {"Tutte", "Da completare", "Generate", "Scartate"})
+        cboMostra.Items.AddRange(New Object() {"Tutte", "Da completare", "Generate",
+                                               "Da sollecitare", "Scartate"})
         cboMostra.SelectedIndex = FiltroTutte
 
         cboStelle.Items.Add("tutte")

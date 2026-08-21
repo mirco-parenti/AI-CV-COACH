@@ -180,6 +180,17 @@ Public Class FinestraImpostazioni
             "Spenta, i testi escono come li scrive il modello: è la stessa cosa che " &
             "succede quando una rifinitura fallisce, non una strada nuova."
 
+        ' I limiti vengono dalla classe che li conosce, non da un numero ricopiato nel
+        ' designer: il tetto è dichiarato una volta sola (cap. 07.3).
+        numFollowUp.Minimum = 0
+        numFollowUp.Maximum = Impostazioni.GiorniFollowUpMassimi
+        numFollowUp.Value = Math.Max(numFollowUp.Minimum,
+                                     Math.Min(numFollowUp.Maximum, _contesto.Impostazioni.GiorniFollowUp))
+
+        lblFollowUpNota.Text =
+            "Nella Home le candidature spedite e rimaste senza risposta si segnalano da " &
+            "sole, con da quanti giorni aspettano. Zero spegne il promemoria."
+
     End Sub
 
     Private Sub cmbLingua_SelectedIndexChanged(sender As Object, e As EventArgs) _
@@ -189,6 +200,11 @@ Public Class FinestraImpostazioni
 
     Private Sub chkRifinitura_CheckedChanged(sender As Object, e As EventArgs) _
         Handles chkRifinitura.CheckedChanged
+        SalvaLePreferenze()
+    End Sub
+
+    Private Sub numFollowUp_ValueChanged(sender As Object, e As EventArgs) _
+        Handles numFollowUp.ValueChanged
         SalvaLePreferenze()
     End Sub
 
@@ -203,7 +219,8 @@ Public Class FinestraImpostazioni
         Dim scelte As New Impostazioni With {
             .LinguaPredefinita = If(cmbLingua.SelectedIndex = 1,
                                     LinguaDocumenti.Inglese, LinguaDocumenti.Italiano),
-            .RifinituraAttiva = chkRifinitura.Checked}
+            .RifinituraAttiva = chkRifinitura.Checked,
+            .GiorniFollowUp = CInt(numFollowUp.Value)}
 
         Try
             _contesto.ArchivioImpostazioni.Salva(scelte)
@@ -457,18 +474,18 @@ Public Class FinestraImpostazioni
         lblTitolo.Font = StileApp.FontTitoloPannello
         lblTitolo.ForeColor = StileApp.RossoTitoli
 
-        For Each sezione As Label In {lblSezioneChiave, lblSezioneDocumenti, lblSezioneCartelle,
-                                      lblSezioneMotore, lblSezioneDati}
+        For Each sezione As Label In {lblSezioneChiave, lblSezioneDocumenti, lblSezioneCandidature,
+                                      lblSezioneCartelle, lblSezioneMotore, lblSezioneDati}
             sezione.Font = StileApp.FontTitoloGruppo
             sezione.ForeColor = StileApp.TestoPrimario
         Next
 
-        For Each testo As Label In {lblSpiegazione, lblStatoChiave, lblLingua,
-                                    lblCartellaDati, lblCartellaDocumenti}
+        For Each testo As Label In {lblSpiegazione, lblStatoChiave, lblLingua, lblFollowUp,
+                                    lblGiorni, lblCartellaDati, lblCartellaDocumenti}
             testo.ForeColor = StileApp.TestoPrimario
         Next
 
-        For Each minore As Label In {lblRifinituraNota, lblModelli, lblPool}
+        For Each minore As Label In {lblRifinituraNota, lblFollowUpNota, lblModelli, lblPool}
             minore.ForeColor = StileApp.TestoSecondario
         Next
 
@@ -477,6 +494,9 @@ Public Class FinestraImpostazioni
 
         cmbLingua.BackColor = StileApp.SfondoContenuto
         cmbLingua.ForeColor = StileApp.TestoPrimario
+
+        numFollowUp.BackColor = StileApp.SfondoContenuto
+        numFollowUp.ForeColor = StileApp.TestoPrimario
 
         StileApp.VestiBottone(btnCambiaChiave, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnApriCartellaDati, LivelloBottone.Esplorativo)
@@ -499,8 +519,8 @@ Public Class FinestraImpostazioni
         Dim larghezzaUtile As Integer = LarghezzaFinestra - 2 * StileApp.MargineRiquadro
 
         For Each testo As Label In {lblSpiegazione, lblStatoChiave, lblRifinituraNota,
-                                    lblCartellaDati, lblCartellaDocumenti, lblModelli,
-                                    lblPool, lblStato}
+                                    lblFollowUpNota, lblCartellaDati, lblCartellaDocumenti,
+                                    lblModelli, lblPool, lblStato}
             testo.MaximumSize = New Size(larghezzaUtile, 0)
         Next
 
@@ -518,7 +538,15 @@ Public Class FinestraImpostazioni
         chkRifinitura.Location = New Point(sinistra, cmbLingua.Bottom + StileApp.DistanzaControlli)
         lblRifinituraNota.Location = New Point(sinistra, chkRifinitura.Bottom + StileApp.InterlineaMinima)
 
-        lblSezioneCartelle.Location = New Point(sinistra, lblRifinituraNota.Bottom + StileApp.MargineRiquadro)
+        lblSezioneCandidature.Location = New Point(sinistra, lblRifinituraNota.Bottom + StileApp.MargineRiquadro)
+        lblFollowUp.Location = New Point(sinistra, lblSezioneCandidature.Bottom + StileApp.InterlineaMinima + 4)
+        numFollowUp.Location = New Point(lblFollowUp.Right + StileApp.InterlineaMinima,
+                                         lblSezioneCandidature.Bottom + StileApp.InterlineaMinima)
+        lblGiorni.Location = New Point(numFollowUp.Right + StileApp.InterlineaMinima,
+                                       lblFollowUp.Top)
+        lblFollowUpNota.Location = New Point(sinistra, numFollowUp.Bottom + StileApp.InterlineaMinima)
+
+        lblSezioneCartelle.Location = New Point(sinistra, lblFollowUpNota.Bottom + StileApp.MargineRiquadro)
         lblCartellaDati.Location = New Point(sinistra, lblSezioneCartelle.Bottom + StileApp.InterlineaMinima)
         btnApriCartellaDati.Location = New Point(sinistra, lblCartellaDati.Bottom + StileApp.InterlineaMinima)
         lblCartellaDocumenti.Location = New Point(sinistra, btnApriCartellaDati.Bottom + StileApp.DistanzaControlli)

@@ -32,6 +32,11 @@ Partial Class FinestraImpostazioni
         Me.cmbLingua = New System.Windows.Forms.ComboBox()
         Me.chkRifinitura = New System.Windows.Forms.CheckBox()
         Me.lblRifinituraNota = New System.Windows.Forms.Label()
+        Me.lblSezioneCandidature = New System.Windows.Forms.Label()
+        Me.lblFollowUp = New System.Windows.Forms.Label()
+        Me.numFollowUp = New System.Windows.Forms.NumericUpDown()
+        Me.lblGiorni = New System.Windows.Forms.Label()
+        Me.lblFollowUpNota = New System.Windows.Forms.Label()
         Me.lblSezioneCartelle = New System.Windows.Forms.Label()
         Me.lblCartellaDati = New System.Windows.Forms.Label()
         Me.btnApriCartellaDati = New System.Windows.Forms.Button()
@@ -47,6 +52,7 @@ Partial Class FinestraImpostazioni
         Me.btnEliminaTutto = New System.Windows.Forms.Button()
         Me.lblStato = New System.Windows.Forms.Label()
         Me.btnChiudi = New System.Windows.Forms.Button()
+        CType(Me.numFollowUp, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'lblTitolo
@@ -122,6 +128,42 @@ Partial Class FinestraImpostazioni
         Me.lblRifinituraNota.Name = "lblRifinituraNota"
         Me.lblRifinituraNota.TabIndex = 9
         Me.lblRifinituraNota.Text = ""
+        '
+        'lblSezioneCandidature
+        '
+        Me.lblSezioneCandidature.AutoSize = True
+        Me.lblSezioneCandidature.Name = "lblSezioneCandidature"
+        Me.lblSezioneCandidature.TabIndex = 10
+        Me.lblSezioneCandidature.Text = "Candidature spedite"
+        '
+        'lblFollowUp
+        '
+        Me.lblFollowUp.AutoSize = True
+        Me.lblFollowUp.Name = "lblFollowUp"
+        Me.lblFollowUp.TabIndex = 11
+        Me.lblFollowUp.Text = "Ricordamele se non rispondono entro:"
+        '
+        'numFollowUp
+        '
+        Me.numFollowUp.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.numFollowUp.Name = "numFollowUp"
+        Me.numFollowUp.Size = New System.Drawing.Size(70, 24)
+        Me.numFollowUp.TabIndex = 12
+        Me.numFollowUp.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
+        '
+        'lblGiorni
+        '
+        Me.lblGiorni.AutoSize = True
+        Me.lblGiorni.Name = "lblGiorni"
+        Me.lblGiorni.TabIndex = 13
+        Me.lblGiorni.Text = "giorni"
+        '
+        'lblFollowUpNota
+        '
+        Me.lblFollowUpNota.AutoSize = True
+        Me.lblFollowUpNota.Name = "lblFollowUpNota"
+        Me.lblFollowUpNota.TabIndex = 14
+        Me.lblFollowUpNota.Text = ""
         '
         'lblSezioneCartelle
         '
@@ -241,6 +283,11 @@ Partial Class FinestraImpostazioni
         Me.Controls.Add(Me.cmbLingua)
         Me.Controls.Add(Me.chkRifinitura)
         Me.Controls.Add(Me.lblRifinituraNota)
+        Me.Controls.Add(Me.lblSezioneCandidature)
+        Me.Controls.Add(Me.lblFollowUp)
+        Me.Controls.Add(Me.numFollowUp)
+        Me.Controls.Add(Me.lblGiorni)
+        Me.Controls.Add(Me.lblFollowUpNota)
         Me.Controls.Add(Me.lblSezioneCartelle)
         Me.Controls.Add(Me.lblCartellaDati)
         Me.Controls.Add(Me.btnApriCartellaDati)
@@ -263,6 +310,7 @@ Partial Class FinestraImpostazioni
         Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
         Me.Text = "TrovaLavoro"
+        CType(Me.numFollowUp, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
     End Sub
@@ -277,6 +325,11 @@ Partial Class FinestraImpostazioni
     Friend WithEvents cmbLingua As System.Windows.Forms.ComboBox
     Friend WithEvents chkRifinitura As System.Windows.Forms.CheckBox
     Friend WithEvents lblRifinituraNota As System.Windows.Forms.Label
+    Friend WithEvents lblSezioneCandidature As System.Windows.Forms.Label
+    Friend WithEvents lblFollowUp As System.Windows.Forms.Label
+    Friend WithEvents numFollowUp As System.Windows.Forms.NumericUpDown
+    Friend WithEvents lblGiorni As System.Windows.Forms.Label
+    Friend WithEvents lblFollowUpNota As System.Windows.Forms.Label
     Friend WithEvents lblSezioneCartelle As System.Windows.Forms.Label
     Friend WithEvents lblCartellaDati As System.Windows.Forms.Label
     Friend WithEvents btnApriCartellaDati As System.Windows.Forms.Button

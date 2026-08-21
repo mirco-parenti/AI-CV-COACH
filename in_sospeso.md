@@ -71,20 +71,8 @@ in «Chiuse».*
 
 ## Da T6 — le email di candidatura (2026-08-14, alla chiusura)
 
-- **Lo stato «esito» e il follow-up** *(ridotta il 2026-08-18: delle tre cose, il
-  destinatario è in «Chiuse»)*. Il cap. 07.3 assegnava a T6 tre cose oltre all'invio, e T6
-  ne ha portata una sola. Restano: lo stato **`esito`** (in attesa · colloquio · rifiutata ·
-  assunto 🎉), che nello schema c'è ma dall'interfaccia non si raggiunge; e il **promemoria
-  di follow-up** per le candidature ferme da giorni. Sono due passi del racconto «a che
-  punto sono», e vanno fatti entro la 1.0. Quel che si è imparato guardandoli da vicino:
-  i quattro valori dell'esito **non esistono in codice**, sono una riga di commento in
-  `StatoOpportunita.vb` — servono un tipo nuovo, un punto d'ingresso nell'interfaccia che
-  non c'è mai stato, e una sotto-macchina a stati dentro uno stato oggi terminale. Il
-  follow-up invece è **il più economico dei due e non dipende dall'altro**: le date stanno
-  già in `DateStati`, non serve nessun campo nuovo, e finché l'esito non c'è «nessun esito
-  registrato» coincide con «stato = inviata». Manca però una decisione che il progetto non
-  ha mai preso: **dopo quanti giorni**. *(cap. 07.3; cap. 14, T9; cap. 15.3 — il promemoria
-  è passivo, il testo del sollecito lo scrive l'utente.)*
+*Chiusa il 2026-08-21 con T9c: lo stato «esito» e il promemoria di follow-up sono in
+«Chiuse».*
 
 ## Da T7 — multilingua e qualità (2026-08-15, alla chiusura di T7a)
 
@@ -166,19 +154,6 @@ erano in nessun piano, e nessuna è grave.*
 
 ## Dal collaudo di tappa di T8 — il gruppo C (2026-08-21)
 
-- **Lo stato «nuova» è un vicolo cieco nella finestra.** Un'opportunità ferma al solo
-  annuncio — che oggi sa creare **solo il server MCP**, perché l'applicazione archivia
-  soltanto dopo il confronto — la finestra la riapre ma non la può proseguire:
-  `RiapriLaCandidatura` svuota la casella dell'incolla, e «Analizza» si accende solo se lì
-  dentro c'è del testo. Il **testo grezzo** dell'annuncio non lo conserva nessuno, né il
-  server né l'app: i due `annuncio.json` hanno le stesse identiche chiavi. Il motore
-  saprebbe farlo — `ConfrontaAsync` vuole l'annuncio **già strutturato**, non il testo —
-  quindi manca solo il gesto nell'interfaccia: un'azione «Confronta» sulla candidatura
-  riaperta, oppure il testo grezzo salvato in `annuncio.json`. La Home conta già quello
-  stato fra le candidature «da completare», e la macchina degli stati prevede
-  `nuova → interessante`: il disegno se lo aspetta, l'interfaccia non lo serve.
-  *(cap. 03.6; cap. 07.3; `PannelloOpportunita.vb`; rientra nella revisione dei pannelli
-  di T9.)*
 - **Il confronto ogni tanto salta i giudizi di «contesto».** Il prompt li pretende per
   scritto — «un giudizio per OGNI campo di contesto presente… non saltarne nessuno» — ma in
   **un giro su quattro** i cinque giudizi di contesto (titolo, sede, contratto, mansioni,
@@ -226,6 +201,23 @@ in «Chiuse».*
   *(cap. 03.5; segnalato dalla revisione, rimandato con motivo.)*
 
 ## Chiuse
+
+- ✅ **Lo stato «esito» e il follow-up** *(aperta il 2026-08-14 alla chiusura di T6,
+  ridotta il 2026-08-18 col destinatario, chiusa il 2026-08-21 con T9c)*. Gli esiti
+  registrabili sono **tre** e non i quattro del capitolo — «in attesa» era già lo stato
+  `inviata`, e registrarla avrebbe creato due modi di dire la stessa cosa — e si segnano da
+  P4 con «Com'è andata…», che li corregge e li toglie: sono una dichiarazione dell'utente,
+  non un fatto osservato. Il promemoria è arrivato con la decisione che mancava, **dopo
+  quanti giorni**: quattordici, modificabili in P8, zero per spegnerlo. Nella Home si vede
+  in tre punti — la riga sotto i contatori, i giorni di attesa nella colonna «Stato», la
+  voce «Da sollecitare» nel filtro. *(cap. 07.3, «Com'è andata, e chi aspetta da troppo».)*
+- ✅ **Lo stato «nuova» è un vicolo cieco nella finestra** *(aperta il 2026-08-21 dal
+  collaudo di tappa di T8, chiusa lo stesso giorno con T9c)*. Si è scelta la strada che non
+  tocca lo schema su disco: sulla candidatura riaperta al solo annuncio «Analizza» **diventa
+  «Confronta»** e fa il secondo passo da solo, perché l'annuncio è già strutturato e
+  rileggerlo sarebbe costata una chiamata per riottenere quel che c'era. Provato dal vivo su
+  una candidatura nata davvero dal server MCP: trentasei secondi, quindici giudizi, e la
+  cartella che avanza a «interessante». *(cap. 03.6, P4; cap. 07.3.)*
 
 - ✅ **L'interruttore della rifinitura** *(aperta il 2026-08-18 con la chiusura di T7b,
   chiusa il 2026-08-21 con T9b)*. È arrivato col pannello che lo ospita: «Rifinisci i testi

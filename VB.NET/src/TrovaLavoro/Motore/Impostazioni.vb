@@ -13,8 +13,9 @@ Namespace Motore
     End Enum
 
     ''' <summary>
-    ''' Le preferenze dell'utente: la lingua con cui si scrivono i documenti nuovi e se la
-    ''' rifinitura anti-slop è accesa (cap. 03, pannello P8; cap. 08.4; cap. 10.1).
+    ''' Le preferenze dell'utente: la lingua con cui si scrivono i documenti nuovi, se la
+    ''' rifinitura anti-slop è accesa, e dopo quanti giorni di silenzio la Home ricorda una
+    ''' candidatura spedita (cap. 03, pannello P8; cap. 07.3; cap. 08.4; cap. 10.1).
     ''' </summary>
     ''' <remarks>
     ''' <para><b>Sono l'opposto della <see cref="Taratura"/>, e per questo stanno in un file
@@ -49,6 +50,29 @@ Namespace Motore
         ''' </summary>
         Public Property RifinituraAttiva As Boolean
 
+        ''' <summary>
+        ''' Dopo quanti giorni di silenzio la Home ricorda una candidatura spedita
+        ''' (cap. 07.3). <b>Zero spegne il promemoria</b>: chi non lo vuole non deve
+        ''' cercare un interruttore, gli basta scendere sotto il primo giorno.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Quattordici giorni è il valore deciso con Mirco il 2026-08-21, e non è
+        ''' un numero neutro: due settimane sono l'intervallo dopo cui un sollecito non
+        ''' sembra impaziente, e restano abbastanza dentro la memoria di chi ha letto
+        ''' l'email. Ma è una regola sociale, non una legge, e cambia col settore: per
+        ''' questo si sposta dalle Impostazioni invece di stare in una costante.</para>
+        ''' <para>Il tetto è <see cref="GiorniFollowUpMassimi"/>: oltre l'anno il
+        ''' promemoria non ricorderebbe più niente a nessuno, e un numero senza limite in
+        ''' una casella è solo un modo di scrivere «spento» per sbaglio.</para>
+        ''' </remarks>
+        Public Property GiorniFollowUp As Integer
+
+        ''' <summary>Il valore di casa: due settimane di silenzio (cap. 07.3).</summary>
+        Public Const GiorniFollowUpPredefiniti As Integer = 14
+
+        ''' <summary>Oltre un anno non è più un promemoria.</summary>
+        Public Const GiorniFollowUpMassimi As Integer = 365
+
         ''' <summary>Da dove vengono i valori in uso.</summary>
         Public Property Origine As OrigineImpostazioni = OrigineImpostazioni.Predefinite
 
@@ -63,6 +87,7 @@ Namespace Motore
             Return New Impostazioni With {
                 .LinguaPredefinita = LinguaDocumenti.Italiano,
                 .RifinituraAttiva = True,
+                .GiorniFollowUp = GiorniFollowUpPredefiniti,
                 .Origine = OrigineImpostazioni.Predefinite
             }
         End Function
@@ -136,6 +161,20 @@ Namespace Motore
                 scartate.Add("rifinitura_attiva non è né vero né falso")
             End Try
 
+            Try
+                Dim giorni As JsonNode = radice("giorni_follow_up")
+                If giorni IsNot Nothing Then
+                    Dim quanti As Integer = giorni.GetValue(Of Integer)()
+                    If quanti >= 0 AndAlso quanti <= GiorniFollowUpMassimi Then
+                        letto.GiorniFollowUp = quanti
+                    Else
+                        scartate.Add($"giorni_follow_up «{quanti}» è fuori da 0-{GiorniFollowUpMassimi}")
+                    End If
+                End If
+            Catch ex As Exception When TypeOf ex Is FormatException OrElse TypeOf ex Is InvalidOperationException
+                scartate.Add("giorni_follow_up non è un numero di giorni")
+            End Try
+
             letto.Origine = OrigineImpostazioni.File
             If scartate.Count > 0 Then
                 letto.Avviso = "Nelle impostazioni ho scartato: " & String.Join("; ", scartate) &
@@ -150,7 +189,8 @@ Namespace Motore
         Public Function VersoJson() As JsonObject
             Return New JsonObject From {
                 {"lingua_predefinita", LinguaPredefinita},
-                {"rifinitura_attiva", RifinituraAttiva}
+                {"rifinitura_attiva", RifinituraAttiva},
+                {"giorni_follow_up", GiorniFollowUp}
             }
         End Function
 

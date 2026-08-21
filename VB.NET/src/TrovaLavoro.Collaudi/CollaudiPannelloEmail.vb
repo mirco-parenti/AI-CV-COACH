@@ -661,6 +661,44 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function RidichiararlaSpeditaConUnEsitoGiaSegnatoNonRompeNiente() As Task
+
+            ' Da T9c una candidatura può essere andata **oltre** l'invio: ha un esito. Chi
+            ' torna qui a rimandare la stessa email preme di nuovo «L'ho spedita», e prima
+            ' quel gesto chiedeva alla macchina degli stati un passo indietro che non
+            ' esiste — cioè sollevava, in faccia a chi non aveva sbagliato niente.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ScriviDocumenti(candidatura, "CV_Luca_Rossi.pdf")
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    pannello.SegnaComeInviata()
+
+                    candidatura.SegnaEsito(EsitoCandidatura.Colloquio)
+                    contesto.Opportunita.Salva(candidatura)
+
+                    pannello.SegnaComeInviata()
+
+                    ' Il punto è qui: prima l'eccezione veniva raccolta e raccontata, e chi
+                    ' rimandava la sua email si vedeva dire «non sono riuscita» per un gesto
+                    ' che andava benissimo. L'esito, intatto, non bastava a rivelarlo.
+                    Assert.DoesNotContain("Non sono riuscita",
+                                          Etichetta(pannello, "lblStatoEmail").Text)
+                    Assert.Contains("Segnata come inviata", Etichetta(pannello, "lblStatoEmail").Text)
+
+                    Dim riletta As Opportunita = contesto.Opportunita.Carica(candidatura.Cartella)
+
+                    Assert.AreEqual(StatoOpportunita.Esito, riletta.Stato,
+                                    "l'esito segnato non si perde per una seconda dichiarazione")
+                    Assert.AreEqual(EsitoCandidatura.Colloquio, riletta.Esito)
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Async Function DichiararlaSpeditaLoDiceAncheAllIndice() As Task
 
             ' Difetto visto sull'applicazione vera il 2026-08-15, al collaudo di tappa: la

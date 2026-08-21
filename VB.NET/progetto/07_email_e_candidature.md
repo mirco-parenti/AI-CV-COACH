@@ -133,9 +133,14 @@ risponde alla domanda «a che punto sono?».
 
 ```
 nuova ──► interessante ──► generata ──► inviata ──► esito
-  │              │                     (in attesa · colloquio · rifiutata ·
-  └──► scartata ◄┘                      assunto 🎉)
+  │              │                     (colloquio · rifiutata · assunto 🎉)
+  └──► scartata ◄┘
 ```
+
+*Gli esiti qui elencati erano quattro fino a **T9c** (2026-08-21): «in attesa» è uscito
+perché è già lo stato `inviata`, e nel menù è rimasto come il modo di **togliere** un
+esito, non come una quarta scelta. È anche l'unico punto del ciclo di vita da cui si
+torna indietro — v. «Com'è andata, e chi aspetta da troppo» in fondo al capitolo.*
 
 **Cosa registra** (per ogni opportunità): azienda, titolo, fonte e link, lingua,
 stelle del match (con l'eventuale ⛔), date di ogni passaggio di stato, i file
@@ -147,7 +152,11 @@ data e ora della risposta.
 **Cosa mostra il pannello Registro (in P1 Home):** l'elenco ordinabile e filtrabile
 per stato e stelle, i contatori (inviate / in attesa / da completare / scartate) e le
 candidature ferme da più giorni («inviata il 12/08, nessun esito registrato — vuoi
-segnare un promemoria di follow-up?»).
+segnare un promemoria di follow-up?»). *Com'è venuto, a **T9c** (2026-08-21): ai
+contatori se n'è aggiunto uno, «con esito», e il promemoria **non chiede** se segnarlo —
+la soglia si sceglie una volta sola in P8 e la Home dice da sé chi aspetta da troppo. Un
+promemoria da confermare candidatura per candidatura sarebbe stato un secondo elenco da
+tenere aggiornato a mano, accanto a quello che il programma sa già leggere dalle date.*
 
 Il registro è anche parte del racconto del progetto: per Mirco documenta nero su
 bianco l'uso reale del prodotto nella sua ricerca di lavoro. Per questo
@@ -195,6 +204,9 @@ dal primo rilascio — **fatta il 2026-08-14**, v. più sotto.
   l'annotazione e per la ricostruzione: è la prova pratica della regola qui sopra, cioè
   che a questo indice si aggiunge una colonna senza migrare niente. Restano fuori lo stato
   **`esito`** e il **promemoria di follow-up**.)*
+  *(E aggiornamento del 2026-08-21, con **T9c**: sono arrivati anche quelli — con un
+  campo `esito` nell'indice, aggiunto esattamente come il destinatario. Il debito di T6 è
+  chiuso; v. «Com'è andata, e chi aspetta da troppo» più sotto.)*
 - **Chi cambia uno stato lo annota anche nell'indice** *(regola resa esplicita il
   2026-08-15, dopo un difetto)*. `registro.json` si fida di sé stesso finché **l'insieme
   delle cartelle** combacia: un cambiamento *dentro* una cartella non lo fa scattare, e
@@ -254,6 +266,75 @@ registro esiste.
   perdita, quando i filtri nascondono qualcosa i contatori aggiungono **«ne vedi 1 su 3»**
   — i numeri restano sul totale, che è la risposta alla domanda «a che punto sono»; la
   riga in più risponde a «e perché ne vedo meno».
+
+### Com'è andata, e chi aspetta da troppo (T9c, 2026-08-21)
+
+Le due cose che il cap. 07.3 prometteva dall'inizio e che T6 non aveva portato: lo stato
+**`esito`** e il **promemoria di follow-up**. Insieme rispondono alla seconda metà della
+domanda «a che punto sono?» — la prima è quante ne ho mandate, la seconda è com'è finita.
+
+- **Gli esiti registrabili sono tre, non quattro** *(deciso con Mirco)*. Il capitolo ne
+  elencava quattro — in attesa · colloquio · rifiutata · assunto 🎉 — ma «spedita e nessuna
+  risposta» **è già** lo stato `inviata`, ed è già un contatore della Home. Registrarlo
+  come esito avrebbe creato due modi di dire la stessa cosa: la candidatura sarebbe uscita
+  da uno stato per entrare in un altro che vuol dire lo stesso, e il promemoria avrebbe
+  dovuto rincorrerla in due posti. Si registra quel che **è successo**; l'attesa si deduce
+  dal silenzio. Nel menù «in attesa» resta, in cima e staccata dalle altre, ma non è una
+  quarta scelta: è il modo di **togliere** l'esito segnato per sbaglio.
+- **L'esito è una dichiarazione, e una dichiarazione si corregge.** È la stessa natura di
+  «l'ho spedita» (7.3): il programma non legge la posta di nessuno. Perciò da «rifiutata»
+  si passa ad «assunto», e si torna anche indietro a «inviata» — due strade che la macchina
+  degli stati non prevede e non deve prevedere, perché per tutto il resto vale ancora che
+  indietro non si torna. Le fa un metodo suo (`Opportunita.SegnaEsito`), che resta il collo
+  di bottiglia unico anche per il server MCP, come `Avanza`.
+- **La data dell'esito è quella dell'ultima notizia**, e non del primo ingresso come per
+  ogni altro stato: una candidatura entrata in colloquio a settembre e diventata «assunto»
+  a novembre, raccontata con la data di settembre, direbbe una cosa falsa proprio nel punto
+  in cui la storia è finita.
+- **Stato ed esito si scrivono insieme e si leggono insieme.** Da soli possono
+  contraddirsi — la cartella dati si corregge a mano (cap. 11.1) — e allora si sceglie in
+  un modo solo, conservativo: uno stato «esito» che non dice quale torna a `inviata`, un
+  esito appeso a un altro stato cade. La regola sta in un punto solo, perché quei due campi
+  li leggono in due: lo `stato.json` di ogni cartella e il `registro.json`.
+- **Si segna in P4, non in Home**: il cruscotto guarda e non decide (cap. 03.6), e in P4
+  c'è già la fascia che dice a che punto è quella candidatura. Il comando è «Com'è
+  andata…», acceso solo da `inviata` in poi, e non chiede conferma: quel che si disfa con
+  un secondo clic non ha bisogno di un «sei sicuro?» — la conferma resta dov'è servita,
+  sullo scarto, che non si disfa.
+
+Il **promemoria** è passivo, come il cap. 15.3 vuole: ricorda, e il sollecito lo scrive
+l'utente.
+
+- **Aspetta chi ha spedito e non sa ancora niente.** Prima non è partito niente; dopo un
+  esito la risposta è arrivata — l'attesa è finita anche quando la notizia è brutta. Le
+  date c'erano già tutte in `date_stati`: non è servito nessun campo nuovo.
+- **Dopo quanti giorni lo decide l'utente**, ed è la decisione che il progetto non aveva
+  mai preso: **quattordici** di casa, modificabili in P8 (cap. 11.6). Due settimane sono
+  l'intervallo dopo cui un sollecito non sembra impaziente e la propria email è ancora
+  nella memoria di chi l'ha letta — ma è una regola sociale, non una legge, e cambia col
+  settore. **Zero spegne il promemoria**: è il modo di dire «non ricordarmelo» senza
+  aggiungere un interruttore.
+- **Nella Home si fa vedere tre volte, e ognuna serve a qualcosa**: una riga sotto i
+  contatori che dice quante aspettano e da quanto, la riga della candidatura marcata nella
+  coda con **da quanti giorni** (il colore attira, il numero spiega — un colore da solo si
+  legge «importante» tanto quanto «in ritardo»), e una voce «Da sollecitare» nel filtro
+  «Mostra», che su una coda di sessanta è l'unico modo di trovarle. Quando non c'è niente
+  da ricordare la riga **sparisce** e la fascia dei filtri torna alta com'era: un avviso
+  che occupa il suo spazio anche da spento insegna a non guardarlo.
+- **La colonna «Stato» dice l'esito quando c'è** — «Rifiutata», non «Con esito» — e la
+  stessa parola esce nel riepilogo esportato (7.3, «esce quel che si vede»). Chi guarda non
+  pensa per stati.
+
+Uno stato che prima nessuno raggiungeva ha toccato anche **P7**: chi ripremeva «L'ho
+spedita» su una candidatura che aveva già un esito — per rimandare la stessa email —
+chiedeva alla macchina degli stati un passo indietro che non esiste, e si sentiva rispondere
+«non sono riuscita a segnarla come inviata». Ora quel gesto avanza **solo se la transizione è
+lecita**: su una candidatura già andata oltre non fa nulla, e non lo racconta come un guasto.
+
+*Provato dal vivo* su una cartella dati usa-e-getta: il promemoria comparso su una spedita
+da venti giorni, l'esito segnato dal menù e ritrovato nella cartella e nell'indice, la riga
+del promemoria sparita appena la candidatura ha avuto una risposta, e la soglia portata a
+tre giorni da P8 con effetto immediato sulla Home.
 
 ## 7.4 Sicurezza e buon senso
 

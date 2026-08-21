@@ -436,6 +436,136 @@ Namespace Ui
         ' Attrezzi
         ' ==================================================================
 
+        ' ==================================================================
+        ' Il promemoria di follow-up e l'esito (T9c, cap. 07.3)
+        ' ==================================================================
+
+        ''' <summary>
+        ''' Una candidatura spedita <b>tanti giorni fa quanti se ne chiedono</b>, con
+        ''' l'esito che si vuole.
+        ''' </summary>
+        ''' <remarks>
+        ''' Le date sono relative a oggi e non fisse come nelle altre prove di questo
+        ''' banco: qui si misura un'attesa, e una data scritta nel calendario diventerebbe
+        ''' «ferma da mille giorni» il mese prossimo — un collaudo che passa oggi e mente
+        ''' domani.
+        ''' </remarks>
+        Private Shared Function Spedita(azienda As String, giorniFa As Integer,
+                                        Optional esito As EsitoCandidatura? = Nothing) As Opportunita
+
+            Dim invio As Date = Date.Now.AddDays(-giorniFa)
+
+            Dim o As New Opportunita With {
+                .Creata = invio.AddHours(-2),
+                .Fonte = "Indeed",
+                .Annuncio = JsonNode.Parse(
+                    $"{{""titolo"": ""Magazziniere"", ""azienda"": ""{azienda}""}}"),
+                .Confronto = JsonNode.Parse("{""giudizi"": [{""requisito"": ""Patente B""}]}"),
+                .Match = New RisultatoMatch With {.Stelle = 3.5},
+                .Cv = JsonNode.Parse("{""intestazione"": {}}")}
+
+            o.Avanza(StatoOpportunita.Interessante, o.Creata)
+            o.Avanza(StatoOpportunita.Generata, o.Creata.AddMinutes(30))
+            o.Avanza(StatoOpportunita.Inviata, invio)
+
+            If esito.HasValue Then o.SegnaEsito(esito.Value, Date.Now.AddHours(-1))
+
+            Return o
+
+        End Function
+
+        <TestMethod>
+        Public Sub IlPromemoriaRicordaLeSpediteFermeDaTroppo()
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim avviso As Label = Etichetta(pannello, "lblPromemoria")
+
+                    Assert.IsTrue(avviso.Visible, "una aspetta da venti giorni")
+                    Assert.Contains("Acme", avviso.Text, "e la riga dice quale")
+                    Assert.Contains("20", avviso.Text, "e da quanto")
+
+                    ' La riga stessa lo dice, e non solo col colore: un colore da solo si
+                    ' legge «importante» tanto quanto «in ritardo».
+                    Dim ferma As ListViewItem = Coda(pannello).
+                        Single(Function(r) r.SubItems(1).Text = "Acme")
+                    Assert.Contains("20 gg", ferma.SubItems(3).Text)
+
+                    Dim fresca As ListViewItem = Coda(pannello).
+                        Single(Function(r) r.SubItems(1).Text = "Bianchi")
+                    Assert.AreEqual("Inviata", fresca.SubItems(3).Text, "quella di ieri no")
+
+                    ' E si isolano dal filtro, che è quello che serve su una coda lunga.
+                    Tendina(pannello, "cboMostra").SelectedItem = "Da sollecitare"
+                    Assert.AreEqual("Acme", Coda(pannello).Single().SubItems(1).Text)
+                End Sub,
+                Sub(candidature)
+                    candidature.Salva(Spedita("Acme", giorniFa:=20))
+                    candidature.Salva(Spedita("Bianchi", giorniFa:=1))
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaNienteDaRicordareLaRigaSparisce()
+            ' Un avviso che occupa il suo spazio anche da spento insegna a non guardarlo.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Assert.IsFalse(Etichetta(pannello, "lblPromemoria").Visible)
+                End Sub,
+                Sub(candidature)
+                    candidature.Salva(Spedita("Bianchi", giorniFa:=2))
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub ChiHaSaputoComEAndataNonAspettaPiu()
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Assert.IsFalse(Etichetta(pannello, "lblPromemoria").Visible,
+                                   "una risposta è arrivata: l'attesa è finita, anche se è un no")
+
+                    Dim riga As ListViewItem = Coda(pannello).Single()
+                    Assert.AreEqual("Rifiutata", riga.SubItems(3).Text,
+                                    "e la colonna dice com'è andata, non «con esito»")
+
+                    Assert.Contains("1 con esito", Etichetta(pannello, "lblContatori").Text)
+                End Sub,
+                Sub(candidature)
+                    candidature.Salva(Spedita("Acme", giorniFa:=40, esito:=EsitoCandidatura.Rifiutata))
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub LaSogliaVieneDalleImpostazioni()
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Assert.IsFalse(Etichetta(pannello, "lblPromemoria").Visible,
+                                   "con i quattordici giorni di casa, cinque non bastano")
+
+                    contesto.ArchivioImpostazioni.Salva(New Impostazioni With {
+                        .LinguaPredefinita = LinguaDocumenti.Italiano,
+                        .RifinituraAttiva = True,
+                        .GiorniFollowUp = 3})
+                    contesto.RileggiLeImpostazioni()
+                    pannello.Aggiorna()
+
+                    Assert.IsTrue(Etichetta(pannello, "lblPromemoria").Visible,
+                                  "abbassata la soglia, la stessa candidatura è ferma da troppo")
+
+                    ' E zero la spegne del tutto, che è il modo di dire «non ricordarmelo».
+                    contesto.ArchivioImpostazioni.Salva(New Impostazioni With {
+                        .LinguaPredefinita = LinguaDocumenti.Italiano,
+                        .RifinituraAttiva = True,
+                        .GiorniFollowUp = 0})
+                    contesto.RileggiLeImpostazioni()
+                    pannello.Aggiorna()
+
+                    Assert.IsFalse(Etichetta(pannello, "lblPromemoria").Visible)
+                End Sub,
+                Sub(candidature)
+                    candidature.Salva(Spedita("Acme", giorniFa:=5))
+                End Sub)
+        End Sub
+
         Private Shared Function Coda(pannello As Control) As List(Of ListViewItem)
 
             Dim elenco As ListView = DirectCast(

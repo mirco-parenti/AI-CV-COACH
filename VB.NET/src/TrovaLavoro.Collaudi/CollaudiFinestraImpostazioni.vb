@@ -288,6 +288,36 @@ Namespace Ui
 
         End Sub
 
+        <TestMethod>
+        Public Sub LaSogliaDelPromemoriaSiCambiaESiSalvaSubito()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Assert.AreEqual(14, contesto.Impostazioni.GiorniFollowUp, "il valore di casa")
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        Dim giorni As NumericUpDown = Numerico(finestra, "numFollowUp")
+
+                        Assert.AreEqual(14D, giorni.Value, "la finestra mostra quel che vale adesso")
+                        Assert.AreEqual(0D, giorni.Minimum, "zero spegne il promemoria, e si deve poter scrivere")
+                        Assert.AreEqual(CDec(Impostazioni.GiorniFollowUpMassimi), giorni.Maximum)
+
+                        giorni.Value = 7D
+                    End Using
+
+                    Assert.AreEqual(7, contesto.Impostazioni.GiorniFollowUp,
+                                    "salvata appena cambiata, senza OK da premere")
+
+                End Sub)
+
+        End Sub
+
+        Private Shared Function Numerico(finestra As Control, nome As String) As NumericUpDown
+            Return DirectCast(finestra.Controls.Find(nome, searchAllChildren:=True).Single(), NumericUpDown)
+        End Function
+
         Private Shared Function Etichetta(finestra As Control, nome As String) As Label
             Return DirectCast(finestra.Controls.Find(nome, searchAllChildren:=True).Single(), Label)
         End Function

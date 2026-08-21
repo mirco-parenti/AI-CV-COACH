@@ -46,6 +46,7 @@ Partial Class PannelloOpportunita
         Me.pnlAzioni = New System.Windows.Forms.Panel()
         Me.btnNuovoAnnuncio = New System.Windows.Forms.Button()
         Me.btnBrainstorm = New System.Windows.Forms.Button()
+        Me.btnEsito = New System.Windows.Forms.Button()
         Me.btnScarta = New System.Windows.Forms.Button()
         Me.btnGeneraDocumenti = New System.Windows.Forms.Button()
         Me.pnlIntestazione.SuspendLayout()
@@ -337,6 +338,7 @@ Partial Class PannelloOpportunita
         '
         Me.pnlAzioni.Controls.Add(Me.btnNuovoAnnuncio)
         Me.pnlAzioni.Controls.Add(Me.btnBrainstorm)
+        Me.pnlAzioni.Controls.Add(Me.btnEsito)
         Me.pnlAzioni.Controls.Add(Me.btnScarta)
         Me.pnlAzioni.Controls.Add(Me.btnGeneraDocumenti)
         Me.pnlAzioni.Dock = System.Windows.Forms.DockStyle.Bottom
@@ -361,12 +363,20 @@ Partial Class PannelloOpportunita
         Me.btnBrainstorm.TabIndex = 1
         Me.btnBrainstorm.Text = "Brainstorm"
         '
+        'btnEsito
+        '
+        Me.btnEsito.Location = New System.Drawing.Point(284, 18)
+        Me.btnEsito.Name = "btnEsito"
+        Me.btnEsito.Size = New System.Drawing.Size(130, 32)
+        Me.btnEsito.TabIndex = 2
+        Me.btnEsito.Text = "Com'è andata…"
+        '
         'btnScarta
         '
-        Me.btnScarta.Location = New System.Drawing.Point(284, 18)
+        Me.btnScarta.Location = New System.Drawing.Point(426, 18)
         Me.btnScarta.Name = "btnScarta"
         Me.btnScarta.Size = New System.Drawing.Size(110, 32)
-        Me.btnScarta.TabIndex = 2
+        Me.btnScarta.TabIndex = 3
         Me.btnScarta.Text = "Scarta"
         '
         'btnGeneraDocumenti
@@ -375,7 +385,7 @@ Partial Class PannelloOpportunita
         Me.btnGeneraDocumenti.Location = New System.Drawing.Point(916, 18)
         Me.btnGeneraDocumenti.Name = "btnGeneraDocumenti"
         Me.btnGeneraDocumenti.Size = New System.Drawing.Size(190, 32)
-        Me.btnGeneraDocumenti.TabIndex = 3
+        Me.btnGeneraDocumenti.TabIndex = 4
         Me.btnGeneraDocumenti.Text = "Genera CV + lettera"
         '
         'PannelloOpportunita
@@ -435,6 +445,7 @@ Partial Class PannelloOpportunita
     Friend WithEvents pnlAzioni As System.Windows.Forms.Panel
     Friend WithEvents btnNuovoAnnuncio As System.Windows.Forms.Button
     Friend WithEvents btnBrainstorm As System.Windows.Forms.Button
+    Friend WithEvents btnEsito As System.Windows.Forms.Button
     Friend WithEvents btnScarta As System.Windows.Forms.Button
     Friend WithEvents btnGeneraDocumenti As System.Windows.Forms.Button
 

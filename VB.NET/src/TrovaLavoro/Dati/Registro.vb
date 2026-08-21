@@ -32,6 +32,13 @@ Namespace Dati
         ''' <summary>A che punto è (cap. 07.3).</summary>
         Public Property Stato As StatoOpportunita
 
+        ''' <summary>
+        ''' Com'è finita, se lo si sa (cap. 07.3); <c>Nothing</c> quando nessuno l'ha
+        ''' registrato — che per una candidatura già spedita vuol dire «sta ancora
+        ''' aspettando», ed è ciò che il promemoria di follow-up va a cercare.
+        ''' </summary>
+        Public Property Esito As EsitoCandidatura?
+
         ''' <summary>Quando è entrata in ciascuno stato.</summary>
         Public ReadOnly Property DateStati As New Dictionary(Of StatoOpportunita, Date)
 
@@ -72,6 +79,32 @@ Namespace Dati
         Public Property Creata As Date
         Public Property Aggiornata As Date
 
+        ''' <summary>
+        ''' Da quanti giorni questa candidatura aspetta una risposta; <c>Nothing</c> se la
+        ''' domanda non si pone (cap. 07.3).
+        ''' </summary>
+        ''' <param name="adesso">Il momento rispetto a cui si contano i giorni.</param>
+        ''' <remarks>
+        ''' <para>Si pone per le sole <see cref="StatoOpportunita.Inviata"/>: prima non è
+        ''' partita niente, e da <see cref="StatoOpportunita.Esito"/> in poi una risposta
+        ''' è arrivata — l'attesa è finita anche quando la notizia è brutta. Una candidatura
+        ''' spedita ma senza la data dell'invio non si conta: nata da un file corretto a
+        ''' mano, direbbe «ferma da duemila anni».</para>
+        ''' <para>I giorni si troncano, non si arrotondano: spedita stamattina vuol dire
+        ''' zero giorni, e la soglia si tocca il giorno in cui la si tocca davvero.</para>
+        ''' </remarks>
+        Public Function GiorniDiAttesa(adesso As Date) As Integer?
+
+            If Stato <> StatoOpportunita.Inviata Then Return Nothing
+
+            Dim invio As Date
+            If Not DateStati.TryGetValue(StatoOpportunita.Inviata, invio) Then Return Nothing
+            If invio = Nothing Then Return Nothing
+
+            Return CInt(Math.Floor((adesso - invio).TotalDays))
+
+        End Function
+
         ''' <summary>La voce che descrive un'opportunità già salvata su disco.</summary>
         Public Shared Function Da(opportunita As Opportunita) As VoceRegistro
 
@@ -85,6 +118,7 @@ Namespace Dati
             Dim voce As New VoceRegistro With {
                 .Cartella = Path.GetFileName(opportunita.Cartella),
                 .Stato = opportunita.Stato,
+                .Esito = opportunita.Esito,
                 .Azienda = opportunita.Azienda,
                 .Titolo = opportunita.Titolo,
                 .Fonte = opportunita.Fonte,
@@ -125,6 +159,7 @@ Namespace Dati
             Return New JsonObject From {
                 {"cartella", Cartella},
                 {"stato", StatiOpportunita.Nome(Stato)},
+                {"esito", If(Esito.HasValue, EsitiCandidatura.Nome(Esito.Value), Nothing)},
                 {"date_stati", StatiOpportunita.DateComeJson(DateStati)},
                 {"azienda", Azienda},
                 {"titolo", Titolo},
@@ -152,9 +187,16 @@ Namespace Dati
             ' il confronto con le cartelle a rimetterla a posto (v. ArchivioRegistro).
             Dim stato As StatoOpportunita? = StatiOpportunita.DaNome(CampiJson.Testo(scritta, "stato"))
 
+            ' Da T9c. Stato ed esito si leggono insieme, con la stessa regola che vale per
+            ' lo stato.json di ogni cartella: da soli possono contraddirsi (cap. 07.3).
+            Dim letto As StatoOpportunita = If(stato.HasValue, stato.Value, StatoOpportunita.Nuova)
+            Dim esito As EsitoCandidatura? = EsitiCandidatura.DaNome(CampiJson.Testo(scritta, "esito"))
+            EsitiCandidatura.Concorda(letto, esito)
+
             Dim voce As New VoceRegistro With {
                 .Cartella = cartella.Trim(),
-                .Stato = If(stato.HasValue, stato.Value, StatoOpportunita.Nuova),
+                .Stato = letto,
+                .Esito = esito,
                 .Azienda = CampiJson.Testo(scritta, "azienda"),
                 .Titolo = CampiJson.Testo(scritta, "titolo"),
                 .Fonte = CampiJson.Testo(scritta, "fonte"),
@@ -245,6 +287,32 @@ Namespace Dati
         ''' </remarks>
         Public Function Quante(stato As StatoOpportunita) As Integer
             Return Voci.Where(Function(v) v.Stato = stato).Count()
+        End Function
+
+        ''' <summary>
+        ''' Le candidature spedite che aspettano da troppo: è il promemoria di follow-up
+        ''' del cap. 07.3, in ordine di attesa — la più vecchia per prima.
+        ''' </summary>
+        ''' <param name="dopoQuantiGiorni">
+        ''' Dopo quanti giorni di silenzio una candidatura entra nell'elenco. Il valore lo
+        ''' sceglie l'utente nelle Impostazioni; <b>zero o meno spegne il promemoria</b>,
+        ''' che è il modo di dire «non ricordarmelo» senza aggiungere un interruttore.
+        ''' </param>
+        ''' <param name="adesso">Il momento rispetto a cui si contano i giorni.</param>
+        ''' <remarks>
+        ''' Il promemoria è <b>passivo</b> (cap. 15.3): dice quali candidature sono ferme,
+        ''' e il sollecito lo scrive l'utente. Qui non si manda niente e non si cambia
+        ''' nessuno stato — questa funzione risponde a una domanda e basta.
+        ''' </remarks>
+        Public Function DaSollecitare(dopoQuantiGiorni As Integer, adesso As Date) As List(Of VoceRegistro)
+
+            If dopoQuantiGiorni <= 0 Then Return New List(Of VoceRegistro)
+
+            Return Voci.
+                Where(Function(v) If(v.GiorniDiAttesa(adesso), -1) >= dopoQuantiGiorni).
+                OrderByDescending(Function(v) v.GiorniDiAttesa(adesso).Value).
+                ToList()
+
         End Function
 
         ''' <summary>

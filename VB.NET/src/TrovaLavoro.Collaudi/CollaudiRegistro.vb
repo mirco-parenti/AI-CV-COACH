@@ -370,6 +370,124 @@ Namespace Dati
                 End Sub)
         End Sub
 
+        ' ==================================================================
+        ' L'esito e il promemoria di follow-up (T9c, cap. 07.3)
+        ' ==================================================================
+
+        ''' <summary>Una candidatura spedita nel giorno indicato, senza esito.</summary>
+        Private Shared Function Spedita(azienda As String, quando As Date) As VoceRegistro
+
+            Dim voce As New VoceRegistro With {
+                .Cartella = azienda.ToLowerInvariant().Replace(" ", "-"),
+                .Stato = StatoOpportunita.Inviata,
+                .Azienda = azienda}
+
+            voce.DateStati(StatoOpportunita.Inviata) = quando
+
+            Return voce
+
+        End Function
+
+        <TestMethod>
+        Public Sub LEsitoEntraNellIndiceESiRilegge()
+            ConArchivioTemporaneo(
+                Sub(indice, candidature, cartella)
+                    Dim andata As Opportunita = Candidatura("Rossi S.p.A.")
+                    andata.Cv = JsonNode.Parse("{""intestazione"": {}}")
+                    andata.Avanza(StatoOpportunita.Generata)
+                    andata.Avanza(StatoOpportunita.Inviata)
+                    andata.SegnaEsito(EsitoCandidatura.Colloquio)
+
+                    candidature.Salva(andata)
+
+                    Assert.AreEqual(EsitoCandidatura.Colloquio, indice.Carica().Voci.Single().Esito)
+
+                    indice.Salva(indice.Carica())
+                    Dim riletto As Registro = Registro.DaJson(File.ReadAllText(cartella.FileRegistro))
+
+                    Assert.AreEqual(EsitoCandidatura.Colloquio, riletto.Voci.Single().Esito,
+                                    "e si rilegge dal file, come lo stato")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub UnIndiceCheSiContraddiceNonInventaUnEsito()
+
+            ' Il file si può correggere a mano (cap. 11.1). Qui dichiara un esito su una
+            ' candidatura scartata: vince lo stato, che è il campo che tutti guardano.
+            Dim scritta As JsonObject = TryCast(JsonNode.Parse(
+                "{""cartella"": ""acme"", ""stato"": ""scartata"", ""esito"": ""assunto""}"), JsonObject)
+
+            Dim voce As VoceRegistro = VoceRegistro.DaJson(scritta)
+
+            Assert.AreEqual(StatoOpportunita.Scartata, voce.Stato)
+            Assert.IsFalse(voce.Esito.HasValue)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub AspettaSoloChiHaSpeditoEnonHaAncoraSaputoNiente()
+
+            Dim adesso As New Date(2026, 8, 21, 12, 0, 0)
+
+            ' Spedita stamattina: zero giorni, e la soglia si tocca quando si tocca davvero.
+            Assert.AreEqual(0, Spedita("Acme", adesso.AddHours(-3)).GiorniDiAttesa(adesso).Value)
+            Assert.AreEqual(16, Spedita("Acme", adesso.AddDays(-16)).GiorniDiAttesa(adesso).Value)
+
+            ' Chi non ha ancora spedito non aspetta una risposta: aspetta sé stesso.
+            Dim ferma As New VoceRegistro With {.Cartella = "acme", .Stato = StatoOpportunita.Generata}
+            ferma.DateStati(StatoOpportunita.Generata) = adesso.AddDays(-90)
+            Assert.IsFalse(ferma.GiorniDiAttesa(adesso).HasValue)
+
+            ' Chi ha saputo com'è andata ha finito di aspettare, anche se la notizia è brutta.
+            Dim rifiutata As VoceRegistro = Spedita("Bianchi", adesso.AddDays(-40))
+            rifiutata.Stato = StatoOpportunita.Esito
+            rifiutata.Esito = EsitoCandidatura.Rifiutata
+            Assert.IsFalse(rifiutata.GiorniDiAttesa(adesso).HasValue)
+
+            ' Spedita senza la data dell'invio — un file corretto a mano — non conta
+            ' duemila anni: non conta affatto.
+            Dim senzaData As New VoceRegistro With {.Cartella = "verdi", .Stato = StatoOpportunita.Inviata}
+            Assert.IsFalse(senzaData.GiorniDiAttesa(adesso).HasValue)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IlPromemoriaMetteDavantiLaPiuVecchia()
+
+            Dim adesso As New Date(2026, 8, 21, 12, 0, 0)
+
+            Dim registro As New Registro
+            registro.Voci.Add(Spedita("Acme", adesso.AddDays(-16)))
+            registro.Voci.Add(Spedita("Bianchi", adesso.AddDays(-40)))
+            registro.Voci.Add(Spedita("Verdi", adesso.AddDays(-3)))
+
+            Dim ferme As List(Of VoceRegistro) = registro.DaSollecitare(14, adesso)
+
+            Assert.HasCount(2, ferme, "quella di tre giorni fa non è ancora ferma")
+            Assert.AreEqual("Bianchi", ferme(0).Azienda, "la più vecchia per prima")
+            Assert.AreEqual("Acme", ferme(1).Azienda)
+
+            ' Il giorno esatto della soglia entra: quattordici giorni di silenzio sono
+            ' quattordici giorni di silenzio.
+            Assert.HasCount(3, registro.DaSollecitare(3, adesso))
+
+        End Sub
+
+        <TestMethod>
+        Public Sub ZeroGiorniSpegneIlPromemoria()
+
+            Dim adesso As New Date(2026, 8, 21, 12, 0, 0)
+
+            Dim registro As New Registro
+            registro.Voci.Add(Spedita("Acme", adesso.AddDays(-400)))
+
+            Assert.IsEmpty(registro.DaSollecitare(0, adesso), "zero vuol dire «non ricordarmelo»")
+            Assert.IsEmpty(registro.DaSollecitare(-7, adesso))
+            Assert.HasCount(1, registro.DaSollecitare(1, adesso))
+
+        End Sub
+
     End Class
 
 End Namespace

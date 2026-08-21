@@ -15,8 +15,9 @@ scelta resta.)*
 
 ```
 TrovaLavoro\
-├── impostazioni.json      le preferenze dell'utente: lingua predefinita dei documenti
-│                          e interruttore della rifinitura (cap. 03, P8; v. 11.6)
+├── impostazioni.json      le preferenze dell'utente: lingua predefinita dei documenti,
+│                          interruttore della rifinitura e giorni del promemoria di
+│                          follow-up (cap. 03, P8; cap. 07.3; v. 11.6)
 ├── ricerche.json          preferenze di ricerca, ricerche salvate e tabella dei portali
 ├── taratura.json          soglia, pesi e limiti del match (v. 11.6)
 ├── modelli.json           mappa livello → modello AI (v. 11.6, cap. 02.5)
@@ -35,7 +36,9 @@ TrovaLavoro\
 │       ├── email.json     (la bozza dell'email: destinatario, oggetto, corpo,
 │       │                   allegati spuntati e la lingua in cui è nata — cap. 07.1)
 │       ├── stato.json     (stato, date, lingua, versione profilo, fonte e link,
-│       │                   e i testi di **prima** della rifinitura — cap. 08.6)
+│       │                   i testi di **prima** della rifinitura — cap. 08.6 — e,
+│       │                   da T9c, l'esito quando c'è, con la data dell'ultima
+│       │                   notizia — cap. 07.3)
 │       └── out\           (i file prodotti: .docx .pdf .eml)
 ├── registro.json          l'indice delle candidature: comodo, ma rigenerabile
 ├── webview2\              profilo di navigazione del browser integrato
@@ -410,12 +413,14 @@ su due macchine. *(Realizzato a T2 in `Ai/Modelli.vb`.)*
 modo — ripiego sui predefiniti, avviso quando ci si cade, e nessun avvio impedito. Perché
 è l'**opposto**: la taratura è di prodotto e l'interfaccia non la mostra, per non lasciare
 che il punteggio misuri l'ottimismo di quel giorno invece dell'attinenza al posto; le
-preferenze sono scelte che *solo* l'utente può fare — in che lingua scrive di solito, e se
-vuole che una macchina gli ritocchi la prosa. Si toccano con mani diverse, e quindi
-stanno in file diversi. Con una differenza anche in lettura: una mappa di taratura storta
-si scarta **intera**, perché le sue voci si compongono in un punteggio solo e tenerne metà
-lo falserebbe in silenzio; le due preferenze invece non si parlano, e una lingua scritta
-male non dice niente sulla rifinitura — si scarta quella e si tiene l'altra.
+preferenze sono scelte che *solo* l'utente può fare — in che lingua scrive di solito, se
+vuole che una macchina gli ritocchi la prosa, e dopo quanti giorni di silenzio vuole che gli
+si ricordi una candidatura spedita *(quest'ultima da **T9c**, 2026-08-21: `giorni_follow_up`,
+quattordici di casa e zero per spegnere il promemoria — cap. 07.3)*. Si toccano con mani
+diverse, e quindi stanno in file diversi. Con una differenza anche in lettura: una mappa di
+taratura storta si scarta **intera**, perché le sue voci si compongono in un punteggio solo e
+tenerne metà lo falserebbe in silenzio; le tre preferenze invece non si parlano, e una lingua
+scritta male non dice niente sulla rifinitura — si scarta quella e si tengono le altre.
 
 A leggerli all'avvio è `Motore/ContestoApp` *(da T3c, 2026-08-07)*: entrambi i file, con
 l'avviso di ripiego quando si cade sui predefiniti. Prima esistevano i lettori ma non

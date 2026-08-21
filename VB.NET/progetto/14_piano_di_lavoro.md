@@ -737,6 +737,48 @@ primo `clic` su un bottone che apre una finestra non la apre, e ci vuole il seco
 annotata nel `README.md` di `strumenti/mcp-collaudi/`, perché il sospetto cade
 naturalmente sull'applicazione — e lì il gestore partiva benissimo.*
 
+**T9c è chiusa** *(2026-08-21)*. «A che punto sono» ha adesso la sua seconda metà: lo stato
+**`esito`** e il **promemoria di follow-up**, il debito che T6 si era lasciata dietro, più il
+**vicolo cieco dello stato «nuova»** trovato dal collaudo di tappa di T8. **910 collaudi
+verdi** (erano 878), versione **0.3.038**, Pool **1.12** invariato.
+
+Tre decisioni hanno orientato la gamba, e le ragioni stanno nel cap. 07.3. Gli esiti
+registrabili sono **tre e non quattro**: «in attesa» è già lo stato `inviata`, e registrarla
+avrebbe creato due modi di dire la stessa cosa da rincorrere in due posti. L'esito **si
+corregge e si toglie** — è una dichiarazione dell'utente, non un fatto osservato — e per
+questo ha un metodo suo, l'unico punto da cui il ciclo di vita torna indietro. Il promemoria
+guarda le **sole spedite senza esito**, con la soglia scelta in P8 (quattordici giorni, zero
+per spegnerlo): le date c'erano già tutte in `date_stati`, e non è servito nessun campo
+nuovo. Il vicolo cieco si è chiuso senza toccare lo schema su disco: «Analizza», sulla
+candidatura riaperta al solo annuncio, **diventa «Confronta»** e fa il secondo passo da solo.
+
+**Sette falsificazioni** provate e tutte cadute (regola 14): lo stato e l'esito che si
+fidano l'uno dell'altro senza mettersi d'accordo, l'attesa contata anche a chi ha già
+saputo, lo zero che non spegne più il promemoria, la data del passaggio disfatto lasciata
+dietro, il vicolo cieco rimesso dov'era, il bottone dell'esito sempre premibile, e la voce
+del menù scollegata dall'azione.
+
+**Uno stato nuovo tocca chi non se lo aspetta**, e a dirlo è stato il secondo controllo, non
+il banco: aprendo davvero lo stato `esito` — che fino a ieri nessuno raggiungeva — **P7** si è
+trovata a chiedere un passo all'indietro che non esiste. Chi torna a rimandare la stessa
+email e ripreme «L'ho spedita» su una candidatura che ha già un esito si sentiva rispondere
+«non sono riuscita a segnarla come inviata»: l'eccezione della macchina degli stati,
+raccolta e raccontata a chi non aveva sbagliato niente. Adesso si avanza **solo se la
+transizione è lecita**, e ripremere non fa nulla. Il primo collaudo scritto per difendere
+quel punto era **verde anche col codice rotto** — guardava l'esito, che restava intatto —
+ed è stato rifatto perché guardasse la riga che l'utente legge (regola 14).
+
+*La prova dal vivo ha trovato quel che il banco non poteva vedere*, su una cartella dati
+usa-e-getta: il menù degli esiti **scendeva fuori dalla finestra**, perché il suo bottone
+sta nella fascia in fondo — ora si apre verso l'alto. E ha stanato un limite dello
+**strumento di collaudo**, non del prodotto: le voci di un menù contestuale non si premono
+(risponde «Premuto» e non succede niente), così come non si legge il valore di un
+`NumericUpDown`. È annotato nel `README.md` di `strumenti/mcp-collaudi/`; il filo fra la
+voce e l'azione, che restava scoperto, si è coperto nel banco con `PerformClick`. Il giro
+vero è stato percorso lo stesso — con un clic del mouse alle coordinate della voce — e con
+esso il **confronto di una candidatura nata dal server MCP**: 36 secondi, quindici giudizi,
+0,8 stelle e la cartella che avanza a «interessante».
+
 
 ## Ordine e dipendenze
 

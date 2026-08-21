@@ -26,6 +26,7 @@ Partial Class PannelloHome
         Me.btnApriProfilo = New System.Windows.Forms.Button()
         Me.pnlFiltro = New System.Windows.Forms.Panel()
         Me.lblContatori = New System.Windows.Forms.Label()
+        Me.lblPromemoria = New System.Windows.Forms.Label()
         Me.lblStelle = New System.Windows.Forms.Label()
         Me.cboStelle = New System.Windows.Forms.ComboBox()
         Me.lblMostra = New System.Windows.Forms.Label()
@@ -126,6 +127,7 @@ Partial Class PannelloHome
         'pnlFiltro
         '
         Me.pnlFiltro.Controls.Add(Me.lblContatori)
+        Me.pnlFiltro.Controls.Add(Me.lblPromemoria)
         Me.pnlFiltro.Controls.Add(Me.lblStelle)
         Me.pnlFiltro.Controls.Add(Me.cboStelle)
         Me.pnlFiltro.Controls.Add(Me.lblMostra)
@@ -144,6 +146,17 @@ Partial Class PannelloHome
         Me.lblContatori.Name = "lblContatori"
         Me.lblContatori.Size = New System.Drawing.Size(620, 20)
         Me.lblContatori.TabIndex = 0
+        '
+        'lblPromemoria
+        '
+        Me.lblPromemoria.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblPromemoria.Font = StileApp.FontDidascalia
+        Me.lblPromemoria.ForeColor = StileApp.Informazione
+        Me.lblPromemoria.Location = New System.Drawing.Point(0, 30)
+        Me.lblPromemoria.Name = "lblPromemoria"
+        Me.lblPromemoria.Size = New System.Drawing.Size(1100, 20)
+        Me.lblPromemoria.TabIndex = 5
+        Me.lblPromemoria.Visible = False
         '
         'lblStelle
         '
@@ -336,6 +349,7 @@ Partial Class PannelloHome
     Friend WithEvents btnApriProfilo As System.Windows.Forms.Button
     Friend WithEvents pnlFiltro As System.Windows.Forms.Panel
     Friend WithEvents lblContatori As System.Windows.Forms.Label
+    Friend WithEvents lblPromemoria As System.Windows.Forms.Label
     Friend WithEvents lblStelle As System.Windows.Forms.Label
     Friend WithEvents cboStelle As System.Windows.Forms.ComboBox
     Friend WithEvents lblMostra As System.Windows.Forms.Label

@@ -165,6 +165,21 @@ dichiarate «rimandate» (cap. 15.3-15.4): qui il puntatore, perché il backlog 
   MCP vero; cap. 09.)*
 - **Follow-up assistito delle candidature** — oggi solo promemoria passivo nel registro;
   la generazione dell'email di sollecito è da valutare. *(2026-08-05 — cap. 15.4.)*
+  **Il promemoria passivo è arrivato con T9c** *(2026-08-21)*: la Home dice quali spedite
+  aspettano da più giorni della soglia scelta in P8. Resta futura la metà assistita — il
+  testo del sollecito lo scrive l'utente, come il cap. 15.3 voleva — e adesso avrebbe dove
+  attaccarsi: la candidatura segnalata, con la sua data e la sua bozza già in `email.json`.
+- **Anche dopo un colloquio si aspetta** — il promemoria di T9c guarda le sole candidature
+  `inviata` senza esito: chi ha fatto il colloquio e non ha più saputo niente esce
+  dall'elenco, perché una risposta era arrivata. È una scelta di semplicità («nessun esito
+  registrato» = «in attesa»), ma la seconda attesa esiste, e talvolta è la più lunga.
+  Servirebbe far partire il conto anche dalla data dell'esito, per il solo colloquio.
+  *(2026-08-21 — emersa costruendo T9c; cap. 07.3.)*
+- **Insegnare allo strumento di collaudo i menù contestuali e i numerici** — oggi `clic`
+  sulle voci di un `ContextMenuStrip` risponde «Premuto» senza premere niente, e di un
+  `NumericUpDown` si vedono solo le due frecce: entrambe le cose si aggirano con un clic
+  vero del mouse alle coordinate lette su una fotografia, che funziona ma non si legge come
+  un collaudo. *(2026-08-21 — pagata a T9c; `strumenti/mcp-collaudi/README.md`.)*
 - **Multi-profilo nella stessa installazione** — il disegno è mono-profilo; da valutare
   se serve. *(2026-08-05 — cap. 15.4.)*
 - **Terze lingue oltre IT/EN** — il pool le ammette per costruzione (varianti `.fr.md`…);

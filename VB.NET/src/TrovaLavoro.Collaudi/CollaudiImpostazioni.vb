@@ -45,7 +45,8 @@ Namespace Motore
 
                     archivio.Salva(New Impostazioni With {
                         .LinguaPredefinita = LinguaDocumenti.Inglese,
-                        .RifinituraAttiva = False})
+                        .RifinituraAttiva = False,
+                        .GiorniFollowUp = 21})
 
                     Assert.IsTrue(archivio.Esiste, "il file deve esserci")
 
@@ -53,6 +54,7 @@ Namespace Motore
 
                     Assert.AreEqual(LinguaDocumenti.Inglese, rilette.LinguaPredefinita)
                     Assert.IsFalse(rilette.RifinituraAttiva)
+                    Assert.AreEqual(21, rilette.GiorniFollowUp)
                     Assert.AreEqual(OrigineImpostazioni.File, rilette.Origine)
                     Assert.IsNull(rilette.Avviso, "ciò che abbiamo scritto noi si rilegge senza rimostranze")
 
@@ -157,6 +159,41 @@ Namespace Motore
 
             Assert.AreEqual(LinguaDocumenti.Inglese, lette.LinguaPredefinita)
             Assert.IsNull(lette.Avviso)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IGiorniDelPromemoriaSonoQuattordiciESiCambiano()
+
+            ' Due settimane è il valore deciso con Mirco il 2026-08-21: una regola sociale,
+            ' non una legge, ed è per questo che si sposta da qui invece di stare in una
+            ' costante (cap. 07.3).
+            Assert.AreEqual(14, Impostazioni.Predefinite().GiorniFollowUp)
+
+            Dim lette As Impostazioni = Impostazioni.DaJson("{ ""giorni_follow_up"": 7 }")
+            Assert.AreEqual(7, lette.GiorniFollowUp)
+            Assert.IsNull(lette.Avviso)
+
+            ' Zero è un valore buono, non un errore: è il modo di spegnere il promemoria
+            ' senza aggiungere un interruttore.
+            Assert.AreEqual(0, Impostazioni.DaJson("{ ""giorni_follow_up"": 0 }").GiorniFollowUp)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaSogliaImpossibileSiScartaSenzaPortarsiViaLeAltre()
+
+            ' Le tre preferenze non si parlano: una storta non deve far cadere le buone.
+            Dim lette As Impostazioni = Impostazioni.DaJson(
+                "{ ""lingua_predefinita"": ""en"", ""giorni_follow_up"": 5000 }")
+
+            Assert.AreEqual(LinguaDocumenti.Inglese, lette.LinguaPredefinita, "questa resta")
+            Assert.AreEqual(14, lette.GiorniFollowUp, "e per quella scartata vale il predefinito")
+            Assert.Contains("giorni_follow_up", lette.Avviso)
+
+            ' Un numero negativo e una parola al posto di un numero: stessa sorte.
+            Assert.AreEqual(14, Impostazioni.DaJson("{ ""giorni_follow_up"": -3 }").GiorniFollowUp)
+            Assert.AreEqual(14, Impostazioni.DaJson("{ ""giorni_follow_up"": ""mai"" }").GiorniFollowUp)
 
         End Sub
 

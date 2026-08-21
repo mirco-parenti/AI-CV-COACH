@@ -120,12 +120,16 @@ Namespace Dati
         ''' <summary>I campi di una voce, nell'ordine delle intestazioni.</summary>
         Private Function Campi(voce As VoceRegistro) As String()
 
+            ' Da T9c la colonna «stato» porta la stessa parola che si legge nella Home —
+            ' «esce quel che si vede» (cap. 07.3), e «Rifiutata» dice quel che «Con esito»
+            ' tace. (Il commento sta qui e non dentro le graffe: in VB una riga di solo
+            ' commento in mezzo a un initializer spezza la continuazione implicita.)
             Return New String() {
                 If(voce.Stelle.HasValue, voce.Stelle.Value.ToString("0.0", CultureInfo.CurrentCulture), ""),
                 If(voce.GateEliminatorio, "sì", "no"),
                 If(voce.Azienda, ""),
                 If(voce.Titolo, ""),
-                StatiOpportunita.Etichetta(voce.Stato),
+                EsitiCandidatura.EtichettaDi(voce.Stato, voce.Esito),
                 If(voce.Fonte, ""),
                 If(voce.Link, ""),
                 If(voce.Lingua, ""),

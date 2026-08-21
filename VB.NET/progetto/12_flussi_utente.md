@@ -170,6 +170,15 @@ messaggio non è stato preparato, perché un `.eml` che non esiste non può esse
    torna ad A4 (nuova raccolta) o si chiude.
 2. Il registro (F6) mostra in ogni momento: inviate, in attesa, da fare, scartate.
 
+*A **T9c** (2026-08-21) il percorso non finisce più con l'invio.* Il punto 2 elenca quello
+che il registro mostra, e adesso mostra anche **com'è finita**: l'esito si segna dalla
+scheda della candidatura — «Com'è andata…» in P4, con colloquio · rifiutata · assunto 🎉 —
+e si corregge, perché è una dichiarazione di chi si è candidato, esattamente come «l'ho
+spedita» di A8. E il registro smette di aspettare solo di essere guardato: le spedite
+rimaste senza risposta oltre la soglia scelta in P8 (quattordici giorni di casa, zero per
+spegnere) vengono **segnalate** nella Home con da quanti giorni aspettano. Il sollecito
+però lo scrive l'utente: il promemoria ricorda e basta (cap. 07.3; cap. 15.3).
+
 ## 12.2 Flusso B — Costruire il CV con il dialogo guidato (F1)
 
 Per chi un CV non ce l'ha, o lo vuole rifare da zero. È l'anello 1 del prototipo,
@@ -272,6 +281,13 @@ racconto sta nel cap. 14 (T8); i due limiti che il collaudo ha scoperto sono in
   *Dal 2026-08-18 «senza perdere ciò che è stato fatto» vale anche quando a farti uscire
   è la **barra in cima**, che non passa dal pannello: da lì la bozza dell'email spariva in
   silenzio, ed era un vicolo cieco travestito da scorciatoia (cap. 03.8).*
+  *E dal 2026-08-21 (T9c) non è più vicolo cieco nemmeno una candidatura **ferma al solo
+  annuncio**, che oggi sa creare il solo server MCP: la finestra la riapriva e non la sapeva
+  proseguire, perché «Analizza» vuole del testo incollato e lì il testo grezzo non lo
+  conserva nessuno. Adesso su quella candidatura il bottone **diventa «Confronta»** e fa il
+  passo successivo con l'annuncio già strutturato (cap. 03.6, P4). Era il difetto trovato
+  dal collaudo di tappa di T8, e viveva proprio dove questa regola guarda: nel punto in cui
+  si rientra.*
 - **La chiusura dichiara ciò che perderebbe** *(2026-08-09, revisione adversariale)*:
   chiudere l'app con un lavoro a metà — un dialogo non consegnato, un import in volo —
   non è vietato, ma non è mai silenzioso: l'app lo dice, e l'import in corso viene

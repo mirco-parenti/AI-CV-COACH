@@ -144,7 +144,7 @@ Prima versione — tutti i tool leggono/scrivono la **stessa cartella dati** del
 | Tool | Cosa fa | Scrive dati? |
 |---|---|---|
 | `leggi_profilo` | restituisce il profilo JSON corrente | no |
-| `leggi_registro` | elenco opportunità con stati, stelle, date | no |
+| `leggi_registro` | elenco opportunità con stati, stelle, date — e da **T9c** l'esito, quando c'è | no |
 | `leggi_opportunita` | tutti gli artefatti di una singola opportunità | no |
 | `analizza_annuncio` | testo annuncio → Annuncio JSON (stesso prompt del pool) | no |
 | `confronta` | profilo + annuncio → giudizi, stelle, note (con clamp e hard-gate) | no |

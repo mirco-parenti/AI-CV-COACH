@@ -47,6 +47,14 @@ Public Class PannelloOpportunita
 
     Private ReadOnly _suggerimenti As New ToolTip()
 
+    ''' <summary>
+    ''' Il menù di «Com'è andata…» (cap. 07.3). Nasce qui e non nel Designer, come il
+    ''' <see cref="_suggerimenti"/>: le sue voci sono quelle dell'enum
+    ''' <see cref="EsitoCandidatura"/>, e un elenco che si ricopia a mano in un file
+    ''' generato è un elenco che prima o poi diverge.
+    ''' </summary>
+    Private ReadOnly _menuEsito As New ContextMenuStrip()
+
     Private _contesto As ContestoApp
 
     ''' <summary>
@@ -181,6 +189,14 @@ Public Class PannelloOpportunita
 
         If AiAlLavoro Then Return
 
+        ' Da T9c. La candidatura riaperta al solo annuncio salta il primo passo: l'annuncio
+        ' è già letto e strutturato, e rileggerlo costerebbe una chiamata per riottenere
+        ' quello che c'è già.
+        If DaConfrontare() Then
+            Await ConfrontaLaRiapertaAsync().ConfigureAwait(True)
+            Return
+        End If
+
         Dim testo As String = txtAnnuncio.Text.Trim()
         If testo = "" Then
             RaccontaLoStato("Incolla il testo dell'annuncio, poi premi «Analizza».", StileApp.TestoSecondario)
@@ -292,6 +308,89 @@ Public Class PannelloOpportunita
     End Function
 
     ''' <summary>
+    ''' Se quel che manca a questa candidatura è <b>solo</b> il confronto: allora
+    ''' «Analizza» cambia mestiere e diventa «Confronta» (cap. 07.3).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>È il vicolo cieco trovato dal collaudo di tappa di T8 (2026-08-21). Una
+    ''' candidatura ferma allo stato <see cref="StatoOpportunita.Nuova"/> — oggi le sa
+    ''' creare solo il server MCP, perché l'applicazione archivia dopo il confronto — si
+    ''' riapriva e non si poteva proseguire: la casella dell'incolla è vuota, e «Analizza»
+    ''' si accende solo se lì dentro c'è del testo. Il motore sapeva già farlo, perché
+    ''' <c>ConfrontaAsync</c> vuole l'annuncio <b>già strutturato</b>: mancava il gesto.</para>
+    ''' <para><b>Il testo incollato ha la precedenza.</b> Chi scrive qualcosa nella casella
+    ''' vuole leggere un annuncio nuovo, non ripescare quello di prima: allora il bottone
+    ''' torna a essere «Analizza» e fa i suoi due passi su una candidatura nuova.</para>
+    ''' </remarks>
+    Private Function DaConfrontare() As Boolean
+
+        If _opportunita Is Nothing OrElse _opportunita.Confrontata Then Return False
+        If _opportunita.Stato = StatoOpportunita.Scartata Then Return False
+        If _opportunita.AnnuncioVuoto Then Return False
+
+        Return txtAnnuncio.Text.Trim() = ""
+
+    End Function
+
+    ''' <summary>
+    ''' Confronta col profilo l'annuncio di una candidatura riaperta, senza rileggerlo:
+    ''' è il solo secondo passo dei due (cap. 07.3; cap. 12, A5).
+    ''' </summary>
+    ''' <remarks>
+    ''' È pubblica per la stessa ragione di <see cref="AnalizzaLAnnuncioAsync"/>: di un
+    ''' gestore di clic il banco non può aspettare la fine.
+    ''' </remarks>
+    Public Async Function ConfrontaLaRiapertaAsync() As Task
+
+        If AiAlLavoro Then Return
+        If _opportunita Is Nothing OrElse _opportunita.Confrontata Then Return
+
+        If _pipeline Is Nothing Then
+            RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
+            Return
+        End If
+
+        Dim profilo As Profilo = LeggiIlProfilo()
+        If profilo Is Nothing Then Return
+
+        Dim candidatura As Opportunita = _opportunita
+
+        Using filo As New CancellationTokenSource()
+
+            _annulla = filo
+            LavoroInCorso(True)
+
+            Try
+                RaccontaLoStato("Confronto l'annuncio con il tuo profilo…", StileApp.TestoSecondario)
+                Await _pipeline.ConfrontaAsync(candidatura, profilo, filo.Token).ConfigureAwait(True)
+
+                candidatura.VersioneProfilo = VersioneInUso()
+
+                MostraLOpportunita()
+                FasciaDIngresso(aperta:=False)
+
+                RaccontaLoStato(Archivia(candidatura, RiassuntoDelMatch()), StileApp.TestoSecondario)
+
+            Catch ex As OperationCanceledException
+                ' Su disco non è cambiato niente: la cartella è quella di prima, con il suo
+                ' annuncio e senza giudizi.
+                RaccontaLoStato("Confronto annullato: la candidatura resta com'era.",
+                                StileApp.TestoSecondario)
+
+            Catch ex As ErroreAi
+                RaccontaLoStato(ex.Message & vbLf & "La candidatura resta com'era: puoi riprovare.",
+                                StileApp.Pericolo)
+
+            Finally
+                _annulla = Nothing
+                LavoroInCorso(False)
+            End Try
+
+        End Using
+
+    End Function
+
+    ''' <summary>
     ''' Il rifiuto garbato di cap. 06.4, detto in modo diverso a seconda di come il testo
     ''' è arrivato: chi ha catturato una pagina va rimandato al singolo annuncio, chi ha
     ''' incollato un testo va rimandato al testo. Dire «pagina di elenco» a chi non ha
@@ -380,9 +479,17 @@ Public Class PannelloOpportunita
             FasciaDIngresso(aperta:=True)
         End If
 
-        RaccontaLoStato(
-            $"Riaperta da «{Path.GetFileName(If(candidatura.Cartella, String.Empty))}». " &
-            RiassuntoDelMatch(), StileApp.TestoSecondario)
+        ' Da T9c: alla riaperta senza giudizi si dice che strada le resta, invece di
+        ' lasciarla in un pannello che sembra non avere comandi per lei.
+        Dim racconto As String = $"Riaperta da «{Path.GetFileName(If(candidatura.Cartella, String.Empty))}». "
+
+        If Not candidatura.Confrontata AndAlso Not candidatura.AnnuncioVuoto Then
+            racconto &= "L'annuncio c'è, il confronto col tuo profilo no: premi «Confronta»."
+        Else
+            racconto &= RiassuntoDelMatch()
+        End If
+
+        RaccontaLoStato(racconto, StileApp.TestoSecondario)
 
         AggiornaComandi()
 
@@ -499,15 +606,17 @@ Public Class PannelloOpportunita
         End If
 
         Dim quando As Date
-        Dim scritto As String = StatiOpportunita.Etichetta(_opportunita.Stato)
+
+        ' Da T9c. Chi guarda non pensa per stati: pensa «rifiutata», non «con esito»
+        ' (cap. 07.3). La parola è la stessa che la Home mette nella sua colonna.
+        Dim scritto As String = EsitiCandidatura.EtichettaDi(_opportunita.Stato, _opportunita.Esito)
 
         If _opportunita.DateStati.TryGetValue(_opportunita.Stato, quando) Then
             scritto &= $" il {quando:dd/MM/yyyy}"
         End If
 
         lblStatoCandidatura.Text = scritto
-        lblStatoCandidatura.ForeColor = If(_opportunita.Stato = StatoOpportunita.Scartata,
-                                           StileApp.Pericolo, StileApp.TestoSecondario)
+        lblStatoCandidatura.ForeColor = ColoreDelloStato()
 
     End Sub
 
@@ -675,8 +784,135 @@ Public Class PannelloOpportunita
 
     End Sub
 
+    ''' <summary>
+    ''' Di che colore si scrive a che punto è. Il rosso resta allo scarto — è l'unica
+    ''' strada senza ritorno — e il verde va all'assunzione: sono i due estremi, e in
+    ''' mezzo il grigio di tutto il resto, perché «rifiutata» non è un guasto del
+    ''' programma da segnalare in rosso.
+    ''' </summary>
+    Private Function ColoreDelloStato() As Color
+
+        If _opportunita Is Nothing Then Return StileApp.TestoSecondario
+        If _opportunita.Stato = StatoOpportunita.Scartata Then Return StileApp.Pericolo
+
+        If _opportunita.Esito.HasValue AndAlso _opportunita.Esito.Value = EsitoCandidatura.Assunto Then
+            Return StileApp.Successo
+        End If
+
+        Return StileApp.TestoSecondario
+
+    End Function
+
     Private Sub txtAnnuncio_TextChanged(sender As Object, e As EventArgs) Handles txtAnnuncio.TextChanged
         AggiornaComandi()
+    End Sub
+
+    ' ==================================================================
+    ' Com'è andata (cap. 07.3)
+    ' ==================================================================
+
+    ''' <summary>
+    ''' Apre il menù degli esiti sotto il bottone. Le voci si ricompongono a ogni
+    ''' apertura, perché la spunta dice qual è l'esito <b>di adesso</b>.
+    ''' </summary>
+    Private Sub btnEsito_Click(sender As Object, e As EventArgs) Handles btnEsito.Click
+
+        If _opportunita Is Nothing OrElse AiAlLavoro Then Return
+
+        ' Si apre <b>sopra</b> il bottone, non sotto: «Com'è andata…» sta nella fascia in
+        ' fondo al pannello, e un menù che scende da lì finisce fuori dalla finestra, sulla
+        ' barra di Windows. Visto alla prima prova dal vivo (2026-08-21).
+        MenuDegliEsiti().Show(btnEsito, New Point(0, 0), ToolStripDropDownDirection.AboveRight)
+
+    End Sub
+
+    ''' <summary>
+    ''' Il menù degli esiti, con le voci di adesso: prima l'attesa, poi i tre esiti veri,
+    ''' separati da una riga.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>«In attesa» sta in cima e non è un esito: è il modo di <b>togliere</b> quello
+    ''' registrato per sbaglio (cap. 07.3). Il separatore serve a dire che le due cose non
+    ''' sono dello stesso genere — sotto c'è com'è andata, sopra c'è che non si sa ancora.
+    ''' Le voci si rifanno a ogni apertura, perché la spunta dice l'esito <b>di adesso</b>.</para>
+    ''' <para>È pubblica per il banco, e non è una comodità: la voce di un menù contestuale
+    ''' non si preme da fuori — lo strumento di collaudo risponde «Premuto» e il gestore non
+    ''' parte (2026-08-21, T9c) — così il filo fra la voce scelta e
+    ''' <see cref="SegnaLEsito"/> resterebbe l'unico pezzo di questa strada che nessuno
+    ''' prova.</para>
+    ''' </remarks>
+    Public Function MenuDegliEsiti() As ContextMenuStrip
+
+        _menuEsito.Items.Clear()
+
+        AggiungiVoceDiEsito("In attesa — nessuna risposta", Nothing)
+        _menuEsito.Items.Add(New ToolStripSeparator())
+
+        For Each esito As EsitoCandidatura In [Enum].GetValues(Of EsitoCandidatura)()
+            AggiungiVoceDiEsito(EsitiCandidatura.Etichetta(esito), esito)
+        Next
+
+        Return _menuEsito
+
+    End Function
+
+    Private Sub AggiungiVoceDiEsito(testo As String, quale As EsitoCandidatura?)
+
+        Dim voce As New ToolStripMenuItem(testo) With {.Checked = EQuelloDiAdesso(quale)}
+
+        AddHandler voce.Click, Sub(mittente As Object, evento As EventArgs) SegnaLEsito(quale)
+
+        _menuEsito.Items.Add(voce)
+
+    End Sub
+
+    ''' <summary>Se quella voce è l'esito che la candidatura ha adesso.</summary>
+    ''' <remarks>
+    ''' Scritto per esteso e non con un <c>=</c> fra due <c>Nullable</c>: quel confronto,
+    ''' quando uno dei due è <c>Nothing</c>, non vale né vero né falso — e in un <c>If</c>
+    ''' di VB finirebbe per valere falso proprio nel caso che qui interessa di più.
+    ''' </remarks>
+    Private Function EQuelloDiAdesso(quale As EsitoCandidatura?) As Boolean
+
+        If _opportunita Is Nothing Then Return False
+        If Not quale.HasValue Then Return Not _opportunita.Esito.HasValue
+
+        Return _opportunita.Esito.HasValue AndAlso _opportunita.Esito.Value = quale.Value
+
+    End Function
+
+    ''' <summary>
+    ''' Registra com'è andata, o toglie l'esito segnato per sbaglio, e scrive su disco
+    ''' (cap. 07.3).
+    ''' </summary>
+    ''' <param name="scelto">L'esito scelto nel menù; <c>Nothing</c> per «in attesa».</param>
+    ''' <remarks>
+    ''' <para>Non c'è nessuna conferma da dare, e non è una dimenticanza: l'esito si
+    ''' cambia con un secondo clic sullo stesso menù, e chiedere «sei sicuro?» per una
+    ''' cosa che si disfa da sé insegna solo a rispondere sì senza leggere. La conferma
+    ''' resta dov'è servita — lo scarto, che non si disfa.</para>
+    ''' <para>È pubblica perché un menù contestuale il banco non lo può premere: senza
+    ''' questa porta, tutto ciò che sta dietro al clic resterebbe fuori dai collaudi.</para>
+    ''' </remarks>
+    Public Sub SegnaLEsito(scelto As EsitoCandidatura?)
+
+        If _opportunita Is Nothing OrElse AiAlLavoro Then Return
+
+        ' Riconfermare quello che c'è già non è un cambiamento: non si riscrive la
+        ' cartella e non si sposta la data di quando lo si era saputo.
+        If EQuelloDiAdesso(scelto) Then Return
+
+        _opportunita.SegnaEsito(scelto)
+
+        Dim riassunto As String = If(scelto.HasValue,
+                                     $"Segnata come «{EsitiCandidatura.Etichetta(scelto.Value)}».",
+                                     "Esito tolto: torna in attesa di una risposta.")
+
+        RaccontaLoStato(Archivia(_opportunita, riassunto), StileApp.TestoSecondario)
+
+        MostraLoStatoDellaCandidatura()
+        AggiornaComandi()
+
     End Sub
 
     ' ==================================================================
@@ -705,7 +941,7 @@ Public Class PannelloOpportunita
 
         If _comandi Is Nothing Then
             _comandi = New FasciaDeiComandi(pnlAzioni)
-            _comandi.ASinistra(btnNuovoAnnuncio, btnBrainstorm, btnScarta)
+            _comandi.ASinistra(btnNuovoAnnuncio, btnBrainstorm, btnEsito, btnScarta)
             _comandi.ADestra(btnGeneraDocumenti)
         End If
 
@@ -731,6 +967,9 @@ Public Class PannelloOpportunita
         StileApp.VestiBottone(btnGeneraDocumenti, LivelloBottone.AzionePrincipale)
         StileApp.VestiBottone(btnNuovoAnnuncio, LivelloBottone.Neutro)
         StileApp.VestiBottone(btnBrainstorm, LivelloBottone.Esplorativo)
+
+        ' Segnare com'è andata non consuma niente e si disfa: è un comando neutro.
+        StileApp.VestiBottone(btnEsito, LivelloBottone.Neutro)
 
         ' Scartare un'opportunità la butta via: pesa quanto un'eliminazione.
         StileApp.VestiBottone(btnScarta, LivelloBottone.Distruttivo)
@@ -760,7 +999,8 @@ Public Class PannelloOpportunita
     ''' manca il profilo, manca il testo. Solo l'ultima è colpa del momento; le prime due
     ''' mandano da qualche parte.
     ''' </summary>
-    Private Sub DiciPercheNonSiPuoAnalizzare(occupato As Boolean, conAi As Boolean, conProfilo As Boolean)
+    Private Sub DiciPercheNonSiPuoAnalizzare(occupato As Boolean, conAi As Boolean,
+                                             conProfilo As Boolean, soloIlConfronto As Boolean)
 
         If occupato Then
             lblPerchePento.Text = ""
@@ -768,12 +1008,21 @@ Public Class PannelloOpportunita
         End If
 
         If Not conAi Then
-            lblPerchePento.Text = "Manca la chiave API: senza, l'annuncio non si può leggere."
+            ' Da T9c il bottone può essere «Confronta», e allora il motivo va detto con la
+            ' parola di quel mestiere: chi non deve leggere niente non capirebbe perché
+            ' gli si parla di un annuncio da leggere.
+            lblPerchePento.Text = If(soloIlConfronto,
+                                     "Manca la chiave API: senza, il confronto non si può fare.",
+                                     "Manca la chiave API: senza, l'annuncio non si può leggere.")
             lblPerchePento.ForeColor = StileApp.Pericolo
 
         ElseIf Not conProfilo Then
             lblPerchePento.Text = "Prima il profilo: apri la scheda «Profilo» e salvalo."
             lblPerchePento.ForeColor = StileApp.Pericolo
+
+        ElseIf soloIlConfronto Then
+            ' Il bottone è acceso e dice già cosa fa: non c'è niente da spiegare.
+            lblPerchePento.Text = ""
 
         ElseIf txtAnnuncio.Text.Trim() = "" Then
             lblPerchePento.Text = "Incolla il testo qui a sinistra."
@@ -858,15 +1107,24 @@ Public Class PannelloOpportunita
         Dim conProfilo As Boolean = _contesto IsNot Nothing AndAlso _contesto.Archivio.Esiste
 
         ' A lavoro in corso il bottone cambia mestiere: è l'annulla dell'attesa
-        ' (cap. 12.7 — le operazioni lunghe sono annullabili).
-        btnAnalizza.Text = If(occupato, "Annulla", "Analizza")
+        ' (cap. 12.7 — le operazioni lunghe sono annullabili). Da T9c ne ha un terzo:
+        ' sulla candidatura riaperta al solo annuncio diventa «Confronta» e fa il secondo
+        ' passo da solo, che è la strada da cui prima non si usciva (v. DaConfrontare).
+        ' Il nome non può essere «daConfrontare»: in VB le maiuscole non distinguono, e
+        ' una locale così coprirebbe la funzione DaConfrontare() qui sopra — la chiamata
+        ' verrebbe letta come un indice su questo Boolean appena dichiarato. È la trappola
+        ' che il progetto ha già pagato in StatiOpportunita.Consentita.
+        Dim soloIlConfronto As Boolean = DaConfrontare()
+
+        btnAnalizza.Text = If(occupato, "Annulla", If(soloIlConfronto, "Confronta", "Analizza"))
         btnAnalizza.Enabled = occupato OrElse
-                              (conAi AndAlso conProfilo AndAlso txtAnnuncio.Text.Trim() <> "")
+                              (conAi AndAlso conProfilo AndAlso
+                               (soloIlConfronto OrElse txtAnnuncio.Text.Trim() <> ""))
 
         ' Un bottone spento senza una ragione a portata d'occhio si legge come
         ' un'applicazione rotta: la ragione si scrive sotto il bottone, dove chi voleva
         ' premerlo sta già guardando.
-        DiciPercheNonSiPuoAnalizzare(occupato, conAi, conProfilo)
+        DiciPercheNonSiPuoAnalizzare(occupato, conAi, conProfilo, soloIlConfronto)
 
         txtAnnuncio.ReadOnly = occupato
         txtAnnuncio.BackColor = If(occupato, StileApp.SfondoBase, StileApp.SfondoContenuto)
@@ -893,6 +1151,21 @@ Public Class PannelloOpportunita
         ' stati a dirlo (cap. 07.3), non un elenco di casi scritto qui.
         btnScarta.Enabled = Not occupato AndAlso _opportunita IsNot Nothing AndAlso
                             StatiOpportunita.Consentita(_opportunita.Stato, StatoOpportunita.Scartata)
+
+        ' Com'è andata si segna dopo l'invio: prima non c'è niente che possa essere andato
+        ' in un modo o nell'altro (cap. 07.3). Da «esito» il menù serve ancora, perché una
+        ' dichiarazione si corregge — ed è l'unico posto da cui si torna indietro.
+        btnEsito.Enabled = Not occupato AndAlso _opportunita IsNot Nothing AndAlso
+                           (_opportunita.Stato = StatoOpportunita.Inviata OrElse
+                            _opportunita.Stato = StatoOpportunita.Esito)
+
+        If Not btnEsito.Enabled AndAlso Not occupato AndAlso _opportunita IsNot Nothing Then
+            _suggerimenti.SetToolTip(btnEsito,
+                                     "Si segna dopo aver spedito la candidatura: prima non c'è " &
+                                     "ancora niente da registrare.")
+        Else
+            _suggerimenti.SetToolTip(btnEsito, Nothing)
+        End If
 
     End Sub
 

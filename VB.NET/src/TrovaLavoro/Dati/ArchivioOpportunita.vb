@@ -231,10 +231,18 @@ Namespace Dati
         ''' </remarks>
         Private Shared Function Stato(o As Opportunita) As JsonObject
 
+            ' Da T9c. L'esito si scrive <b>sempre</b>, anche quando non c'è, e qui la
+            ' riga vuota racconta invece di ingombrare: «"stato": "inviata"» con
+            ' «"esito": null» accanto è esattamente il caso che fa scattare il promemoria
+            ' di follow-up (cap. 07.3). È l'opposto della scelta fatta per «rifinitura»
+            ' qui sotto, che è un blocco intero e tace quando non ha niente da dire.
+            Dim esito As String = If(o.Esito.HasValue, EsitiCandidatura.Nome(o.Esito.Value), Nothing)
+
             Dim scritto As New JsonObject From {
                 {"creata", CampiJson.Quando(o.Creata)},
                 {"aggiornata", CampiJson.Quando(o.Aggiornata)},
                 {"stato", StatiOpportunita.Nome(o.Stato)},
+                {"esito", esito},
                 {"date_stati", StatiOpportunita.DateComeJson(o.DateStati)},
                 {"lingua", o.Lingua},
                 {"versione_profilo", o.VersioneProfilo},
@@ -275,7 +283,15 @@ Namespace Dati
             ' stato si deduce dai file presenti invece di riscrivere all'indietro i file
             ' dell'utente (cap. 07.3).
             Dim dichiarato As StatoOpportunita? = StatiOpportunita.DaNome(CampiJson.Testo(stato, "stato"))
-            o.Stato = If(dichiarato.HasValue, dichiarato.Value, StatiOpportunita.Dedotto(o))
+            Dim letto As StatoOpportunita = If(dichiarato.HasValue, dichiarato.Value, StatiOpportunita.Dedotto(o))
+
+            ' Da T9c. Stato ed esito si sono scritti insieme e si leggono insieme: da soli
+            ' possono contraddirsi, e chi decide come è una regola sola (cap. 07.3).
+            Dim esito As EsitoCandidatura? = EsitiCandidatura.DaNome(CampiJson.Testo(stato, "esito"))
+            EsitiCandidatura.Concorda(letto, esito)
+
+            o.Stato = letto
+            o.Esito = esito
 
             StatiOpportunita.RiempiDate(o.DateStati, TryCast(CampiJson.Nodo(stato, "date_stati"), JsonObject))
 
