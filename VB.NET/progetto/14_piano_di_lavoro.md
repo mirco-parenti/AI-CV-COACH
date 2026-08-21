@@ -686,9 +686,14 @@ perdi tutto, ripristina — è stato percorso **dal vivo** sull'applicazione ver
 cartella dati usa-e-getta, e ha stanato un difetto che nessun collaudo aveva visto: la data
 del profilo nel backup, dedotta dall'ultima versione dello storico, annunciava «come era il
 17 agosto» un profilo salvato il 21. Curato facendo viaggiare la data **dentro il file**.
-*Resta una riserva, dichiarata come vuole la regola 15 delle `regole_di_progetto`: il
-tredicesimo tool non è ancora stato visto da un **client MCP vero** — i server si caricano
-all'avvio della sessione, e quella in cui è nato l'aveva già caricato. È in `in_sospeso.md`.*
+*La riserva dichiarata alla chiusura — il tredicesimo tool mai visto da un **client MCP
+vero** — è caduta nella sessione successiva, quella che riavviandosi ha ricaricato il
+server: `esporta_backup` chiamato da Claude Code sui dati veri, con i due contenuti, e nel
+file l'intestazione di formato e la data del profilo che ora viaggia dentro; fuori la chiave
+API e la cartella `out` dei documenti impaginati. Un `contenuto` inventato è stato rifiutato
+spiegando i valori validi senza scrivere niente, e il lucchetto ha negato la scrittura a
+finestra aperta — dicendo cosa continuava a funzionare, e diceva il vero — per concederla
+appena chiusa. Nessun difetto, nessuna riga toccata: **T9a è chiusa senza riserve.***
 
 
 ## Ordine e dipendenze

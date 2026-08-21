@@ -196,13 +196,8 @@ erano in nessun piano, e nessuna è grave.*
 
 ## Da T9a — backup e ripristino (2026-08-21, alla chiusura)
 
-- **Il tredicesimo tool visto da un client MCP vero.** `esporta_backup` è collaudato dal
-  banco (cinque prove, lucchetto compreso) e la funzione che espone è stata percorsa dal
-  vivo nella finestra, ma da un client vero non l'ha ancora chiamato nessuno: i server MCP
-  si caricano **all'avvio** della sessione, e quella in cui il tool è nato aveva già
-  caricato il server di prima. Serve un riavvio, non una modifica al codice. È mezz'ora,
-  e la strada è quella già percorsa il 2026-08-21 con gli altri dodici. *(cap. 09.3;
-  cap. 14, T9a; regola 15.)*
+*Chiusa lo stesso giorno: il tredicesimo tool è stato chiamato da un client MCP vero ed è
+in «Chiuse».*
 
 ## Da revisione adversariale (2026-08-09)
 
@@ -213,6 +208,24 @@ erano in nessun piano, e nessuna è grave.*
   *(cap. 03.5; segnalato dalla revisione, rimandato con motivo.)*
 
 ## Chiuse
+
+- ✅ **Il tredicesimo tool visto da un client MCP vero** *(aperta il 2026-08-21 con la
+  chiusura di T9a, chiusa lo stesso giorno)*. Bastava il riavvio che la voce chiedeva: i
+  tool `mcp__trovalavoro__*` sono comparsi **tredici**, e `esporta_backup` ha lavorato sui
+  dati veri. Senza parametri fa quel che promette — «profilo» — e crea da zero la cartella
+  `backup\`; con «tutto» porta via il registro e **nove candidature su nove**. Dentro c'è
+  l'intestazione di formato (`formato_backup: 1`) e la data del profilo che viaggia **nel
+  file** (`profilo_salvato: 2026-08-17 12:50:03`), cioè la cura del difetto trovato poche
+  ore prima. Fuori restano la chiave API — nessun frammento di `segreti.bin`, né binario né
+  in base64 — e i documenti impaginati: di ogni candidatura il backup porta via tutti i
+  `.json` che ha (dai due della più magra ai sette della più completa) e lascia fuori la
+  sola cartella `out`. Provato a farlo fallire, come vuole la regola 14: un `contenuto`
+  inventato viene **rifiutato spiegando** i due valori validi e il predefinito, senza
+  scrivere niente; a finestra aperta il lucchetto nega la scrittura e dichiara cosa
+  funziona lo stesso — vero, `leggi_registro` ha risposto — e chiusa la finestra la stessa
+  chiamata riesce; un file già esistente **non viene sovrascritto**, gli
+  nasce accanto un `_2` identico a parte la data. Nessun difetto trovato, nessuna riga di
+  codice toccata. *(cap. 09.3; cap. 11.4; cap. 14, T9a; regola 15.)*
 
 - ✅ **Il tool `esporta_backup`** *(aperta il 2026-08-19 con la chiusura di T8c, chiusa il
   2026-08-21 con T9a)*. Aspettava la funzione che espone, ed è arrivato con lei: scrive un
