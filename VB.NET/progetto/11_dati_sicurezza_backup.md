@@ -245,6 +245,51 @@ silenziosi.
 Il campo `formato_backup` permette ai programmi futuri di leggere i backup vecchi:
 il numero cresce solo quando lo schema cambia davvero.
 
+### Com'è stato costruito (T9a, 2026-08-21)
+
+- **Nel backup entrano i file grezzi, non gli oggetti.** Il profilo, il CV base e gli
+  artefatti di ogni candidatura si copiano **così come stanno sul disco**, non
+  ricostruendoli dalle classi del programma. La differenza si vede solo nel caso che conta:
+  un campo che questa versione non modella — scritto a mano, o da un programma futuro —
+  passando per gli oggetti sparirebbe nel viaggio, e un backup che perde qualcosa non è un
+  backup. L'unica eccezione è il **registro**, che è un indice rigenerabile (cap. 07.3) e
+  infatti al ritorno **si ricostruisce dalle cartelle** invece di essere ricopiato: dopo un
+  ripristino sul disco c'è un insieme che nessun indice salvato conosce — le candidature
+  tornate più quelle che c'erano già.
+- **Il ripristino rimette a posto, non riporta il disco a quel giorno.** Le candidature che
+  il backup non nomina **restano dove sono**, e l'anteprima lo dice prima della conferma.
+  Un ripristino che cancellasse il non-nominato sarebbe una perdita silenziosa che nessuno
+  ha chiesto: cancellare è un altro gesto, sta nelle Impostazioni e costa una parola
+  scritta a mano (cap. 11.5).
+- **Prima si mette in salvo, poi si scrive.** Il profilo di adesso finisce nello storico
+  *prima* che quello del backup prenda il suo posto (passo 3 qui sopra), e la versione con
+  cui è stato archiviato si dichiara all'utente: da lì si riprende. Vale anche quando il
+  profilo corrente non si lascia leggere — allora è la copia `profilo.rotto-…` a fare da
+  rete (cap. 11.1).
+- **I nomi che arrivano da fuori sono nomi di file, non percorsi.** Un file di backup si
+  può scrivere a mano, e uno costruito male — `..\..\fuori` al posto del nome di una
+  cartella — non deve poter far scrivere l'applicazione dove vuole chi l'ha costruito. Chi
+  non passa il controllo viene **rifiutato e detto in chiaro**, non ignorato in silenzio.
+  Che il controllo non fosse decorativo l'ha dimostrato la falsificazione (regola 14):
+  reso permissivo, il collaudo ha scritto davvero un file fuori dalla cartella dati.
+- **Una finestra sola per le due metà.** Esportare e ripristinare stanno insieme perché
+  sono lo stesso gesto nei due versi, e chi cerca «come si ripristina» lo cerca dove ha
+  esportato. Erano due bottoni possibili nella fascia di P2, ma il ripristino deve far
+  **leggere cosa sovrascrive** prima di toccare qualcosa, e quello un bottone non lo sa
+  fare: finché non si sceglie un file, «Ripristina» resta spento.
+- **Livello 5, non 6** (cap. 03.3). Il ripristino sovrascrive dati esistenti, ma il profilo
+  di prima finisce nello storico e le candidature non nominate restano: non è una
+  cancellazione definitiva. Chiedere di ridigitare `TrovaLavoro` qui sarebbe un allarme che
+  grida più forte di quanto il gesto meriti — e allarmi così, ripetuti dove non servono,
+  insegnano a scacciarli anche dove servono. La conferma però parte da **«no»**.
+- **Il CV base viaggia col profilo**, non con le candidature: è il suo ritratto in forma di
+  CV (cap. 11.1), e infatti è anche quello che se ne va quando il profilo si elimina
+  (cap. 11.5). I documenti impaginati delle cartelle `out\` restano invece **fuori**: sono
+  file normali, si copiano da sé e si rigenerano con un bottone.
+- **La stessa funzione si affaccia anche dal server MCP**, con il tool `esporta_backup` che
+  aspettava questa tappa per nascere (cap. 09.3). Da lì si esporta e basta: il ritorno
+  indietro resta dove c'è l'utente a guardarlo.
+
 ## 11.5 Pulizia e diritto all'oblio
 
 Dalle Impostazioni: «Svuota dati di navigazione» (cartella `webview2\`), «Elimina

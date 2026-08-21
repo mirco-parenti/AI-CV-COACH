@@ -145,6 +145,7 @@ Namespace Mcp
 
         Public Const SalvaOpportunita As String = "salva_opportunita"
         Public Const EsportaDocumento As String = "esporta_documento"
+        Public Const EsportaBackup As String = "esporta_backup"
 
         Private ReadOnly _lettura As ToolDiLettura
         Private ReadOnly _ai As ToolDiAi
@@ -286,6 +287,20 @@ Namespace Mcp
                     {"formati", Formato()}},
                     "cartella")))
 
+            _definizioni.Add(New DefinizioneTool(
+                EsportaBackup, "Esporta un backup",
+                "Scrive un backup JSON della cartella dati nella sottocartella «backup» e ne " &
+                "restituisce il percorso. Con «profilo» (il valore di sempre) esporta il profilo, " &
+                "il suo storico e il CV base; con «tutto» aggiunge il registro e le candidature. " &
+                "La chiave API non entra mai nel backup, e i documenti già impaginati nemmeno: " &
+                "sono file normali, si copiano da sé. Il ripristino non si fa da qui — è " &
+                "irreversibile e si fa dall'applicazione, dove l'utente vede cosa sovrascrive.",
+                Schema(New JsonObject From {
+                    {"contenuto", New JsonObject From {
+                        {"type", "string"},
+                        {"enum", New JsonArray From {"profilo", "tutto"}},
+                        {"description", "Che cosa mettere nel backup. Se non lo dici: «profilo»."}}}})))
+
         End Sub
 
         ''' <summary>I tool, nell'ordine in cui vanno elencati.</summary>
@@ -375,6 +390,9 @@ Namespace Mcp
 
                 Case EsportaDocumento
                     Return Await _scrittura.EsportaDocumento(argomenti, annulla).ConfigureAwait(False)
+
+                Case EsportaBackup
+                    Return Await _scrittura.EsportaBackup(argomenti, annulla).ConfigureAwait(False)
 
                 Case Else
                     ' Non ci si arriva passando da Conosce: se ci si arriva, è perché un

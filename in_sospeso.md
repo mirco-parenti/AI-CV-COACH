@@ -131,12 +131,8 @@ accanto a quelli della finestra, e il diario dei consumi, sono in «Chiuse».*
 
 ## Da T8c — i tool che scrivono e il lucchetto (2026-08-19, alla chiusura)
 
-- **Il tool `esporta_backup`.** Il cap. 09.3 lo elenca dalla prima stesura, ma espone il
-  **backup del profilo**, che è la funzione F7 e si costruisce a **T9**: oggi nell'app quel
-  bottone è visibile e spento, e lo dichiara. Esporre via MCP una funzione che non esiste
-  sarebbe una promessa vuota, quindi il tool nasce con ciò che espone. Non è una
-  dimenticanza da recuperare ma una dipendenza da rispettare, ed è mezz'ora di lavoro
-  quando F7 c'è. *(cap. 09.3, nota «`esporta_backup` arriva con T9»; cap. 14, T9.)*
+*Chiusa il 2026-08-21 con T9a: il tool `esporta_backup` è nato insieme alla funzione che
+espone, ed è in «Chiuse».*
 
 ## Da questa passata sui debiti prima di T9 (2026-08-19)
 
@@ -198,6 +194,16 @@ erano in nessun piano, e nessuna è grave.*
   poi si decide se curare il prompt — uno su quattro non è ancora un dato.
   *(cap. 04.7; `prompt-pool/confronto/confronto.md`.)*
 
+## Da T9a — backup e ripristino (2026-08-21, alla chiusura)
+
+- **Il tredicesimo tool visto da un client MCP vero.** `esporta_backup` è collaudato dal
+  banco (cinque prove, lucchetto compreso) e la funzione che espone è stata percorsa dal
+  vivo nella finestra, ma da un client vero non l'ha ancora chiamato nessuno: i server MCP
+  si caricano **all'avvio** della sessione, e quella in cui il tool è nato aveva già
+  caricato il server di prima. Serve un riavvio, non una modifica al codice. È mezz'ora,
+  e la strada è quella già percorsa il 2026-08-21 con gli altri dodici. *(cap. 09.3;
+  cap. 14, T9a; regola 15.)*
+
 ## Da revisione adversariale (2026-08-09)
 
 - **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:
@@ -208,6 +214,13 @@ erano in nessun piano, e nessuna è grave.*
 
 ## Chiuse
 
+- ✅ **Il tool `esporta_backup`** *(aperta il 2026-08-19 con la chiusura di T8c, chiusa il
+  2026-08-21 con T9a)*. Aspettava la funzione che espone, ed è arrivato con lei: scrive un
+  backup JSON nella cartella `backup\` e restituisce il percorso, con le **stesse due
+  scelte** della finestra — il solo profilo, oppure tutto. Il ripristino resta fuori, ed è
+  una scelta: sovrascrive roba dell'utente e passa dall'anteprima che dice cosa sostituisce
+  cosa, quindi vive dove c'è l'utente a guardarla. I tool del server sono adesso **tredici**.
+  *(cap. 09.3; cap. 11.4; diario, Step 2.38.)*
 - ✅ **Il collaudo da un client MCP vero** *(aperta il 2026-08-19 con la chiusura di T8a,
   chiusa il 2026-08-21)*. Non serviva aspettare Claude Desktop: un client MCP vero era già
   in casa — **Claude Code**, registrato fra i suoi server e caricato al riavvio della

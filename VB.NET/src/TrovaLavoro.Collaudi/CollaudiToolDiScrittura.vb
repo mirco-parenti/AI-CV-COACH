@@ -402,6 +402,137 @@ Namespace Mcp
 
 #End Region
 
+#Region "esporta_backup"
+
+        <TestMethod>
+        Public Async Function IlBackupEsceNellaSuaCartellaEDiceCosaContiene() As Task
+
+            ' Il tool nasce con la funzione che espone (cap. 09.3): finché F7 non c'era,
+            ' questo sarebbe stato un bottone finto anche via MCP.
+            Await ConMotore(
+                Async Function(contesto)
+
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+
+                    Dim esito As EsitoTool = Await Chiama(contesto, CatalogoTool.EsportaBackup, New JsonObject())
+
+                    Assert.IsFalse(esito.Fallito, $"doveva riuscire: {esito.Spiegazione}")
+
+                    Dim detto As JsonObject = TryCast(esito.Dati, JsonObject)
+                    Dim dove As String = detto("file").GetValue(Of String)()
+
+                    Assert.IsTrue(File.Exists(dove), "il file di backup sta dove dice di stare")
+                    Assert.AreEqual(contesto.Cartella.CartellaBackup, Path.GetDirectoryName(dove),
+                                    "cioè nella cartella «backup» (cap. 11.1)")
+                    Assert.AreEqual(0, detto("candidature").GetValue(Of Integer)(),
+                                    "chi non sceglie ha il solo profilo")
+
+                    Dim riletto As TrovaLavoro.Dati.Backup = ArchivioBackup.Leggi(dove)
+                    Assert.IsNotNull(riletto.Profilo, "e dentro c'è davvero il profilo")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlBackupCompletoPortaAncheLeCandidature() As Task
+
+            ' Le due scelte della finestra si affacciano anche da questa porta: una porta
+            ' che ne offrisse una sola costringerebbe ad aprire l'applicazione per l'altra.
+            Await ConMotore(
+                Async Function(contesto)
+
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+                    CartellaDi(Await Chiama(contesto, CatalogoTool.SalvaOpportunita,
+                                            New JsonObject From {{"annuncio", Annuncio()}}))
+
+                    Dim esito As EsitoTool = Await Chiama(
+                        contesto, CatalogoTool.EsportaBackup,
+                        New JsonObject From {{"contenuto", "tutto"}})
+
+                    Assert.IsFalse(esito.Fallito, $"doveva riuscire: {esito.Spiegazione}")
+
+                    Dim detto As JsonObject = TryCast(esito.Dati, JsonObject)
+                    Assert.AreEqual(1, detto("candidature").GetValue(Of Integer)(), "la candidatura c'è")
+
+                    Dim riletto As TrovaLavoro.Dati.Backup = ArchivioBackup.Leggi(detto("file").GetValue(Of String)())
+                    Assert.HasCount(1, riletto.Opportunita, "e si rilegge dal file")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnContenutoCheNonEsisteSiSpiegaInveceDiIndovinare() As Task
+
+            ' Chi legge è un modello: gli si dicono le due parole ammesse, non «parametro
+            ' non valido». Indovinare al posto suo sarebbe peggio — scriverebbe un file
+            ' diverso da quello che ha chiesto senza saperlo.
+            Await ConMotore(
+                Async Function(contesto)
+
+                    Dim esito As EsitoTool = Await Chiama(
+                        contesto, CatalogoTool.EsportaBackup,
+                        New JsonObject From {{"contenuto", "mezzo"}})
+
+                    Assert.IsTrue(esito.Fallito, "un contenuto inventato non passa")
+                    StringAssert.Contains(esito.Spiegazione, "profilo", "si dicono le parole buone")
+                    StringAssert.Contains(esito.Spiegazione, "tutto", "tutte e due")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function DueBackupNelloStessoGiornoNonSiSovrascrivono() As Task
+
+            ' Il nome porta il giorno: senza progressivo, il secondo backup di oggi
+            ' cancellerebbe il primo — cioè dimezzerebbe le copie proprio nel momento in
+            ' cui uno le sta facendo apposta.
+            Await ConMotore(
+                Async Function(contesto)
+
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+
+                    Dim primo As EsitoTool = Await Chiama(contesto, CatalogoTool.EsportaBackup, New JsonObject())
+                    Dim secondo As EsitoTool = Await Chiama(contesto, CatalogoTool.EsportaBackup, New JsonObject())
+
+                    Dim unNome As String = TryCast(primo.Dati, JsonObject)("file").GetValue(Of String)()
+                    Dim laltro As String = TryCast(secondo.Dati, JsonObject)("file").GetValue(Of String)()
+
+                    Assert.AreNotEqual(unNome, laltro, "due file distinti")
+                    Assert.HasCount(2, Directory.GetFiles(contesto.Cartella.CartellaBackup, "*.json"),
+                                    "e tutti e due sul disco")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function ConLApplicazioneApertaIlBackupNonSiScrive() As Task
+
+            ' Scrive nella cartella dati, quindi passa dal lucchetto come gli altri due
+            ' (cap. 09.4): mentre la finestra è aperta, quel che sta per finire nel backup
+            ' potrebbe essere già cambiato in memoria.
+            Await ConMotore(
+                Async Function(contesto)
+                    Using altro As LucchettoDati = LucchettoDati.Prendi(contesto.Cartella)
+
+                        Assert.IsNotNull(altro, "il lucchetto se lo prende qualcun altro")
+
+                        Dim esito As EsitoTool = Await Chiama(
+                            contesto, CatalogoTool.EsportaBackup, New JsonObject())
+
+                        Assert.IsTrue(esito.Fallito, "e allora da qui non si scrive")
+                        StringAssert.Contains(esito.Spiegazione, "Chiudi la finestra", "si dice che fare")
+
+                    End Using
+                End Function)
+
+        End Function
+
+#End Region
+
     End Class
 
 End Namespace

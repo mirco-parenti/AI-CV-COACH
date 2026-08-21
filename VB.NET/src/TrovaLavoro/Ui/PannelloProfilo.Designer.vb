@@ -888,7 +888,7 @@ Partial Class PannelloProfilo
         Me.btnEsportaBackup.Name = "btnEsportaBackup"
         Me.btnEsportaBackup.Size = New System.Drawing.Size(130, 32)
         Me.btnEsportaBackup.TabIndex = 5
-        Me.btnEsportaBackup.Text = "Esporta backup"
+        Me.btnEsportaBackup.Text = "Backup…"
         '
         'btnSalva
         '

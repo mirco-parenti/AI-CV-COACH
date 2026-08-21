@@ -218,7 +218,8 @@ ogni modulo abbia **un compito solo**:
   motore (cap. 09).
   *Nata a **T8** (2026-08-19), in tre gambe, e la divisione ricalca quella di sempre:*
   `ProtocolloMcp` e `RichiestaMcp` sanno la grammatica del protocollo e niente del
-  prodotto; `CatalogoTool` dichiara i dodici strumenti e il loro schema; `ToolDiLettura`,
+  prodotto; `CatalogoTool` dichiara i dodici strumenti e il loro schema (tredici da T9a, con
+  `esporta_backup`); `ToolDiLettura`,
   `ToolDiAi` e `ToolDiScrittura` sono i tre gruppi che chiamano il motore. `ServerMcp`
   tiene il ciclo su stdio, ma il metodo che **risponde a un messaggio** sta fuori da quel
   ciclo, così il banco può interrogarlo senza avviare un processo. Nessun pezzo di motore è

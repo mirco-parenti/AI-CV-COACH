@@ -256,8 +256,9 @@ Namespace Mcp
                                               CatalogoTool.Mitiga, CatalogoTool.StrutturaCv,
                                               CatalogoTool.GeneraCv, CatalogoTool.GeneraLettera,
                                               CatalogoTool.RifinisciTesto,
-                                              CatalogoTool.SalvaOpportunita, CatalogoTool.EsportaDocumento},
-                    nomi, "i tre di lettura, i sette dell'AI e i due che scrivono, nell'ordine dichiarato")
+                                              CatalogoTool.SalvaOpportunita, CatalogoTool.EsportaDocumento,
+                                              CatalogoTool.EsportaBackup},
+                    nomi, "i tre di lettura, i sette dell'AI e i tre che scrivono, nell'ordine dichiarato")
 
             End Using
         End Function

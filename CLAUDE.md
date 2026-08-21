@@ -191,7 +191,8 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   il cap. 09 ed è stato costruito a T8 *(2026-08-19)*: due server distinti, da non
   confondere quando si parla di «MCP» in questo repo. Il server **del prodotto** ha avuto il
   suo collaudo da un client vero il **2026-08-21**, e il client vero è **Claude Code stesso**:
-  registrandolo fra i suoi server MCP, i dodici tool compaiono come `mcp__trovalavoro__*` e
+  registrandolo fra i suoi server MCP, i tool (dodici allora, **tredici** da T9a) compaiono
+  come `mcp__trovalavoro__*` e
   si possono chiamare come qualunque altro strumento. La registrazione vive **fuori dal repo**
   (nella configurazione di Claude Code) e i server si caricano **solo all'avvio**: se i tool
   non ci sono, serve un riavvio della sessione, non una modifica al codice. Come si

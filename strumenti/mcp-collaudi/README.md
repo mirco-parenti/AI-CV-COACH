@@ -80,6 +80,13 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
 
 ## Quel che ancora non sa fare
 
+- **I bottoni-scelta non compaiono nell'elenco.** *(2026-08-21, T9a.)* `controlli` cerca fra
+  i tipi che servono — bottoni, caselle, tendine, liste, schede — e i **RadioButton** non
+  sono fra quelli: la finestra di backup mostra le sue due scelte («solo il profilo» /
+  «tutto») e l'elenco non le nomina, così non si sa quale delle due è spuntata né la si può
+  cambiare con `clic`. Finché non gli si insegna, quella parte si guarda con una
+  fotografia — che è esattamente come è stata provata la finestra — e si collauda nel banco,
+  dove la scelta ha un metodo suo.
 - **Il contenuto delle caselle di testo non si legge.** L'elenco dice la voce dei menù,
   ma non cosa c'è scritto in una casella: per leggere l'indirizzo del browser serve
   ancora una fotografia.

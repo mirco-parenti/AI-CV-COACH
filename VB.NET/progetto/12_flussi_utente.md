@@ -238,7 +238,8 @@ Per l'utente evoluto che lavora con Claude Desktop / Claude Code:
    server MCP: restano nell'app, dove c'è la conferma visiva dell'utente (cap. 09.3).
 
 *Costruito a **T8** (2026-08-19), e il flusso qui sopra è rimasto quello che è: dodici tool
-— tre che leggono, sette che passano dall'AI, due che scrivono — sugli stessi prompt e sugli
+— tre che leggono, sette che passano dall'AI, due che scrivono; **tredici da T9a**, quando ai
+secondi si è aggiunto `esporta_backup` (cap. 11.4) — sugli stessi prompt e sugli
 stessi mestieri dei pannelli. Tre precisazioni che la sceneggiatura non poteva contenere. La
 prima: il punto 2 immagina un client che orchestra più annunci di fila, e perché sia
 possibile senza diventare sordo il server serve **più richieste insieme** (cap. 09.2). La

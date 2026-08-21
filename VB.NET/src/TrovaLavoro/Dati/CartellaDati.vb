@@ -237,6 +237,23 @@ Namespace Dati
         End Property
 
         ''' <summary>
+        ''' Dove atterrano i backup JSON che l'app esporta (cap. 11.4). È il posto
+        ''' <b>proposto</b>, non l'unico ammesso: un backup serve anche a portare i propri
+        ''' dati altrove, e chi lo salva su una chiavetta fa la cosa giusta.
+        ''' </summary>
+        ''' <remarks>
+        ''' Come <see cref="CartellaWebView2"/> non è fra le cartelle che <see cref="Assicura"/>
+        ''' crea: la crea il primo export. E come lei sta <i>dentro</i> la cartella dati senza
+        ''' esserne parte — nel backup di domani non entra, altrimenti ogni copia si porterebbe
+        ''' dietro tutte le precedenti.
+        ''' </remarks>
+        Public ReadOnly Property CartellaBackup As String
+            Get
+                Return Path.Combine(Radice, "backup")
+            End Get
+        End Property
+
+        ''' <summary>
         ''' Il file con cui un processo dichiara che sta scrivendo qui (cap. 09.4). Non
         ''' contiene niente: quel che conta è che qualcuno lo tenga aperto, e a dirlo è il
         ''' sistema operativo — così un processo ucciso non lascia dietro di sé un

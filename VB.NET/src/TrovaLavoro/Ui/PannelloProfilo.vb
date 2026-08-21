@@ -778,6 +778,39 @@ Public Class PannelloProfilo
     ''' da scrivere a mano — perché un «sei sicuro?» a cui si risponde di riflesso, davanti
     ''' a una cosa che non si disfa, non è una domanda ma una formalità.
     ''' </summary>
+    ''' <summary>
+    ''' Apre la finestra di backup e ripristino (F7, cap. 11.4). Sta in P2 perché il
+    ''' backup nasce dal profilo — è il dato che l'utente non può rifare da capo — e
+    ''' perché è qui che si guarda quando ci si chiede «e se lo perdo?».
+    ''' </summary>
+    ''' <remarks>
+    ''' Un ripristino riscrive il profilo <b>sul disco</b> mentre il pannello ne tiene una
+    ''' copia sullo schermo: chiusa la finestra, quella copia va rifatta, o l'utente
+    ''' continuerebbe a vedere quello di prima e col primo «Salva» lo rimetterebbe al posto
+    ''' di quello appena ripristinato.
+    ''' </remarks>
+    Private Sub btnEsportaBackup_Click(sender As Object, e As EventArgs) Handles btnEsportaBackup.Click
+
+        If _contesto Is Nothing Then Return
+
+        ' Le correzioni non salvate stanno solo qui dentro: nel backup finisce il profilo
+        ' che sta su disco, e un ripristino le sostituirebbe senza preavviso.
+        If _modificato AndAlso Not PossoSostituireIlProfilo("Un backup ripristinato") Then Return
+
+        Using finestra As New FinestraBackup(_contesto)
+
+            finestra.ShowDialog(Me.FindForm())
+
+            If finestra.ProfiloRipristinato Then
+                CaricaIlProfilo()
+                _modificato = False
+                AggiornaComandi()
+            End If
+
+        End Using
+
+    End Sub
+
     Private Sub btnEliminaProfilo_Click(sender As Object, e As EventArgs) Handles btnEliminaProfilo.Click
 
         If _contesto Is Nothing Then Return
@@ -1206,7 +1239,9 @@ Public Class PannelloProfilo
 
         _suggerimenti.SetToolTip(btnAggiornamento,
             "La sessione di aggiornamento del profilo arriva più avanti (flusso D).")
-        _suggerimenti.SetToolTip(btnEsportaBackup, "Backup e ripristino arrivano con la tappa T9.")
+
+        _suggerimenti.SetToolTip(btnEsportaBackup,
+            "Porta via i tuoi dati in un file .json, o rimettili al loro posto da un backup.")
 
     End Sub
 
@@ -1243,7 +1278,10 @@ Public Class PannelloProfilo
         End If
 
         btnAggiornamento.Enabled = False
-        btnEsportaBackup.Enabled = False
+
+        ' Backup e ripristino non passano dall'AI e non chiedono un profilo già salvato:
+        ' anche su una cartella vuota, «Ripristina» è esattamente il gesto che serve.
+        btnEsportaBackup.Enabled = conMotore AndAlso Not occupato
 
         ' Il 📄 CV-1 base nasce dal profilo che sta su disco, non da quello che si sta
         ' correggendo adesso: si genera quando c'è un profilo salvato, e le correzioni in

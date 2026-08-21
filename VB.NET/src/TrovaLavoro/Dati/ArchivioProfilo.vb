@@ -333,6 +333,96 @@ Namespace Dati
             Return Profilo.DaTesto(File.ReadAllText(PercorsoVersione(versione), Encoding.UTF8))
         End Function
 
+        ''' <summary>
+        ''' Mette il profilo corrente nello storico senza toccarlo, e restituisce il nome
+        ''' della versione (<c>Nothing</c> se un profilo non c'è ancora).
+        ''' </summary>
+        ''' <remarks>
+        ''' È il gesto che il cap. 11.4 chiede <b>prima</b> di ogni ripristino: un backup
+        ''' che arriva da un'altra macchina non deve poter cancellare l'unico profilo buono.
+        ''' Diverso da <see cref="Salva"/>, che archivia ciò che l'utente sta confermando:
+        ''' qui si archivia ciò che sta per essere sostituito, e il file corrente resta
+        ''' intatto perché a riscriverlo sarà chi ripristina.
+        ''' </remarks>
+        Public Function ArchiviaIlCorrente() As String
+
+            If Not Esiste Then Return Nothing
+
+            Dim versione As String = VersioneLibera(Date.Now)
+
+            Directory.CreateDirectory(_cartella.CartellaStorico)
+            File.Copy(_cartella.FileProfilo, PercorsoVersione(versione))
+
+            Return versione
+
+        End Function
+
+        ''' <summary>
+        ''' Rimette al suo posto il profilo che arriva da un backup, <b>testo com'è</b>
+        ''' (cap. 11.4).
+        ''' </summary>
+        ''' <remarks>
+        ''' Non passa dalla classe <see cref="Dati.Profilo"/> di proposito: un profilo che
+        ''' torna da un backup deve tornare identico, compresi i campi che il programma di
+        ''' oggi non modella. Rileggerlo e riscriverlo li lascerebbe per strada senza dirlo.
+        ''' </remarks>
+        Public Sub RipristinaCorrente(testoJson As String)
+
+            If String.IsNullOrWhiteSpace(testoJson) Then
+                Throw New ArgumentException("Il profilo da ripristinare è vuoto.", NameOf(testoJson))
+            End If
+
+            _cartella.Assicura()
+            ScriviInModoAtomico(_cartella.FileProfilo, testoJson)
+
+        End Sub
+
+        ''' <summary>
+        ''' Rimette nello storico una versione che arriva da un backup.
+        ''' </summary>
+        ''' <returns><c>False</c> se una versione con quel nome c'era già: non si sovrascrive.</returns>
+        ''' <remarks>
+        ''' Il nome di una versione è la sua data al secondo: due file omonimi sono lo
+        ''' stesso istante, e riscriverne uno vorrebbe dire preferire la copia venuta da
+        ''' fuori all'originale che sta qui. Nel dubbio vince quello di casa.
+        ''' </remarks>
+        Public Function RiportaNelloStorico(versione As String, testoJson As String) As Boolean
+
+            If String.IsNullOrWhiteSpace(versione) Then
+                Throw New ArgumentException("Manca il nome della versione.", NameOf(versione))
+            End If
+
+            ' Il nome arriva da un file che l'app non ha scritto: deve restare un nome di
+            ' file, non diventare un percorso verso un'altra cartella (cap. 11.4).
+            If Not versione.Equals(Path.GetFileName(versione), StringComparison.Ordinal) OrElse
+               versione.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 Then
+                Throw New ArgumentException($"«{versione}» non è un nome di versione valido.", NameOf(versione))
+            End If
+
+            If File.Exists(PercorsoVersione(versione)) Then Return False
+
+            Directory.CreateDirectory(_cartella.CartellaStorico)
+            ScriviInModoAtomico(PercorsoVersione(versione), testoJson)
+
+            Return True
+
+        End Function
+
+        ''' <summary>
+        ''' Rimette al suo posto il 📄 CV-1 base che arriva da un backup, testo com'è: sta
+        ''' col profilo perché è il suo ritratto in forma di CV (cap. 11.1).
+        ''' </summary>
+        Public Sub RipristinaCvBase(testoJson As String)
+
+            If String.IsNullOrWhiteSpace(testoJson) Then
+                Throw New ArgumentException("Il CV base da ripristinare è vuoto.", NameOf(testoJson))
+            End If
+
+            _cartella.Assicura()
+            ScriviInModoAtomico(_cartella.FileCvBase, testoJson)
+
+        End Sub
+
         ''' <summary>Il file di una versione dello storico.</summary>
         Private Function PercorsoVersione(versione As String) As String
             Return Path.Combine(_cartella.CartellaStorico, versione & ".json")

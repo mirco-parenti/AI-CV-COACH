@@ -155,7 +155,7 @@ Prima versione — tutti i tool leggono/scrivono la **stessa cartella dati** del
 | `rifinisci_testo` | passata anti-slop su un testo di prosa | no |
 | `esporta_documento` | il CV e la lettera di una candidatura salvata → file DOCX e/o PDF nella sua cartella | sì (nuovi file) |
 | `salva_opportunita` | mette in coda una candidatura: l'annuncio e quel che di essa è già stato prodotto | sì |
-| `esporta_backup` | scrive il backup JSON del profilo | sì (nuovo file) |
+| `esporta_backup` | scrive un backup JSON nella cartella `backup\`: il profilo con storico e CV base, oppure tutto (registro e candidature) | sì (nuovo file) |
 
 **Una riga di diagnostica, e la cartella che nasce** *(2026-08-19)*. La colonna «scrive
 dati» parla dei **dati dell'utente** — profilo, registro, candidature, documenti — e per i
@@ -202,11 +202,20 @@ di accettarle da fuori (§9.5), e dei documenti **senza il confronto da cui nasc
 rifiutano — la macchina degli stati (cap. 07.3) non ammette il salto da «nuova» a
 «generata», e ha ragione: un 🎯 CV mirato nasce dai giudizi.
 
-**`esporta_backup` arriva con T9** *(2026-08-19)*. Non è un ripensamento: il backup e il
-ripristino sono la funzione F7, che si costruisce a T9 (cap. 14) — nell'applicazione il
-bottone è oggi visibile e spento, e lo dichiara. Esporre via MCP una funzione che non
-esiste ancora sarebbe una promessa vuota; il tool nasce lì, insieme a ciò che espone, ed è
-mezz'ora di lavoro quando quel giorno arriva. La voce è in `in_sospeso.md`.
+**`esporta_backup` è arrivato con T9a** *(2026-08-21; la nota di attesa è del 2026-08-19)*.
+Era annunciato dalla prima stesura e rimasto vuoto per una dipendenza, non per una
+dimenticanza: espone la funzione F7, che si costruisce a T9 (cap. 11.4), e finché quella
+non c'era il bottone dell'applicazione era visibile e spento. Adesso c'è, e il tool con
+lui. Due cose che la riga della tabella non dice. La prima: **espone le stesse due scelte
+della finestra** — il solo profilo, oppure tutto — perché sono la stessa funzione vista da
+due porte, e una porta che ne offrisse una sola costringerebbe a chiudere l'applicazione
+per avere l'altra; chi non sceglie ha il **profilo**, che è il dato che l'utente non può
+rifare da capo. La seconda: **il ripristino non si fa da qui**. Rimettere a posto un backup
+sovrascrive roba dell'utente e passa dall'anteprima che dice *cosa* sostituisce *cosa*: sta
+nell'applicazione, dov'è l'utente a guardarla, per la stessa ragione per cui non esiste un
+tool che cambia il profilo. Il file finisce nella cartella `backup\` con un nome che porta
+il giorno, e se quel nome è occupato prende un progressivo invece di cancellare il backup
+di stamattina.
 
 **Fuori dalla prima versione, di proposito**: la modifica del profilo via MCP, azione
 irreversibile che resta nell'app dove c'è la conferma visiva dell'utente (livello 6 del

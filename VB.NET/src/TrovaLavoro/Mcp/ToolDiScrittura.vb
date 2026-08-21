@@ -311,6 +311,97 @@ Namespace Mcp
         End Function
 
         ''' <summary>
+        ''' Scrive un backup JSON della cartella dati nella sottocartella <c>backup\</c>
+        ''' (cap. 09.3, cap. 11.4).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para><b>Arriva con T9 e non prima</b>: espone la funzione F7, e finché quella
+        ''' non c'era questo tool sarebbe stato una promessa vuota (cap. 09.3).</para>
+        ''' <para><b>Espone le stesse due scelte della finestra</b> — il solo profilo o
+        ''' tutto — perché sono la stessa funzione vista da due porte, e una porta che ne
+        ''' offre una sola costringerebbe a chiudere l'applicazione per avere l'altra. Chi
+        ''' non sceglie ha il profilo: è il dato che l'utente non può rifare da capo.</para>
+        ''' <para><b>Non ripristina.</b> Il ritorno indietro è irreversibile e passa
+        ''' dall'anteprima che dice cosa sovrascrive: sta nell'applicazione, dove l'utente
+        ''' vede quel che sta accettando — la stessa ragione per cui non c'è un tool che
+        ''' cambia il profilo (cap. 09.3).</para>
+        ''' </remarks>
+        Public Function EsportaBackup(argomenti As JsonObject,
+                                      annulla As CancellationToken) As Task(Of EsitoTool)
+
+            Dim chiesto As String = CampiJson.Testo(argomenti, "contenuto")
+            Dim contenuto As ContenutoBackup = ContenutoBackup.SoloProfilo
+
+            If Not String.IsNullOrWhiteSpace(chiesto) Then
+
+                Select Case chiesto.Trim().ToLowerInvariant()
+
+                    Case "profilo"
+                        contenuto = ContenutoBackup.SoloProfilo
+
+                    Case "tutto"
+                        contenuto = ContenutoBackup.Tutto
+
+                    Case Else
+                        Return Task.FromResult(EsitoTool.NonRiuscito(
+                            $"Il contenuto «{chiesto}» non esiste. Si può chiedere «profilo» — il " &
+                            "profilo con il suo storico e il CV base — oppure «tutto», che aggiunge " &
+                            "il registro e le candidature. Chi non lo dice ha «profilo»."))
+
+                End Select
+
+            End If
+
+            Using preso As LucchettoDati = LucchettoDati.Prendi(_contesto.Cartella)
+
+                If preso Is Nothing Then Return Task.FromResult(LAppETuttaSua())
+
+                Try
+                    Dim fatto As Dati.Backup = _contesto.Backup.Componi(contenuto)
+                    Dim dove As String = FileLibero(contenuto)
+
+                    _contesto.Backup.Scrivi(fatto, dove)
+
+                    Return Task.FromResult(EsitoTool.Riuscito(New JsonObject From {
+                        {"file", dove},
+                        {"contenuto", New JsonArray(fatto.Contenuto().
+                            Select(Function(v) CType(JsonValue.Create(v), JsonNode)).ToArray())},
+                        {"candidature", fatto.Opportunita.Count},
+                        {"versioni_storico", fatto.Storico.Count}}))
+
+                Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                           TypeOf ex Is UnauthorizedAccessException
+                    Return Task.FromResult(EsitoTool.NonRiuscito(
+                        $"Non sono riuscito a scrivere il backup: {ex.Message}"))
+                End Try
+
+            End Using
+
+        End Function
+
+        ''' <summary>
+        ''' Dove scrivere, senza sovrascrivere il backup di stamattina: il nome porta il
+        ''' giorno, e se quel nome è occupato si aggiunge un progressivo. Un backup che
+        ''' cancella il precedente dimezza le copie proprio quando servono di più.
+        ''' </summary>
+        Private Function FileLibero(contenuto As ContenutoBackup) As String
+
+            Dim cartella As String = _contesto.Cartella.CartellaBackup
+            Dim proposto As String = ArchivioBackup.NomeProposto(contenuto, Date.Now)
+            Dim radice As String = Path.GetFileNameWithoutExtension(proposto)
+            Dim nome As String = proposto
+            Dim progressivo As Integer = 1
+
+            While File.Exists(Path.Combine(cartella, nome))
+                progressivo += 1
+                nome = $"{radice}_{progressivo}.json"
+            End While
+
+            Return Path.Combine(cartella, nome)
+
+        End Function
+
+        ''' <summary>
         ''' Quando il lucchetto ce l'ha qualcun altro. La frase dice <b>che cosa fare</b>,
         ''' non solo che è andata male: chi legge è un modello, e da «chiudi la finestra
         ''' oppure usa i tool di lettura» sa scegliere da sé la strada che gli resta.

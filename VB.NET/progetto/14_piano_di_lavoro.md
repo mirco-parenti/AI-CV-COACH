@@ -649,6 +649,48 @@ aggiornamento del diario e del README; demo (video) per il portfolio; tag `v1.0`
 **Collaudo finale:** la checklist «Problemi e mitigazioni» ereditata dal prototipo
 (`HTML+JS/prompt_design.md`) ripercorsa punto per punto sulla nuova app.
 
+**T9 si fa in cinque gambe** *(2026-08-21)*. È la tappa più larga del percorso e tiene
+insieme cose che non si somigliano — una funzione nuova, un pannello che non c'è mai stato,
+due difetti trovati dal collaudo di T8, e un rilascio. Come a T5, T7 e T8, ogni gamba è un
+ramo suo, chiuso con merge fast-forward: `main` resta pubblicabile a ogni passo, e una
+gamba che si areni non tiene ferme le altre.
+
+- **T9a — I dati.** Backup e ripristino (F7, cap. 11.4) e il tool `esporta_backup` che li
+  aspettava (cap. 09.3).
+- **T9b — P8 Impostazioni.** Il pannello che non c'è mai stato (cap. 03, tabella dei
+  pannelli) e la pulizia dati del cap. 11.5, che vive lì.
+- **T9c — «A che punto sono».** Lo stato `esito` e il promemoria di follow-up, debito di T6
+  (cap. 07.3), più il **vicolo cieco dello stato «nuova»** trovato dal collaudo di T8.
+- **T9d — Rifinitura.** La gestione errori rivista pannello per pannello, la **misura** dei
+  giudizi di contesto che il confronto ogni tanto salta, la modifica a mano dei testi in P6
+  (cap. 08.4) e i difetti minori raccolti in `in_sospeso.md`.
+- **T9e — Rilascio.** La checklist «Problemi e mitigazioni», il collaudo generale di Mirco
+  su candidature reali, l'icona dell'eseguibile, diario e README, la demo e il tag `v1.0`.
+
+Tre cose lasciate in bianco dal progetto sono state decise prima di cominciare: il
+**follow-up scatta a 14 giorni**, con il valore modificabile da P8; la **modifica a mano dei
+testi in P6** entra nella 1.0 nella sua forma minima (T9d); le gambe hanno **un ramo
+ciascuna**.
+
+**T9a è chiusa** *(2026-08-21)*. Backup e ripristino esistono: un solo file `.json` con
+l'intestazione di formato, due contenuti a scelta (il profilo con storico e CV base, oppure
+tutto), l'anteprima che dice *cosa contiene e cosa sovrascrive* prima di ogni conferma, e il
+profilo di adesso messo in salvo nello storico prima che quello del backup ne prenda il
+posto. Il ripristino **non cancella** quello che il backup non nomina, e i nomi che arrivano
+da un file scritto a mano restano nomi di file: `..\..\fuori` viene rifiutato e detto in
+chiaro. Il tool `esporta_backup` porta i tool del server a **tredici**. **845 collaudi
+verdi** (erano 817), versione **0.3.036**, Pool **1.12** invariato. Cinque falsificazioni
+provate e cadute tutte (regola 14) — fra cui quella che, tolto il controllo dei nomi, ha
+scritto davvero un file fuori dalla cartella dati. Il giro completo — esporta,
+perdi tutto, ripristina — è stato percorso **dal vivo** sull'applicazione vera, su una
+cartella dati usa-e-getta, e ha stanato un difetto che nessun collaudo aveva visto: la data
+del profilo nel backup, dedotta dall'ultima versione dello storico, annunciava «come era il
+17 agosto» un profilo salvato il 21. Curato facendo viaggiare la data **dentro il file**.
+*Resta una riserva, dichiarata come vuole la regola 15 delle `regole_di_progetto`: il
+tredicesimo tool non è ancora stato visto da un **client MCP vero** — i server si caricano
+all'avvio della sessione, e quella in cui è nato l'aveva già caricato. È in `in_sospeso.md`.*
+
+
 ## Ordine e dipendenze
 
 ```

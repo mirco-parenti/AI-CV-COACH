@@ -138,6 +138,13 @@ Namespace Motore
         Public ReadOnly Property Registro As ArchivioRegistro
 
         ''' <summary>
+        ''' Backup e ripristino della cartella dati, la funzione F7 (cap. 11.4). Sta qui
+        ''' come gli altri archivi perché a chiederglielo sono in due: il pannello del
+        ''' profilo e il tool <c>esporta_backup</c> del server MCP (cap. 09.3).
+        ''' </summary>
+        Public ReadOnly Property Backup As ArchivioBackup
+
+        ''' <summary>
         ''' I portali e le ricerche salvate in vigore (cap. 06.3). C'è sempre: senza file
         ''' sono i portali predefiniti, e cercare lavoro non dipende dall'AI.
         ''' </summary>
@@ -451,6 +458,7 @@ Namespace Motore
             _Archivio = New ArchivioProfilo(Cartella)
             _Opportunita = New ArchivioOpportunita(Cartella)
             _Registro = New ArchivioRegistro(Cartella, _Opportunita)
+            _Backup = New ArchivioBackup(Cartella, _Archivio, _Opportunita, _Registro)
 
             _ArchivioRicerche = New ArchivioRicerche(Cartella)
             _Ricerche = ArchivioRicerche.Carica()
