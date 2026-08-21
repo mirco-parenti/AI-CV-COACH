@@ -189,8 +189,11 @@ VB.NET/
   postazioni, non perché si distribuiscano.
   *Da T6 (2026-08-14) ce n'è un secondo, **`strumenti/sigilla-pool`**: rigenera le impronte
   del manifest chiamando lo stesso codice del caricatore (cap. 04.5). Esiste perché quel
-  comando, nel disegno, vive nelle Impostazioni — cioè a T9 — mentre i prompt si toccano
-  da T2. Come l'altro, è un progetto a sé che non entra in nessuna pubblicazione.*
+  comando, nel disegno, doveva vivere nelle Impostazioni — cioè a T9 — mentre i prompt si
+  toccano da T2. Come l'altro, è un progetto a sé che non entra in nessuna pubblicazione.*
+  *E a **T9b** (2026-08-21) si è deciso che nelle Impostazioni non ci andrà mai: il
+  manifest sta nel repo, non nella cartella dati, e un exe distribuito non avrebbe nulla di
+  utile da sigillare (cap. 04.5). Questo strumento non è più un anticipo: è il posto.*
 - Build di sviluppo da Visual Studio (o `dotnet build` da riga di comando Windows);
   collaudi con `dotnet test` da `VB.NET/src` (cap. 14).
 - Lo script `publish.bat` in `src/` produce l'exe di rilascio con i parametri del

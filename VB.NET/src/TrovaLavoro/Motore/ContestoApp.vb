@@ -154,6 +154,16 @@ Namespace Motore
         Public ReadOnly Property ArchivioRicerche As ArchivioRicerche
 
         ''' <summary>
+        ''' Le preferenze dell'utente in vigore (cap. 03, pannello P8). Ci sono sempre:
+        ''' senza file valgono quelle di fabbrica, che sono ciò che l'applicazione faceva
+        ''' prima che le Impostazioni esistessero.
+        ''' </summary>
+        Public ReadOnly Property Impostazioni As Motore.Impostazioni
+
+        ''' <summary>Da dove le <see cref="Impostazioni"/> si rileggono e dove si riscrivono.</summary>
+        Public ReadOnly Property ArchivioImpostazioni As ArchivioImpostazioni
+
+        ''' <summary>
         ''' La cartella documenti dell'utente e quel che ci si è riconosciuto dentro
         ''' (cap. 05.2). C'è sempre — vuota finché una cartella non è stata scelta — perché
         ''' leggere un elenco di nomi non dipende dall'AI.
@@ -235,6 +245,7 @@ Namespace Motore
 
             contesto.MontaPool(cartellaPool)
             contesto.MontaNumeri()
+            contesto.MontaPreferenze()
             contesto.MontaAi(chiave)
             contesto.MontaDati()
 
@@ -255,6 +266,21 @@ Namespace Motore
         ''' </remarks>
         Public Sub RileggiLaRaccolta()
             _Raccolta = ArchivioRaccolta.Carica()
+        End Sub
+
+        ''' <summary>
+        ''' Rilegge le preferenze da disco: la finestra delle Impostazioni le scrive
+        ''' <b>appena si cambiano</b>, e chi le usa deve vedere quelle nuove senza
+        ''' aspettare un riavvio (cap. 03, pannello P8).
+        ''' </summary>
+        ''' <remarks>
+        ''' Rileggere dal file invece di farsi passare l'oggetto dalla finestra ha un
+        ''' motivo: la verità delle preferenze è il file, e un utente che lo corregge a
+        ''' mano — cosa che il formato invita a fare — non deve trovarsi scavalcato dalla
+        ''' copia in memoria di una finestra che nel frattempo era aperta.
+        ''' </remarks>
+        Public Sub RileggiLeImpostazioni()
+            _Impostazioni = ArchivioImpostazioni.Carica()
         End Sub
 
         ''' <summary>
@@ -331,6 +357,23 @@ Namespace Motore
 
         End Sub
 
+        ''' <summary>
+        ''' Legge le preferenze dell'utente (cap. 03, P8). Sta <b>prima</b> di
+        ''' <see cref="MontaAi"/> di proposito: la rifinitura nasce lì e chiede a queste
+        ''' se è accesa. Finché la domanda resta pigra l'ordine non si vede, ed è proprio
+        ''' per questo che va scritto — un domani qualcuno leggerà quel valore subito.
+        ''' </summary>
+        Private Sub MontaPreferenze()
+
+            ' Il file che non c'è non si annota: finché nessuno ha aperto le Impostazioni
+            ' è la normalità, e un avviso a ogni avvio insegnerebbe solo a non leggerli.
+            ' Uno illeggibile invece si dice.
+            _ArchivioImpostazioni = New ArchivioImpostazioni(Cartella)
+            _Impostazioni = ArchivioImpostazioni.Carica()
+            If Impostazioni.Avviso IsNot Nothing Then Avvisa(Impostazioni.Avviso)
+
+        End Sub
+
         Private Sub MontaAi(chiave As String)
 
             ' Attenzione al nome: in VB le maiuscole non distinguono, e una variabile
@@ -371,7 +414,11 @@ Namespace Motore
             ' La rifinitura anti-slop (cap. 08): per la stessa ragione del generatore il
             ' tipo si scrive qualificato, perché la proprietà che la tiene si chiama come
             ' lui. Nasce prima della pipeline perché è la pipeline a riceverla.
-            _Rifinitura = New Motore.Rifinitura(New Rifinitore(Libreria, Client))
+            ' L'interruttore arriva come domanda e non come valore: le Impostazioni lo
+            ' girano a programma acceso (cap. 08.4), e la risposta deve essere quella di
+            ' adesso, non quella dell'avvio.
+            _Rifinitura = New Motore.Rifinitura(New Rifinitore(Libreria, Client),
+                                                Function() Impostazioni.RifinituraAttiva)
 
             ' Il confrontatore si tiene, invece di nascerci dentro la fila: il server MCP
             ' lo chiama per conto suo. Il tipo si scrive qualificato per la solita ragione
@@ -383,7 +430,8 @@ Namespace Motore
                 _Confrontatore,
                 _Generatore,
                 Taratura,
-                _Rifinitura)
+                _Rifinitura,
+                Function() Impostazioni.LinguaPredefinita)
 
             ' L'email sta fuori dalla pipeline e non è una dimenticanza: la fila di T4
             ' arriva ai documenti, e da lì in poi decide l'utente — quali allegati, a chi,

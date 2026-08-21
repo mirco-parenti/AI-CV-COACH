@@ -54,6 +54,7 @@ Namespace Motore
         Private ReadOnly _confrontatore As IConfrontatore
         Private ReadOnly _generatore As IGeneratore
         Private ReadOnly _rifinitura As Rifinitura
+        Private ReadOnly _linguaPredefinita As Func(Of String)
         Private ReadOnly _taratura As Taratura
 
         ''' <param name="analizzatore">Il mestiere che struttura l'annuncio.</param>
@@ -68,7 +69,8 @@ Namespace Motore
                        confrontatore As IConfrontatore,
                        generatore As IGeneratore,
                        Optional taratura As Taratura = Nothing,
-                       Optional rifinitura As Rifinitura = Nothing)
+                       Optional rifinitura As Rifinitura = Nothing,
+                       Optional linguaPredefinita As Func(Of String) = Nothing)
 
             If analizzatore Is Nothing Then Throw New ArgumentNullException(NameOf(analizzatore))
             If confrontatore Is Nothing Then Throw New ArgumentNullException(NameOf(confrontatore))
@@ -79,6 +81,11 @@ Namespace Motore
             _generatore = generatore
             _taratura = taratura
             _rifinitura = rifinitura
+
+            ' Come per la rifinitura: è una domanda, non un valore. La preferenza si
+            ' cambia dalle Impostazioni a programma acceso, e la candidatura che nasce
+            ' dopo dev'essere già della lingua nuova.
+            _linguaPredefinita = If(linguaPredefinita, Function() LinguaDocumenti.Italiano)
 
         End Sub
 
@@ -98,7 +105,8 @@ Namespace Motore
             Dim ora As Date = Date.Now
             Dim opportunita As New Opportunita With {
                 .Annuncio = annuncio, .Creata = ora,
-                .Lingua = LinguaDocumenti.PerDocumenti(LinguaDellAnnuncio(annuncio))}
+                .Lingua = LinguaDocumenti.PerDocumenti(LinguaDellAnnuncio(annuncio),
+                                                       _linguaPredefinita())}
             opportunita.Avanza(StatoOpportunita.Nuova, ora)
 
             Return opportunita

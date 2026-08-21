@@ -61,7 +61,15 @@ perde contro la forma.*
   **modifica a mano** campo per campo no — è rimandata, v. 8.6 e `in_sospeso.md`.*
 - La rifinitura si può disattivare (Impostazioni), ma è attiva di default: è parte
   dell'identità del prodotto. *A T7b è sempre attiva: l'interruttore vive in P8, che è
-  di T9.*
+  di T9.* *E a **T9b** (2026-08-21) l'interruttore c'è, in P8: «Rifinisci i testi generati
+  (anti-slop)». Vale **subito**, senza riavviare — la rifinitura non riceve un valore
+  copiato all'avvio ma una domanda da rifare a ogni giro — e vale da **tutte e due le
+  porte**, finestra e server MCP, perché il cap. 09.3 vuole che il CV chiesto da un client
+  sia lo stesso che esce dalla finestra: un interruttore valido solo di qua li farebbe
+  divergere proprio sul testo. Spenta, i documenti escono col testo grezzo, che è quel che
+  già succede quando una rifinitura fallisce; e non si chiama l'AI affatto, perché
+  interrogare il modello per poi buttarne via la risposta costerebbe soldi e tempo a chi
+  l'ha spenta apposta.*
 - Regola pratica ereditata dal metodo del progetto: se il prima/dopo rivela che la
   rifinitura ha cambiato un fatto, è un difetto del prompt da correggere nel pool, non
   un caso da sistemare a mano in silenzio.
@@ -129,6 +137,8 @@ arriverebbe insieme a loro.
 mano** campo per campo in P6 (le tre caselle sono `ReadOnly`: è disegno di P6, non
 anti-slop) e l'**interruttore** per disattivare la rifinitura, che vive nelle Impostazioni
 P8 di T9. Fino ad allora la rifinitura è sempre attiva, e la via d'uscita è il prima/dopo.
+*Delle due, l'interruttore è arrivato con **T9b** (2026-08-21), insieme al pannello che lo
+ospita (v. 8.4); la modifica a mano resta, ed è di **T9d**.*
 
 ## 8.7 Cosa ha insegnato l'AI vera (collaudo di T7b, 2026-08-18)
 

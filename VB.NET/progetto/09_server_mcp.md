@@ -176,6 +176,12 @@ client MCP dev'essere **lo stesso** che si otterrebbe dalla finestra. Una differ
 qualità fra le due porte non la dichiarerebbe nessuno, e si scoprirebbe mesi dopo
 confrontando due documenti senza capire perché uno dei due è più piatto. Chi vuole la
 passata su un testo suo ha `rifinisci_testo`, che è la stessa cosa offerta da sola.
+*E da **T9b** (2026-08-21) «lo stesso che si otterrebbe dalla finestra» include anche il
+caso in cui la finestra la rifinitura non la fa: l'interruttore delle Impostazioni
+(cap. 08.4) vive nella cartella dati, che il server legge come la legge l'applicazione, e
+vale perciò da tutte e due le porte. Spento, di qui escono documenti col testo grezzo — ed
+è la risposta giusta: un interruttore valido solo nell'interfaccia farebbe divergere le due
+porte proprio sul testo, che è la cosa che questo paragrafo esiste per impedire.*
 
 **Da qui escono anche i PDF, e `salva_opportunita` prende tutto** *(2026-08-19; la prima
 metà riscritta lo stesso giorno)*. Due cose che la tabella da sola non spiega. La prima:

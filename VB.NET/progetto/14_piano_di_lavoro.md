@@ -695,6 +695,48 @@ spiegando i valori validi senza scrivere niente, e il lucchetto ha negato la scr
 finestra aperta — dicendo cosa continuava a funzionare, e diceva il vero — per concederla
 appena chiusa. Nessun difetto, nessuna riga toccata: **T9a è chiusa senza riserve.***
 
+**T9b è chiusa** *(2026-08-21)*. Il pannello che non c'era mai stato adesso c'è, ed è una
+finestra: «⚙ Impostazioni» stava nella barra da mesi, spento, con scritto per quale tappa.
+Dentro, cinque sezioni — la chiave API che si riconosce senza rileggerla, le preferenze sui
+documenti, dove stanno le cartelle, cosa gira sotto il cofano, e i dati con le loro due
+pulizie. **Non ha OK né Annulla**: le preferenze si scrivono appena si cambiano, in un
+`impostazioni.json` fatto per essere aperto e corretto a mano, e quel che invece non si
+disfa ha la sua conferma prima di partire. Le tre finestre che servivano c'erano già e
+vengono **richiamate**, non rifatte. **878 collaudi verdi** (erano 845), versione
+**0.3.037**, Pool **1.12** invariato.
+
+Due promesse del progetto sono state mantenute in una forma diversa da come erano scritte,
+e le ragioni stanno nei capitoli: la **cartella dati** si mostra ma non si sposta (cap.
+11.1), i **modelli** e il **pool** si leggono e basta (cap. 11.6, cap. 04.5), la **cartella
+documenti** si gestisce in P7 dove quel giro sa aspettare l'AI (cap. 05.2). In compenso
+`config.json`, che il cap. 11.1 prometteva dal principio e nessuno aveva mai scritto, si
+scopre non servire più: le sue due voci avevano trovato case migliori da sole.
+
+Con questa gamba si chiude anche un **debito di T7b**: l'interruttore dell'anti-slop
+(cap. 08.4). Vale subito e da entrambe le porte — anche via MCP, perché il cap. 09.3 vuole
+che il CV chiesto da un client sia lo stesso che esce dalla finestra. Spenta, la rifinitura
+non chiama l'AI affatto: interrogare il modello per buttarne via la risposta costerebbe a
+chi l'ha spenta apposta.
+
+**Sei falsificazioni** provate e tutte cadute (regola 14): il lucchetto cancellato con
+tutto il resto, l'interruttore ignorato, la finestra che salva già all'apertura, la
+preferenza che scavalca la lingua dell'annuncio, i predefiniti cambiati, il ricalcolo dei
+bottoni tolto. E **due difetti trovati**, nessuno dei quali un collaudo scritto a tavolino
+avrebbe visto. Il primo: «c'è qualcosa da eliminare?» contava le *voci* della cartella, ma
+`Assicura` ne ricrea quattro vuote appena qualcuno la tocca — il bottone rosso si sarebbe
+riacceso subito dopo un'eliminazione totale, promettendo di mandare via il nulla. Il
+secondo l'ha trovato solo la **prova dal vivo**: salvando la prima preferenza nasce
+`impostazioni.json`, cioè il primo dato di quella cartella, e il bottone che elimina tutto
+restava spento fino alla riapertura della finestra. Il giro è stato poi percorso fino in
+fondo su una cartella usa-e-getta — preferenze cambiate e ritrovate al riavvio,
+eliminazione totale confermata con la parola scritta a mano, tre voci via, applicazione
+chiusa da sé e nella cartella il solo `dati.lock`.
+
+*Un'ora è stata pagata a una trappola dello **strumento di collaudo**, non del prodotto: il
+primo `clic` su un bottone che apre una finestra non la apre, e ci vuole il secondo. È
+annotata nel `README.md` di `strumenti/mcp-collaudi/`, perché il sospetto cade
+naturalmente sull'applicazione — e lì il gestore partiva benissimo.*
+
 
 ## Ordine e dipendenze
 

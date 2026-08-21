@@ -34,15 +34,35 @@ Namespace Motore
         ''' rifiutarsi di generare peggio ancora.
         ''' </remarks>
         ''' <param name="rilevata">Il campo <c>lingua</c> dell'annuncio; può essere vuoto.</param>
-        Public Shared Function PerDocumenti(rilevata As String) As String
+        ''' <param name="predefinita">
+        ''' In che lingua scrivere quando l'annuncio non dice niente: è la preferenza
+        ''' dell'utente (cap. 03, P8). Omessa vale <see cref="Italiano"/>, cioè quel che
+        ''' questa funzione ha sempre risposto — <b>e va omessa da chi rilegge</b> una
+        ''' candidatura o un documento già scritto. Il vuoto di una candidatura nata prima
+        ''' di T7 significa «italiano» e non «quel che l'utente preferisce oggi»: passare
+        ''' la preferenza anche lì riscriverebbe all'indietro la lingua di roba già fatta.
+        ''' </param>
+        Public Shared Function PerDocumenti(rilevata As String,
+                                            Optional predefinita As String = Italiano) As String
 
-            If String.IsNullOrWhiteSpace(rilevata) Then Return Italiano
+            If String.IsNullOrWhiteSpace(rilevata) Then
+                Return If(PulitaEInglese(predefinita), Inglese, Italiano)
+            End If
 
             Dim pulita As String = rilevata.Trim()
 
             If pulita.Equals(Italiano, StringComparison.OrdinalIgnoreCase) Then Return Italiano
 
             Return Inglese
+
+        End Function
+
+        ''' <summary>Se una lingua scritta come capita è l'inglese.</summary>
+        Private Shared Function PulitaEInglese(lingua As String) As Boolean
+
+            If String.IsNullOrWhiteSpace(lingua) Then Return False
+
+            Return lingua.Trim().Equals(Inglese, StringComparison.OrdinalIgnoreCase)
 
         End Function
 

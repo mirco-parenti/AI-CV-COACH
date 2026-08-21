@@ -207,6 +207,92 @@ Namespace Motore
 
         End Sub
 
+        ' ==================================================================
+        ' L'interruttore delle Impostazioni (T9b, cap. 08.4)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function SpentaNonChiamaLAiPerIlCv() As Task
+
+            Dim finto As New RifinitoreFinto()
+
+            Dim prima As JsonObject = Await New Rifinitura(finto, Function() False).DelCvAsync(Cv())
+
+            ' Il punto non è che il documento torni uguale: è che <b>non si chiami</b>.
+            ' Una rifinitura spenta che interrogasse il modello per poi buttare via la
+            ' risposta costerebbe soldi e tempo all'utente che l'ha spenta apposta.
+            Assert.IsEmpty(finto.Passate, "spenta, l'AI non va disturbata affatto")
+            Assert.IsNull(prima, "e non c'è nessun «com'era» da mostrare")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SpentaNonChiamaLAiPerLaLettera() As Task
+
+            Dim finto As New RifinitoreFinto()
+
+            Assert.IsNull(Await New Rifinitura(finto, Function() False).DellaLetteraAsync(Lettera()))
+            Assert.IsEmpty(finto.Passate)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SpentaIlTestoTornaIdenticoSenzaChiamare() As Task
+
+            Dim finto As RifinitoreFinto = New RifinitoreFinto().Dara("corpo", "questo non deve arrivare mai")
+
+            Dim esito As String = Await New Rifinitura(finto, Function() False).
+                DelTestoAsync("Buongiorno, mi candido.")
+
+            Assert.AreEqual("Buongiorno, mi candido.", esito, "spenta, il testo esce com'è entrato")
+            Assert.IsEmpty(finto.Passate)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function AccesaLavoraComeSempre() As Task
+
+            ' Il gemello del collaudo qui sopra: se questo non fosse verde, i tre di prima
+            ' sarebbero verdi per il motivo sbagliato — una rifinitura rotta non chiama
+            ' l'AI nemmeno lei.
+            Dim finto As New RifinitoreFinto()
+
+            Await New Rifinitura(finto, Function() True).DelCvAsync(Cv())
+
+            Assert.IsNotEmpty(finto.Passate, "accesa, il mestiere viene chiamato")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LInterruttoreSiLeggeAOgniGiroNonAllaCostruzione() As Task
+
+            ' È la ragione per cui il costruttore vuole una funzione e non un valore: la
+            ' finestra delle Impostazioni salva subito, e la generazione che parte dopo
+            ' deve già saperlo, senza aspettare un riavvio.
+            Dim accesa As Boolean = True
+            Dim finto As New RifinitoreFinto()
+            Dim rifinitura As New Rifinitura(finto, Function() accesa)
+
+            Await rifinitura.DelCvAsync(Cv())
+            Assert.IsNotEmpty(finto.Passate, "prima era accesa")
+
+            Dim quante As Integer = finto.Passate.Count
+            accesa = False
+
+            Await rifinitura.DelCvAsync(Cv())
+            Assert.HasCount(quante, finto.Passate, "spenta a caldo, non ha chiamato di nuovo")
+
+        End Function
+
+        <TestMethod>
+        Public Sub SenzaInterruttoreERimastaAccesa()
+
+            ' Chi la costruisce senza dire niente — il banco, e chiunque non abbia un
+            ' contesto intorno — deve trovarla com'era prima che l'interruttore esistesse.
+            Assert.IsTrue(New Rifinitura(New RifinitoreFinto()).Accesa)
+
+        End Sub
+
         <TestMethod>
         Public Sub GliIdSiLeggonoInItaliano()
 

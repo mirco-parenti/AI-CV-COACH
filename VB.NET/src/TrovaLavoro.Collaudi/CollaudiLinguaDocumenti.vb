@@ -64,6 +64,35 @@ Namespace Motore
         End Sub
 
         <TestMethod>
+        Public Sub LaPreferenzaValeSoloDoveLAnnuncioTace()
+
+            ' La preferenza dell'utente (cap. 03, P8) risponde al vuoto, non all'annuncio:
+            ' uno scritto in italiano resta italiano anche a chi preferisce l'inglese, o
+            ' il programma scriverebbe a un'azienda nella lingua sbagliata.
+            Assert.AreEqual("en", LinguaDocumenti.PerDocumenti("", "en"), "il vuoto prende la preferenza")
+            Assert.AreEqual("en", LinguaDocumenti.PerDocumenti(Nothing, "en"))
+            Assert.AreEqual("it", LinguaDocumenti.PerDocumenti("it", "en"), "l'annuncio italiano no")
+            Assert.AreEqual("en", LinguaDocumenti.PerDocumenti("de", "it"),
+                            "e una terza lingua diventa inglese comunque, che è il ripiego dichiarato")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaPreferenzaRispondeComeHaSempreRisposto()
+
+            ' Chi <b>rilegge</b> una candidatura non passa nessuna preferenza, ed è la
+            ' ragione per cui il parametro è opzionale: il vuoto di una candidatura nata
+            ' prima di T7 vuol dire italiano, non «quel che l'utente preferisce oggi».
+            Assert.AreEqual("it", LinguaDocumenti.PerDocumenti(""))
+            Assert.AreEqual("it", LinguaDocumenti.PerDocumenti(Nothing))
+
+            ' E una preferenza scritta storta non trascina nessuno nell'inglese.
+            Assert.AreEqual("it", LinguaDocumenti.PerDocumenti("", "portoghese"))
+            Assert.AreEqual("it", LinguaDocumenti.PerDocumenti("", ""))
+
+        End Sub
+
+        <TestMethod>
         Public Sub IlNomeSiLeggeInItaliano()
             ' L'interfaccia resta in una lingua sola (cap. 10.1): la tendina di P6 dice
             ' «Inglese», non «English».

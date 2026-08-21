@@ -192,9 +192,17 @@ descrizione: Genera il CV mirato; il profilo è l'unica fonte di fatti.
 - Il **bump del pool** è un piccolo rito documentato: si modificano i file, si
   aggiorna `versione_pool`, si rigenerano le impronte (lo fa un comando
   dell'app stessa, in Impostazioni → «Sigilla pool»), si annota il `CHANGELOG.md`.
+  *A **T9b** (2026-08-21), costruendo le Impostazioni, si è visto che quel comando lì non
+  ci sta e non ci starà: il manifest è una **risorsa incorporata**, vive nel repo accanto
+  ai prompt, e un eseguibile distribuito che lo sigillasse riscriverebbe qualcosa che
+  nessuno rileggerà mai — l'utente non ha il repo. Il sigillo resta perciò un gesto di
+  chi sviluppa (`strumenti/sigilla-pool`, cap. 13), e in P8 va la **sola diagnosi**:
+  la versione con l'asterisco e l'elenco dei file fuori impronta, che è la metà utile a
+  chi usa il programma — sapere se sta lavorando con prompt manomessi.*
   *A T6 (2026-08-14) il rito ha finalmente il suo attrezzo, e non poteva aspettare le
-  Impostazioni*: quel comando vive nelle Impostazioni, che sono di T9, mentre i prompt si
-  toccano da T2 — e il primo bump che **aggiunge** prompt è arrivato prima. Perciò
+  Impostazioni*: quel comando doveva vivere nelle Impostazioni, che sono di T9, mentre i
+  prompt si toccano da T2 — e il primo bump che **aggiunge** prompt è arrivato prima.
+  *(Col senno di T9b, quell'attrezzo non era un anticipo ma la casa definitiva.)* Perciò
   `strumenti/sigilla-pool` chiama `LibreriaPrompt.Sigilla`, cioè **lo stesso codice** con
   cui il caricatore verifica le impronte: la regola resta scritta in un posto solo, e chi
   sigilla e chi controlla non possono divergere. Rilegge il manifest dopo averlo scritto,

@@ -94,11 +94,6 @@ in «Chiuse».*
   caselle di P6 sono `ReadOnly`, e renderle scrivibili vuol dire decidere che cosa
   succede al documento salvato, agli export e alla rigenerazione. È **disegno di P6**, non
   anti-slop, e apparteneva a T7b solo per vicinanza. *(cap. 08.4; cap. 08.6; cap. 03.6.)*
-- **L'interruttore della rifinitura** (2026-08-18). Il cap. 8.4 la dà per disattivabile
-  dalle Impostazioni: quelle sono il pannello **P8, di T9**, e fino ad allora la
-  rifinitura è sempre attiva. Non è un buco pericoloso — la via d'uscita è il prima/dopo,
-  e una rifinitura che fallisce lascia comunque il testo grezzo — ma è una promessa del
-  capitolo non ancora mantenuta. *(cap. 08.4; cap. 03, tabella dei pannelli, P8.)*
 - **Il prima/dopo dell'email in P7** (2026-08-18). Il corpo del messaggio passa
   dall'anti-slop come gli altri testi, ma com'era prima non si conserva e non si mostra:
   la casella del confronto vive in P6, e in P7 l'utente ha davanti una casella che può già
@@ -199,6 +194,29 @@ erano in nessun piano, e nessuna è grave.*
 *Chiusa lo stesso giorno: il tredicesimo tool è stato chiamato da un client MCP vero ed è
 in «Chiuse».*
 
+## Da T9b — le Impostazioni (2026-08-21, alla chiusura)
+
+- **«⚙ Impostazioni» resta premibile mentre l'AI lavora.** `BarraDiNavigazione` spegne
+  Home, Profilo, Candidatura e Ricerca durante una chiamata, ma non il quinto bottone —
+  che a T9b ha smesso di essere spento sempre, e nessuno se n'è ricordato lì. Da quella
+  finestra si arriva a «ELIMINA TUTTI I DATI»: cancellare la cartella mentre una
+  generazione ci sta scrivendo dentro è il caso peggiore, e oggi niente lo impedisce. Va
+  deciso se spegnere l'intero bottone col resto della barra o solo le due pulizie; il posto
+  naturale è **T9d**, che rivede la gestione degli errori pannello per pannello.
+  *(cap. 03, tabella dei pannelli, P8; cap. 11.5.)*
+- **La finestra non è stata vista su uno schermo piccolo.** È alta quanto le serve — le
+  sezioni si dispongono in fila, e i testi cambiano lunghezza con quel che c'è nella
+  cartella dati — e sulla macchina di sviluppo ci sta comoda. Su un portatile a 768 px di
+  altezza, o al 150% di scala, no: e la finestra è a misura fissa, senza scorrimento.
+  È imparentata con la voce del **pannello del logo a DPI alti** qui sotto, e chiede la
+  stessa cosa: uno schermo su cui verificare. *(cap. 03.4.)*
+- **«Svuota i dati di navigazione» non è stato premuto dal vivo.** Il giro di prova non è
+  mai passato dalla ricerca annunci, quindi una cartella `webview2\` non è mai esistita e
+  il bottone è rimasto spento — correttamente, ma non provato. Il banco lo copre; a
+  mancare è la prova che il browser incorporato **lasci davvero cancellare** i suoi file,
+  che è esattamente il caso che il codice prevede e spiega. Serve un giro che apra P3
+  prima. *(cap. 11.5.)*
+
 ## Da revisione adversariale (2026-08-09)
 
 - **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:
@@ -208,6 +226,18 @@ in «Chiuse».*
   *(cap. 03.5; segnalato dalla revisione, rimandato con motivo.)*
 
 ## Chiuse
+
+- ✅ **L'interruttore della rifinitura** *(aperta il 2026-08-18 con la chiusura di T7b,
+  chiusa il 2026-08-21 con T9b)*. È arrivato col pannello che lo ospita: «Rifinisci i testi
+  generati (anti-slop)» in P8. Due cose non erano scontate e sono state decise lì. Vale
+  **subito**, senza riavviare, perché la rifinitura non riceve più un valore copiato
+  all'avvio ma una domanda da rifare a ogni giro — la finestra salva appena si cambia, e la
+  generazione che parte dopo deve già saperlo. E vale da **tutte e due le porte**, finestra
+  e server MCP: il cap. 09.3 vuole che il CV chiesto da un client sia lo stesso che esce
+  dalla finestra, e un interruttore valido solo di qua li farebbe divergere proprio sul
+  testo. Spenta, l'AI **non viene chiamata affatto**: interrogare il modello per poi
+  buttarne via la risposta costerebbe soldi e tempo a chi l'ha spenta apposta.
+  *(cap. 08.4; cap. 03, tabella dei pannelli, P8; cap. 14, T9b.)*
 
 - ✅ **Il tredicesimo tool visto da un client MCP vero** *(aperta il 2026-08-21 con la
   chiusura di T9a, chiusa lo stesso giorno)*. Bastava il riavvio che la voce chiedeva: i

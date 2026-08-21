@@ -138,7 +138,9 @@ Non c'è alcun tentativo di scaricare il link «alla cieca»: la lezione dello S
 - WebView2 conserva il proprio **profilo di navigazione** (cookie, sessioni) in una
   sottocartella della cartella dati dell'app: i login ai portali sopravvivono tra un
   avvio e l'altro, e un bottone nelle Impostazioni li cancella («Svuota dati di
-  navigazione»).
+  navigazione»). *Il bottone c'è da **T9b** (2026-08-21) ed è di livello 5: si conferma
+  come uno scarto, partendo da «No», e la domanda dice che cosa sparisce davvero — le
+  sessioni sui portali, non le candidature (cap. 11.5).*
 - Le credenziali dei portali **non passano mai** dal programma: l'utente le digita nel
   browser, come farebbe in Edge. L'app non le vede e non le salva.
 - Ciò che viene catturato (testo dell'annuncio) resta **sul PC dell'utente**, nella

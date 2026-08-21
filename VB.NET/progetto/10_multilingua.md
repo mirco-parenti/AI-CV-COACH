@@ -22,6 +22,17 @@ annuncio (IT o EN) ──► analisi ──► campo `lingua` nell'Annuncio JSON
 Il **brainstorming** (P5) resta sempre in italiano: è una conversazione con l'utente,
 non un documento per l'azienda.
 
+**Chi risponde quando l'annuncio tace** *(T9b, 2026-08-21)*. Fino a qui il vuoto valeva
+italiano, sempre: era la scelta giusta finché nessuno poteva dire altro, perché una
+candidatura nata prima di T7 il campo `lingua` non ce l'ha e nessuna di quelle era in
+inglese. Adesso c'è una **lingua predefinita** nelle Impostazioni (P8), e risponde
+**soltanto** a quel vuoto: un annuncio che dichiara l'italiano resta italiano anche per
+chi lavora di solito in inglese — il contrario vorrebbe dire scrivere a un'azienda nella
+lingua sbagliata per una preferenza generica. E vale solo dove una lingua **si sceglie
+adesso**: la nascita di una candidatura e il primo 📄 CV-1 base. Chi **rilegge** roba già
+scritta non la passa affatto, o le vecchie candidature si ritroverebbero riscritte
+all'indietro in una lingua che nessuno aveva scelto per loro.
+
 Il 📄 **CV-1 base** è l'eccezione che completa la regola, e a **T7d** (2026-08-18) ha
 avuto la sua lingua: un annuncio non ce l'ha — nasce dal solo profilo — quindi la sua
 lingua non può venire da lì. La sceglie l'utente nella stessa tendina di P6, e vive

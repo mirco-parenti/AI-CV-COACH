@@ -6,11 +6,17 @@ prodotto.*
 
 ## 11.1 La cartella dati
 
-Default: `%APPDATA%\TrovaLavoro` (modificabile al primo avvio o nelle Impostazioni).
+Default: `%APPDATA%\TrovaLavoro`, scelta all'avvio con `--dati`. *(Il disegno la dava
+anche «modificabile nelle Impostazioni»; a T9b, 2026-08-21, le Impostazioni la **mostrano
+e la aprono, ma non la spostano**: il lucchetto è preso all'avvio e per tutta la sessione
+— cap. 09.4 — e cambiarla a metà partita vorrebbe dire spostare i file sotto i piedi di
+chi ci sta scrivendo. L'avvio è il momento in cui nessuno ci lavora, ed è lì che la
+scelta resta.)*
 
 ```
 TrovaLavoro\
-├── config.json            impostazioni (modelli AI, cartelle)
+├── impostazioni.json      le preferenze dell'utente: lingua predefinita dei documenti
+│                          e interruttore della rifinitura (cap. 03, P8; v. 11.6)
 ├── ricerche.json          preferenze di ricerca, ricerche salvate e tabella dei portali
 ├── taratura.json          soglia, pesi e limiti del match (v. 11.6)
 ├── modelli.json           mappa livello → modello AI (v. 11.6, cap. 02.5)
@@ -39,6 +45,14 @@ TrovaLavoro\
 └── backup\                gli export JSON (v. 11.4)
 ```
 
+- **`config.json` non è mai nato, e `impostazioni.json` non è il suo erede** *(T9b,
+  2026-08-21)*. Il disegno prevedeva un `config.json` che tenesse «modelli AI, cartelle»:
+  le due cose hanno poi trovato case migliori — i modelli in `modelli.json`, che è del
+  cap. 11.6 e si corregge come la taratura; la cartella documenti in `documenti.json`,
+  insieme a quel che ci si è riconosciuto dentro; la cartella dati negli argomenti
+  d'avvio, perché sceglierla dopo vorrebbe dire spostarla sotto i piedi di chi ci scrive.
+  Quel che restava senza casa erano le **preferenze**, che nel disegno di allora non
+  c'erano ancora: le tiene questo file, col nome in italiano come tutti i suoi vicini.
 - **Un'opportunità = una cartella**: tutto ciò che riguarda una candidatura sta
   insieme, apribile anche a mano con Esplora file. Il nome della cartella è parlante
   (data + azienda + ruolo).
@@ -330,6 +344,30 @@ che elimina resta spento finché la parola non è esatta; il tasto Invio non lo 
 Esc chiude senza fare niente. Non c'è cestino e non c'è «annulla»: è la ragione per cui
 il gesto costa una parola scritta a mano.
 
+### Com'è stato costruito (T9b, 2026-08-21)
+
+Le due pulizie generali sono arrivate col pannello che le ospita, e stanno in
+`Dati/PuliziaDati` e non dentro la finestra: **una cancellazione va collaudata**, e un
+banco non sa premere un bottone. «Svuota i dati di navigazione» è di **livello 5** e si
+conferma come lo «Scarta» di P4 — una domanda che parte da «No» e dice cosa sparisce
+davvero (le sessioni sui portali, non le candidature). «ELIMINA TUTTI I DATI» è di
+**livello 6** e passa dalla `FinestraConfermaCritica` che già serviva «ELIMINA PROFILO»:
+la stessa parola da riscrivere a mano, e non una finestra nuova che le somigliasse.
+
+**«Tutto» vuol dire tutto tranne il lucchetto**, e va detto: `dati.lock` è tenuto aperto
+in esclusiva per tutta la sessione (cap. 09.4), quindi con il programma vivo non si
+lascerebbe cancellare comunque, e provarci solleverebbe un errore proprio nel gesto più
+radicale. Non è un dato dell'utente, e alla riapertura una cartella con dentro solo quello
+è indistinguibile da un primo avvio. Dopo l'eliminazione **l'applicazione si chiude**: da
+lì in poi ogni pannello lavorerebbe su file che non ci sono più.
+
+*Un difetto trovato provandolo dal vivo, che nessun collaudo vedeva*: il bottone si
+accende se «c'è qualcosa da eliminare», e contando le **voci** della cartella si sarebbe
+riacceso subito dopo un'eliminazione totale — perché `CartellaDati.Assicura` ricrea
+`profilo\`, `storico\`, `out\` e `opportunita\` vuote appena qualcuno tocca la cartella
+dati. Un bottone rosso che promette di eliminare quattro cartelle vuote insegna solo a non
+fidarsi del colore: adesso la domanda guarda i **file**, in tutto l'albero.
+
 ## 11.6 I due file dei numeri: taratura e modelli
 
 `taratura.json` contiene i numeri del calcolo delle stelle: soglia 1,5, pesi 5 e 1,
@@ -366,6 +404,18 @@ assente, parziale o illeggibile non impedisce l'avvio, si ricade sui valori inte
 lo si annota. Anche qui il motivo è pratico: cambiare modello — o fare il secondo
 esperimento su Sonnet 5 — deve costare una riga, non una nuova build da reinstallare
 su due macchine. *(Realizzato a T2 in `Ai/Modelli.vb`.)*
+
+**E c'è un terzo file che di numeri non ne ha: `impostazioni.json`** *(T9b,
+2026-08-21)*. Vale la pena dire perché non sta qui dentro, visto che si legge allo stesso
+modo — ripiego sui predefiniti, avviso quando ci si cade, e nessun avvio impedito. Perché
+è l'**opposto**: la taratura è di prodotto e l'interfaccia non la mostra, per non lasciare
+che il punteggio misuri l'ottimismo di quel giorno invece dell'attinenza al posto; le
+preferenze sono scelte che *solo* l'utente può fare — in che lingua scrive di solito, e se
+vuole che una macchina gli ritocchi la prosa. Si toccano con mani diverse, e quindi
+stanno in file diversi. Con una differenza anche in lettura: una mappa di taratura storta
+si scarta **intera**, perché le sue voci si compongono in un punteggio solo e tenerne metà
+lo falserebbe in silenzio; le due preferenze invece non si parlano, e una lingua scritta
+male non dice niente sulla rifinitura — si scarta quella e si tiene l'altra.
 
 A leggerli all'avvio è `Motore/ContestoApp` *(da T3c, 2026-08-07)*: entrambi i file, con
 l'avviso di ripiego quando si cade sui predefiniti. Prima esistevano i lettori ma non

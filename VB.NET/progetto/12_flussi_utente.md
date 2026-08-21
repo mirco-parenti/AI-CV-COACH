@@ -20,7 +20,10 @@ opportunità sono esaurite.
    vale quella predefinita, e per lavorare altrove c'è `--dati` alla riga di comando
    (cap. 11.1). Chiederla al primo avvio a chi non sa ancora cosa sia il programma
    sarebbe stato un ostacolo prima del primo vantaggio; quando arriveranno le
-   Impostazioni (T9) sarà lì che si cambia.*
+   Impostazioni (T9) sarà lì che si cambia.* *A **T9b** (2026-08-21) le Impostazioni sono
+   arrivate e la cartella dati **non si cambia** nemmeno lì: la si vede e la si apre, ma
+   spostarla resta un mestiere dell'avvio, perché il lucchetto è preso all'apertura e per
+   tutta la sessione (cap. 09.4). `--dati` non è più un ripiego provvisorio: è la strada.*
 2. L'app carica la libreria prompt — quella integrata nell'exe o, se presente, la
    cartella `prompt-pool/` accanto all'exe (cap. 04.2) — e ne mostra versione e
    sorgente nel riquadro del logo, in basso a sinistra.
@@ -154,7 +157,11 @@ su un annuncio che l'indirizzo ce l'aveva.* Gli **attestati della
 cartella documenti** ci sono, e arrivano spenti (cap. 07.1). Prima del punto 1 c'è un
 passo che il flusso non prevedeva: la **cartella documenti va indicata una volta**, dal
 bottone «Documenti da allegare…» di P7 — è configurazione, e quando ci saranno le
-Impostazioni sarà lì che si sposterà (cap. 03.6). Il punto 2 è come scritto; il punto 3
+Impostazioni sarà lì che si sposterà (cap. 03.6). *A **T9b** (2026-08-21) si è spostata a
+metà, di proposito: le Impostazioni **dicono** quale cartella è in uso e quanti attestati
+ci si sono riconosciuti, ma a gestirla mandano in P7 — quel giro chiama l'AI per
+classificare i file e la sa aspettare e annullare, e rifarlo in una finestra di
+configurazione avrebbe significato riscriverne il ciclo.* Il punto 2 è come scritto; il punto 3
 pure, con una precisazione che vale la pena: «l'hai spedita?» è **spento** finché il
 messaggio non è stato preparato, perché un `.eml` che non esiste non può essere partito.
 

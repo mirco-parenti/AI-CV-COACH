@@ -112,6 +112,18 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
 
 ## Le trappole già pagate
 
+- **Il primo `clic` su un bottone che apre una finestra non la apre** *(2026-08-21, T9b)*.
+  Premendo «⚙ Impostazioni» su un'applicazione appena avviata lo strumento risponde
+  «Premuto», e non si apre niente: né la finestra, né un errore. Al **secondo** `clic`
+  compare. Succede allo stesso modo con i bottoni **dentro** una finestra già aperta —
+  «ELIMINA TUTTI I DATI», che chiama la conferma critica, ha voluto anche lui due colpi.
+  Il primo `Invoke` sembra andarsene nel dare il fuoco alla finestra. Costa un'ora se non
+  lo si sa, perché il sospetto cade sull'applicazione: si va a cercare un gestore che non
+  parte, e invece parte benissimo — a dimostrarlo è bastato mettergli in cima un
+  `MessageBox` e vederlo comparire al primo colpo. Perciò: quando un `clic` dovrebbe
+  aprire una finestra e la fotografia non la mostra, **ripremi prima di indagare**; e per
+  sapere se la finestra c'è, `controlli` la elenca in cima (le finestre di messaggio le
+  legge invece `rispondi_finestra` senza argomenti).
 - **I percorsi.** `dotnet.exe` è un eseguibile Windows: un percorso alla maniera di WSL
   (`/mnt/c/…`) MSBuild lo scambia per un'opzione (errore `MSB1001`). I progetti si
   nominano perciò relativi a `VB.NET/src`, e i comandi si eseguono da lì.

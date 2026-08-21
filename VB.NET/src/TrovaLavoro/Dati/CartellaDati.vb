@@ -90,6 +90,17 @@ Namespace Dati
             End Get
         End Property
 
+        ''' <summary>
+        ''' Le preferenze dell'utente: lingua dei documenti nuovi e interruttore della
+        ''' rifinitura (cap. 03, pannello P8). Gemello di <see cref="FileTaratura"/> per
+        ''' come si legge, il suo opposto per chi ha il diritto di toccarlo.
+        ''' </summary>
+        Public ReadOnly Property FileImpostazioni As String
+            Get
+                Return Path.Combine(Radice, "impostazioni.json")
+            End Get
+        End Property
+
         ''' <summary>La mappa livello → modello AI (cap. 11.6, cap. 02.5).</summary>
         Public ReadOnly Property FileModelli As String
             Get

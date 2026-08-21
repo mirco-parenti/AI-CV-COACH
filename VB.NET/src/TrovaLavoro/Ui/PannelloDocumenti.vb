@@ -263,7 +263,10 @@ Public Class PannelloDocumenti
         _sulCvBase = True
         _cvBase = Nothing
         _primaDelCvBase = Nothing
-        _linguaCvBase = LinguaDocumenti.Italiano
+        ' Un 📄 CV-1 base che nasce adesso parte dalla lingua preferita (cap. 03, P8);
+        ' uno già salvato tiene la sua, che si rilegge poco più giù.
+        _linguaCvBase = If(_contesto Is Nothing,
+                           LinguaDocumenti.Italiano, _contesto.Impostazioni.LinguaPredefinita)
 
         Mostra()
 

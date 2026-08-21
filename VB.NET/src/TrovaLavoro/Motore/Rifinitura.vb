@@ -40,14 +40,35 @@ Namespace Motore
         Private Const PrefissoAltra As String = "altra."
 
         Private ReadOnly _rifinitore As IRifinitore
+        Private ReadOnly _accesa As Func(Of Boolean)
 
         ''' <param name="rifinitore">Il mestiere che parla con l'AI.</param>
-        Public Sub New(rifinitore As IRifinitore)
+        ''' <param name="accesa">
+        ''' Se la rifinitura è attiva adesso (cap. 08.4). È una <b>domanda</b> e non un
+        ''' valore perché l'interruttore vive nelle Impostazioni e si può girare a
+        ''' programma acceso: un flag copiato alla costruzione avrebbe obbligato a
+        ''' riavviare per farlo valere. Omesso, la rifinitura è accesa — che è come si è
+        ''' sempre comportata, ed è ciò che serve a chi la costruisce senza un contesto
+        ''' intorno, cioè al banco di collaudo. Chi passa dal
+        ''' <see cref="ContestoApp"/> riceve invece la preferenza dell'utente, e la
+        ''' riceve <b>da tutte e due le porte</b>: il cap. 09.3 vuole che il CV chiesto da
+        ''' un client MCP sia lo stesso che esce dalla finestra, e un interruttore che
+        ''' valesse solo di qua li farebbe divergere proprio sul testo.
+        ''' </param>
+        Public Sub New(rifinitore As IRifinitore, Optional accesa As Func(Of Boolean) = Nothing)
 
             If rifinitore Is Nothing Then Throw New ArgumentNullException(NameOf(rifinitore))
             _rifinitore = rifinitore
+            _accesa = If(accesa, Function() True)
 
         End Sub
+
+        ''' <summary>Se la rifinitura è accesa in questo momento.</summary>
+        Public ReadOnly Property Accesa As Boolean
+            Get
+                Return _accesa()
+            End Get
+        End Property
 
         ''' <summary>
         ''' Rifinisce un CV — il 📄 base o il 🎯 mirato, che hanno la stessa forma: prima il
@@ -57,6 +78,8 @@ Namespace Motore
         Public Async Function DelCvAsync(cv As JsonNode,
                                          Optional lingua As String = "it",
                                          Optional annulla As CancellationToken = Nothing) As Task(Of JsonObject)
+
+            If Not Accesa Then Return Nothing
 
             Dim documento As JsonObject = TryCast(cv, JsonObject)
             If documento Is Nothing Then Return Nothing
@@ -87,6 +110,8 @@ Namespace Motore
                                                 Optional lingua As String = "it",
                                                 Optional annulla As CancellationToken = Nothing) As Task(Of JsonObject)
 
+            If Not Accesa Then Return Nothing
+
             Dim documento As JsonObject = TryCast(lettera, JsonObject)
             If documento Is Nothing Then Return Nothing
 
@@ -108,6 +133,7 @@ Namespace Motore
                                             Optional lingua As String = "it",
                                             Optional annulla As CancellationToken = Nothing) As Task(Of String)
 
+            If Not Accesa Then Return testo
             If String.IsNullOrWhiteSpace(testo) Then Return testo
 
             Dim esito As IReadOnlyDictionary(Of String, String) = Await _rifinitore.RifinisciAsync(

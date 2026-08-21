@@ -100,7 +100,6 @@ Public Class FormPrincipale
             StileApp.VestiBottone(navigazione, LivelloBottone.Neutro)
         Next
 
-        DichiaraLeTappeCheMancano()
 
         ' Un motore del browser per tutta l'applicazione, e da lui la stampante: due
         ' ambienti sulla stessa cartella di navigazione stanno buoni solo finché nessuno
@@ -108,13 +107,7 @@ Public Class FormPrincipale
         _motoreBrowser = New MotoreBrowser(_contesto.Cartella.CartellaWebView2)
         _stampante = New StampantePdf(_motoreBrowser)
 
-        pnlHome.Collega(_contesto)
-        pnlProfilo.Collega(_contesto)
-        pnlDialogo.Collega(_contesto)
-        pnlOpportunita.Collega(_contesto)
-        pnlDocumenti.Collega(_contesto, New ArchivioDocumenti(_contesto.Cartella, _stampante))
-        pnlRicerca.Collega(_contesto, _motoreBrowser)
-        pnlEmail.Collega(_contesto)
+        CollegaIPannelli()
 
         pnlLogo.BringToFront()
         AggiornaPannelloLogo()
@@ -126,14 +119,20 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
-    ''' I pannelli che arrivano con le tappe successive restano visibili e spenti, con
-    ''' scritto quando arrivano: un bottone che sparisce non insegna niente, uno spento
-    ''' che si spiega dice come è fatto il programma.
+    ''' Dà a ogni pannello il contesto in vigore. Sta in un metodo perché si fa <b>due
+    ''' volte</b>: all'avvio, e quando una chiave data dalle Impostazioni rimonta il
+    ''' motore a pannelli già in piedi (cap. 11.3). All'avvio la chiave arriva prima dei
+    ''' pannelli e basterebbe una volta sola; dopo, no.
     ''' </summary>
-    Private Sub DichiaraLeTappeCheMancano()
+    Private Sub CollegaIPannelli()
 
-        btnImpostazioni.Enabled = False
-        ttSuggerimenti.SetToolTip(btnImpostazioni, "La finestra delle impostazioni arriva con la tappa T9.")
+        pnlHome.Collega(_contesto)
+        pnlProfilo.Collega(_contesto)
+        pnlDialogo.Collega(_contesto)
+        pnlOpportunita.Collega(_contesto)
+        pnlDocumenti.Collega(_contesto, New ArchivioDocumenti(_contesto.Cartella, _stampante))
+        pnlRicerca.Collega(_contesto, _motoreBrowser)
+        pnlEmail.Collega(_contesto)
 
     End Sub
 
@@ -196,6 +195,50 @@ Public Class FormPrincipale
 
     Private Sub btnProfilo_Click(sender As Object, e As EventArgs) Handles btnProfilo.Click
         MostraPannello(pnlProfilo, btnProfilo)
+    End Sub
+
+    ''' <summary>
+    ''' Apre le Impostazioni (P8, cap. 03). È una finestra e non un pannello dell'area:
+    ''' non è un passo di nessun flusso, e si raggiunge da dovunque si sia.
+    ''' </summary>
+    ''' <remarks>
+    ''' Tre cose possono uscirne, e nessuna la sa fare la finestra da sola. Una chiave
+    ''' nuova vuole il motore <b>rimontato</b> e i pannelli ricollegati, com'è già al
+    ''' primo avvio (cap. 11.3). La cartella documenti vuole P7, dove quel giro sa
+    ''' aspettare l'AI e annullarla (cap. 05.2): le Impostazioni ci mandano, invece di
+    ''' rifarlo. E i dati eliminati vogliono la chiusura, perché da lì in poi ogni
+    ''' pannello lavorerebbe su file che non ci sono più (cap. 11.5).
+    ''' </remarks>
+    Private Async Sub btnImpostazioni_Click(sender As Object, e As EventArgs) Handles btnImpostazioni.Click
+
+        Dim chiaveCambiata As Boolean
+        Dim documenti As Boolean
+        Dim eliminati As Boolean
+
+        Using finestra As New FinestraImpostazioni(_contesto)
+            finestra.ShowDialog(Me)
+            chiaveCambiata = finestra.ChiaveCambiata
+            documenti = finestra.VuoleGestireIDocumenti
+            eliminati = finestra.DatiEliminati
+        End Using
+
+        If eliminati Then
+            Close()
+            Return
+        End If
+
+        If chiaveCambiata Then
+            _contesto.Dispose()
+            _contesto = ContestoApp.Monta(_argomenti.RadiceDati)
+            CollegaIPannelli()
+            AggiornaPannelloLogo()
+        End If
+
+        If documenti Then
+            MostraPannello(pnlEmail, btnCandidatura)
+            Await pnlEmail.GestisciIDocumentiAsync()
+        End If
+
     End Sub
 
     ''' <summary>Dalle scorciatoie del cruscotto ai due flussi che ci portano (cap. 03.6).</summary>
