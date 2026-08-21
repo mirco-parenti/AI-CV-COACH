@@ -246,9 +246,14 @@ seconda: dal momento in cui una porta scrive, i dati hanno due scrittori, ed è 
 **lucchetto** del cap. 09.4 — se l'applicazione è aperta, i tool che scrivono rifiutano e
 dicono cosa fare, mentre lettura e generazione continuano. La terza: quel che esce da qui è
 **identico** a quel che esce dalla finestra, rifinitura anti-slop compresa, e i documenti
-escono in DOCX, in PDF o in tutti e due. Manca ancora un pezzo di questo flusso, ed è quello
-che nessun collaudo automatico può dare: percorrerlo con un **client MCP vero**, su una
-macchina Windows, con la configurazione in `claude_desktop_config.json` — sta in
+escono in DOCX, in PDF o in tutti e due. Il pezzo che nessun collaudo automatico poteva
+dare — percorrere il flusso con un **client MCP vero** — è stato fatto il **2026-08-21**,
+e non da Claude Desktop, che su questa postazione non c'è, ma da **Claude Code**:
+dodici tool visti da un client che non abbiamo scritto noi, insieme alle **istruzioni del
+server** (cap. 09.2); il lucchetto provato fra **due processi veri**, con l'applicazione
+aperta che fa rifiutare la scrittura e la stessa chiamata che riesce a finestra chiusa; e
+la generazione uscita con lo **scheletro dei fatti identico** a quello della finestra. Il
+racconto sta nel cap. 14 (T8); i due limiti che il collaudo ha scoperto sono in
 `in_sospeso.md`.*
 
 ## 12.7 Regole trasversali dei flussi

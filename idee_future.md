@@ -155,6 +155,14 @@ dichiarate «rimandate» (cap. 15.3-15.4): qui il puntatore, perché il backlog 
   vorrebbe una conferma umana che su un canale senza interfaccia non si sa ancora dove
   mettere. Anche la **modifica del profilo** resta fuori di proposito: da MCP il profilo si
   legge e basta.
+- **Un nome che distingua il server dalla finestra.** Il server MCP e l'applicazione sono lo
+  **stesso eseguibile**, e con un client collegato in elenco processi compaiono due
+  `TrovaLavoro.exe` identici: chi ne deve chiudere uno — una persona, o un attrezzo che
+  chiude per nome — rischia di spegnere l'altro. Oggi si distinguono solo di sponda, perché
+  il server non ha finestra e quindi non ha titolo. Un titolo di processo riconoscibile, o
+  un argomento che si veda da fuori, toglierebbe la trappola alla radice invece di
+  insegnarla. *(2026-08-21 — emersa dal collaudo di tappa di T8, con Claude Code come client
+  MCP vero; cap. 09.)*
 - **Follow-up assistito delle candidature** — oggi solo promemoria passivo nel registro;
   la generazione dell'email di sollecito è da valutare. *(2026-08-05 — cap. 15.4.)*
 - **Multi-profilo nella stessa installazione** — il disegno è mono-profilo; da valutare

@@ -622,6 +622,26 @@ Windows con un client MCP vero** — il collaudo di tappa di T8 — insieme ai d
 che vogliono una seconda macchina. **817 collaudi verdi** (erano 812) più 15 reali,
 versione **0.3.035**, Pool **1.12**.
 
+**Il collaudo di tappa (2026-08-21).** Quello dichiarato qui sopra — «da Claude
+Desktop/Code: `tools/list` corretto, un confronto e una generazione via MCP con risultati
+identici a quelli dell'interfaccia» — è stato fatto, e senza aspettare Claude Desktop: il
+client vero è **Claude Code**, registrato fra i suoi server MCP. Dodici tool visti da un
+client che non abbiamo scritto noi, insieme alle **istruzioni del server**, che il banco
+non poteva esercitare perché non ha un modello a cui darle. Il lucchetto provato fra **due
+processi veri** — app aperta, scrittura rifiutata e spiegata; app chiusa, stessa chiamata
+riuscita. Il confronto: **0,9 stelle da entrambe le porte**, per aritmetiche diverse (36 e
+18 dalla finestra, 37 e 15 dal server, dove `clamp_giu = -20` taglia lo scarto), il conto
+verificato a mano da tutti e due i lati e prodotto da una funzione sola con tre chiamanti.
+La generazione: 🎯 CV-2 con lo **scheletro dei fatti identico**, varia solo la prosa. E
+`chiamate_ai.csv`, che non esisteva, è **nato**: quattordici righe, sei dal server e otto
+dalla finestra, con l'analisi dell'annuncio uscita **identica al token** dalle due porte.
+Nessuna riga di codice toccata: **817 collaudi verdi**, versione **0.3.035**, Pool **1.12**
+invariati. Il collaudo ha però prodotto **due difetti**, entrambi in `in_sospeso.md`: lo
+stato «nuova» che la finestra riapre ma non sa proseguire — una porta aperta dal server da
+cui l'interfaccia non sa rientrare, ed è roba della revisione dei pannelli di T9 — e i
+giudizi di «contesto» saltati dal confronto in un giro su quattro, da misurare prima di
+curare. Con questo T8 è chiusa per intero.
+
 ### T9 — Rifinitura e rilascio 1.0
 Backup/ripristino (F7); Impostazioni complete; pulizia dati; gestione errori rivista
 pannello per pannello; **collaudo generale condotto da Mirco su candidature reali**;

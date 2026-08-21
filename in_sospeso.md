@@ -117,15 +117,6 @@ vero era un altro.*
 
 ## Da T8a — il guscio del server MCP (2026-08-19, alla chiusura)
 
-- **Il collaudo da un client MCP vero.** Il cap. 14 chiede, per T8, «da Claude
-  Desktop/Code: `tools/list` corretto». Il dialogo è provato in tutte e due le ere del
-  protocollo, e l'eseguibile vero è stato avviato con le pipe da un collaudo automatico —
-  ma chi gli parla è sempre il banco, che è scritto da noi e quindi non ci smentisce mai.
-  Un client vero fa cose che nessuno gli ha detto di fare: chiede la scoperta prima di
-  tutto, mostra i tool a un utente, decide da sé quando fidarsi. Serve la configurazione in
-  `claude_desktop_config.json` e una mano su una macchina Windows, quindi tocca a Mirco.
-  *Fino ad allora la modalità `--mcp` è dimostrata contro sé stessa, non contro il mondo.*
-  *(cap. 09.2; cap. 14, T8; `CollaudiServerMcpDalVivo`.)*
 - **La versione moderna del protocollo accettata è una sola.** Il server parla
   `2026-07-28` e, per l'era dell'handshake, le quattro revisioni note fino a
   `2025-11-25`. Quando ne uscirà una moderna nuova, un client che la chieda si sentirà
@@ -135,20 +126,8 @@ vero era un altro.*
 
 ## Da T8b — i tool che passano dall'AI (2026-08-19, alla chiusura)
 
-- **Un confronto e una generazione veri via MCP, messi accanto a quelli della finestra.**
-  È la seconda metà del collaudo di tappa che il cap. 14 chiede per T8: non solo che
-  `tools/list` sia corretto, ma che i risultati siano **identici a quelli
-  dell'interfaccia**. Nessun collaudo automatico può farlo — chiamerebbe l'AI vera, a
-  pagamento e con esiti che cambiano — quindi serve una sessione a mano, con la chiave
-  configurata. È il gesto che chiude anche la voce qui sotto, e si fa insieme al collaudo
-  da un client vero rimasto da T8a. *(cap. 14, T8; cap. 09.3.)*
-- **Il diario dei consumi via MCP è verificato leggendo, non eseguendo.** Che ogni
-  chiamata dei sette tool annoti la sua riga in `chiamate_ai.csv` — e che alla prima la
-  cartella dati nasca — discende dal fatto che il diario è agganciato al client dell'AI nel
-  montaggio del motore, quindi vale per chiunque lo usi. È una deduzione dal codice, solida
-  ma non una prova: nessuna riga di quel file è mai stata scritta da una chiamata partita
-  dal server. Si chiude alla prima generazione vera. *(cap. 09.3, nota «Una riga di
-  diagnostica»; `ContestoApp.MontaAi`.)*
+*Chiuse il 2026-08-21 dal collaudo di tappa: il confronto e la generazione messi
+accanto a quelli della finestra, e il diario dei consumi, sono in «Chiuse».*
 
 ## Da T8c — i tool che scrivono e il lucchetto (2026-08-19, alla chiusura)
 
@@ -158,13 +137,6 @@ vero era un altro.*
   sarebbe una promessa vuota, quindi il tool nasce con ciò che espone. Non è una
   dimenticanza da recuperare ma una dipendenza da rispettare, ed è mezz'ora di lavoro
   quando F7 c'è. *(cap. 09.3, nota «`esporta_backup` arriva con T9»; cap. 14, T9.)*
-- **Il lucchetto visto da due processi veri.** Che il secondo che prova resti fuori è
-  provato dal banco, ma dentro un solo processo: sono due `FileStream` sulla stessa
-  cartella, non l'applicazione e un server MCP che si contendono davvero i dati. Il
-  meccanismo è quello del sistema operativo e non cambia, però il gesto che conta — aprire
-  l'app, chiedere a un client MCP di salvare, vedersi rispondere «chiudi la finestra» — non
-  è ancora stato fatto da nessuno. Si chiude insieme al collaudo di tappa di T8.
-  *(cap. 09.4; `CollaudiLucchettoDati`.)*
 
 ## Da questa passata sui debiti prima di T9 (2026-08-19)
 
@@ -201,6 +173,31 @@ erano in nessun piano, e nessuna è grave.*
   pagina non esiste. È il tipo di messaggio che manda l'utente a controllare il modem invece
   che l'indirizzo. *(cap. 06.6; rientra nella revisione della gestione errori, T9.)*
 
+## Dal collaudo di tappa di T8 — il gruppo C (2026-08-21)
+
+- **Lo stato «nuova» è un vicolo cieco nella finestra.** Un'opportunità ferma al solo
+  annuncio — che oggi sa creare **solo il server MCP**, perché l'applicazione archivia
+  soltanto dopo il confronto — la finestra la riapre ma non la può proseguire:
+  `RiapriLaCandidatura` svuota la casella dell'incolla, e «Analizza» si accende solo se lì
+  dentro c'è del testo. Il **testo grezzo** dell'annuncio non lo conserva nessuno, né il
+  server né l'app: i due `annuncio.json` hanno le stesse identiche chiavi. Il motore
+  saprebbe farlo — `ConfrontaAsync` vuole l'annuncio **già strutturato**, non il testo —
+  quindi manca solo il gesto nell'interfaccia: un'azione «Confronta» sulla candidatura
+  riaperta, oppure il testo grezzo salvato in `annuncio.json`. La Home conta già quello
+  stato fra le candidature «da completare», e la macchina degli stati prevede
+  `nuova → interessante`: il disegno se lo aspetta, l'interfaccia non lo serve.
+  *(cap. 03.6; cap. 07.3; `PannelloOpportunita.vb`; rientra nella revisione dei pannelli
+  di T9.)*
+- **Il confronto ogni tanto salta i giudizi di «contesto».** Il prompt li pretende per
+  scritto — «un giudizio per OGNI campo di contesto presente… non saltarne nessuno» — ma in
+  **un giro su quattro** i cinque giudizi di contesto (titolo, sede, contratto, mansioni,
+  benefit) non sono stati emessi. Non è un'asimmetria fra le due porte: è successo su una
+  chiamata del server, mentre gli altri tre giri — server e finestra — li hanno emessi
+  tutti. Siccome il contesto pesa un quinto del nucleo, la sua assenza sposta il punteggio
+  di base. È la stessa famiglia del «corso senza nome»: prima si **misura** su più giri,
+  poi si decide se curare il prompt — uno su quattro non è ancora un dato.
+  *(cap. 04.7; `prompt-pool/confronto/confronto.md`.)*
+
 ## Da revisione adversariale (2026-08-09)
 
 - **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:
@@ -210,6 +207,43 @@ erano in nessun piano, e nessuna è grave.*
   *(cap. 03.5; segnalato dalla revisione, rimandato con motivo.)*
 
 ## Chiuse
+
+- ✅ **Il collaudo da un client MCP vero** *(aperta il 2026-08-19 con la chiusura di T8a,
+  chiusa il 2026-08-21)*. Non serviva aspettare Claude Desktop: un client MCP vero era già
+  in casa — **Claude Code**, registrato fra i suoi server e caricato al riavvio della
+  sessione. `tools/list` ha mostrato i **dodici tool** con nomi e descrizioni sensate, e in
+  più una superficie che il banco non poteva esercitare: le **istruzioni del server**, lette
+  dal client e passate al modello. Da lì le letture sui dati veri — il profilo e le sette
+  opportunità del registro. *(cap. 09.2; cap. 14, T8; diario, Step 2.37.)*
+- ✅ **Un confronto e una generazione veri via MCP, accanto a quelli della finestra**
+  *(aperta il 2026-08-19 con la chiusura di T8b, chiusa il 2026-08-21)*. Lo stesso testo
+  grezzo fatto entrare dalle due porte: **0,9 stelle da entrambe**, e per aritmetiche
+  diverse — 36 di base con 18 di stima dalla finestra, 37 con 15 dal server, che con
+  `clamp_giu = -20` fa scattare il taglio dello scarto. Il conto torna a mano da tutti e due
+  i lati, e viene da una funzione sola con tre chiamanti (`CalcoloMatch.Calcola`): la stessa
+  regola vista lavorare su ingressi diversi dice più di due numeri identici. Il 🎯 CV-2 ha
+  lo **scheletro dei fatti identico** — stesso tipo, stessa intestazione, otto ruoli con
+  aziende e durate uguali carattere per carattere, sedici competenze, stessa formazione —
+  e varia solo la prosa. Due giri del solo server differiscono fra loro quanto il server
+  differisce dalla finestra: la varianza residua è del modello, non della porta.
+  *(cap. 14, T8; cap. 09.3; diario, Step 2.37.)*
+- ✅ **Il diario dei consumi via MCP, verificato eseguendo** *(aperta il 2026-08-19 con la
+  chiusura di T8b, chiusa il 2026-08-21)*. `chiamate_ai.csv` non esisteva nella cartella
+  dati vera: alla prima chiamata partita dal server è **nato**, con l'intestazione e una
+  riga per chiamata. A fine collaudo quattordici righe — sei dal server, otto dalla
+  finestra — tutte sotto il 50% del tetto e tutte chiuse con `end_turn`. In più ha finito
+  per fare da metro: l'analisi dell'annuncio è uscita **identica al token** dalle due porte
+  (2896 → 902, 11,3% del tetto), e le altre righe differiscono di uno solo.
+  *(cap. 09.3; `ContestoApp.MontaAi`; diario, Step 2.37.)*
+- ✅ **Il lucchetto visto da due processi veri** *(aperta il 2026-08-19 con la chiusura di
+  T8c, chiusa il 2026-08-21)*. Con la finestra aperta, `salva_opportunita` è stato
+  **rifiutato** senza andare in errore: «La cartella dati è in uso da un altro processo…
+  Chiudi la finestra e riprova», con l'elenco di ciò che continua a funzionare lo stesso.
+  Chiusa la finestra, la stessa identica chiamata è riuscita. Stavolta i processi erano
+  davvero due — la finestra e il server MCP della sessione — e non due `FileStream` dentro
+  lo stesso. Verificato anche il rovescio: i tool che passano dall'AI **non** vogliono il
+  lucchetto, e il diario dei consumi si scrive lo stesso ad app aperta.
+  *(cap. 09.4; `CollaudiLucchettoDati`; diario, Step 2.37.)*
 
 - ✅ **I `max_token` di Sonnet 5, misurati invece che temuti** *(aperta il 2026-08-07 da T2,
   riscritta più volte, chiusa il 2026-08-19)*. Sonnet 5 conta i token in modo diverso e a

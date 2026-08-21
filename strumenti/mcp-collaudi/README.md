@@ -320,3 +320,32 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   `avvia_app` **non** va bene: carica sempre la chiave vera dal `.env` del prototipo, e
   vanificherebbe la prova. L'exe si lancia a mano, con la variabile d'ambiente che si vuole
   (ricordando `WSLENV`) e sempre con `--dati` su una cartella usa-e-getta.
+- **Chiudere per nome ammazza anche il server MCP del prodotto.** *(2026-08-21, dal collaudo
+  di tappa di T8.)* `compila` e `chiudi_app` fanno `taskkill.exe /IM TrovaLavoro.exe /F`:
+  chiudono per **nome**, non per processo. Da quando esiste il server MCP del **prodotto**
+  (cap. 09), un client che ce l'abbia registrato — Claude Code, per dirne uno — tiene in vita
+  un secondo `TrovaLavoro.exe` senza finestra, e quei due attrezzi lo spengono insieme
+  all'applicazione, facendo cadere il client che stava collaudando. Finché l'attrezzo non
+  impara a scegliere il PID, **non si chiamano `compila` e `chiudi_app` mentre un client
+  esterno parla col server MCP del prodotto**. Per distinguerli: da PowerShell,
+  `Get-Process TrovaLavoro | Select Id, StartTime, MainWindowTitle` — il server è quello
+  **senza titolo di finestra**; per chiudere solo l'applicazione si usa `CloseMainWindow()`,
+  che è la chiusura gentile, non `taskkill /F`.
+- **Avviare l'applicazione da WSL con `cmd.exe /c start` resta appeso.** *(2026-08-21.)*
+  `cmd.exe /c start "" "…\TrovaLavoro.exe"` non ritorna: la chiamata sembra bloccata e finisce
+  in background solo allo scadere del timeout. Funziona invece invocare l'eseguibile
+  direttamente con `nohup … &`, poi aspettare qualche secondo e **verificare il processo**
+  invece di fidarsi. Serve quando l'applicazione va lanciata a mano, fuori da `avvia_app` —
+  per esempio per lasciarla viva mentre un client MCP esterno le contende i dati.
+- **`dati.lock` che c'è non vuol dire lucchetto tenuto.** *(2026-08-21.)* Il file è vuoto
+  (0 byte) e **resta su disco** anche dopo che l'applicazione lo ha rilasciato: quel che conta
+  è la presa esclusiva, che vive nel sistema operativo e non nel file. Vederlo nella cartella
+  dati dice che l'app è passata di lì, non che è ancora aperta. Per sapere se è **tenuto**
+  serve un secondo processo che provi davvero a prenderlo.
+- **`chiamate_ai.csv` confronta due strade a colpi di token, senza leggere il codice.**
+  *(2026-08-21.)* Il diario dei consumi nella cartella dati registra prompt, modello, tetto,
+  token e percentuale di **ogni** chiamata, da qualunque porta arrivi — finestra o server MCP
+  del prodotto. Per stabilire se due strade fanno davvero lo stesso mestiere non serve
+  rileggersi il montaggio del motore: si fa lo stesso gesto dalle due parti e si guardano le
+  righe nuove. Nel collaudo di T8 l'analisi dell'annuncio è uscita **identica al token** dalle
+  due porte, e quella riga ha dimostrato più di mezza giornata di lettura del codice.

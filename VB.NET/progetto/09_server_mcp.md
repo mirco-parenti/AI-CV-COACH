@@ -117,6 +117,17 @@ pipe richieste che non c'entrano nulla fra loro.
 in `structuredContent`, per chi lo sa leggere, e lo stesso JSON serializzato in un blocco
 di testo, che è quel che la spec chiede per compatibilità.
 
+**Il server si presenta da sé, e un client vero lo mostra.** Sia `initialize` sia
+`server/discover` portano un campo `instructions`: poche righe che dicono a chi arriva che
+mestiere fa questo server e — soprattutto — quali sono i suoi limiti veri, cioè che **il
+punteggio in stelle lo calcola il programma e non si negozia a parole** e che nessun testo
+prodotto inventa esperienze che il profilo non dichiara. Sono i due vincoli del prodotto
+detti a un lettore che non è una persona: un modello che arriva da fuori non ha letto il
+`README.md`, e senza quelle righe proverebbe a trattare sul voto. È anche la superficie che
+il banco **non può** esercitare, perché non ha un modello a cui mostrarla — il primo a
+riceverla e a mostrarla davvero è stato un client vero, nel collaudo di tappa di T8
+*(2026-08-21, cap. 14)*.
+
 **Due specie di errore, e non vanno confuse.** Un tool che non esiste o una richiesta
 malformata sono **errori di protocollo** e tornano come errori JSON-RPC. Un tool che
 esiste ma non può fare il suo lavoro — la chiave API non c'è, l'opportunità chiesta non

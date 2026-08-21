@@ -109,6 +109,17 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    server reso di nuovo seriale (T8b), il lucchetto reso permissivo (T8c) e il client
    dello streaming privato del riarmo del silenzio — dove il collaudo restò verde ed era
    cieco.)*
+15. **Una tappa col collaudo rimandato è «chiusa con riserva», e la riserva si scrive**:
+   il cap. 14 dice già che una tappa si chiude **con** il suo collaudo, e rimandarlo a volte
+   è inevitabile — manca una macchina, manca un client, tocca a un'altra sessione. Quel che
+   non è ammesso è chiamarla **chiusa** lo stesso: si dichiara la riserva (che cosa non è
+   stato provato, e perché), si annota in `in_sospeso.md`, e la tappa resta **aperta con
+   riserva** finché quel collaudo non è fatto. Un collaudo di tappa non è la cerimonia che
+   ratifica ciò che si è già verificato: è l'unica parte che verifica ciò che non si sapeva
+   di non aver verificato. *(Ratificata 2026-08-21: T8 fu dichiarata chiusa il 19 agosto col
+   suo collaudo spostato in `in_sospeso.md`, e due giorni dopo quel collaudo trovò due
+   difetti che 817 collaudi verdi non potevano vedere — uno vive nello spazio fra le due
+   porte, l'altro è il modello che disobbedisce a una riga del prompt.)*
 
 ## Contesto del progetto (fatti stabili + puntatori, niente stato copiato)
 
@@ -178,7 +189,13 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
   condizione si avveri** invece di guardare a intervalli. Non parte da solo
   (`node strumenti/mcp-collaudi/server.mjs`) e **non** è il server MCP del prodotto, che è
   il cap. 09 ed è stato costruito a T8 *(2026-08-19)*: due server distinti, da non
-  confondere quando si parla di «MCP» in questo repo. Come si accende, cosa sa fare e le
+  confondere quando si parla di «MCP» in questo repo. Il server **del prodotto** ha avuto il
+  suo collaudo da un client vero il **2026-08-21**, e il client vero è **Claude Code stesso**:
+  registrandolo fra i suoi server MCP, i dodici tool compaiono come `mcp__trovalavoro__*` e
+  si possono chiamare come qualunque altro strumento. La registrazione vive **fuori dal repo**
+  (nella configurazione di Claude Code) e i server si caricano **solo all'avvio**: se i tool
+  non ci sono, serve un riavvio della sessione, non una modifica al codice. Come si
+  accende, cosa sa fare e le
   trappole già pagate stanno nel suo `README.md`: **leggilo prima di usarlo**, sono ore
   risparmiate.
 

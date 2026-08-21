@@ -359,7 +359,15 @@ i tool MCP).
   è `email_candidatura` al **27,1%**, poi `umanizzazione_sintesi` al 25,0% e
   `umanizzazione_frasi` al 18,2%, e ogni riga si chiude con `end_turn` — **nessun tetto da
   alzare**, nessun troncamento. La misura ha quindi risparmiato la modifica che era nata per
-  giustificare, che è il modo migliore in cui può finire.* Tre proprietà lo tengono innocuo: **non è un dato dell'utente** (nessun testo,
+  giustificare, che è il modo migliore in cui può finire. Il **2026-08-21**, col collaudo
+  di tappa di T8, il file ha avuto la sua prova anche dal lato del **secondo scrittore**:
+  nella cartella dati vera non esisteva ancora ed è **nato** alla prima chiamata partita
+  dal server: a fine collaudo portava quattordici righe — sei dal server, otto dalla
+  finestra — tutte sotto la metà del proprio tetto e tutte chiuse con `end_turn`. Il
+  criterio dei due livelli regge anche da quella porta (`analisi_annuncio` su Haiku 4.5,
+  confronto e generazione su Sonnet 5), e l'analisi dell'annuncio è uscita **identica al
+  token** dalle due strade: un file nato per sorvegliare i costi ha finito per misurare
+  una parità.* Tre proprietà lo tengono innocuo: **non è un dato dell'utente** (nessun testo,
   nessun profilo, nessuna risposta: solo nomi di prompt e numeri), **cancellarlo non perde
   niente**, e **non deve mai far fallire una chiamata** — se il file non si lascia scrivere
   si perde la riga e si tira dritto, perché una candidatura persa per non aver potuto
@@ -424,3 +432,12 @@ dimostrazione: `registro.json` è **ricostruibile** dalle cartelle, quindi il di
 contiene solo lo stato — contiene abbastanza da rifarlo. Un file d'appoggio che non si
 potesse rigenerare sarebbe uno stato che vive in un posto solo, cioè il contrario di
 questa regola.*
+
+*Il lucchetto della cartella dati (cap. 09.4) ha avuto la sua prova sul campo il
+**2026-08-21**, col collaudo di tappa di T8: non più due `FileStream` dentro un processo
+solo, ma l'applicazione aperta e un server MCP che si contendono davvero i dati. Chi
+arriva secondo **resta fuori e lo sa**: la scrittura è stata rifiutata con un messaggio
+che dice il perché, cosa fare e cosa continua a funzionare lo stesso — e chiusa la
+finestra la stessa identica chiamata è riuscita. Vale anche il rovescio: i mestieri che
+passano dall'AI **non** chiedono il lucchetto, perché non toccano i file dell'utente, e
+infatti girano anche a finestra aperta.*
