@@ -167,6 +167,9 @@ riporta dove si era (candidatura, profilo o Home).*
   la loro prima difesa, e non si baratta per due righe di spazio.
 - Finestre secondarie (Impostazioni, Primo avvio, Anteprima file, Informazioni su…):
   dialoghi a bordo fisso, sfondo bianco, titolo Segoe UI 14 Bold in `RossoTitoli`.
+  *Il «Primo avvio» di questo elenco non è mai nato come finestra a sé: a T6 si è ridotto
+  alla sola domanda della chiave (cap. 11.3, cap. 12 A1), e la schermata di T9e non è la
+  sua erede — quella compare a **ogni** avvio e non chiede niente.*
 - **La prima finestra secondaria è la conferma critica** *(2026-08-14)*: `FinestraConfermaCritica`,
   il dialogo delle azioni di livello 6. Elenca cosa sparisce e cosa resta, e per accendere
   il bottone chiede di **ridigitare una parola** (il nome dell'app, come vuole il
@@ -195,6 +198,22 @@ riporta dove si era (candidatura, profilo o Home).*
   cose dette in chat che nel profilo non risultano. Non sono appunti e non entrano nei
   documenti; stanno lì con scritto perché, che è l'unico modo di non perderle senza usarle.
   Come le altre, non chiama l'AI: raccoglie una decisione e la restituisce al pannello.
+- **Con T9e arrivano le due che non chiedono niente a nessuno** *(2026-08-22)*. La
+  **schermata di avvio** (`FinestraAvvio`) copre il montaggio: senza bordi, centrata sullo
+  schermo, sopra tutto, e con dentro il marchio disegnato per 800×648. Perché abbia senso
+  ha un **tempo minimo** a video, ed è una misura e non un gusto: dal doppio clic alla
+  finestra passano **265–330 ms**, e una schermata legata al solo caricamento lampeggerebbe
+  senza che nessuno la legga. Ma il minimo vale per chi guarda, non per chi deve rispondere:
+  chi sta per aprire una finestra che chiede qualcosa — al primo avvio la chiave API, che
+  nasce dentro il `Load` — la manda via **subito**, e provato dal vivo succede a 438 ms, un
+  secondo prima della sua scadenza. Su uno schermo piccolo, o scalato, si rimpicciolisce
+  per stare dentro il **70%** dell'area di lavoro senza deformarsi. Un clic la chiude.
+  Nasce in `Programma.Main`, **dopo** la biforcazione del server: in modalità `--mcp` non
+  esiste, come nessun'altra finestra (cap. 09). La seconda è **«Informazioni su…»**
+  (`FinestraInformazioni`), e non ripete le Impostazioni: il marchio, la riga di versione e
+  il copyright, nient'altro — cartella dati, modelli e preferenze stanno in P8, e una
+  seconda vetrina degli stessi valori sarebbe la solita copia destinata a divergere. La
+  porta è il **pannello del logo** (cap. 03.5).
 - **E con T9b arriva la più grande, che è anche l'unica che non chiede niente**
   *(2026-08-21)*. `FinestraImpostazioni` è P8 (v. la tabella dei pannelli): non raccoglie
   una decisione per restituirla a chi l'ha aperta, ma **fa** — scrive le preferenze appena
@@ -249,6 +268,15 @@ sinistra della finestra principale:
   non esiste nessun file immagine. *(Deciso 2026-08-06 in T1 — cap. 15, voce 4.)*
 - Il numero di versione dell'app vive in **un solo file sorgente** (`Versione.vb`, una
   costante), mai duplicato altrove; ogni modifica al codice lo incrementa.
+- **Il pannello si clicca, e apre «Informazioni su…»** *(T9e, 2026-08-22)*. Vale su tutte
+  le sue parti — immagine, nome, versione, copyright — con la mano sul puntatore e il
+  suggerimento, perché una porta senza maniglia non è una porta: è la lezione di T9d,
+  «quel che è acceso deve sembrarlo», applicata a un riquadro che per undici tappe è stato
+  solo un'insegna. La porta è questa e non un bottone in barra: qui versione e pool si
+  vanno già a leggere, e il gesto è quello che si prova per primo.
+- La riga «Ver. … · Pool …» la compone **`Versione.Riga`**, non chi la mostra: le finestre
+  che la scrivono sono due — questo pannello e «Informazioni su…» — e due copie della
+  stessa riga divergono al primo ritocco.
 
 ## 3.6 I pannelli, uno per uno
 

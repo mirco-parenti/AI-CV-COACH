@@ -43,12 +43,59 @@ Public Class FormPrincipale
         Me.New(Nothing)
     End Sub
 
-    Public Sub New(argomenti As ArgomentiAvvio)
+    ''' <param name="schermataDiAvvio">
+    ''' La schermata che copre il montaggio (cap. 03.4), se ce n'è una: è
+    ''' <c>Nothing</c> nel banco e in ogni avvio che non l'ha aperta. La finestra non sa
+    ''' che aspetto abbia — le chiede soltanto di togliersi, e sa dire <b>quando</b>.
+    ''' </param>
+    Public Sub New(argomenti As ArgomentiAvvio, Optional schermataDiAvvio As ISchermataDiAvvio = Nothing)
 
         InitializeComponent()
+        Marchio.Vesti(Me)
         _argomenti = If(argomenti, ArgomentiAvvio.Leggi(Nothing))
+        _schermataDiAvvio = schermataDiAvvio
+        DichiaraLaPortaDelleInformazioni()
 
     End Sub
+
+    ''' <summary>
+    ''' Il pannello del logo è cliccabile e deve sembrarlo: mano sul puntatore e
+    ''' suggerimento, su tutte le sue parti. Senza, sarebbe una porta senza maniglia —
+    ''' la lezione di T9d, «quel che è acceso deve sembrarlo», applicata a un pannello
+    ''' che per undici tappe è stato solo un'insegna.
+    ''' </summary>
+    Private Sub DichiaraLaPortaDelleInformazioni()
+
+        For Each parte As Control In PartiDelPannelloLogo()
+            parte.Cursor = Cursors.Hand
+            ttSuggerimenti.SetToolTip(parte, "Informazioni su TrovaLavoro")
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Le parti del pannello del logo, in un posto solo: le vestono il puntatore, il
+    ''' suggerimento e il clic che apre «Informazioni su…», e tre elenchi separati
+    ''' finirebbero per non dire più la stessa cosa.
+    ''' </summary>
+    Private Function PartiDelPannelloLogo() As Control()
+        Return New Control() {pnlLogo, picLogo, lblMarchio, lblVersione, lblCopyright}
+    End Function
+
+    ''' <summary>
+    ''' Apre «Informazioni su…» (cap. 03.4). La porta è il pannello del logo, che è dove
+    ''' versione e pool si vanno già a leggere (cap. 03.5): nessun bottone nuovo in
+    ''' barra, e il gesto è quello che si prova per primo.
+    ''' </summary>
+    Private Sub ApriLeInformazioni(mittente As Object, e As EventArgs) _
+        Handles pnlLogo.Click, picLogo.Click, lblMarchio.Click, lblVersione.Click, lblCopyright.Click
+
+        FinestraInformazioni.Mostra(Me, EtichettaDelPool())
+
+    End Sub
+
+    ''' <summary>La schermata di avvio da togliere, se l'avvio ne ha aperta una.</summary>
+    Private ReadOnly _schermataDiAvvio As ISchermataDiAvvio
 
     ''' <summary>
     ''' L'unico motore del browser dell'applicazione (v. <see cref="MotoreBrowser"/>).
@@ -116,6 +163,16 @@ Public Class FormPrincipale
         ' primo avvio, quando non c'è ancora niente, è lui a mandare al profilo — che
         ' resta il primo passo del flusso A.
         MostraPannello(pnlHome, btnHome)
+    End Sub
+
+    ''' <summary>
+    ''' La finestra è a video: la schermata di avvio ha finito il suo mestiere e se ne
+    ''' va — appena scaduto il minimo, se non è ancora passato. Si aspetta <c>Shown</c>
+    ''' e non la fine del <c>Load</c>, che arriva prima del primo disegno: toglierla là
+    ''' lascerebbe scoperto per un istante il desktop.
+    ''' </summary>
+    Private Sub FormPrincipale_Shown(sender As Object, e As EventArgs) Handles MyBase.Shown
+        _schermataDiAvvio?.ChiudiQuandoPuoi()
     End Sub
 
     ''' <summary>
@@ -675,6 +732,13 @@ Public Class FormPrincipale
 
         If _contesto.Client IsNot Nothing AndAlso Not _argomenti.ChiediLaChiave Then Return
 
+        ' Da qui in poi si apre una finestra che aspetta una risposta, e la schermata di
+        ' avvio non può restarle davanti: il suo tempo minimo vale per chi guarda, non
+        ' per chi deve rispondere. Sta dentro questo metodo, dopo la sua condizione, e
+        ' non nel Load con una condizione gemella: due condizioni che dicono la stessa
+        ' cosa in due posti sono il difetto che T9d ha già pagato una volta.
+        _schermataDiAvvio?.ChiudiSubito()
+
         Dim illeggibile As Boolean
         Dim digitata As String = FinestraChiaveApi.Chiedi(Me, _contesto.Segreti.LeggiChiaveApi(illeggibile))
         If digitata Is Nothing Then Return
@@ -719,11 +783,19 @@ Public Class FormPrincipale
     ''' «Pool —» resta per l'anomalia totale, quando la libreria non si è aperta affatto.
     ''' </summary>
     Private Sub MostraLoStatoDellAvvio()
-        Dim etichettaPool As String = If(_contesto.Libreria IsNot Nothing,
-                                         _contesto.Libreria.Etichetta, "Pool —")
-        lblVersione.Text = $"Ver. {Versione.Numero} · {etichettaPool}"
+        lblVersione.Text = Versione.Riga(EtichettaDelPool())
         lblStato.Text = If(AvvisoDellAvvio(), "Pronto")
     End Sub
+
+    ''' <summary>
+    ''' Come si chiama la libreria in vigore: la dichiara lei stessa — sorgente e stato,
+    ''' asterisco compreso (cap. 04.5) — e il «Pool —» resta per l'anomalia totale,
+    ''' quando non si è aperta affatto. Sta in un metodo perché la leggono in due: il
+    ''' pannello del logo e «Informazioni su…».
+    ''' </summary>
+    Private Function EtichettaDelPool() As String
+        Return If(_contesto?.Libreria IsNot Nothing, _contesto.Libreria.Etichetta, "Pool —")
+    End Function
 
     ''' <summary>
     ''' Tutto ciò che l'utente deve sapere appena aperta la finestra, in un ordine che

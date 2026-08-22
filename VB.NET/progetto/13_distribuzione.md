@@ -150,8 +150,21 @@ insieme al resto:
 - Il logo è lo **scudo di Aviolab AI**, incorporato **in forma binaria nel sorgente**
   (PNG codificato Base64 in `LogoAviolab.vb`): nessun file immagine nel repo né accanto
   all'exe *(deciso 2026-08-06 in T1 — cap. 15, voce 4)*. Nel pannello logo, sotto lo
-  scudo, compare sempre e solo «AVIOLAB AI» (cap. 03.5). L'icona dell'exe resta da
-  produrre, idealmente dallo stesso scudo.
+  scudo, compare sempre e solo «AVIOLAB AI» (cap. 03.5).
+- **L'icona dell'eseguibile c'è, e viene da quello stesso scudo** *(T9e, 2026-08-22)*.
+  Ricavata dal PNG di `LogoAviolab.vb` — ritagliata al contorno della figura e ricentrata,
+  altrimenti a 16 px lo scudo sarebbe un francobollo dentro un riquadro mezzo vuoto — in
+  sette misure (16, 24, 32, 48, 64, 128, 256), le prime cinque come bitmap e le due grandi
+  compresse in PNG, che è il formato che Windows si aspetta. Vive in
+  `VB.NET/src/TrovaLavoro/Risorse/TrovaLavoro.ico` ed è **l'unico file immagine del
+  prodotto nel repository**: non è una deroga di comodo, è che `<ApplicationIcon>` di
+  MSBuild vuole un file su disco e un Base64 nel sorgente non lo sa leggere. Il vincolo
+  vero — *niente file accanto all'exe* — resta intatto: quel file entra **dentro**
+  l'eseguibile, due volte, come icona di Windows e come risorsa incorporata per la finestra
+  principale. La stessa cartella ospita `schermata-avvio.png`, il marchio della schermata
+  di avvio (cap. 03.4), anch'esso incorporato.
+- **Le finestre secondarie non prendono l'icona**, e non è una dimenticanza: sono tutte
+  `FixedDialog`, e Windows in quella cornice l'icona non la disegna affatto.
 
 ## 13.6 Avvisi di Windows (SmartScreen)
 

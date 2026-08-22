@@ -17,6 +17,11 @@
     <!-- I sorgenti sono UTF-8: senza questo le lettere accentate e il « · » del
          pannello logo verrebbero letti con la codepage di sistema. -->
     <CodePage>65001</CodePage>
+    <!-- L'icona dell'eseguibile (cap. 13.5). È l'unico file immagine del prodotto
+         nel repository, e non per una deroga di comodo: <ApplicationIcon> vuole un
+         file su disco, e un Base64 nel sorgente MSBuild non lo sa leggere. Il vincolo
+         vero resta rispettato: il file entra DENTRO l'exe, non accanto. -->
+    <ApplicationIcon>Risorse\TrovaLavoro.ico</ApplicationIcon>
   </PropertyGroup>
 
   <!-- Proprietà dell'eseguibile, scheda «Dettagli» di Windows (cap. 13.5). -->
@@ -124,6 +129,20 @@
     <EmbeddedResource Include="Documenti\modello-html\*.html;Documenti\modello-html\*.css"
                       WithCulture="false">
       <LogicalName>modello-html/%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!-- Il marchio dentro l'eseguibile (cap. 13.5): la stessa icona che veste l'exe veste
+       anche le finestre, e la schermata di avvio copre i primi istanti (cap. 03.4). Come
+       il pool e i modelli, entrano come risorse incorporate: accanto all'exe non resta
+       nessun file.
+
+       WithCulture=false per la ragione dei prompt: senza, un punto nel nome verrebbe
+       letto come codice di lingua e ne nascerebbe un assembly satellite. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Risorse\TrovaLavoro.ico;Risorse\schermata-avvio.png"
+                      WithCulture="false">
+      <LogicalName>marchio/%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 

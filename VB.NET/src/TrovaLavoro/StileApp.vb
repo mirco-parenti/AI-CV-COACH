@@ -32,6 +32,14 @@ Public Module StileApp
 
     ' --- Colori (cap. 03.2) ---
 
+    ''' <summary>
+    ''' Il blu notte del marchio: è il fondo della schermata di avvio e dell'immagine
+    ''' che apre «Informazioni su…» (cap. 13.5). Sta qui perché nessun form scriva un
+    ''' colore a mano — e perché la finestra ce l'ha sotto l'immagine, dove si vedrebbe
+    ''' subito una banda di un blu leggermente diverso.
+    ''' </summary>
+    Public ReadOnly FondoMarchio As Color = ColorTranslator.FromHtml("#000C38")
+
     ''' <summary>Testo normale, valori, titoli di sezione.</summary>
     Public ReadOnly TestoPrimario As Color = ColorTranslator.FromHtml("#212529")
 

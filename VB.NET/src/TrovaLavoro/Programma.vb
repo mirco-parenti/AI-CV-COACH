@@ -44,8 +44,21 @@ Friend Module Programma
         Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException)
         AddHandler Application.ThreadException, AddressOf MostraErroreImprevisto
 
-        Application.Run(New FormPrincipale(letti))
+        ' La schermata di avvio copre il montaggio (cap. 03.4). Nasce di qua e non dentro
+        ' la finestra principale perché deve essere a video *prima* che il montaggio
+        ' cominci: quel che accade nel Load — cartella dati, lucchetto, libreria, browser
+        ' — accade a finestra ancora invisibile, cioè davanti a uno schermo vuoto. È lei
+        ' poi a dire quando toglierla, che è l'unica parte con una regola vera.
+        _schermataDiAvvio = FinestraAvvio.Mostra()
+
+        Application.Run(New FormPrincipale(letti, _schermataDiAvvio))
     End Sub
+
+    ''' <summary>
+    ''' La schermata di avvio in corso, se ce n'è una: serve alla rete delle eccezioni,
+    ''' che deve poterla togliere prima di mostrare un errore.
+    ''' </summary>
+    Private _schermataDiAvvio As FinestraAvvio
 
     ''' <summary>
     ''' La modalità server MCP (cap. 09): niente finestre, si parla con il client che ha
@@ -95,6 +108,10 @@ Friend Module Programma
     End Sub
 
     Private Sub MostraErroreImprevisto(mittente As Object, e As ThreadExceptionEventArgs)
+
+        ' Prima di tutto la schermata di avvio, se è ancora lì: sta sopra ogni altra
+        ' finestra, e un messaggio d'errore che nessuno vede è peggio dell'errore.
+        _schermataDiAvvio?.ChiudiSubito()
 
         MessageBox.Show(
             "È successo qualcosa che il programma non aveva previsto:" & vbLf &
