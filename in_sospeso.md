@@ -171,14 +171,9 @@ in «Chiuse».*
 
 ## Da T9b — le Impostazioni (2026-08-21, alla chiusura)
 
-- **«⚙ Impostazioni» resta premibile mentre l'AI lavora.** `BarraDiNavigazione` spegne
-  Home, Profilo, Candidatura e Ricerca durante una chiamata, ma non il quinto bottone —
-  che a T9b ha smesso di essere spento sempre, e nessuno se n'è ricordato lì. Da quella
-  finestra si arriva a «ELIMINA TUTTI I DATI»: cancellare la cartella mentre una
-  generazione ci sta scrivendo dentro è il caso peggiore, e oggi niente lo impedisce. Va
-  deciso se spegnere l'intero bottone col resto della barra o solo le due pulizie; il posto
-  naturale è **T9d**, che rivede la gestione degli errori pannello per pannello.
-  *(cap. 03, tabella dei pannelli, P8; cap. 11.5.)*
+*La voce sul bottone «⚙ Impostazioni» premibile durante una chiamata all'AI è stata chiusa il
+2026-08-22 col primo tempo di T9d, ed è in «Chiuse»; le due qui sotto restano aperte.*
+
 - **La finestra non è stata vista su uno schermo piccolo.** È alta quanto le serve — le
   sezioni si dispongono in fila, e i testi cambiano lunghezza con quel che c'è nella
   cartella dati — e sulla macchina di sviluppo ci sta comoda. Su un portatile a 768 px di
@@ -192,6 +187,20 @@ in «Chiuse».*
   che è esattamente il caso che il codice prevede e spiega. Serve un giro che apra P3
   prima. *(cap. 11.5.)*
 
+## Da T9d — la rifinitura (2026-08-22, alla chiusura)
+
+- **La fascia nuova di P6 non è stata vista a DPI alti.** L'etichetta «📄 Documento:», la
+  tendina larga 416 px e la sua cornice stanno in **pixel non scalati**, come il resto
+  dell'interfaccia: a 125/150% la fascia si allarga, e la lingua — che ora le sta a destra —
+  è la prima che rischia di uscire dal bordo. La larghezza minima della finestra (1150 px)
+  mette al riparo il caso a 100%, non gli altri. Vuole la stessa macchina della voce sul
+  **pannello del logo a DPI alti** e della **finestra su uno schermo piccolo**: si verificano
+  in un giro solo. *(cap. 03, tabella dei pannelli, P6.)*
+
+*Il collaudo fragile che doveva finire qui — `UnaRispostaLungaMaVivaNonScadeMai`, che cadeva
+in batteria completa e mai da solo — è stato **curato** invece che annotato: sta fuori dal
+parallelismo e la sua storia è nella chiusura della gamba (cap. 14).*
+
 ## Da revisione adversariale (2026-08-09)
 
 - **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:
@@ -201,6 +210,15 @@ in «Chiuse».*
   *(cap. 03.5; segnalato dalla revisione, rimandato con motivo.)*
 
 ## Chiuse
+
+- ✅ **«⚙ Impostazioni» premibile mentre l'AI lavora** *(aperta il 2026-08-21 alla chiusura
+  di T9b, chiusa il 2026-08-22 col primo tempo di T9d)*. Il difetto non era un bottone
+  dimenticato: erano **due elenchi** di bottoni che dicevano cose diverse — `BarraDiNavigazione`
+  ne contava quattro a mano, `BottoniDiNavigazione()` cinque — e adesso ce n'è uno solo. Si
+  spegne l'intero bottone e non «solo le due pulizie», perché da P8 si esce in **tre** modi
+  che una chiamata in volo non regge: i dati eliminati, la chiave nuova (che rimonta il
+  contesto sotto una chiamata viva) e la cartella documenti (che manda in P7 e avvia un
+  secondo giro di AI). *(cap. 03.8; cap. 11.5; cap. 14, T9d.)*
 
 - ✅ **Lo stato «esito» e il follow-up** *(aperta il 2026-08-14 alla chiusura di T6,
   ridotta il 2026-08-18 col destinatario, chiusa il 2026-08-21 con T9c)*. Gli esiti

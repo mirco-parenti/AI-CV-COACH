@@ -25,6 +25,7 @@ Partial Class PannelloDocumenti
         Me.lblLingua = New System.Windows.Forms.Label()
         Me.cmbLingua = New System.Windows.Forms.ComboBox()
         Me.lblDocumento = New System.Windows.Forms.Label()
+        Me.pnlCorniceDocumento = New System.Windows.Forms.Panel()
         Me.cmbDocumento = New System.Windows.Forms.ComboBox()
         Me.pnlCorpo = New System.Windows.Forms.Panel()
         Me.pnlCv = New System.Windows.Forms.Panel()
@@ -99,21 +100,26 @@ Partial Class PannelloDocumenti
         ' La rifinitura anti-slop è di T7b: si vede, spenta, col suo suggerimento
         ' (cap. 03.8), perché è qui che arriverà. La lingua accanto a lei era nella stessa
         ' condizione fino a T7a, che l'ha accesa.
+        ' L'ordine è quello della lettura, e dice cosa viene prima: **quale** documento
+        ' si guarda, e solo dopo in che lingua. Fino a T9d era il contrario, con la
+        ' tendina dei documenti relegata a destra della lingua e larga uguale: la prova
+        ' dal vivo l'ha trovata «poco visibile» proprio mentre è la porta da cui questo
+        ' pannello si usa.
+        Me.pnlOpzioni.Controls.Add(Me.lblDocumento)
+        Me.pnlOpzioni.Controls.Add(Me.pnlCorniceDocumento)
         Me.pnlOpzioni.Controls.Add(Me.lblLingua)
         Me.pnlOpzioni.Controls.Add(Me.cmbLingua)
-        Me.pnlOpzioni.Controls.Add(Me.lblDocumento)
-        Me.pnlOpzioni.Controls.Add(Me.cmbDocumento)
         Me.pnlOpzioni.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlOpzioni.Location = New System.Drawing.Point(14, 74)
         Me.pnlOpzioni.Name = "pnlOpzioni"
-        Me.pnlOpzioni.Size = New System.Drawing.Size(1106, 40)
+        Me.pnlOpzioni.Size = New System.Drawing.Size(1106, 48)
         Me.pnlOpzioni.TabIndex = 1
         '
         'lblLingua
         '
         Me.lblLingua.Font = StileApp.FontTesto
         Me.lblLingua.ForeColor = StileApp.TestoPrimario
-        Me.lblLingua.Location = New System.Drawing.Point(0, 6)
+        Me.lblLingua.Location = New System.Drawing.Point(548, 14)
         Me.lblLingua.Name = "lblLingua"
         Me.lblLingua.Size = New System.Drawing.Size(60, 20)
         Me.lblLingua.TabIndex = 0
@@ -127,20 +133,20 @@ Partial Class PannelloDocumenti
         ' l'interfaccia è in una lingua sola (cap. 10.1): la tendina dice «Inglese», non
         ' «English». L'ordine conta — è quello che «LinguaDaTendina» legge.
         Me.cmbLingua.Items.AddRange(New Object() {"Italiano", "Inglese"})
-        Me.cmbLingua.Location = New System.Drawing.Point(64, 3)
+        Me.cmbLingua.Location = New System.Drawing.Point(612, 12)
         Me.cmbLingua.Name = "cmbLingua"
         Me.cmbLingua.Size = New System.Drawing.Size(140, 23)
         Me.cmbLingua.TabIndex = 1
         '
         'lblDocumento
         '
-        Me.lblDocumento.Font = StileApp.FontTesto
-        Me.lblDocumento.ForeColor = StileApp.TestoPrimario
-        Me.lblDocumento.Location = New System.Drawing.Point(228, 6)
+        Me.lblDocumento.Font = StileApp.FontTitoloGruppo
+        Me.lblDocumento.ForeColor = StileApp.Accento
+        Me.lblDocumento.Location = New System.Drawing.Point(0, 14)
         Me.lblDocumento.Name = "lblDocumento"
-        Me.lblDocumento.Size = New System.Drawing.Size(84, 20)
-        Me.lblDocumento.TabIndex = 2
-        Me.lblDocumento.Text = "Documento:"
+        Me.lblDocumento.Size = New System.Drawing.Size(112, 20)
+        Me.lblDocumento.TabIndex = 0
+        Me.lblDocumento.Text = "📄 Documento:"
         '
         'cmbDocumento
         '
@@ -149,10 +155,26 @@ Partial Class PannelloDocumenti
         ' sa quali candidature hanno davvero un documento da mostrare.
         Me.cmbDocumento.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cmbDocumento.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.cmbDocumento.Location = New System.Drawing.Point(316, 3)
+        ' Il carattere è quello dell'azione principale: una tendina non è un bottone, ma
+        ' qui fa lo stesso mestiere — è da lei che si sceglie cosa si sta guardando.
+        Me.cmbDocumento.Font = StileApp.FontAzionePrincipale
+        Me.cmbDocumento.Location = New System.Drawing.Point(2, 2)
         Me.cmbDocumento.Name = "cmbDocumento"
-        Me.cmbDocumento.Size = New System.Drawing.Size(330, 23)
-        Me.cmbDocumento.TabIndex = 3
+        Me.cmbDocumento.Size = New System.Drawing.Size(412, 26)
+        Me.cmbDocumento.TabIndex = 1
+        '
+        'pnlCorniceDocumento
+        '
+        ' Non è decorazione: una ComboBox piatta non sa disegnarsi un bordo colorato, e
+        ' il contorno d'accento è ciò che la distingue da una casella qualunque. Il
+        ' pannello fa da cornice di 2 px, e la sua misura la detta la tendina (vedi il
+        ' costruttore): l'altezza di una ComboBox la decide il carattere, non chi disegna.
+        Me.pnlCorniceDocumento.Controls.Add(Me.cmbDocumento)
+        Me.pnlCorniceDocumento.BackColor = StileApp.Accento
+        Me.pnlCorniceDocumento.Location = New System.Drawing.Point(116, 9)
+        Me.pnlCorniceDocumento.Name = "pnlCorniceDocumento"
+        Me.pnlCorniceDocumento.Size = New System.Drawing.Size(416, 30)
+        Me.pnlCorniceDocumento.TabIndex = 1
         '
         'pnlCorpo
         '
@@ -366,6 +388,7 @@ Partial Class PannelloDocumenti
     Friend WithEvents lblLingua As System.Windows.Forms.Label
     Friend WithEvents cmbLingua As System.Windows.Forms.ComboBox
     Friend WithEvents lblDocumento As System.Windows.Forms.Label
+    Friend WithEvents pnlCorniceDocumento As System.Windows.Forms.Panel
     Friend WithEvents cmbDocumento As System.Windows.Forms.ComboBox
     Friend WithEvents pnlCorpo As System.Windows.Forms.Panel
     Friend WithEvents pnlAnnuncio As System.Windows.Forms.Panel

@@ -613,7 +613,15 @@ Namespace Ai
             End Using
         End Function
 
-        <TestMethod>
+        ' Fuori dal parallelismo, e non per capriccio: questo collaudo misura il **tempo**,
+        ' e la batteria gira a metodi paralleli (MSTestSettings.vb). Nel traffico — la prima
+        ' batteria dopo una compilazione, con la macchina ancora calda — la ripresa dopo una
+        ' pausa da 60 ms arrivava oltre il secondo concesso, e il collaudo cadeva senza che
+        ' nel prodotto fosse cambiato niente: tre volte fra il 2026-08-19 e il 2026-08-22,
+        ' mai da solo, sempre in batteria completa. Le proporzioni qui sotto **non si
+        ' toccano**: allargare il tetto del silenzio gli toglierebbe la sola cosa che sa
+        ' fare, accorgersi del ritorno a un'attesa complessiva (regola 14).
+        <TestMethod, DoNotParallelize>
         Public Async Function UnaRispostaLungaMaVivaNonScadeMai() As Task
             ' Il rovescio del collaudo qui sopra, ed è quello che dimostra la regola: una
             ' risposta che dura **più** del silenzio concesso deve arrivare in fondo,

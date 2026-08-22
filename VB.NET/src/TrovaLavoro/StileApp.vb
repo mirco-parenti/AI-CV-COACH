@@ -185,7 +185,8 @@ Public Module StileApp
         ' resta scritto in grassetto e non cambia ingombro quando si riaccende.
         Select Case livello
             Case LivelloBottone.SicuroPositivo, LivelloBottone.Attenzione,
-                 LivelloBottone.Distruttivo, LivelloBottone.Critico
+                 LivelloBottone.Distruttivo, LivelloBottone.Critico,
+                 LivelloBottone.Esplorativo
                 bottone.Font = FontBottoneForte
             Case LivelloBottone.AzionePrincipale
                 bottone.Font = FontAzionePrincipale
@@ -217,6 +218,17 @@ Public Module StileApp
                 ' al livello sopra — che d'accento ha il bordo e in più il fondo azzurro e
                 ' il carattere grande: la parentela è voluta, l'esplorativo resta il fratello
                 ' quieto dell'azione principale.
+                '
+                ' Il bordo però non è bastato: alla **seconda** prova dal vivo dello stesso
+                ' giorno «Esporta PDF» e «Esporta DOCX» erano ancora letti come spenti. La
+                ' ragione è che l'occhio giudica un bottone dal **testo** prima che dal
+                ' contorno, e nero-su-azzurrino è esattamente ciò che nell'app significa
+                ' spento (grigio su grigio): il fondo tenue non basta a smentirlo. Adesso le
+                ' lettere sono d'accento, il contorno è doppio e il carattere è quello dei
+                ' bottoni che pesano — tre segnali invece di uno, e nessuno tolto allo
+                ' spento, che resta grigio in tutto.
+                bottone.ForeColor = Accento
+                bottone.FlatAppearance.BorderSize = 2
                 bottone.FlatAppearance.BorderColor = Accento
 
             Case LivelloBottone.AzionePrincipale

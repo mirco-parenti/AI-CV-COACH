@@ -779,6 +779,66 @@ vero è stato percorso lo stesso — con un clic del mouse alle coordinate della
 esso il **confronto di una candidatura nata dal server MCP**: 36 secondi, quindici giudizi,
 0,8 stelle e la cartella che avanza a «interessante».
 
+**T9d è chiusa** *(2026-08-22)*. La gamba più disomogenea di T9 — la gestione errori rivista
+pannello per pannello, la misura dei giudizi di contesto, la modifica a mano dei testi e i
+difetti minori di `in_sospeso.md` — si è fatta in **quattro tempi**, tutti con merge
+fast-forward. **955 collaudi verdi** (erano 910), più il banco dei copioni 10 su 10, versione
+**0.3.039**, Pool **1.12 invariato**. **Sedici falsificazioni** provate e tutte cadute
+(regola 14).
+
+Il **primo tempo** ha chiuso il debito che T9b si era lasciata dietro: durante una chiamata
+all'AI si spegne **tutta** la barra, «⚙ Impostazioni» compreso — il difetto non era un
+bottone dimenticato ma **due elenchi** che dicevano cose diverse, e ora ce n'è uno solo. Con
+lui, i messaggi che incolpavano la cosa sbagliata, l'annullamento che su `PannelloRicerca`
+avrebbe fatto cadere l'applicazione se lasciato propagare, e la regola «una rifinitura che
+fallisce si dichiara» estesa a P6 e P7, che tacevano. `FormPrincipale` ha avuto il suo primo
+banco — senza reflection e senza `InternalsVisibleTo` — e i due copioni JavaScript di
+`LettorePagina`, l'unico codice del prodotto che nessun compilatore guardava, hanno avuto il
+loro in `strumenti/collauda-copioni/`.
+
+Il **secondo tempo** ha portato «Modifica i testi» (cap. 03, P6; cap. 08.4), e la domanda da
+cui era partito aveva una premessa falsa: le tre caselle di P6 non mostrano il documento ma
+la pagina di blocchi che finisce nel DOCX, e renderle scrivibili avrebbe voluto dire
+ricostruire il JSON da un testo impaginato. Di lì la finestra a parte, con l'elenco dei campi
+di prosa che **`Rifinitura` è l'unico posto a conoscere**: una seconda lista nell'interfaccia
+divergerebbe al primo campo nuovo.
+
+Il **terzo tempo** è nato da quattro dubbi guardando l'applicazione vera. I due export
+**chiedono dove salvare** e aprono Esplora risorse sul file: il difetto non era il colore dei
+bottoni ma il **silenzio** — i file c'erano, in una cartella che l'utente non aveva scelto.
+La voce **«📄 Documenti»** entra in barra con la tendina che le fa da seconda metà, e il
+**prima/dopo della rifinitura è stato tolto del tutto**, misurando prima cosa mostrava
+davvero: su una candidatura vera, cinque ritocchi in tutto e **nessun fatto toccato**. La
+lingua invece non si tocca, e la ragione è che un CV inglese non è la traduzione di uno
+italiano. Due difetti stanati dalla prova dal vivo sullo stesso punto di codice: il testo
+catturato da un portale arrivava **tutto attaccato** (`\n` in una casella che rende solo
+`\r\n`) e portava le righe `&nbsp;` dei separatori grafici — curati, il secondo con un
+criterio buono per ogni portale: un pezzo che, ripulito, non contiene nemmeno una lettera o
+una cifra non entra nel testo.
+
+*La **misura** dei giudizi di contesto che il confronto ogni tanto salta è stata fatta e non
+ha chiesto nessuna cura: **otto giri, 4 per porta**, stesso profilo e stesso annuncio, tutti
+**5 giudizi su 5** (titolo, sede, contratto, mansioni, benefit). `prompt-pool/confronto` non
+si tocca, e il Pool resta 1.12.*
+
+Il **quarto tempo** è la prova dal vivo di chiusura, condotta da Mirco su cinque punti, e ha
+detto due volte la stessa cosa: **quel che è acceso deve sembrarlo**. La tendina dei documenti
+era «poco visibile» proprio mentre è la porta da cui P6 si usa, e adesso apre la fascia, in
+grande e dentro una cornice d'accento (cap. 03, P6); i bottoni di livello 2 erano **ancora**
+letti come spenti dopo la cura del bordo del terzo tempo, e adesso hanno lettere d'accento,
+contorno doppio e grassetto — tre segnali invece di uno, su tutta l'applicazione (cap. 03,
+livelli). Nello stesso tempo il **sottotitolo** dell'app è cambiato insieme al banner del
+logo prodotto fuori dal repo (cap. 13.5; cap. 15, voce 3).
+
+*Un collaudo ballerino è stato curato invece di essere annotato, ed è il caso che la regola 14
+guarda con più sospetto: `UnaRispostaLungaMaVivaNonScadeMai` misura un tempo e girava in mezzo
+al traffico della batteria parallela — subito dopo una compilazione la ripresa da una pausa da
+60 ms arrivava oltre il secondo concesso, e cadeva senza che nel prodotto fosse cambiato
+niente. Tre volte in due giorni, mai da solo. Ora è `DoNotParallelize`, e le sue proporzioni
+non si sono toccate: allargare il tetto del silenzio gli avrebbe tolto la sola cosa che sa
+fare, accorgersi del ritorno a un'attesa complessiva. Falsificato togliendo il riarmo del
+silenzio: **rosso**.*
+
 
 ## Ordine e dipendenze
 

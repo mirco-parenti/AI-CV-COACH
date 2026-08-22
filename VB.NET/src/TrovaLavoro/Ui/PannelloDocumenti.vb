@@ -172,6 +172,11 @@ Public Class PannelloDocumenti
 
         InitializeComponent()
 
+        ' La cornice sta addosso alla tendina, e la misura giusta si sa solo adesso:
+        ' l'altezza di una ComboBox la impone il carattere — a DPI diversi cambia — e una
+        ' cornice disegnata a occhio nel progettista lascerebbe una banda blu scoperta.
+        pnlCorniceDocumento.Size = New Size(cmbDocumento.Width + 4, cmbDocumento.Height + 4)
+
         AddHandler Me.Disposed, Sub() _suggerimenti.Dispose()
 
         VestiIBottoni()
