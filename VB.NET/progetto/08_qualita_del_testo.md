@@ -59,6 +59,41 @@ perde contro la forma.*
   l'utente può accettare, modificare a mano o tornare alla versione non rifinita.
   *A T7b il prima/dopo c'è (casella «Mostra il prima/dopo della rifinitura»); la
   **modifica a mano** campo per campo no — è rimandata, v. 8.6 e `in_sospeso.md`.*
+  *A **T9d** (2026-08-22) ci sono anche le altre due, e vivono in una **finestra** aperta
+  dal bottone «Modifica i testi» di P6: l'elenco dei campi di prosa, la casella per
+  riscrivere quello scelto e il «Ripristina il testo non rifinito», acceso sui soli campi
+  che l'anti-slop aveva cambiato. Tre scelte che il capitolo prometteva insieme e che
+  insieme adesso ci sono — accettare è non toccare niente.*
+- **Si riscrive la prosa, non i fatti** *(T9d)*. I campi aperti alla modifica sono quelli
+  che l'anti-slop tocca — sommario, descrizioni delle esperienze, corpo della lettera — e
+  a dire quali siano è la stessa classe che li rifinisce (8.2): una seconda lista
+  nell'interfaccia divergerebbe al primo campo nuovo. Nomi, aziende, date, competenze e
+  titoli restano fuori: vengono dal profilo, e riscriverli qui li farebbe divergere in
+  silenzio da chi li custodisce — per poi tornare com'erano alla prima rigenerazione.
+  L'**anti-invenzione non c'entra**: quel vincolo tiene la macchina dentro i fatti
+  dichiarati, e qui a scrivere è l'utente, che dei suoi fatti è il proprietario.
+- **Le tre caselle di P6 restano in sola lettura, ed è il motivo per cui la finestra
+  esiste** *(T9d)*. Non mostrano il documento: mostrano la **pagina di blocchi** che
+  finirà nel DOCX e nel PDF (cap. 05.3), etichette di sezione comprese, e in coda il
+  prima/dopo, che documento non è. Renderle scrivibili vorrebbe dire ricostruire il JSON
+  da quel testo — un mestiere che nessuna delle tre stampanti fa, e che sbaglierebbe
+  proprio dove l'utente si fida di più.
+- **Dove finisce quel che si riscrive** *(T9d)*. Nel documento, al «Salva»: annullando,
+  la finestra muore con dentro tutto quello che si era scritto. Da lì il testo si salva
+  **subito** su disco — fra la modifica e la prossima azione si può chiudere
+  l'applicazione, e un lavoro perso in silenzio è peggio di un lavoro non offerto — e non
+  serve avvisare nessun altro: export, email di P7 e tool del server leggono lo stesso
+  JSON (cap. 05.6, cap. 09.3). Il **📄 CV-1 base risalvato non rinasce**: la versione di
+  profilo da cui viene e la data in cui fu scritto restano quelle, o il pannello direbbe
+  «l'ho scritto oggi» di un documento di ieri, e smetterebbe di avvertire che il profilo
+  è cambiato da allora (cap. 11.1). E **«Rigenera»** — come il cambio di lingua, che passa
+  di lì — avverte che a sparire saranno anche le modifiche fatte a mano: di un testo
+  scritto dall'AI si sa che si rifà premendo di nuovo, di uno scritto a mano no.
+- **Il confronto dice «prima» e «adesso»** *(T9d)*, non più «prima» e «dopo». Il secondo
+  termine è il documento **com'è in questo momento**: se in mezzo è passata anche la mano
+  dell'utente, «adesso» resta vero e «dopo la rifinitura» no. Il «prima» invece non si
+  tocca mai — resta il testo da cui l'AI era partita, ed è quello che il «Ripristina»
+  rimette nella casella.
 - La rifinitura si può disattivare (Impostazioni), ma è attiva di default: è parte
   dell'identità del prodotto. *A T7b è sempre attiva: l'interruttore vive in P8, che è
   di T9.* *E a **T9b** (2026-08-21) l'interruttore c'è, in P8: «Rifinisci i testi generati
@@ -138,7 +173,9 @@ mano** campo per campo in P6 (le tre caselle sono `ReadOnly`: è disegno di P6, 
 anti-slop) e l'**interruttore** per disattivare la rifinitura, che vive nelle Impostazioni
 P8 di T9. Fino ad allora la rifinitura è sempre attiva, e la via d'uscita è il prima/dopo.
 *Delle due, l'interruttore è arrivato con **T9b** (2026-08-21), insieme al pannello che lo
-ospita (v. 8.4); la modifica a mano resta, ed è di **T9d**.*
+ospita (v. 8.4); la **modifica a mano** con **T9d** (2026-08-22), in una finestra a parte —
+perché le tre caselle del pannello mostrano la pagina impaginata, non il documento (v. 8.4).
+Il capitolo non ha più niente in sospeso.*
 
 ## 8.7 Cosa ha insegnato l'AI vera (collaudo di T7b, 2026-08-18)
 

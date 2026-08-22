@@ -155,11 +155,19 @@ Namespace Motore
             ''' <summary>Il nome del campo in italiano: «Sommario», «Esperienza 2».</summary>
             Public Property Etichetta As String
 
-            ''' <summary>Il testo com'era.</summary>
+            ''' <summary>Il testo com'era prima della rifinitura.</summary>
             Public Property Prima As String
 
-            ''' <summary>Il testo com'è adesso.</summary>
-            Public Property Dopo As String
+            ''' <summary>
+            ''' Il testo com'è <b>adesso</b> nel documento.
+            ''' </summary>
+            ''' <remarks>
+            ''' Si chiama così, e non «dopo», da quando l'utente può riscrivere un campo a
+            ''' mano (T9d, cap. 08.4): il confronto è sempre fra com'era prima della
+            ''' rifinitura e com'è adesso: se in mezzo è passata anche la mano dell'utente,
+            ''' «adesso» resta vero e «dopo la rifinitura» no.
+            ''' </remarks>
+            Public Property Adesso As String
 
         End Class
 
@@ -180,27 +188,121 @@ Namespace Motore
             Dim cambiati As New List(Of CampoRifinito)
 
             Dim comEra As JsonObject = TryCast(prima, JsonObject)
-            Dim comE As JsonObject = TryCast(documento, JsonObject)
-            If comEra Is Nothing OrElse comE Is Nothing Then Return cambiati
+            If comEra Is Nothing Then Return cambiati
 
-            Dim campi As New List(Of Campo)
-            campi.AddRange(Sommario(comE))
-            campi.AddRange(Descrizioni(comE))
-            campi.AddRange(Corpo(comE))
-
-            For Each campo As Campo In campi
+            For Each campo As Campo In Prosa(documento)
 
                 Dim testo As String = CampiJson.Testo(comEra, campo.Id)
                 If String.IsNullOrWhiteSpace(testo) Then Continue For
 
+                ' Un campo tornato uguale a com'era non è un confronto: succede da T9d,
+                ' quando l'utente ripristina il testo non rifinito, e mostrarlo lo stesso
+                ' vorrebbe dire far leggere due volte la stessa frase sotto due nomi
+                ' diversi. È la stessa regola con cui la rifinitura non annota un testo
+                ' che il modello ha restituito identico.
+                If String.Equals(testo, campo.Testo, StringComparison.Ordinal) Then Continue For
+
                 cambiati.Add(New CampoRifinito With {
                     .Etichetta = ComeSiLegge(campo.Id),
                     .Prima = testo,
-                    .Dopo = campo.Testo})
+                    .Adesso = campo.Testo})
 
             Next
 
             Return cambiati
+
+        End Function
+
+        ''' <summary>Un campo di prosa come lo si riscrive a mano in P6 (T9d, cap. 08.4).</summary>
+        Public Class CampoDiProsa
+
+            ''' <summary>L'identificativo del campo: <c>sommario</c>, <c>esperienza.1</c>.</summary>
+            Public Property Id As String
+
+            ''' <summary>Il nome come si legge a video: «Sommario», «Esperienza 2».</summary>
+            Public Property Etichetta As String
+
+            ''' <summary>Il testo che c'è adesso.</summary>
+            Public Property Testo As String
+
+        End Class
+
+        ''' <summary>
+        ''' I campi di prosa di un documento, nell'ordine in cui si leggono: è l'elenco che
+        ''' la modifica a mano mette davanti all'utente (T9d, cap. 08.4).
+        ''' </summary>
+        ''' <remarks>
+        ''' Sta qui, e non nella finestra che lo mostra, per la ragione scritta in cima a
+        ''' questa classe: <b>quali</b> campi di un documento sono prosa lo sa un posto
+        ''' solo. Una seconda lista, nell'interfaccia, divergerebbe al primo campo nuovo —
+        ''' e a divergere sarebbero proprio i campi che l'utente può riscrivere e la
+        ''' rifinitura rifinire, cioè gli stessi.
+        ''' </remarks>
+        Public Shared Function CampiDiProsa(documento As JsonNode) As List(Of CampoDiProsa)
+
+            Dim leggibili As New List(Of CampoDiProsa)
+
+            For Each campo As Campo In Prosa(documento)
+                leggibili.Add(New CampoDiProsa With {
+                    .Id = campo.Id,
+                    .Etichetta = ComeSiLegge(campo.Id),
+                    .Testo = campo.Testo})
+            Next
+
+            Return leggibili
+
+        End Function
+
+        ''' <summary>
+        ''' Rimette al suo posto, dentro il documento, il testo di un campo riscritto a
+        ''' mano.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Un testo vuoto si <b>rifiuta</b>: un campo senza testo esce dall'elenco
+        ''' della prosa — è la regola di <see cref="UnCampo"/> — e da lì non ci si potrebbe
+        ''' più rientrare per rimetterlo. Svuotare una descrizione è un'altra cosa, e si fa
+        ''' dal profilo, che è dove i fatti vivono.</para>
+        ''' <para>Il «prima» della rifinitura non si tocca: resta il testo da cui l'AI era
+        ''' partita, e il confronto di P6 continua a raccontare com'era prima di lei contro
+        ''' com'è <b>adesso</b> il documento — che dopo questa scrittura vuol dire com'è
+        ''' stato riscritto dall'utente.</para>
+        ''' </remarks>
+        ''' <returns>Falso se quell'id qui non c'è, o se il testo è vuoto.</returns>
+        Public Shared Function Riscrivi(documento As JsonNode, id As String, testo As String) As Boolean
+
+            If String.IsNullOrWhiteSpace(testo) Then Return False
+
+            Dim campo As Campo = Prosa(documento).FirstOrDefault(
+                Function(c) String.Equals(c.Id, id, StringComparison.Ordinal))
+            If campo Is Nothing Then Return False
+
+            campo.Dove(campo.Nome) = testo.Trim()
+
+            Return True
+
+        End Function
+
+        ''' <summary>
+        ''' I campi di prosa di un documento — sommario, descrizioni, corpo — in un elenco
+        ''' solo, nell'ordine in cui si leggono.
+        ''' </summary>
+        ''' <remarks>
+        ''' Un CV il corpo non ce l'ha e una lettera non ha né sommario né esperienze: i
+        ''' campi che non esistono non compaiono, e chi chiama non deve sapere quale dei due
+        ''' documenti ha in mano.
+        ''' </remarks>
+        Private Shared Function Prosa(documento As JsonNode) As List(Of Campo)
+
+            Dim campi As New List(Of Campo)
+
+            Dim oggetto As JsonObject = TryCast(documento, JsonObject)
+            If oggetto Is Nothing Then Return campi
+
+            campi.AddRange(Sommario(oggetto))
+            campi.AddRange(Descrizioni(oggetto))
+            campi.AddRange(Corpo(oggetto))
+
+            Return campi
 
         End Function
 

@@ -1,3 +1,4 @@
+Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports System.Threading.Tasks
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
@@ -191,7 +192,7 @@ Namespace Motore
 
             Assert.AreEqual("Sommario", cambiati(0).Etichetta, "in italiano, e nell'ordine del CV")
             Assert.AreEqual("com'era il sommario", cambiati(0).Prima, "il prima")
-            Assert.AreEqual("Ho esperienza nel servizio di sala.", cambiati(0).Dopo, "e il dopo")
+            Assert.AreEqual("Ho esperienza nel servizio di sala.", cambiati(0).Adesso, "e com'è adesso")
 
             Assert.AreEqual("Esperienza 2", cambiati(1).Etichetta,
                             "contata da 1, come la conta una persona")
@@ -300,6 +301,134 @@ Namespace Motore
             Assert.AreEqual("Corpo della lettera", Rifinitura.ComeSiLegge("corpo"))
             Assert.AreEqual("Esperienza 1", Rifinitura.ComeSiLegge("esperienza.0"))
             Assert.AreEqual("Altra esperienza 3", Rifinitura.ComeSiLegge("altra.2"))
+
+        End Sub
+
+        ' ==================================================================
+        ' La prosa che si riscrive a mano (T9d, cap. 08.4)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Sub LaProsaDiUnCvSiElencaNellOrdineInCuiSiLegge()
+
+            ' È l'elenco che la modifica a mano mette davanti all'utente: se l'ordine non
+            ' fosse quello del CV, chi cerca «la seconda esperienza» la troverebbe altrove.
+            Dim campi As List(Of Rifinitura.CampoDiProsa) = Rifinitura.CampiDiProsa(Cv())
+
+            Assert.HasCount(4, campi, "sommario, due esperienze e un'altra esperienza")
+
+            Assert.AreEqual("sommario", campi(0).Id, "prima il sommario")
+            Assert.AreEqual("Sommario", campi(0).Etichetta, "con l'etichetta che si legge")
+            Assert.AreEqual("Ho esperienza nel servizio di sala.", campi(0).Testo, "e il testo di adesso")
+
+            Assert.AreEqual("Esperienza 1", campi(1).Etichetta, "poi le esperienze, contate da 1")
+            Assert.AreEqual("Esperienza 2", campi(2).Etichetta, "nell'ordine del documento")
+            Assert.AreEqual("Altra esperienza 1", campi(3).Etichetta, "e in fondo quelle informali")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub DiUnaLetteraSiRiscriveSoloIlCorpo()
+
+            ' Apertura, chiusura e firma restano fuori come dalla rifinitura (cap. 08.2):
+            ' non sono slop, sono le formule che il lettore si aspetta.
+            Dim campi As List(Of Rifinitura.CampoDiProsa) = Rifinitura.CampiDiProsa(Lettera())
+
+            Assert.HasCount(1, campi, "un campo solo")
+            Assert.AreEqual("corpo", campi(0).Id, "il corpo")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub INomiELeDateNonSonoProsa()
+
+            ' La promessa del cap. 08.2 vista dalla parte dell'utente: quello che si
+            ' riscrive a mano è la prosa, non i fatti — che vengono dal profilo.
+            Dim id As String = String.Join(" ", Rifinitura.CampiDiProsa(Cv()).Select(Function(c) c.Id))
+
+            Assert.DoesNotContain("intestazione", id, "il nome no")
+            Assert.DoesNotContain("competenze", id, "le competenze no")
+            Assert.DoesNotContain("formazione", id, "i titoli di studio no")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub RiscrivereUnCampoLoMetteAlPostoGiusto()
+
+            Dim documento As JsonNode = Cv()
+
+            Assert.IsTrue(Rifinitura.Riscrivi(documento, "esperienza.1", "L'ho scritto io."), "riscritto")
+
+            Assert.AreEqual("L'ho scritto io.", Descrizione(documento, "esperienze_professionali", 1),
+                            "il testo è nella voce chiesta")
+            Assert.AreEqual("Servizio ai tavoli — e gestione della cassa",
+                            Descrizione(documento, "esperienze_professionali", 0),
+                            "e l'altra esperienza non l'ha toccata nessuno")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnTestoVuotoNonSvuotaIlCampo()
+
+            ' Un campo senza testo esce dall'elenco della prosa, e da lì non ci si
+            ' rientrerebbe più per rimetterlo: togliere una descrizione è un'altra cosa, e
+            ' si fa dal profilo.
+            Dim documento As JsonNode = Cv()
+
+            Assert.IsFalse(Rifinitura.Riscrivi(documento, "sommario", "   "), "il vuoto si rifiuta")
+            Assert.AreEqual("Ho esperienza nel servizio di sala.", Testo(documento, "sommario"), "e il testo è ancora lì")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnCampoCheQuiNonCeNonSiRiscrive()
+
+            Dim documento As JsonNode = Lettera()
+
+            Assert.IsFalse(Rifinitura.Riscrivi(documento, "sommario", "Un sommario in una documento."),
+                           "una documento il sommario non ce l'ha")
+            Assert.IsFalse(Rifinitura.Riscrivi(documento, "esperienza.7", "La settima."),
+                           "e nemmeno un'esperienza che non esiste")
+            Assert.AreEqual("Mi candido perché ho esperienza di sala.", Testo(documento, "corpo"),
+                            "il documento è rimasto com'era")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub DopoUnaRiscritturaAManoIlConfrontoDiceComEraPrimaDellaRifinitura()
+
+            ' Il «prima» non si tocca: resta il testo da cui l'AI era partita. Quello che
+            ' cambia è il secondo termine del confronto, che per questo si chiama «adesso»
+            ' e non «dopo» — in mezzo è passata anche la mano dell'utente.
+            Dim documento As JsonNode = Cv()
+            Dim prima As JsonNode = JsonNode.Parse("{""sommario"": ""com'era il sommario""}")
+
+            Rifinitura.Riscrivi(documento, "sommario", "L'ho riscritto io a mano.")
+
+            Dim cambiati As List(Of Rifinitura.CampoRifinito) = Rifinitura.Confronta(documento, prima)
+
+            Assert.HasCount(1, cambiati, "una riga sola")
+            Assert.AreEqual("com'era il sommario", cambiati(0).Prima, "il prima è ancora quello della rifinitura")
+            Assert.AreEqual("L'ho riscritto io a mano.", cambiati(0).Adesso, "e adesso c'è il testo dell'utente")
+
+        End Sub
+
+
+        <TestMethod>
+        Public Sub UnCampoRiportatoComEraEsceDalConfronto()
+
+            ' Il difetto visto solo dal vivo: ripristinando il testo non rifinito, il
+            ' confronto mostrava «Prima» e «Adesso» con dentro la stessa identica frase.
+            Dim documento As JsonNode = Cv()
+            Dim prima As JsonNode = JsonNode.Parse(
+                "{""sommario"": ""com'era il sommario"", ""esperienza.0"": ""Servizio ai tavoli""}")
+
+            Rifinitura.Riscrivi(documento, "esperienza.0", "Servizio ai tavoli")
+
+            Dim cambiati As List(Of Rifinitura.CampoRifinito) = Rifinitura.Confronta(documento, prima)
+
+            Assert.HasCount(1, cambiati, "resta il solo campo che è davvero diverso")
+            Assert.AreEqual("Sommario", cambiati(0).Etichetta, "ed è il sommario")
 
         End Sub
 

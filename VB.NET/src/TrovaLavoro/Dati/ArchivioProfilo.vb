@@ -236,10 +236,18 @@ Namespace Dati
         ''' rileggendolo bisogna poter impaginare e riesportare il CV con le etichette
         ''' della sua lingua, e indovinarlo dal testo non è un mestiere di questo strato.
         ''' </param>
+        ''' <param name="generato">
+        ''' Quando il CV è stato <b>scritto</b>; omesso, è adesso. Lo passa chi risalva un
+        ''' CV che esiste già — la modifica a mano dei testi di P6 (T9d, cap. 08.4) — per
+        ''' non spostare a oggi la data di un documento nato ieri: il pannello la rilegge
+        ''' per dire «questo 📄 CV base l'ho scritto il…», e sarebbe una frase falsa proprio
+        ''' nel punto in cui l'utente decide se fidarsene.
+        ''' </param>
         ''' <returns>Il percorso del file scritto.</returns>
         Public Function SalvaCvBase(cv As JsonNode, versioneProfilo As String,
                                     Optional primaDellaRifinitura As JsonNode = Nothing,
-                                    Optional lingua As String = Nothing) As String
+                                    Optional lingua As String = Nothing,
+                                    Optional generato As Date? = Nothing) As String
 
             If cv Is Nothing Then Throw New ArgumentNullException(NameOf(cv))
 
@@ -247,7 +255,7 @@ Namespace Dati
 
             Dim involucro As New JsonObject From {
                 {"versione_profilo", versioneProfilo},
-                {"generato", Date.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)},
+                {"generato", If(generato, Date.Now).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)},
                 {"lingua", lingua},
                 {"cv", cv.DeepClone()}}
 

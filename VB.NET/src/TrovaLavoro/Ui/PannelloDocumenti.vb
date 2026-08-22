@@ -111,6 +111,35 @@ Public Class PannelloDocumenti
     Private _ilCvBaseNonERifinito As Boolean
 
     ''' <summary>
+    ''' Da quale versione del profilo nasce il 📄 CV base in mostra, e quando fu scritto
+    ''' (T9d, cap. 08.4).
+    ''' </summary>
+    ''' <remarks>
+    ''' Prima non servivano: il CV base si salvava solo appena generato, e allora la
+    ''' versione è l'ultima e il momento è adesso. Da quando i suoi testi si possono
+    ''' riscrivere a mano lo si risalva anche <b>dopo</b>, e ripassare quei due valori
+    ''' come se il CV nascesse ora vorrebbe dire riscriverne la storia: la provenienza
+    ''' diventerebbe un profilo che non è quello da cui nacque, e la data direbbe «l'ho
+    ''' scritto oggi» di un documento di ieri, proprio dove l'utente decide se fidarsene.
+    ''' </remarks>
+    Private _versioneDelCvBase As String
+
+    ''' <inheritdoc cref="_versioneDelCvBase"/>
+    Private _generatoIlCvBase As Date?
+
+    ''' <summary>
+    ''' Se in questa sessione l'utente ha riscritto a mano qualche testo di quel che sta
+    ''' guardando (T9d, cap. 08.4).
+    ''' </summary>
+    ''' <remarks>
+    ''' Serve a una cosa sola: dire, in una conferma che sostituisce i documenti, che a
+    ''' sparire sarà anche il suo lavoro. Vive in memoria e non su disco perché un avviso
+    ''' più forte è un di più, non un dato del documento — e un campo nuovo nei file lo
+    ''' avrebbero pagato anche il backup (T9a) e le due porte del cap. 09.3.
+    ''' </remarks>
+    Private _modificatiAMano As Boolean
+
+    ''' <summary>
     ''' Vero mentre è il pannello a muovere la tendina della lingua, non l'utente.
     ''' </summary>
     ''' <remarks>
@@ -213,11 +242,29 @@ Public Class PannelloDocumenti
         ' scritto — proprio mentre lo stato racconta che è stato eliminato. Qui non c'è
         ' più niente da guardare, e il pannello torna vuoto.
         _sulCvBase = False
-        _cvBase = Nothing
-        _primaDelCvBase = Nothing
+        _modificatiAMano = False
+        LasciaIlCvBase()
         Mostra()
         RaccontaLoStato("Il profilo è stato eliminato: il 📄 CV base che era qui non c'è più.",
                         StileApp.TestoSecondario)
+
+    End Sub
+
+    ''' <summary>
+    ''' Lascia andare il 📄 CV base che era in mostra: il documento, il suo prima/dopo e
+    ''' la provenienza che gli apparteneva.
+    ''' </summary>
+    ''' <remarks>
+    ''' Stanno insieme perché si perdono insieme: una provenienza sopravvissuta al suo
+    ''' documento finirebbe addosso al prossimo, che nasce da un altro profilo e in un
+    ''' altro momento.
+    ''' </remarks>
+    Private Sub LasciaIlCvBase()
+
+        _cvBase = Nothing
+        _primaDelCvBase = Nothing
+        _versioneDelCvBase = Nothing
+        _generatoIlCvBase = Nothing
 
     End Sub
 
@@ -236,8 +283,8 @@ Public Class PannelloDocumenti
 
         _candidatura = candidatura
         _sulCvBase = False
-        _cvBase = Nothing
-        _primaDelCvBase = Nothing
+        _modificatiAMano = False
+        LasciaIlCvBase()
 
         Mostra()
 
@@ -269,8 +316,8 @@ Public Class PannelloDocumenti
 
         _candidatura = Nothing
         _sulCvBase = True
-        _cvBase = Nothing
-        _primaDelCvBase = Nothing
+        _modificatiAMano = False
+        LasciaIlCvBase()
         ' Un 📄 CV-1 base che nasce adesso parte dalla lingua preferita (cap. 03, P8);
         ' uno già salvato tiene la sua, che si rilegge poco più giù.
         _linguaCvBase = If(_contesto Is Nothing,
@@ -315,6 +362,12 @@ Public Class PannelloDocumenti
         _cvBase = salvato.Cv
         _primaDelCvBase = salvato.PrimaDellaRifinitura
         _linguaCvBase = LinguaDocumenti.PerDocumenti(salvato.Lingua)
+
+        ' Da dove viene e di quando è: si tengono perché il CV può essere risalvato dopo
+        ' — la modifica a mano dei suoi testi — e quei due valori sono la sua storia, non
+        ' quella del salvataggio (cap. 08.4).
+        _versioneDelCvBase = salvato.VersioneProfilo
+        _generatoIlCvBase = If(salvato.Generato = Nothing, CType(Nothing, Date?), salvato.Generato)
 
         Mostra()
         RaccontaLoStato(DaDoveViene(salvato), StileApp.TestoSecondario)
@@ -381,6 +434,12 @@ Public Class PannelloDocumenti
 
                 _cvBase = Await _generatore.GeneraCvBaseAsync(
                     JsonNode.Parse(profilo.ComeTesto()), filo.Token, _linguaCvBase).ConfigureAwait(True)
+
+                ' Il CV di prima non c'è più, e con lui le riscritture a mano che aveva.
+                ' Si dimenticano qui e non prima di chiamare: se la generazione fosse
+                ' andata storta, a video sarebbe rimasto quello vecchio — con dentro il
+                ' lavoro dell'utente — e la prossima conferma avrebbe smesso di nominarlo.
+                _modificatiAMano = False
 
                 _primaDelCvBase = Await RifinisciIlCvBaseAsync(filo.Token).ConfigureAwait(True)
 
@@ -541,12 +600,35 @@ Public Class PannelloDocumenti
 
     End Function
 
+    ''' <summary>
+    ''' La riga da aggiungere a una conferma che sostituisce i testi, quando fra quelli
+    ''' che spariscono c'è anche il lavoro dell'utente; vuota quando non ne ha fatto.
+    ''' </summary>
+    ''' <remarks>
+    ''' «Vengono sostituiti» è vero lo stesso, ma di un testo scritto dall'AI si sa che si
+    ''' rifà premendo di nuovo, e di uno scritto a mano no: è l'unico caso in cui il costo
+    ''' di un sì non è un'attesa, è del lavoro perso (cap. 03.3, livello 4).
+    ''' </remarks>
+    Private Function AncheQuelliRiscrittiAMano() As String
+
+        If Not _modificatiAMano Then Return String.Empty
+
+        Return vbLf & "Comprese le modifiche che hai fatto a mano."
+
+    End Function
+
     ''' <summary>Scrive il 📄 CV base accanto al profilo, annotando da quale versione nasce.</summary>
     Private Function ArchiviaIlCvBase() As String
 
         Try
-            _contesto.Archivio.SalvaCvBase(_cvBase, _contesto.Archivio.Versioni().LastOrDefault(),
-                                           _primaDelCvBase, _linguaCvBase)
+            ' La versione e il momento si tengono anche in memoria: da qui in avanti il CV
+            ' può essere risalvato senza rinascere (cap. 08.4), e allora vanno ripassati
+            ' questi e non quelli di allora.
+            _versioneDelCvBase = _contesto.Archivio.Versioni().LastOrDefault()
+            _generatoIlCvBase = Date.Now
+
+            _contesto.Archivio.SalvaCvBase(_cvBase, _versioneDelCvBase,
+                                           _primaDelCvBase, _linguaCvBase, _generatoIlCvBase)
             Return $"Il 📄 CV base è pronto{InQuestaLingua()} ed è salvato col tuo profilo." & vbLf &
                    "Esportalo in DOCX o PDF quando ti va bene." & LaRifinituraSeENonRiuscita()
 
@@ -631,6 +713,136 @@ Public Class PannelloDocumenti
 
     Private Function CEQualcosaDaEsportare() As Boolean
         Return _cvBase IsNot Nothing OrElse (_candidatura IsNot Nothing AndAlso _candidatura.Cv IsNot Nothing)
+    End Function
+
+    ' ==================================================================
+    ' Riscrivere a mano
+    ' ==================================================================
+
+    ''' <summary>
+    ''' Apre la modifica a mano dei testi e, se qualcosa è stato riscritto, lo mette a
+    ''' video e per iscritto (T9d, cap. 08.4).
+    ''' </summary>
+    ''' <remarks>
+    ''' È il metodo che preme il bottone, e le sue due metà stanno fuori di qui — quali
+    ''' documenti si aprono e cosa si fa di quel che torna — perché una finestra modale il
+    ''' banco non la sa chiudere: è lo stesso taglio di
+    ''' <see cref="PannelloDialogo.TrasformaInAppuntiAsync"/>.
+    ''' </remarks>
+    Public Sub ModificaITesti()
+
+        If AiAlLavoro OrElse Not CEQualcosaDaRiscrivere() Then Return
+
+        Dim riscritti As Integer = FinestraModificaTesti.Chiedi(FindForm(), DocumentiDaRiscrivere())
+        If riscritti = 0 Then Return
+
+        ConfermaLeRiscritture(riscritti)
+
+    End Sub
+
+    ''' <summary>
+    ''' Mette a video e per iscritto i testi appena riscritti a mano.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Si salva subito</b>, come per la lingua (v. <see cref="RicordaLaLingua"/>):
+    ''' fra la riscrittura e la prossima azione l'utente può chiudere l'applicazione, e un
+    ''' lavoro perso in silenzio è peggio di un lavoro non offerto.</para>
+    ''' <para><b>Gli export non hanno bisogno di sapere niente</b>: leggono lo stesso
+    ''' documento che la finestra ha appena riscritto (cap. 05.6), e così l'email di P7 e i
+    ''' tool del server (cap. 09.3). Il testo entra da un posto solo, e da lì lo trovano
+    ''' tutti.</para>
+    ''' </remarks>
+    Public Sub ConfermaLeRiscritture(riscritti As Integer)
+
+        If riscritti <= 0 Then Return
+
+        _modificatiAMano = True
+
+        Mostra()
+        RaccontaLoStato(ArchiviaLeRiscritture(riscritti), StileApp.TestoSecondario)
+
+    End Sub
+
+    ''' <summary>
+    ''' I documenti in mostra aperti alla riscrittura, ciascuno col «prima» della sua
+    ''' rifinitura.
+    ''' </summary>
+    ''' <remarks>
+    ''' Sono due per una candidatura — il 🎯 CV mirato e la ✉️ lettera — e uno solo per il
+    ''' 📄 CV base, che una lettera non ce l'ha. Un documento non ancora scritto non
+    ''' compare: non c'è niente da riscrivere finché non esiste.
+    ''' </remarks>
+    Public Function DocumentiDaRiscrivere() As List(Of DocumentoDaRiscrivere)
+
+        Dim aperti As New List(Of DocumentoDaRiscrivere)
+
+        If _sulCvBase Then
+
+            If _cvBase IsNot Nothing Then
+                aperti.Add(New DocumentoDaRiscrivere With {
+                    .Documento = _cvBase, .PrimaDellaRifinitura = _primaDelCvBase})
+            End If
+
+            Return aperti
+
+        End If
+
+        If _candidatura Is Nothing Then Return aperti
+
+        If _candidatura.Cv IsNot Nothing Then
+            aperti.Add(New DocumentoDaRiscrivere With {
+                .Documento = _candidatura.Cv, .PrimaDellaRifinitura = PrimaDi("cv")})
+        End If
+
+        If _candidatura.Lettera IsNot Nothing Then
+            aperti.Add(New DocumentoDaRiscrivere With {
+                .Documento = _candidatura.Lettera, .PrimaDellaRifinitura = PrimaDi("lettera")})
+        End If
+
+        Return aperti
+
+    End Function
+
+    ''' <summary>
+    ''' Se c'è qualcosa da riscrivere: un documento in mostra che abbia dentro della prosa.
+    ''' </summary>
+    ''' <remarks>
+    ''' Non basta che un documento ci sia: un CV senza sommario e senza descrizioni — tutto
+    ''' fatti, che di qui non si toccano — aprirebbe una finestra vuota. Chi risponde è
+    ''' <see cref="Rifinitura"/>, che è l'unico posto che sa quali campi sono prosa.
+    ''' </remarks>
+    Private Function CEQualcosaDaRiscrivere() As Boolean
+
+        Return DocumentiDaRiscrivere().Any(
+            Function(aperto) Rifinitura.CampiDiProsa(aperto.Documento).Count > 0)
+
+    End Function
+
+    ''' <summary>Scrive il documento riscritto dov'è di casa, e racconta com'è andata.</summary>
+    Private Function ArchiviaLeRiscritture(riscritti As Integer) As String
+
+        Dim quanti As String = If(riscritti = 1, "il testo che hai riscritto",
+                                  $"i {riscritti} testi che hai riscritto")
+
+        If _contesto Is Nothing Then Return $"Ho messo {quanti} nel documento."
+
+        Try
+            ' Il CV base torna nel suo file con la storia che aveva: la modifica a mano non
+            ' lo fa rinascere da un altro profilo né in un altro giorno (cap. 08.4).
+            If _sulCvBase Then
+                _contesto.Archivio.SalvaCvBase(_cvBase, _versioneDelCvBase, _primaDelCvBase,
+                                               _linguaCvBase, _generatoIlCvBase)
+            Else
+                _contesto.Opportunita.Salva(_candidatura)
+            End If
+
+            Return $"Ho salvato {quanti}: è quello che esce adesso in DOCX, in PDF e nell'email."
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            Return $"Ho messo {quanti} nel documento, ma non sono riuscita a salvarlo ({ex.Message})."
+        End Try
+
     End Function
 
     ' ==================================================================
@@ -760,7 +972,7 @@ Public Class PannelloDocumenti
             testo.AppendLine().
                   AppendLine($"▸ {campo.Etichetta}").
                   AppendLine().AppendLine("Prima:").AppendLine(campo.Prima).
-                  AppendLine().AppendLine("Dopo:").AppendLine(campo.Dopo)
+                  AppendLine().AppendLine("Adesso:").AppendLine(campo.Adesso)
         Next
 
         Return testo.ToString()
@@ -826,7 +1038,7 @@ Public Class PannelloDocumenti
         ' costa un'altra attesa: si chiede prima (cap. 03.3, livello 4).
         If MessageBox.Show(
             "Vuoi che li riscriva da capo?" & vbLf &
-            "I testi che vedi adesso vengono sostituiti.",
+            "I testi che vedi adesso vengono sostituiti." & AncheQuelliRiscrittiAMano(),
             NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
             MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then Return
 
@@ -853,6 +1065,7 @@ Public Class PannelloDocumenti
         _candidatura.Cv = Nothing
         _candidatura.Lettera = Nothing
         _candidatura.PrimaDellaRifinitura = Nothing
+        _modificatiAMano = False
         Mostra()
 
         Await GeneraLaCandidaturaAsync().ConfigureAwait(True)
@@ -902,7 +1115,7 @@ Public Class PannelloDocumenti
 
         If MessageBox.Show(
             $"Vuoi che riscriva CV e lettera in {nome}?" & vbLf &
-            "I testi che vedi adesso vengono sostituiti.",
+            "I testi che vedi adesso vengono sostituiti." & AncheQuelliRiscrittiAMano(),
             NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
             MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then
 
@@ -945,7 +1158,7 @@ Public Class PannelloDocumenti
 
         If MessageBox.Show(
             $"Vuoi che riscriva il 📄 CV base in {nome}?" & vbLf &
-            "Il testo che vedi adesso viene sostituito.",
+            "Il testo che vedi adesso viene sostituito." & AncheQuelliRiscrittiAMano(),
             NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
             MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then
 
@@ -960,8 +1173,7 @@ Public Class PannelloDocumenti
         ' storta a metà, il pannello non deve restare con un testo italiano impaginato
         ' sotto «Work experience» — e la conferma ha appena detto che viene sostituito.
         _linguaCvBase = scelta
-        _cvBase = Nothing
-        _primaDelCvBase = Nothing
+        LasciaIlCvBase()
         Mostra()
 
         Await GeneraIlCvBaseAsync().ConfigureAwait(True)
@@ -1038,12 +1250,16 @@ Public Class PannelloDocumenti
 
         If _comandi Is Nothing Then
             _comandi = New FasciaDeiComandi(pnlAzioni)
-            _comandi.ASinistra(btnTornaIndietro, btnRigenera)
+            _comandi.ASinistra(btnTornaIndietro, btnRigenera, btnModificaTesti)
             _comandi.ADestra(btnPreparaEmail, btnEsportaPdf, btnEsportaDocx)
         End If
 
         _comandi.Disponi(Math.Max(AltezzaMinimaAzioni, _ingombroLogo.Height))
 
+    End Sub
+
+    Private Sub btnModificaTesti_Click(sender As Object, e As EventArgs) Handles btnModificaTesti.Click
+        ModificaITesti()
     End Sub
 
     Private Sub btnPreparaEmail_Click(sender As Object, e As EventArgs) Handles btnPreparaEmail.Click
@@ -1060,6 +1276,9 @@ Public Class PannelloDocumenti
 
         ' Rigenerare sostituisce testi già scritti: modifica dati esistenti.
         StileApp.VestiBottone(btnRigenera, LivelloBottone.Attenzione)
+
+        ' E riscrivere a mano pure, con la differenza che a scrivere è l'utente.
+        StileApp.VestiBottone(btnModificaTesti, LivelloBottone.Attenzione)
 
         StileApp.VestiBottone(btnEsportaDocx, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnEsportaPdf, LivelloBottone.Esplorativo)
@@ -1133,6 +1352,23 @@ Public Class PannelloDocumenti
                               (_pipeline IsNot Nothing OrElse _generatore IsNot Nothing)
 
         btnTornaIndietro.Enabled = Not occupato
+
+        ' Si riscrive quel che c'è già, e solo la sua prosa (cap. 08.4): su un pannello
+        ' vuoto non c'è niente da aprire, e mentre l'AI scrive nemmeno — riscriverebbero
+        ' in due lo stesso documento.
+        btnModificaTesti.Enabled = Not occupato AndAlso CEQualcosaDaRiscrivere()
+
+        If btnModificaTesti.Enabled Then
+            _suggerimenti.SetToolTip(btnModificaTesti,
+                "Riscrivi tu il sommario, le descrizioni delle esperienze e il corpo della lettera." & vbLf &
+                "I fatti restano quelli del profilo.")
+        ElseIf conDocumento Then
+            _suggerimenti.SetToolTip(btnModificaTesti,
+                "Qui non c'è prosa da riscrivere: in questo documento ci sono solo fatti.")
+        Else
+            _suggerimenti.SetToolTip(btnModificaTesti,
+                "Prima genera i documenti: si riscrive un testo che c'è.")
+        End If
 
         ' La lingua si sceglie su un documento, e i documenti sono due (T7d, cap. 10.3):
         ' quelli della candidatura, dove la lingua è dell'opportunità, e il 📄 CV base,

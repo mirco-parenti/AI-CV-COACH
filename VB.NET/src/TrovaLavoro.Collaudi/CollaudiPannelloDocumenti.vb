@@ -1,5 +1,6 @@
 Imports System.Drawing
 Imports System.IO
+Imports System.IO.Compression
 Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports System.Threading.Tasks
@@ -837,6 +838,192 @@ Namespace Ui
 
         End Function
 
+        ' ==================================================================
+        ' I testi riscritti a mano (T9d, cap. 08.4)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function SiRiscrivonoIDueDocumentiInMostraColLoroPrima() As Task
+
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = GiaScritta(contesto, "it")
+                    candidatura.PrimaDellaRifinitura = JsonNode.Parse(
+                        "{""cv"": {""sommario"": ""Com'era prima.""}}")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim aperti As List(Of DocumentoDaRiscrivere) = pannello.DocumentiDaRiscrivere()
+
+                    Assert.HasCount(2, aperti, "il 🎯 CV mirato e la ✉️ lettera")
+                    Assert.AreSame(candidatura.Cv, aperti(0).Documento, "il CV è quello vero, non una copia")
+                    Assert.AreSame(candidatura.Lettera, aperti(1).Documento, "e la lettera pure")
+
+                    Assert.IsNotNull(aperti(0).PrimaDellaRifinitura, "il CV si porta dietro il suo prima")
+                    Assert.IsNull(aperti(1).PrimaDellaRifinitura,
+                                  "la lettera no, perché la rifinitura non l'aveva cambiata")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function DelCvBaseSiRiscriveIlSoloDocumentoCheCE() As Task
+
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    GiaScritto(contesto, "it")
+
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.HasCount(1, pannello.DocumentiDaRiscrivere(),
+                                    "un documento solo: una lettera il CV base non ce l'ha")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlTestoRiscrittoSiSalvaSubitoConLaCandidatura() As Task
+
+            ' Fra la riscrittura e la prossima azione l'utente può chiudere tutto: un
+            ' lavoro perso in silenzio è peggio di un lavoro non offerto (v. la lingua).
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = GiaScritta(contesto, "it")
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim aperti As List(Of DocumentoDaRiscrivere) = pannello.DocumentiDaRiscrivere()
+                    Assert.IsTrue(Rifinitura.Riscrivi(aperti(0).Documento, "sommario", "L'ho riscritto io."),
+                                  "è la stessa scrittura che fa la finestra")
+
+                    pannello.ConfermaLeRiscritture(1)
+
+                    Assert.AreEqual("L'ho riscritto io.",
+                                    contesto.Opportunita.Carica(candidatura.Cartella).Cv("sommario").GetValue(Of String)(),
+                                    "il testo è già su disco")
+                    Assert.Contains("L'ho riscritto io.", Casella(pannello, "txtCv").Text,
+                                    "e l'anteprima mostra quello che i file conterranno")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlTestoRiscrittoEQuelloCheEsce() As Task
+
+            ' Gli export non sanno niente della modifica a mano: leggono lo stesso
+            ' documento (cap. 05.6). È l'unica prova che quel «da qui in poi esce questo»
+            ' non sia una promessa scritta solo nel messaggio.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    GiaScritto(contesto, "it")
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Rifinitura.Riscrivi(pannello.DocumentiDaRiscrivere()(0).Documento,
+                                        "sommario", "Questo l'ho scritto io.")
+                    pannello.ConfermaLeRiscritture(1)
+
+                    Await pannello.EsportaAsync(FormatiDocumento.Docx)
+
+                    Dim scritti As String() = Directory.GetFiles(contesto.Cartella.CartellaOutProfilo, "*.docx")
+                    Assert.HasCount(1, scritti, "il file c'è")
+                    Assert.Contains("Questo l'ho scritto io.", TestoDelDocx(scritti(0)),
+                                    "e dentro c'è il testo dell'utente, non quello dell'AI")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function RiscrivereIlCvBaseNonNeRiscriveLaStoria() As Task
+
+            ' Il CV è nato ieri da un altro profilo: correggerne una frase oggi non lo fa
+            ' rinascere. Se la provenienza e la data si spostassero, il pannello direbbe
+            ' «l'ho scritto oggi» — e «da allora hai cambiato il profilo» smetterebbe di
+            ' comparire proprio quando serve.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    GiaScrittoIeri(contesto)
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Rifinitura.Riscrivi(pannello.DocumentiDaRiscrivere()(0).Documento,
+                                        "sommario", "L'ho riscritto io.")
+                    pannello.ConfermaLeRiscritture(1)
+
+                    Dim salvato As TrovaLavoro.Dati.CvBase = contesto.Archivio.CaricaCvBase()
+
+                    Assert.AreEqual("L'ho riscritto io.", salvato.Cv("sommario").GetValue(Of String)(),
+                                    "il testo nuovo è su disco")
+                    Assert.AreEqual("profilo-di-ieri", salvato.VersioneProfilo,
+                                    "e nasce ancora dal profilo da cui nacque")
+                    Assert.AreEqual(New Date(2026, 8, 15, 9, 30, 0), salvato.Generato,
+                                    "scritto quando fu scritto")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SiRiscriveSoloDoveCEDellaProsa() As Task
+
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+
+                    Assert.IsFalse(Bottone(pannello, "btnModificaTesti").Enabled,
+                                   "sul pannello vuoto non c'è niente da riscrivere")
+
+                    ' Un CV di soli fatti: nome e competenze vengono dal profilo, e di qui
+                    ' non si toccano.
+                    contesto.Archivio.SalvaCvBase(
+                        JsonNode.Parse("{""tipo"": ""cv_base"", ""intestazione"": {""nome"": ""Luca Ferrari""}}"),
+                        contesto.Archivio.Versioni().LastOrDefault(), Nothing, "it")
+
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.IsTrue(Bottone(pannello, "btnEsportaDocx").Enabled, "il documento c'è e si esporta")
+                    Assert.IsFalse(Bottone(pannello, "btnModificaTesti").Enabled,
+                                   "ma di prosa da riscrivere non ne ha")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function MentreLAiScriveNonSiRiscriveAMano() As Task
+
+            ' Il caso in cui la guardia conta davvero: la lettera manca e il CV c'è già,
+            ' quindi della prosa da riscrivere ce ne sarebbe — ma una chiamata è in volo.
+            ' Senza guardia riscriverebbero in due lo stesso documento, e resterebbe quel
+            ' che arriva per ultimo.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.Cv = JsonNode.Parse(CvMirato)
+
+                    Dim durante As Boolean? = Nothing
+
+                    AddHandler pannello.LavoroAiCambiato,
+                        Sub()
+                            If pannello.AiAlLavoro AndAlso Not durante.HasValue Then
+                                durante = Bottone(pannello, "btnModificaTesti").Enabled
+                            End If
+                        End Sub
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.IsTrue(durante.HasValue, "l'AI è stata chiamata davvero")
+                    Assert.IsFalse(durante.Value, "e col CV già a video il bottone era spento lo stesso")
+                    Assert.IsTrue(Bottone(pannello, "btnModificaTesti").Enabled, "finito il giro si riapre")
+                End Function)
+
+        End Function
+
         ''' <summary>
         ''' Un 📄 CV base già scritto su disco, nella lingua data e sull'ultima versione di
         ''' profilo: è il caso in cui P6 lo ripesca invece di rigenerarlo (T7d).
@@ -845,6 +1032,17 @@ Namespace Ui
 
             contesto.Archivio.SalvaCvBase(JsonNode.Parse(CvBase),
                                           contesto.Archivio.Versioni().LastOrDefault(), Nothing, lingua)
+
+        End Sub
+
+        ''' <summary>
+        ''' Un 📄 CV base scritto <b>ieri</b>, da una versione di profilo che si riconosce
+        ''' a vista: serve a vedere se un risalvataggio gli riscrive la storia (T9d).
+        ''' </summary>
+        Private Shared Sub GiaScrittoIeri(contesto As ContestoApp)
+
+            contesto.Archivio.SalvaCvBase(JsonNode.Parse(CvBase), "profilo-di-ieri", Nothing, "it",
+                                          New Date(2026, 8, 15, 9, 30, 0))
 
         End Sub
 
@@ -922,6 +1120,22 @@ Namespace Ui
 
             contesto.Opportunita.Salva(candidatura)
             Return candidatura
+
+        End Function
+
+        ''' <summary>Il testo dentro un <c>.docx</c>: l'XML del documento, tag compresi.</summary>
+        ''' <remarks>
+        ''' Basta per chiedersi «questa frase c'è dentro?», che è l'unica domanda che il
+        ''' banco fa a un file impaginato: come sia impaginato lo guarda
+        ''' <c>CollaudiImpaginazione</c>, e come sia fatto lo ZIP <c>CollaudiScrittoreDocx</c>.
+        ''' </remarks>
+        Private Shared Function TestoDelDocx(percorso As String) As String
+
+            Using archivio As ZipArchive = ZipFile.OpenRead(percorso)
+                Using lettore As New StreamReader(archivio.GetEntry("word/document.xml").Open())
+                    Return lettore.ReadToEnd()
+                End Using
+            End Using
 
         End Function
 
