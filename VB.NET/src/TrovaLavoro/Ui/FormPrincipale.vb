@@ -1,4 +1,4 @@
-Imports System.Drawing
+﻿Imports System.Drawing
 Imports System.Windows.Forms
 Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Documenti
@@ -186,7 +186,7 @@ Public Class FormPrincipale
     End Sub
 
     Private Function BottoniDiNavigazione() As Button()
-        Return {btnHome, btnProfilo, btnRicerca, btnCandidatura, btnImpostazioni}
+        Return {btnHome, btnProfilo, btnRicerca, btnCandidatura, btnDocumenti, btnImpostazioni}
     End Function
 
     Private Sub btnHome_Click(sender As Object, e As EventArgs) Handles btnHome.Click
@@ -262,6 +262,17 @@ Public Class FormPrincipale
 
         MostraPannello(pnlOpportunita, btnCandidatura)
         pnlOpportunita.RiapriLaCandidatura(e.Candidatura)
+
+    End Sub
+
+    ''' <summary>
+    ''' La voce «📄 Documenti» della barra (T9d): porta a P6 da fermo, senza passare da un
+    ''' flusso. Si torna alla Home, che è la casa di chi si sposta con la barra.
+    ''' </summary>
+    Private Async Sub btnDocumenti_Click(sender As Object, e As EventArgs) Handles btnDocumenti.Click
+
+        VaiAiDocumenti(pnlHome, btnHome)
+        Await pnlDocumenti.ApriQualcosaAsync()
 
     End Sub
 
@@ -446,12 +457,19 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>Porta ai documenti, ricordandosi la strada da cui si è arrivati.</summary>
+    ''' <remarks>
+    ''' <b>In barra si accende «📄 Documenti», qualunque sia la strada</b> (T9d). Prima si
+    ''' teneva acceso il bottone di provenienza, perché P6 non era una destinazione ma il
+    ''' passo successivo di un flusso; da quando ha una voce sua, la barra direbbe di
+    ''' trovarsi in un posto diverso da quello che si sta guardando. Dove si torna, invece,
+    ''' resta la strada percorsa: alla candidatura, al profilo o alla Home.
+    ''' </remarks>
     Private Sub VaiAiDocumenti(daDove As Control, conQualeBottone As Button)
 
         _ritornoDaiDocumenti = daDove
         _bottoneDelRitorno = conQualeBottone
 
-        MostraPannello(pnlDocumenti, conQualeBottone)
+        MostraPannello(pnlDocumenti, btnDocumenti)
 
     End Sub
 

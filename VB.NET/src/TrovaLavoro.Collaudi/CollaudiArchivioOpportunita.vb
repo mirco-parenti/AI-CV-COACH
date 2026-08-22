@@ -1,4 +1,4 @@
-Imports System.IO
+﻿Imports System.IO
 Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
@@ -50,50 +50,18 @@ Namespace Dati
         End Function
 
         <TestMethod>
-        Public Sub IlPrimaDellaRifinituraViaggiaConLoStato()
+        Public Sub LoStatoNonPortaPiuIlTestoDiPrimaDellaRifinitura()
 
-            ' T7b, cap. 08.4: i testi di prima stanno nello stato.json e non dentro i
-            ' documenti, perché il CV mirato finisce nel prompt della lettera e la lettera
-            ' in quello dell'email — un campo di servizio scritto nel documento arriverebbe
-            ' fin dentro quelle richieste.
-            ConArchivioTemporaneo(
-                Sub(archivio, cartella)
-                    Dim o As Opportunita = OpportunitaDiProva()
-                    o.PrimaDellaRifinitura = JsonNode.Parse(
-                        "{""cv"": {""sommario"": ""com'era il sommario""}," &
-                        """lettera"": {""corpo"": ""com'era il corpo""}}")
-
-                    Dim dove As String = archivio.Salva(o)
-
-                    Assert.DoesNotContain("com'era", File.ReadAllText(Path.Combine(dove, "cv.json")),
-                                          "il documento resta il documento")
-
-                    Dim riletta As Opportunita = archivio.Carica(dove)
-
-                    Assert.AreEqual("com'era il sommario",
-                                    riletta.PrimaDellaRifinitura("cv")("sommario").GetValue(Of String)(),
-                                    "il prima del CV si rilegge")
-                    Assert.AreEqual("com'era il corpo",
-                                    riletta.PrimaDellaRifinitura("lettera")("corpo").GetValue(Of String)(),
-                                    "e quello della lettera")
-                End Sub)
-
-        End Sub
-
-        <TestMethod>
-        Public Sub SenzaRifinituraLoStatoNonHaQuelCampo()
-
-            ' Scriverlo vuoto direbbe «è stata fatta e non ha toccato niente» esattamente
-            ' come non scriverlo — e un file si legge meglio senza righe che non raccontano.
-            ' Vale anche per le cartelle nate prima di T7b, che si riaprono uguali.
+            ' Il campo «rifinitura» si è scritto da T7b a T9d: teneva i testi da cui
+            ' l'anti-slop era partito, per il prima/dopo di P6. Tolto quello, il testo di
+            ' prima non serve più a nessuno — e un dato che nessuno legge è un dato che
+            ' invecchia in silenzio dentro i file dell'utente (2026-08-22).
             ConArchivioTemporaneo(
                 Sub(archivio, cartella)
                     Dim dove As String = archivio.Salva(OpportunitaDiProva())
 
                     Assert.DoesNotContain("""rifinitura""", File.ReadAllText(Path.Combine(dove, "stato.json")),
-                                          "nessun campo scritto per simmetria")
-                    Assert.IsNull(archivio.Carica(dove).PrimaDellaRifinitura,
-                                  "e riaprendola non c'è niente da mostrare")
+                                          "il campo non si scrive più")
                 End Sub)
 
         End Sub

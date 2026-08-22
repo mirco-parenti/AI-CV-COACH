@@ -1,4 +1,4 @@
-Imports System.Drawing
+﻿Imports System.Drawing
 Imports System.IO
 Imports System.Linq
 Imports System.Threading.Tasks
@@ -613,6 +613,37 @@ Namespace Ui
                         pannello.Candidatura.Cartella, ArchivioOpportunita.FileStato))
                     Assert.Contains("Indeed", stato)
                     Assert.Contains("viewjob", stato)
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlCatturatoSiLeggeConGliACapoAlLoroPosto() As Task
+
+            ' T9d (2026-08-22), trovato nella prova dal vivo: il lettore di pagine cuce i
+            ' pezzi con \n (cap. 06.4) e una casella multiriga di Windows i \n non li
+            ' mostra — una pagina intera arrivava in un blocco unico e illeggibile, proprio
+            ' dove si promette all'utente che potrà rileggerla e correggerla. Il difetto
+            ' viveva solo a video: il testo mandato all'AI era già giusto.
+            Await ConPannelloAsync(PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Await pannello.AnalizzaIlCatturatoAsync(
+                        "Addetto spedizioni" & vbCrLf & "Atena Service" & vbLf & "Rapallo, Liguria",
+                        "Indeed", "https://it.indeed.com/viewjob?jk=9f3c1a")
+
+                    Dim aVideo As String = Casella(pannello, "txtAnnuncio").Text
+
+                    Assert.Contains("Addetto spedizioni" & vbCrLf & "Atena Service", aVideo,
+                                    "le righe restano righe")
+                    Assert.HasCount(3, aVideo.Split(New String() {vbCrLf}, StringSplitOptions.None),
+                                    "tre righe, non un blocco solo")
+                    ' Il testo arriva misto di proposito: è cucito da più pezzi di pagina,
+                    ' e chi converte i \n senza passare prima da lì riempie di righe vuote
+                    ' quello che i CRLF ce li aveva già.
+                    Assert.DoesNotContain(vbCrLf & vbCrLf, aVideo,
+                                          "e nessuna riga vuota inventata da una doppia conversione")
 
                 End Function)
 

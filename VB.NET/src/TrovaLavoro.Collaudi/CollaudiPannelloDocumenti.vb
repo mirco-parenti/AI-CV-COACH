@@ -1,4 +1,4 @@
-Imports System.Drawing
+﻿Imports System.Drawing
 Imports System.IO
 Imports System.IO.Compression
 Imports System.Linq
@@ -360,9 +360,9 @@ Namespace Ui
                                     Casella(pannello, "txtCv").Text, "a video c'è il testo rifinito")
 
                     Dim salvato As TrovaLavoro.Dati.CvBase = contesto.Archivio.CaricaCvBase()
-                    Assert.AreEqual("Il ritratto del profilo.",
-                                    salvato.PrimaDellaRifinitura("sommario").GetValue(Of String)(),
-                                    "e nel file, accanto al CV, com'era prima")
+                    Assert.AreEqual("Il ritratto del profilo, riscritto.",
+                                    salvato.Cv("sommario").GetValue(Of String)(),
+                                    "e nel file c'è il testo rifinito, il solo che si conserva")
                 End Function,
                 rifinitore)
 
@@ -394,68 +394,6 @@ Namespace Ui
                                     "e chi ha l'anti-slop acceso non deve crederlo rifinito")
                 End Function,
                 rifinitore)
-
-        End Function
-
-        <TestMethod>
-        Public Async Function LaCasellaSiAccendeSoloDoveCEQualcosaDaConfrontare() As Task
-
-            Dim generatore As New GeneratoreFinto
-            generatore.Dara(CvBase)
-
-            Await ConPannelloAsync(
-                generatore,
-                Async Function(pannello, contesto, documenti)
-                    Dim spunta As CheckBox = Casella(Of CheckBox)(pannello, "chkRifinitura")
-
-                    ' Senza rifinitore montato la generazione non rifinisce niente.
-                    Await pannello.MostraIlCvBaseAsync()
-                    Assert.IsFalse(spunta.Enabled, "niente è cambiato: niente da guardare")
-
-                    Dim candidatura As Opportunita = Confrontata(contesto)
-                    candidatura.Cv = JsonNode.Parse(CvMirato)
-                    candidatura.Lettera = JsonNode.Parse(Lettera)
-                    candidatura.PrimaDellaRifinitura = JsonNode.Parse(
-                        "{""cv"": {""sommario"": ""Quattro anni — di magazzino.""}}")
-
-                    Await pannello.MostraLaCandidaturaAsync(candidatura)
-                    Assert.IsTrue(spunta.Enabled, "qui invece un prima c'è, e si può guardare")
-                End Function)
-
-        End Function
-
-        <TestMethod>
-        Public Async Function SpuntandoLaCasellaCompareIlPrimaDopoAccantoAlDocumento() As Task
-
-            ' Il confronto sta in coda e non al posto dell'anteprima: il documento vero è
-            ' quello sopra, e serve a controllare che la rifinitura non abbia cambiato un
-            ' fatto (cap. 08.4).
-            Await ConPannelloAsync(
-                Nothing,
-                Async Function(pannello, contesto, documenti)
-                    Dim candidatura As Opportunita = Confrontata(contesto)
-                    candidatura.Cv = JsonNode.Parse(CvMirato)
-                    candidatura.Lettera = JsonNode.Parse(Lettera)
-                    candidatura.PrimaDellaRifinitura = JsonNode.Parse(
-                        "{""cv"": {""sommario"": ""Quattro anni — di magazzino.""}," &
-                        """lettera"": {""corpo"": ""Ho quattro anni — di magazzino.""}}")
-
-                    Await pannello.MostraLaCandidaturaAsync(candidatura)
-
-                    Dim cv As TextBox = Casella(pannello, "txtCv")
-                    Assert.DoesNotContain("PRIMA DELLA RIFINITURA", cv.Text,
-                                          "a casella spenta si legge il documento e basta")
-
-                    Casella(Of CheckBox)(pannello, "chkRifinitura").Checked = True
-
-                    Assert.Contains("Quattro anni di magazzino.", cv.Text, "il documento resta sopra")
-                    Assert.Contains("PRIMA DELLA RIFINITURA", cv.Text, "e sotto arriva il confronto")
-                    Assert.Contains("Sommario", cv.Text, "col nome del campo in italiano")
-                    Assert.Contains("Quattro anni — di magazzino.", cv.Text, "e com'era, lineetta compresa")
-
-                    Assert.Contains("Corpo della lettera", Casella(pannello, "txtLettera").Text,
-                                    "anche la lettera ha il suo")
-                End Function)
 
         End Function
 
@@ -532,6 +470,233 @@ Namespace Ui
 
         End Function
 
+        <TestMethod>
+        Public Async Function EsportareDoveDiceLUtenteLasciaLaCopiaCheServeAllEmail() As Task
+
+            ' T9d (2026-08-22): i file nascono nella cartella della candidatura e di lì li
+            ' prende P7 per allegarli all'email. La cartella scelta dall'utente riceve una
+            ' copia; portarli via invece di copiarli lascerebbe l'email a mani vuote.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim scelta As String = Path.Combine(contesto.Cartella.Radice, "scelta-dall-utente")
+
+                    Dim finiti As IReadOnlyList(Of String) =
+                        Await pannello.EsportaAsync(FormatiDocumento.Docx, scelta)
+
+                    Assert.HasCount(2, Directory.GetFiles(scelta, "*.docx"),
+                                    "il CV e la lettera stanno dove l'utente li ha chiesti")
+                    Assert.HasCount(2, Directory.GetFiles(ArchivioOpportunita.CartellaOut(candidatura), "*.docx"),
+                                    "e restano anche nella cartella della candidatura, dove P7 li cerca")
+                    Assert.HasCount(2, finiti, "tornano i file su cui l'utente può mettere le mani")
+                    Assert.Contains("scelta-dall-utente", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "e il pannello dice dove sono finiti")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlPermessoDiSostituireSiChiedeSoloQuandoServeENegarloNonToccaNiente() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Await pannello.MostraLaCandidaturaAsync(Confrontata(contesto))
+
+                    Dim scelta As String = Path.Combine(contesto.Cartella.Radice, "scelta-dall-utente")
+                    Dim chiesto As Boolean = False
+
+                    ' Cartella vuota: non c'è niente da sostituire, e una domanda che non
+                    ' ha oggetto è solo un clic in più.
+                    Await pannello.EsportaAsync(FormatiDocumento.Docx, scelta,
+                                                Function(nomi)
+                                                    chiesto = True
+                                                    Return True
+                                                End Function)
+
+                    Assert.IsFalse(chiesto, "la prima volta non si chiede niente a nessuno")
+
+                    ' Adesso in quella cartella i file ci sono: al posto del primo metto
+                    ' qualcosa di riconoscibile, che deve sopravvivere al rifiuto.
+                    Dim primo As String = Directory.GetFiles(scelta, "*.docx").First()
+                    File.WriteAllText(primo, "questo è il file di ieri")
+
+                    Dim finiti As IReadOnlyList(Of String) =
+                        Await pannello.EsportaAsync(FormatiDocumento.Docx, scelta,
+                                                    Function(nomi)
+                                                        chiesto = True
+                                                        Return False
+                                                    End Function)
+
+                    Assert.IsTrue(chiesto, "la seconda volta sì: quei file verrebbero sostituiti")
+                    Assert.AreEqual("questo è il file di ieri", File.ReadAllText(primo),
+                                    "e chi dice di no se li ritrova come stavano")
+                    Assert.IsEmpty(finiti, "non si torna con file che non sono stati scritti")
+                    Assert.Contains("Non ho sostituito", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "il pannello lo dice, invece di far credere a un'esportazione riuscita")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function ColPermessoIFileVengonoSostituiti() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Await pannello.MostraLaCandidaturaAsync(Confrontata(contesto))
+
+                    Dim scelta As String = Path.Combine(contesto.Cartella.Radice, "scelta-dall-utente")
+
+                    Await pannello.EsportaAsync(FormatiDocumento.Docx, scelta)
+
+                    Dim primo As String = Directory.GetFiles(scelta, "*.docx").First()
+                    File.WriteAllText(primo, "questo è il file di ieri")
+
+                    Await pannello.EsportaAsync(FormatiDocumento.Docx, scelta, Function(nomi) True)
+
+                    ' Un DOCX è un archivio: quello vero pesa, la riga di prima no.
+                    Assert.IsGreaterThan(1000, New FileInfo(primo).Length,
+                                         "al posto della riga di ieri c'è di nuovo un documento")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function EsportareNellaCartellaDoveIFileNasconoNonLiCopiaSuSeStessi() As Task
+
+            ' Copiare un file su se stesso non si può, e chi sceglie proprio la cartella
+            ' della candidatura non sta sbagliando niente: i file sono già dove li vuole.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim uscita As String = ArchivioOpportunita.CartellaOut(candidatura)
+
+                    Dim finiti As IReadOnlyList(Of String) =
+                        Await pannello.EsportaAsync(FormatiDocumento.Docx, uscita)
+
+                    Assert.HasCount(2, finiti, "l'esportazione riesce lo stesso")
+                    Assert.HasCount(2, Directory.GetFiles(uscita, "*.docx"), "e i file sono quelli, non il doppio")
+                    Assert.Contains(".docx", Etichetta(pannello, "lblStatoDocumenti").Text, "senza un errore da raccontare")
+                End Function)
+
+        End Function
+
+
+        ' ==================================================================
+        ' La tendina dei documenti e la voce della barra (T9d)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function LaTendinaElencaSoloIDocumentiCheEsistono() As Task
+
+            ' Elencare un documento non ancora scritto vorrebbe dire far partire una
+            ' generazione a chi credeva di spostarsi fra due schermate.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase).Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+
+                    ' Una candidatura salvata su disco ma senza documenti: in tendina non
+                    ' deve comparire, perché aprirla non mostrerebbe niente.
+                    Confrontata(contesto)
+
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Dim tendina As ComboBox = Scelta(pannello, "cmbDocumento")
+                    Assert.HasCount(1, tendina.Items, "c'è solo il CV base, che è l'unico documento scritto")
+                    Assert.Contains("CV base", tendina.Items(0).ToString(), "ed è lui")
+                    Assert.AreEqual(0, tendina.SelectedIndex, "segnato come quello in mostra")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function DallaTendinaSiSaltaDaUnDocumentoAllAltro() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+
+                    ' Prima il CV base (che si salva su disco), poi una candidatura coi
+                    ' suoi documenti già scritti.
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.Cv = JsonNode.Parse(CvMirato)
+                    candidatura.Lettera = JsonNode.Parse(Lettera)
+                    contesto.Opportunita.Salva(candidatura)
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim tendina As ComboBox = Scelta(pannello, "cmbDocumento")
+                    Assert.HasCount(2, tendina.Items, "adesso i documenti sono due")
+
+                    Dim rigaDelCvBase As Integer = -1
+                    For i As Integer = 0 To tendina.Items.Count - 1
+                        If tendina.Items(i).ToString().Contains("CV base") Then rigaDelCvBase = i
+                    Next
+                    Assert.IsTrue(rigaDelCvBase >= 0, "il CV base è in elenco")
+
+                    ' Il salto: si sceglie la riga del CV base e il pannello ci va, senza
+                    ' passare dalla Home e senza chiamare l'AI (il CV base è già scritto).
+                    Dim chiamatePrima As Integer = generatore.LingueChieste.Count
+                    Await pannello.ApriDallaTendinaAsync(rigaDelCvBase)
+
+                    Assert.Contains("CV base", Etichetta(pannello, "lblCv").Text, "si sta guardando il CV base")
+                    Assert.HasCount(chiamatePrima, generatore.LingueChieste, "e non è costato una generazione")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function EntrareDaiDocumentiNonChiamaMaiLAi() As Task
+
+            ' La voce «📄 Documenti» della barra è navigazione: senza niente da mostrare il
+            ' pannello resta vuoto e lo spiega, invece di mettersi a generare.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+
+                    Await pannello.ApriQualcosaAsync()
+
+                    Assert.IsEmpty(generatore.LingueChieste, "nessuna generazione partita da sola")
+                    Assert.Contains("Non c'è ancora nessun documento",
+                                    Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "e il pannello dice come farne uno")
+
+                End Function)
+
+        End Function
+
         ' ==================================================================
         ' Quando l'AI non c'è, e le tappe che verranno
         ' ==================================================================
@@ -567,10 +732,12 @@ Namespace Ui
                 ' un pannello vuoto non c'è nessun documento a cui quella lingua appartenga.
                 Assert.IsFalse(Scelta(pannello, "cmbLingua").Enabled,
                                "niente lingua, che senza documenti non ha padrone")
-                ' Da T7b la casella non è più «quel che arriverà»: è spenta perché su un
-                ' pannello vuoto non c'è nessun prima/dopo da guardare.
-                Assert.IsFalse(Casella(Of CheckBox)(pannello, "chkRifinitura").Enabled,
-                               "e niente prima/dopo, che senza documenti non esiste")
+                ' La casella del prima/dopo stava qui fino a T9d: quel confronto si guarda
+                ' adesso dentro «Modifica i testi», col bottone che va avanti e indietro.
+                ' Al suo posto c'è la tendina dei documenti, spenta finché il pannello non
+                ' è collegato a una cartella dati da cui elencarli.
+                Assert.IsFalse(Scelta(pannello, "cmbDocumento").Enabled,
+                               "e niente tendina dei documenti, che senza dati non ha niente da elencare")
                 Assert.IsFalse(Bottone(pannello, "btnPreparaEmail").Enabled, "l'email arriva con T6")
 
                 Assert.AreEqual(LivelloBottone.AzionePrincipale,
@@ -843,14 +1010,12 @@ Namespace Ui
         ' ==================================================================
 
         <TestMethod>
-        Public Async Function SiRiscrivonoIDueDocumentiInMostraColLoroPrima() As Task
+        Public Async Function SiRiscrivonoIDueDocumentiInMostra() As Task
 
             Await ConPannelloAsync(
                 Nothing,
                 Async Function(pannello, contesto, documenti)
                     Dim candidatura As Opportunita = GiaScritta(contesto, "it")
-                    candidatura.PrimaDellaRifinitura = JsonNode.Parse(
-                        "{""cv"": {""sommario"": ""Com'era prima.""}}")
 
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
 
@@ -860,9 +1025,6 @@ Namespace Ui
                     Assert.AreSame(candidatura.Cv, aperti(0).Documento, "il CV è quello vero, non una copia")
                     Assert.AreSame(candidatura.Lettera, aperti(1).Documento, "e la lettera pure")
 
-                    Assert.IsNotNull(aperti(0).PrimaDellaRifinitura, "il CV si porta dietro il suo prima")
-                    Assert.IsNull(aperti(1).PrimaDellaRifinitura,
-                                  "la lettera no, perché la rifinitura non l'aveva cambiata")
                 End Function)
 
         End Function
@@ -978,7 +1140,7 @@ Namespace Ui
                     ' non si toccano.
                     contesto.Archivio.SalvaCvBase(
                         JsonNode.Parse("{""tipo"": ""cv_base"", ""intestazione"": {""nome"": ""Luca Ferrari""}}"),
-                        contesto.Archivio.Versioni().LastOrDefault(), Nothing, "it")
+                        contesto.Archivio.Versioni().LastOrDefault(), "it")
 
                     Await pannello.MostraIlCvBaseAsync()
 
@@ -1031,7 +1193,7 @@ Namespace Ui
         Private Shared Sub GiaScritto(contesto As ContestoApp, lingua As String)
 
             contesto.Archivio.SalvaCvBase(JsonNode.Parse(CvBase),
-                                          contesto.Archivio.Versioni().LastOrDefault(), Nothing, lingua)
+                                          contesto.Archivio.Versioni().LastOrDefault(), lingua)
 
         End Sub
 
@@ -1041,7 +1203,7 @@ Namespace Ui
         ''' </summary>
         Private Shared Sub GiaScrittoIeri(contesto As ContestoApp)
 
-            contesto.Archivio.SalvaCvBase(JsonNode.Parse(CvBase), "profilo-di-ieri", Nothing, "it",
+            contesto.Archivio.SalvaCvBase(JsonNode.Parse(CvBase), "profilo-di-ieri", "it",
                                           New Date(2026, 8, 15, 9, 30, 0))
 
         End Sub

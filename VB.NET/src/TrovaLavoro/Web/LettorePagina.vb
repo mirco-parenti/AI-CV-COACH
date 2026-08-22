@@ -1,4 +1,4 @@
-Imports System.Globalization
+﻿Imports System.Globalization
 Imports System.Text.Json
 Imports System.Text.Json.Nodes
 Imports System.Threading.Tasks
@@ -254,6 +254,20 @@ Namespace Web
         ''' Il JavaScript che legge i tre pezzi in un colpo solo: tre viaggi separati
         ''' potrebbero cadere su tre pagine diverse, se l'utente naviga nel frattempo.
         ''' </summary>
+        ''' <remarks>
+        ''' <para><b>Un pezzo che non porta né lettere né cifre non entra nel testo</b>
+        ''' <i>(T9d, 2026-08-22)</i>. Le pagine dei portali sono piene di elementi che
+        ''' l'occhio legge come <i>grafica</i> — una linea di separazione, un pallino, uno
+        ''' spazio — e che al copione arrivano come testo: su Indeed sono <c>&amp;nbsp;</c>
+        ''' scritti per esteso, sei caratteri per ogni riga grigia che si vede a video. Non
+        ''' ingannano l'AI, che li ignora, ma sporcano il testo che l'utente deve poter
+        ''' rileggere e correggere (cap. 06.4).</para>
+        ''' <para><b>Le entità HTML si tolgono prima di giudicare</b>, o il criterio le
+        ''' lascerebbe passare tutte: in <c>&amp;nbsp;</c> di lettere ce ne sono quattro.
+        ''' Si toglie solo per <i>decidere</i> — quel che resta dentro un pezzo che entra
+        ''' non si tocca — e si scarta soltanto ciò che, tolte quelle, non ha più niente da
+        ''' dire.</para>
+        ''' </remarks>
         Private Shared Function Copione() As String
 
             Dim massimo As String = MassimoCaratteri.ToString(CultureInfo.InvariantCulture)
@@ -268,6 +282,14 @@ Namespace Web
                    "    if (!s || !s.display) return false;" &
                    "    return s.display.indexOf('inline') !== 0 && s.display !== 'contents';" &
                    "  }" &
+                   "  function utile(s) {" &
+                   "    var t = s.replace(/&[a-zA-Z]+;|&#[0-9]+;/g, ' ');" &
+                   "    return /[\p{L}\p{N}]/u.test(t);" &
+                   "  }" &
+                   "  function metti(pezzi, s) {" &
+                   "    var t = s && s.trim();" &
+                   "    if (t && utile(t)) pezzi.push(t);" &
+                   "  }" &
                    "  function daSaltare(e) {" &
                    "    var g = e.tagName;" &
                    "    return g === 'SCRIPT' || g === 'STYLE' || g === 'NOSCRIPT' || g === 'TEMPLATE';" &
@@ -281,14 +303,14 @@ Namespace Web
                    "    }" &
                    "    if (!dentroCiSonoBlocchi) {" &
                    "      var tutto = e.innerText;" &
-                   "      if (tutto && tutto.trim()) pezzi.push(tutto.trim());" &
+                   "      metti(pezzi, tutto);" &
                    "      return;" &
                    "    }" &
                    "    for (var j = 0; j < figli.length; j++) {" &
                    "      var f = figli[j];" &
                    "      if (f.nodeType === 3) {" &
                    "        var suo = f.nodeValue;" &
-                   "        if (suo && suo.trim()) pezzi.push(suo.trim());" &
+                   "        metti(pezzi, suo);" &
                    "        continue;" &
                    "      }" &
                    "      if (f.nodeType !== 1 || daSaltare(f) || !visibile(f)) continue;" &

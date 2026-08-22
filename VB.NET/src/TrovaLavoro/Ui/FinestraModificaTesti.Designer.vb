@@ -1,4 +1,4 @@
-<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class FinestraModificaTesti
     Inherits System.Windows.Forms.Form
 
@@ -30,7 +30,6 @@ Partial Class FinestraModificaTesti
         Me.colSegno = New System.Windows.Forms.ColumnHeader()
         Me.lblModifica = New System.Windows.Forms.Label()
         Me.txtTesto = New System.Windows.Forms.TextBox()
-        Me.btnRipristina = New System.Windows.Forms.Button()
         Me.btnSalva = New System.Windows.Forms.Button()
         Me.btnAnnulla = New System.Windows.Forms.Button()
         Me.SuspendLayout()
@@ -101,14 +100,6 @@ Partial Class FinestraModificaTesti
         Me.txtTesto.Size = New System.Drawing.Size(772, 110)
         Me.txtTesto.TabIndex = 4
         '
-        'btnRipristina
-        '
-        Me.btnRipristina.Location = New System.Drawing.Point(14, 518)
-        Me.btnRipristina.Name = "btnRipristina"
-        Me.btnRipristina.Size = New System.Drawing.Size(280, 32)
-        Me.btnRipristina.TabIndex = 5
-        Me.btnRipristina.Text = "Ripristina il testo non rifinito"
-        '
         'btnSalva
         '
         Me.btnSalva.Location = New System.Drawing.Point(536, 518)
@@ -133,7 +124,6 @@ Partial Class FinestraModificaTesti
         Me.Controls.Add(Me.lvwCampi)
         Me.Controls.Add(Me.lblModifica)
         Me.Controls.Add(Me.txtTesto)
-        Me.Controls.Add(Me.btnRipristina)
         Me.Controls.Add(Me.btnSalva)
         Me.Controls.Add(Me.btnAnnulla)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
@@ -155,7 +145,6 @@ Partial Class FinestraModificaTesti
     Friend WithEvents colSegno As System.Windows.Forms.ColumnHeader
     Friend WithEvents lblModifica As System.Windows.Forms.Label
     Friend WithEvents txtTesto As System.Windows.Forms.TextBox
-    Friend WithEvents btnRipristina As System.Windows.Forms.Button
     Friend WithEvents btnSalva As System.Windows.Forms.Button
     Friend WithEvents btnAnnulla As System.Windows.Forms.Button
 

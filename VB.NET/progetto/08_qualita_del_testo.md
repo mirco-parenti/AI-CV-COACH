@@ -64,6 +64,16 @@ perde contro la forma.*
   riscrivere quello scelto e il «Ripristina il testo non rifinito», acceso sui soli campi
   che l'anti-slop aveva cambiato. Tre scelte che il capitolo prometteva insieme e che
   insieme adesso ci sono — accettare è non toccare niente.*
+  *Poche ore dopo, **il prima/dopo è stato tolto del tutto** — la casella di P6, il
+  «Ripristina il testo non rifinito» della finestra e il testo di prima conservato nei file
+  (2026-08-22). **Le tre cose promesse restano due**: accettare e riscrivere a mano. La
+  decisione è di Mirco, presa guardando cosa la rifinitura cambiava davvero sui suoi dati:
+  su una candidatura vera, cinque modifiche in tutto — un «una significativa» tolto davanti
+  a «esperienza», e quattro lineette lunghe diventate virgole o parentesi. **Nessun fatto
+  toccato**, mai. Un confronto che l'utente non riesce a distinguere non è una garanzia che
+  usa: è un comando in più da capire. La garanzia contro l'anti-slop che sbaglia resta dove
+  è sempre stata davvero — nella regola qui sotto: se l'anti-slop cambia un fatto, si
+  corregge il prompt nel pool. E chi vuole il testo grezzo ha l'interruttore in P8.*
 - **Si riscrive la prosa, non i fatti** *(T9d)*. I campi aperti alla modifica sono quelli
   che l'anti-slop tocca — sommario, descrizioni delle esperienze, corpo della lettera — e
   a dire quali siano è la stessa classe che li rifinisce (8.2): una seconda lista
@@ -93,7 +103,10 @@ perde contro la forma.*
   termine è il documento **com'è in questo momento**: se in mezzo è passata anche la mano
   dell'utente, «adesso» resta vero e «dopo la rifinitura» no. Il «prima» invece non si
   tocca mai — resta il testo da cui l'AI era partita, ed è quello che il «Ripristina»
-  rimette nella casella.
+  rimette nella casella. *Vale finché il «prima» esiste: **dal 2026-08-22 non si conserva
+  più**, e con lui se ne vanno il confronto e il ripristino (v. sopra). Il campo
+  `rifinitura` non si scrive più né in `stato.json` né in `cv_base.json`; nei file di prima
+  c'è ancora e viene ignorato, e sparisce da sé al primo salvataggio.*
 - La rifinitura si può disattivare (Impostazioni), ma è attiva di default: è parte
   dell'identità del prodotto. *A T7b è sempre attiva: l'interruttore vive in P8, che è
   di T9.* *E a **T9b** (2026-08-21) l'interruttore c'è, in P8: «Rifinisci i testi generati
@@ -105,9 +118,11 @@ perde contro la forma.*
   già succede quando una rifinitura fallisce; e non si chiama l'AI affatto, perché
   interrogare il modello per poi buttarne via la risposta costerebbe soldi e tempo a chi
   l'ha spenta apposta.*
-- Regola pratica ereditata dal metodo del progetto: se il prima/dopo rivela che la
-  rifinitura ha cambiato un fatto, è un difetto del prompt da correggere nel pool, non
-  un caso da sistemare a mano in silenzio.
+- Regola pratica ereditata dal metodo del progetto: se la rifinitura cambia un fatto, è un
+  difetto del prompt da correggere nel pool, non un caso da sistemare a mano in silenzio.
+  *Dal 2026-08-22 questa è la sola garanzia rimasta, e la sola che sia mai stata davvero
+  tale: il prima/dopo a video faceva vedere il ritocco a chi lo cercava, ma a chiudere il
+  buco è sempre stata la correzione del prompt.*
 - **La rifinitura non è una funzione del pannello** *(T8b, 2026-08-19)*: anche i documenti
   chiesti dal **server MCP** ci passano, anti-slop compreso (cap. 09.3). Chi chiede da
   fuori riceve gli stessi testi di chi preme il bottone — una differenza di qualità fra le
@@ -171,7 +186,8 @@ arriverebbe insieme a loro.
 **Quel che il capitolo prometteva e T7b non ha fatto** (→ `in_sospeso.md`): la **modifica a
 mano** campo per campo in P6 (le tre caselle sono `ReadOnly`: è disegno di P6, non
 anti-slop) e l'**interruttore** per disattivare la rifinitura, che vive nelle Impostazioni
-P8 di T9. Fino ad allora la rifinitura è sempre attiva, e la via d'uscita è il prima/dopo.
+P8 di T9. Fino ad allora la rifinitura è sempre attiva, e la via d'uscita è il prima/dopo
+*— che dal 2026-08-22 non c'è più, e la via d'uscita resta l'interruttore (v. 8.4)*.
 *Delle due, l'interruttore è arrivato con **T9b** (2026-08-21), insieme al pannello che lo
 ospita (v. 8.4); la **modifica a mano** con **T9d** (2026-08-22), in una finestra a parte —
 perché le tre caselle del pannello mostrano la pagina impaginata, non il documento (v. 8.4).

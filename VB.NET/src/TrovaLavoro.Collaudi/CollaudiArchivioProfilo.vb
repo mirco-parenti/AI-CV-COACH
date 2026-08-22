@@ -1,4 +1,4 @@
-Imports System.Globalization
+﻿Imports System.Globalization
 Imports System.IO
 Imports System.Linq
 Imports System.Text.Json
@@ -67,7 +67,7 @@ Namespace Dati
 
                     archivio.SalvaCvBase(
                         Text.Json.Nodes.JsonNode.Parse("{""intestazione"": {""nome"": ""Luca Ferrari""}}"),
-                        versione, Nothing, "en")
+                        versione, "en")
 
                     Assert.AreEqual("en", archivio.CaricaCvBase().Lingua, "la lingua è annotata nel file")
                 End Sub)

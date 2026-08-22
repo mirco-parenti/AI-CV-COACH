@@ -126,6 +126,15 @@ a mano (utile per annunci ricevuti via email o messaggio). *E le due strade non 
 due: il testo catturato entra nella stessa casella in cui lo si incollerebbe, si vede, e
 da lì parte l'analisi di sempre (cap. 03.6, P4).*
 
+*«Si vede» ha smesso di essere vero per un po', e nessun collaudo poteva accorgersene*
+*(T9d, 2026-08-22)*: il lettore cuce i pezzi della pagina con `\n`, e una casella
+multiriga di Windows i `\n` non li mostra — la pagina compariva in un blocco unico,
+illeggibile. Il testo era giusto ovunque: su disco, e in quello che partiva per l'AI.
+Sbagliato era solo ciò che leggeva l'utente. Ora **gli a capo si convertono alla porta
+della casella** (`Motore.TestoDaMostrare`), lo stesso rimedio che il corpo dell'email
+usava già dalla sua parte: dentro il programma gli a capo restano `\n`, come vogliono
+JSON, prompt e pagine web.
+
 ## 6.5 L'annuncio da link (flusso C)
 
 Un link incollato nel campo dedicato apre la pagina nel browser integrato; l'utente

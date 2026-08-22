@@ -1,4 +1,5 @@
-﻿Imports System.Drawing
+﻿Imports System.Diagnostics
+Imports System.Drawing
 Imports System.Globalization
 Imports System.IO
 Imports System.Linq
@@ -95,18 +96,9 @@ Public Class PannelloDocumenti
     Private _linguaCvBase As String = LinguaDocumenti.Italiano
 
     ''' <summary>
-    ''' Com'erano i testi del 📄 CV base prima della rifinitura (T7b, cap. 08.4). Per una
-    ''' candidatura la stessa cosa vive nell'opportunità, che si salva e si riapre; qui sta
-    ''' in memoria perché il CV base in questo pannello non si rilegge mai — o lo si è
-    ''' appena generato, o non c'è.
-    ''' </summary>
-    Private _primaDelCvBase As JsonNode
-
-    ''' <summary>
-    ''' Vero quando l'anti-slop è inciampato e il 📄 CV base mostrato è quello grezzo:
-    ''' è il rovescio di <see cref="_primaDelCvBase"/>, che in quel caso resta
-    ''' <c>Nothing</c> — e senza dirlo, un prima/dopo che non compare sembrerebbe un CV
-    ''' che la rifinitura non ha avuto niente da correggere (cap. 08.4).
+    ''' Vero quando l'anti-slop è inciampato e il 📄 CV base mostrato è quello grezzo.
+    ''' Va detto: un documento uscito senza la passata che il programma promette non deve
+    ''' passare per un documento a cui non c'era niente da correggere (cap. 08.4).
     ''' </summary>
     Private _ilCvBaseNonERifinito As Boolean
 
@@ -151,6 +143,13 @@ Public Class PannelloDocumenti
     Private _tendinaInAllestimento As Boolean
 
     Private _annulla As CancellationTokenSource
+
+    ''' <summary>
+    ''' L'ultima cartella in cui si è esportato, per non ripartire dal Desktop a ogni giro.
+    ''' È <b>condivisa</b> perché il pannello è uno per area ma la scelta è dell'utente, non
+    ''' del documento che sta guardando, e vale finché l'applicazione resta aperta.
+    ''' </summary>
+    Private Shared _ultimaCartellaScelta As String
 
     ''' <summary>
     ''' L'utente vuole tornare da dov'era venuto. Dove sia, il pannello non lo sa — a P6
@@ -262,7 +261,6 @@ Public Class PannelloDocumenti
     Private Sub LasciaIlCvBase()
 
         _cvBase = Nothing
-        _primaDelCvBase = Nothing
         _versioneDelCvBase = Nothing
         _generatoIlCvBase = Nothing
 
@@ -286,6 +284,7 @@ Public Class PannelloDocumenti
         _modificatiAMano = False
         LasciaIlCvBase()
 
+        AllestisciLaTendinaDeiDocumenti()
         Mostra()
 
         ' Già generati: si guardano e basta. A rifarli c'è «Rigenera», che lo dichiara.
@@ -296,6 +295,9 @@ Public Class PannelloDocumenti
         End If
 
         Await GeneraLaCandidaturaAsync().ConfigureAwait(True)
+
+        ' Come per il CV base: quello che è appena stato scritto va in elenco.
+        AllestisciLaTendinaDeiDocumenti()
 
     End Function
 
@@ -323,11 +325,16 @@ Public Class PannelloDocumenti
         _linguaCvBase = If(_contesto Is Nothing,
                            LinguaDocumenti.Italiano, _contesto.Impostazioni.LinguaPredefinita)
 
+        AllestisciLaTendinaDeiDocumenti()
         Mostra()
 
         If RipescaIlCvBase() Then Return
 
         Await GeneraIlCvBaseAsync().ConfigureAwait(True)
+
+        ' Un documento appena nato è un documento in più da elencare: la tendina va
+        ' rifatta adesso, o resterebbe indietro proprio su quello che si sta guardando.
+        AllestisciLaTendinaDeiDocumenti()
 
     End Function
 
@@ -360,7 +367,6 @@ Public Class PannelloDocumenti
         If salvato Is Nothing OrElse salvato.Cv Is Nothing Then Return False
 
         _cvBase = salvato.Cv
-        _primaDelCvBase = salvato.PrimaDellaRifinitura
         _linguaCvBase = LinguaDocumenti.PerDocumenti(salvato.Lingua)
 
         ' Da dove viene e di quando è: si tengono perché il CV può essere risalvato dopo
@@ -441,7 +447,7 @@ Public Class PannelloDocumenti
                 ' lavoro dell'utente — e la prossima conferma avrebbe smesso di nominarlo.
                 _modificatiAMano = False
 
-                _primaDelCvBase = Await RifinisciIlCvBaseAsync(filo.Token).ConfigureAwait(True)
+                Await RifinisciIlCvBaseAsync(filo.Token).ConfigureAwait(True)
 
                 Mostra()
                 RaccontaLoStato(ArchiviaIlCvBase(), StileApp.TestoSecondario)
@@ -628,7 +634,7 @@ Public Class PannelloDocumenti
             _generatoIlCvBase = Date.Now
 
             _contesto.Archivio.SalvaCvBase(_cvBase, _versioneDelCvBase,
-                                           _primaDelCvBase, _linguaCvBase, _generatoIlCvBase)
+                                           _linguaCvBase, _generatoIlCvBase)
             Return $"Il 📄 CV base è pronto{InQuestaLingua()} ed è salvato col tuo profilo." & vbLf &
                    "Esportalo in DOCX o PDF quando ti va bene." & LaRifinituraSeENonRiuscita()
 
@@ -645,12 +651,40 @@ Public Class PannelloDocumenti
     ' ==================================================================
 
     ''' <summary>
-    ''' Scrive i file nel formato chiesto e dice quali sono. È il metodo che premono i due
-    ''' bottoni d'esportazione; il banco lo chiama direttamente.
+    ''' Scrive i file nel formato chiesto, ne mette una copia dove dice l'utente e racconta
+    ''' dove sono finiti. Restituisce i file su cui l'utente può mettere le mani.
     ''' </summary>
-    Public Async Function EsportaAsync(formati As FormatiDocumento) As Task
+    ''' <param name="formati">Quali file scrivere: solo DOCX, solo PDF o entrambi.</param>
+    ''' <param name="destinazione">
+    ''' La cartella scelta dall'utente, dove va la copia; <c>Nothing</c> per fermarsi alla
+    ''' cartella della candidatura — ed è così che lo chiama il banco, che una finestra di
+    ''' scelta cartella non la sa chiudere.
+    ''' </param>
+    ''' <param name="confermaSostituzione">
+    ''' Chi chiede il permesso di sostituire i file che in quella cartella ci sono già,
+    ''' ricevendone i nomi; <c>Nothing</c> vuol dire sostituirli senza chiedere.
+    ''' </param>
+    ''' <remarks>
+    ''' <para><b>I file nascono sempre nella cartella della candidatura</b> (cap. 05.6), e
+    ''' solo dopo se ne copia una coppia dove l'utente li vuole. Di lì li prende l'email di
+    ''' P7, che gli allegati li legge da quella cartella e non da altrove: portare i file
+    ''' via invece di copiarli lascerebbe l'email senza niente da allegare.</para>
+    ''' <para><b>La scelta della cartella e l'apertura di Esplora risorse stanno fuori di
+    ''' qui</b> — le fa <see cref="EsportaConSceltaAsync"/> — per lo stesso taglio di
+    ''' <see cref="ModificaITesti"/>: quel che ha dentro una finestra modale il banco non
+    ''' lo può provare, quindi la parte che vale la pena provare non ne ha nessuna.</para>
+    ''' <para><b>Chi rifiuta la sostituzione non perde niente</b>: i documenti appena
+    ''' scritti restano nella cartella della candidatura, e il messaggio lo dice. È l'unico
+    ''' caso in cui si torna a mani vuote avendo comunque lavorato.</para>
+    ''' </remarks>
+    Public Async Function EsportaAsync(formati As FormatiDocumento,
+                                       Optional destinazione As String = Nothing,
+                                       Optional confermaSostituzione As Func(Of IReadOnlyList(Of String), Boolean) = Nothing) _
+                                       As Task(Of IReadOnlyList(Of String))
 
-        If _documenti Is Nothing OrElse Not CEQualcosaDaEsportare() Then Return
+        Dim niente As IReadOnlyList(Of String) = New List(Of String)()
+
+        If _documenti Is Nothing OrElse Not CEQualcosaDaEsportare() Then Return niente
 
         Cursor = Cursors.AppStarting
 
@@ -659,13 +693,25 @@ Public Class PannelloDocumenti
 
             If scritti.Count = 0 Then
                 RaccontaLoStato("Non c'era ancora niente da esportare.", StileApp.TestoSecondario)
-                Return
+                Return niente
+            End If
+
+            Dim finiti As IReadOnlyList(Of String) = CopiaDove(scritti, destinazione, confermaSostituzione)
+
+            If finiti.Count = 0 Then
+                RaccontaLoStato(
+                    "Non ho sostituito niente: i file che c'erano sono rimasti come stavano." & vbLf &
+                    $"I documenti aggiornati sono in «{Path.GetDirectoryName(scritti(0))}».",
+                    StileApp.TestoSecondario)
+                Return niente
             End If
 
             RaccontaLoStato(
-                "Ho scritto:" & vbLf & String.Join(vbLf, scritti.Select(AddressOf Path.GetFileName)) & vbLf &
-                $"in «{Path.GetDirectoryName(scritti(0))}».",
+                "Ho scritto:" & vbLf & String.Join(vbLf, finiti.Select(AddressOf Path.GetFileName)) & vbLf &
+                $"in «{Path.GetDirectoryName(finiti(0))}».",
                 StileApp.TestoSecondario)
+
+            Return finiti
 
         Catch ex As ErroreStampa
             ' Il messaggio si porta dietro il ripiego onesto: il DOCX c'è comunque
@@ -680,7 +726,148 @@ Public Class PannelloDocumenti
             Cursor = Cursors.Default
         End Try
 
+        Return niente
+
     End Function
+
+    ''' <summary>
+    ''' Porta una copia dei file appena scritti nella cartella scelta e restituisce i
+    ''' percorsi finali: quelli copiati, o gli originali se non c'è nessuna cartella dove
+    ''' copiarli. Elenco vuoto se l'utente ha negato la sostituzione.
+    ''' </summary>
+    Private Shared Function CopiaDove(scritti As IReadOnlyList(Of String),
+                                      destinazione As String,
+                                      confermaSostituzione As Func(Of IReadOnlyList(Of String), Boolean)) _
+                                      As IReadOnlyList(Of String)
+
+        If String.IsNullOrWhiteSpace(destinazione) Then Return scritti
+
+        Directory.CreateDirectory(destinazione)
+
+        ' Esportare dentro la cartella dove i file sono appena nati non è un errore: è la
+        ' stessa cartella, e copiare un file su se stesso fallirebbe. Non c'è niente da
+        ' fare, e i percorsi buoni sono già quelli.
+        If String.Equals(Path.GetFullPath(Path.GetDirectoryName(scritti(0))).TrimEnd(Path.DirectorySeparatorChar),
+                         Path.GetFullPath(destinazione).TrimEnd(Path.DirectorySeparatorChar),
+                         StringComparison.OrdinalIgnoreCase) Then Return scritti
+
+        Dim gia As List(Of String) = scritti.
+            Select(Function(f) Path.GetFileName(f)).
+            Where(Function(nome) File.Exists(Path.Combine(destinazione, nome))).
+            ToList()
+
+        If gia.Count > 0 AndAlso confermaSostituzione IsNot Nothing AndAlso Not confermaSostituzione(gia) Then
+            Return New List(Of String)()
+        End If
+
+        Dim copiati As New List(Of String)
+
+        For Each origine As String In scritti
+            Dim arrivo As String = Path.Combine(destinazione, Path.GetFileName(origine))
+            File.Copy(origine, arrivo, overwrite:=True)
+            copiati.Add(arrivo)
+        Next
+
+        Return copiati
+
+    End Function
+
+    ''' <summary>
+    ''' L'esportazione come la vede l'utente: chiede dove salvare, scrive, e apre Esplora
+    ''' risorse sui file appena fatti. È il metodo che premono i due bottoni.
+    ''' </summary>
+    ''' <remarks>
+    ''' <b>Aprire la cartella alla fine è il pezzo che mancava</b> (cap. 05.6, il bottone
+    ''' «Apri cartella» promesso e mai fatto): finché l'unico segno dell'esportazione era
+    ''' una riga di testo in fondo al pannello, premere «Esporta» sembrava non fare niente,
+    ''' e i file finivano in una cartella che l'utente non aveva scelto e non sapeva
+    ''' trovare. Ora li sceglie lui e se li vede davanti.
+    ''' </remarks>
+    Public Async Function EsportaConSceltaAsync(formati As FormatiDocumento) As Task
+
+        If _documenti Is Nothing OrElse Not CEQualcosaDaEsportare() Then Return
+
+        Dim dove As String = ScegliDoveSalvare()
+        If String.IsNullOrEmpty(dove) Then Return
+
+        Dim finiti As IReadOnlyList(Of String) =
+            Await EsportaAsync(formati, dove, AddressOf SostituiscoIFileCheCiSono).ConfigureAwait(True)
+
+        If finiti.Count > 0 Then MostraNellEsploraRisorse(finiti(0))
+
+    End Function
+
+    ''' <summary>
+    ''' Chiede all'utente dove salvare i documenti; <c>Nothing</c> se ha rinunciato.
+    ''' </summary>
+    ''' <remarks>
+    ''' Si parte dal <b>Desktop</b> — dove chi esporta un CV lo vuole, e dove lo ritrova
+    ''' senza cercarlo — e dalla seconda volta in poi dall'ultima cartella scelta. È un
+    ''' ricordo della sessione, non una preferenza: le preferenze sono quelle che l'utente
+    ''' dichiara in P8 (v. <see cref="Impostazioni"/>), e questa non l'ha mai dichiarata,
+    ''' l'ha solo usata.
+    ''' </remarks>
+    Private Function ScegliDoveSalvare() As String
+
+        Using dialogo As New FolderBrowserDialog()
+
+            dialogo.Description = "Scegli dove salvare i documenti."
+            dialogo.UseDescriptionForTitle = True
+            dialogo.ShowNewFolderButton = True
+            dialogo.SelectedPath = DaDoveSiParte()
+
+            If dialogo.ShowDialog(Me) <> DialogResult.OK Then Return Nothing
+
+            _ultimaCartellaScelta = dialogo.SelectedPath
+            Return dialogo.SelectedPath
+
+        End Using
+
+    End Function
+
+    ''' <summary>La cartella su cui si apre la scelta: l'ultima usata, o il Desktop.</summary>
+    Private Shared Function DaDoveSiParte() As String
+
+        If Not String.IsNullOrEmpty(_ultimaCartellaScelta) AndAlso
+           Directory.Exists(_ultimaCartellaScelta) Then Return _ultimaCartellaScelta
+
+        Return Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)
+
+    End Function
+
+    ''' <summary>Chiede se sostituire i file che nella cartella scelta ci sono già.</summary>
+    Private Function SostituiscoIFileCheCiSono(nomi As IReadOnlyList(Of String)) As Boolean
+
+        Return MessageBox.Show(
+            "In quella cartella ci sono già:" & vbLf &
+            String.Join(vbLf, nomi) & vbLf & vbLf &
+            "Li sostituisco con quelli nuovi?",
+            NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button2) = DialogResult.Yes
+
+    End Function
+
+    ''' <summary>
+    ''' Apre Esplora risorse sulla cartella dei file esportati, col primo già selezionato.
+    ''' </summary>
+    ''' <remarks>
+    ''' Se non si apre non è successo niente di grave — i file ci sono lo stesso e il
+    ''' messaggio dice dove — quindi un guasto qui non deve arrivare all'utente come un
+    ''' errore dell'esportazione, che invece è andata a buon fine.
+    ''' </remarks>
+    Private Shared Sub MostraNellEsploraRisorse(percorso As String)
+
+        Try
+            Process.Start(New ProcessStartInfo("explorer.exe", $"/select,""{percorso}""") With {
+                .UseShellExecute = True})
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is System.ComponentModel.Win32Exception OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            ' Nessuna parola: l'esportazione è riuscita, e il pannello l'ha già detto.
+        End Try
+
+    End Sub
 
     ''' <summary>
     ''' La candidatura che si sta guardando; <c>Nothing</c> quando qui c'è il 📄 CV base,
@@ -779,8 +966,7 @@ Public Class PannelloDocumenti
         If _sulCvBase Then
 
             If _cvBase IsNot Nothing Then
-                aperti.Add(New DocumentoDaRiscrivere With {
-                    .Documento = _cvBase, .PrimaDellaRifinitura = _primaDelCvBase})
+                aperti.Add(New DocumentoDaRiscrivere With {.Documento = _cvBase})
             End If
 
             Return aperti
@@ -790,13 +976,11 @@ Public Class PannelloDocumenti
         If _candidatura Is Nothing Then Return aperti
 
         If _candidatura.Cv IsNot Nothing Then
-            aperti.Add(New DocumentoDaRiscrivere With {
-                .Documento = _candidatura.Cv, .PrimaDellaRifinitura = PrimaDi("cv")})
+            aperti.Add(New DocumentoDaRiscrivere With {.Documento = _candidatura.Cv})
         End If
 
         If _candidatura.Lettera IsNot Nothing Then
-            aperti.Add(New DocumentoDaRiscrivere With {
-                .Documento = _candidatura.Lettera, .PrimaDellaRifinitura = PrimaDi("lettera")})
+            aperti.Add(New DocumentoDaRiscrivere With {.Documento = _candidatura.Lettera})
         End If
 
         Return aperti
@@ -830,7 +1014,7 @@ Public Class PannelloDocumenti
             ' Il CV base torna nel suo file con la storia che aveva: la modifica a mano non
             ' lo fa rinascere da un altro profilo né in un altro giorno (cap. 08.4).
             If _sulCvBase Then
-                _contesto.Archivio.SalvaCvBase(_cvBase, _versioneDelCvBase, _primaDelCvBase,
+                _contesto.Archivio.SalvaCvBase(_cvBase, _versioneDelCvBase,
                                                _linguaCvBase, _generatoIlCvBase)
             Else
                 _contesto.Opportunita.Salva(_candidatura)
@@ -869,8 +1053,7 @@ Public Class PannelloDocumenti
             txtAnnuncio.Text = "Il 📄 CV base non nasce da un annuncio: è il ritratto del tuo profilo."
             txtCv.Text = Anteprima(_cvBase,
                                    Function(d) Impaginazione.PaginaCv(d, _linguaCvBase),
-                                   "Il CV non è ancora stato scritto.",
-                                   _primaDelCvBase)
+                                   "Il CV non è ancora stato scritto.")
             txtLettera.Text = "La lettera si scrive su un annuncio: qui non ce n'è uno."
             AggiornaComandi()
             Return
@@ -897,12 +1080,10 @@ Public Class PannelloDocumenti
         ' sbagliate vorrebbe dire scoprire l'errore solo aprendo il file.
         txtCv.Text = Anteprima(_candidatura.Cv,
                                Function(d) Impaginazione.PaginaCv(d, lingua),
-                               "Il CV non è ancora stato scritto.",
-                               PrimaDi("cv"))
+                               "Il CV non è ancora stato scritto.")
         txtLettera.Text = Anteprima(_candidatura.Lettera,
                                     Function(d) Impaginazione.PaginaLettera(d, lingua),
-                                    "La lettera non è ancora stata scritta.",
-                                    PrimaDi("lettera"))
+                                    "La lettera non è ancora stata scritta.")
 
         AggiornaComandi()
 
@@ -931,72 +1112,21 @@ Public Class PannelloDocumenti
 
     End Function
 
-    ''' <summary>
-    ''' Un documento come si legge, o il motivo per cui non c'è ancora. Con la casella
-    ''' spuntata, in coda arriva il prima/dopo della rifinitura (cap. 08.4).
-    ''' </summary>
+    ''' <summary>Un documento come si legge, o il motivo per cui non c'è ancora.</summary>
+    ''' <remarks>
+    ''' Fino a T9d qui si attaccava in coda il prima/dopo della rifinitura, quando la
+    ''' casella di P6 era spuntata. Quel confronto si guarda adesso dentro «Modifica i
+    ''' testi», campo per campo e col bottone che va avanti e indietro fra il testo
+    ''' rifinito e quello di prima: leggerlo lì costa un clic in meno e non allunga
+    ''' l'anteprima del documento, che è la cosa che l'utente sta guardando (cap. 08.4).
+    ''' </remarks>
     Private Function Anteprima(documento As JsonNode,
                                impagina As Func(Of JsonNode, PaginaDocumento),
-                               seManca As String,
-                               Optional prima As JsonNode = Nothing) As String
+                               seManca As String) As String
 
         If documento Is Nothing Then Return seManca
 
-        Dim testo As String = ScrittoreTesto.Componi(impagina(documento))
-        If Not chkRifinitura.Checked Then Return testo
-
-        Return ConIlPrimaDopo(testo, documento, prima)
-
-    End Function
-
-    ''' <summary>
-    ''' Attacca al documento l'elenco dei campi che la rifinitura ha cambiato, con com'era
-    ''' e com'è.
-    ''' </summary>
-    ''' <remarks>
-    ''' Sta in coda e non al posto dell'anteprima perché il documento vero è quello: il
-    ''' confronto serve a controllare che la rifinitura non abbia cambiato un fatto (è la
-    ''' regola pratica del cap. 08.4), non a sostituire ciò che si sta leggendo.
-    ''' </remarks>
-    Private Shared Function ConIlPrimaDopo(anteprima As String, documento As JsonNode,
-                                           prima As JsonNode) As String
-
-        Dim cambiati As List(Of Rifinitura.CampoRifinito) = Rifinitura.Confronta(documento, prima)
-        If cambiati.Count = 0 Then Return anteprima
-
-        Dim testo As New StringBuilder(anteprima)
-
-        testo.AppendLine().AppendLine(New String("─"c, 30)).AppendLine("PRIMA DELLA RIFINITURA")
-
-        For Each campo As Rifinitura.CampoRifinito In cambiati
-            testo.AppendLine().
-                  AppendLine($"▸ {campo.Etichetta}").
-                  AppendLine().AppendLine("Prima:").AppendLine(campo.Prima).
-                  AppendLine().AppendLine("Adesso:").AppendLine(campo.Adesso)
-        Next
-
-        Return testo.ToString()
-
-    End Function
-
-    ''' <summary>I testi di prima di uno dei due documenti della candidatura.</summary>
-    Private Function PrimaDi(quale As String) As JsonNode
-
-        If _candidatura Is Nothing Then Return Nothing
-
-        Dim tutti As JsonObject = TryCast(_candidatura.PrimaDellaRifinitura, JsonObject)
-        If tutti Is Nothing Then Return Nothing
-
-        Return CampiJson.Nodo(tutti, quale)
-
-    End Function
-
-    ''' <summary>Se c'è una rifinitura da poter mostrare in questo momento.</summary>
-    Private Function CEUnPrimaDaMostrare() As Boolean
-
-        If _sulCvBase Then Return _primaDelCvBase IsNot Nothing
-
-        Return _candidatura IsNot Nothing AndAlso _candidatura.PrimaDellaRifinitura IsNot Nothing
+        Return ScrittoreTesto.Componi(impagina(documento))
 
     End Function
 
@@ -1064,7 +1194,6 @@ Public Class PannelloDocumenti
         ' pannello non deve mostrare un CV vecchio accanto a una lettera nuova.
         _candidatura.Cv = Nothing
         _candidatura.Lettera = Nothing
-        _candidatura.PrimaDellaRifinitura = Nothing
         _modificatiAMano = False
         Mostra()
 
@@ -1207,22 +1336,241 @@ Public Class PannelloDocumenti
 
     End Sub
 
-    ''' <summary>
-    ''' La casella del prima/dopo: cambia <b>solo quel che si legge</b>, non i documenti né
-    ''' quel che si esporta (cap. 08.4). Nei file va sempre il testo rifinito.
-    ''' </summary>
-    Private Sub chkRifinitura_CheckedChanged(sender As Object, e As EventArgs) _
-                                             Handles chkRifinitura.CheckedChanged
-        Mostra()
-    End Sub
-
     Private Async Sub btnEsportaDocx_Click(sender As Object, e As EventArgs) Handles btnEsportaDocx.Click
-        Await EsportaAsync(FormatiDocumento.Docx)
+        Await EsportaConSceltaAsync(FormatiDocumento.Docx)
     End Sub
 
     Private Async Sub btnEsportaPdf_Click(sender As Object, e As EventArgs) Handles btnEsportaPdf.Click
-        Await EsportaAsync(FormatiDocumento.Pdf)
+        Await EsportaConSceltaAsync(FormatiDocumento.Pdf)
     End Sub
+
+    ' ==================================================================
+    ' La tendina dei documenti (T9d)
+    ' ==================================================================
+
+    ''' <summary>
+    ''' Una voce della tendina: quale documento apre, e come si chiama a video.
+    ''' </summary>
+    Private NotInheritable Class VoceDocumento
+
+        ''' <summary>La cartella della candidatura; <c>Nothing</c> per il 📄 CV base.</summary>
+        Public ReadOnly Cartella As String
+
+        Public ReadOnly Etichetta As String
+
+        Public Sub New(cartella As String, etichetta As String)
+            Me.Cartella = cartella
+            Me.Etichetta = etichetta
+        End Sub
+
+        Public Overrides Function ToString() As String
+            Return Etichetta
+        End Function
+
+    End Class
+
+    ''' <summary>
+    ''' Riempie la tendina coi documenti che <b>esistono davvero</b> e ci segna quello in
+    ''' mostra.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Solo documenti già scritti</b>: il 📄 CV base compare se è salvato su disco,
+    ''' una candidatura se ha almeno un documento. Elencare un CV base che non c'è ancora
+    ''' vorrebbe dire far partire una generazione — un'attesa e dei token — a chi credeva di
+    ''' spostarsi fra due schermate.</para>
+    ''' <para><b>Dal più recente</b>: l'archivio li dà dal più vecchio perché il nome della
+    ''' cartella comincia con la data, ma chi cerca un documento cerca quasi sempre l'ultimo
+    ''' su cui ha lavorato.</para>
+    ''' </remarks>
+    Private Sub AllestisciLaTendinaDeiDocumenti()
+
+        If _contesto Is Nothing Then Return
+
+        cmbDocumento.Items.Clear()
+
+        If CESuDiscoUnCvBase() Then cmbDocumento.Items.Add(New VoceDocumento(Nothing, "📄 CV base"))
+
+        For Each cartella As String In _contesto.Opportunita.Elenco().Reverse()
+
+            Dim voce As Opportunita = LeggiSenzaLamentarsi(cartella)
+            If voce Is Nothing OrElse (voce.Cv Is Nothing AndAlso voce.Lettera Is Nothing) Then Continue For
+
+            Dim azienda As String = If(String.IsNullOrWhiteSpace(voce.Azienda),
+                                       "(azienda non dichiarata)", voce.Azienda.Trim())
+
+            cmbDocumento.Items.Add(New VoceDocumento(cartella, $"🎯 {azienda}"))
+
+        Next
+
+        SegnaNellaTendinaQuelloInMostra()
+
+    End Sub
+
+    ''' <summary>Mette la spunta sulla voce del documento che si sta guardando.</summary>
+    Private Sub SegnaNellaTendinaQuelloInMostra()
+
+        For Each voce As VoceDocumento In cmbDocumento.Items
+
+            Dim eQuesta As Boolean =
+                If(_sulCvBase,
+                   voce.Cartella Is Nothing,
+                   voce.Cartella IsNot Nothing AndAlso _candidatura IsNot Nothing AndAlso
+                   String.Equals(voce.Cartella, _candidatura.Cartella, StringComparison.OrdinalIgnoreCase))
+
+            If eQuesta Then
+                cmbDocumento.SelectedItem = voce
+                Return
+            End If
+
+        Next
+
+        cmbDocumento.SelectedIndex = -1
+
+    End Sub
+
+    ''' <summary>
+    ''' Il documento scelto dalla tendina prende il posto di quello in mostra.
+    ''' </summary>
+    ''' <remarks>
+    ''' È <c>SelectionChangeCommitted</c> e non <c>SelectedIndexChanged</c>: scatta solo
+    ''' quando a scegliere è stato l'utente, e non quando è il pannello a segnare la voce
+    ''' del documento che sta già mostrando — che sarebbe un rientro dentro se stesso.
+    ''' </remarks>
+    Private Async Sub cmbDocumento_SelectionChangeCommitted(sender As Object, e As EventArgs) _
+                                                            Handles cmbDocumento.SelectionChangeCommitted
+        Await ApriDallaTendinaAsync(cmbDocumento.SelectedIndex)
+    End Sub
+
+    ''' <summary>
+    ''' Apre il documento che sta alla riga indicata della tendina. È pubblica perché il
+    ''' banco una scelta col mouse non la sa fare, e la scelta è tutto quel che c'è da
+    ''' provare qui.
+    ''' </summary>
+    Public Async Function ApriDallaTendinaAsync(indice As Integer) As Task
+
+        Dim scelta As VoceDocumento = Nothing
+        If indice >= 0 AndAlso indice < cmbDocumento.Items.Count Then
+            scelta = TryCast(cmbDocumento.Items(indice), VoceDocumento)
+        End If
+
+        If scelta Is Nothing OrElse AiAlLavoro Then
+            SegnaNellaTendinaQuelloInMostra()
+            Return
+        End If
+
+        If scelta.Cartella Is Nothing Then
+            Await MostraIlCvBaseAsync().ConfigureAwait(True)
+            Return
+        End If
+
+        Dim candidatura As Opportunita = LeggiSenzaLamentarsi(scelta.Cartella)
+
+        If candidatura Is Nothing Then
+            RaccontaLoStato("Quel documento non si è lasciato leggere: riprova dalla Home.", StileApp.Pericolo)
+            AllestisciLaTendinaDeiDocumenti()
+            Return
+        End If
+
+        Await MostraLaCandidaturaAsync(candidatura).ConfigureAwait(True)
+
+    End Function
+
+    ''' <summary>
+    ''' Riallestisce la tendina ogni volta che la si apre: fra un giro e l'altro possono
+    ''' essere nati documenti nuovi, e un elenco vecchio è peggio di nessun elenco.
+    ''' </summary>
+    Private Sub cmbDocumento_DropDown(sender As Object, e As EventArgs) Handles cmbDocumento.DropDown
+        AllestisciLaTendinaDeiDocumenti()
+    End Sub
+
+    ''' <summary>
+    ''' Apre i documenti «da fermo», come chiede la voce ⟨📄 Documenti⟩ della barra: quello
+    ''' già in mostra se c'è, altrimenti il 📄 CV base salvato, altrimenti l'ultima
+    ''' candidatura che abbia un documento.
+    ''' </summary>
+    ''' <remarks>
+    ''' <b>Non chiama mai l'AI</b>: senza niente da mostrare il pannello resta vuoto con la
+    ''' sua spiegazione. Entrare in una schermata è un gesto di navigazione, e una
+    ''' navigazione che fa partire una generazione sarebbe una spesa non chiesta.
+    ''' </remarks>
+    Public Async Function ApriQualcosaAsync() As Task
+
+        If AiAlLavoro Then Return
+
+        If _cvBase IsNot Nothing OrElse _candidatura IsNot Nothing Then
+            AllestisciLaTendinaDeiDocumenti()
+            Mostra()
+            Return
+        End If
+
+        If CESuDiscoUnCvBase() Then
+            Await MostraIlCvBaseAsync().ConfigureAwait(True)
+            Return
+        End If
+
+        Dim ultima As Opportunita = UltimaConDocumenti()
+
+        If ultima IsNot Nothing Then
+            Await MostraLaCandidaturaAsync(ultima).ConfigureAwait(True)
+            Return
+        End If
+
+        AllestisciLaTendinaDeiDocumenti()
+        Mostra()
+        RaccontaLoStato(
+            "Non c'è ancora nessun documento: genera il 📄 CV base dalla scheda «Profilo», " &
+            "oppure apri una candidatura dalla Home.",
+            StileApp.TestoSecondario)
+
+    End Function
+
+    ''' <summary>L'ultima candidatura che abbia almeno un documento scritto.</summary>
+    Private Function UltimaConDocumenti() As Opportunita
+
+        If _contesto Is Nothing Then Return Nothing
+
+        For Each cartella As String In _contesto.Opportunita.Elenco().Reverse()
+            Dim voce As Opportunita = LeggiSenzaLamentarsi(cartella)
+            If voce IsNot Nothing AndAlso (voce.Cv IsNot Nothing OrElse voce.Lettera IsNot Nothing) Then
+                Return voce
+            End If
+        Next
+
+        Return Nothing
+
+    End Function
+
+    ''' <summary>
+    ''' Se sul disco c'è un 📄 CV base già scritto. Un file illeggibile qui vale come
+    ''' assente: la tendina è navigazione, e chi deve raccontare il guasto è chi apre il
+    ''' documento davvero (v. <see cref="RipescaIlCvBase"/>).
+    ''' </summary>
+    Private Function CESuDiscoUnCvBase() As Boolean
+
+        If _contesto Is Nothing OrElse Not _contesto.Archivio.Esiste Then Return False
+
+        Try
+            Return _contesto.Archivio.CaricaCvBase() IsNot Nothing
+
+        Catch ex As Exception When TypeOf ex Is JsonException OrElse TypeOf ex Is IOException _
+                                   OrElse TypeOf ex Is UnauthorizedAccessException
+            Return False
+        End Try
+
+    End Function
+
+    ''' <summary>Una candidatura letta da disco, o <c>Nothing</c> se non si lascia leggere.</summary>
+    Private Function LeggiSenzaLamentarsi(cartella As String) As Opportunita
+
+        Try
+            Return _contesto.Opportunita.Carica(cartella)
+
+        Catch ex As Exception When TypeOf ex Is JsonException OrElse TypeOf ex Is IOException _
+                                   OrElse TypeOf ex Is UnauthorizedAccessException
+            Return Nothing
+        End Try
+
+    End Function
 
     ' ==================================================================
     ' Aspetto, spazio e stato dei comandi
@@ -1377,6 +1725,14 @@ Public Class PannelloDocumenti
         cmbLingua.Enabled = Not occupato AndAlso (_sulCvBase OrElse _candidatura IsNot Nothing)
         lblLingua.Enabled = cmbLingua.Enabled
 
+        ' La tendina dei documenti è navigazione, e la navigazione si ferma mentre l'AI
+        ' lavora: cambiare documento sotto una chiamata in volo è lo stesso difetto che
+        ' T9d ha chiuso sulla barra in alto (cap. 03.4).
+        cmbDocumento.Enabled = Not occupato AndAlso _contesto IsNot Nothing
+        lblDocumento.Enabled = cmbDocumento.Enabled
+        _suggerimenti.SetToolTip(cmbDocumento,
+            "Salta a un altro documento già scritto: il 📄 CV base o quelli di un'altra candidatura.")
+
         _suggerimenti.SetToolTip(lblLingua, Nothing)
 
         If _sulCvBase Then
@@ -1388,24 +1744,6 @@ Public Class PannelloDocumenti
         Else
             _suggerimenti.SetToolTip(cmbLingua,
                 "La lingua si sceglie su un documento: prima aprine uno.")
-        End If
-
-        ' Il prima/dopo si può guardare solo dove c'è (cap. 08.4). La casella non si
-        ' despunta da sola quando non c'è niente: toglierle la spunta qui vorrebbe dire
-        ' rientrare in Mostra da dentro Mostra, e con la rifinitura assente l'anteprima non
-        ' ci mette nulla in coda comunque.
-        Dim conPrimaDopo As Boolean = CEUnPrimaDaMostrare()
-        chkRifinitura.Enabled = conPrimaDopo AndAlso Not occupato
-
-        If conPrimaDopo Then
-            _suggerimenti.SetToolTip(chkRifinitura,
-                "Mostra com'erano i testi prima della rifinitura anti-slop, campo per campo.")
-        ElseIf conDocumento Then
-            _suggerimenti.SetToolTip(chkRifinitura,
-                "Non c'è niente da confrontare: la rifinitura non ha cambiato nessun testo.")
-        Else
-            _suggerimenti.SetToolTip(chkRifinitura,
-                "Prima genera i documenti: il prima/dopo si guarda su un testo scritto.")
         End If
 
         ' L'email nasce dalla lettera (cap. 07.1): senza, non c'è niente da scrivere. E il

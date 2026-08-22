@@ -1,4 +1,4 @@
-Imports System.Linq
+﻿Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports System.Threading.Tasks
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
@@ -143,8 +143,12 @@ Namespace Motore
         End Function
 
         <TestMethod>
-        Public Async Function IlPrimaSiAnnotaDocumentoPerDocumento() As Task
+        Public Async Function LaRifinituraLavoraSenzaLasciareIlTestoDiPrima() As Task
 
+            ' Da T9d (2026-08-22) il «prima» non si conserva più: l'anti-slop rifinisce e
+            ' quel che resta è il documento rifinito. Lo si teneva per il prima/dopo di P6,
+            ' che non c'è più — e un dato che nessuno legge invecchia in silenzio nei file
+            ' dell'utente.
             Dim generatore As New GeneratoreFinto
             generatore.Dara("{""sommario"": ""com'era il sommario""}").
                        Dara("{""corpo"": ""com'era il corpo""}")
@@ -158,12 +162,10 @@ Namespace Motore
 
             Await pipeline.GeneraAsync(opportunita, ProfiloDiProva())
 
-            Dim prima As JsonNode = opportunita.PrimaDellaRifinitura
-
-            Assert.AreEqual("com'era il sommario", prima("cv")("sommario").GetValue(Of String)(),
-                            "il prima del CV")
-            Assert.AreEqual("com'era il corpo", prima("lettera")("corpo").GetValue(Of String)(),
-                            "e quello della lettera, ciascuno sotto il suo nome")
+            Assert.AreEqual("adesso il sommario",
+                            opportunita.Cv("sommario").GetValue(Of String)(), "il CV è rifinito")
+            Assert.AreEqual("adesso il corpo",
+                            opportunita.Lettera("corpo").GetValue(Of String)(), "e la lettera pure")
 
         End Function
 
@@ -187,7 +189,6 @@ Namespace Motore
 
             Assert.IsNotNull(opportunita.Cv, "il CV c'è comunque")
             Assert.IsNotNull(opportunita.Lettera, "e la lettera pure: la fila non si è fermata")
-            Assert.IsNull(opportunita.PrimaDellaRifinitura, "nessun prima, perché non è cambiato niente")
 
         End Function
 

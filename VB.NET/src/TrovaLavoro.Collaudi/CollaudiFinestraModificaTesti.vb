@@ -1,4 +1,4 @@
-Imports System.Linq
+﻿Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
@@ -159,35 +159,6 @@ Namespace Ui
         End Sub
 
         <TestMethod>
-        Public Sub SiTornaAlTestoNonRifinitoSoloDoveLaRifinituraEPassata()
-
-            ' È la terza cosa promessa dal cap. 08.4 — accettare, riscrivere, tornare
-            ' indietro — e vale sui soli campi che la rifinitura ha davvero cambiato: sugli
-            ' altri non c'è nessun «prima» da rimettere.
-            Dim documento As JsonNode = Cv()
-
-            Dim aperti As New List(Of DocumentoDaRiscrivere) From {
-                New DocumentoDaRiscrivere With {
-                    .Documento = documento,
-                    .PrimaDellaRifinitura = JsonNode.Parse("{""sommario"": ""Ho esperienza di sala.""}")}}
-
-            Using finestra As New FinestraModificaTesti(aperti)
-
-                Assert.IsTrue(finestra.SiPuoRipristinare(0), "il sommario era stato rifinito")
-                Assert.IsFalse(finestra.SiPuoRipristinare(1), "la descrizione no")
-                Assert.IsFalse(finestra.Ripristina(1), "e infatti non si ripristina")
-
-                Assert.IsTrue(finestra.Ripristina(0), "il sommario sì")
-                Assert.AreEqual("Ho esperienza di sala.", finestra.Testo(0), "col testo da cui l'AI era partita")
-
-                Assert.AreEqual(1, finestra.Applica(), "e ripristinare è riscrivere: entra nel documento")
-                Assert.AreEqual("Ho esperienza di sala.", Testo(documento, "sommario"))
-
-            End Using
-
-        End Sub
-
-        <TestMethod>
         Public Sub UnDocumentoSenzaProsaNonPortaRighe()
 
             ' Un CV tutto fatti — nome, competenze, titoli — non ha niente da riscrivere: la
@@ -213,7 +184,6 @@ Namespace Ui
 
                 Assert.IsFalse(finestra.Riscrivi(-1, "Prima della prima."), "prima del primo")
                 Assert.IsFalse(finestra.Riscrivi(9, "Dopo l'ultima."), "dopo l'ultimo")
-                Assert.IsFalse(finestra.SiPuoRipristinare(9), "e non si ripristina il nulla")
                 Assert.AreEqual(String.Empty, finestra.Etichetta(9), "né si legge il nome di una riga che non c'è")
 
             End Using

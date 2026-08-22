@@ -1,4 +1,4 @@
-Imports System.Drawing
+﻿Imports System.Drawing
 Imports System.Windows.Forms
 
 ''' <summary>
@@ -209,7 +209,15 @@ Public Module StileApp
 
             Case LivelloBottone.Esplorativo
                 bottone.BackColor = AccentoTenue
-                bottone.FlatAppearance.BorderColor = BordoForte
+                ' Il bordo è dell'accento e non grigio: il fondo tenue di questo livello,
+                ' su una finestra già chiara, si legge quasi come quello di un bottone
+                ' spento — ed è successo davvero, con «Esporta PDF» e «Esporta DOCX»
+                ' creduti morti mentre funzionavano (T9d, 2026-08-22). Il colore del bordo
+                ' è la differenza più piccola che si vede a colpo d'occhio, e lo avvicina
+                ' al livello sopra — che d'accento ha il bordo e in più il fondo azzurro e
+                ' il carattere grande: la parentela è voluta, l'esplorativo resta il fratello
+                ' quieto dell'azione principale.
+                bottone.FlatAppearance.BorderColor = Accento
 
             Case LivelloBottone.AzionePrincipale
                 bottone.BackColor = FondoAzione

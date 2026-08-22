@@ -1,4 +1,4 @@
-<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class PannelloDocumenti
     Inherits System.Windows.Forms.UserControl
 
@@ -24,7 +24,8 @@ Partial Class PannelloDocumenti
         Me.pnlOpzioni = New System.Windows.Forms.Panel()
         Me.lblLingua = New System.Windows.Forms.Label()
         Me.cmbLingua = New System.Windows.Forms.ComboBox()
-        Me.chkRifinitura = New System.Windows.Forms.CheckBox()
+        Me.lblDocumento = New System.Windows.Forms.Label()
+        Me.cmbDocumento = New System.Windows.Forms.ComboBox()
         Me.pnlCorpo = New System.Windows.Forms.Panel()
         Me.pnlCv = New System.Windows.Forms.Panel()
         Me.lblCv = New System.Windows.Forms.Label()
@@ -100,7 +101,8 @@ Partial Class PannelloDocumenti
         ' condizione fino a T7a, che l'ha accesa.
         Me.pnlOpzioni.Controls.Add(Me.lblLingua)
         Me.pnlOpzioni.Controls.Add(Me.cmbLingua)
-        Me.pnlOpzioni.Controls.Add(Me.chkRifinitura)
+        Me.pnlOpzioni.Controls.Add(Me.lblDocumento)
+        Me.pnlOpzioni.Controls.Add(Me.cmbDocumento)
         Me.pnlOpzioni.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlOpzioni.Location = New System.Drawing.Point(14, 74)
         Me.pnlOpzioni.Name = "pnlOpzioni"
@@ -130,15 +132,27 @@ Partial Class PannelloDocumenti
         Me.cmbLingua.Size = New System.Drawing.Size(140, 23)
         Me.cmbLingua.TabIndex = 1
         '
-        'chkRifinitura
+        'lblDocumento
         '
-        Me.chkRifinitura.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.chkRifinitura.Location = New System.Drawing.Point(228, 4)
-        Me.chkRifinitura.Name = "chkRifinitura"
-        Me.chkRifinitura.Size = New System.Drawing.Size(320, 22)
-        Me.chkRifinitura.TabIndex = 2
-        Me.chkRifinitura.Text = "Mostra il prima/dopo della rifinitura"
-        Me.chkRifinitura.UseVisualStyleBackColor = False
+        Me.lblDocumento.Font = StileApp.FontTesto
+        Me.lblDocumento.ForeColor = StileApp.TestoPrimario
+        Me.lblDocumento.Location = New System.Drawing.Point(228, 6)
+        Me.lblDocumento.Name = "lblDocumento"
+        Me.lblDocumento.Size = New System.Drawing.Size(84, 20)
+        Me.lblDocumento.TabIndex = 2
+        Me.lblDocumento.Text = "Documento:"
+        '
+        'cmbDocumento
+        '
+        ' Il selettore dei documenti (T9d): da qui si salta al 📄 CV-1 base o a quelli di
+        ' un'altra candidatura senza tornare alla Home. Le voci le mette il pannello, che
+        ' sa quali candidature hanno davvero un documento da mostrare.
+        Me.cmbDocumento.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbDocumento.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.cmbDocumento.Location = New System.Drawing.Point(316, 3)
+        Me.cmbDocumento.Name = "cmbDocumento"
+        Me.cmbDocumento.Size = New System.Drawing.Size(330, 23)
+        Me.cmbDocumento.TabIndex = 3
         '
         'pnlCorpo
         '
@@ -351,7 +365,8 @@ Partial Class PannelloDocumenti
     Friend WithEvents pnlOpzioni As System.Windows.Forms.Panel
     Friend WithEvents lblLingua As System.Windows.Forms.Label
     Friend WithEvents cmbLingua As System.Windows.Forms.ComboBox
-    Friend WithEvents chkRifinitura As System.Windows.Forms.CheckBox
+    Friend WithEvents lblDocumento As System.Windows.Forms.Label
+    Friend WithEvents cmbDocumento As System.Windows.Forms.ComboBox
     Friend WithEvents pnlCorpo As System.Windows.Forms.Panel
     Friend WithEvents pnlAnnuncio As System.Windows.Forms.Panel
     Friend WithEvents lblAnnuncio As System.Windows.Forms.Label

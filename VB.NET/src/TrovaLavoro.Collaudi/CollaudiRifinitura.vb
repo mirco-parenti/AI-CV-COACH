@@ -1,4 +1,4 @@
-Imports System.Linq
+﻿Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports System.Threading.Tasks
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
@@ -180,39 +180,6 @@ Namespace Motore
         End Function
 
         <TestMethod>
-        Public Sub IlConfrontoMetteInFilaSoloICampiCheHannoUnPrima()
-
-            Dim documento As JsonNode = Cv()
-            Dim prima As JsonNode = JsonNode.Parse(
-                "{""sommario"": ""com'era il sommario"", ""esperienza.1"": ""com'era la seconda""}")
-
-            Dim cambiati As List(Of Rifinitura.CampoRifinito) = Rifinitura.Confronta(documento, prima)
-
-            Assert.HasCount(2, cambiati, "due campi cambiati, due righe")
-
-            Assert.AreEqual("Sommario", cambiati(0).Etichetta, "in italiano, e nell'ordine del CV")
-            Assert.AreEqual("com'era il sommario", cambiati(0).Prima, "il prima")
-            Assert.AreEqual("Ho esperienza nel servizio di sala.", cambiati(0).Adesso, "e com'è adesso")
-
-            Assert.AreEqual("Esperienza 2", cambiati(1).Etichetta,
-                            "contata da 1, come la conta una persona")
-
-        End Sub
-
-        <TestMethod>
-        Public Sub SenzaUnPrimaNonCEUnConfronto()
-
-            Assert.IsEmpty(Rifinitura.Confronta(Cv(), Nothing), "niente prima, niente confronto")
-            Assert.IsEmpty(Rifinitura.Confronta(Nothing, JsonNode.Parse("{""sommario"":""x""}")),
-                           "e niente documento, nemmeno")
-
-        End Sub
-
-        ' ==================================================================
-        ' L'interruttore delle Impostazioni (T9b, cap. 08.4)
-        ' ==================================================================
-
-        <TestMethod>
         Public Async Function SpentaNonChiamaLAiPerIlCv() As Task
 
             Dim finto As New RifinitoreFinto()
@@ -391,44 +358,6 @@ Namespace Motore
                            "e nemmeno un'esperienza che non esiste")
             Assert.AreEqual("Mi candido perché ho esperienza di sala.", Testo(documento, "corpo"),
                             "il documento è rimasto com'era")
-
-        End Sub
-
-        <TestMethod>
-        Public Sub DopoUnaRiscritturaAManoIlConfrontoDiceComEraPrimaDellaRifinitura()
-
-            ' Il «prima» non si tocca: resta il testo da cui l'AI era partita. Quello che
-            ' cambia è il secondo termine del confronto, che per questo si chiama «adesso»
-            ' e non «dopo» — in mezzo è passata anche la mano dell'utente.
-            Dim documento As JsonNode = Cv()
-            Dim prima As JsonNode = JsonNode.Parse("{""sommario"": ""com'era il sommario""}")
-
-            Rifinitura.Riscrivi(documento, "sommario", "L'ho riscritto io a mano.")
-
-            Dim cambiati As List(Of Rifinitura.CampoRifinito) = Rifinitura.Confronta(documento, prima)
-
-            Assert.HasCount(1, cambiati, "una riga sola")
-            Assert.AreEqual("com'era il sommario", cambiati(0).Prima, "il prima è ancora quello della rifinitura")
-            Assert.AreEqual("L'ho riscritto io a mano.", cambiati(0).Adesso, "e adesso c'è il testo dell'utente")
-
-        End Sub
-
-
-        <TestMethod>
-        Public Sub UnCampoRiportatoComEraEsceDalConfronto()
-
-            ' Il difetto visto solo dal vivo: ripristinando il testo non rifinito, il
-            ' confronto mostrava «Prima» e «Adesso» con dentro la stessa identica frase.
-            Dim documento As JsonNode = Cv()
-            Dim prima As JsonNode = JsonNode.Parse(
-                "{""sommario"": ""com'era il sommario"", ""esperienza.0"": ""Servizio ai tavoli""}")
-
-            Rifinitura.Riscrivi(documento, "esperienza.0", "Servizio ai tavoli")
-
-            Dim cambiati As List(Of Rifinitura.CampoRifinito) = Rifinitura.Confronta(documento, prima)
-
-            Assert.HasCount(1, cambiati, "resta il solo campo che è davvero diverso")
-            Assert.AreEqual("Sommario", cambiati(0).Etichetta, "ed è il sommario")
 
         End Sub
 

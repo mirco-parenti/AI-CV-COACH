@@ -203,8 +203,22 @@ due uscite una accanto all'altra a verificarlo (cap. 14).
   un dettaglio di ordine — è ciò che impedisce alla versione inglese di sovrascrivere
   l'italiana dello stesso giorno, e in una cartella dove i due CV convivono dice a colpo
   d'occhio quale si sta per allegare.*
-- Un bottone «Apri cartella» accanto a ogni documento generato: l'utente deve sempre
-  poter mettere le mani sui suoi file.
+- L'utente deve sempre poter mettere le mani sui suoi file. *Il disegno prevedeva un
+  bottone «Apri cartella» accanto a ogni documento generato; non è mai stato fatto, e la
+  prova dal vivo di T9d ha mostrato il prezzo: premere «Esporta» scriveva davvero i file,
+  ma nella cartella dati — che l'utente non ha scelto e non sa trovare — e l'unico avviso
+  era una riga di testo in fondo al pannello. Sembrava un bottone rotto. **Dal 2026-08-22
+  la promessa si mantiene meglio di così**: l'esportazione **chiede dove salvare** (si parte
+  dal Desktop, poi dall'ultima cartella usata) e alla fine **apre Esplora risorse** sul file
+  appena scritto. Il bottone che apre una cartella diventa superfluo quando è
+  l'esportazione stessa ad aprirla.*
+- **La cartella scelta riceve una copia, non gli originali** *(2026-08-22)*: i file
+  nascono comunque dove dice questo capitolo — la cartella dell'opportunità, o quella del
+  profilo per il 📄 CV-1 base — perché di lì li prende P7 per allegarli all'email
+  (cap. 07.2). Spostarli invece di copiarli lascerebbe l'email senza niente da allegare.
+  Se nella cartella scelta ci sono già file con quei nomi si chiede prima di sostituirli, e
+  chi dice di no non perde niente: i documenti aggiornati restano dove sono nati, e il
+  pannello lo dice.
 - **Si scrive solo il formato che si chiede** *(2026-08-10, T4c)*: P6 ha due bottoni
   d'esportazione (cap. 03.6), e chi preme «Esporta PDF» non deve ritrovarsi accanto anche
   un DOCX che non ha chiesto. Resta invece l'ordine di T4b quando si chiedono entrambi —

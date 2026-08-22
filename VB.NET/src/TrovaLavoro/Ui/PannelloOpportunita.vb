@@ -224,7 +224,12 @@ Public Class PannelloOpportunita
         If AiAlLavoro Then Return
 
         FasciaDIngresso(aperta:=True)
-        txtAnnuncio.Text = If(testo, String.Empty)
+
+        ' Nella casella ci va con gli a capo di Windows: il lettore di pagine cuce i pezzi
+        ' con \n (cap. 06.4) e una casella multiriga i \n non li mostra — la pagina intera
+        ' comparirebbe in un blocco unico, illeggibile proprio dove si promette all'utente
+        ' che potrà rileggerla e correggerla. All'AI e su disco il testo va come sta.
+        txtAnnuncio.Text = TestoDaMostrare.ConGliACapoDiWindows(testo)
 
         Await AvviaIPassiAsync(If(testo, String.Empty).Trim(), fonte, link).ConfigureAwait(True)
 

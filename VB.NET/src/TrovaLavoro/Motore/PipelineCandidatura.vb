@@ -1,4 +1,4 @@
-Imports System.Text.Json.Nodes
+﻿Imports System.Text.Json.Nodes
 Imports System.Threading
 Imports System.Threading.Tasks
 Imports TrovaLavoro.Ai
@@ -177,11 +177,6 @@ Namespace Motore
             ' rigenerare i documenti dopo un ripensamento li rifà nella lingua nuova.
             Dim lingua As String = LinguaDocumenti.PerDocumenti(opportunita.Lingua)
 
-            ' Si riparte da zero: quel che si sta per scrivere non ha ancora un «prima», e
-            ' tenersi quello dei documenti di ieri farebbe raccontare a P6 un confronto fra
-            ' testi che non sono mai stati uno la rifinitura dell'altro.
-            opportunita.PrimaDellaRifinitura = Nothing
-
             ' Gli appunti di mira, se il brainstorming ce n'è stato (T7c, cap. 12 A6.4):
             ' orientano l'enfasi come fanno annuncio e giudizi, e come loro non aggiungono
             ' un solo fatto. I «fatti nuovi» detti in chat restano fuori — li toglie
@@ -242,7 +237,9 @@ Namespace Motore
             Annuncia(avanzamento, passo, cosa)
 
             Try
-                Annota(opportunita, quale, Await passata().ConfigureAwait(False))
+                ' Quel che la passata restituisce — i testi di prima — non si tiene più
+                ' da T9d: l'anti-slop lavora e basta, e il documento che resta è il suo.
+                Await passata().ConfigureAwait(False)
 
             Catch ex As ErroreAi
                 ' Non si tace: il passo dice cos'è successo, e il documento resta grezzo.
@@ -250,22 +247,6 @@ Namespace Motore
             End Try
 
         End Function
-
-        ''' <summary>Mette il «prima» di un documento accanto a quello degli altri.</summary>
-        Private Shared Sub Annota(opportunita As Opportunita, quale As String, prima As JsonObject)
-
-            If prima Is Nothing Then Return
-
-            Dim tutti As JsonObject = TryCast(opportunita.PrimaDellaRifinitura, JsonObject)
-
-            If tutti Is Nothing Then
-                tutti = New JsonObject()
-                opportunita.PrimaDellaRifinitura = tutti
-            End If
-
-            tutti(quale) = prima
-
-        End Sub
 
         ''' <summary>Se questa fila ha una passata anti-slop montata.</summary>
         Private ReadOnly Property ConRifinitura As Boolean

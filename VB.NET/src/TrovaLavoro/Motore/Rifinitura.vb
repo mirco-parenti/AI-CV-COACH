@@ -1,4 +1,4 @@
-Imports System.Linq
+﻿Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports System.Threading
 Imports System.Threading.Tasks
@@ -146,70 +146,6 @@ Namespace Motore
             End If
 
             Return rifinito
-
-        End Function
-
-        ''' <summary>Un campo che la rifinitura ha cambiato, come si mostra in P6.</summary>
-        Public Class CampoRifinito
-
-            ''' <summary>Il nome del campo in italiano: «Sommario», «Esperienza 2».</summary>
-            Public Property Etichetta As String
-
-            ''' <summary>Il testo com'era prima della rifinitura.</summary>
-            Public Property Prima As String
-
-            ''' <summary>
-            ''' Il testo com'è <b>adesso</b> nel documento.
-            ''' </summary>
-            ''' <remarks>
-            ''' Si chiama così, e non «dopo», da quando l'utente può riscrivere un campo a
-            ''' mano (T9d, cap. 08.4): il confronto è sempre fra com'era prima della
-            ''' rifinitura e com'è adesso: se in mezzo è passata anche la mano dell'utente,
-            ''' «adesso» resta vero e «dopo la rifinitura» no.
-            ''' </remarks>
-            Public Property Adesso As String
-
-        End Class
-
-        ''' <summary>
-        ''' Mette in fila i campi cambiati di un documento: è il prima/dopo che P6 mostra
-        ''' quando la casella è spuntata (cap. 08.4).
-        ''' </summary>
-        ''' <param name="documento">Il documento com'è adesso, cioè il «dopo».</param>
-        ''' <param name="prima">I testi conservati alla rifinitura.</param>
-        ''' <remarks>
-        ''' Si parte dai campi del documento e non dalle chiavi del «prima»: così l'ordine
-        ''' è quello in cui l'utente li legge nel CV, e un id che nel documento non esiste
-        ''' più — una voce cancellata dopo la generazione — sparisce da sé invece di
-        ''' comparire come un confronto con il nulla.
-        ''' </remarks>
-        Public Shared Function Confronta(documento As JsonNode, prima As JsonNode) As List(Of CampoRifinito)
-
-            Dim cambiati As New List(Of CampoRifinito)
-
-            Dim comEra As JsonObject = TryCast(prima, JsonObject)
-            If comEra Is Nothing Then Return cambiati
-
-            For Each campo As Campo In Prosa(documento)
-
-                Dim testo As String = CampiJson.Testo(comEra, campo.Id)
-                If String.IsNullOrWhiteSpace(testo) Then Continue For
-
-                ' Un campo tornato uguale a com'era non è un confronto: succede da T9d,
-                ' quando l'utente ripristina il testo non rifinito, e mostrarlo lo stesso
-                ' vorrebbe dire far leggere due volte la stessa frase sotto due nomi
-                ' diversi. È la stessa regola con cui la rifinitura non annota un testo
-                ' che il modello ha restituito identico.
-                If String.Equals(testo, campo.Testo, StringComparison.Ordinal) Then Continue For
-
-                cambiati.Add(New CampoRifinito With {
-                    .Etichetta = ComeSiLegge(campo.Id),
-                    .Prima = testo,
-                    .Adesso = campo.Testo})
-
-            Next
-
-            Return cambiati
 
         End Function
 

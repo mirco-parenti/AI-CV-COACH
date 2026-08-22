@@ -30,6 +30,7 @@ Partial Class FormPrincipale
         Me.btnProfilo = New System.Windows.Forms.Button()
         Me.btnRicerca = New System.Windows.Forms.Button()
         Me.btnCandidatura = New System.Windows.Forms.Button()
+        Me.btnDocumenti = New System.Windows.Forms.Button()
         Me.btnImpostazioni = New System.Windows.Forms.Button()
         Me.pnlBordoBarraSuperiore = New System.Windows.Forms.Panel()
         Me.pnlAreaCentrale = New System.Windows.Forms.Panel()
@@ -81,6 +82,7 @@ Partial Class FormPrincipale
         Me.pnlBarraSuperiore.Controls.Add(Me.btnProfilo)
         Me.pnlBarraSuperiore.Controls.Add(Me.btnRicerca)
         Me.pnlBarraSuperiore.Controls.Add(Me.btnCandidatura)
+        Me.pnlBarraSuperiore.Controls.Add(Me.btnDocumenti)
         Me.pnlBarraSuperiore.Controls.Add(Me.btnImpostazioni)
         Me.pnlBarraSuperiore.Controls.Add(Me.pnlBordoBarraSuperiore)
         Me.pnlBarraSuperiore.Dock = System.Windows.Forms.DockStyle.Fill
@@ -148,6 +150,23 @@ Partial Class FormPrincipale
         Me.btnCandidatura.Text = "📋 Candidatura"
         Me.btnCandidatura.UseVisualStyleBackColor = False
         '
+        'btnDocumenti
+        '
+        ' La porta di P6 (T9d). Fino ad allora i documenti erano solo il passo successivo
+        ' di un flusso — dalla candidatura o dal profilo — e per rileggere un CV scritto
+        ' ieri bisognava ripassare dalla Home e riaprire la candidatura giusta.
+        Me.btnDocumenti.BackColor = StileApp.SfondoContenuto
+        Me.btnDocumenti.FlatAppearance.BorderColor = StileApp.BordoLeggero
+        Me.btnDocumenti.FlatAppearance.BorderSize = 1
+        Me.btnDocumenti.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnDocumenti.ForeColor = StileApp.TestoPrimario
+        Me.btnDocumenti.Location = New System.Drawing.Point(502, 7)
+        Me.btnDocumenti.Name = "btnDocumenti"
+        Me.btnDocumenti.Size = StileApp.BottoneBarraSuperiore
+        Me.btnDocumenti.TabIndex = 4
+        Me.btnDocumenti.Text = "📄 Documenti"
+        Me.btnDocumenti.UseVisualStyleBackColor = False
+        '
         'btnImpostazioni
         '
         Me.btnImpostazioni.BackColor = StileApp.SfondoContenuto
@@ -155,10 +174,10 @@ Partial Class FormPrincipale
         Me.btnImpostazioni.FlatAppearance.BorderSize = 1
         Me.btnImpostazioni.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnImpostazioni.ForeColor = StileApp.TestoPrimario
-        Me.btnImpostazioni.Location = New System.Drawing.Point(502, 7)
+        Me.btnImpostazioni.Location = New System.Drawing.Point(624, 7)
         Me.btnImpostazioni.Name = "btnImpostazioni"
         Me.btnImpostazioni.Size = StileApp.BottoneBarraSuperiore
-        Me.btnImpostazioni.TabIndex = 4
+        Me.btnImpostazioni.TabIndex = 5
         Me.btnImpostazioni.Text = "⚙ Impostazioni"
         Me.btnImpostazioni.UseVisualStyleBackColor = False
         '
@@ -369,6 +388,7 @@ Partial Class FormPrincipale
     Friend WithEvents btnProfilo As System.Windows.Forms.Button
     Friend WithEvents btnRicerca As System.Windows.Forms.Button
     Friend WithEvents btnCandidatura As System.Windows.Forms.Button
+    Friend WithEvents btnDocumenti As System.Windows.Forms.Button
     Friend WithEvents btnImpostazioni As System.Windows.Forms.Button
     Friend WithEvents pnlBordoBarraSuperiore As System.Windows.Forms.Panel
     Friend WithEvents pnlAreaCentrale As System.Windows.Forms.Panel

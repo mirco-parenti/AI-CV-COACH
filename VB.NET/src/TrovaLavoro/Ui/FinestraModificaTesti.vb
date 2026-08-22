@@ -1,4 +1,4 @@
-Imports System.Linq
+﻿Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports System.Windows.Forms
 Imports TrovaLavoro.Dati
@@ -23,12 +23,6 @@ Public Class DocumentoDaRiscrivere
 
     ''' <summary>Il documento: un CV o una lettera.</summary>
     Public Property Documento As JsonNode
-
-    ''' <summary>
-    ''' Com'erano i suoi campi prima dell'anti-slop, o <c>Nothing</c> se non ne è cambiato
-    ''' nessuno: è quello che il «Ripristina» rimette nella casella (cap. 08.4).
-    ''' </summary>
-    Public Property PrimaDellaRifinitura As JsonNode
 
 End Class
 
@@ -78,9 +72,6 @@ Public Class FinestraModificaTesti
 
         ''' <summary>Il testo com'è adesso nella casella.</summary>
         Public Property Testo As String
-
-        ''' <summary>Il testo prima della rifinitura, o <c>Nothing</c> se non fu cambiato.</summary>
-        Public Property NonRifinito As String
 
         ''' <summary>Se in questo giro l'utente l'ha cambiato.</summary>
         Public ReadOnly Property Riscritto As Boolean
@@ -204,33 +195,6 @@ Public Class FinestraModificaTesti
 
     End Function
 
-    ''' <summary>Se di quel campo si conserva il testo da cui la rifinitura era partita.</summary>
-    Public Function SiPuoRipristinare(indice As Integer) As Boolean
-
-        If Not CE(indice) Then Return False
-
-        Return Not String.IsNullOrWhiteSpace(_voci(indice).NonRifinito)
-
-    End Function
-
-    ''' <summary>
-    ''' Rimette nel campo il testo che c'era prima della rifinitura anti-slop.
-    ''' </summary>
-    ''' <remarks>
-    ''' È la terza delle tre cose promesse dal cap. 08.4 — «tornare alla versione non
-    ''' rifinita» — e vive qui e non nel pannello perché è la stessa mano che riscrive:
-    ''' ripristinare è riscrivere con un testo che si conosce già. Come ogni altra
-    ''' riscrittura non tocca il documento finché non si conferma.
-    ''' </remarks>
-    ''' <returns>Falso se quella riga non c'è, o se di quel campo non si conserva il prima.</returns>
-    Public Function Ripristina(indice As Integer) As Boolean
-
-        If Not SiPuoRipristinare(indice) Then Return False
-
-        Return Riscrivi(indice, _voci(indice).NonRifinito)
-
-    End Function
-
     ''' <summary>
     ''' Mette nei documenti i campi riscritti.
     ''' </summary>
@@ -255,16 +219,12 @@ Public Class FinestraModificaTesti
 
     End Function
 
-    ''' <summary>
-    ''' Mette in fila i campi di prosa di tutti i documenti, ciascuno col suo «prima».
-    ''' </summary>
+    ''' <summary>Mette in fila i campi di prosa di tutti i documenti.</summary>
     Private Sub RaccogliLaProsa(documenti As IEnumerable(Of DocumentoDaRiscrivere))
 
         For Each documento As DocumentoDaRiscrivere In documenti
 
             If documento Is Nothing OrElse documento.Documento Is Nothing Then Continue For
-
-            Dim prima As JsonObject = TryCast(documento.PrimaDellaRifinitura, JsonObject)
 
             For Each campo As Rifinitura.CampoDiProsa In Rifinitura.CampiDiProsa(documento.Documento)
 
@@ -273,8 +233,7 @@ Public Class FinestraModificaTesti
                     .Id = campo.Id,
                     .Etichetta = campo.Etichetta,
                     .Originale = campo.Testo,
-                    .Testo = campo.Testo,
-                    .NonRifinito = If(prima Is Nothing, Nothing, CampiJson.Testo(prima, campo.Id))})
+                    .Testo = campo.Testo})
 
             Next
 
@@ -298,7 +257,6 @@ Public Class FinestraModificaTesti
         txtTesto.BackColor = StileApp.SfondoContenuto
 
         StileApp.VestiBottone(btnSalva, LivelloBottone.SicuroPositivo)
-        StileApp.VestiBottone(btnRipristina, LivelloBottone.Attenzione)
         StileApp.VestiBottone(btnAnnulla, LivelloBottone.Neutro)
 
     End Sub
@@ -366,13 +324,6 @@ Public Class FinestraModificaTesti
                                   $"Il testo di «{_voci(indice).Etichetta}» (puoi riscriverlo):",
                                   "Scegli un campo dall'elenco.")
 
-            btnRipristina.Enabled = SiPuoRipristinare(indice)
-
-            _suggerimenti.SetToolTip(btnRipristina,
-                If(btnRipristina.Enabled,
-                   "Rimette il testo com'era prima della rifinitura anti-slop.",
-                   "Su questo campo non c'è niente da ripristinare: la rifinitura non l'ha cambiato."))
-
         Finally
             _riempimenti -= 1
         End Try
@@ -406,17 +357,6 @@ Public Class FinestraModificaTesti
         If _riempimenti > 0 Then Return
 
         Riscrivi(IndiceScelto, txtTesto.Text)
-
-    End Sub
-
-    Private Sub btnRipristina_Click(sender As Object, e As EventArgs) Handles btnRipristina.Click
-
-        Dim indice As Integer = IndiceScelto
-        If Not Ripristina(indice) Then Return
-
-        ' La casella si rilegge dalla voce: scrivendoci dentro si passerebbe di nuovo da
-        ' TextChanged, e la riscrittura si farebbe due volte per lo stesso gesto.
-        MostraIlCampoScelto()
 
     End Sub
 

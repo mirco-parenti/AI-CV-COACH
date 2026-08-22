@@ -139,6 +139,42 @@ caso("il testo appeso direttamente a un contenitore non si perde", () => {
   if (!letto.testo.includes("Un paragrafo.")) return "sparito il paragrafo: " + JSON.stringify(letto.testo);
 });
 
+caso("i separatori grafici non entrano nel testo", () => {
+  // Il caso vero (Indeed, 22-08-2026): fra una sezione e l'altra la pagina mette elementi
+  // che a video sono una linea grigia e nel testo arrivano come «&nbsp;» scritto per
+  // esteso. L'AI li ignora, ma sporcano il testo che l'utente deve poter rileggere.
+  const corpo = elemento("BODY", "block", [
+    elemento("P", "block", [testo("Tipo di contratto")]),
+    elemento("DIV", "block", [testo("&nbsp;")]),
+    elemento("DIV", "block", [testo("•")]),
+    elemento("DIV", "block", [testo("──────")]),
+    elemento("P", "block", [testo("Tempo pieno")]),
+  ]);
+
+  const letto = JSON.parse(esegui(lettura(), pagina(corpo)));
+
+  if (letto.testo.includes("&nbsp;")) return "il separatore di Indeed è ancora lì: " + JSON.stringify(letto.testo);
+  if (letto.testo.includes("•")) return "il pallino è ancora lì: " + JSON.stringify(letto.testo);
+  if (letto.testo.includes("──")) return "la linea è ancora lì: " + JSON.stringify(letto.testo);
+  if (letto.testo !== "Tipo di contratto\nTempo pieno") {
+    return "resta solo il testo vero, e in ordine: " + JSON.stringify(letto.testo);
+  }
+});
+
+caso("una riga vera che contiene un'entità non si perde", () => {
+  // Il criterio toglie le entità solo per decidere: dentro un pezzo che entra non si tocca
+  // niente, o si mangerebbe mezzo annuncio per una parola scritta escapata.
+  const corpo = elemento("BODY", "block", [
+    elemento("P", "block", [testo("Buoni pasto &nbsp; e orario flessibile")]),
+  ]);
+
+  const letto = JSON.parse(esegui(lettura(), pagina(corpo)));
+
+  if (letto.testo !== "Buoni pasto &nbsp; e orario flessibile") {
+    return "la riga doveva restare intera: " + JSON.stringify(letto.testo);
+  }
+});
+
 caso("quello che il foglio di stile spegne resta fuori", () => {
   const corpo = elemento("BODY", "block", [
     elemento("P", "block", [testo("Questo si legge.")]),

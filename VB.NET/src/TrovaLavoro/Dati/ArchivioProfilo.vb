@@ -1,4 +1,4 @@
-Imports System.Globalization
+﻿Imports System.Globalization
 Imports System.IO
 Imports System.Linq
 Imports System.Text
@@ -29,13 +29,6 @@ Namespace Dati
         ''' una lingua non dichiarata è italiano sta lì, in un posto solo.
         ''' </summary>
         Public Property Lingua As String
-
-        ''' <summary>
-        ''' Com'erano i suoi campi-prosa <b>prima</b> della rifinitura anti-slop (T7b,
-        ''' cap. 08.4), o <c>Nothing</c> se non ne è cambiato nessuno. Sta nell'involucro
-        ''' e non dentro il CV, come per una candidatura: il documento resta il documento.
-        ''' </summary>
-        Public Property PrimaDellaRifinitura As JsonNode
 
     End Class
 
@@ -245,7 +238,6 @@ Namespace Dati
         ''' </param>
         ''' <returns>Il percorso del file scritto.</returns>
         Public Function SalvaCvBase(cv As JsonNode, versioneProfilo As String,
-                                    Optional primaDellaRifinitura As JsonNode = Nothing,
                                     Optional lingua As String = Nothing,
                                     Optional generato As Date? = Nothing) As String
 
@@ -258,11 +250,6 @@ Namespace Dati
                 {"generato", If(generato, Date.Now).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)},
                 {"lingua", lingua},
                 {"cv", cv.DeepClone()}}
-
-            ' Da T7b, e solo quando c'è stato davvero un cambiamento da raccontare.
-            If primaDellaRifinitura IsNot Nothing Then
-                involucro("rifinitura") = primaDellaRifinitura.DeepClone()
-            End If
 
             ScriviInModoAtomico(_cartella.FileCvBase, involucro.ToJsonString(FormatoLeggibile))
 
@@ -293,17 +280,11 @@ Namespace Dati
             Dim cv As JsonNode = Nothing
             involucro.TryGetPropertyValue("cv", cv)
 
-            ' Da T7b: nei file scritti prima non c'è, ed è giusto così — quel CV dalla
-            ' rifinitura non ci è mai passato.
-            Dim prima As JsonNode = Nothing
-            involucro.TryGetPropertyValue("rifinitura", prima)
-
             Return New CvBase With {
                 .Cv = cv,
                 .VersioneProfilo = Campo(involucro, "versione_profilo"),
                 .Generato = generato,
-                .Lingua = Campo(involucro, "lingua"),
-                .PrimaDellaRifinitura = prima}
+                .Lingua = Campo(involucro, "lingua")}
 
         End Function
 
