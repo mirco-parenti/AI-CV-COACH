@@ -30,6 +30,15 @@ riferimento è quello del perito, non dell'ingegnere: se un capitolo non si capi
 | [14](14_piano_di_lavoro.md) | Piano di lavoro | le tappe T0–T9, ognuna con il suo collaudo |
 | [15](15_decisioni_aperte.md) | Decisioni aperte | ciò che spetta all'utente decidere prima di partire |
 
+## Allegati
+
+Non sono capitoli — non descrivono l'applicazione — ma stanno qui perché è qui che si
+verrebbe a cercarli.
+
+| File | In una riga |
+|---|---|
+| [prompt-logo.md](prompt-logo.md) | I due prompt con cui è stata generata l'illustrazione del marchio (banner e icona), le righe di ricambio e le parole che ne rovinano la resa. È la **ricetta**: le immagini che ne sono uscite stanno in `immagini/`, la lavorazione fuori dal repo. |
+
 ## Come leggerlo
 
 - **Prima volta**: 01 → 12 → 02 (capire cosa fa e come), poi i capitoli tematici.
