@@ -227,9 +227,11 @@ sinistra della finestra principale:
 > Il pannello in basso a sinistra è il **marchio aziendale**: sotto lo scudo compare
 > **sempre e solo «AVIOLAB AI»** *(precisato 2026-08-06)*. **Il nome mostrato
 > all'utente resta «TrovaLavoro»** (cap. 15, voce 3) nella barra del titolo; il
-> sottotitolo «e candidati con il CV giusto, senza fatica» compare nella finestra
-> «Informazioni su…» e nel primo avvio. *AI-CV-COACH* resta il nome del progetto e
-> del repository, non del prodotto.
+> sottotitolo «Crea il tuo miglior CV e rispondi subito all'annuncio di lavoro
+> perfetto per te!» compare nella finestra «Informazioni su…» e nel primo avvio
+> *(cambiato il 2026-08-22 insieme al banner del logo: prima era «e candidati con
+> il CV giusto, senza fatica»)*. *AI-CV-COACH* resta il nome del progetto e del
+> repository, non del prodotto.
 
 - `Panel` di circa **261×216 px**, sfondo `SfondoBase`, ancorato **Bottom+Left**,
   aggiunto al form come elemento flottante sopra la struttura (così sopravvive ai

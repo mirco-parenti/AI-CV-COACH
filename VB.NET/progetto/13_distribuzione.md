@@ -124,11 +124,13 @@ senza sparpagliare file.
 ## 13.5 Nome, versione e identità
 
 **Il nome che l'utente legge è «TrovaLavoro»** (cap. 15, voce 3): barra del titolo,
-icona, eseguibile `TrovaLavoro.exe`, sottotitolo «e candidati con il CV giusto, senza
-fatica». Il criterio è la comprensibilità per chi non è tecnico — sul modello di
-*TrovaPrezzi*: verbo più nome, si detta al telefono senza compitarlo e dice da sé che
-cosa fa. **Il nome del progetto, del repository e di questi documenti resta
-AI-CV-COACH**: cambia solo ciò che appare all'utente.
+icona, eseguibile `TrovaLavoro.exe`, sottotitolo «Crea il tuo miglior CV e rispondi
+subito all'annuncio di lavoro perfetto per te!» *(cambiato il 2026-08-22 insieme al
+banner del logo: prima era «e candidati con il CV giusto, senza fatica»)*. Il criterio
+è la comprensibilità per chi non è tecnico — sul modello di *TrovaPrezzi*: verbo più
+nome, si detta al telefono senza compitarlo e dice da sé che cosa fa. **Il nome del
+progetto, del repository e di questi documenti resta AI-CV-COACH**: cambia solo ciò
+che appare all'utente.
 
 Le **proprietà dell'eseguibile** (scheda «Dettagli» di Windows) si compilano a T1
 insieme al resto:
