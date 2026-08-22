@@ -163,6 +163,15 @@ Friend Class ConduttoreDiDialogo
                     ' Un turno ripetibile: un'altra voce se la traccia ce l'ha, se no avanti.
                     scelta = If(AncoraInQuestoGruppo(gruppo, battuta), Scelte.Altra, Scelte.Procedi)
 
+                ElseIf offerte.Contains(Scelte.Riprendi) Then
+                    ' Prima di chiudere il dialogo riofre una domanda rimasta a vuoto.
+                    ' La traccia però è scritta per un giro solo, e le sue battute sono
+                    ' già state dette tutte: si declina e lo si annota, perché il
+                    ' rapporto dica che quel turno è rimasto senza risposta.
+                    scelta = Scelte.Lascia
+                    Stranezze.Add("Il dialogo ha riproposto una domanda rimasta senza risposta: " &
+                                  $"«{Accorcia(String.Join(" ", mossa.Detto))}». Si è lasciata così.")
+
                 ElseIf offerte.Contains(Scelte.Conferma) Then
                     ' Vale per le schede dei turni e per i frammenti ripescati: la persona
                     ' che si è raccontata bene conferma ciò che ha detto.

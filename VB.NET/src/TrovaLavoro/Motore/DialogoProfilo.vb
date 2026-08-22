@@ -55,6 +55,14 @@ Namespace Motore
     ''' categorie potrebbero rimpallarselo all'infinito e la passata finale non
     ''' convergerebbe mai.</item>
     ''' </list>
+    ''' <para>Alla stessa passata finale è appesa la <b>ripresa delle domande
+    ''' saltate</b>: un turno chiuso con «passiamo oltre» non è perduto per sempre, e
+    ''' prima del riepilogo viene riofferto — una volta sola, chiedendo il permesso, e
+    ''' soltanto se nel frattempo nessun frammento recuperato l'ha già riempito. Dove
+    ''' l'anti-perdita recupera <i>contenuto</i> detto nel turno sbagliato, questa
+    ''' recupera una <i>domanda</i> a cui non si era risposto: sono cugine, non la stessa
+    ''' cosa. Anche qui vale il tentativo unico, per lo stesso motivo — se una ripresa
+    ''' potesse rimettere in elenco la propria domanda, il dialogo non finirebbe più.</para>
     ''' </remarks>
     Public Class DialogoProfilo
 
@@ -72,6 +80,7 @@ Namespace Motore
             AggiuntaCompetenze
             ConfermaPending
             CorrezionePending
+            RipresaDomanda
             Concluso
         End Enum
 
@@ -208,6 +217,15 @@ Namespace Motore
         ''' <summary>Il magazzino dei frammenti instradati ad altri turni.</summary>
         Private ReadOnly _pending As New Dictionary(Of String, List(Of String))
 
+        ''' <summary>
+        ''' Le domande chiuse senza aver raccolto niente, in attesa della seconda
+        ''' occasione che la ripresa dà loro prima del riepilogo.
+        ''' </summary>
+        Private ReadOnly _saltate As New List(Of String)
+
+        ''' <summary>Se il turno in corso è stato riaperto dalla ripresa.</summary>
+        Private _inRipresa As Boolean
+
         Private _indice As Integer
         Private _attesa As Attesa
         Private _frammento As JsonObject
@@ -294,6 +312,8 @@ Namespace Motore
                     Return ScegliSuCompetenzeAsync(scelta, annulla)
                 Case Attesa.ConfermaPending
                     Return ScegliSuPendingAsync(scelta, annulla)
+                Case Attesa.RipresaDomanda
+                    Return ScegliSuRipresaAsync(scelta, annulla)
                 Case Else
                     Throw New InvalidOperationException(
                         "Il dialogo non sta aspettando una scelta in questo momento.")
@@ -328,8 +348,18 @@ Namespace Motore
 
         End Function
 
-        ''' <summary>Passa al turno successivo.</summary>
+        ''' <summary>Passa al turno successivo, o chiude la ripresa in corso.</summary>
         Private Function AvanzaAsync(mossa As Mossa, annulla As CancellationToken) As Task(Of Mossa)
+
+            ' Dentro una ripresa non c'è un turno dopo: il dialogo era già arrivato in
+            ' fondo. Si torna alla passata finale, che smaltirà l'eventuale materiale
+            ' nuovo finito nel magazzino e passerà poi alla domanda saltata successiva.
+            ' È l'unico punto da deviare, perché tutte le uscite di un turno passano
+            ' di qui: la conferma, il ponte «un'altra o procediamo», il passare oltre.
+            If _inRipresa Then
+                _inRipresa = False
+                Return PassataFinaleAsync(mossa, annulla)
+            End If
 
             _indice += 1
             Return ApriTurnoAsync(mossa, annulla)
@@ -346,7 +376,7 @@ Namespace Motore
         Private Async Function PassataFinaleAsync(mossa As Mossa, annulla As CancellationToken) As Task(Of Mossa)
 
             Dim dest As String = DestinazioniPending.FirstOrDefault(Function(c) _pending(c).Count > 0)
-            If dest Is Nothing Then Return Riepilogo(mossa)
+            If dest Is Nothing Then Return Await RiprendiSaltateAsync(mossa, annulla).ConfigureAwait(False)
 
             mossa.Detto.Add(
                 "Prima di chiudere, recuperiamo una cosa che avevi accennato e non avevamo ancora registrato.")
@@ -471,6 +501,8 @@ Namespace Motore
                 Case Scelte.Oltre
                     ' Anche rinunciando, ciò che era per altri turni non si butta.
                     RaccogliAltrove(_frammento, Nothing)
+                    ' E non si butta nemmeno la domanda: prima di chiudere si riofre.
+                    SegnaSaltata(turno.Chiave)
                     Return Await AvanzaAsync(mossa, annulla).ConfigureAwait(False)
                 Case Else
                     Throw SceltaSconosciuta(scelta)
@@ -735,6 +767,97 @@ Namespace Motore
             mossa.Schede.Add(SchedaElenco(Nothing, Profilo.Competenze))
 
         End Sub
+
+        ' ==================================================================
+        ' Le domande saltate: la ripresa prima del riepilogo
+        ' ==================================================================
+
+        ''' <summary>
+        ''' Mette in conto una domanda chiusa a mani vuote, perché prima del riepilogo le
+        ''' si possa dare una seconda occasione.
+        ''' </summary>
+        ''' <remarks>
+        ''' <b>Dentro una ripresa non si segna niente</b>, ed è la guardia di
+        ''' terminazione: senza, un turno che resta vuoto anche la seconda volta
+        ''' rientrerebbe nell'elenco e tornerebbe all'infinito. È la stessa disciplina
+        ''' della guardia anti-rimbalzo del magazzino — si tenta una volta sola.
+        ''' </remarks>
+        Private Sub SegnaSaltata(chiave As String)
+
+            If _inRipresa Then Return
+            If Not _saltate.Contains(chiave) Then _saltate.Add(chiave)
+
+        End Sub
+
+        ''' <summary>
+        ''' La prossima domanda da riproporre, o <c>Nothing</c> se non ne restano. Quelle
+        ''' che nel frattempo si sono riempite da sé — l'anti-perdita ha recuperato per
+        ''' loro un frammento detto nel turno sbagliato — si tolgono senza chiedere
+        ''' niente: la risposta c'è già, e richiederla sembrerebbe non aver ascoltato.
+        ''' </summary>
+        Private Function ProssimaSaltata() As String
+
+            _saltate.RemoveAll(Function(c) Not AncoraVuoto(c))
+            Return _saltate.FirstOrDefault()
+
+        End Function
+
+        ''' <summary>Se di quella categoria il profilo non ha ancora niente.</summary>
+        Private Function AncoraVuoto(chiave As String) As Boolean
+
+            If chiave = Competenze Then Return Profilo.Competenze.Count = 0
+            Return ProfiloComeVoci(chiave).Count = 0
+
+        End Function
+
+        ''' <summary>
+        ''' L'ultimo giro prima del riepilogo: le domande rimaste senza risposta si
+        ''' riofrono una per una, e prima si chiede il permesso — chi aveva scelto di
+        ''' saltare non se la ritrova addosso. Chi accetta rientra nel turno vero, con la
+        ''' sua domanda e le sue conferme: qui non si duplica niente.
+        ''' </summary>
+        Private Function RiprendiSaltateAsync(mossa As Mossa, annulla As CancellationToken) As Task(Of Mossa)
+
+            Dim chiave As String = ProssimaSaltata()
+            If chiave Is Nothing Then Return Task.FromResult(Riepilogo(mossa))
+
+            ' Si toglie dall'elenco adesso, non quando la risposta arriva: l'occasione è
+            ' una, e resta consumata anche se va di nuovo a vuoto.
+            _saltate.Remove(chiave)
+            _indice = Turni.FindIndex(Function(t) t.Chiave = chiave)
+
+            mossa.Detto.Add(
+                $"Prima di chiudere: su «{EtichetteCategoria(chiave)}» non avevamo raccolto niente. " &
+                "Vuoi provarci ora?")
+
+            _attesa = Attesa.RipresaDomanda
+            Return Task.FromResult(DueScelte(mossa, "Ci provo", Scelte.Riprendi, "Lasciamo così", Scelte.Lascia))
+
+        End Function
+
+        Private Async Function ScegliSuRipresaAsync(scelta As String,
+                                                    annulla As CancellationToken) As Task(Of Mossa)
+
+            Dim mossa As New Mossa
+
+            Select Case scelta
+
+                Case Scelte.Riprendi
+                    ' Da qui il turno si comporta come sempre: è AvanzaAsync che, invece
+                    ' di proseguire col turno dopo, riporterà alla passata finale.
+                    _inRipresa = True
+                    Return Await ApriTurnoAsync(mossa, annulla).ConfigureAwait(False)
+
+                Case Scelte.Lascia
+                    mossa.Detto.Add("Va bene, lasciamo così.")
+                    Return Await RiprendiSaltateAsync(mossa, annulla).ConfigureAwait(False)
+
+                Case Else
+                    Throw SceltaSconosciuta(scelta)
+
+            End Select
+
+        End Function
 
         ' ==================================================================
         ' Anti-perdita: il magazzino, l'iniezione, il «lasciato fuori»

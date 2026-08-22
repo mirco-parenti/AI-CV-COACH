@@ -71,6 +71,8 @@ Namespace Motore
         Public Const Procedi As String = "procedi"
         Public Const Aggiungi As String = "aggiungi"
         Public Const Scarta As String = "scarta"
+        Public Const Riprendi As String = "riprendi"
+        Public Const Lascia As String = "lascia"
     End Module
 
     ''' <summary>

@@ -664,7 +664,8 @@ gamba che si areni non tiene ferme le altre.
 - **T9d — Rifinitura.** La gestione errori rivista pannello per pannello, la **misura** dei
   giudizi di contesto che il confronto ogni tanto salta, la modifica a mano dei testi in P6
   (cap. 08.4) e i difetti minori raccolti in `in_sospeso.md`.
-- **T9e — Rilascio.** La checklist «Problemi e mitigazioni», il collaudo generale di Mirco
+- **T9e — Rilascio.** La checklist «Problemi e mitigazioni», la **ripresa delle domande
+  saltate** (la voce 4 della checklist, riaperta e costruita), il collaudo generale di Mirco
   su candidature reali, l'icona dell'eseguibile, diario e README, la demo e il tag `v1.0`.
 
 Tre cose lasciate in bianco dal progetto sono state decise prima di cominciare: il
@@ -854,7 +855,7 @@ rieseguibili (`CollaudiChecklistReale`, categoria `Reale`) con il loro rapporto 
 | 1 | Gonfiamento delle competenze | prova A, con l'AI vera | ✅ «leader nato» resta «leader nato», «un po' di inglese» resta attenuato |
 | 2 | Informali promosse a formali | prova A | ✅ il banco del cognato «in nero» è stato instradato alle informali |
 | 3 | Campi indovinati | prova A | ✅ email, telefono, scuola e anno taciuti restano vuoti; città e titolo detti ci sono |
-| 4 | `pending_questions` | decisione | ➖ **ratificata fuori dalla 1.0** (vedi sotto) |
+| 4 | `pending_questions` | decisione, poi **costruita** | ✅ **entrata nella 1.0**: la ripresa delle domande saltate (vedi sotto) |
 | 5 | Più voci in una risposta | prova A | ✅ tre impieghi in una battuta sola restano tre |
 | 6 | Scoring della famiglia A | rilettura del codice + banco | ✅ architettura ibrida intatta; sei casi dell'hard-gate più la parità deterministica |
 | 7 | Requisiti «tipici» non scritti | prova B, con l'AI vera | ✅ da quattro righe escono quattro liste vuote, azienda vuota, e l'email ricopiata |
@@ -865,7 +866,11 @@ rieseguibili (`CollaudiChecklistReale`, categoria `Reale`) con il loro rapporto 
 nella 1.0 il suo posto lo tengono tre difese che esistono davvero — il default sicuro sui
 vuoti, la conferma in blocco prima che qualcosa entri, e il campo `altrove`
 dell'anti-perdita, che di una domanda saltata recupera almeno il contenuto detto nel turno
-sbagliato. La voce resta in `idee_future.md`, dov'era.*
+sbagliato. La voce resta in `idee_future.md`, dov'era.* **Quella ratifica è durata poche
+ore**: rileggendola, Mirco ha chiesto di far entrare la voce nella 1.0, ed è il terzo tempo
+qui sotto. Il paragrafo resta com'era scritto perché la ratifica c'è stata davvero, e la
+sua motivazione — tre difese che esistono al posto di una che non c'era — è ancora il
+motivo per cui la 1.0 sarebbe uscita bene anche senza.
 
 **Quel che il rito ha stanato, e che nessuno cercava.** La metà-codice della voce 8 —
 `non determinabile` escluso dal conteggio, e il sentinel «Nessuna esperienza richiesta» che
@@ -908,6 +913,52 @@ Anna Ricci, che guarda l'anti-perdita, e quella di Marco Gentili, che tenta le d
 modo di condurre dev'essere uno solo, per la stessa ragione per cui l'anti-invenzione vive
 in un posto solo. Il dialogo di Anna è stato rifatto con l'AI vera dopo l'estrazione:
 verde.*
+
+
+**La ripresa delle domande saltate** *(2026-08-22, terzo tempo di T9e)*. La voce 4 della
+checklist era l'unica senza una difesa costruita, e Mirco ha scelto di darle la sua invece di
+lasciarla al backlog. Il buco era piccolo e preciso: un turno che non raccoglie niente offre
+«Riprovo / Passiamo oltre», e con «passiamo oltre» quella domanda non tornava mai più. Ora
+torna — **una volta sola, prima del riepilogo, e chiedendo il permesso**: «su *«esperienze
+informali»* non avevamo raccolto niente. Vuoi provarci ora?» → *Ci provo* / *Lasciamo così*.
+
+Il perimetro è **i quattro turni-contenuto** (esperienze formali e informali, competenze,
+formazione), gli unici che passano dallo stato «niente colto». I tre turni singoli — nome,
+contatti, patente — restano fuori: lì il vuoto lo si conferma, si rilegge nel riepilogo e si
+corregge dall'editing del profilo (cap. 12, A2); riproporlo sarebbe insistere su una risposta
+data.
+
+Il disegno **non aggiunge una seconda strada al dialogo**, che è la parte che conta. La
+ripresa si aggancia alla passata finale — quella dell'anti-perdita — e **dopo** di lei, così
+un turno che nel frattempo si è riempito da sé (un frammento recuperato dal magazzino) non
+viene richiesto: la risposta c'è già. Chi accetta **rientra nel turno vero**, con la sua
+domanda e le sue schede di conferma; l'unico punto deviato è `AvanzaAsync`, che dentro una
+ripresa torna alla passata finale invece di proseguire col turno dopo. È un `If` solo, e
+copre tutte le uscite di un turno perché passano tutte di lì — compreso il caso in cui la
+ripresa accenni a un'altra categoria, che finisce nel magazzino e viene smaltito prima del
+riepilogo.
+
+**La terminazione è la stessa lezione dell'anti-rimbalzo, applicata alle domande**: dentro
+una ripresa non si segna niente, e la domanda esce dall'elenco quando la si offre, non quando
+riesce. Senza l'una o l'altra il dialogo non finirebbe più. **Cinque falsificazioni, cinque
+rosse** (regola 14): la guardia di terminazione, l'occasione unica, la guardia di rilevanza,
+il deviatore di `AvanzaAsync` e la segnalazione del turno saltato — ognuna rompe esattamente
+il collaudo che la difende, nessuna è rimasta verde per merito di un altro strato. La prima
+volta però una di esse **appese** il banco invece di arrossarlo: l'aiutante che declina le
+riprese ciclava senza fine, e adesso ha un tetto — un collaudo che non termina non è un
+collaudo che passa.
+
+**994 collaudi verdi** (erano 988), più i copioni 10 su 10; versione **0.3.041**, **Pool 1.12
+invariato**: nessun prompt è stato toccato, la ripresa è tutta codice e testi. Due collaudi
+dell'anti-perdita sono stati adeguati — saltavano dei turni per arrivare in fondo, e ora in
+fondo trovano la domanda — e il conduttore dei collaudi reali ha imparato a declinarla,
+annotandolo fra le stranezze del rapporto. Una cosa va detta e messa in conto: **questa
+funzione nel prototipo non esiste**, quindi il collaudo di non-regressione non la copre e non
+la può coprire (cap. 04.7). È il primo pezzo di dialogo che nasce senza termine di paragone,
+e la sua unica rete è il banco headless — per questo qui le falsificazioni contano doppio.
+
+Con lei T9e diventa di **cinque tempi**: l'identità visiva, la checklist, la ripresa, il
+collaudo generale di Mirco e il rilascio.
 
 
 ## Ordine e dipendenze

@@ -42,9 +42,9 @@ Namespace Motore
                    " ""altrove"": " & altrove & "}"
         End Function
 
-        Private Shared Function FrInformale(cosa As String) As String
+        Private Shared Function FrInformale(cosa As String, Optional altrove As String = "{}") As String
             Return "{""esperienze_informali"": [{""cosa_facevo"": """ & cosa & """, ""quando"": """"," &
-                   " ""con_chi"": """"}], ""altrove"": {}}"
+                   " ""con_chi"": """"}], ""altrove"": " & altrove & "}"
         End Function
 
         Private Shared Function FrCompetenze(altrove As String, ParamArray voci As String()) As String
@@ -168,6 +168,33 @@ Namespace Motore
 
         End Function
 
+        ''' <summary>
+        ''' Declina ogni domanda riproposta dalla ripresa, fino alla chiusura. Serve ai
+        ''' collaudi che saltano dei turni per arrivare in fondo e che della ripresa non
+        ''' parlano: quella ha i suoi.
+        ''' </summary>
+        Private Shared Async Function OltreLeRipreseAsync(dialogo As DialogoProfilo,
+                                                          mossa As Mossa) As Task(Of Mossa)
+
+            ' Il tetto non è decorazione: se la ripresa smettesse di consumare le
+            ' domande, senza di esso questo ciclo non finirebbe più e il collaudo
+            ' resterebbe appeso invece di diventare rosso. Le domande riproponibili
+            ' sono al più quattro, una per turno-contenuto.
+            Dim giri As Integer = 0
+
+            While mossa.Tipo = TipoMossa.ChiediScelta AndAlso
+                  mossa.Scelte.Any(Function(sc) sc.Id = Scelte.Lascia)
+
+                giri += 1
+                Assert.IsLessThanOrEqualTo(4, giri, "la ripresa continua a riproporre le stesse domande")
+                mossa = Await dialogo.ScegliAsync(Scelte.Lascia)
+
+            End While
+
+            Return mossa
+
+        End Function
+
         ' ------------------------------------------------------------------
         ' Anti-perdita
         ' ------------------------------------------------------------------
@@ -248,6 +275,10 @@ Namespace Motore
             mossa = Await dialogo.ScegliAsync(Scelte.Conferma)
 
             Assert.HasCount(1, dialogo.Profilo.EsperienzeFormali, "il lavoro è stato recuperato")
+
+            ' Qui il dialogo riofre le domande saltate: non è quello che questo collaudo
+            ' misura, si declina e si guarda che chiuda. La ripresa ha i suoi collaudi.
+            mossa = Await OltreLeRipreseAsync(dialogo, mossa)
             Assert.AreEqual(TipoMossa.Fine, mossa.Tipo, "e poi si chiude")
 
         End Function
@@ -290,6 +321,9 @@ Namespace Motore
             Await dialogo.RispondiAsync("Niente")
             mossa = Await dialogo.ScegliAsync(Scelte.Oltre)
 
+            ' Saltati tutti e quattro i turni, tutti e quattro vengono riofferti: si
+            ' declina, e si guarda che la passata finale converga lo stesso.
+            mossa = Await OltreLeRipreseAsync(dialogo, mossa)
             Assert.AreEqual(TipoMossa.Fine, mossa.Tipo, "il dialogo converge")
             Assert.IsEmpty(dialogo.Profilo.EsperienzeFormali, "e niente è entrato di soppiatto")
 
@@ -607,6 +641,206 @@ Namespace Motore
         End Function
 
         ' ------------------------------------------------------------------
+        ' La ripresa delle domande saltate
+        ' ------------------------------------------------------------------
+
+        <TestMethod>
+        Public Async Function LaDomandaSaltataTornaPrimaDelRiepilogo() As Task
+
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavoro("Magazziniere")).Dara(FrVuoto("esperienze_informali")).
+                  Dara(FrCompetenze("{}", "Uso del muletto")).Dara(FrFormazione("Diploma"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Dim mossa As Mossa = Await FinoAllaRipresaAsync(dialogo)
+
+            Assert.AreEqual(TipoMossa.ChiediScelta, mossa.Tipo, "prima del riepilogo la domanda torna")
+            Assert.Contains("esperienze informali", String.Join(" ", mossa.Detto), "proprio quella rimasta a vuoto")
+            Assert.Contains("Vuoi provarci ora?", String.Join(" ", mossa.Detto), "e prima si chiede il permesso")
+            Assert.AreEqual("riprendi, lascia", String.Join(", ", mossa.Scelte.Select(Function(sc) sc.Id)),
+                            "con le due scelte della ripresa")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaDomandaRipresaEntraNelProfiloComeOgniAltra() As Task
+
+            ' Chi accetta rientra nel turno vero: stessa domanda, stessa scheda di
+            ' conferma. Se la ripresa avesse una strada sua, quella regola sarebbe da
+            ' rifare da capo, e prima o poi divergerebbe.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavoro("Magazziniere")).Dara(FrVuoto("esperienze_informali")).
+                  Dara(FrCompetenze("{}", "Uso del muletto")).Dara(FrFormazione("Diploma")).
+                  Dara(FrInformale("Traslochi con un amico"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await FinoAllaRipresaAsync(dialogo)
+
+            Dim mossa As Mossa = Await dialogo.ScegliAsync(Scelte.Riprendi)
+            Assert.AreEqual(TipoMossa.ChiediRisposta, mossa.Tipo, "si rientra nel turno")
+            Assert.Contains("esperienze informali", String.Join(" ", mossa.Detto), "con la sua domanda")
+
+            Await dialogo.RispondiAsync("Davo una mano nei traslochi")
+            Assert.IsEmpty(dialogo.Profilo.EsperienzeInformali, "niente entra prima della conferma")
+
+            Await dialogo.ScegliAsync(Scelte.Conferma)
+            mossa = Await dialogo.ScegliAsync(Scelte.Procedi)
+
+            Assert.HasCount(1, dialogo.Profilo.EsperienzeInformali, "la risposta recuperata è entrata")
+            Assert.AreEqual("Traslochi con un amico", dialogo.Profilo.EsperienzeInformali(0).CosaFacevo,
+                            "con le parole dell'utente")
+            Assert.AreEqual(TipoMossa.Fine, mossa.Tipo, "e il dialogo chiude")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaDomandaSiRiproponeUnaVoltaSola() As Task
+
+            ' La guardia di terminazione, gemella di quella anti-rimbalzo: dentro una
+            ' ripresa un turno che resta vuoto non rientra nell'elenco. Senza, la
+            ' domanda tornerebbe a ogni giro e il dialogo non finirebbe mai.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavoro("Magazziniere")).Dara(FrVuoto("esperienze_informali")).
+                  Dara(FrCompetenze("{}", "Uso del muletto")).Dara(FrFormazione("Diploma")).
+                  Dara(FrVuoto("esperienze_informali"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await FinoAllaRipresaAsync(dialogo)
+
+            Await dialogo.ScegliAsync(Scelte.Riprendi)
+            Await dialogo.RispondiAsync("No, non mi viene in mente niente")
+            Dim mossa As Mossa = Await dialogo.ScegliAsync(Scelte.Oltre)
+
+            Assert.AreEqual(TipoMossa.Fine, mossa.Tipo, "la domanda non torna una terza volta")
+            Assert.IsEmpty(dialogo.Profilo.EsperienzeInformali, "e niente è entrato")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function ChiDeclinaLaRipresaNonSeLaRitrovaPiu() As Task
+
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavoro("Magazziniere")).Dara(FrVuoto("esperienze_informali")).
+                  Dara(FrCompetenze("{}", "Uso del muletto")).Dara(FrFormazione("Diploma"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await FinoAllaRipresaAsync(dialogo)
+
+            Dim mossa As Mossa = Await dialogo.ScegliAsync(Scelte.Lascia)
+
+            Assert.Contains("lasciamo così", String.Join(" ", mossa.Detto), "si prende atto")
+            Assert.AreEqual(TipoMossa.Fine, mossa.Tipo, "e si chiude senza insistere")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaDomandaCheLAntiPerditaHaGiaRiempitoNonSiRichiede() As Task
+
+            ' Le esperienze di lavoro si saltano, ma alla formazione l'utente ne accenna
+            ' una: il frammento si parcheggia e la passata finale lo recupera. A quel
+            ' punto la risposta c'è, e richiedere la domanda sembrerebbe non aver
+            ' ascoltato.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrVuoto("esperienze_formali")).
+                  Dara(FrInformale("Traslochi")).
+                  Dara(FrCompetenze("{}", "Uso del muletto")).
+                  Dara(FrFormazione("Diploma", "{""esperienze_formali"": [""ho lavorato in magazzino tre anni""]}")).
+                  Dara(FrLavoro("Magazziniere"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+            Await dialogo.RispondiAsync("Nessuna")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+            Await ConfermaAsync(dialogo, "Traslochi")
+            Await dialogo.ScegliAsync(Scelte.Procedi)
+            Await dialogo.RispondiAsync("Muletto")
+            Await dialogo.ScegliAsync(Scelte.Conferma)
+            Await ConfermaAsync(dialogo, "Il diploma, e ho lavorato in magazzino tre anni")
+
+            Dim mossa As Mossa = Await dialogo.ScegliAsync(Scelte.Procedi)
+            Assert.AreEqual(TipoMossa.ChiediScelta, mossa.Tipo, "la passata finale recupera il lavoro")
+
+            mossa = Await dialogo.ScegliAsync(Scelte.Conferma)
+
+            Assert.HasCount(1, dialogo.Profilo.EsperienzeFormali, "il turno saltato si è riempito da sé")
+            Assert.AreEqual(TipoMossa.Fine, mossa.Tipo, "e la domanda non si rifà")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaRipresaCheAccennaAdAltroLoRecuperaPrimaDiChiudere() As Task
+
+            ' Una ripresa è un turno come gli altri: può contenere materiale di
+            ' un'altra categoria. Finisce nel magazzino, e siccome la ripresa torna alla
+            ' passata finale, di lì viene smaltito prima del riepilogo. Se la ripresa
+            ' chiudesse il dialogo da sé, quel frammento resterebbe orfano.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavoro("Magazziniere")).Dara(FrVuoto("esperienze_informali")).
+                  Dara(FrCompetenze("{}", "Uso del muletto")).Dara(FrFormazione("Diploma")).
+                  Dara(FrInformale("Traslochi", "{""formazione"": [""e ho fatto un corso serale""]}")).
+                  Dara(FrFormazione("Corso serale"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await FinoAllaRipresaAsync(dialogo)
+
+            Await dialogo.ScegliAsync(Scelte.Riprendi)
+            Await dialogo.RispondiAsync("Traslochi, e ho fatto un corso serale")
+            Await dialogo.ScegliAsync(Scelte.Conferma)
+            Dim mossa As Mossa = Await dialogo.ScegliAsync(Scelte.Procedi)
+
+            Assert.AreEqual(TipoMossa.ChiediScelta, mossa.Tipo, "il corso accennato nella ripresa si recupera")
+            Assert.Contains("studi e formazione", String.Join(" ", mossa.Detto), "nella sua categoria")
+
+            mossa = Await dialogo.ScegliAsync(Scelte.Conferma)
+
+            Assert.HasCount(2, dialogo.Profilo.Formazione, "ed entra accanto al diploma")
+            Assert.AreEqual(TipoMossa.Fine, mossa.Tipo, "poi si chiude")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function AncheLeCompetenzeSiRiprendono() As Task
+
+            ' Le competenze sono l'unico turno «a blocco»: rispondono a un ramo diverso
+            ' di RispostaDelTurnoAsync e chiudono con «ne aggiungo altre / vanno bene»
+            ' invece che col ponte. Se la ripresa valesse solo per i turni ripetibili,
+            ' qui si vedrebbe.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavoro("Magazziniere")).Dara(FrInformale("Traslochi")).
+                  Dara(FrVuoto("competenze")).Dara(FrFormazione("Diploma")).
+                  Dara(FrCompetenze("{}", "Uso del muletto"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+            Await ConfermaAsync(dialogo, "Magazziniere")
+            Await dialogo.ScegliAsync(Scelte.Procedi)
+            Await ConfermaAsync(dialogo, "Traslochi")
+            Await dialogo.ScegliAsync(Scelte.Procedi)
+            Await dialogo.RispondiAsync("Boh, non saprei")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+            Await ConfermaAsync(dialogo, "Diploma")
+            Dim mossa As Mossa = Await dialogo.ScegliAsync(Scelte.Procedi)
+
+            Assert.Contains("competenze", String.Join(" ", mossa.Detto), "la domanda saltata torna")
+
+            Await dialogo.ScegliAsync(Scelte.Riprendi)
+            Await dialogo.RispondiAsync("So usare il muletto")
+            mossa = Await dialogo.ScegliAsync(Scelte.Conferma)
+
+            Assert.HasCount(1, dialogo.Profilo.Competenze, "e stavolta la competenza entra")
+            Assert.AreEqual("Uso del muletto", dialogo.Profilo.Competenze(0), "con le parole dell'utente")
+            Assert.AreEqual(TipoMossa.Fine, mossa.Tipo, "poi il dialogo chiude")
+
+        End Function
+
+        ' ------------------------------------------------------------------
         ' Servizi dei collaudi
         ' ------------------------------------------------------------------
 
@@ -622,6 +856,24 @@ Namespace Motore
             Await ConfermaAsync(dialogo, "Luca Ferrari")
             Await ConfermaAsync(dialogo, "luca@example.it")
             Await ConfermaAsync(dialogo, "No, niente patente")
+        End Function
+
+''' <summary>
+        ''' Porta il dialogo fino alla domanda di ripresa: le esperienze informali sono
+        ''' state saltate, a tutto il resto si è risposto.
+        ''' </summary>
+        Private Shared Async Function FinoAllaRipresaAsync(dialogo As DialogoProfilo) As Task(Of Mossa)
+
+            Await PrimiTreTurniAsync(dialogo)
+            Await ConfermaAsync(dialogo, "Magazziniere")
+            Await dialogo.ScegliAsync(Scelte.Procedi)
+            Await dialogo.RispondiAsync("Nessuna")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+            Await dialogo.RispondiAsync("Muletto")
+            Await dialogo.ScegliAsync(Scelte.Conferma)
+            Await ConfermaAsync(dialogo, "Diploma")
+            Return Await dialogo.ScegliAsync(Scelte.Procedi)
+
         End Function
 
         ''' <summary>Un dialogo portato fino in fondo, per guardare la chiusura.</summary>

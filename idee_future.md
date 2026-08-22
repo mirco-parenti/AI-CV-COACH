@@ -87,10 +87,6 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   numerate, pensate per diventare sotto-prompt separati. *(Diario Step 1.10.)*
 
 ## Dialogo (anello 1)
-- **pending_questions**: accantonare le domande saltate o non strutturabili e riprenderle
-  in un secondo giro a fine dialogo. Pianificato, non costruito. È **cugino** dell'anti-perdita
-  (Step 1.26) ma caso diverso: lì recupero contenuto dato nel turno sbagliato, qui una
-  *domanda* saltata. *(Diario apertura Fase 1, Step 1.2.)*
 - **Collocazione manuale degli "esclusi"**: oggi un frammento che nessun turno sa
   strutturare (es. "Vittoria Concorso Servizio Civile 2022", contenuto di confine) viene
   **dichiarato "lasciato fuori"** — terminazione garantita, perdita visibile, niente
@@ -349,6 +345,17 @@ giudice per la prima volta.
 
 Idee del backlog ormai costruite. Si tengono qui (con il puntatore a dove sono narrate o
 implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
+- ✅ **`pending_questions`** — le domande saltate o rimaste senza risposta si riprendono, una
+  volta sola, **prima del riepilogo** e chiedendo il permesso («Vuoi provarci ora?» → *Ci
+  provo* / *Lasciamo così*). Vale per i quattro turni-contenuto, gli unici che passano dallo
+  stato «niente colto»; i turni singoli restano fuori, perché lì il vuoto si conferma, si
+  rilegge nel riepilogo e si corregge dall'editing del profilo. Resta **cugina**
+  dell'anti-perdita (Step 1.26) e non la stessa cosa: lì si recupera *contenuto* dato nel
+  turno sbagliato, qui una *domanda* a cui non si era risposto — e infatti una domanda che
+  l'anti-perdita ha già riempito non viene richiesta. È agganciata alla stessa passata finale,
+  con la stessa disciplina del tentativo unico che la fa convergere. *(2026-08-22, terzo tempo
+  di T9e: era la voce 4 della checklist «Problemi e mitigazioni», ratificata fuori dalla 1.0
+  al mattino e costruita il pomeriggio; cap. 14, sezione T9; `DialogoProfilo.RiprendiSaltateAsync`.)*
 - ✅ **Il CV più recente della cartella, che nessuno usava** — la porta «qui c'è tutto» del
   profilo (cap. 05.2) è aperta: premendo «IMPORTA CV DA UN FILE» il programma **propone per
   nome** il CV che la classificazione aveva già indicato come il più aggiornato, e lascia tre
