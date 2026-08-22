@@ -840,6 +840,76 @@ fare, accorgersi del ritorno a un'attesa complessiva. Falsificato togliendo il r
 silenzio: **rosso**.*
 
 
+**Il collaudo di tappa: la checklist «Problemi e mitigazioni»** *(2026-08-22, secondo tempo
+di T9e)*. Le otto voci ereditate dal prototipo (`HTML+JS/prompt_design.md`) sono state
+ripercorse una per una sulla nuova app. Sette delle otto difese oggi vivono **dentro i
+prompt del pool**, e un prompt lo si può leggere quanto si vuole: dice cosa il modello è
+tenuto a fare, non cosa fa. Perciò la checklist non si è chiusa leggendo, ma **chiedendolo
+al modello** con tre prove costruite per tentarlo, che restano nel banco come collaudi
+rieseguibili (`CollaudiChecklistReale`, categoria `Reale`) con il loro rapporto in
+`casi/reale/`.
+
+| # | Voce | Come è stata verificata | Esito |
+|---|---|---|---|
+| 1 | Gonfiamento delle competenze | prova A, con l'AI vera | ✅ «leader nato» resta «leader nato», «un po' di inglese» resta attenuato |
+| 2 | Informali promosse a formali | prova A | ✅ il banco del cognato «in nero» è stato instradato alle informali |
+| 3 | Campi indovinati | prova A | ✅ email, telefono, scuola e anno taciuti restano vuoti; città e titolo detti ci sono |
+| 4 | `pending_questions` | decisione | ➖ **ratificata fuori dalla 1.0** (vedi sotto) |
+| 5 | Più voci in una risposta | prova A | ✅ tre impieghi in una battuta sola restano tre |
+| 6 | Scoring della famiglia A | rilettura del codice + banco | ✅ architettura ibrida intatta; sei casi dell'hard-gate più la parità deterministica |
+| 7 | Requisiti «tipici» non scritti | prova B, con l'AI vera | ✅ da quattro righe escono quattro liste vuote, azienda vuota, e l'email ricopiata |
+| 8 | Confine lacuna / «non si sa» | prova C, con l'AI vera + tre casi nuovi senza rete | ✅ nessuna lacuna archiviata come dubbio; 0,2 stelle invece di saturare |
+
+*La voce 4 non chiedeva una decisione nuova: il **cancello T0 l'aveva già presa**
+(cap. 15.5, «`pending_questions`: **fuori**, resta nel backlog»). È stata **ratificata**:
+nella 1.0 il suo posto lo tengono tre difese che esistono davvero — il default sicuro sui
+vuoti, la conferma in blocco prima che qualcosa entri, e il campo `altrove`
+dell'anti-perdita, che di una domanda saltata recupera almeno il contenuto detto nel turno
+sbagliato. La voce resta in `idee_future.md`, dov'era.*
+
+**Quel che il rito ha stanato, e che nessuno cercava.** La metà-codice della voce 8 —
+`non determinabile` escluso dal conteggio, e il sentinel «Nessuna esperienza richiesta» che
+non pesa mai — era **scoperta**: due righe di `CalcoloMatch` che nessuno dei 973 collaudi
+guardava. Adesso hanno i loro tre casi (`Caso7`, `Caso8`, `Caso9`), con gli attesi prodotti
+dal prototipo come tutti gli altri della classe. **988 collaudi verdi** (erano 955 alla
+chiusura di T9d, 973 dopo il primo tempo). Versione e Pool **non si toccano**: nessun
+prompt è stato modificato, perché nessuna prova ha trovato un difetto da curare.
+
+**Nove falsificazioni, sei rosse e tre verdi — e le tre verdi dicono qualcosa** (regola
+14). Sono diventate rosse: il conteggio che accoglie `non determinabile` fra i punti; il
+sentinel che smette di essere escluso; il prompt `confronto` privato della «distinzione
+chiave», dove il modello ha subito archiviato l'inglese come «non determinabile» e la prova
+C l'ha visto; la prova A dopo la cura raccontata qui sotto; e i due giudici accecati apposta.
+
+Le tre rimaste verdi hanno tutte lo stesso motivo, e vale la pena saperlo: **la stessa cosa
+è difesa su più strati, e toglierne uno non basta.** Nel codice, cancellare da
+`CalcoloMatch` la riga che esclude `non determinabile` non cambia niente — quell'esito non
+sta nemmeno nella tabella dei punti, e la guardia successiva lo scarta lo stesso; per
+vedere il rosso è servito **metterlo nella tabella**. Nei prompt, le regole tolte a
+`esperienze_formali` e ad `analisi_annuncio` non hanno fatto cedere il modello, perché
+attorno restavano la definizione delle quattro categorie e il compito dichiarato in
+apertura.
+
+C'è poi la falsificazione che è verde e rossa insieme — quella contata fra le sei, perché
+rossa lo è diventata dopo — e ha stanato un difetto della **prova**, non del prodotto:
+tolte a `competenze` le due regole della normalizzazione, il modello ha smesso di scrivere
+«un po' di inglese» e ha scritto «inglese» — il gonfiamento vero non è il livello inventato,
+è l'attenuante che sparisce — e la prova A non lo vedeva. Adesso ha una seconda spia, e
+rifatta la falsificazione è diventata rossa. Restava però la domanda aperta sulle altre:
+verdi perché la difesa regge, o perché non saprebbero vedere il contrario? Da lì è nato
+`CollaudiGiudiziChecklist`: dodici collaudi senza rete che danno a ciascun giudice il
+difetto scritto a mano — il lavoro in nero messo fra i lavori veri, anche solo nascosto
+dentro `cosa_facevo`; l'annuncio riempito di requisiti mai scritti; la competenza gonfiata;
+la lacuna archiviata come dubbio — e verificano che lo trovi.
+
+*Il conduttore del dialogo — chi risponde al posto dell'utente — è stato **estratto** da
+`CollaudiDialogoReale` in `ConduttoreDiDialogo`, perché adesso le tracce sono due: quella di
+Anna Ricci, che guarda l'anti-perdita, e quella di Marco Gentili, che tenta le difese. Il
+modo di condurre dev'essere uno solo, per la stessa ragione per cui l'anti-invenzione vive
+in un posto solo. Il dialogo di Anna è stato rifatto con l'AI vera dopo l'estrazione:
+verde.*
+
+
 ## Ordine e dipendenze
 
 ```

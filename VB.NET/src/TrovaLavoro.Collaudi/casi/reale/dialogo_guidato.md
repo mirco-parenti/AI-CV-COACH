@@ -2,7 +2,7 @@
 
 *Rapporto generato da `CollaudiDialogoReale`. Sta nel repo perché la persona è inventata: Anna Ricci non esiste, e la sua storia è scritta apposta perché l'anti-perdita e il «lasciato fuori» abbiano occasione di scattare.*
 
-- **Quando**: 2026-08-19 22:03
+- **Quando**: 2026-08-22 21:29
 - **Mosse del dialogo**: 25
 - **Chiamate all'AI**: 12
 - **Turni, in ordine di prima chiamata**: nome → contatti → patente → esperienze_formali → esperienze_informali → competenze → formazione
@@ -25,7 +25,7 @@
 | dal turno | verso | le parole dell'utente | reso conto |
 |---|---|---|---|
 | `contatti` | `formazione` | ho fatto anche un corso, ma non mi ricordo più né quale né dove | = |
-| `patente` | `formazione` | patentino per il muletto | = |
+| `patente` | `formazione` | Ho anche il patentino per il muletto | = |
 | `competenze` | `esperienze_formali` | mi hanno anche offerto un posto fisso in trattoria | = |
 | `formazione` | `esperienze_informali` | per due estati ho aiutato mia sorella nel suo chiosco di piadine in spiaggia | = |
 
@@ -104,11 +104,11 @@ Niente: il dialogo è andato come la traccia si aspettava.
     }
   ],
   "competenze": [
-    "Cucinare per tanta gente",
+    "Cucina per gruppi numerosi",
     "Velocità",
     "Precisione",
-    "Alzarsi presto",
-    "Uso delle lavapavimenti industriali"
+    "Disponibilità a svegliarsi presto",
+    "Uso di lavapavimenti industriali"
   ],
   "formazione": [
     {
@@ -248,11 +248,11 @@ Niente: il dialogo è andato come la traccia si aspettava.
 
 > Ecco cosa ho capito — le cose che sai fare:
 >
-> - Cucinare per tanta gente
+> - Cucina per gruppi numerosi
 > - Velocità
 > - Precisione
-> - Alzarsi presto
-> - Uso delle lavapavimenti industriali
+> - Disponibilità a svegliarsi presto
+> - Uso di lavapavimenti industriali
 >
 
 **Anna:** *[Ne aggiungo altre]*
@@ -264,11 +264,11 @@ Niente: il dialogo è andato come la traccia si aspettava.
 
 > Ecco cosa ho capito — le cose che sai fare:
 >
-> - Cucinare per tanta gente
+> - Cucina per gruppi numerosi
 > - Velocità
 > - Precisione
-> - Alzarsi presto
-> - Uso delle lavapavimenti industriali
+> - Disponibilità a svegliarsi presto
+> - Uso di lavapavimenti industriali
 >
 
 **Anna:** *[Confermiamo]*
@@ -280,7 +280,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > Prima avevi accennato a qualcosa che riguarda «studi e formazione», e l'avevo tenuto da parte. Vediamolo ora:
 >
-> *(le tue parole)* «ho fatto anche un corso, ma non mi ricordo più né quale né dove / patentino per il muletto»
+> *(le tue parole)* «ho fatto anche un corso, ma non mi ricordo più né quale né dove / Ho anche il patentino per il muletto»
 >
 > - Titolo: patentino per il muletto
 > - Istituto: (non specificata)
@@ -362,11 +362,11 @@ Niente: il dialogo è andato come la traccia si aspettava.
 > - Con chi: mia sorella
 >
 > **Competenze**
-> - Cucinare per tanta gente
+> - Cucina per gruppi numerosi
 > - Velocità
 > - Precisione
-> - Alzarsi presto
-> - Uso delle lavapavimenti industriali
+> - Disponibilità a svegliarsi presto
+> - Uso di lavapavimenti industriali
 >
 > **Formazione 1**
 > - Titolo: patentino per il muletto

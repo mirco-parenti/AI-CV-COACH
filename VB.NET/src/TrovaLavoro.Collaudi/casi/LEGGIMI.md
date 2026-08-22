@@ -27,6 +27,7 @@ resta traccia.
 | `genera_attesi.mjs` | Rigenera i quattro file qui sopra facendoli produrre al prototipo. |
 | `reale/confronto_*.json` | L'esito del collaudo reale di T2: risposta del prototipo, risposta dell'app, e il ricalcolo. |
 | `reale/dialogo_guidato.md` | Il collaudo di tappa di T3, gamba C: il dialogo guidato condotto per intero con l'AI vera sulla traccia di **Anna Ricci**, che non esiste. Si legge come una conversazione, e dice dove è finito ogni frammento detto nel turno sbagliato. |
+| `reale/checklist_*.md` | Il collaudo di tappa di T9: la checklist «Problemi e mitigazioni» del prototipo ripercorsa con l'AI vera. Tre rapporti — il candidato che si vende (voci 1, 2, 3, 5), l'annuncio scarno (voce 7), il confronto con le lacune (voce 8) — e ognuno dice in testa quali voci copre. Le persone e le aziende sono inventate. |
 | `reale/dialogo_turno_formali.json` | Lo stesso turno «esperienze formali» chiesto all'app e al prototipo con la **stessa identica risposta**: la prova di parità della gamba C. |
 
 ## Le due batterie
@@ -48,6 +49,7 @@ postazione non c'è né la chiave né il CV.
 | `CollaudiImportReale` | lo stesso CV importato dalle due parti | sì | sì | sì |
 | `CollaudiFormatiReale` | lo stesso CV dalle quattro porte (PDF, DOCX, TXT, MD) | sì | sì | — |
 | `CollaudiDialogoReale` | il dialogo guidato da zero; e un turno solo chiesto anche al prototipo | sì | — | solo per il turno di parità |
+| `CollaudiChecklistReale` | le tre prove della checklist «Problemi e mitigazioni» (cap. 14, T9) | sì | — | — |
 
 Il **CV vero** si indica con la variabile `CV_DI_PROVA` (la cartella che lo contiene);
 il **prototipo** si accende con `npm start` dentro `HTML+JS/`; la **chiave** sta in

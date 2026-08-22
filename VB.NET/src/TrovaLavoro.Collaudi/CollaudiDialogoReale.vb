@@ -58,35 +58,9 @@ Namespace NonRegressione
         ''' <summary>L'esito del turno chiesto anche al prototipo.</summary>
         Private Const NomeParita As String = "dialogo_turno_formali.json"
 
-        ''' <summary>
-        ''' Quante mosse al massimo può durare il dialogo prima che si debba concludere
-        ''' che non converge. La traccia ne prevede una trentina: il doppio è largo, e
-        ''' serve solo a non lasciare un collaudo a girare all'infinito se un giorno la
-        ''' guardia anti-rimbalzo si rompesse.
-        ''' </summary>
-        Private Const MosseMassime As Integer = 80
-
-        ''' <summary>La risposta di ripiego se il dialogo richiede la categoria della patente.</summary>
-        ''' <remarks>
-        ''' La traccia la dichiara già («la patente B»), quindi la ri-domanda non dovrebbe
-        ''' arrivare. Se arriva è il modello che non ha colto la categoria: si risponde e
-        ''' si annota fra le stranezze del rapporto, invece di mandare al posto suo la
-        ''' battuta del turno dopo e sballare tutto il resto.
-        ''' </remarks>
-        Private Const RipiegoCategoria As String = "La B."
-
         ' ==================================================================
         ' La traccia: una persona inventata, e quattro trappole di proposito
         ' ==================================================================
-
-        ''' <summary>
-        ''' Un turno della traccia: le risposte che l'utente darebbe, nell'ordine. Più di
-        ''' una vuol dire che al giro «ne hai un'altra?» si risponde di sì.
-        ''' </summary>
-        Private Class Gruppo
-            Public Property Turno As String
-            Public Property Battute As New List(Of String)
-        End Class
 
         ''' <summary>
         ''' Le sette risposte di Anna Ricci, che non esiste. Quattro pezzi sono messi lì
@@ -108,21 +82,21 @@ Namespace NonRegressione
         ''' competenze e un titolo di studio: senza una storia intera non si vedrebbe se il
         ''' profilo finale sta in piedi.
         ''' </summary>
-        Private Shared ReadOnly Traccia As New List(Of Gruppo) From {
-            New Gruppo With {
+        Private Shared ReadOnly Traccia As New List(Of ConduttoreDiDialogo.Gruppo) From {
+            New ConduttoreDiDialogo.Gruppo With {
                 .Turno = "nome",
                 .Battute = New List(Of String) From {
                     "Buongiorno, mi chiamo Anna Ricci."}},
-            New Gruppo With {
+            New ConduttoreDiDialogo.Gruppo With {
                 .Turno = "contatti",
                 .Battute = New List(Of String) From {
                     "anna.ricci@example.it, il numero è 340 1122334, abito a Forlì in via del " &
                     "Mulino 12. Ah, e ho fatto anche un corso, ma non mi ricordo più né quale né dove."}},
-            New Gruppo With {
+            New ConduttoreDiDialogo.Gruppo With {
                 .Turno = "patente",
                 .Battute = New List(Of String) From {
                     "Sì, ho la patente B. Ho anche il patentino per il muletto, se può servire."}},
-            New Gruppo With {
+            New ConduttoreDiDialogo.Gruppo With {
                 .Turno = "esperienze_formali",
                 .Battute = New List(Of String) From {
                     "Per cinque anni ho fatto le pulizie al supermercato Il Gabbiano di Forlì, " &
@@ -130,19 +104,19 @@ Namespace NonRegressione
                     "dell'apertura.",
                     "Poi dal 2021 lavoro come aiuto cuoca alla trattoria Da Vittorio, sempre a " &
                     "Forlì: preparo le verdure, gli antipasti e do una mano quando escono i piatti."}},
-            New Gruppo With {
+            New ConduttoreDiDialogo.Gruppo With {
                 .Turno = "esperienze_informali",
                 .Battute = New List(Of String) From {
                     "Da tre anni do una mano alla sagra del mio paese: cucino per duecento " &
                     "persone insieme alle altre volontarie."}},
-            New Gruppo With {
+            New ConduttoreDiDialogo.Gruppo With {
                 .Turno = "competenze",
                 .Battute = New List(Of String) From {
                     "So cucinare per tanta gente, sono veloce e precisa, e non mi pesa alzarmi " &
                     "presto. So usare le lavapavimenti industriali.",
                     "Ah, poi mi hanno anche offerto un posto fisso in trattoria, ma ho dovuto " &
                     "dire di no per via degli orari."}},
-            New Gruppo With {
+            New ConduttoreDiDialogo.Gruppo With {
                 .Turno = "formazione",
                 .Battute = New List(Of String) From {
                     "Ho la licenza media e basta. Ah, e per due estati ho aiutato mia sorella " &
@@ -191,13 +165,6 @@ Namespace NonRegressione
         ' Il collaudo
         ' ==================================================================
 
-        ''' <summary>Una mossa del dialogo e ciò che il conduttore le ha risposto.</summary>
-        Private Class Battito
-            Public Property Mossa As Mossa
-            Public Property Risposta As String
-            Public Property Scelta As String
-        End Class
-
         <TestMethod, TestCategory("Reale")>
         Public Async Function IlDialogoGuidatoCostruisceIlProfiloSenzaPerdereNiente() As Task
 
@@ -212,8 +179,9 @@ Namespace NonRegressione
                 Dim spia As New StrutturatoreSpia(New StrutturatoreTurni(libreria, client))
                 Dim dialogo As New DialogoProfilo(spia)
 
-                Dim stranezze As New List(Of String)
-                Dim battiti As List(Of Battito) = Await ConduciAsync(dialogo, stranezze)
+                Dim conduttore As New ConduttoreDiDialogo(Traccia)
+                Dim battiti As List(Of ConduttoreDiDialogo.Battito) = Await conduttore.ConduciAsync(dialogo)
+                Dim stranezze As List(Of String) = conduttore.Stranezze
 
                 Dim profilo As Profilo = dialogo.Profilo
                 Dim instradati As List(Of StrutturatoreSpia.Instradato) = spia.Altrove()
@@ -224,10 +192,10 @@ Namespace NonRegressione
                 ' Di ogni frammento instradato altrove il dialogo deve rendere conto: o lo
                 ' ripesca e lo rimette in bocca all'utente, o dichiara di lasciarlo fuori.
                 Dim nonOnorati As List(Of StrutturatoreSpia.Instradato) =
-                    instradati.Where(Function(i) Not Onorato(i, battiti)).ToList()
+                    instradati.Where(Function(i) Not ConduttoreDiDialogo.Onorato(i, battiti)).ToList()
 
                 Dim inventate As CollaudoReale.Invenzioni =
-                    CollaudoReale.ValoriFuoriDalTesto(profilo, TestoDellaTraccia(battiti))
+                    CollaudoReale.ValoriFuoriDalTesto(profilo, ConduttoreDiDialogo.TestoDetto(battiti))
 
                 ' Il profilo salvato e riletto: è dove finisce il flusso B del cap. 12, e
                 ' un dialogo che arriva in fondo ma non si conserva non serve a niente.
@@ -235,8 +203,10 @@ Namespace NonRegressione
 
                 ' Il rapporto si scrive PRIMA di giudicare: se un Assert ferma tutto, la
                 ' prova di com'era andata resta su disco comunque.
+                Dim allineamento As List(Of String) = conduttore.AllineamentoRotto(spia)
+
                 Dim dove As String = Scrivi(battiti, spia, profilo, instradati, fuoriDalDialogo,
-                                            nonOnorati, inventate, stranezze)
+                                            nonOnorati, inventate, stranezze, allineamento)
                 Console.WriteLine(Riassunto(dove, battiti, spia, profilo, instradati,
                                             nonOnorati, inventate, stranezze))
 
@@ -249,20 +219,19 @@ Namespace NonRegressione
                 ' Si guardano le prime volte che ciascun turno è stato chiesto: dopo, lo
                 ' stesso prompt torna per smaltire i frammenti parcheggiati, ed è giusto
                 ' che torni fuori ordine — è l'anti-perdita che lavora.
-                Assert.AreEqual(String.Join(" → ", OrdineDeiTurni), PrimeVolte(spia),
+                Assert.AreEqual(String.Join(" → ", OrdineDeiTurni), ConduttoreDiDialogo.PrimeVolte(spia),
                     "l'ordine dei sette turni del prototipo")
 
                 ' --- Il conduttore ha risposto alle domande giuste. -------------------
                 ' Prima di giudicare l'app bisogna sapere che il collaudo ha misurato ciò
                 ' che dice di misurare: ogni battuta è scritta per un turno preciso.
-                Dim allineamento As List(Of String) = AllineamentoRotto(spia)
                 Assert.IsEmpty(allineamento,
                     "il conduttore è andato fuori passo, e questo giro non misura il dialogo " &
                     "ma sé stesso: " & String.Join(" · ", allineamento))
 
                 ' --- Nessuna conferma al buio. ---------------------------------------
-                For Each battito As Battito In battiti
-                    If Not ChiedeConferma(battito.Mossa) Then Continue For
+                For Each battito As ConduttoreDiDialogo.Battito In battiti
+                    If Not ConduttoreDiDialogo.ChiedeConferma(battito.Mossa) Then Continue For
                     Assert.IsTrue(battito.Mossa.Detto.Count > 0 OrElse battito.Mossa.Schede.Count > 0,
                         "il dialogo ha chiesto una conferma senza mostrare niente da confermare")
                 Next
@@ -354,256 +323,8 @@ Namespace NonRegressione
         End Function
 
         ' ==================================================================
-        ' Il conduttore: chi risponde al posto dell'utente
-        ' ==================================================================
-
-        ''' <summary>
-        ''' Porta il dialogo dall'inizio alla fine rispondendo con la traccia. Non segue
-        ''' una sequenza di gesti preparata: <b>guarda la mossa</b> e decide, perché con
-        ''' l'AI vera non si sa in anticipo se un turno coglierà qualcosa o dirà «non ho
-        ''' colto», e un copione rigido si romperebbe al primo scarto.
-        ''' </summary>
-        ''' <param name="stranezze">Dove annotare ciò che la traccia non prevedeva.</param>
-        Private Shared Async Function ConduciAsync(dialogo As DialogoProfilo,
-                                                   stranezze As List(Of String)) As Task(Of List(Of Battito))
-
-            Dim battiti As New List(Of Battito)
-
-            Dim gruppo As Integer = 0
-            Dim battuta As Integer = 0
-            Dim ultima As String = Nothing
-            Dim daRipetere As Boolean = False
-            Dim riprovato As Boolean = False
-
-            Dim mossa As Mossa = Await dialogo.AvviaAsync()
-
-            Do
-                Dim battito As New Battito With {.Mossa = mossa}
-                battiti.Add(battito)
-
-                If mossa.Tipo = TipoMossa.Fine Then Exit Do
-
-                If battiti.Count > MosseMassime Then
-                    stranezze.Add($"Il dialogo ha superato {MosseMassime} mosse senza chiudere: " &
-                                  "interrotto qui.")
-                    Exit Do
-                End If
-
-                If mossa.Tipo = TipoMossa.ChiediRisposta Then
-
-                    Dim testo As String
-
-                    If daRipetere Then
-                        ' Si è scelto «riprovo»: si ridice la stessa cosa, non la prossima.
-                        testo = ultima
-                        daRipetere = False
-
-                    ElseIf ChiedeLaCategoriaDellaPatente(mossa) Then
-                        ' La traccia la dichiara già: se la si richiede, il modello non
-                        ' l'aveva colta. Si risponde senza consumare la traccia.
-                        stranezze.Add("Il modello non ha colto la categoria della patente dalla " &
-                                      "risposta, e il dialogo l'ha richiesta.")
-                        testo = RipiegoCategoria
-
-                    Else
-                        ' La prossima battuta: se il gruppo è finito, si passa al turno dopo.
-                        While gruppo < Traccia.Count AndAlso battuta >= Traccia(gruppo).Battute.Count
-                            gruppo += 1
-                            battuta = 0
-                        End While
-
-                        If gruppo >= Traccia.Count Then
-                            stranezze.Add("Il dialogo ha chiesto una risposta in più di quelle che " &
-                                          "la traccia prevede: interrotto qui.")
-                            Exit Do
-                        End If
-
-                        testo = Traccia(gruppo).Battute(battuta)
-                        battuta += 1
-                        riprovato = False
-                    End If
-
-                    ultima = testo
-                    battito.Risposta = testo
-                    mossa = Await dialogo.RispondiAsync(testo)
-
-                Else
-
-                    Dim offerte As List(Of String) = mossa.Scelte.Select(Function(s) s.Id).ToList()
-                    Dim scelta As String
-
-                    If offerte.Contains(Scelte.Riprova) Then
-                        ' «Non ho colto niente»: si riprova una volta con le stesse parole,
-                        ' poi si passa oltre — insistere non porterebbe da nessuna parte.
-                        If riprovato Then
-                            scelta = Scelte.Oltre
-                            stranezze.Add($"Il turno non ha colto nulla nemmeno al secondo tentativo: " &
-                                          $"«{Accorcia(ultima)}». Si è passato oltre.")
-                        Else
-                            scelta = Scelte.Riprova
-                            riprovato = True
-                            daRipetere = True
-                            stranezze.Add($"Il turno non ha colto nulla da: «{Accorcia(ultima)}». " &
-                                          "Si è riprovato con le stesse parole.")
-                        End If
-
-                    ElseIf offerte.Contains(Scelte.Aggiungi) AndAlso AncoraInQuestoGruppo(gruppo, battuta) Then
-                        ' Le competenze: la traccia ne ha un secondo giro da aggiungere.
-                        scelta = Scelte.Aggiungi
-
-                    ElseIf offerte.Contains(Scelte.Altra) Then
-                        ' Un turno ripetibile: un'altra voce se la traccia ce l'ha, se no avanti.
-                        scelta = If(AncoraInQuestoGruppo(gruppo, battuta), Scelte.Altra, Scelte.Procedi)
-
-                    ElseIf offerte.Contains(Scelte.Conferma) Then
-                        ' Vale per le schede dei turni e per i frammenti ripescati: la
-                        ' persona che si è raccontata bene conferma ciò che ha detto.
-                        scelta = Scelte.Conferma
-
-                    Else
-                        stranezze.Add("Il dialogo ha offerto scelte che il conduttore non conosce: " &
-                                      String.Join(", ", offerte) & ". Interrotto qui.")
-                        Exit Do
-                    End If
-
-                    battito.Scelta = scelta
-                    mossa = Await dialogo.ScegliAsync(scelta)
-
-                End If
-
-            Loop
-
-            Return battiti
-
-        End Function
-
-        ''' <summary>Se nel turno in corso la traccia ha ancora qualcosa da dire.</summary>
-        Private Shared Function AncoraInQuestoGruppo(gruppo As Integer, battuta As Integer) As Boolean
-
-            Return gruppo < Traccia.Count AndAlso battuta < Traccia(gruppo).Battute.Count
-
-        End Function
-
-        ''' <summary>Se questa mossa è la ri-domanda della categoria della patente.</summary>
-        ''' <remarks>
-        ''' Si cerca <c>«Una cosa sola:»</c> e non <c>«di che categoria»</c>, che sembrerebbe
-        ''' più naturale ma è la trappola in cui questo conduttore è caduto al primo giro:
-        ''' quelle parole stanno <b>anche</b> nell'apertura del turno della patente, così il
-        ''' conduttore ha risposto «La B.» alla domanda vera, si è tenuto in tasca la battuta
-        ''' della traccia e ha fatto slittare di un turno tutte quelle dopo — con il collaudo
-        ''' che restava verde perché il dialogo, dal canto suo, si era comportato bene.
-        ''' Da lì nasce anche <see cref="AllineamentoRotto"/>: un conduttore fuori passo non
-        ''' deve poter passare per un collaudo riuscito.
-        ''' </remarks>
-        Private Shared Function ChiedeLaCategoriaDellaPatente(mossa As Mossa) As Boolean
-
-            Return mossa.Detto.Any(Function(d) d.Contains("Una cosa sola:"))
-
-        End Function
-
-        ''' <summary>
-        ''' Le battute della traccia finite nel turno sbagliato: ognuna è scritta per un
-        ''' turno preciso, e se il conduttore la manda a un altro il collaudo non sta più
-        ''' misurando quello che dice di misurare.
-        ''' </summary>
-        ''' <remarks>
-        ''' Non guarda il conduttore, guarda la <b>spia</b>: che turno abbia strutturato
-        ''' quella risposta lo dice il dialogo, chiamando il prompt di quel turno. È il
-        ''' secondo controllo, indipendente dal primo.
-        ''' </remarks>
-        Private Shared Function AllineamentoRotto(spia As StrutturatoreSpia) As List(Of String)
-
-            Dim rotte As New List(Of String)
-
-            For Each chiamata As StrutturatoreSpia.Chiamata In spia.Chiamate
-
-                Dim suo As Gruppo = Traccia.FirstOrDefault(
-                    Function(g) g.Battute.Any(Function(b) b = chiamata.Risposta))
-
-                ' Non è una battuta della traccia: è un frammento ripescato, o una
-                ' risposta di ripiego. Quelle vanno dove il dialogo decide.
-                If suo Is Nothing Then Continue For
-
-                If suo.Turno <> chiamata.Turno Then
-                    rotte.Add($"«{Accorcia(chiamata.Risposta)}» è scritta per il turno " &
-                              $"«{suo.Turno}» ed è finita nel turno «{chiamata.Turno}»")
-                End If
-
-            Next
-
-            Return rotte
-
-        End Function
-
-        ''' <summary>Se questa mossa sta chiedendo di confermare qualcosa.</summary>
-        Private Shared Function ChiedeConferma(mossa As Mossa) As Boolean
-
-            Return mossa.Tipo = TipoMossa.ChiediScelta AndAlso
-                   mossa.Scelte.Any(Function(s) s.Id = Scelte.Conferma)
-
-        End Function
-
-        ' ==================================================================
         ' I giudizi che non guardano il contenuto
         ' ==================================================================
-
-        ''' <summary>
-        ''' Se di un frammento instradato altrove il dialogo ha reso conto: o l'ha
-        ''' ripescato rimettendolo in bocca all'utente (<c>EcoUtente</c>), o ha detto di
-        ''' lasciarlo fuori. Il confronto è per sole lettere e cifre — il modello ricopia
-        ''' le parole dell'utente ma può cambiare una virgola, e una virgola non è una
-        ''' perdita.
-        ''' </summary>
-        Private Shared Function Onorato(instradato As StrutturatoreSpia.Instradato,
-                                        battiti As List(Of Battito)) As Boolean
-
-            Dim cercato As String = CollaudoReale.PerCercare(instradato.Frase)
-            If cercato = "" Then Return True
-
-            For Each battito As Battito In battiti
-
-                If CollaudoReale.PerCercare(battito.Mossa.EcoUtente).Contains(cercato) Then Return True
-
-                For Each detto As String In battito.Mossa.Detto
-                    If Not detto.Contains("lascio fuori") Then Continue For
-                    If CollaudoReale.PerCercare(detto).Contains(cercato) Then Return True
-                Next
-
-            Next
-
-            Return False
-
-        End Function
-
-        ''' <summary>
-        ''' I sette turni nell'ordine in cui sono stati chiesti la <b>prima</b> volta.
-        ''' Le volte successive sono gli smaltimenti dell'anti-perdita, che per mestiere
-        ''' tornano su un turno passato: contarle direbbe che l'ordine è rotto quando
-        ''' invece sta funzionando.
-        ''' </summary>
-        Private Shared Function PrimeVolte(spia As StrutturatoreSpia) As String
-
-            Dim visti As New List(Of String)
-
-            For Each chiamata As StrutturatoreSpia.Chiamata In spia.Chiamate
-                If Not visti.Contains(chiamata.Turno) Then visti.Add(chiamata.Turno)
-            Next
-
-            Return String.Join(" → ", visti)
-
-        End Function
-
-        ''' <summary>
-        ''' Tutto ciò che l'utente ha detto, in un testo solo: è il pagliaio in cui
-        ''' l'anti-invenzione cerca i valori del profilo. Il posto del CV, qui, lo prende
-        ''' la traccia.
-        ''' </summary>
-        Private Shared Function TestoDellaTraccia(battiti As List(Of Battito)) As String
-
-            Return String.Join(vbLf, battiti.Where(Function(b) b.Risposta IsNot Nothing).
-                                             Select(Function(b) b.Risposta))
-
-        End Function
 
         ''' <summary>
         ''' Salva il profilo in una cartella temporanea e lo rilegge: la fine del flusso B
@@ -625,14 +346,6 @@ Namespace NonRegressione
 
         End Function
 
-        ''' <summary>Una frase lunga ridotta a un promemoria leggibile.</summary>
-        Private Shared Function Accorcia(testo As String) As String
-
-            Dim pulito As String = CollaudoReale.Ripulito(testo)
-            Return If(pulito.Length <= 60, pulito, pulito.Substring(0, 57) & "…")
-
-        End Function
-
         ' ==================================================================
         ' Il rapporto
         ' ==================================================================
@@ -643,13 +356,14 @@ Namespace NonRegressione
         ''' dialogo per intero è la parte che nessun Assert può giudicare.
         ''' </summary>
         ''' <returns>Dove è stato scritto.</returns>
-        Private Shared Function Scrivi(battiti As List(Of Battito), spia As StrutturatoreSpia,
+        Private Shared Function Scrivi(battiti As List(Of ConduttoreDiDialogo.Battito), spia As StrutturatoreSpia,
                                        profilo As Profilo,
                                        instradati As List(Of StrutturatoreSpia.Instradato),
                                        fuoriDalDialogo As List(Of StrutturatoreSpia.Instradato),
                                        nonOnorati As List(Of StrutturatoreSpia.Instradato),
                                        inventate As CollaudoReale.Invenzioni,
-                                       stranezze As List(Of String)) As String
+                                       stranezze As List(Of String),
+                                       allineamento As List(Of String)) As String
 
             Dim testo As New StringBuilder()
 
@@ -661,7 +375,7 @@ Namespace NonRegressione
             testo.Append($"- **Quando**: {DateTime.Now:yyyy-MM-dd HH:mm}").Append(vbLf)
             testo.Append($"- **Mosse del dialogo**: {battiti.Count}").Append(vbLf)
             testo.Append($"- **Chiamate all'AI**: {spia.Chiamate.Count}").Append(vbLf)
-            testo.Append($"- **Turni, in ordine di prima chiamata**: {PrimeVolte(spia)}").Append(vbLf).Append(vbLf)
+            testo.Append($"- **Turni, in ordine di prima chiamata**: {ConduttoreDiDialogo.PrimeVolte(spia)}").Append(vbLf).Append(vbLf)
 
             ' --- Le trappole ---------------------------------------------------------
             testo.Append("## Le quattro trappole, e dove sono finite").Append(vbLf).Append(vbLf)
@@ -745,8 +459,6 @@ Namespace NonRegressione
             End If
 
             ' --- Il conduttore in passo ----------------------------------------------
-            Dim allineamento As List(Of String) = AllineamentoRotto(spia)
-
             testo.Append("## Il conduttore ha risposto alle domande giuste?").Append(vbLf).Append(vbLf)
             testo.Append("*Ogni battuta della traccia è scritta per un turno preciso. Se una finisce ").
                   Append("in un altro turno, il giro non misura il dialogo: misura il conduttore che ").
@@ -800,8 +512,8 @@ Namespace NonRegressione
             testo.Append("*Da leggere come lo leggerebbe la persona che l'ha fatto: è la parte che ").
                   Append("nessun Assert giudica.*").Append(vbLf).Append(vbLf)
 
-            For Each battito As Battito In battiti
-                Trascrivi(testo, battito)
+            For Each battito As ConduttoreDiDialogo.Battito In battiti
+                ConduttoreDiDialogo.Trascrivi(testo, battito, "Anna")
             Next
 
             Dim cartella As String = Path.Combine(CasiDiCollaudo.Cartella, "reale")
@@ -815,45 +527,6 @@ Namespace NonRegressione
             Return doveScritto
 
         End Function
-
-        ''' <summary>Una mossa del dialogo, come si leggerebbe a schermo.</summary>
-        Private Shared Sub Trascrivi(testo As StringBuilder, battito As Battito)
-
-            For Each detto As String In battito.Mossa.Detto
-                For Each riga As String In detto.Split(ChrW(10))
-                    testo.Append("> ").Append(riga).Append(vbLf)
-                Next
-                testo.Append(">").Append(vbLf)
-            Next
-
-            If Not String.IsNullOrEmpty(battito.Mossa.EcoUtente) Then
-                testo.Append($"> *(le tue parole)* «{battito.Mossa.EcoUtente}»").Append(vbLf).Append(">").Append(vbLf)
-            End If
-
-            For Each scheda As Scheda In battito.Mossa.Schede
-                If Not String.IsNullOrEmpty(scheda.Titolo) Then
-                    testo.Append($"> **{scheda.Titolo}**").Append(vbLf)
-                End If
-                For Each riga As RigaScheda In scheda.Righe
-                    testo.Append("> - ").
-                          Append(If(riga.Etichetta = "", "", riga.Etichetta & ": ")).
-                          Append(riga.Valore).Append(vbLf)
-                Next
-                testo.Append(">").Append(vbLf)
-            Next
-
-            If battito.Risposta IsNot Nothing Then
-                testo.Append(vbLf).Append($"**Anna:** {battito.Risposta}").Append(vbLf).Append(vbLf)
-            ElseIf battito.Scelta IsNot Nothing Then
-                Dim etichetta As String = battito.Mossa.Scelte.
-                    Where(Function(s) s.Id = battito.Scelta).
-                    Select(Function(s) s.Etichetta).FirstOrDefault()
-                testo.Append(vbLf).Append($"**Anna:** *[{etichetta}]*").Append(vbLf).Append(vbLf)
-            Else
-                testo.Append(vbLf)
-            End If
-
-        End Sub
 
         ''' <summary>
         ''' L'esito del turno chiesto anche al prototipo, nella stessa forma dei rapporti
@@ -887,7 +560,7 @@ Namespace NonRegressione
         End Function
 
         ''' <summary>I numeri che si possono dire a console, e dove sta il rapporto.</summary>
-        Private Shared Function Riassunto(dove As String, battiti As List(Of Battito),
+        Private Shared Function Riassunto(dove As String, battiti As List(Of ConduttoreDiDialogo.Battito),
                                           spia As StrutturatoreSpia, profilo As Profilo,
                                           instradati As List(Of StrutturatoreSpia.Instradato),
                                           nonOnorati As List(Of StrutturatoreSpia.Instradato),
@@ -902,7 +575,7 @@ Namespace NonRegressione
 
             testo.AppendLine("Collaudo di tappa T3 — il dialogo guidato da zero, con l'AI vera.")
             testo.AppendLine($"Mosse {battiti.Count}, chiamate all'AI {spia.Chiamate.Count}.")
-            testo.AppendLine($"Turni in ordine di prima chiamata: {PrimeVolte(spia)}")
+            testo.AppendLine($"Turni in ordine di prima chiamata: {ConduttoreDiDialogo.PrimeVolte(spia)}")
             testo.AppendLine($"Profilo: formali {profilo.EsperienzeFormali.Count}, " &
                              $"informali {profilo.EsperienzeInformali.Count}, " &
                              $"competenze {profilo.Competenze.Count}, " &

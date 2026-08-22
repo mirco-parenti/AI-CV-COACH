@@ -8,7 +8,9 @@ Namespace Motore
     ''' Non-regressione di <c>CalcoloMatch</c> contro il prototipo (cap. 14, T2).
     ''' Sono i sei casi dell'hard-gate dello Step 1.37 — gate attivo, gate ma requisito
     ''' soddisfatto, flag come stringa, match già basso che non va alzato, gate più
-    ''' clamp con note coerenti — con in più il caso di andamento normale.
+    ''' clamp con note coerenti — con in più il caso di andamento normale, e i tre del
+    ''' <b>confine</b> aggiunti a T9e ripercorrendo la voce 8 della checklist «Problemi e
+    ''' mitigazioni»: ciò che esce dal conteggio, e cosa resta quando non ne esce niente.
     ''' </summary>
     ''' <remarks>
     ''' I valori attesi non sono stati scritti a mano: sono l'uscita di
@@ -133,6 +135,79 @@ Namespace Motore
                            "lo porta verso 95: match finale 85. " &
                            "Requisito eliminatorio non soddisfatto (Patente C tassativa): " &
                            "il match non può superare 20/100, cioè ≤ 1 stella, a prescindere dal resto del profilo.")
+        End Sub
+
+        ' ==================================================================
+        ' Il confine «lacuna» / «non si sa» (checklist, voce 8) — T9e
+        ' ==================================================================
+
+        ''' <summary>
+        ''' Il conteggio non deve contare ciò che nessuno poteva sapere: <c>non
+        ''' determinabile</c> esce dal numeratore <b>e</b> dal denominatore.
+        ''' </summary>
+        ''' <remarks>
+        ''' È la metà-codice della voce 8 della checklist, ed è una riga sola di
+        ''' <see cref="CalcoloMatch"/> che fino a T9e nessun collaudo guardava. Il caso è
+        ''' costruito perché la differenza si veda: una lacuna, un dubbio e una voce
+        ''' coperta, tutte di peso 5. Escludendo il dubbio il conteggio è 5/10 = 50; se
+        ''' invece finisse nel denominatore come una lacuna sarebbe 5/15 = 33, e il
+        ''' candidato pagherebbe per una domanda che non gli è mai stata fatta.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub Caso7_NonDeterminabileEsceDalConteggio()
+            Dim g = Giudizi("[
+                {""requisito"":""Diploma di istituto alberghiero"",""esito"":""non soddisfatto"",""priorita"":""richiesto"",""importanza"":"""",""categoria"":""formazione""},
+                {""requisito"":""Disponibilità nei fine settimana"",""esito"":""non determinabile"",""priorita"":""richiesto"",""importanza"":"""",""categoria"":""altri_requisiti""},
+                {""requisito"":""Uso della cassa"",""esito"":""soddisfatto"",""priorita"":""richiesto"",""importanza"":"""",""categoria"":""competenze""}]")
+
+            Verifica("7 non determinabile escluso", CalcoloMatch.Calcola(g, JsonValue.Create(50)),
+                     scoreBase:=50, numeroLlm:=50, matchFinale:=50, stelle:=2.5,
+                     scartoTagliato:=False, gate:=False, nota:=Nothing)
+        End Sub
+
+        ''' <summary>
+        ''' «Nessuna esperienza richiesta» non è un requisito da soddisfare: esce dal
+        ''' conteggio <b>qualunque</b> esito le abbia dato l'AI.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il sentinel lo scrive il prompt dell'annuncio quando l'offerta dichiara che
+        ''' esperienza non ne serve; il prompt del confronto ordina di giudicarlo «non
+        ''' determinabile», ma è il codice a garantirlo, e apposta: qui il caso gli dà
+        ''' l'esito peggiore — <c>non soddisfatto</c> — e il conteggio deve ignorarlo lo
+        ''' stesso. Contarlo darebbe 5/10 = 50 invece di 5/5 = 100: un candidato bocciato
+        ''' a metà per non avere l'esperienza che l'annuncio non chiedeva.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub Caso8_NessunaEsperienzaRichiestaNonPesaMaiSulConteggio()
+            Dim g = Giudizi("[
+                {""requisito"":""Nessuna esperienza richiesta"",""esito"":""non soddisfatto"",""priorita"":""richiesto"",""importanza"":"""",""categoria"":""esperienza""},
+                {""requisito"":""Uso del muletto"",""esito"":""soddisfatto"",""priorita"":""richiesto"",""importanza"":"""",""categoria"":""competenze""}]")
+
+            Verifica("8 sentinel nessuna esperienza", CalcoloMatch.Calcola(g, JsonValue.Create(95)),
+                     scoreBase:=100, numeroLlm:=95, matchFinale:=95, stelle:=4.8,
+                     scartoTagliato:=False, gate:=False, nota:=Nothing)
+        End Sub
+
+        ''' <summary>
+        ''' Se <b>tutte</b> le voci sono indeterminabili non c'è nessun conteggio da fare:
+        ''' lo <c>score_base</c> resta vuoto e il match è quello che dice l'AI.
+        ''' </summary>
+        ''' <remarks>
+        ''' È il ramo del denominatore a zero, l'unico posto in cui il numero dell'AI non
+        ''' viene corretto da niente. Non è un caso di scuola: capita a un annuncio che
+        ''' chiede solo disponibilità e offre solo benefit, dove il profilo non ha nulla da
+        ''' opporre. Il collaudo lo fissa perché è anche il ramo più facile da rompere
+        ''' cambiando il conteggio.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub Caso9_TutteIndeterminabiliLasciaDecidereAllAi()
+            Dim g = Giudizi("[
+                {""requisito"":""Disponibilità a trasferte"",""esito"":""non determinabile"",""priorita"":""richiesto"",""importanza"":"""",""categoria"":""altri_requisiti""},
+                {""requisito"":""benefit: buoni pasto"",""esito"":""non determinabile"",""priorita"":""non specificata"",""importanza"":"""",""categoria"":""contesto""}]")
+
+            Verifica("9 tutte non determinabili", CalcoloMatch.Calcola(g, JsonValue.Create(62)),
+                     scoreBase:=Nothing, numeroLlm:=62, matchFinale:=62, stelle:=3.1,
+                     scartoTagliato:=False, gate:=False, nota:=Nothing)
         End Sub
 
     End Class
