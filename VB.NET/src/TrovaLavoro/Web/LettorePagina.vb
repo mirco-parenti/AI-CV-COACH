@@ -28,6 +28,16 @@ Namespace Web
         ''' </summary>
         Public Property Troncato As Boolean
 
+        ''' <summary>
+        ''' Se il testo viene da quello che l'utente aveva <b>selezionato</b> nella pagina
+        ''' invece che da tutta la pagina (R5, 2026-08-23). È la risposta più semplice alle
+        ''' pagine-risultati, dove catturare tutto significa catturare cento annunci: chi
+        ''' seleziona l'annuncio che gli interessa ha già detto, senza doverlo spiegare a
+        ''' nessuno, qual è il testo che conta. Va detto a chi guarda, perché cambia cosa è
+        ''' stato letto.
+        ''' </summary>
+        Public Property DaSelezione As Boolean
+
     End Class
 
     ''' <summary>
@@ -94,6 +104,77 @@ Namespace Web
         ''' l'intero contenuto di una pagina che di annunci ne mostra cento.
         ''' </summary>
         Public Const MassimoCaratteri As Integer = 50000
+
+        ''' <summary>
+        ''' Quanto testo deve avere una selezione perché si preferisca alla pagina intera.
+        ''' Sotto, è più probabile un clic andato a vuoto che una scelta voluta.
+        ''' </summary>
+        Public Const MinimoDellaSelezione As Integer = 200
+
+        ' Le soglie con cui si riconosce una pagina-risultati. Sono volutamente SEVERE:
+        ' sbagliare dicendo «sembra una lista» su un annuncio buono ferma chi aveva ragione,
+        ' mentre non accorgersene lascia le cose come stavano prima. Nel dubbio, si tace.
+        Private Const RigheMinimePerGiudicare As Integer = 40
+        Private Const RigaLunga As Integer = 160
+        Private Const QuotaMassimaDiRigheLunghe As Double = 0.03
+        Private Const SpieMinime As Integer = 8
+
+        ''' <summary>Le parole che in una lista di annunci si ripetono a ogni riga.</summary>
+        Private Shared ReadOnly Spie As String() = {
+            "candidati", "giorni fa", "giorno fa", "ore fa", "ora fa", "minuti fa",
+            "annunci", "offerte di lavoro", "filtra", "ordina per"}
+
+        ''' <summary>
+        ''' Se il testo catturato somiglia a una <b>pagina di risultati</b> invece che a un
+        ''' annuncio solo (R5, 2026-08-23). Una lista è fatta di tante righe corte tutte
+        ''' uguali, con le stesse parole di servizio ripetute a ogni voce, e quasi nessun
+        ''' paragrafo vero; un annuncio ha meno righe e almeno qualche frase lunga.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il danno che previene non è l'analisi sbagliata: è il <b>silenzio</b>. Senza
+        ''' questo, l'applicazione analizza l'accozzaglia, dà un punteggio in stelle e
+        ''' sembra funzionare (collaudo dal vivo di T9e, giro C). Non pretende di
+        ''' riconoscerle tutte, e nemmeno di sbagliare mai: pretende di non fingere che vada
+        ''' bene quando ha in mano cento annunci invece di uno.
+        ''' </remarks>
+        Public Shared Function SembraUnaPaginaDiRisultati(testo As String) As Boolean
+
+            If String.IsNullOrWhiteSpace(testo) Then Return False
+
+            Dim righe As List(Of String) = testo.
+                Split(ControlChars.Lf).
+                Select(Function(r) r.Trim()).
+                Where(Function(r) r.Length > 0).
+                ToList()
+
+            If righe.Count < RigheMinimePerGiudicare Then Return False
+
+            ' In VB «Count» è la property della lista e copre il metodo con predicato:
+            ' si passa da Where, o il compilatore protesta che Count non si indicizza.
+            Dim lunghe As Integer = righe.Where(Function(r) r.Length >= RigaLunga).Count()
+            If lunghe / CDbl(righe.Count) > QuotaMassimaDiRigheLunghe Then Return False
+
+            Dim minuscolo As String = testo.ToLowerInvariant()
+            Dim quante As Integer = Spie.Sum(Function(s) Ripetizioni(minuscolo, s))
+
+            Return quante >= SpieMinime
+
+        End Function
+
+        ''' <summary>Quante volte una parola compare in un testo già in minuscolo.</summary>
+        Private Shared Function Ripetizioni(testo As String, parola As String) As Integer
+
+            Dim quante As Integer = 0
+            Dim da As Integer = testo.IndexOf(parola, StringComparison.Ordinal)
+
+            While da >= 0
+                quante += 1
+                da = testo.IndexOf(parola, da + parola.Length, StringComparison.Ordinal)
+            End While
+
+            Return quante
+
+        End Function
 
         Private ReadOnly _vista As CoreWebView2
 
@@ -317,14 +398,23 @@ Namespace Web
                    "      raccogli(f, pezzi);" &
                    "    }" &
                    "  }" &
-                   "  var pezzi = [];" &
-                   "  if (document.body) raccogli(document.body, pezzi);" &
-                   "  var t = pezzi.join('\n').replace(/\n{3,}/g, '\n\n');" &
+                   "  var scelto = '';" &
+                   "  try { scelto = (window.getSelection && window.getSelection().toString()) || ''; }" &
+                   "  catch (err) { scelto = ''; }" &
+                   "  scelto = scelto.replace(/\n{3,}/g, '\n\n').trim();" &
+                   "  var daSelezione = scelto.length >= " & MinimoDellaSelezione & ";" &
+                   "  var t;" &
+                   "  if (daSelezione) { t = scelto; } else {" &
+                   "    var pezzi = [];" &
+                   "    if (document.body) raccogli(document.body, pezzi);" &
+                   "    t = pezzi.join('\n').replace(/\n{3,}/g, '\n\n');" &
+                   "  }" &
                    "  return JSON.stringify({" &
                    "    titolo: document.title || ''," &
                    "    indirizzo: location.href || ''," &
                    $"    testo: t.slice(0, {massimo})," &
-                   $"    troncato: t.length > {massimo}" &
+                   $"    troncato: t.length > {massimo}," &
+                   "    selezione: daSelezione" &
                    "  });" &
                    "})()"
 
@@ -357,6 +447,7 @@ Namespace Web
                 letta.Indirizzo = Testo(contenuto, "indirizzo")
                 letta.Testo = Testo(contenuto, "testo")
                 letta.Troncato = Vero(contenuto, "troncato")
+                letta.DaSelezione = Vero(contenuto, "selezione")
 
             Catch ex As JsonException
                 ' Una risposta che non è JSON non è un guasto da propagare: è una pagina

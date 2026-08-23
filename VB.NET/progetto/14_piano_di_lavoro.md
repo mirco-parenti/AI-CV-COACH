@@ -998,15 +998,56 @@ dal repo perché tocca dati reali.
 Il quarto tempo non chiude niente da solo: le cure dei **dodici reperti** sono il **quinto
 tempo**, insieme alla **domanda di approfondimento sui campi mancanti**, che il collaudo ha
 promosso dentro la 1.0 in forma minima — una domanda per voce, solo sui campi che pesano nel
-CV, occasione unica. Prima delle tre cure del giro B c'è però una decisione a monte, ancora
-da prendere (cap. 15.7): curarle puntualmente, o dare all'interfaccia un modo unico di
-dichiarare le misure in unità coerenti col DPI — e in entrambi i casi stabilire come il banco
-potrà vederle. **995 collaudi verdi**, versione **0.3.041**, Pool **1.12 invariato**: in
-questo tempo non si è scritta una riga.
+CV, occasione unica. Prima delle tre cure del giro B c'era però una decisione a monte, e il
+quinto tempo si è aperto prendendola (cap. 15.7). **995 collaudi verdi**, versione
+**0.3.041**, Pool **1.12 invariato**: in questo tempo non si è scritta una riga.
 
 Con lei T9e diventa di **sei tempi**: l'identità visiva, la checklist, la ripresa, il
 **collaudo dal vivo**, **le cure dei reperti con la domanda di approfondimento**, e il
 rilascio.
+
+### Il quinto tempo — le cure (2026-08-23, in corso)
+
+**La decisione a monte, e perché non è andata come sembrava.** La domanda era se curare i tre
+difetti di scala uno per uno o dare all'interfaccia un modo unico di dichiarare le misure
+rispetto al DPI. Un censimento del codice ha contato oltre ottanta punti della stessa forma —
+in astratto, l'argomento perfetto per la via larga. Guardandoli da vicino, però, i tre difetti
+**non erano la stessa specie**: uno era davvero un confronto fra unità diverse, uno era una
+costante che duplicava una misura già posseduta dal runtime (si toglie, non si converte), uno
+non era affatto un problema di unità ma di tetto e scorrimento mancanti — si sarebbe rotto
+uguale a 96 DPI su uno schermo basso — e l'ultimo era una **doppia** scalatura, dove un
+convertitore in più avrebbe moltiplicato due volte. La via larga ne avrebbe curato uno.
+Si è scelta la via puntuale, ma **collaudabile**: un modulo di funzioni pure a cui il DPI si
+**passa**, così un banco che gira a 96 DPI può chiedere cosa succede a 144. Prima non esisteva
+nel progetto una sola riga che leggesse il DPI, né un collaudo che lo esercitasse.
+
+**Le cure, verificate dal vivo a 150%.** Il pannello del logo passa in compatta (186×160
+invece di 373×360) e non sfonda più nell'area viva; la finestra si ferma al minimo vero,
+**1725×900**, che sono i 1150×600 di progetto esatti; le Impostazioni stanno in **1012×1008**
+dentro l'area di lavoro e quel che eccede si raggiunge scorrendo. Il tetto e lo scorrimento
+sono stati messi su **tutte e quattro** le finestre che condividevano quella riga, non solo su
+quella caduta. Una scoperta non prevista lega due reperti che sembravano indipendenti: la
+sovrapposizione dei comandi al minimo non veniva dal minimo, ma dallo stesso ingombro sbagliato
+del logo — la fascia credeva di avere 125 px in più e concludeva che i bottoni ci stavano su
+una riga. Curato l'ingombro, va a capo da sé, e il minimo non è stato alzato.
+
+**Con le cure si è chiuso un debito vecchio.** «Svuota i dati di navigazione» (T9b) non era mai
+stato premuto dal vivo: a 150% era irraggiungibile proprio per il difetto delle Impostazioni.
+Curato quello, il bottone è tornato a portata, ha chiesto conferma e ha cancellato davvero i
+**183 MB** di `webview2\`, spegnendosi da sé perché non restava più niente da svuotare. La
+stessa prova ha verificato la cura e chiuso il debito, che era il motivo per cui si era deciso
+di farla qui.
+
+**Poi i reperti dei giri A e C.** Il primo curato è **R2**, il più grave: i turni singoli del
+profilo sostituiscono il blocco intero, quindi chi correggeva la sola via perdeva email e
+telefono già confermati — in silenzio. La semantica resta la sostituzione, che è la regola che
+l'utente può prevedere; a cambiare è che ora il riepilogo **dice** quali campi spariranno,
+prima che si confermi. Guardando il codice è saltato fuori un secondo caso della stessa
+famiglia, più insidioso: una patente non colta in una correzione vale «no», e la patente è
+spesso il requisito eliminatorio di un annuncio. Avvisata anche quella.
+
+Restano i reperti R1, R3-R9 e la domanda di approfondimento, e **un bump solo del Pool** a
+chiudere il tempo. Banco a **1010 collaudi verdi**.
 
 
 ## Ordine e dipendenze

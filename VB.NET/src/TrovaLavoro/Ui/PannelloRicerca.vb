@@ -515,6 +515,21 @@ Public Class PannelloRicerca
             Return
         End If
 
+        ' R5 (collaudo dal vivo di T9e, giro C): su una pagina-risultati la cattura prendeva
+        ' lista e pannello di dettaglio insieme, e i 25 passi di scorrimento ne caricavano
+        ' altri. Il guaio non era l'analisi sbagliata — era che nessuno lo diceva: usciva un
+        ' punteggio in stelle su un'accozzaglia di decine di offerte, e sembrava funzionare.
+        ' Chi ha selezionato il testo a mano è già stato esplicito, e non lo si contraddice.
+        If Not pagina.DaSelezione AndAlso LettorePagina.SembraUnaPaginaDiRisultati(testo) Then
+            Racconta("Questa sembra la pagina con l'elenco degli annunci, non un annuncio " &
+                     "solo: leggendola tutta metterei insieme decine di offerte diverse, e il " &
+                     "punteggio in stelle non vorrebbe dire niente. Due modi per andare " &
+                     "avanti: apri l'annuncio che ti interessa e premi di nuovo, oppure " &
+                     "selezionane il testo qui con il mouse — se trovo una selezione, leggo " &
+                     "quella e basta.")
+            Return
+        End If
+
         ' Premere due volte sulla stessa pagina non deve produrre due candidature
         ' identiche: costerebbe due chiamate all'AI per riscrivere quel che c'è già, e
         ' lascerebbe nella coda di T5c due voci che l'utente non sa distinguere.
@@ -662,6 +677,9 @@ Public Class PannelloRicerca
         Dim titolo As String = If(pagina.Titolo, String.Empty).Trim()
 
         Return If(titolo = "", "Pagina catturata.", $"Catturato: «{titolo}».") &
+               If(pagina.DaSelezione,
+                  " Ho letto il testo che avevi selezionato, non tutta la pagina.",
+                  String.Empty) &
                If(pagina.Troncato,
                   $" La pagina era più lunga di {LettorePagina.MassimoCaratteri} caratteri: " &
                   "all'analisi va la prima parte.",

@@ -188,6 +188,68 @@ Namespace Documenti
                 End Sub)
         End Sub
 
+        ' --- Esportare un documento solo (R8, 2026-08-23) --------------------------------
+
+        <TestMethod>
+        Public Sub SiPuoEsportareIlSoloCvMirato()
+
+            ConCartellaDati(
+                Sub(cartella)
+                    Dim opportunita As Opportunita = OpportunitaDiProva()
+                    Dim archivio As New ArchivioOpportunita(cartella)
+                    archivio.Salva(opportunita)
+
+                    Dim documenti As New ArchivioDocumenti(cartella)
+                    documenti.ScriviCandidaturaAsync(
+                        opportunita, FormatiDocumento.Docx, DocumentiDaScrivere.Cv).GetAwaiter().GetResult()
+
+                    CollectionAssert.AreEqual(
+                        {"CV_Luca_Ferrari_Trattoria_Da_Gino_2026-08-10.docx"},
+                        NomiIn(ArchivioOpportunita.CartellaOut(opportunita)),
+                        "la lettera non è stata chiesta e non deve comparire")
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub SiPuoEsportareLaSolaLettera()
+
+            ConCartellaDati(
+                Sub(cartella)
+                    Dim opportunita As Opportunita = OpportunitaDiProva()
+                    Dim archivio As New ArchivioOpportunita(cartella)
+                    archivio.Salva(opportunita)
+
+                    Dim documenti As New ArchivioDocumenti(cartella)
+                    documenti.ScriviCandidaturaAsync(
+                        opportunita, FormatiDocumento.Docx, DocumentiDaScrivere.Lettera).GetAwaiter().GetResult()
+
+                    CollectionAssert.AreEqual(
+                        {"Lettera_Trattoria_Da_Gino_2026-08-10.docx"},
+                        NomiIn(ArchivioOpportunita.CartellaOut(opportunita)),
+                        "e viceversa: il CV non è stato chiesto")
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub ChiNonSceglieLiOttieneTuttiEDue()
+
+            ConCartellaDati(
+                Sub(cartella)
+                    Dim opportunita As Opportunita = OpportunitaDiProva()
+                    Dim archivio As New ArchivioOpportunita(cartella)
+                    archivio.Salva(opportunita)
+
+                    Dim documenti As New ArchivioDocumenti(cartella)
+                    documenti.ScriviCandidaturaAsync(opportunita, FormatiDocumento.Docx).GetAwaiter().GetResult()
+
+                    Assert.AreEqual(2, NomiIn(ArchivioOpportunita.CartellaOut(opportunita)).Count,
+                                    "il comportamento di sempre non cambia per chi non chiede niente")
+                End Sub)
+
+        End Sub
+
     End Class
 
 End Namespace

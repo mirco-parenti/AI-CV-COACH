@@ -899,7 +899,8 @@ Public Class PannelloDocumenti
             AnnotaNelRegistro()
         End If
 
-        Return _documenti.ScriviCandidaturaAsync(_candidatura, formati)
+        Return _documenti.ScriviCandidaturaAsync(
+            _candidatura, formati, DocumentiDaTendina(cmbEsporta.SelectedIndex))
 
     End Function
 
@@ -1114,6 +1115,22 @@ Public Class PannelloDocumenti
     Private Function LinguaDallaTendina() As String
 
         Return If(cmbLingua.SelectedIndex = 1, LinguaDocumenti.Inglese, LinguaDocumenti.Italiano)
+
+    End Function
+
+    ''' <summary>
+    ''' Quali documenti la tendina «Esporta:» sta chiedendo (R8, 2026-08-23). È
+    ''' <c>Shared</c> e prende l'indice invece di leggere il controllo, così il banco può
+    ''' provarla senza una finestra: la traduzione fra una posizione in un elenco e una
+    ''' scelta è il punto in cui si sbaglia, non il resto.
+    ''' </summary>
+    Public Shared Function DocumentiDaTendina(indice As Integer) As DocumentiDaScrivere
+
+        Select Case indice
+            Case 1 : Return DocumentiDaScrivere.Cv
+            Case 2 : Return DocumentiDaScrivere.Lettera
+            Case Else : Return DocumentiDaScrivere.Entrambi
+        End Select
 
     End Function
 
@@ -1650,6 +1667,9 @@ Public Class PannelloDocumenti
         ' il 📄 CV base da T7d.
         cmbLingua.SelectedIndex = 0
 
+        ' «CV e lettera»: chi non tocca la tendina ottiene quel che otteneva prima di R8.
+        cmbEsporta.SelectedIndex = 0
+
         ' Nemmeno il prima/dopo della rifinitura: T7b è arrivata, e la casella la accende
         ' AggiornaComandi quando c'è un confronto da mostrare.
 
@@ -1729,6 +1749,16 @@ Public Class PannelloDocumenti
         ' l'altro, e la tendina resta spenta.
         cmbLingua.Enabled = Not occupato AndAlso (_sulCvBase OrElse _candidatura IsNot Nothing)
         lblLingua.Enabled = cmbLingua.Enabled
+
+        ' «Esporta:» ha senso solo dove i documenti sono due. Sul 📄 CV-1 base la lettera
+        ' non esiste, quindi non si sceglie niente e la tendina sparisce invece di restare
+        ' lì spenta a far domandare perché (cap. 03.3: quel che è acceso deve sembrarlo, e
+        ' quel che non serve non deve nemmeno esserci).
+        Dim siSceglie As Boolean = Not _sulCvBase AndAlso _candidatura IsNot Nothing
+        cmbEsporta.Visible = siSceglie
+        lblEsporta.Visible = siSceglie
+        cmbEsporta.Enabled = siSceglie AndAlso Not occupato
+        lblEsporta.Enabled = cmbEsporta.Enabled
 
         ' La tendina dei documenti è navigazione, e la navigazione si ferma mentre l'AI
         ' lavora: cambiare documento sotto una chiamata in volo è lo stesso difetto che

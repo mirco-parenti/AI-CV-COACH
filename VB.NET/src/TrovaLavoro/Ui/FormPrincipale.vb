@@ -16,6 +16,15 @@ Public Class FormPrincipale
     ''' <summary>Sotto questa larghezza il pannello logo passa in compatta (cap. 03.5).</summary>
     Private Const LarghezzaModalitaCompatta As Integer = 1350
 
+    ''' <summary>
+    ''' Il minimo della finestra in unità di progetto (cap. 03.4). Il Designer dichiara gli
+    ''' stessi due numeri — è lì che li vuole la finestra di progettazione — ma li lascia
+    ''' scalare a WinForms in modo asimmetrico: il valore buono lo rimette
+    ''' <see cref="RiapplicaIlMinimoDellaFinestra"/>.
+    ''' </summary>
+    Private Const LarghezzaMinimaDiProgetto As Integer = 1150
+    Private Const AltezzaMinimaDiProgetto As Integer = 600
+
     ' Geometria del pannello logo nelle due modalità.
     Private Const LogoLarghezza As Integer = 261
     Private Const LogoAltezza As Integer = 216
@@ -28,6 +37,9 @@ Public Class FormPrincipale
 
     ' Nothing finché la modalità non è stata decisa la prima volta.
     Private compattaAttiva As Boolean?
+
+    ' L'ultimo ingombro comunicato ai pannelli: si ridichiara solo quando cambia davvero.
+    Private ingombroDichiarato As Size = Size.Empty
 
     ''' <summary>Il motore montato all'avvio: da qui in avanti lo usano i pannelli.</summary>
     Private _contesto As ContestoApp
@@ -173,6 +185,24 @@ Public Class FormPrincipale
     ''' </summary>
     Private Sub FormPrincipale_Shown(sender As Object, e As EventArgs) Handles MyBase.Shown
         _schermataDiAvvio?.ChiudiQuandoPuoi()
+        RiapplicaIlMinimoDellaFinestra()
+    End Sub
+
+    ''' <summary>
+    ''' Rimette il minimo di progetto (cap. 03.4) in pixel veri di questo schermo.
+    ''' <c>AutoScaleMode.Font</c> lo scala già per conto suo, ma con rapporti <b>diversi</b>
+    ''' per larghezza e altezza — a 144 DPI ×1,42 contro ×1,605 — e la larghezza finiva 61
+    ''' unità di progetto <i>sotto</i> il minimo dichiarato, cioè dentro le misure in cui la
+    ''' fascia dei comandi non ha più spazio. Si fa nello <c>Shown</c> e non nel <c>Load</c>
+    ''' perché la scalatura automatica dev'essere già avvenuta: altrimenti l'ultima parola
+    ''' resta la sua (decisione 15.7).
+    ''' </summary>
+    Private Sub RiapplicaIlMinimoDellaFinestra()
+
+        Me.MinimumSize = New Size(
+            ScalaSchermo.InPixelDelloSchermo(LarghezzaMinimaDiProgetto, Me.DeviceDpi),
+            ScalaSchermo.InPixelDelloSchermo(AltezzaMinimaDiProgetto, Me.DeviceDpi))
+
     End Sub
 
     ''' <summary>
@@ -853,7 +883,8 @@ Public Class FormPrincipale
     ''' la sua posizione si ricalcola a ogni ridimensionamento.
     ''' </summary>
     Private Sub AggiornaPannelloLogo()
-        Dim compatta As Boolean = (Me.ClientSize.Width < LarghezzaModalitaCompatta)
+        Dim compatta As Boolean = ScalaSchermo.ModalitaCompatta(
+            Me.ClientSize.Width, Me.DeviceDpi, LarghezzaModalitaCompatta)
 
         If Not compattaAttiva.HasValue OrElse compattaAttiva.Value <> compatta Then
             compattaAttiva = compatta
@@ -861,6 +892,11 @@ Public Class FormPrincipale
         End If
 
         pnlLogo.Location = New Point(0, Me.ClientSize.Height - pnlLogo.Height)
+
+        ' L'ingombro si dichiara qui, e non dentro DisponiPannelloLogo, perché il pannello
+        ' vero lo dimensiona WinForms e non alla stessa svolta in cui cambia la modalità:
+        ' quel che serve ai pannelli è la misura che ha adesso (decisione 15.7).
+        DichiaraLIngombroDelLogo()
     End Sub
 
     ''' <summary>Dispone i contenuti del pannello logo nella modalità richiesta.</summary>
@@ -899,7 +935,6 @@ Public Class FormPrincipale
 
         pnlLogo.ResumeLayout()
 
-        DichiaraLIngombroDelLogo(larghezza, altezza)
     End Sub
 
     ''' <summary>
@@ -908,10 +943,16 @@ Public Class FormPrincipale
     ''' in basso a sinistra dell'area centrale: quel rettangolo non è disponibile, e ogni
     ''' pannello deve saperlo per non metterci dentro dei dati (v. <see cref="IPannelloArea"/>).
     ''' </summary>
-    Private Sub DichiaraLIngombroDelLogo(larghezza As Integer, altezza As Integer)
+    Private Sub DichiaraLIngombroDelLogo()
 
-        Dim sfondamento As Integer = Math.Max(0, altezza - pnlFasciaInferiore.Height)
-        Dim ingombro As New Size(larghezza, sfondamento)
+        ' Si misura il pannello invece di ripetere le costanti di geometria: quelle sono in
+        ' unità di progetto, il pannello vero lo scala WinForms, e a 150% dichiarare 261×216
+        ' dove il pannello ne occupa 373×360 sfondava nell'area viva (cap. 03.5).
+        Dim sfondamento As Integer = Math.Max(0, pnlLogo.Height - pnlFasciaInferiore.Height)
+        Dim ingombro As New Size(pnlLogo.Width, sfondamento)
+
+        If ingombro = ingombroDichiarato Then Return
+        ingombroDichiarato = ingombro
 
         For Each figlio As Control In pnlAreaCentrale.Controls
             Dim pannello As IPannelloArea = TryCast(figlio, IPannelloArea)

@@ -235,7 +235,7 @@ Partial Class PannelloProfilo
         Me.lblDomicilio.Name = "lblDomicilio"
         Me.lblDomicilio.Size = New System.Drawing.Size(74, 20)
         Me.lblDomicilio.TabIndex = 6
-        Me.lblDomicilio.Text = "Domicilio"
+        Me.lblDomicilio.Text = "Città"
         '
         'txtDomicilio
         '

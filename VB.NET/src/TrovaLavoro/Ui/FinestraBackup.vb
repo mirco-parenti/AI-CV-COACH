@@ -416,7 +416,11 @@ Public Class FinestraBackup
     Private Sub Disponi()
 
         Dim sinistra As Integer = StileApp.MargineRiquadro
-        Dim larghezzaUtile As Integer = LarghezzaFinestra - 2 * StileApp.MargineRiquadro
+        ' La larghezza di progetto in pixel veri: dichiararla cruda stringeva la finestra
+        ' di un terzo mentre i testi dentro crescevano col DPI, e a mandare a capo il
+        ' doppio delle righe era proprio questo (decisione 15.7).
+        Dim larghezza As Integer = ScalaSchermo.InPixelDelloSchermo(LarghezzaFinestra, Me.DeviceDpi)
+        Dim larghezzaUtile As Integer = larghezza - 2 * StileApp.MargineRiquadro
 
         For Each testo As Label In {lblSpiegazione, lblComeSiRipristina, lblCosaCE, lblStato}
             testo.MaximumSize = New Size(larghezzaUtile, 0)
@@ -444,9 +448,20 @@ Public Class FinestraBackup
         ' Il chiudi in fondo a destra: la via d'uscita ha il posto d'onore, come nelle
         ' altre finestre del programma.
         Dim riga As Integer = lblStato.Bottom + StileApp.MargineRiquadro
-        btnChiudi.Location = New Point(LarghezzaFinestra - StileApp.MargineRiquadro - btnChiudi.Width, riga)
+        btnChiudi.Location = New Point(larghezza - StileApp.MargineRiquadro - btnChiudi.Width, riga)
 
-        ClientSize = New Size(LarghezzaFinestra, btnChiudi.Bottom + StileApp.MargineRiquadro)
+        ' Un tetto sullo spazio che c'è, e lo scorrimento per quel che non ci sta: le due
+        ' cose insieme, perché il tetto da solo taglierebbe e lo scorrimento da solo
+        ' lascerebbe la finestra fuori schermo. Senza, a 150% questa finestra si dimensionava
+        ' sul proprio contenuto e il sistema la troncava: quel che restava fuori cadeva fuori
+        ' dalla <i>finestra</i>, non dallo schermo, e nessuno spostamento lo recuperava
+        ' (cap. 03.4, decisione 15.7).
+        Dim voluta As Integer = btnChiudi.Bottom + StileApp.MargineRiquadro
+        Dim disponibile As Integer = ScalaSchermo.SpazioClienteDisponibile(
+            Screen.FromControl(Me).WorkingArea.Height, Me.Height - Me.ClientSize.Height)
+
+        Me.AutoScroll = ScalaSchermo.ServeScorrimento(voluta, disponibile)
+        ClientSize = New Size(larghezza, ScalaSchermo.AltezzaSostenibile(voluta, disponibile))
 
     End Sub
 

@@ -24,6 +24,8 @@ Partial Class PannelloDocumenti
         Me.pnlOpzioni = New System.Windows.Forms.Panel()
         Me.lblLingua = New System.Windows.Forms.Label()
         Me.cmbLingua = New System.Windows.Forms.ComboBox()
+        Me.lblEsporta = New System.Windows.Forms.Label()
+        Me.cmbEsporta = New System.Windows.Forms.ComboBox()
         Me.lblDocumento = New System.Windows.Forms.Label()
         Me.pnlCorniceDocumento = New System.Windows.Forms.Panel()
         Me.cmbDocumento = New System.Windows.Forms.ComboBox()
@@ -109,6 +111,8 @@ Partial Class PannelloDocumenti
         Me.pnlOpzioni.Controls.Add(Me.pnlCorniceDocumento)
         Me.pnlOpzioni.Controls.Add(Me.lblLingua)
         Me.pnlOpzioni.Controls.Add(Me.cmbLingua)
+        Me.pnlOpzioni.Controls.Add(Me.lblEsporta)
+        Me.pnlOpzioni.Controls.Add(Me.cmbEsporta)
         Me.pnlOpzioni.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlOpzioni.Location = New System.Drawing.Point(14, 74)
         Me.pnlOpzioni.Name = "pnlOpzioni"
@@ -137,6 +141,30 @@ Partial Class PannelloDocumenti
         Me.cmbLingua.Name = "cmbLingua"
         Me.cmbLingua.Size = New System.Drawing.Size(140, 23)
         Me.cmbLingua.TabIndex = 1
+        '
+        'lblEsporta
+        '
+        Me.lblEsporta.Font = StileApp.FontTesto
+        Me.lblEsporta.ForeColor = StileApp.TestoPrimario
+        Me.lblEsporta.Location = New System.Drawing.Point(768, 14)
+        Me.lblEsporta.Name = "lblEsporta"
+        Me.lblEsporta.Size = New System.Drawing.Size(64, 20)
+        Me.lblEsporta.TabIndex = 2
+        Me.lblEsporta.Text = "Esporta:"
+        '
+        'cmbEsporta
+        '
+        ' Quali documenti finiscono nei file (R8, 2026-08-23): prima l'esportazione era in
+        ' blocco e chi voleva il solo CV si ritrovava accanto anche la lettera. L'ordine
+        ' delle voci conta — è quello che «DocumentiDaTendina» legge — e la prima è quella
+        ' di sempre, così chi non tocca niente ottiene quel che otteneva prima.
+        Me.cmbEsporta.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbEsporta.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.cmbEsporta.Items.AddRange(New Object() {"CV e lettera", "Solo il CV", "Solo la lettera"})
+        Me.cmbEsporta.Location = New System.Drawing.Point(836, 12)
+        Me.cmbEsporta.Name = "cmbEsporta"
+        Me.cmbEsporta.Size = New System.Drawing.Size(160, 23)
+        Me.cmbEsporta.TabIndex = 3
         '
         'lblDocumento
         '
@@ -387,6 +415,8 @@ Partial Class PannelloDocumenti
     Friend WithEvents pnlOpzioni As System.Windows.Forms.Panel
     Friend WithEvents lblLingua As System.Windows.Forms.Label
     Friend WithEvents cmbLingua As System.Windows.Forms.ComboBox
+    Friend WithEvents lblEsporta As System.Windows.Forms.Label
+    Friend WithEvents cmbEsporta As System.Windows.Forms.ComboBox
     Friend WithEvents lblDocumento As System.Windows.Forms.Label
     Friend WithEvents pnlCorniceDocumento As System.Windows.Forms.Panel
     Friend WithEvents cmbDocumento As System.Windows.Forms.ComboBox

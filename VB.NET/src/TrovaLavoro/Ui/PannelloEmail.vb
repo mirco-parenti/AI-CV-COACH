@@ -585,7 +585,17 @@ Public Class PannelloEmail
 
         Try
             Process.Start(New ProcessStartInfo(percorso) With {.UseShellExecute = True})
+
+            ' La seconda frase esiste per un difetto che non è nostro ma che l'utente vede
+            ' come nostro (collaudo dal vivo di T9e, 2026-08-23): se il programma di posta
+            ' non era già in esecuzione, Outlook si avvia a freddo e la finestra del
+            ' messaggio resta grigia; chiudendola e ripremendo, funziona subito. Non si può
+            ' prevedere prima — cercare per nome quale programma sia, e se sia già vivo, è
+            ' fragile quanto i portali per selettore (R5) — quindi non si indovina: si
+            ' avverte, e chi non ne ha bisogno legge una riga in più.
             Racconta("Messaggio preparato e aperto nel tuo programma di posta. " &
+                     "Se non era già aperto può metterci qualche secondo, e la prima " &
+                     "finestra a volte resta vuota: in quel caso chiudila e premi di nuovo. " &
                      "Quando l'hai spedito, torna qui e dimmelo.", StileApp.TestoSecondario)
 
         Catch ex As Exception When TypeOf ex Is Win32Exception OrElse

@@ -1325,6 +1325,32 @@ Namespace Ui
             Return Path.Combine(Path.GetTempPath(), "pool-inesistente")
         End Function
 
+        ' --- La tendina «Esporta:» (R8, 2026-08-23) --------------------------------------
+
+        <TestMethod>
+        Public Sub LaTendinaDiEsportazioneDiceQuelloCheMostra()
+
+            Assert.AreEqual(DocumentiDaScrivere.Entrambi, PannelloDocumenti.DocumentiDaTendina(0),
+                            "la prima voce è «CV e lettera»")
+            Assert.AreEqual(DocumentiDaScrivere.Cv, PannelloDocumenti.DocumentiDaTendina(1),
+                            "la seconda è «Solo il CV»")
+            Assert.AreEqual(DocumentiDaScrivere.Lettera, PannelloDocumenti.DocumentiDaTendina(2),
+                            "la terza è «Solo la lettera»")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaTendinaSenzaSceltaEsportaTutto()
+
+            ' -1 è quel che risponde una ComboBox su cui nessuno ha ancora scelto: da lì non
+            ' deve uscire «esporta niente», ma il comportamento di sempre.
+            Assert.AreEqual(DocumentiDaScrivere.Entrambi, PannelloDocumenti.DocumentiDaTendina(-1),
+                            "senza scelta si esporta tutto, come prima di R8")
+            Assert.AreEqual(DocumentiDaScrivere.Entrambi, PannelloDocumenti.DocumentiDaTendina(99),
+                            "e un indice che non esiste non inventa una terza via")
+
+        End Sub
+
     End Class
 
 End Namespace

@@ -27,6 +27,34 @@ La non-regressione contro il prototipo (cap. 14, T2) è passata su questa versio
 prompt del confronto costruito dal pool è identico carattere per carattere a quello che
 il prototipo costruisce nel codice.
 
+## Pool 1.13 — 2026-08-23
+
+*In lavorazione durante il quinto tempo di T9e: la versione è stata alzata una volta sola,
+e il pool si risigilla senza cambiarla finché il tempo non è chiuso.*
+
+**Quel che si lascia fuori si dichiara** (`profilo/contatti` 1.3 → 1.4). Il collaudo dal
+vivo ha trovato un buco fra le due regole del prodotto. L'anti-invenzione dice di non
+aggiungere; l'anti-perdita dice di non perdere quel che l'utente dichiara, e per il
+materiale di un *altro* turno c'è il campo `altrove`. Ma la via di un indirizzo non è
+materiale di un altro turno: è di questo, e il prompt chiedeva «una città sola», quindi il
+modello obbediva e la via spariva **senza che nessuno lo dicesse**. Ora c'è un terzo posto,
+`lasciato_fuori`: quel che il turno ha scelto di non tenere, con le parole dell'utente, che
+l'applicazione gli rimette davanti prima di confermare. La scelta di tenere la sola città
+resta — su un CV che va a sconosciuti si scrive la città, non l'indirizzo di casa — ma
+smette di essere silenziosa. *(L'etichetta a video è passata da «Domicilio» a «Città»:
+diceva indirizzo e raccoglieva città, ed era metà del malinteso.)*
+
+**Un accenno scarno resta una voce** (`profilo/esperienze_formali` 1.2 → 1.3). Due difetti
+della stessa famiglia, trovati nello stesso giro. Il primo: «Se la risposta non contiene
+alcuna esperienza di lavoro formale, restituisci una lista vuota» faceva scartare un
+mestiere detto nudo — «ho fatto lo spazzino» — mentre la regola dell'`altrove`, **nello
+stesso prompt**, dice che un accenno vale anche quando è incompleto. La stessa incompletezza
+si teneva se destinata a un altro turno e si buttava se destinata a questo: ora una voce
+incompleta è comunque una voce, e la lista resta vuota solo se di lavoro non si è parlato
+affatto. Il secondo: «ho lavorato in un negozio di pittura» finiva in `ruolo`, con `azienda`
+vuota. Il prompt ora distingue il mestiere dal posto e dice cosa fare quando c'è solo uno
+dei due — un campo vuoto è un dato onesto, un campo riempito con la cosa sbagliata no.
+
 ## Pool 1.12 — 2026-08-19
 
 **Un accenno incompleto non è «niente da raccogliere»** (`profilo/contatti` 1.2 → 1.3).

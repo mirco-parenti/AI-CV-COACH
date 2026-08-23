@@ -188,6 +188,92 @@ Namespace Web
 
         End Sub
 
+        ' --- Riconoscere una pagina-risultati (R5, 2026-08-23) ---------------------------
+
+        ''' <summary>Una lista di annunci: tante righe corte, tutte con le stesse parole.</summary>
+        Private Shared Function ListaDiAnnunci(quanti As Integer) As String
+
+            Dim righe As New List(Of String)
+            For i As Integer = 1 To quanti
+                righe.Add($"Magazziniere addetto al carico {i}")
+                righe.Add("Logistica Bianchi s.r.l. - Sestri Levante")
+                righe.Add($"{i} giorni fa")
+                righe.Add("Candidati")
+            Next
+            Return String.Join(vbLf, righe)
+
+        End Function
+
+        ''' <summary>Un annuncio solo: poche righe, ma con dentro dei paragrafi veri.</summary>
+        Private Shared Function UnAnnuncioSolo() As String
+
+            Dim paragrafo As String =
+                "Cerchiamo un magazziniere da inserire nel nostro reparto logistico con " &
+                "esperienza nella preparazione degli ordini e nella gestione delle scorte, " &
+                "disponibile a lavorare su turni anche nel fine settimana, con buona " &
+                "capacità di organizzazione e attenzione alla sicurezza sul lavoro."
+
+            Return String.Join(vbLf, {
+                "Magazziniere addetto al carico",
+                "Logistica Bianchi s.r.l. - Sestri Levante",
+                "2 giorni fa",
+                "Descrizione del posto",
+                paragrafo,
+                "Che cosa chiediamo",
+                paragrafo,
+                "Che cosa offriamo",
+                paragrafo,
+                "Candidati"})
+
+        End Function
+
+        <TestMethod>
+        Public Sub UnaListaDiAnnunciSiRiconosce()
+
+            Assert.IsTrue(LettorePagina.SembraUnaPaginaDiRisultati(ListaDiAnnunci(30)),
+                          "trenta voci con «Candidati» e «giorni fa» a ogni riga sono una lista")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnAnnuncioSoloNonSiScambiaPerUnaLista()
+
+            Assert.IsFalse(LettorePagina.SembraUnaPaginaDiRisultati(UnAnnuncioSolo()),
+                           "qui il falso allarme è il danno peggiore: fermerebbe chi ha ragione")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnAnnuncioLungoEArticolatoNonSiScambiaPerUnaLista()
+
+            ' Il caso che fa più paura: un annuncio ricco, con molte righe di elenco
+            ' («richiediamo: …») e le stesse parole di servizio di un portale.
+            Dim righe As New List(Of String) From {"Candidati", "3 giorni fa", "Offerte di lavoro"}
+            For i As Integer = 1 To 45
+                righe.Add($"requisito numero {i} richiesto per la posizione")
+            Next
+            righe.Add("Cerchiamo una persona motivata da inserire nel nostro organico con " &
+                      "esperienza pregressa nel settore della logistica e della gestione " &
+                      "del magazzino, disponibile fin da subito e con voglia di crescere " &
+                      "insieme a noi in un ambiente giovane e dinamico e collaborativo.")
+
+            Assert.IsFalse(LettorePagina.SembraUnaPaginaDiRisultati(String.Join(vbLf, righe)),
+                           "le spie da sole non bastano: senza la ripetizione non è una lista")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnTestoCortoNonSiGiudicaAffatto()
+
+            Assert.IsFalse(LettorePagina.SembraUnaPaginaDiRisultati(ListaDiAnnunci(3)),
+                           "su poche righe non c'è abbastanza per dire niente, e nel dubbio si tace")
+            Assert.IsFalse(LettorePagina.SembraUnaPaginaDiRisultati(""),
+                           "e il vuoto non è una lista")
+            Assert.IsFalse(LettorePagina.SembraUnaPaginaDiRisultati(Nothing),
+                           "né lo è il niente")
+
+        End Sub
+
     End Class
 
 End Namespace

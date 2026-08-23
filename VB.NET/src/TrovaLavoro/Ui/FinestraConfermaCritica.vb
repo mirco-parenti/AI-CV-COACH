@@ -101,7 +101,11 @@ Public Class FinestraConfermaCritica
     Private Sub Disponi()
 
         Dim sinistra As Integer = StileApp.MargineRiquadro
-        Dim larghezzaUtile As Integer = LarghezzaFinestra - 2 * StileApp.MargineRiquadro
+        ' La larghezza di progetto in pixel veri: dichiararla cruda stringeva la finestra
+        ' di un terzo mentre i testi dentro crescevano col DPI, e a mandare a capo il
+        ' doppio delle righe era proprio questo (decisione 15.7).
+        Dim larghezza As Integer = ScalaSchermo.InPixelDelloSchermo(LarghezzaFinestra, Me.DeviceDpi)
+        Dim larghezzaUtile As Integer = larghezza - 2 * StileApp.MargineRiquadro
 
         lblSpiegazione.MaximumSize = New Size(larghezzaUtile, 0)
         lblRichiesta.MaximumSize = New Size(larghezzaUtile, 0)
@@ -114,10 +118,21 @@ Public Class FinestraConfermaCritica
         ' I bottoni in fondo a destra, con l'annulla più a destra di quello che esegue:
         ' il posto d'onore va alla via d'uscita, non all'azione che non si disfa.
         Dim riga As Integer = txtParola.Bottom + StileApp.MargineRiquadro
-        btnAnnulla.Location = New Point(LarghezzaFinestra - StileApp.MargineRiquadro - btnAnnulla.Width, riga)
+        btnAnnulla.Location = New Point(larghezza - StileApp.MargineRiquadro - btnAnnulla.Width, riga)
         btnAzione.Location = New Point(btnAnnulla.Left - StileApp.DistanzaControlli - btnAzione.Width, riga)
 
-        ClientSize = New Size(LarghezzaFinestra, btnAnnulla.Bottom + StileApp.MargineRiquadro)
+        ' Un tetto sullo spazio che c'è, e lo scorrimento per quel che non ci sta: le due
+        ' cose insieme, perché il tetto da solo taglierebbe e lo scorrimento da solo
+        ' lascerebbe la finestra fuori schermo. Senza, a 150% questa finestra si dimensionava
+        ' sul proprio contenuto e il sistema la troncava: quel che restava fuori cadeva fuori
+        ' dalla <i>finestra</i>, non dallo schermo, e nessuno spostamento lo recuperava
+        ' (cap. 03.4, decisione 15.7).
+        Dim voluta As Integer = btnAnnulla.Bottom + StileApp.MargineRiquadro
+        Dim disponibile As Integer = ScalaSchermo.SpazioClienteDisponibile(
+            Screen.FromControl(Me).WorkingArea.Height, Me.Height - Me.ClientSize.Height)
+
+        Me.AutoScroll = ScalaSchermo.ServeScorrimento(voluta, disponibile)
+        ClientSize = New Size(larghezza, ScalaSchermo.AltezzaSostenibile(voluta, disponibile))
 
     End Sub
 

@@ -11,6 +11,21 @@ Namespace Documenti
     ''' d'esportazione (cap. 03.6): l'utente che vuole solo il PDF non deve ritrovarsi
     ''' anche un DOCX che non ha chiesto.
     ''' </summary>
+    ''' <summary>
+    ''' Quali documenti di una candidatura si vogliono. Gemello di
+    ''' <see cref="FormatiDocumento"/>, e nato dalla stessa ragione un anno dopo: chi vuole
+    ''' esportare il solo 🎯 CV-2 non deve ritrovarsi accanto anche la lettera. Fino al
+    ''' 2026-08-23 l'esportazione era in blocco e non si poteva scegliere.
+    ''' </summary>
+    Public Enum DocumentiDaScrivere
+        ''' <summary>Il solo CV mirato.</summary>
+        Cv
+        ''' <summary>La sola lettera di presentazione.</summary>
+        Lettera
+        ''' <summary>Tutti e due, il CV per primo.</summary>
+        Entrambi
+    End Enum
+
     Public Enum FormatiDocumento
         ''' <summary>Il solo <c>.docx</c>.</summary>
         Docx
@@ -102,7 +117,8 @@ Namespace Documenti
         ''' <param name="opportunita">La candidatura, già salvata su disco.</param>
         ''' <param name="formati">Quali file scrivere; tutti e due, se non si dice.</param>
         Public Function ScriviCandidaturaAsync(opportunita As Opportunita,
-                                               Optional formati As FormatiDocumento = FormatiDocumento.Entrambi) _
+                                               Optional formati As FormatiDocumento = FormatiDocumento.Entrambi,
+                                               Optional quali As DocumentiDaScrivere = DocumentiDaScrivere.Entrambi) _
                                                As Task(Of IReadOnlyList(Of String))
 
             If opportunita Is Nothing Then Throw New ArgumentNullException(NameOf(opportunita))
@@ -114,13 +130,13 @@ Namespace Documenti
             ' «Formazione» dentro (cap. 10.4, cap. 05.6).
             Dim lingua As String = LinguaDocumenti.PerDocumenti(opportunita.Lingua)
 
-            If opportunita.Cv IsNot Nothing Then
+            If opportunita.Cv IsNot Nothing AndAlso quali <> DocumentiDaScrivere.Lettera Then
                 Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(opportunita.Cv, lingua)
                 lavori.Add(New Lavoro(pagina, NomiDocumenti.Cv(
                     DiChiE(pagina), opportunita.Azienda, opportunita.Creata, lingua)))
             End If
 
-            If opportunita.Lettera IsNot Nothing Then
+            If opportunita.Lettera IsNot Nothing AndAlso quali <> DocumentiDaScrivere.Cv Then
                 lavori.Add(New Lavoro(
                     Impaginazione.PaginaLettera(opportunita.Lettera, lingua),
                     NomiDocumenti.Lettera(opportunita.Azienda, opportunita.Creata, lingua)))

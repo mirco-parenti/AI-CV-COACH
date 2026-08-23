@@ -2,6 +2,7 @@ Imports System.Linq
 Imports System.Threading.Tasks
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro.Ai
+Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Motore
 
 Namespace Motore
@@ -902,6 +903,68 @@ Namespace Motore
         Private Shared Function UltimaMossaAsync(dialogo As DialogoProfilo) As Task(Of Mossa)
             Return dialogo.ScegliAsync(Scelte.Procedi)
         End Function
+
+        ' --- Quel che sparisce correggendo un turno singolo (R2, 2026-08-23) -------------
+
+        <TestMethod>
+        Public Sub CorreggendoUnSoloRecapitoGliAltriRisultanoInPartenza()
+
+            ' Il caso vero del collaudo dal vivo: erano confermati email e telefono, si
+            ' corregge dando la sola città, e il turno sostituisce il blocco intero.
+            Dim prima As New List(Of String) From {"Email: anna@esempio.it", "Telefono: 333 0000000"}
+            Dim dopo As New List(Of String) From {"Domicilio: Genova"}
+
+            Dim perduti As List(Of String) = DialogoProfilo.CampiCheSpariscono(prima, dopo)
+
+            Assert.AreEqual(2, perduti.Count, "spariscono tutti e due, e vanno detti")
+            CollectionAssert.AreEquivalent(prima, perduti, "sono proprio quelli di prima")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnCampoRidettoDiversoNonEUnaPerdita()
+
+            Dim prima As New List(Of String) From {"Email: vecchia@esempio.it", "Telefono: 333 0000000"}
+            Dim dopo As New List(Of String) From {"Email: nuova@esempio.it", "Telefono: 333 0000000"}
+
+            Assert.AreEqual(0, DialogoProfilo.CampiCheSpariscono(prima, dopo).Count,
+                            "cambiare un valore è una correzione voluta, non una perdita")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub AlPrimoGiroNonSparisceNienteEIlDialogoTace()
+
+            Assert.AreEqual(0, DialogoProfilo.CampiCheSpariscono(New List(Of String)(), 
+                                                                 New List(Of String) From {"Email: a@b.it"}).Count,
+                            "senza niente di confermato prima, non c'è niente da avvisare")
+            Assert.AreEqual(0, DialogoProfilo.CampiCheSpariscono(Nothing, Nothing).Count,
+                            "e un profilo mai toccato non fa saltare il conto")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub RispondendoAVuotoSparisceTuttoQuelCheCera()
+
+            Dim prima As New List(Of String) From {"Email: anna@esempio.it", "Telefono: 333 0000000"}
+
+            Assert.AreEqual(2, DialogoProfilo.CampiCheSpariscono(prima, New List(Of String)()).Count,
+                            "una risposta che non contiene recapiti li porta via tutti")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LeRigheDeiRecapitiSaltanoIVuotiETengonoLOrdine()
+
+            Dim righe As List(Of String) = DialogoProfilo.RigheDeiContatti(
+                New ContattiProfilo With {.Email = "anna@esempio.it", .Citta = "Genova"})
+
+            CollectionAssert.AreEqual(New List(Of String) From {"Email: anna@esempio.it", "Città: Genova"},
+                                      righe, "solo i campi pieni, nell'ordine di sempre")
+            Assert.AreEqual(0, DialogoProfilo.RigheDeiContatti(Nothing).Count,
+                            "e senza contatti non si inventa una riga")
+
+        End Sub
 
     End Class
 

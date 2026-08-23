@@ -448,7 +448,7 @@ Namespace Motore
             Select Case turno.Tipo
 
                 Case TipoTurno.Singolo
-                    DiciCosaHoCapito(mossa, turno, frammento)
+                    DiciCosaHoCapito(mossa, turno, frammento, Profilo)
                     _attesa = Attesa.ConfermaSingolo
                     Return DueScelte(mossa, "Sì, è giusto", Scelte.Conferma, "Correggi", Scelte.Correggi)
 
@@ -512,8 +512,16 @@ Namespace Motore
 
         ' --- Turni singoli: nome, contatti, patente ---------------------------------
 
-        ''' <summary>Il «ho capito questo» dei turni singoli, con le parole del prototipo.</summary>
-        Private Shared Sub DiciCosaHoCapito(mossa As Mossa, turno As Turno, frammento As JsonObject)
+        ''' <summary>
+        ''' Il «ho capito questo» dei turni singoli, con le parole del prototipo — più, dal
+        ''' 2026-08-23, quel che <b>sparisce</b> confermando. I turni singoli sostituiscono il
+        ''' blocco intero (v. <see cref="Unisci"/>), quindi un campo già confermato e non
+        ''' ripetuto se ne va: prima lo faceva in silenzio, e chi correggeva la sola via
+        ''' perdeva email e telefono senza che nessuno glielo dicesse. Si continua a
+        ''' sostituire — è la regola che l'utente può prevedere — ma non più di nascosto.
+        ''' </summary>
+        Private Shared Sub DiciCosaHoCapito(mossa As Mossa, turno As Turno, frammento As JsonObject,
+                                            adesso As Profilo)
 
             Select Case turno.Chiave
 
@@ -526,17 +534,35 @@ Namespace Motore
                                        "Non ho colto un nome nella tua risposta."))
 
                 Case Contatti
-                    Dim c As JsonObject = TryCast(frammento(Contatti), JsonObject)
-                    Dim righe As New List(Of String)
-                    If c IsNot Nothing Then
-                        If Testo(c, "email") <> "" Then righe.Add("Email: " & Testo(c, "email"))
-                        If Testo(c, "telefono") <> "" Then righe.Add("Telefono: " & Testo(c, "telefono"))
-                        If Testo(c, "citta") <> "" Then righe.Add("Domicilio: " & Testo(c, "citta"))
-                        If Testo(c, "link") <> "" Then righe.Add("Link: " & Testo(c, "link"))
-                    End If
+                    Dim righe As List(Of String) = RigheDeiContatti(Dati.Profilo.DaJson(frammento).Contatti)
                     mossa.Detto.Add(If(righe.Count > 0,
                                        "Ecco cosa ho capito:" & vbLf & String.Join(vbLf, righe),
                                        "Non ho colto nessun recapito nella tua risposta."))
+
+                    Dim perduti As List(Of String) =
+                        CampiCheSpariscono(RigheDeiContatti(adesso?.Contatti), righe)
+                    If perduti.Count > 0 Then
+                        mossa.Detto.Add(
+                            "Attenzione: questi me li avevi già dati, e confermando spariscono, " &
+                            "perché in questa risposta non ci sono:" & vbLf &
+                            String.Join(vbLf, perduti) & vbLf &
+                            "Se li vuoi tenere, scegli «Correggi» e ridimmeli insieme al resto.")
+                    End If
+
+                    ' Il secondo «lasciato fuori» del dialogo, e va tenuto distinto dal primo.
+                    ' Quello di AltroveLasciatoFuori è materiale di ALTRI turni che nessuna
+                    ' sezione ha saputo accogliere: lì si lascia fuori per resa. Questo è
+                    ' materiale di QUESTO turno che il turno sceglie di non tenere — la via e il
+                    ' civico di un indirizzo — e si lascia fuori di proposito. Le due ragioni
+                    ' sono opposte, il vocabolario verso l'utente è lo stesso, e la frase dice
+                    ' quale delle due è: né l'una né l'altra sparisce in silenzio.
+                    Dim nonTenuto As String = Testo(frammento, "lasciato_fuori")
+                    If nonTenuto <> "" Then
+                        mossa.Detto.Add(
+                            $"Questo l'ho lasciato fuori di proposito: «{nonTenuto}». Su un CV si " &
+                            "scrive la città e non l'indirizzo di casa, perché finisce in mano a " &
+                            "sconosciuti. Se per te conta, scegli «Correggi» e dimmelo.")
+                    End If
 
                 Case Else ' patente
                     Dim p As Profilo = Dati.Profilo.DaJson(frammento)
@@ -551,9 +577,65 @@ Namespace Motore
                     End If
                     mossa.Detto.Add("Ecco cosa ho capito:" & vbLf & "Patente: " & detto)
 
+                    ' Confermando, una patente non colta vale «no» (v. Unisci): è la scelta del
+                    ' prototipo e resta, ma chi l'aveva già dichiarata deve vederselo dire —
+                    ' la patente è spesso il requisito eliminatorio di un annuncio.
+                    If adesso IsNot Nothing AndAlso adesso.Patente.Ha = "sì" AndAlso p.Patente.Ha <> "sì" Then
+                        mossa.Detto.Add(
+                            "Attenzione: mi avevi detto di avere la patente" &
+                            If(adesso.Patente.Categorie.Count > 0,
+                               $" ({String.Join(", ", adesso.Patente.Categorie)})", "") &
+                            ", e confermando questa risposta risulterai senza. " &
+                            "Se non è quello che vuoi, scegli «Correggi».")
+                    End If
+
             End Select
 
         End Sub
+
+        ''' <summary>
+        ''' Le righe con cui si mostrano i recapiti, saltando i vuoti. Sta in un posto solo
+        ''' perché servono due volte: per dire cosa si è capito e per dire cosa sparisce, e
+        ''' due elenchi costruiti separatamente divergerebbero al primo campo aggiunto.
+        ''' </summary>
+        Public Shared Function RigheDeiContatti(c As ContattiProfilo) As List(Of String)
+
+            Dim righe As New List(Of String)
+            If c Is Nothing Then Return righe
+
+            If c.Email <> "" Then righe.Add("Email: " & c.Email)
+            If c.Telefono <> "" Then righe.Add("Telefono: " & c.Telefono)
+            If c.Citta <> "" Then righe.Add("Città: " & c.Citta)
+            If c.Link <> "" Then righe.Add("Link: " & c.Link)
+
+            Return righe
+
+        End Function
+
+        ''' <summary>
+        ''' Quali righe già confermate se ne andrebbero, se al posto delle vecchie si
+        ''' mettessero le nuove. Il confronto è sull'<b>etichetta</b> e non sul valore: un
+        ''' campo ridetto diverso è una correzione voluta, un campo non ridetto è una perdita.
+        ''' </summary>
+        Public Shared Function CampiCheSpariscono(prima As List(Of String),
+                                                  dopo As List(Of String)) As List(Of String)
+
+            If prima Is Nothing OrElse prima.Count = 0 Then Return New List(Of String)
+
+            Dim restano As New HashSet(Of String)(
+                If(dopo, New List(Of String)).Select(Function(r) EtichettaDi(r)))
+
+            Return prima.Where(Function(r) Not restano.Contains(EtichettaDi(r))).ToList()
+
+        End Function
+
+        ''' <summary>La parte di riga prima dei due punti: «Email: a@b» -> «Email».</summary>
+        Private Shared Function EtichettaDi(riga As String) As String
+
+            Dim taglio As Integer = If(riga, "").IndexOf(":"c)
+            Return If(taglio < 0, If(riga, ""), riga.Substring(0, taglio))
+
+        End Function
 
         Private Async Function ScegliSuSingoloAsync(scelta As String, annulla As CancellationToken) As Task(Of Mossa)
 
@@ -646,7 +728,7 @@ Namespace Motore
             End Try
 
             _frammento = If(frammento, New JsonObject())
-            DiciCosaHoCapito(mossa, turno, _frammento)
+            DiciCosaHoCapito(mossa, turno, _frammento, Profilo)
             _attesa = Attesa.ConfermaSingolo
             Return DueScelte(mossa, "Sì, è giusto", Scelte.Conferma, "Correggi", Scelte.Correggi)
 

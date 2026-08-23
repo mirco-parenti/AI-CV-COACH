@@ -136,6 +136,23 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   un attrezzo indipendente: per il giro B sono bastati quattro script PowerShell
   usa-e-getta che chiamano `SetProcessDPIAware()` e leggono i rettangoli da UI Automation.
 
+- **A DPI alto `clic` dichiara «Premuto» senza aver premuto.** *(2026-08-23, il quinto tempo
+  di T9e.)* È la sorella cattiva della voce qui sopra, e va saputa prima di fidarsi di un
+  esito. Con lo schermo al 150%, `clic` su «Svuota i dati di navigazione» ha risposto
+  **«Premuto »** — e non era successo niente: nessuna finestra di conferma, nessun file
+  toccato. Non è la trappola nota del clic che finisce a chi ha il fuoco: quella si vede,
+  perché qualcos'altro reagisce. Qui lo strumento **riferisce un successo che non c'è stato**,
+  e chi legge la risposta annota «bottone premuto, non succede nulla» — cioè un difetto del
+  prodotto che il prodotto non ha. Ci si è arrivati solo perché la conferma attesa non
+  compariva; se il bottone non avesse avuto una conferma, il falso reperto sarebbe finito nel
+  registro. **Come si fa invece**: si trova il bottone con UI Automation da un processo
+  dichiarato DPI-aware, si porta davanti la sua finestra, si calcola il **centro** del suo
+  rettangolo e si clicca lì con `SetCursorPos` + `mouse_event`. Così il bottone è stato premuto
+  al primo colpo. Alla conferma, invece, `rispondi_finestra` ha risposto benissimo: **legge e
+  preme via UI Automation**, e il DPI non lo tocca. La regola pratica è quella: a DPI diverso
+  da 96, degli attrezzi che muovono il puntatore non ci si fida, di quelli che passano da UI
+  Automation sì.
+
 ## Le trappole già pagate
 
 - **Il primo `clic` su un bottone che apre una finestra non la apre** *(2026-08-21, T9b)*.

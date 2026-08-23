@@ -171,7 +171,15 @@ riporta dove si era (candidatura, profilo o Home).*
   scende fino a **1088,7 px logici**, 61 sotto il minimo dichiarato. In quei 61 px «Modifica
   i testi» e «Prepara email» tornano a incontrarsi a metà strada, per 77×44 px, e il clic
   finisce al bottone sbagliato: è il difetto del 2026-08-14 che rientra da una porta che
-  allora non si guardava. La cura non è ancora scelta (cap. 15.7).
+  allora non si guardava. **Curato lo stesso giorno** (decisione 15.7): il minimo di progetto
+  si rimette in pixel veri nello `Shown`, quando la scalatura automatica ha già detto la sua,
+  e la finestra si ferma dove deve — misurata **1725×900**, che sono i 1150×600 esatti. La
+  sovrapposizione, però, era figlia di un altro numero: la fascia calcolava lo spazio
+  disponibile col vecchio ingombro del logo, credendone **125 px in più** di quelli veri, e
+  concludeva che i due comandi ci stavano su una riga. Dichiarato l'ingombro misurato, va a
+  capo da sé: «Modifica i testi» e «Prepara email» sono tornati distanti 90 px, su righe
+  diverse. Il minimo non è stato alzato — a difendere quei bottoni non erano i 15 px di
+  margine, era il ritorno a capo che non scattava.
 - Finestre secondarie (Impostazioni, Primo avvio, Anteprima file, Informazioni su…):
   dialoghi a bordo fisso, sfondo bianco, titolo Segoe UI 14 Bold in `RossoTitoli`.
   *Il «Primo avvio» di questo elenco non è mai nato come finestra a sé: a T6 si è ridotto
@@ -240,7 +248,15 @@ riporta dove si era (candidatura, profilo o Home).*
   lavoro alta 1008: restano fuori «Apri modelli.json», «Backup…», «Svuota i dati di
   navigazione», «ELIMINA TUTTI I DATI» e perfino il bottone «Chiudi», e non è un problema di
   posizione — quei comandi cadono **fuori dalla finestra**, non solo fuori dallo schermo,
-  quindi nessuno spostamento li recupera. La cura non è ancora scelta (cap. 15.7).
+  quindi nessuno spostamento li recupera. **Curata lo stesso giorno** (decisione 15.7), in tre
+  mosse che vanno insieme: la larghezza dichiarata passa in pixel veri — cruda stringeva la
+  finestra di un terzo mentre i testi dentro crescevano col DPI, ed era lì che nasceva metà
+  dell'altezza di troppo — un tetto la ferma sull'area di lavoro, e l'`AutoScroll` rende
+  raggiungibile quel che resta sotto. Misurata **1012×1008**, con «Backup…», «Svuota i dati di
+  navigazione», «ELIMINA TUTTI I DATI» e «Chiudi» raggiungibili scorrendo. La stessa riga
+  viveva identica in altre **tre** finestre — Backup, ChiaveApi, ConfermaCritica — e sono state
+  curate tutte, non solo quella caduta: la ChiaveApi è quella che al primo avvio compare prima
+  della finestra principale, e troncata lì non si sarebbe potuta inserire la chiave.
 
 ## 3.5 Il pannello del logo (in basso a sinistra)
 
@@ -275,8 +291,10 @@ sinistra della finestra principale:
   di T9e, 2026-08-23)**: a 150% misura **373×360**, e la differenza **sfonda nell'area
   viva** — copre due righe della coda in P1, l'angolo basso-sinistro della casella
   «Annuncio» in P6, e 71 px del bottone di sinistra in entrambi i pannelli. Nessuno dei 995
-  collaudi verdi poteva vederlo: a 96 DPI quei numeri sono giusti. La cura non è ancora
-  scelta (cap. 15.7).
+  collaudi verdi poteva vederlo: a 96 DPI quei numeri sono giusti. **Curato lo stesso giorno**
+  (decisione 15.7): l'ingombro non si dichiara più ripetendo le costanti, si **misura** sul
+  pannello vero, a ogni ridimensionamento. Una costante che copia un valore già posseduto dal
+  runtime è destinata a divergere da lui, e a DPI alti divergeva di 112 px in larghezza.
 - La riga versione mostra **due numeri**: la versione dell'applicazione e la versione
   della **libreria prompt** caricata (cap. 04), separate dal punto mediano « · ».
   Il numero di pool dichiara anche sorgente e stato: `Pool 1.03` (cartella esterna),
@@ -289,7 +307,11 @@ sinistra della finestra principale:
   `ClientSize.Width`, che è in pixel fisici, con un numero pensato a 96 DPI, e servirebbero
   900 px logici per farla scattare — meno del minimo che la finestra concede. È codice morto
   a DPI alti, ed è il motivo per cui il pannello resta grande proprio quando lo spazio
-  manca. La cura non è ancora scelta (cap. 15.7).
+  manca. **Curata lo stesso giorno** (decisione 15.7): la soglia si confronta in unità di
+  progetto e non in pixel dello schermo. La conseguenza è voluta ed è visibile a occhio: su uno
+  schermo 1920 al 150% la finestra massimizzata vale 1280 unità, quindi la compatta **scatta
+  sempre** — ed è giusto che scatti, perché a quella scala lo spazio per il contenuto è quello
+  di uno schermo 1280.
 - Il logo è lo **scudo di Aviolab AI** e vive **in forma binaria dentro il sorgente**
   (PNG 256×256 codificato Base64 in `LogoAviolab.vb`): nel repository e accanto all'exe
   non esiste nessun file immagine. *(Deciso 2026-08-06 in T1 — cap. 15, voce 4.)*

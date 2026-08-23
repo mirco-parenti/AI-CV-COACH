@@ -161,32 +161,9 @@ in «Chiuse».*
 *La voce sul bottone «⚙ Impostazioni» premibile durante una chiamata all'AI è stata chiusa il
 2026-08-22 col primo tempo di T9d, ed è in «Chiuse»; le due qui sotto restano aperte.*
 
-- **La finestra non è stata vista su uno schermo piccolo.** È alta quanto le serve — le
-  sezioni si dispongono in fila, e i testi cambiano lunghezza con quel che c'è nella
-  cartella dati — e sulla macchina di sviluppo ci sta comoda. Su un portatile a 768 px di
-  altezza, o al 150% di scala, no: e la finestra è a misura fissa, senza scorrimento.
-  **Verificato il 2026-08-23** (collaudo dal vivo di T9e, giro B): era il timore giusto, ed
-  è andata peggio del previsto — **metà finestra è irraggiungibile**, ed è il reperto più
-  grave del giro. `FinestraImpostazioni.vb:574` la dimensiona sul **contenuto** senza
-  guardare quanto schermo ci sia, e in tutta la finestra non c'è **nessun `AutoScroll`**:
-  il sistema la tronca a 682×1106 (il suo massimo) mentre il contenuto arriva a y=1384, su
-  un'area di lavoro alta 1008. Restano fuori «Apri modelli.json», **«Backup…»**, **«Svuota
-  i dati di navigazione»**, **«ELIMINA TUTTI I DATI»** e il bottone **«Chiudi»** — e cadono
-  fuori dalla **finestra**, non solo fuori dallo schermo, quindi nessuno spostamento li
-  recupera. La voce resta aperta perché la cura non c'è ancora: serve un tetto sull'area di
-  lavoro **e** uno scorrimento, le due cose insieme, ed è nel **quinto tempo di T9e**.
-  *(cap. 03.4 e 15.7.)*
-- **«Svuota i dati di navigazione» non è stato premuto dal vivo.** Il giro di prova non è
-  mai passato dalla ricerca annunci, quindi una cartella `webview2\` non è mai esistita e
-  il bottone è rimasto spento — correttamente, ma non provato. Il banco lo copre; a
-  mancare è la prova che il browser incorporato **lasci davvero cancellare** i suoi file,
-  che è esattamente il caso che il codice prevede e spiega. Serve un giro che apra P3
-  prima. **Ritentato il 2026-08-23** (collaudo dal vivo di T9e, giro B) e **non riuscito per
-  una ragione nuova**: la cartella `webview2\` finalmente esiste, quindi il bottone sarebbe
-  acceso, ma a 150% è **irraggiungibile** per il difetto della voce qui sopra — sta a y=1211
-  dentro una finestra alta 1106, cioè fuori *finestra*, non fuori *schermo*. **Deciso con
-  Mirco**: si preme nel **quinto tempo, a 150%, subito dopo la cura di quel difetto**, così
-  la stessa prova chiude questo debito e verifica la cura appena fatta. *(cap. 11.5.)*
+*Le due voci sui DPI — la finestra mai vista su uno schermo piccolo e «Svuota i dati di
+navigazione» mai premuto — sono state **chiuse il 2026-08-23** dal quinto tempo di T9e e
+stanno in «Chiuse»: la prima curata, la seconda provata proprio grazie alla cura della prima.*
 
 ## Da T9d — la rifinitura (2026-08-22, alla chiusura)
 
@@ -214,24 +191,115 @@ e la riserva si dichiara qui invece di lasciarla implicita (regola 15).*
 
 ## Da revisione adversariale (2026-08-09)
 
-- **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:
+*L'unica voce rimasta — il pannello del logo a DPI alti — è stata **chiusa il 2026-08-23** dal
+quinto tempo di T9e ed è in «Chiuse». Era aperta da quattordici giorni e aspettava uno schermo
+su cui verificarla.*
+
+## Dal quinto tempo di T9e — le cure dei reperti DPI (2026-08-23)
+
+*Le tre cure sono fatte e verificate dal vivo a 150% (decisione 15.7). Quel che segue è ciò che
+si è deciso di **non** fare adesso, e va scritto per non spacciarlo per finito.*
+
+- **Le costanti di `StileApp` sommate a misure già scalate.** Curati i tre difetti, resta la
+  specie da cui venivano: `MargineRiquadro` (14), `DistanzaControlli` (12), `InterlineaMinima`
+  (8) e le misure dei bottoni sono in unità di progetto, e il codice che dispone a mano le
+  finestre le somma a `.Bottom`, `.Right`, `.ClientSize` — che a runtime sono in pixel dello
+  schermo. Quante siano dipende da come si conta: due censimenti indipendenti dello stesso
+  giorno danno **83 occorrenze su 16 file** e **107 su 14**, quindi l'ordine di grandezza è
+  «oltre ottanta, su una quindicina di file» e il numero esatto non va citato come se fosse
+  una misura. A queste si aggiungono i **10 file** di `Ui/` che non dichiarano
+  `AutoScaleMode` contro i 7 che lo fanno — e la divisione non è fra finestre e pannelli,
+  come verrebbe da dire: `PannelloEmail` sta fra i dieci senza e `FormPrincipale` fra i
+  sette con. Il danno è cosmetico
+  (spaziature compresse a DPI alti, non comandi irraggiungibili); il rischio di toccarle non
+  lo è, perché sarebbe rimettere mano al posizionamento di sedici file e **il banco non ha un
+  solo collaudo di misure d'interfaccia** — una regressione non la vedrebbe nessuno fino al
+  prossimo collaudo dal vivo. Rimandate di proposito, non dimenticate: con `ScalaSchermo` ora
+  esiste il posto dove passerebbero, e le funzioni pure che le renderebbero collaudabili.
+  *(cap. 03.4 e 15.7.)*
+- **Nelle Impostazioni compare una barra di scorrimento orizzontale che non serve.** Curato
+  R11, la finestra scorre come deve in verticale, ma la barra verticale ruba larghezza
+  all'area cliente e fa scattare anche quella orizzontale, che non ha niente da mostrare. È
+  rifinitura, non funzione: tutti i comandi si raggiungono. Si chiude riservando la larghezza
+  della barra quando lo scorrimento si accende. *(cap. 03.4; visto il 2026-08-23 nella
+  verifica della cura.)*
+
+## Chiuse
+
+- ✅ **Il pannello del logo a DPI alti** *(aperta il 2026-08-09 dalla revisione adversariale,
+  misurata il 2026-08-23 dal collaudo dal vivo di T9e, **chiusa lo stesso giorno** dal quinto
+  tempo)*. **Curato.** Le costanti di geometria sono in pixel non scalati:
   a 125/150% di scala — l'impostazione di fabbrica di quasi tutti i portatili recenti — il
   disegno è fuori misura. Difetto vero, ma correggerlo alla cieca rischiava di rompere il
   layout **validato a video** in T3: serviva uno schermo su cui verificare a 150%.
   **Verificato il 2026-08-23** (collaudo dal vivo di T9e, giro B, a 144 DPI di sistema): il
-  sospetto era giusto e la voce resta aperta perché il difetto ora è **provato, non curato**.
+  sospetto era giusto, e per una giornata la voce è rimasta aperta col difetto **provato ma
+  non curato**.
   Il pannello non passa in compatta e resta in modalità piena, sfondando nell'area viva:
   copre due righe della coda in P1 e 71 px di «Apri la candidatura», e in P6 l'angolo
   basso-sinistro della casella «Annuncio» e 71 px di «Torna al profilo». Le cause misurate
-  sono due, tutte e due di unità di misura: la soglia della compatta
-  (`FormPrincipale.vb:856`, `ClientSize.Width < 1350`) confronta pixel **fisici** con un
-  numero pensato a 96 DPI, e l'ingombro dichiarato ai pannelli (261×216,
-  `FormPrincipale.vb:20-21`) è quello di progetto mentre il pannello vero misura 373×360.
+  sono due, tutte e due di unità di misura: la soglia della compatta confrontava pixel
+  **fisici** con un numero pensato a 96 DPI, e l'ingombro dichiarato ai pannelli (261×216)
+  era quello di progetto mentre il pannello vero misurava 373×360. *(I numeri di riga che
+  stavano qui sono stati tolti il 2026-08-23: la cura ha spostato quel codice, e una riga
+  citata che non è più quella inganna chi la va a controllare.)*
   La cura è nel **quinto tempo di T9e**, insieme alle due sorelle qui sotto — sono la stessa
   specie di errore. *(cap. 03.5 e 15.7; segnalato dalla revisione, misurato dal collaudo dal
   vivo di T9e.)*
+  **La cura, e cosa ha insegnato** *(2026-08-23)*: le due cause erano due malattie diverse. La
+  soglia della compatta ora si confronta in **unità di progetto**, e a 150% su 1920 la
+  compatta scatta — misurata **186×160** invece di 373×360, con «Apri la candidatura» che
+  comincia a x=238 mentre il pannello finisce a 197. L'ingombro dichiarato ai pannelli invece
+  non si è convertito: si è **tolto**, perché era una costante che copiava una misura già
+  posseduta dal runtime, e ora si legge il pannello vero a ogni ridimensionamento. Il seguito
+  non era previsto: quello stesso numero sbagliato faceva credere alla fascia dei comandi di
+  avere 125 px in più di spazio, ed è **per questo** che i comandi non andavano a capo e si
+  sovrapponevano al minimo. Un difetto ne teneva in piedi un altro in un punto lontano.
 
-## Chiuse
+- ✅ **La finestra Impostazioni su uno schermo piccolo** *(aperta il 2026-08-21 alla chiusura
+  di T9b, verificata e **chiusa il 2026-08-23** dal quinto tempo di T9e)*. **Curata.** È alta quanto le serve — le
+  sezioni si dispongono in fila, e i testi cambiano lunghezza con quel che c'è nella
+  cartella dati — e sulla macchina di sviluppo ci sta comoda. Su un portatile a 768 px di
+  altezza, o al 150% di scala, no: e la finestra è a misura fissa, senza scorrimento.
+  **Verificato il 2026-08-23** (collaudo dal vivo di T9e, giro B): era il timore giusto, ed
+  è andata peggio del previsto — **metà finestra è irraggiungibile**, ed è il reperto più
+  grave del giro. `FinestraImpostazioni.vb:574` la dimensiona sul **contenuto** senza
+  guardare quanto schermo ci sia, e in tutta la finestra non c'è **nessun `AutoScroll`**:
+  il sistema la tronca a 682×1106 (il suo massimo) mentre il contenuto arriva a y=1384, su
+  un'area di lavoro alta 1008. Restano fuori «Apri modelli.json», **«Backup…»**, **«Svuota
+  i dati di navigazione»**, **«ELIMINA TUTTI I DATI»** e il bottone **«Chiudi»** — e cadono
+  fuori dalla **finestra**, non solo fuori dallo schermo, quindi nessuno spostamento li
+  recupera. Quel che serviva era chiaro fin da subito — un tetto sull'area di lavoro **e**
+  uno scorrimento, le due cose insieme — ed è quel che il quinto tempo ha fatto.
+  *(cap. 03.4 e 15.7.)*
+  **La cura** *(2026-08-23)*: tre mosse che vanno insieme — larghezza dichiarata in pixel veri
+  (cruda stringeva la finestra di un terzo mentre i testi crescevano col DPI, ed era lì che
+  nasceva metà dell'altezza di troppo), un tetto sull'area di lavoro, e l'`AutoScroll` per quel
+  che resta sotto. Misurata **1012×1008** contro i 682×1106 di prima, con ogni comando
+  raggiungibile scorrendo. La stessa riga viveva identica in **altre tre finestre** — Backup,
+  ChiaveApi, ConfermaCritica — curate tutte: la ChiaveApi compare al primo avvio prima della
+  finestra principale, e troncata lì avrebbe impedito di inserire la chiave.
+
+- ✅ **«Svuota i dati di navigazione» premuto dal vivo** *(aperta il 2026-08-21 alla chiusura
+  di T9b, ritentata il 2026-08-23 e **chiusa lo stesso giorno**, subito dopo la cura di R11)*.
+  **Passa.** Il giro di prova non è
+  mai passato dalla ricerca annunci, quindi una cartella `webview2\` non è mai esistita e
+  il bottone è rimasto spento — correttamente, ma non provato. Il banco lo copre; a
+  mancare è la prova che il browser incorporato **lasci davvero cancellare** i suoi file,
+  che è esattamente il caso che il codice prevede e spiega. Serve un giro che apra P3
+  prima. **Ritentato il 2026-08-23** (collaudo dal vivo di T9e, giro B) e **non riuscito per
+  una ragione nuova**: la cartella `webview2\` finalmente esiste, quindi il bottone sarebbe
+  acceso, ma a 150% è **irraggiungibile** per il difetto della voce qui sopra — sta a y=1211
+  dentro una finestra alta 1106, cioè fuori *finestra*, non fuori *schermo*. **Deciso con
+  Mirco**: si preme nel **quinto tempo, a 150%, subito dopo la cura di quel difetto**, così
+  la stessa prova chiude questo debito e verifica la cura appena fatta. *(cap. 11.5.)*
+  **La prova** *(2026-08-23, a 150%)*: curata la finestra, il bottone è tornato raggiungibile
+  scorrendo, la conferma ha spiegato cosa sarebbe sparito, e alla risposta «Sì» i **183 MB** di
+  `webview2\` sono stati cancellati davvero. L'app ha scritto «Dati di navigazione svuotati.» e
+  il bottone **si è spento da sé**, perché non c'era più niente da svuotare. Era il caso che il
+  codice prevedeva e spiegava: il browser incorporato lascia cancellare i suoi file quando la
+  ricerca annunci non è viva. La stessa prova ha chiuso il debito e verificato la cura, che era
+  esattamente il motivo per cui si era deciso di farla qui.
 
 - ✅ **Il confronto ogni tanto salta i giudizi di «contesto»** *(aperta il 2026-08-21 dal
   collaudo di tappa di T8, chiusa il 2026-08-23 dal collaudo dal vivo di T9e, giro C)*. La
@@ -263,6 +331,13 @@ e la riserva si dichiara qui invece di lasciarla implicita (regola 15).*
   minimo vero scende a **1088,7 px logici** — 61 sotto quello di progetto — e in quei 61 px
   la fascia comandi di P6 si accavalla per 77×44 px: il clic su «Prepara email» va a
   «Modifica i testi». *(cap. 03.4 e 15.7; `FormPrincipale.Designer.vb:371`.)*
+  **Curato anche questo il 2026-08-23**, dal quinto tempo, e con una sorpresa: il minimo si
+  rimette in pixel veri dopo la scalatura automatica — misurato **1725×900**, cioè i 1150×600
+  esatti — ma la sovrapposizione non veniva da lì. La fascia calcolava lo spazio disponibile
+  col **vecchio ingombro del logo**, credendone 125 px in più di quelli veri, e concludeva che
+  i comandi ci stavano su una riga sola. Dichiarato l'ingombro misurato, va a capo da sé: i
+  due bottoni sono tornati distanti 90 px, su righe diverse. Un difetto ne teneva in piedi un
+  altro in un punto lontano, ed è il motivo per cui il minimo **non** è stato alzato.
 
 - ✅ **«⚙ Impostazioni» premibile mentre l'AI lavora** *(aperta il 2026-08-21 alla chiusura
   di T9b, chiusa il 2026-08-22 col primo tempo di T9d)*. Il difetto non era un bottone
