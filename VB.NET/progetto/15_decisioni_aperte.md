@@ -127,3 +127,17 @@ Le decisioni che cambiano la proposta originale e vanno riportate negli altri ca
 | 9 | **Invio diretto SMTP fuori** dalla 1.0: cadono pannello server, password di posta cifrata e traduzione degli errori di invio (la protezione dati di Windows resta per la chiave API) | 02, 07, 11, 14 |
 | 10 | Soglia e pesi in **file di taratura**, non nel codice | 02, 11 |
 | — | **Profilo da LinkedIn dentro la 1.0**, dopo T5 | 06, 14 |
+
+## 15.7 Riaperta dal collaudo dal vivo di T9e (2026-08-23)
+
+*Il capitolo era stato dichiarato svuotato al cancello T0 (15.6), e da allora le decisioni
+delle tappe si sono narrate nel cap. 14, dove nascono. Il collaudo dal vivo del quarto tempo
+di T9e ne ha però portata alla luce una che non appartiene a un punto solo: riguarda il modo
+in cui l'interfaccia dichiara le proprie misure, e va presa **prima** di curare i tre difetti
+che l'hanno segnalata. La numerazione riprende da dove si era fermata: le voci **1–13** sono
+quelle del cancello — le tabelle di 15.1 e 15.2 più le tre domande di 15.4 — e questa è la
+**14**.*
+
+| # | Decisione | Le due strade | Esito |
+|---|---|---|---|
+| 14 | **Come curare i difetti di scala a DPI alto**: il pannello del logo che a 150% sfonda nell'area viva, la finestra Impostazioni irraggiungibile per metà, il minimo della finestra principale sceso sotto la soglia di progetto (cap. 14, giro B) | **(a) puntuale** — si aggiusta ciascuno dei tre punti dove fa male. **(b) unità coerenti** — un modo unico di dichiarare le misure dell'interfaccia rispetto al DPI, di cui i tre punti diventano clienti: più lavoro, ma toglie la **specie** di errore invece dei tre esemplari. In entrambi i casi va deciso **come il banco potrà vedere questi difetti**: oggi gira a 96 DPI, dove i numeri sbagliati sono giusti, e nessuno dei 995 collaudi verdi li mostrava. | ⏳ **Aperta**: è il prossimo ragionamento con Mirco, non una decisione presa. |

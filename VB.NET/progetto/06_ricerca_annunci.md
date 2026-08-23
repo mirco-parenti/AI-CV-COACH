@@ -112,6 +112,18 @@ annuncio aperto, il suo testo fa parte della pagina, e la cattura prende quello 
 l'utente sta guardando, che è la cosa giusta. Il disegno prometteva un comportamento
 uniforme che i portali non hanno: qui si corregge la carta, non il territorio.
 
+*E il verdetto va corretto a sua volta (collaudo dal vivo di T9e, 2026-08-23).* Su Indeed la
+cattura **non** prende «quello che l'utente sta guardando»: `LettorePagina` parte da
+`document.body`, quindi insieme al riquadro di destra porta via anche la **lista** di
+sinistra — e su una lista a scorrimento infinito i venticinque passi di scorrimento nel
+frattempo **caricano altri annunci**, così il di più cresce invece di restare fisso. Il
+danno non è il testo in eccesso: è che l'applicazione analizza l'accozzaglia, dà un
+punteggio in stelle e **sembra funzionare**. Chi conosce il programma se ne accorge e apre
+l'annuncio in una finestra a parte; chi lo usa e basta, no. Deciso di riconoscere la
+pagina-lista e fermarsi, e di catturare la **selezione** quando c'è; la scelta del
+sottoalbero più «articolo» per densità di testo resta fuori dalla 1.0, perché cambierebbe
+la cattura su tutti i portali e andrebbe misurata su ciascuno.
+
 Due cose che il programma **non** fa, e sono decisioni:
 - **non indovina** se la pagina sia un elenco. A dirlo è l'analisi, con lo schema vuoto;
   l'unica cosa che si controlla prima è che una pagina da mandare ci sia — sotto un

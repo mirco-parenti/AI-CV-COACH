@@ -126,6 +126,16 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   scrivendo a mano `documenti.json` nella cartella dati e si prova il resto del giro con
   «Fai rileggere la cartella»: è così che T6 è stata collaudata.
 
+- **A DPI alto le fotografie escono virtualizzate.** *(2026-08-23, il giro B del collaudo
+  di T9e.)* `schermata` non si dichiara DPI-aware, e Windows le consegna il desktop già
+  rimpicciolito: con lo schermo al 150% ha reso un PNG di **1295×687** di una finestra che
+  a video misurava **1942×1030** pixel veri. Su un'immagine così un testo un po' sgranato
+  somiglia moltissimo a un testo mal disegnato, e si finisce per annotare difetti che non
+  esistono — o per non vedere quelli che ci sono. Finché non impara a dichiararsi
+  DPI-aware prima di premere il grilletto, a un DPI diverso da 96 le misure si prendono con
+  un attrezzo indipendente: per il giro B sono bastati quattro script PowerShell
+  usa-e-getta che chiamano `SetProcessDPIAware()` e leggono i rettangoli da UI Automation.
+
 ## Le trappole già pagate
 
 - **Il primo `clic` su un bottone che apre una finestra non la apre** *(2026-08-21, T9b)*.
@@ -356,13 +366,16 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   vanificherebbe la prova. L'exe si lancia a mano, con la variabile d'ambiente che si vuole
   (ricordando `WSLENV`) e sempre con `--dati` su una cartella usa-e-getta.
 - **Chiudere per nome ammazza anche il server MCP del prodotto.** *(2026-08-21, dal collaudo
-  di tappa di T8.)* `compila` e `chiudi_app` fanno `taskkill.exe /IM TrovaLavoro.exe /F`:
+  di tappa di T8.)* `compila`, `collaudi` e `chiudi_app` fanno `taskkill.exe /IM TrovaLavoro.exe /F`:
   chiudono per **nome**, non per processo. Da quando esiste il server MCP del **prodotto**
   (cap. 09), un client che ce l'abbia registrato — Claude Code, per dirne uno — tiene in vita
-  un secondo `TrovaLavoro.exe` senza finestra, e quei due attrezzi lo spengono insieme
+  un secondo `TrovaLavoro.exe` senza finestra, e quei tre attrezzi lo spengono insieme
   all'applicazione, facendo cadere il client che stava collaudando. Finché l'attrezzo non
-  impara a scegliere il PID, **non si chiamano `compila` e `chiudi_app` mentre un client
-  esterno parla col server MCP del prodotto**. Per distinguerli: da PowerShell,
+  impara a scegliere il PID, **non si chiamano `compila`, `collaudi` e `chiudi_app` mentre
+  un client esterno parla col server MCP del prodotto**. Dei tre il più insidioso è
+  `collaudi`, perché lo si lancia per abitudine e non sembra un attrezzo che chiude niente:
+  anche il banco ricompila, e per ricompilare deve liberare l'exe. *(Aggiunto `collaudi`
+  il 2026-08-23: fa lo stesso `taskkill` degli altri due, e l'elenco lo dimenticava.)* Per distinguerli: da PowerShell,
   `Get-Process TrovaLavoro | Select Id, StartTime, MainWindowTitle` — il server è quello
   **senza titolo di finestra**; per chiudere solo l'applicazione si usa `CloseMainWindow()`,
   che è la chiusura gentile, non `taskkill /F`.
@@ -384,3 +397,31 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   rileggersi il montaggio del motore: si fa lo stesso gesto dalle due parti e si guardano le
   righe nuove. Nel collaudo di T8 l'analisi dell'annuncio è uscita **identica al token** dalle
   due porte, e quella riga ha dimostrato più di mezza giornata di lettura del codice.
+- **`GetDpiForSystem` risponde 96 a chi non si è dichiarato DPI-aware.** *(2026-08-23, il
+  giro B del collaudo di T9e.)* Portata la scala di Windows al 150% e fatta la
+  disconnessione che serve a farla valere davvero, la prima misura diceva ancora **96** —
+  cioè «la disconnessione non è servita a niente» — ed era falso: quel numero è il valore di
+  compatibilità che il sistema riserva a chi il DPI non lo capisce, e chi misurava non aveva
+  chiamato `SetProcessDPIAware()`. Si rischia di buttare via un collaudo che invece si poteva
+  fare, o di rifare una disconnessione per niente. Le controprove costano un comando e vanno
+  prese **prima** di concludere: `Screen.Bounds` virtualizzato (1280×720 su uno schermo
+  1920×1080) e `LogPixels` nel registro di Windows (144 = 150%).
+- **Il clic a coordinate assolute arriva a chi ha il fuoco, non a chi si è fotografato.**
+  *(2026-08-23, il giro B del collaudo di T9e.)* Le voci di menù e le caselle che UI
+  Automation non pilota (vedi sopra) si premono con un clic vero alle coordinate lette sulla
+  fotografia — ma se fra la fotografia e il clic una console PowerShell passa in primo piano,
+  il clic va **al terminale**, e non lo dice nessuno: l'attrezzo risponde «premuto» e
+  l'applicazione non ha ricevuto niente. È successo davvero, e il punto di collaudo è andato
+  perso in silenzio. Si porta **prima** la finestra dell'applicazione in primo piano, si
+  verifica che ci sia andata (`GetForegroundWindow`), e si clicca in coordinate **relative a
+  lei** — così la stessa prova vale a qualunque posizione della finestra.
+- **Il fattore di scala non è ×1,5, e non è lo stesso nelle due direzioni.** *(2026-08-23, il
+  giro B del collaudo di T9e.)* Con lo schermo al 150% viene naturale calcolare che una
+  misura di progetto diventi il 150% di sé stessa. WinForms però scala con
+  `AutoScaleMode.Font`, cioè sul rapporto fra i font, e i due rapporti sono **diversi**: nel
+  giro B la larghezza è cresciuta ×1,42 e l'altezza ×1,605, così il minimo della finestra
+  principale — 1150×600 di progetto — è diventato 1633×963 pixel veri, che in unità logiche
+  fa **1088,7×642**: più **stretto** del minimo dichiarato. Chi si calcola la soglia attesa
+  moltiplicando per il DPI la sbaglia, e poi crede a un difetto o ne scusa uno vero per il
+  motivo sbagliato. Il fattore si **misura**: si chiede una misura più piccola del minimo e
+  si rilegge il rettangolo che Windows concede.

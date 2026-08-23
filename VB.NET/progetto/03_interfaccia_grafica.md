@@ -165,6 +165,13 @@ riporta dove si era (candidatura, profilo o Home).*
   rimetterci è l'area dei dati, che di spazio ne ha, e non la leggibilità dei comandi. Le
   azioni di **livello 6** restano su una riga tutta loro (v. cap. 11.5): il vuoto intorno è
   la loro prima difesa, e non si baratta per due righe di spazio.
+  *Il rimedio però poggia su un pavimento che a DPI alti non c'è* **(collaudo dal vivo di
+  T9e, 2026-08-23)**: `MinimumSize` viene scalata da `AutoScaleMode.Font` in modo
+  **asimmetrico** — ×1,42 in larghezza contro ×1,605 in altezza — così a 150% la finestra
+  scende fino a **1088,7 px logici**, 61 sotto il minimo dichiarato. In quei 61 px «Modifica
+  i testi» e «Prepara email» tornano a incontrarsi a metà strada, per 77×44 px, e il clic
+  finisce al bottone sbagliato: è il difetto del 2026-08-14 che rientra da una porta che
+  allora non si guardava. La cura non è ancora scelta (cap. 15.7).
 - Finestre secondarie (Impostazioni, Primo avvio, Anteprima file, Informazioni su…):
   dialoghi a bordo fisso, sfondo bianco, titolo Segoe UI 14 Bold in `RossoTitoli`.
   *Il «Primo avvio» di questo elenco non è mai nato come finestra a sé: a T6 si è ridotto
@@ -226,6 +233,14 @@ riporta dove si era (candidatura, profilo o Home).*
   Una cosa l'ha insegnata al banco: su una finestra mai mostrata `PerformClick` non
   scatena niente, quindi ogni azione che valga la pena collaudare deve avere un **metodo
   pubblico** — è la stessa regola che la `FinestraBackup` aveva già scoperto a T9a.
+  *A 150% è risultata la finestra più fragile dell'applicazione* **(collaudo dal vivo di
+  T9e, 2026-08-23, il reperto più grave del giro)**: si dimensiona sul **proprio contenuto**
+  senza guardare quanto schermo ci sia, e non ha **nessun `AutoScroll`**. Il sistema la
+  tronca a 682×1106 — è il suo massimo — mentre il contenuto arriva a y=1384 su un'area di
+  lavoro alta 1008: restano fuori «Apri modelli.json», «Backup…», «Svuota i dati di
+  navigazione», «ELIMINA TUTTI I DATI» e perfino il bottone «Chiudi», e non è un problema di
+  posizione — quei comandi cadono **fuori dalla finestra**, non solo fuori dallo schermo,
+  quindi nessuno spostamento li recupera. La cura non è ancora scelta (cap. 15.7).
 
 ## 3.5 Il pannello del logo (in basso a sinistra)
 
@@ -255,6 +270,13 @@ sinistra della finestra principale:
 - `Panel` di circa **261×216 px**, sfondo `SfondoBase`, ancorato **Bottom+Left**,
   aggiunto al form come elemento flottante sopra la struttura (così sopravvive ai
   ridimensionamenti).
+  *Quelle due misure sono anche l'ingombro che la finestra dichiara ai pannelli
+  (`IPannelloArea`), e a DPI alti non descrivono più il pannello vero* **(collaudo dal vivo
+  di T9e, 2026-08-23)**: a 150% misura **373×360**, e la differenza **sfonda nell'area
+  viva** — copre due righe della coda in P1, l'angolo basso-sinistro della casella
+  «Annuncio» in P6, e 71 px del bottone di sinistra in entrambi i pannelli. Nessuno dei 995
+  collaudi verdi poteva vederlo: a 96 DPI quei numeri sono giusti. La cura non è ancora
+  scelta (cap. 15.7).
 - La riga versione mostra **due numeri**: la versione dell'applicazione e la versione
   della **libreria prompt** caricata (cap. 04), separate dal punto mediano « · ».
   Il numero di pool dichiara anche sorgente e stato: `Pool 1.03` (cartella esterna),
@@ -263,6 +285,11 @@ sinistra della finestra principale:
   totale, e l'app la spiega.
 - **Modalità compatta**: sotto ~1350 px di larghezza restano solo l'immagine (ridotta) e
   la versione, per liberare spazio.
+  *A 150% questa modalità è **irraggiungibile*** **(stesso collaudo)**: la soglia confronta
+  `ClientSize.Width`, che è in pixel fisici, con un numero pensato a 96 DPI, e servirebbero
+  900 px logici per farla scattare — meno del minimo che la finestra concede. È codice morto
+  a DPI alti, ed è il motivo per cui il pannello resta grande proprio quando lo spazio
+  manca. La cura non è ancora scelta (cap. 15.7).
 - Il logo è lo **scudo di Aviolab AI** e vive **in forma binaria dentro il sorgente**
   (PNG 256×256 codificato Base64 in `LogoAviolab.vb`): nel repository e accanto all'exe
   non esiste nessun file immagine. *(Deciso 2026-08-06 in T1 — cap. 15, voce 4.)*

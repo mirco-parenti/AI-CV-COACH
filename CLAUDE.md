@@ -175,9 +175,9 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
 - **Idee/raffinamenti futuri (puntatore)**: il backlog ragionato per le fasi successive
   è in `idee_future.md`.
 - **Cose rimaste indietro (puntatore)**: ciò che è **già nel perimetro** ma aspetta il
-  momento, una macchina o una mano — collaudi su un PC pulito, l'icona dell'exe, il
-  salto di modello — sta in `in_sospeso.md`. Da non confondere con `idee_future.md`:
-  lì un'idea può non farsi mai, qui una voce **va fatta**.
+  momento, una macchina o una mano — il collaudo su un PC pulito, i documenti aperti in
+  Word, i difetti di scala a DPI alti — sta in `in_sospeso.md`. Da non confondere con
+  `idee_future.md`: lì un'idea può non farsi mai, qui una voce **va fatta**.
 - **Lo strumento di collaudo (puntatore)** *(dal 2026-08-10)*: in `strumenti/mcp-collaudi/`
   c'è un server MCP locale con cui **provare l'applicazione vera** — compilarla, far girare
   il banco, avviarla (anche su una **cartella dati usa-e-getta**, dal 2026-08-14),

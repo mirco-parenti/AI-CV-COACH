@@ -948,7 +948,7 @@ volta però una di esse **appese** il banco invece di arrossarlo: l'aiutante che
 riprese ciclava senza fine, e adesso ha un tetto — un collaudo che non termina non è un
 collaudo che passa.
 
-**994 collaudi verdi** (erano 988), più i copioni 10 su 10; versione **0.3.041**, **Pool 1.12
+**995 collaudi verdi** (erano 988), più i copioni 10 su 10; versione **0.3.041**, **Pool 1.12
 invariato**: nessun prompt è stato toccato, la ripresa è tutta codice e testi. Due collaudi
 dell'anti-perdita sono stati adeguati — saltavano dei turni per arrivare in fondo, e ora in
 fondo trovano la domanda — e il conduttore dei collaudi reali ha imparato a declinarla,
@@ -957,8 +957,56 @@ funzione nel prototipo non esiste**, quindi il collaudo di non-regressione non l
 la può coprire (cap. 04.7). È il primo pezzo di dialogo che nasce senza termine di paragone,
 e la sua unica rete è il banco headless — per questo qui le falsificazioni contano doppio.
 
-Con lei T9e diventa di **cinque tempi**: l'identità visiva, la checklist, la ripresa, il
-collaudo generale di Mirco e il rilascio.
+**Il quarto tempo è il collaudo dal vivo** (2026-08-23), condotto da Mirco su quattro giri
+pensati per domande diverse fra loro, come già a T3, T4, T5 e T8. **Nessuna riga di prodotto
+è stata toccata**: qui si guarda, si misura e si annota, e il registro dei reperti vive fuori
+dal repo perché tocca dati reali.
+
+- **Giro A — il dialogo del profilo**, su una cartella dati usa-e-getta. La ripresa delle
+  domande saltate costruita nel terzo tempo funziona dal vivo: la domanda torna una volta
+  sola, prima del riepilogo, chiedendo il permesso. Quattro reperti, tutti da curare: la via
+  del domicilio che sparisce in silenzio, un «Correggi» che azzera i campi non ripetuti —
+  perdita di dati già confermati, il più grave del giro — un ruolo nudo scartato in
+  contraddizione con la regola dell'`altrove`, e un luogo finito nel campo «Ruolo».
+- **Giro C — una candidatura vera, dall'annuncio all'email.** Chiude il debito lasciato dal
+  collaudo di T8 sui giudizi di contesto: cinque su cinque. Con 0,8 stelle, mitigazione
+  onesta e **nessuna riga inventata** in CV mirato e lettera; il `.eml` è corretto fin nelle
+  intestazioni, e il destinatario resta vuoto perché l'annuncio non dava nessuna email — non
+  se l'è inventata. Cinque reperti: due con la cura già decisa nella stessa sessione — la
+  cattura che sulle pagine-risultati prende tutto in silenzio, e il conflitto fra modifica a
+  mano e rigenerazione, che si porta dietro un **bump del Pool** su `lettera.it/en.md` — e tre
+  lasciati al tempo delle cure: la finestra «Modifica i testi» copre la sola prosa, e va
+  deciso dove si tolgono e si riordinano le voci di un singolo documento senza duplicare i
+  fatti che vivono nel profilo; l'**export è in blocco** e scrive tutti i documenti della
+  candidatura insieme, mentre CV e lettera vanno esportabili uno per uno; e il primo
+  «Prepara email» con il programma di posta chiuso mostra una **finestra grigia** finché
+  Outlook non si è scaldato — non è un difetto nostro, ma l'esperienza è rotta e basta una
+  riga di avviso.
+- **Giro B — la scala di Windows al 150%** (notte del 23 agosto; DPI di sistema 144
+  verificato dopo la disconnessione, che è l'unico modo di farla valere davvero). Cinque
+  debiti di `in_sospeso.md` esercitati in una passata sola, senza spendere una chiamata
+  all'AI, e tre reperti: il pannello del logo che sfonda nell'area viva, metà della finestra
+  Impostazioni irraggiungibile — è dimensionata sul contenuto e non ha scorrimento — e la
+  finestra principale che scende sotto il minimo di progetto lasciando accavallati due
+  bottoni della fascia comandi di P6. Il filo che li lega è uno solo: **costanti in pixel di
+  progetto usate dove il DPI le ha già moltiplicate**. Invisibili al 100%, e invisibili al
+  banco, che gira a 96 DPI.
+- **Giro D — l'exe su un PC senza runtime .NET 10 e i due debiti di Word** resta **fuori
+  portata su questa macchina**: qui c'è l'SDK 10 installato e c'è solo LibreOffice. Va fatto
+  altrove, ed è la riserva con cui la tappa si chiuderà (regola 15).
+
+Il quarto tempo non chiude niente da solo: le cure dei **dodici reperti** sono il **quinto
+tempo**, insieme alla **domanda di approfondimento sui campi mancanti**, che il collaudo ha
+promosso dentro la 1.0 in forma minima — una domanda per voce, solo sui campi che pesano nel
+CV, occasione unica. Prima delle tre cure del giro B c'è però una decisione a monte, ancora
+da prendere (cap. 15.7): curarle puntualmente, o dare all'interfaccia un modo unico di
+dichiarare le misure in unità coerenti col DPI — e in entrambi i casi stabilire come il banco
+potrà vederle. **995 collaudi verdi**, versione **0.3.041**, Pool **1.12 invariato**: in
+questo tempo non si è scritta una riga.
+
+Con lei T9e diventa di **sei tempi**: l'identità visiva, la checklist, la ripresa, il
+**collaudo dal vivo**, **le cure dei reperti con la domanda di approfondimento**, e il
+rilascio.
 
 
 ## Ordine e dipendenze

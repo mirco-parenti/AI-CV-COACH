@@ -291,6 +291,19 @@ Idee emerse **collaudando T7b** *(2026-08-18)*: la passata anti-slop provata con
   rifinitura non fallisce quasi mai — ma il giorno che fallisse spesso, oggi non lo si
   vedrebbe. *(2026-08-18 — emersa dal collaudo di T7b; cap. 08.4.)*
 
+Idee emerse dal **collaudo dal vivo di T9e** *(2026-08-23)*: l'applicazione provata a caccia
+di difetti prima della 1.0.
+- **Riconoscere il testo di un annuncio per densità, non portale per portale.** Sulle
+  pagine-risultati la cattura prende lista e dettaglio insieme, in silenzio (reperto R5): per
+  la 1.0 si è deciso di riconoscere quella forma di pagina e di preferire il testo
+  **selezionato** dall'utente quando c'è. Resta fuori la terza via, che è anche la più
+  generale: scegliere il sottoalbero della pagina più «articolo» per densità di testo
+  rispetto ai collegamenti — il principio dietro *Readability*, assimilato e non copiato.
+  Cambierebbe la cattura su **ogni** portale e andrebbe misurata su ciascuno, che è troppo
+  adesso; ma è la cura vera se un domani i portali moltiplicano le pagine che ingannano la
+  lettura di oggi. *(2026-08-23 — collaudo dal vivo di T9e, giro C; cap. 06.4;
+  `LettorePagina`.)*
+
 ## Collaudi e non-regressione (Fase VB.NET)
 
 Idee emerse **costruendo la batteria di T2** (cap. 14), quando il prototipo ha fatto da

@@ -120,7 +120,8 @@ espone, ed è in «Chiuse».*
 ## Da questa passata sui debiti prima di T9 (2026-08-19)
 
 *Le voci qui sotto sono nate guardando l'applicazione mentre si chiudevano altre cose: non
-erano in nessun piano, e nessuna è grave.*
+erano in nessun piano, e nessuna è grave. La voce sulla finestra a misura ridotta è stata
+verificata il 2026-08-23 dal collaudo dal vivo di T9e ed è in «Chiuse».*
 
 - **La traccia del dialogo reale non ha più nessuna trappola che sfugga.** Curato il «corso
   senza nome» (Pool 1.12), tutte e quattro le trappole della traccia vengono instradate ogni
@@ -134,13 +135,6 @@ erano in nessun piano, e nessuna è grave.*
   scrittura di una macchina invece di un testo: gli appunti di mira che ne escono, invece,
   sono già puliti. O si rende la bolla capace di leggerlo, o si dice al prompt di non
   scriverlo. *(cap. 03.5; `PannelloDialogo`.)*
-- **La finestra a misura ridotta è da guardare col mouse.** Forzandola via API a 1366×768 —
-  sopra la `MinimumSize`, che è 1150×600 — il contenuto risulta tagliato e la barra di
-  navigazione sparisce. Ma il layout è tutto `Dock.Fill`, e ridimensionare via API una
-  finestra **massimizzata** è manovra che inganna (il README dello strumento ne elenca già
-  di simili): finché non si trascina il bordo con il mouse, non è un difetto, è
-  un'osservazione. Se si conferma, è roba della rifinitura di T9. *(cap. 03.4;
-  `FormPrincipale.Designer`.)*
 - **Le parole si incollano fra un blocco e l'altro della pagina letta.** Nel testo che l'app
   ricava da una pagina web, la fine di un blocco e l'inizio del successivo finiscono
   attaccate: «Pubblica AmministrazioneDue suite specializzate». Sul sito provato il modello
@@ -154,15 +148,8 @@ erano in nessun piano, e nessuna è grave.*
 
 ## Dal collaudo di tappa di T8 — il gruppo C (2026-08-21)
 
-- **Il confronto ogni tanto salta i giudizi di «contesto».** Il prompt li pretende per
-  scritto — «un giudizio per OGNI campo di contesto presente… non saltarne nessuno» — ma in
-  **un giro su quattro** i cinque giudizi di contesto (titolo, sede, contratto, mansioni,
-  benefit) non sono stati emessi. Non è un'asimmetria fra le due porte: è successo su una
-  chiamata del server, mentre gli altri tre giri — server e finestra — li hanno emessi
-  tutti. Siccome il contesto pesa un quinto del nucleo, la sua assenza sposta il punteggio
-  di base. È la stessa famiglia del «corso senza nome»: prima si **misura** su più giri,
-  poi si decide se curare il prompt — uno su quattro non è ancora un dato.
-  *(cap. 04.7; `prompt-pool/confronto/confronto.md`.)*
+*La voce sui giudizi di «contesto» saltati è stata chiusa il 2026-08-23 dal collaudo dal vivo
+di T9e ed è in «Chiuse»: misurata, come chiedeva, invece che curata a naso.*
 
 ## Da T9a — backup e ripristino (2026-08-21, alla chiusura)
 
@@ -178,38 +165,104 @@ in «Chiuse».*
   sezioni si dispongono in fila, e i testi cambiano lunghezza con quel che c'è nella
   cartella dati — e sulla macchina di sviluppo ci sta comoda. Su un portatile a 768 px di
   altezza, o al 150% di scala, no: e la finestra è a misura fissa, senza scorrimento.
-  È imparentata con la voce del **pannello del logo a DPI alti** qui sotto, e chiede la
-  stessa cosa: uno schermo su cui verificare. *(cap. 03.4.)*
+  **Verificato il 2026-08-23** (collaudo dal vivo di T9e, giro B): era il timore giusto, ed
+  è andata peggio del previsto — **metà finestra è irraggiungibile**, ed è il reperto più
+  grave del giro. `FinestraImpostazioni.vb:574` la dimensiona sul **contenuto** senza
+  guardare quanto schermo ci sia, e in tutta la finestra non c'è **nessun `AutoScroll`**:
+  il sistema la tronca a 682×1106 (il suo massimo) mentre il contenuto arriva a y=1384, su
+  un'area di lavoro alta 1008. Restano fuori «Apri modelli.json», **«Backup…»**, **«Svuota
+  i dati di navigazione»**, **«ELIMINA TUTTI I DATI»** e il bottone **«Chiudi»** — e cadono
+  fuori dalla **finestra**, non solo fuori dallo schermo, quindi nessuno spostamento li
+  recupera. La voce resta aperta perché la cura non c'è ancora: serve un tetto sull'area di
+  lavoro **e** uno scorrimento, le due cose insieme, ed è nel **quinto tempo di T9e**.
+  *(cap. 03.4 e 15.7.)*
 - **«Svuota i dati di navigazione» non è stato premuto dal vivo.** Il giro di prova non è
   mai passato dalla ricerca annunci, quindi una cartella `webview2\` non è mai esistita e
   il bottone è rimasto spento — correttamente, ma non provato. Il banco lo copre; a
   mancare è la prova che il browser incorporato **lasci davvero cancellare** i suoi file,
   che è esattamente il caso che il codice prevede e spiega. Serve un giro che apra P3
-  prima. *(cap. 11.5.)*
+  prima. **Ritentato il 2026-08-23** (collaudo dal vivo di T9e, giro B) e **non riuscito per
+  una ragione nuova**: la cartella `webview2\` finalmente esiste, quindi il bottone sarebbe
+  acceso, ma a 150% è **irraggiungibile** per il difetto della voce qui sopra — sta a y=1211
+  dentro una finestra alta 1106, cioè fuori *finestra*, non fuori *schermo*. **Deciso con
+  Mirco**: si preme nel **quinto tempo, a 150%, subito dopo la cura di quel difetto**, così
+  la stessa prova chiude questo debito e verifica la cura appena fatta. *(cap. 11.5.)*
 
 ## Da T9d — la rifinitura (2026-08-22, alla chiusura)
 
-- **La fascia nuova di P6 non è stata vista a DPI alti.** L'etichetta «📄 Documento:», la
-  tendina larga 416 px e la sua cornice stanno in **pixel non scalati**, come il resto
-  dell'interfaccia: a 125/150% la fascia si allarga, e la lingua — che ora le sta a destra —
-  è la prima che rischia di uscire dal bordo. La larghezza minima della finestra (1150 px)
-  mette al riparo il caso a 100%, non gli altri. Vuole la stessa macchina della voce sul
-  **pannello del logo a DPI alti** e della **finestra su uno schermo piccolo**: si verificano
-  in un giro solo. *(cap. 03, tabella dei pannelli, P6.)*
+*La voce sulla fascia di P6 a DPI alti è stata verificata il 2026-08-23 dal collaudo dal vivo
+di T9e ed è in «Chiuse»: regge.*
 
 *Il collaudo fragile che doveva finire qui — `UnaRispostaLungaMaVivaNonScadeMai`, che cadeva
 in batteria completa e mai da solo — è stato **curato** invece che annotato: sta fuori dal
 parallelismo e la sua storia è nella chiusura della gamba (cap. 14).*
+
+## Dal collaudo dal vivo di T9e — il giro D, rimasto fuori (2026-08-23)
+
+*Il quarto tempo di T9e prevedeva un **giro D** apposta per chiudere in un colpo tre debiti
+vecchi: tutti e tre vogliono una macchina che questa postazione non è. Non si è potuto fare,
+e la riserva si dichiara qui invece di lasciarla implicita (regola 15).*
+
+- **Serve una macchina senza l'SDK .NET 10 e con Word.** Non può essere AVIOLAB03, che l'SDK
+  ce l'ha, e qui c'è solo LibreOffice. Con quella macchina si chiudono in un giro solo la
+  **prova dell'exe su un PC pulito** (voce di T1), il **DOCX e il PDF aperti in Word** (voce
+  di T4) e il **`.docx` salvato da Word e reimportato nel profilo** (voce di T3), che sono
+  già aperte qui sopra e restano tali. L'eseguibile di rilascio è pronto e non aspetta
+  altro: `VB.NET\src\pubblicazione\TrovaLavoro.exe`, un file solo, ProductVersion 0.3.041.
+  Il giro D si può fare prima del sesto tempo o subito dopo; quel che non si può è darlo per
+  fatto. *(cap. 13.5; cap. 14, T9e.)*
 
 ## Da revisione adversariale (2026-08-09)
 
 - **Il pannello del logo a DPI alti.** Le costanti di geometria sono in pixel non scalati:
   a 125/150% di scala — l'impostazione di fabbrica di quasi tutti i portatili recenti — il
   disegno è fuori misura. Difetto vero, ma correggerlo alla cieca rischiava di rompere il
-  layout **validato a video** in T3: serve uno schermo su cui verificare a 150%.
-  *(cap. 03.5; segnalato dalla revisione, rimandato con motivo.)*
+  layout **validato a video** in T3: serviva uno schermo su cui verificare a 150%.
+  **Verificato il 2026-08-23** (collaudo dal vivo di T9e, giro B, a 144 DPI di sistema): il
+  sospetto era giusto e la voce resta aperta perché il difetto ora è **provato, non curato**.
+  Il pannello non passa in compatta e resta in modalità piena, sfondando nell'area viva:
+  copre due righe della coda in P1 e 71 px di «Apri la candidatura», e in P6 l'angolo
+  basso-sinistro della casella «Annuncio» e 71 px di «Torna al profilo». Le cause misurate
+  sono due, tutte e due di unità di misura: la soglia della compatta
+  (`FormPrincipale.vb:856`, `ClientSize.Width < 1350`) confronta pixel **fisici** con un
+  numero pensato a 96 DPI, e l'ingombro dichiarato ai pannelli (261×216,
+  `FormPrincipale.vb:20-21`) è quello di progetto mentre il pannello vero misura 373×360.
+  La cura è nel **quinto tempo di T9e**, insieme alle due sorelle qui sotto — sono la stessa
+  specie di errore. *(cap. 03.5 e 15.7; segnalato dalla revisione, misurato dal collaudo dal
+  vivo di T9e.)*
 
 ## Chiuse
+
+- ✅ **Il confronto ogni tanto salta i giudizi di «contesto»** *(aperta il 2026-08-21 dal
+  collaudo di tappa di T8, chiusa il 2026-08-23 dal collaudo dal vivo di T9e, giro C)*. La
+  voce chiedeva di **misurare prima di curare**, perché «uno su quattro non è ancora un
+  dato», ed è esattamente quel che è stato fatto: otto giri a T9d — quattro per porta, tutti
+  5 su 5, per cui il Pool non fu toccato — e il **nono** dal vivo su una candidatura vera,
+  ancora 5 su 5. Nove giri buoni di fila dopo l'unico caso storto: il prompt non ha niente da
+  correggere, e la voce si chiude senza un bump. *(cap. 04.7;
+  `prompt-pool/confronto/confronto.md`.)*
+
+- ✅ **La fascia di P6 a DPI alti** *(aperta il 2026-08-22 alla chiusura di T9d, chiusa il
+  2026-08-23 dal collaudo dal vivo di T9e, giro B)*. **Regge.** A 150% l'etichetta
+  «📄 Documento:» (x 40, larga 160), la tendina (x 206, larga 591), «Lingua:» (x 823) e la
+  sua tendina finiscono attorno a x 1100, contro un bordo a 1902: nessun taglio, e la
+  cornice d'accento è al suo posto. Il timore era che la lingua uscisse dal bordo, e non
+  esce. Sulla stessa pagina si vede un difetto, ma non è suo: è il **pannello del logo**
+  che le sconfina addosso. *(cap. 03, tabella dei pannelli, P6.)*
+
+- ✅ **La finestra a misura ridotta, guardata per davvero** *(aperta il 2026-08-19 dalla
+  passata sui debiti prima di T9, chiusa il 2026-08-23 dal collaudo dal vivo di T9e, giro
+  B)*. Il dubbio era doppio, e tutte e due le metà hanno risposto. Primo: ridimensionare via
+  API vale come trascinare col mouse — sì, perché la `MinimumSize` la applica **Windows**,
+  non lo strumento, e chiedendo una misura più piccola del minimo la finestra si ferma
+  esattamente lì. Secondo: al minimo il contenuto **non** si taglia e la barra di navigazione
+  **resta** — l'osservazione del 19 agosto nasceva proprio dalla manovra ingannevole su una
+  finestra massimizzata, com'era il sospetto. Ne è però uscito un difetto diverso e più
+  preciso, che vive ora nel quinto tempo di T9e: a 150% la `MinimumSize` non si scala di
+  1,5 uniforme ma di 1,42 in larghezza e 1,605 in altezza (`AutoScaleMode.Font`), così il
+  minimo vero scende a **1088,7 px logici** — 61 sotto quello di progetto — e in quei 61 px
+  la fascia comandi di P6 si accavalla per 77×44 px: il clic su «Prepara email» va a
+  «Modifica i testi». *(cap. 03.4 e 15.7; `FormPrincipale.Designer.vb:371`.)*
 
 - ✅ **«⚙ Impostazioni» premibile mentre l'AI lavora** *(aperta il 2026-08-21 alla chiusura
   di T9b, chiusa il 2026-08-22 col primo tempo di T9d)*. Il difetto non era un bottone
