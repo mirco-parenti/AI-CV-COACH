@@ -234,7 +234,7 @@ Namespace Dati
             ' Da T9c. L'esito si scrive <b>sempre</b>, anche quando non c'è, e qui la
             ' riga vuota racconta invece di ingombrare: «"stato": "inviata"» con
             ' «"esito": null» accanto è esattamente il caso che fa scattare il promemoria
-            ' di follow-up (cap. 07.3). È l'opposto della scelta fatta per «rifinitura»
+            ' di follow-up (cap. 07.3). È l'opposto della scelta fatta per «riscritture»
             ' qui sotto, che è un blocco intero e tace quando non ha niente da dire.
             Dim esito As String = If(o.Esito.HasValue, EsitiCandidatura.Nome(o.Esito.Value), Nothing)
 
@@ -252,6 +252,20 @@ Namespace Dati
                 {"link", o.Link}}
 
             If o.Match IsNot Nothing Then scritto("match") = o.Match.ComeJson()
+
+            ' Da R7 (T9e). Quel che l'utente ha riscritto a mano nei due documenti, e
+            ' quando la lettera è stata scritta l'ultima volta: insieme rispondono alla
+            ' domanda che P6 fa a ogni rientro — «questa lettera ha visto il CV com'è
+            ' adesso?». Tacciono tutt'e due quando non c'è niente da dire, così una
+            ' candidatura che nessuno ha toccato a mano resta scritta com'era.
+            Dim riscritture As New JsonObject
+            Dim delCv As JsonObject = o.RiscrittureDelCv.ComeJson()
+            If delCv IsNot Nothing Then riscritture("cv") = delCv
+            Dim dellaLettera As JsonObject = o.RiscrittureDellaLettera.ComeJson()
+            If dellaLettera IsNot Nothing Then riscritture("lettera") = dellaLettera
+
+            If riscritture.Count > 0 Then scritto("riscritture") = riscritture
+            If o.LetteraGenerata <> Nothing Then scritto("lettera_generata") = CampiJson.Quando(o.LetteraGenerata)
 
             Return scritto
 
@@ -302,6 +316,14 @@ Namespace Dati
             ' Il campo «rifinitura» — il testo di prima dell'anti-slop — si scriveva da T7b
             ' e non si scrive più da T9d: nei file di allora c'è ancora, e viene semplicemente
             ' ignorato. Se ne va da sé al primo salvataggio.
+
+            ' Da R7 (T9e). Nei file scritti prima questi due non ci sono, e l'assenza vale
+            ' «mai riscritto a mano»: non si deduce all'indietro una storia che nessuno ha
+            ' registrato (cap. 11.1).
+            Dim riscritture As JsonObject = TryCast(CampiJson.Nodo(stato, "riscritture"), JsonObject)
+            o.RiscrittureDelCv.Rileggi(TryCast(CampiJson.Nodo(riscritture, "cv"), JsonObject))
+            o.RiscrittureDellaLettera.Rileggi(TryCast(CampiJson.Nodo(riscritture, "lettera"), JsonObject))
+            o.LetteraGenerata = CampiJson.Istante(stato, "lettera_generata")
 
             Dim match As JsonObject = TryCast(CampiJson.Nodo(stato, "match"), JsonObject)
             If match Is Nothing Then Return

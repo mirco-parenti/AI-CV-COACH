@@ -24,6 +24,31 @@ Public Class DocumentoDaRiscrivere
     ''' <summary>Il documento: un CV o una lettera.</summary>
     Public Property Documento As JsonNode
 
+    ''' <summary>
+    ''' Quale dei due è (R7): il CV — mirato o base — oppure la lettera. Serve a chi
+    ''' salva, non a questa finestra: un campo riscritto nel CV può disallineare la
+    ''' lettera che ne discende, e per accorgersene bisogna sapere dove è stato scritto.
+    ''' </summary>
+    Public Property Ruolo As RuoloDocumento
+
+End Class
+
+''' <summary>Un campo che l'utente ha riscritto davvero, e in quale documento (R7).</summary>
+''' <remarks>
+''' È quello che la finestra consegna a chi l'ha aperta: fino a T9d bastava <b>quanti</b>
+''' campi fossero cambiati, perché serviva solo a scrivere «ho salvato i 2 testi che hai
+''' riscritto». Da R7 il pannello deve anche annotare <b>quali</b> e <b>dove</b>, perché
+''' quell'annotazione sopravvive alla sessione e finisce nei file (v.
+''' <see cref="RiscrittureAMano"/>).
+''' </remarks>
+Public Class RiscritturaFatta
+
+    ''' <summary>In quale documento.</summary>
+    Public Property Ruolo As RuoloDocumento
+
+    ''' <summary>Quale campo: <c>sommario</c>, <c>esperienza.1</c>, <c>corpo</c>.</summary>
+    Public Property Id As String
+
 End Class
 
 ''' <summary>
@@ -63,6 +88,9 @@ Public Class FinestraModificaTesti
 
         ''' <summary>Il documento a cui appartiene: è lì che il testo va rimesso.</summary>
         Public Property Documento As JsonNode
+
+        ''' <summary>Quale documento è, per chi dovrà annotare la riscrittura (R7).</summary>
+        Public Property Ruolo As RuoloDocumento
 
         Public Property Id As String
         Public Property Etichetta As String
@@ -132,16 +160,18 @@ Public Class FinestraModificaTesti
     ''' Mostra la finestra e mette nei documenti quello che l'utente ha riscritto.
     ''' </summary>
     ''' <returns>
-    ''' Quanti campi sono stati riscritti davvero: zero se ha annullato, e zero anche se
-    ''' ha confermato senza cambiare niente — che per chi salva è la stessa cosa.
+    ''' I campi riscritti davvero, con il documento in cui stanno: la lista è <b>vuota</b>
+    ''' se ha annullato, e vuota anche se ha confermato senza cambiare niente — che per chi
+    ''' salva è la stessa cosa.
     ''' </returns>
     Public Shared Function Chiedi(proprietario As IWin32Window,
-                                  documenti As IEnumerable(Of DocumentoDaRiscrivere)) As Integer
+                                  documenti As IEnumerable(Of DocumentoDaRiscrivere)) _
+                                  As List(Of RiscritturaFatta)
 
         Using finestra As New FinestraModificaTesti(documenti)
 
             finestra.ShowDialog(proprietario)
-            If finestra.Esito <> EsitoModifica.Confermato Then Return 0
+            If finestra.Esito <> EsitoModifica.Confermato Then Return New List(Of RiscritturaFatta)
 
             Return finestra.Applica()
 
@@ -203,15 +233,17 @@ Public Class FinestraModificaTesti
     ''' identico non cambierebbe niente nel file, ma farebbe contare come «modificato» un
     ''' documento che nessuno ha toccato.
     ''' </remarks>
-    ''' <returns>Quanti campi sono finiti davvero nei documenti.</returns>
-    Public Function Applica() As Integer
+    ''' <returns>I campi finiti davvero nei documenti, con il documento di ciascuno.</returns>
+    Public Function Applica() As List(Of RiscritturaFatta)
 
-        Dim scritti As Integer
+        Dim scritti As New List(Of RiscritturaFatta)
 
         For Each voce As Voce In _voci
 
             If Not voce.Riscritto Then Continue For
-            If Rifinitura.Riscrivi(voce.Documento, voce.Id, voce.Testo) Then scritti += 1
+            If Rifinitura.Riscrivi(voce.Documento, voce.Id, voce.Testo) Then
+                scritti.Add(New RiscritturaFatta With {.Ruolo = voce.Ruolo, .Id = voce.Id})
+            End If
 
         Next
 
@@ -230,6 +262,7 @@ Public Class FinestraModificaTesti
 
                 _voci.Add(New Voce With {
                     .Documento = documento.Documento,
+                    .Ruolo = documento.Ruolo,
                     .Id = campo.Id,
                     .Etichetta = campo.Etichetta,
                     .Originale = campo.Testo,

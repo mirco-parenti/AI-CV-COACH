@@ -171,8 +171,12 @@ Namespace Ai
             Assert.AreEqual(16000, libreria.Carica("importa_cv").MaxToken, "importa_cv: max_token")
 
             ' La lettera è quella con più dati iniettati: profilo, annuncio, giudizi, CV,
-            ' mitigazioni e — da T7c — gli appunti di mira.
-            Assert.HasCount(6, libreria.Carica("lettera").Segnaposto, "lettera: segnaposto")
+            ' mitigazioni, gli appunti di mira (T7c) e — da R7 — i testi che l'utente ha
+            ' riscritto a mano nel CV, che sono l'unico blocco oltre al profilo a valere
+            ' come fonte di fatti.
+            Assert.HasCount(7, libreria.Carica("lettera").Segnaposto, "lettera: segnaposto")
+            Assert.Contains("RISCRITTURE", libreria.Carica("lettera").Segnaposto,
+                            "lettera: le riscritture a mano")
 
             ' Il CV mirato riceve gli stessi appunti, che nel CV base invece non hanno
             ' senso: quello nasce dal solo profilo, e appunti di mira su cosa non c'è

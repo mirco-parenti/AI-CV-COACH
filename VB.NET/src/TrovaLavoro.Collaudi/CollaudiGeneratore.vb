@@ -1,4 +1,4 @@
-Imports System.IO
+﻿Imports System.IO
 Imports System.Text.Json.Nodes
 Imports System.Threading.Tasks
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
@@ -126,6 +126,46 @@ Namespace Ai
             Assert.DoesNotContain("{{", testo, "nessun segnaposto rimasto")
 
             Assert.AreEqual(4000, CInt(corpo("max_tokens").GetValue(Of Integer)()), "il limite del suo prompt")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function ITestiRiscrittiAManoArrivanoAllaLetteraNelLoroBlocco() As Task
+
+            ' R7: è l'unico blocco, oltre al profilo, che il prompt della lettera tratta
+            ' come fonte di fatti — quelle parole non le ha scritte un modello, le ha
+            ' scritte la persona. Se si fermassero per strada, la lettera continuerebbe a
+            ' raccontare la storia di prima.
+            Dim finta As New ApiFinta(New Passo With {.Corpo = RispostaCon("{""corpo"":""...""}")})
+
+            Await GeneratoreDiProva(finta).GeneraLetteraAsync(
+                CasiDiCollaudo.Profilo(),
+                CasiDiCollaudo.Annuncio(CasiDiCollaudo.Compatibile),
+                CasiDiCollaudo.Giudizi(CasiDiCollaudo.Compatibile),
+                CvMirato(), Nothing, Nothing, "it", Nothing,
+                JsonNode.Parse("[{""campo"": ""Sommario"", ""testo"": ""Ho traslocato elefanti.""}]"))
+
+            Assert.Contains("Ho traslocato elefanti.", Mandato(finta), "il testo dell'utente arriva")
+            Assert.Contains("<riscritture>", Mandato(finta), "dentro il blocco che lo dichiara suo")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SenzaRiscrittureIlBloccoArrivaVuoto() As Task
+
+            ' Il caso normale, ed è la maggioranza: un CV uscito tutto dall'AI. Il blocco
+            ' c'è ma è vuoto — la stessa regola delle mitigazioni e degli appunti, perché
+            ' un segnaposto senza valore fa fallire la richiesta prima ancora di partire.
+            Dim finta As New ApiFinta(New Passo With {.Corpo = RispostaCon("{""corpo"":""...""}")})
+
+            Await GeneratoreDiProva(finta).GeneraLetteraAsync(
+                CasiDiCollaudo.Profilo(),
+                CasiDiCollaudo.Annuncio(CasiDiCollaudo.Compatibile),
+                CasiDiCollaudo.Giudizi(CasiDiCollaudo.Compatibile),
+                CvMirato(), Nothing)
+
+            Assert.Contains("<riscritture>" & vbLf & "[]" & vbLf & "</riscritture>", Mandato(finta),
+                            "col blocco vuoto invece che assente")
 
         End Function
 

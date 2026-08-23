@@ -94,6 +94,49 @@ Namespace Dati
         End Sub
 
         <TestMethod>
+        Public Sub IlCvBaseRicordaCosaHaRiscrittoLUtente()
+
+            ' R7: il 📄 CV-1 base una lettera non ce l'ha, quindi qui non c'è nessuna spia
+            ' da accendere — l'annotazione serve all'avviso di «Rigenera», che senza di lei
+            ' scadeva al primo rientro in P6.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim versione As String = archivio.Salva(ProfiloDiProva())
+
+                    Dim riscritture As New RiscrittureAMano
+                    riscritture.Annota("sommario", New Date(2026, 8, 23, 18, 40, 0))
+
+                    archivio.SalvaCvBase(
+                        Text.Json.Nodes.JsonNode.Parse("{""intestazione"": {""nome"": ""Luca Ferrari""}}"),
+                        versione, "it", Nothing, riscritture)
+
+                    Assert.AreEqual("sommario",
+                                    String.Join(", ", archivio.CaricaCvBase().Riscritture.Campi),
+                                    "il campo riscritto a mano torna dal file")
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnCvBaseMaiToccatoAManoNonPortaIlBloccoNuovo()
+
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim versione As String = archivio.Salva(ProfiloDiProva())
+
+                    archivio.SalvaCvBase(
+                        Text.Json.Nodes.JsonNode.Parse("{""intestazione"": {""nome"": ""Luca Ferrari""}}"),
+                        versione)
+
+                    Assert.DoesNotContain("riscritture", File.ReadAllText(cartella.FileCvBase),
+                                          "un CV che nessuno ha toccato resta scritto com'era")
+                    Assert.IsFalse(archivio.CaricaCvBase().Riscritture.CEQualcosa,
+                                   "e rileggendolo non se ne inventa nessuna")
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
         Public Sub SenzaGenerazioneNonCECvBase()
             ConArchivioTemporaneo(
                 Sub(archivio, cartella)

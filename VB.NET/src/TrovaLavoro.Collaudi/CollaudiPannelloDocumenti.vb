@@ -1060,7 +1060,8 @@ Namespace Ui
                     Assert.IsTrue(Rifinitura.Riscrivi(aperti(0).Documento, "sommario", "L'ho riscritto io."),
                                   "è la stessa scrittura che fa la finestra")
 
-                    pannello.ConfermaLeRiscritture(1)
+                    Await pannello.ConfermaLeRiscrittureAsync(
+                        {New RiscritturaFatta With {.Ruolo = RuoloDocumento.Cv, .Id = "sommario"}})
 
                     Assert.AreEqual("L'ho riscritto io.",
                                     contesto.Opportunita.Carica(candidatura.Cartella).Cv("sommario").GetValue(Of String)(),
@@ -1085,7 +1086,8 @@ Namespace Ui
 
                     Rifinitura.Riscrivi(pannello.DocumentiDaRiscrivere()(0).Documento,
                                         "sommario", "Questo l'ho scritto io.")
-                    pannello.ConfermaLeRiscritture(1)
+                    Await pannello.ConfermaLeRiscrittureAsync(
+                        {New RiscritturaFatta With {.Ruolo = RuoloDocumento.Cv, .Id = "sommario"}})
 
                     Await pannello.EsportaAsync(FormatiDocumento.Docx)
 
@@ -1112,7 +1114,8 @@ Namespace Ui
 
                     Rifinitura.Riscrivi(pannello.DocumentiDaRiscrivere()(0).Documento,
                                         "sommario", "L'ho riscritto io.")
-                    pannello.ConfermaLeRiscritture(1)
+                    Await pannello.ConfermaLeRiscrittureAsync(
+                        {New RiscritturaFatta With {.Ruolo = RuoloDocumento.Cv, .Id = "sommario"}})
 
                     Dim salvato As TrovaLavoro.Dati.CvBase = contesto.Archivio.CaricaCvBase()
 
@@ -1212,6 +1215,180 @@ Namespace Ui
         ''' Una candidatura con i documenti già scritti, nella lingua data: è il caso in
         ''' cui P6 mostra e basta, senza generare niente.
         ''' </summary>
+        ' ==================================================================
+        ' La lettera rimasta indietro, e l'avviso che non scade (R7, 2026-08-23)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function LAvvisoDiRigeneraDiceQualiTestiSiPerdono() As Task
+
+            ' Prima diceva «comprese le modifiche che hai fatto a mano», e solo finché non
+            ' si cambiava pannello. «Sommario» è un lavoro che si riconosce.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = GiaScritta(contesto, "it")
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.IsEmpty(pannello.AncheQuelliRiscrittiAMano(),
+                                   "chi non ha riscritto niente non si sente dire niente")
+
+                    Await pannello.ConfermaLeRiscrittureAsync(
+                        {New RiscritturaFatta With {.Ruolo = RuoloDocumento.Cv, .Id = "sommario"}})
+
+                    Assert.Contains("Sommario", pannello.AncheQuelliRiscrittiAMano(),
+                                    "l'avviso nomina il campo")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LAvvisoNonScadeAlRientroInP6() As Task
+
+            ' È il difetto di R7 preso di petto: prima bastava tornare al profilo e
+            ' rientrare perché il pannello dimenticasse, e da lì «Rigenera» si portava via
+            ' il lavoro dell'utente senza nominarlo.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = GiaScritta(contesto, "it")
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Rifinitura.Riscrivi(pannello.DocumentiDaRiscrivere()(0).Documento,
+                                        "sommario", "L'ho riscritto io.")
+                    Await pannello.ConfermaLeRiscrittureAsync(
+                        {New RiscritturaFatta With {.Ruolo = RuoloDocumento.Cv, .Id = "sommario"}})
+
+                    ' Si esce e si rientra da capo, rileggendo la candidatura da disco:
+                    ' è esattamente quel che fa la barra di navigazione.
+                    Await pannello.MostraIlCvBaseAsync()
+                    Await pannello.MostraLaCandidaturaAsync(
+                        contesto.Opportunita.Carica(candidatura.Cartella))
+
+                    Assert.Contains("Sommario", pannello.AncheQuelliRiscrittiAMano(),
+                                    "l'avviso c'è ancora, perché adesso l'annotazione sta nel file")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaSpiaDellaLetteraCompareSoloQuandoServe() As Task
+
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = GiaScritta(contesto, "it")
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.IsFalse(Bottone(pannello, "btnRigeneraLettera").Visible,
+                                   "documenti d'accordo: il comando non deve nemmeno esserci")
+
+                    candidatura.SegnaLetteraGenerata(New Date(2026, 8, 23, 9, 0, 0))
+                    candidatura.SegnaRiscritture(RuoloDocumento.Cv, {"sommario"},
+                                                 New Date(2026, 8, 23, 18, 40, 0))
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.IsTrue(Bottone(pannello, "btnRigeneraLettera").Visible,
+                                  "la lettera è rimasta indietro: la spia si accende")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SulCvBaseLaSpiaDellaLetteraNonEsiste() As Task
+
+            ' Il 📄 CV-1 base una lettera non ce l'ha: non c'è niente che possa restare
+            ' indietro.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    GiaScritto(contesto, "it")
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Await pannello.ConfermaLeRiscrittureAsync(
+                        {New RiscritturaFatta With {.Ruolo = RuoloDocumento.Cv, .Id = "sommario"}})
+
+                    Assert.IsFalse(Bottone(pannello, "btnRigeneraLettera").Visible)
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function RiscrivereIlCvRiallineaLaLetteraDaSolo() As Task
+
+            ' Il rimedio al silenzio: chiusa la finestra, la lettera si rifà da sé sul CV
+            ' come l'ha lasciato l'utente — una volta sola, senza chiedere niente a chi la
+            ' lettera non l'aveva toccata.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara("{""tipo"": ""lettera_mirata"", ""corpo"": ""Ho traslocato elefanti.""}")
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = GiaScritta(contesto, "it")
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Rifinitura.Riscrivi(pannello.DocumentiDaRiscrivere()(0).Documento,
+                                        "sommario", "Ho traslocato elefanti.")
+                    Await pannello.ConfermaLeRiscrittureAsync(
+                        {New RiscritturaFatta With {.Ruolo = RuoloDocumento.Cv, .Id = "sommario"}})
+
+                    Assert.AreEqual("Ho traslocato elefanti.",
+                                    candidatura.Lettera("corpo").GetValue(Of String)(),
+                                    "la lettera è stata riscritta")
+                    Assert.IsFalse(candidatura.LetteraDaRiallineare, "e la spia è spenta")
+                    Assert.AreEqual("Ho traslocato elefanti.",
+                                    contesto.Opportunita.Carica(candidatura.Cartella).Lettera("corpo").
+                                        GetValue(Of String)(),
+                                    "e quella nuova è già su disco")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function RiscrivereLaLetteraNonFaPartireNessunaRigenerazione() As Task
+
+            ' Il verso conta: la lettera discende dal CV, non il contrario. Rifare qualcosa
+            ' qui vorrebbe dire cancellare il testo appena scritto dall'utente.
+            Dim generatore As New GeneratoreFinto
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = GiaScritta(contesto, "it")
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Await pannello.ConfermaLeRiscrittureAsync(
+                        {New RiscritturaFatta With {.Ruolo = RuoloDocumento.Lettera, .Id = "corpo"}})
+
+                    Assert.IsEmpty(generatore.LavoriChiesti(), "nessuna chiamata all'AI")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SenzaAiIlSalvataggioDelTestoRestaUnaBuonaNotizia() As Task
+
+            ' Senza chiave il riallineo non può partire, e non deve trasformare la conferma
+            ' di un salvataggio riuscito in un errore rosso: il disallineamento lo racconta
+            ' la spia, che è lì col suo comando.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = GiaScritta(contesto, "it")
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Await pannello.ConfermaLeRiscrittureAsync(
+                        {New RiscritturaFatta With {.Ruolo = RuoloDocumento.Cv, .Id = "sommario"}})
+
+                    Assert.Contains("Ho salvato", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "la riga parla del salvataggio")
+                    Assert.Contains("nel profilo", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "e dice dove si correggono i fatti")
+                End Function)
+
+        End Function
+
         Private Shared Function GiaScritta(contesto As ContestoApp, lingua As String) As Opportunita
 
             Dim candidatura As Opportunita = Confrontata(contesto)

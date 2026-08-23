@@ -329,6 +329,74 @@ Namespace Dati
                 End Sub)
         End Sub
 
+        <TestMethod>
+        Public Sub LeRiscrittureAManoTornanoDalDisco()
+
+            ' R7. È tutto il punto della cura: l'avviso di «Rigenera» deve sopravvivere a
+            ' un rientro in P6, e per farlo deve sopravvivere a un giro su disco.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim o As Opportunita = OpportunitaDiProva()
+                    o.SegnaRiscritture(RuoloDocumento.Cv, {"sommario", "esperienza.1"},
+                                       New Date(2026, 8, 23, 18, 40, 0))
+                    o.SegnaLetteraGenerata(New Date(2026, 8, 23, 9, 0, 0))
+
+                    Dim riletta As Opportunita = archivio.Carica(archivio.Salva(o))
+
+                    Assert.AreEqual("sommario, esperienza.1", String.Join(", ", riletta.RiscrittureDelCv.Campi),
+                                    "i campi riscritti a mano")
+                    Assert.AreEqual(New Date(2026, 8, 23, 18, 40, 0), riletta.RiscrittureDelCv.Quando,
+                                    "e quando l'utente ci ha messo mano")
+                    Assert.AreEqual(New Date(2026, 8, 23, 9, 0, 0), riletta.LetteraGenerata,
+                                    "la lettera è di stamattina")
+                    Assert.IsTrue(riletta.LetteraDaRiallineare,
+                                  "quindi riaprendo la candidatura la spia è ancora accesa")
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaCandidaturaMaiToccataAManoNonPortaIlBloccoNuovo()
+
+            ' La promessa fatta ai file già scritti (cap. 11.1): chi non ha niente da
+            ' dichiarare resta sul disco esattamente com'era.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim dove As String = archivio.Salva(OpportunitaDiProva())
+                    Dim scritto As String = File.ReadAllText(Path.Combine(dove, ArchivioOpportunita.FileStato))
+
+                    Assert.DoesNotContain("riscritture", scritto, "nessun blocco delle riscritture")
+                    Assert.DoesNotContain("lettera_generata", scritto, "e nessuna data della lettera")
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaCartellaScrittaPrimaDiR7SiRiapreComeMaiToccataAMano()
+
+            ' Non si deduce all'indietro una storia che nessuno ha registrato: una
+            ' candidatura vecchia non è «riscritta a mano», è una di cui non si sa nulla.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim o As Opportunita = OpportunitaDiProva()
+                    o.SegnaRiscritture(RuoloDocumento.Cv, {"sommario"}, New Date(2026, 8, 23, 18, 40, 0))
+
+                    Dim dove As String = archivio.Salva(o)
+                    Dim stato As String = Path.Combine(dove, ArchivioOpportunita.FileStato)
+
+                    Dim vecchio As JsonObject = TryCast(JsonNode.Parse(File.ReadAllText(stato)), JsonObject)
+                    vecchio.Remove("riscritture")
+                    vecchio.Remove("lettera_generata")
+                    File.WriteAllText(stato, vecchio.ToJsonString())
+
+                    Dim riletta As Opportunita = archivio.Carica(dove)
+
+                    Assert.IsFalse(riletta.RiscrittureDelCv.CEQualcosa, "nessuna riscrittura")
+                    Assert.IsFalse(riletta.LetteraDaRiallineare, "e nessuna spia accesa senza motivo")
+                End Sub)
+
+        End Sub
+
         ''' <summary>
         ''' Salva l'opportunità e le toglie di dosso ciò che T4 non scriveva, poi la
         ''' rilegge: è il modo di avere in mano una cartella com'era prima di T5c.

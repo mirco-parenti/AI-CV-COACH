@@ -113,7 +113,7 @@ Namespace Ui
 
                 finestra.Riscrivi(2, "L'ho riscritta io.")
 
-                Assert.AreEqual(1, finestra.Applica(), "uno solo è stato toccato")
+                Assert.AreEqual(1, finestra.Applica().Count, "uno solo è stato toccato")
 
                 Assert.AreEqual("L'ho riscritta io.", Descrizione(documento, 1), "ed è finito nella voce giusta")
                 Assert.AreEqual("Servizio ai tavoli", Descrizione(documento, 0), "l'altra esperienza è intatta")
@@ -135,7 +135,7 @@ Namespace Ui
 
                 finestra.Riscrivi(0, "Ho esperienza nel servizio di sala.")
 
-                Assert.AreEqual(0, finestra.Applica(), "niente da scrivere")
+                Assert.AreEqual(0, finestra.Applica().Count, "niente da scrivere")
 
             End Using
 
@@ -152,7 +152,7 @@ Namespace Ui
                 Assert.AreEqual("Ho esperienza nel servizio di sala.", finestra.Testo(0),
                                 "e nella finestra resta quello che c'era")
 
-                Assert.AreEqual(0, finestra.Applica(), "niente è cambiato")
+                Assert.AreEqual(0, finestra.Applica().Count, "niente è cambiato")
 
             End Using
 
@@ -171,7 +171,7 @@ Namespace Ui
             Using finestra As New FinestraModificaTesti(Aperti(soloFatti))
 
                 Assert.AreEqual(0, finestra.Quanti, "nessun campo di prosa")
-                Assert.AreEqual(0, finestra.Applica(), "e niente da applicare")
+                Assert.AreEqual(0, finestra.Applica().Count, "e niente da applicare")
 
             End Using
 

@@ -1,4 +1,5 @@
 Imports System.Drawing
+Imports System.Linq
 Imports System.Windows.Forms
 
 ''' <summary>
@@ -91,18 +92,26 @@ Public NotInheritable Class FasciaDeiComandi
         Dim disponibile As Integer = _fascia.ClientSize.Width -
                                      _fascia.Padding.Left - StileApp.MargineRiquadro
 
+        ' Un comando nascosto non occupa posto (R7, 2026-08-23). Finora nessun pannello ne
+        ' aveva: il primo è «Rigenera la lettera» di P6, che c'è solo quando la lettera è
+        ' rimasta indietro rispetto al CV. Senza questo filtro lascerebbe il suo buco in
+        ' fascia anche da invisibile, e — peggio — potrebbe mandare a capo gli altri per
+        ' fare spazio a sé stesso.
+        Dim aSinistra As List(Of Button) = Visibili(_aSinistra)
+        Dim aDestra As List(Of Button) = Visibili(_aDestra)
+
         Dim righe As New List(Of RigaDiComandi)
 
-        For Each critico As Button In _critici
+        For Each critico As Button In Visibili(_critici)
             Dim sua As New RigaDiComandi(StaccoDelCritico)
             sua.Aggiungi(critico, versoDestra:=True)
             righe.Add(sua)
         Next
 
-        If Larghezza(_aSinistra) + StileApp.DistanzaControlli + Larghezza(_aDestra) <= disponibile Then
+        If Larghezza(aSinistra) + StileApp.DistanzaControlli + Larghezza(aDestra) <= disponibile Then
             Dim unica As New RigaDiComandi(StileApp.InterlineaMinima)
-            unica.ASinistra.AddRange(_aSinistra)
-            unica.ADestra.AddRange(_aDestra)
+            unica.ASinistra.AddRange(aSinistra)
+            unica.ADestra.AddRange(aDestra)
             righe.Add(unica)
             Return righe
         End If
@@ -110,8 +119,8 @@ Public NotInheritable Class FasciaDeiComandi
         ' Insieme non ci stanno: ogni fila prende le righe che le servono, e quelle che
         ' portano altrove restano in fondo — il comando principale di un pannello si cerca
         ' in basso a destra, e deve restare dov'era.
-        righe.AddRange(Spezzata(_aSinistra, disponibile, versoDestra:=False))
-        righe.AddRange(Spezzata(_aDestra, disponibile, versoDestra:=True))
+        righe.AddRange(Spezzata(aSinistra, disponibile, versoDestra:=False))
+        righe.AddRange(Spezzata(aDestra, disponibile, versoDestra:=True))
 
         Return righe
 
@@ -199,6 +208,16 @@ Public NotInheritable Class FasciaDeiComandi
     End Function
 
     ''' <summary>Quanto spazio vuole una fila di bottoni messi in riga.</summary>
+    ''' <summary>
+    ''' Solo i bottoni che si vedono: gli altri non sono in fascia, e la fascia non deve
+    ''' tenere loro il posto (R7).
+    ''' </summary>
+    Private Shared Function Visibili(bottoni As List(Of Button)) As List(Of Button)
+
+        Return bottoni.Where(Function(b) b IsNot Nothing AndAlso b.Visible).ToList()
+
+    End Function
+
     Private Shared Function Larghezza(bottoni As List(Of Button)) As Integer
 
         Dim totale As Integer = 0

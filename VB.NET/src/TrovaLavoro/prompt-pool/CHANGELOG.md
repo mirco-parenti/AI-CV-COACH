@@ -55,6 +55,22 @@ affatto. Il secondo: «ho lavorato in un negozio di pittura» finiva in `ruolo`,
 vuota. Il prompt ora distingue il mestiere dal posto e dice cosa fare quando c'è solo uno
 dei due — un campo vuoto è un dato onesto, un campo riempito con la cosa sbagliata no.
 
+**Il CV riscritto a mano è una dichiarazione** (`generazione/lettera.it` 1.2 → 1.3,
+`lettera.en` 1.1 → 1.2). Fin dal Pool 1.00 il prompt della lettera diceva che il `<cv>`
+**non** è una fonte di fatti, ed era giusto: quel CV l'ha scritto un modello a partire dal
+profilo, e farglielo confermare da sé stesso non aggiungerebbe niente. Ma da T9d l'utente
+può riscriverne la prosa a mano, e lì dentro finiscono parole che nessun modello ha
+scritto: correggere «trasloco» in «elefante» è una dichiarazione della persona, come lo è
+quel che scrive nel profilo. Il collaudo dal vivo l'ha trovato dal lato peggiore (R7): la
+lettera continuava a raccontare la storia di prima, in silenzio. Ora c'è un settimo blocco,
+`<riscritture>`, che porta **solo** i campi riscritti a mano col loro testo, ed è l'unica
+cosa dentro un CV che valga come fonte di fatti; il resto del `<cv>` resta quel che era.
+Vale come le parole della persona e niente di più: non si estendono per analogia, non se ne
+ricavano fatti che non hanno nominato, non riempiono un gap su cui tacciono. La lista è
+vuota nel caso normale — un CV tutto dell'AI — come già succede per `<appunti>` e
+`<mitigazioni>`. *(L'anti-invenzione non è stata toccata: vieta al modello di inventare,
+non all'utente di dichiarare.)*
+
 ## Pool 1.12 — 2026-08-19
 
 **Un accenno incompleto non è «niente da raccogliere»** (`profilo/contatti` 1.2 → 1.3).

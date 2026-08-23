@@ -191,23 +191,87 @@ Namespace Motore
                                  Function() _rifinitura.DelCvAsync(opportunita.Cv, lingua, annulla),
                                  avanzamento).ConfigureAwait(False)
 
-            ' La lettera riceve il CV **già rifinito**: le serve come riferimento di
-            ' coerenza, e dargli quello grezzo vorrebbe dire farle raccontare la stessa
-            ' storia con parole che nel CV non ci sono più.
-            Annuncia(avanzamento, If(ConRifinitura, 5, 4), "Scrivo la lettera")
-            opportunita.Lettera = Await _generatore.GeneraLetteraAsync(
-                profiloJson, opportunita.Annuncio, giudizi, opportunita.Cv,
-                ElencoMitigazioni(opportunita.Mitigazioni), annulla, lingua, appunti).ConfigureAwait(False)
-
-            Await RifinisciAsync(opportunita, "lettera", 6, "Rifinisco la lettera",
-                                 Function() _rifinitura.DellaLetteraAsync(opportunita.Lettera, lingua, annulla),
-                                 avanzamento).ConfigureAwait(False)
+            Await ScriviLaLetteraAsync(opportunita, profiloJson, giudizi, lingua, appunti,
+                                       If(ConRifinitura, 5, 4), 0, avanzamento, annulla).ConfigureAwait(False)
 
             ' I documenti ci sono: la candidatura è «generata» (cap. 07.3). Rigenerarli
             ' non è un passaggio nuovo, e la data resta quella della prima volta.
             If opportunita.Stato = StatoOpportunita.Interessante Then
                 opportunita.Avanza(StatoOpportunita.Generata)
             End If
+
+        End Function
+
+        ''' <summary>
+        ''' Riscrive la <b>sola</b> ✉️ lettera, sul 🎯 CV che la candidatura ha adesso
+        ''' (R7, 2026-08-23).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para><b>Perché esiste.</b> Quando l'utente riscrive a mano un testo del CV, la
+        ''' lettera resta indietro: i suoi fatti li ha presi dal profilo e dal CV di prima,
+        ''' e continua a raccontare la storia vecchia senza che nessuno lo dica (R7). Rifare
+        ''' <i>tutto</i> non è la risposta: butterebbe via proprio il CV appena riscritto a
+        ''' mano, che è il lavoro da salvare. Si riscrive quel che discende, non quel da cui
+        ''' si discende.</para>
+        ''' <para><b>Il verso è quello, e vale la pena dirlo</b>: il CV racconta, la lettera
+        ''' ripete. Non esiste il gemello che rifà il CV dalla lettera — riscrivere la
+        ''' lettera non disallinea niente.</para>
+        ''' </remarks>
+        Public Async Function RigeneraLetteraAsync(opportunita As Opportunita, profilo As Profilo,
+                                                   Optional avanzamento As IProgress(Of AvanzamentoPipeline) = Nothing,
+                                                   Optional annulla As CancellationToken = Nothing) As Task
+
+            Esigi(opportunita)
+            If profilo Is Nothing Then Throw New ArgumentNullException(NameOf(profilo))
+
+            If Not opportunita.Confrontata Then
+                Throw New InvalidOperationException(
+                    "La lettera si riscrive dopo il confronto: prima ConfrontaAsync.")
+            End If
+
+            ' Senza CV non c'è niente da cui ripartire: la lettera nasce con lui, e da
+            ' sola non è un documento che questa pipeline sappia scrivere.
+            If opportunita.Cv Is Nothing Then
+                Throw New InvalidOperationException(
+                    "La lettera si riscrive sul CV della candidatura: prima GeneraAsync.")
+            End If
+
+            Await ScriviLaLetteraAsync(
+                opportunita, ComeJson(profilo), opportunita.Giudizi(),
+                LinguaDocumenti.PerDocumenti(opportunita.Lingua),
+                AppuntiDiMira.PerIlPrompt(opportunita.Appunti),
+                1, If(ConRifinitura, 2, 1), avanzamento, annulla).ConfigureAwait(False)
+
+        End Function
+
+        ''' <summary>
+        ''' Scrive la ✉️ lettera e la rifinisce: è il pezzo in comune fra la generazione
+        ''' intera e la rigenerazione della sola lettera (R7).
+        ''' </summary>
+        ''' <param name="passo">Il numero del passo «scrivo la lettera» in questa fila.</param>
+        ''' <param name="totale">Quanti passi ha la fila; zero per quella intera, che il totale lo sa da sé.</param>
+        Private Async Function ScriviLaLetteraAsync(opportunita As Opportunita, profiloJson As JsonNode,
+                                                    giudizi As JsonArray, lingua As String, appunti As JsonNode,
+                                                    passo As Integer, totale As Integer,
+                                                    avanzamento As IProgress(Of AvanzamentoPipeline),
+                                                    annulla As CancellationToken) As Task
+
+            ' La lettera riceve il CV **già rifinito**: le serve come riferimento di
+            ' coerenza, e dargli quello grezzo vorrebbe dire farle raccontare la stessa
+            ' storia con parole che nel CV non ci sono più.
+            Annuncia(avanzamento, passo, "Scrivo la lettera", totale)
+            opportunita.Lettera = Await _generatore.GeneraLetteraAsync(
+                profiloJson, opportunita.Annuncio, giudizi, opportunita.Cv,
+                ElencoMitigazioni(opportunita.Mitigazioni), annulla, lingua, appunti,
+                Rifinitura.RiscrittiAMano(opportunita.Cv, opportunita.RiscrittureDelCv.Campi)).ConfigureAwait(False)
+
+            Await RifinisciAsync(opportunita, "lettera", passo + 1, "Rifinisco la lettera",
+                                 Function() _rifinitura.DellaLetteraAsync(opportunita.Lettera, lingua, annulla),
+                                 avanzamento, totale).ConfigureAwait(False)
+
+            ' Da questo istante la lettera ha visto il CV com'è: la spia di P6 si spegne, e
+            ' quel che l'utente aveva riscritto a mano *nella lettera* non c'è più (R7).
+            opportunita.SegnaLetteraGenerata()
 
         End Function
 
@@ -230,11 +294,12 @@ Namespace Motore
         Private Async Function RifinisciAsync(opportunita As Opportunita, quale As String,
                                               passo As Integer, cosa As String,
                                               passata As Func(Of Task(Of JsonObject)),
-                                              avanzamento As IProgress(Of AvanzamentoPipeline)) As Task
+                                              avanzamento As IProgress(Of AvanzamentoPipeline),
+                                              Optional totale As Integer = 0) As Task
 
             If _rifinitura Is Nothing Then Return
 
-            Annuncia(avanzamento, passo, cosa)
+            Annuncia(avanzamento, passo, cosa, totale)
 
             Try
                 ' Quel che la passata restituisce — i testi di prima — non si tiene più
@@ -243,7 +308,7 @@ Namespace Motore
 
             Catch ex As ErroreAi
                 ' Non si tace: il passo dice cos'è successo, e il documento resta grezzo.
-                Annuncia(avanzamento, passo, $"{cosa}: non ci sono riuscita, tengo il testo com'è")
+                Annuncia(avanzamento, passo, $"{cosa}: non ci sono riuscita, tengo il testo com'è", totale)
             End Try
 
         End Function
@@ -378,14 +443,20 @@ Namespace Motore
 
         End Sub
 
+        ''' <param name="totale">
+        ''' Quanti passi ha questa fila; <b>zero</b> per la fila intera, che il totale lo sa
+        ''' da sé. Lo passa chi ne fa una più corta — la rigenerazione della sola lettera
+        ''' (R7) — perché annunciare «1 di 6» a chi aspetta due passi sarebbe una promessa
+        ''' di quattro attese che non arriveranno.
+        ''' </param>
         Private Sub Annuncia(avanzamento As IProgress(Of AvanzamentoPipeline),
-                             passo As Integer, cosa As String)
+                             passo As Integer, cosa As String, Optional totale As Integer = 0)
 
             ' Il totale dipende da com'è montata la fila: annunciare «4 di 6» a chi la
             ' rifinitura non ce l'ha vorrebbe dire promettere due passi che non arriveranno.
             avanzamento?.Report(New AvanzamentoPipeline With {
                 .Passo = passo,
-                .Totale = If(ConRifinitura, PassiTotali, PassiSenzaRifinitura),
+                .Totale = If(totale > 0, totale, If(ConRifinitura, PassiTotali, PassiSenzaRifinitura)),
                 .Cosa = cosa})
 
         End Sub

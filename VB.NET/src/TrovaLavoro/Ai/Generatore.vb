@@ -1,4 +1,4 @@
-Imports System.Text.Json.Nodes
+﻿Imports System.Text.Json.Nodes
 Imports System.Threading
 Imports System.Threading.Tasks
 
@@ -69,11 +69,17 @@ Namespace Ai
         ''' <param name="annulla">Il gettone del pulsante Annulla (cap. 02.6).</param>
         ''' <param name="lingua">La lingua del documento: <c>it</c> o <c>en</c> (cap. 10).</param>
         ''' <param name="appunti">Gli appunti di mira (T7c), come per il CV mirato.</param>
+        ''' <param name="riscritture">
+        ''' I testi del CV che l'utente ha <b>riscritto a mano</b> (R7): quelli sì sono una
+        ''' sua dichiarazione, e la lettera può fidarsene come si fida del profilo. Lista
+        ''' vuota nel caso normale, che è un CV uscito tutto dall'AI.
+        ''' </param>
         Function GeneraLetteraAsync(profilo As JsonNode, annuncio As JsonNode, giudizi As JsonNode,
                                     cv As JsonNode, mitigazioni As JsonNode,
                                     Optional annulla As CancellationToken = Nothing,
                                     Optional lingua As String = "it",
-                                    Optional appunti As JsonNode = Nothing) As Task(Of JsonNode)
+                                    Optional appunti As JsonNode = Nothing,
+                                    Optional riscritture As JsonNode = Nothing) As Task(Of JsonNode)
 
     End Interface
 
@@ -98,6 +104,7 @@ Namespace Ai
         Public Const SegnapostoCv As String = "CV"
         Public Const SegnapostoMitigazioni As String = "MITIGAZIONI"
         Public Const SegnapostoAppunti As String = "APPUNTI"
+        Public Const SegnapostoRiscritture As String = "RISCRITTURE"
 
         ''' <summary>Come si chiamano i tre lavori nei messaggi all'utente.</summary>
         Private Const EtichettaCvBase As String = "la generazione del CV base"
@@ -149,7 +156,8 @@ Namespace Ai
                                            cv As JsonNode, mitigazioni As JsonNode,
                                            Optional annulla As CancellationToken = Nothing,
                                            Optional lingua As String = "it",
-                                           Optional appunti As JsonNode = Nothing) _
+                                           Optional appunti As JsonNode = Nothing,
+                                           Optional riscritture As JsonNode = Nothing) _
                                            As Task(Of JsonNode) Implements IGeneratore.GeneraLetteraAsync
 
             Esigi(profilo, "il profilo", EtichettaLettera)
@@ -168,7 +176,8 @@ Namespace Ai
                     {SegnapostoGiudizi, LibreriaPrompt.ComeNelPrompt(giudizi)},
                     {SegnapostoCv, LibreriaPrompt.ComeNelPrompt(cv)},
                     {SegnapostoMitigazioni, LibreriaPrompt.ComeNelPrompt(If(mitigazioni, New JsonArray()))},
-                    {SegnapostoAppunti, LibreriaPrompt.ComeNelPrompt(SenzaAppunti(appunti))}},
+                    {SegnapostoAppunti, LibreriaPrompt.ComeNelPrompt(SenzaAppunti(appunti))},
+                    {SegnapostoRiscritture, LibreriaPrompt.ComeNelPrompt(If(riscritture, New JsonArray()))}},
                 annulla, lingua)
 
         End Function

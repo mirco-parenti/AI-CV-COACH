@@ -87,6 +87,58 @@ Namespace NonRegressione
 
         End Function
 
+        ''' <summary>
+        ''' R7: quel che l'utente ha riscritto a mano nel CV vale come una sua
+        ''' dichiarazione, e la lettera può fidarsene.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para><b>Il caso è scelto perché senza la cura non può passare.</b> Il gestionale
+        ''' di magazzino è un requisito <i>preferenziale</i> dell'annuncio che il profilo
+        ''' <b>non copre</b>: il modello non può nominarlo, o inventerebbe. Se lo nomina è
+        ''' perché l'ha letto fra le <c>&lt;riscritture&gt;</c> — cioè perché la cura del
+        ''' Pool 1.13 funziona. Rimettendo sotto il prompt di prima questo collaudo deve
+        ''' tornare rosso (regola 14).</para>
+        ''' <para>Il pass/fail sta su una parola che <b>non esiste altrove</b> — il nome del
+        ''' gestionale, inventato — e non sulla forma della frase: come per gli altri, quel
+        ''' che il modello decide cambia da un giro all'altro, quel che deve valere no.</para>
+        ''' </remarks>
+        <TestMethod, TestCategory("Reale")>
+        Public Async Function LaLetteraRecepisceUnFattoDichiaratoAManoNelCv() As Task
+
+            Dim chiave As String = CollaudoReale.ChiaveOppureRinuncia()
+
+            ' Il CV mirato com'è uscito dall'AI, poi riscritto a mano dall'utente: è la
+            ' stessa scrittura che fa la finestra «Modifica i testi» (cap. 08.4).
+            Dim cv As JsonNode = JsonNode.Parse(
+                "{""tipo"": ""cv_mirato""," &
+                """intestazione"": {""nome"": ""Luca Ferrari""}," &
+                """sommario"": ""Addetto al magazzino con tre anni di esperienza.""}")
+
+            Rifinitura.Riscrivi(cv, "sommario",
+                "Addetto al magazzino con tre anni di esperienza. " &
+                "Per due anni ho lavorato ogni giorno col gestionale di magazzino MAGOSTELLA.")
+
+            Using client As New ClientClaude(chiave)
+
+                Dim lettera As JsonNode = Await New Generatore(CollaudoReale.PoolIntegrato(), client).
+                    GeneraLetteraAsync(
+                        CasiDiCollaudo.Profilo(),
+                        CasiDiCollaudo.Annuncio(CasiDiCollaudo.Compatibile),
+                        CasiDiCollaudo.Giudizi(CasiDiCollaudo.Compatibile),
+                        cv, Nothing, Nothing, "it", Nothing,
+                        Rifinitura.RiscrittiAMano(cv, {"sommario"}))
+
+                Dim scritta As String = lettera.ToJsonString().ToUpperInvariant()
+
+                Assert.Contains("MAGOSTELLA", scritta,
+                                "il gestionale sta solo fra le riscritture a mano: se la lettera " &
+                                "lo nomina è perché le ha credute una dichiarazione dell'utente. " &
+                                $"Lettera ricevuta: {lettera.ToJsonString()}")
+
+            End Using
+
+        End Function
+
         ' --- l'impalcatura ---------------------------------------------------------------
 
         Private Shared Async Function FrammentoAsync(turno As String, detto As String) As Task(Of JsonObject)

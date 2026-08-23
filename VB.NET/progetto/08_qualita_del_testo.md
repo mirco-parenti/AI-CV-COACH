@@ -99,6 +99,29 @@ perde contro la forma.*
   è cambiato da allora (cap. 11.1). E **«Rigenera»** — come il cambio di lingua, che passa
   di lì — avverte che a sparire saranno anche le modifiche fatte a mano: di un testo
   scritto dall'AI si sa che si rifà premendo di nuovo, di uno scritto a mano no.
+- **Quel che si riscrive a mano resta scritto, e la lettera lo viene a sapere** *(R7,
+  2026-08-23)*. Il collaudo dal vivo di T9e ha trovato due strade cieche che partivano dallo
+  stesso punto. La prima: modificato un testo del 🎯 CV-2, la ✉️ lettera continuava a
+  raccontare la storia di prima — i suoi fatti li aveva presi dal profilo e dal CV di allora
+  — e nessuno lo diceva. La seconda: «Rigenera» avvisava sì che le modifiche a mano sarebbero
+  sparite, ma solo finché non si cambiava pannello, perché quell'informazione viveva in un
+  **booleano di sessione**. Le due si curano insieme dando memoria alla modifica: dei campi
+  riscritti si annotano gli **id**, e vivono dove vive il documento — nello `stato.json` della
+  candidatura, in `cv_base.json` per il 📄 CV-1 (cap. 11.1). Da lì discendono tre cose. L'avviso
+  di «Rigenera» **dice quali** testi si perdono e non scade più al rientro. In P6 compare
+  «⚠ Rigenera la lettera», che c'è **solo** quando il CV è stato riscritto dopo l'ultima
+  lettera — il verso conta, perché il CV racconta e la lettera ripete: riscrivere la lettera
+  non disallinea niente. E la lettera si **riallinea da sé** alla chiusura della finestra,
+  una volta sola; se anche lei era stata riscritta a mano si chiede prima, e se l'AI fallisce
+  lo si dice e la spia resta. Il salvataggio, infine, aggiunge una riga che dice dove valgono
+  le modifiche: in questo documento, mentre **i fatti si correggono nel profilo**.
+- **E il prompt della lettera impara a distinguere due CV** *(R7)*. Fin dal Pool 1.00 il
+  `<cv>` non era fonte di fatti, ed era giusto finché a scriverlo era solo il modello: farglielo
+  confermare da sé stesso non aggiunge niente. Ma un testo riscritto **a mano** è una
+  dichiarazione della persona, come il profilo — l'anti-invenzione vieta al modello di
+  inventare, non all'utente di dichiarare. Al prompt arriva perciò un blocco nuovo,
+  `<riscritture>`, coi soli campi che l'utente ha davvero riscritto (Pool 1.13): vale come le
+  sue parole e niente di più, e nel caso normale è una lista vuota.
 - **Il confronto dice «prima» e «adesso»** *(T9d)*, non più «prima» e «dopo». Il secondo
   termine è il documento **com'è in questo momento**: se in mezzo è passata anche la mano
   dell'utente, «adesso» resta vero e «dopo la rifinitura» no. Il «prima» invece non si

@@ -190,6 +190,47 @@ Namespace Motore
         End Function
 
         ''' <summary>
+        ''' I testi che l'utente ha riscritto <b>a mano</b> in un documento, come li riceve
+        ''' il prompt della lettera (R7): per ciascuno il nome del campo come si legge e il
+        ''' testo che c'è adesso.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Serve a distinguere, dentro uno stesso CV, quel che ha scritto il modello
+        ''' da quel che ha scritto la persona. Il primo non è fonte di fatti — è il profilo
+        ''' riscritto in forma di CV, e prenderlo per fonte vorrebbe dire far confermare al
+        ''' modello i fatti di sé stesso; il secondo sì, perché una modifica dell'utente è
+        ''' una <b>dichiarazione</b>, come lo è quel che scrive nel profilo. L'anti-invenzione
+        ''' vieta al modello di inventare, non all'utente di dichiarare (cap. 04).</para>
+        ''' <para>Un campo annotato che nel documento non c'è più — rigenerato, o sparito
+        ''' col profilo — semplicemente non compare: si riferisce quel che c'è, non quel
+        ''' che risultava.</para>
+        ''' </remarks>
+        Public Shared Function RiscrittiAMano(documento As JsonNode,
+                                              campi As IEnumerable(Of String)) As JsonArray
+
+            Dim elenco As New JsonArray()
+
+            If documento Is Nothing OrElse campi Is Nothing Then Return elenco
+
+            Dim prosa As List(Of CampoDiProsa) = CampiDiProsa(documento)
+
+            For Each id As String In campi
+
+                Dim campo As CampoDiProsa = prosa.FirstOrDefault(
+                    Function(c) String.Equals(c.Id, id, StringComparison.Ordinal))
+                If campo Is Nothing Then Continue For
+
+                elenco.Add(New JsonObject From {
+                    {"campo", campo.Etichetta},
+                    {"testo", campo.Testo}})
+
+            Next
+
+            Return elenco
+
+        End Function
+
+        ''' <summary>
         ''' Rimette al suo posto, dentro il documento, il testo di un campo riscritto a
         ''' mano.
         ''' </summary>

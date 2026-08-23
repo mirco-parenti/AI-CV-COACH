@@ -1,4 +1,4 @@
-Imports System.Drawing
+﻿Imports System.Drawing
 Imports System.Linq
 Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
@@ -112,6 +112,54 @@ Namespace Ui
         End Sub
 
         <TestMethod>
+        Public Sub UnComandoNascostoNonOccupaPosto()
+
+            ' R7: il primo comando che c'è solo quando serve è «Rigenera la lettera» di P6.
+            ' Da nascosto non deve né lasciare un buco in fascia né — peggio — mandare a
+            ' capo gli altri per fare spazio a sé stesso.
+            Using banco As New BancoDiProva(larghezza:=700, altezza:=60)
+
+                Dim primo As Button = banco.Bottone("A", 200)
+                Dim nascosto As Button = banco.Bottone("NASCOSTO", 300)
+                Dim ultimo As Button = banco.Bottone("B", 200)
+                nascosto.Visible = False
+
+                banco.Comandi.ASinistra(primo, nascosto, ultimo)
+                banco.Comandi.Disponi(altezzaMinima:=60)
+
+                Assert.AreEqual(primo.Top, ultimo.Top, "i due che si vedono stanno sulla stessa riga")
+                Assert.AreEqual(primo.Right + StileApp.DistanzaControlli, ultimo.Left,
+                                "e uno accanto all'altro, senza il buco di quello nascosto")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub QuandoIlComandoNascostoCompareTuttiGliAltriGliFannoPosto()
+
+            Using banco As New BancoDiProva(larghezza:=700, altezza:=60)
+
+                Dim primo As Button = banco.Bottone("A", 200)
+                Dim aRichiesta As Button = banco.Bottone("A RICHIESTA", 300)
+                Dim ultimo As Button = banco.Bottone("B", 200)
+                aRichiesta.Visible = False
+
+                banco.Comandi.ASinistra(primo, aRichiesta, ultimo)
+                banco.Comandi.Disponi(altezzaMinima:=60)
+
+                aRichiesta.Visible = True
+                banco.Comandi.Disponi(altezzaMinima:=60)
+
+                banco.NessunaSovrapposizione()
+                Assert.AreEqual(primo.Right + StileApp.DistanzaControlli, aRichiesta.Left,
+                                "adesso il posto ce l'ha")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
         Public Sub NessunPannelloSovrapponeIProprioComandiANessunaLarghezza()
             ' Il collaudo di sistema: la geometria sta in un posto solo, ma i comandi li
             ' dichiara ogni pannello, e un pannello che ne aggiunge uno troppo largo
@@ -129,12 +177,22 @@ Namespace Ui
                         ' il caso stretto non si ricava da quello largo.
                         Dim ingombro As Size = If(larghezza < 1350, New Size(130, 68), New Size(261, 188))
 
-                        pannello.Width = larghezza
-                        DirectCast(pannello, IPannelloArea).ImpostaIngombroLogo(ingombro)
-
                         Dim fascia As Panel = DirectCast(
                             pannello.Controls.Find("pnlAzioni", searchAllChildren:=True).Single(), Panel)
                         Dim comandi As Button() = fascia.Controls.OfType(Of Button)().ToArray()
+
+                        ' Si accende tutto quel che la fascia può contenere, compresi i
+                        ' comandi che di norma non ci sono — «Rigenera la lettera» di P6
+                        ' compare solo quando la lettera è rimasta indietro (R7). È il caso
+                        ' peggiore, ed è un caso vero: quando quel bottone c'è, ci sono anche
+                        ' tutti gli altri. Verificarlo solo da spento vorrebbe dire non
+                        ' verificarlo mai — e la fascia, da spento, non gli tiene il posto.
+                        For Each comando As Button In comandi
+                            comando.Visible = True
+                        Next
+
+                        pannello.Width = larghezza
+                        DirectCast(pannello, IPannelloArea).ImpostaIngombroLogo(ingombro)
 
                         For primo As Integer = 0 To comandi.Length - 2
                             For secondo As Integer = primo + 1 To comandi.Length - 1

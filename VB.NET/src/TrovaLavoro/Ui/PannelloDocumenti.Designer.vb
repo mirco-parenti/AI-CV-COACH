@@ -43,6 +43,7 @@ Partial Class PannelloDocumenti
         Me.btnTornaIndietro = New System.Windows.Forms.Button()
         Me.btnRigenera = New System.Windows.Forms.Button()
         Me.btnModificaTesti = New System.Windows.Forms.Button()
+        Me.btnRigeneraLettera = New System.Windows.Forms.Button()
         Me.btnEsportaDocx = New System.Windows.Forms.Button()
         Me.btnEsportaPdf = New System.Windows.Forms.Button()
         Me.btnPreparaEmail = New System.Windows.Forms.Button()
@@ -321,6 +322,7 @@ Partial Class PannelloDocumenti
         Me.pnlAzioni.Controls.Add(Me.btnTornaIndietro)
         Me.pnlAzioni.Controls.Add(Me.btnRigenera)
         Me.pnlAzioni.Controls.Add(Me.btnModificaTesti)
+        Me.pnlAzioni.Controls.Add(Me.btnRigeneraLettera)
         Me.pnlAzioni.Controls.Add(Me.btnEsportaDocx)
         Me.pnlAzioni.Controls.Add(Me.btnEsportaPdf)
         Me.pnlAzioni.Controls.Add(Me.btnPreparaEmail)
@@ -354,13 +356,24 @@ Partial Class PannelloDocumenti
         Me.btnModificaTesti.TabIndex = 2
         Me.btnModificaTesti.Text = "Modifica i testi"
         '
+        'btnRigeneraLettera
+        '
+        ' Nasce invisibile: c'è solo quando la lettera è rimasta indietro rispetto al CV
+        ' riscritto a mano (R7). La posizione la decide la fascia, come per tutti gli altri.
+        Me.btnRigeneraLettera.Location = New System.Drawing.Point(506, 18)
+        Me.btnRigeneraLettera.Name = "btnRigeneraLettera"
+        Me.btnRigeneraLettera.Size = New System.Drawing.Size(210, 32)
+        Me.btnRigeneraLettera.TabIndex = 3
+        Me.btnRigeneraLettera.Text = "⚠ Rigenera la lettera"
+        Me.btnRigeneraLettera.Visible = False
+        '
         'btnEsportaDocx
         '
         Me.btnEsportaDocx.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnEsportaDocx.Location = New System.Drawing.Point(646, 18)
         Me.btnEsportaDocx.Name = "btnEsportaDocx"
         Me.btnEsportaDocx.Size = New System.Drawing.Size(130, 32)
-        Me.btnEsportaDocx.TabIndex = 3
+        Me.btnEsportaDocx.TabIndex = 4
         Me.btnEsportaDocx.Text = "Esporta DOCX"
         '
         'btnEsportaPdf
@@ -369,7 +382,7 @@ Partial Class PannelloDocumenti
         Me.btnEsportaPdf.Location = New System.Drawing.Point(788, 18)
         Me.btnEsportaPdf.Name = "btnEsportaPdf"
         Me.btnEsportaPdf.Size = New System.Drawing.Size(130, 32)
-        Me.btnEsportaPdf.TabIndex = 4
+        Me.btnEsportaPdf.TabIndex = 5
         Me.btnEsportaPdf.Text = "Esporta PDF"
         '
         'btnPreparaEmail
@@ -378,7 +391,7 @@ Partial Class PannelloDocumenti
         Me.btnPreparaEmail.Location = New System.Drawing.Point(930, 18)
         Me.btnPreparaEmail.Name = "btnPreparaEmail"
         Me.btnPreparaEmail.Size = New System.Drawing.Size(176, 32)
-        Me.btnPreparaEmail.TabIndex = 5
+        Me.btnPreparaEmail.TabIndex = 6
         Me.btnPreparaEmail.Text = "Prepara email"
         '
         'PannelloDocumenti
@@ -434,6 +447,7 @@ Partial Class PannelloDocumenti
     Friend WithEvents btnTornaIndietro As System.Windows.Forms.Button
     Friend WithEvents btnRigenera As System.Windows.Forms.Button
     Friend WithEvents btnModificaTesti As System.Windows.Forms.Button
+    Friend WithEvents btnRigeneraLettera As System.Windows.Forms.Button
     Friend WithEvents btnEsportaDocx As System.Windows.Forms.Button
     Friend WithEvents btnEsportaPdf As System.Windows.Forms.Button
     Friend WithEvents btnPreparaEmail As System.Windows.Forms.Button

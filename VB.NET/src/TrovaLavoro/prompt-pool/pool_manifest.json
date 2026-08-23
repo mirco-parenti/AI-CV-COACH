@@ -49,11 +49,11 @@
     },
     {
       "percorso": "generazione/lettera.en.md",
-      "sha256": "f8d8eb4b3c548393fe22c104d3395c4c68a239d58f9a3ccadf76555ca2bd06ed"
+      "sha256": "e17a6172fdd1c74d65ddff294880a2313a533b3f3a55cb6c7153ca0cde0ee83e"
     },
     {
       "percorso": "generazione/lettera.it.md",
-      "sha256": "3e467318da2f483370c6c788cd97ff77fab596604c3d77480a084fbbc6619f9d"
+      "sha256": "46d6f58e018cee30825dcc7616042d61ad8c9bc328ca46a8e9cbd1db95730faa"
     },
     {
       "percorso": "profilo/classifica_documenti.md",

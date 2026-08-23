@@ -58,6 +58,39 @@ Namespace Motore
         End Function
 
         <TestMethod>
+        Public Sub IRiscrittiAManoPortanoIlNomeDelCampoEIlTestoDiAdesso()
+
+            ' R7: è quel che riceve il prompt della lettera, ed è l'unica cosa dentro un CV
+            ' che valga come fonte di fatti — le parole non le ha scritte un modello, le ha
+            ' scritte la persona.
+            Dim documento As JsonNode = Cv()
+            Rifinitura.Riscrivi(documento, "esperienza.1", "Ho traslocato elefanti.")
+
+            Dim riscritti As JsonArray = Rifinitura.RiscrittiAMano(documento, {"esperienza.1"})
+
+            Assert.HasCount(1, riscritti, "un campo solo")
+            Assert.AreEqual("Esperienza 2", riscritti(0)("campo").GetValue(Of String)(),
+                            "col nome come si legge a video, non con l'id")
+            Assert.AreEqual("Ho traslocato elefanti.", riscritti(0)("testo").GetValue(Of String)(),
+                            "e col testo che c'è adesso nel documento")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnCampoRiscrittoCheNelDocumentoNonCEPiuNonSiRiferisce()
+
+            ' Può succedere: il documento è stato rigenerato, o il profilo ha perso quella
+            ' voce. Si riferisce quel che c'è, non quel che risultava — e senza inventare
+            ' un testo vuoto, che al modello direbbe una cosa falsa.
+            Assert.IsEmpty(Rifinitura.RiscrittiAMano(Cv(), {"esperienza.9"}),
+                           "un campo che non esiste non porta niente")
+
+            Assert.IsEmpty(Rifinitura.RiscrittiAMano(Nothing, {"sommario"}),
+                           "e senza documento nemmeno")
+
+        End Sub
+
+        <TestMethod>
         Public Async Function DalCvPartonoDueGeneriConGliIdGiusti() As Task
 
             Dim finto As New RifinitoreFinto()

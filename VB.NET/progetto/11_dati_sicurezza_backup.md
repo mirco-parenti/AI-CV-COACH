@@ -89,6 +89,18 @@ TrovaLavoro\
   prova di dove stava. Le opportunità scritte prima di T5b non hanno i due campi e si
   riaprono senza: non si inventa una provenienza che non c'era. Il link è anche
   l'identità con cui la cattura riconosce di aver già preso quella pagina (cap. 06.4).
+- **Un documento riscritto a mano se lo ricorda** *(R7, 2026-08-23)*: lo `stato.json` di
+  una candidatura annota **quali** campi di prosa ha riscritto l'utente e quando (blocco
+  `riscritture`, uno per il CV e uno per la lettera), più la data dell'ultima lettera scritta
+  dall'AI (`lettera_generata`); per il 📄 CV-1 base gli stessi id stanno in `cv_base.json`.
+  Servono a tre cose che prima non si potevano fare (cap. 08.4): dire **quali** testi una
+  rigenerazione butterebbe via, accorgersi che la lettera è rimasta indietro rispetto al CV, e
+  far sapere al prompt della lettera quali parole vengono dalla persona invece che dal modello.
+  Come sempre qui dentro, **i blocchi tacciono quando non hanno niente da dire**: una
+  candidatura che nessuno ha toccato a mano resta scritta esattamente com'era, e una scritta
+  prima di R7 si riapre come «mai toccata» invece di indovinare una storia che nessuno ha
+  registrato. Backup e ripristino non hanno avuto bisogno di sapere niente: copiano i file
+  grezzi (11.4), e i tool di lettura li restituiscono com'è (cap. 09.3).
 - **Il profilo è versionato**: ogni modifica confermata (editing, sessione di
   aggiornamento) salva una copia datata nello storico; `stato.json` di ogni
   opportunità annota **con quale versione** del profilo furono generati i documenti.

@@ -30,6 +30,17 @@ Namespace Dati
         ''' </summary>
         Public Property Lingua As String
 
+        ''' <summary>
+        ''' I campi di prosa che l'utente ha riscritto <b>a mano</b> in questo CV (R7,
+        ''' 2026-08-23): vuoto nei file nati prima, che è come dire «mai toccato a mano».
+        ''' </summary>
+        ''' <remarks>
+        ''' Il 📄 CV-1 base una lettera non ce l'ha, quindi qui non c'è nessuna spia da
+        ''' accendere: le riscritture servono all'avviso di «Rigenera», che senza di loro
+        ''' scadrebbe al primo rientro in P6 (v. <see cref="RiscrittureAMano"/>).
+        ''' </remarks>
+        Public ReadOnly Property Riscritture As New RiscrittureAMano
+
     End Class
 
     ''' <summary>
@@ -239,7 +250,8 @@ Namespace Dati
         ''' <returns>Il percorso del file scritto.</returns>
         Public Function SalvaCvBase(cv As JsonNode, versioneProfilo As String,
                                     Optional lingua As String = Nothing,
-                                    Optional generato As Date? = Nothing) As String
+                                    Optional generato As Date? = Nothing,
+                                    Optional riscritture As RiscrittureAMano = Nothing) As String
 
             If cv Is Nothing Then Throw New ArgumentNullException(NameOf(cv))
 
@@ -250,6 +262,11 @@ Namespace Dati
                 {"generato", If(generato, Date.Now).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)},
                 {"lingua", lingua},
                 {"cv", cv.DeepClone()}}
+
+            ' Da R7 (T9e): il blocco c'è solo se l'utente ha riscritto qualcosa a mano, e
+            ' un CV base che nessuno ha toccato resta scritto esattamente com'era.
+            Dim aMano As JsonObject = riscritture?.ComeJson()
+            If aMano IsNot Nothing Then involucro("riscritture") = aMano
 
             ScriviInModoAtomico(_cartella.FileCvBase, involucro.ToJsonString(FormatoLeggibile))
 
@@ -280,11 +297,15 @@ Namespace Dati
             Dim cv As JsonNode = Nothing
             involucro.TryGetPropertyValue("cv", cv)
 
-            Return New CvBase With {
+            Dim letto As New CvBase With {
                 .Cv = cv,
                 .VersioneProfilo = Campo(involucro, "versione_profilo"),
                 .Generato = generato,
                 .Lingua = Campo(involucro, "lingua")}
+
+            letto.Riscritture.Rileggi(TryCast(CampiJson.Nodo(involucro, "riscritture"), JsonObject))
+
+            Return letto
 
         End Function
 

@@ -2,7 +2,7 @@
 
 *Collaudo di tappa di T9 (cap. 14), voci **7** della checklist ereditata dal prototipo (`HTML+JS/prompt_design.md`). Quattro righe che dicono mansione, sede e contratto, e nient'altro: tutto ciò che un magazziniere «di solito» deve avere qui non è scritto. Persone e aziende sono inventate: per questo il rapporto sta nel repo.*
 
-- **Quando**: 2026-08-22 21:26
+- **Quando**: 2026-08-23 21:36
 
 L'annuncio dato in pasto all'analisi:
 

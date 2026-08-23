@@ -1,4 +1,4 @@
-Imports System.Linq
+﻿Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports System.Threading
 Imports System.Threading.Tasks
@@ -133,6 +133,13 @@ Friend Class GeneratoreFinto
     ''' </summary>
     Friend ReadOnly Property AppuntiVisti As New List(Of JsonNode)
 
+    ''' <summary>
+    ''' I testi riscritti a mano arrivati alla lettera (R7), per la stessa ragione degli
+    ''' appunti: se si fermassero fra il documento e la richiesta, la lettera continuerebbe
+    ''' a raccontare la storia di prima e nessun collaudo se ne accorgerebbe.
+    ''' </summary>
+    Friend ReadOnly Property RiscrittureViste As New List(Of JsonNode)
+
     Public Function GeneraCvBaseAsync(profilo As JsonNode,
                                       Optional annulla As CancellationToken = Nothing,
                                       Optional lingua As String = "it") _
@@ -159,11 +166,13 @@ Friend Class GeneratoreFinto
                                        cv As JsonNode, mitigazioni As JsonNode,
                                        Optional annulla As CancellationToken = Nothing,
                                        Optional lingua As String = "it",
-                                       Optional appunti As JsonNode = Nothing) _
+                                       Optional appunti As JsonNode = Nothing,
+                                       Optional riscritture As JsonNode = Nothing) _
                                        As Task(Of JsonNode) Implements IGeneratore.GeneraLetteraAsync
 
         LingueChieste.Add(lingua)
         AppuntiVisti.Add(appunti)
+        RiscrittureViste.Add(riscritture)
         Return Prossima("lettera", profilo, annuncio, giudizi, cv, mitigazioni)
 
     End Function

@@ -97,6 +97,142 @@ Namespace Motore
 
         End Function
 
+        ' ==================================================================
+        ' Riscrivere la sola lettera (R7, 2026-08-23)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function RiscrivereLaLetteraNonToccaIlCv() As Task
+
+            ' È la ragione per cui questo metodo esiste invece di richiamare «Rigenera»:
+            ' rifare tutto butterebbe via proprio il CV riscritto a mano, cioè il lavoro da
+            ' salvare.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara("{""sommario"": ""Traslochi.""}").
+                       Dara("{""corpo"": ""Ho fatto traslochi.""}").
+                       Dara("{""corpo"": ""Ho traslocato elefanti.""}")
+
+            Dim confrontatore As New ConfrontatoreFinto
+            confrontatore.Dara(ConfrontoPieno)
+
+            Dim pipeline As PipelineCandidatura = PipelineDiProva(
+                New AnalizzatoreFinto, confrontatore, generatore)
+
+            Dim opportunita As Opportunita = Await GiaConfrontataAsync(pipeline)
+            Await pipeline.GeneraAsync(opportunita, ProfiloDiProva())
+
+            ' L'utente riscrive a mano il sommario del CV, come farebbe dalla finestra.
+            Rifinitura.Riscrivi(opportunita.Cv, "sommario", "Traslochi di elefanti.")
+            opportunita.SegnaRiscritture(RuoloDocumento.Cv, {"sommario"})
+
+            Await pipeline.RigeneraLetteraAsync(opportunita, ProfiloDiProva())
+
+            Assert.AreEqual("Traslochi di elefanti.", opportunita.Cv("sommario").GetValue(Of String)(),
+                            "il CV è rimasto quello scritto dall'utente")
+            Assert.AreEqual("Ho traslocato elefanti.", opportunita.Lettera("corpo").GetValue(Of String)(),
+                            "e la lettera è quella nuova")
+            Assert.IsFalse(opportunita.LetteraDaRiallineare, "la spia si è spenta")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaLetteraRicevePerScrittoQuelCheLUtenteHaRiscrittoAMano() As Task
+
+            ' Il filo di R7, gemello di quello degli appunti: se le riscritture si
+            ' fermassero prima della richiesta, la lettera continuerebbe a raccontare la
+            ' storia di prima e nessuno se ne accorgerebbe — che è il difetto da cui
+            ' tutto questo nasce.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara("{""sommario"": ""Traslochi.""}").
+                       Dara("{""corpo"": ""…""}").
+                       Dara("{""corpo"": ""…""}")
+
+            Dim confrontatore As New ConfrontatoreFinto
+            confrontatore.Dara(ConfrontoPieno)
+
+            Dim pipeline As PipelineCandidatura = PipelineDiProva(
+                New AnalizzatoreFinto, confrontatore, generatore)
+
+            Dim opportunita As Opportunita = Await GiaConfrontataAsync(pipeline)
+            Await pipeline.GeneraAsync(opportunita, ProfiloDiProva())
+
+            Rifinitura.Riscrivi(opportunita.Cv, "sommario", "Ho traslocato elefanti.")
+            opportunita.SegnaRiscritture(RuoloDocumento.Cv, {"sommario"})
+
+            Await pipeline.RigeneraLetteraAsync(opportunita, ProfiloDiProva())
+
+            Dim ultime As String = generatore.RiscrittureViste.Last().ToJsonString()
+
+            Assert.Contains("elefanti", ultime, "il testo dell'utente arriva al prompt")
+            Assert.Contains("Sommario", ultime, "col nome del campo, come si legge a video")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SenzaRiscrittureAllaLetteraArrivaUnaListaVuota() As Task
+
+            ' Il caso normale, ed è la maggioranza: un CV uscito tutto dall'AI. Al prompt
+            ' arriva una lista vuota, non un buco — la stessa regola degli appunti.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara("{""intestazione"": {}}").Dara("{""corpo"": ""…""}")
+
+            Dim confrontatore As New ConfrontatoreFinto
+            confrontatore.Dara(ConfrontoPieno)
+
+            Dim pipeline As PipelineCandidatura = PipelineDiProva(
+                New AnalizzatoreFinto, confrontatore, generatore)
+
+            Await pipeline.GeneraAsync(Await GiaConfrontataAsync(pipeline), ProfiloDiProva())
+
+            Assert.HasCount(1, generatore.RiscrittureViste, "una sola lettera scritta")
+            Assert.IsNotNull(generatore.RiscrittureViste(0), "le riscritture non arrivano mai come niente")
+            Assert.AreEqual("[]", generatore.RiscrittureViste(0).ToJsonString(), "ma come lista vuota")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SenzaCvLaLetteraNonSiRiscrive() As Task
+
+            ' La lettera nasce col CV: da sola non è un documento che questa pipeline
+            ' sappia scrivere, e chiederglielo è un errore di chi programma, non un caso
+            ' d'uso dell'utente.
+            Dim generatore As New GeneratoreFinto
+            Dim confrontatore As New ConfrontatoreFinto
+            confrontatore.Dara(ConfrontoPieno)
+
+            Dim pipeline As PipelineCandidatura = PipelineDiProva(
+                New AnalizzatoreFinto, confrontatore, generatore)
+
+            Dim opportunita As Opportunita = Await GiaConfrontataAsync(pipeline)
+
+            Await Assert.ThrowsExactlyAsync(Of InvalidOperationException)(
+                Function() pipeline.RigeneraLetteraAsync(opportunita, ProfiloDiProva()))
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaLetteraRiscrittaDaSolaPassaComunqueDallAntiSlop() As Task
+
+            ' La rifinitura non è una funzione del percorso lungo (cap. 08.4): un documento
+            ' uscito da questa strada dev'essere lo stesso che sarebbe uscito dall'altra.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara("{""sommario"": ""Ho un — sommario""}").
+                       Dara("{""corpo"": ""Un corpo — con lineetta""}").
+                       Dara("{""corpo"": ""Un corpo nuovo — con lineetta""}")
+
+            Dim rifinitore As New RifinitoreFinto()
+            Dim pipeline As PipelineCandidatura = PipelineConRifinitura(generatore, rifinitore)
+
+            Dim opportunita As Opportunita = Await GiaConfrontataAsync(pipeline)
+            Await pipeline.GeneraAsync(opportunita, ProfiloDiProva())
+
+            Await pipeline.RigeneraLetteraAsync(opportunita, ProfiloDiProva())
+
+            Assert.AreEqual("Sintesi → Prosa → Prosa", rifinitore.GeneriChiesti(),
+                            "la lettera riscritta da sola è passata anche lei")
+
+        End Function
+
         <TestMethod>
         Public Async Function OgniDocumentoPassaDallaRifinituraAppenaScritto() As Task
 

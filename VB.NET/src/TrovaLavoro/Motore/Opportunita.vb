@@ -63,6 +63,35 @@ Namespace Motore
         ''' <summary>La lettera di presentazione.</summary>
         Public Property Lettera As JsonNode
 
+        ''' <summary>
+        ''' I campi di prosa che l'utente ha riscritto <b>a mano</b> nel 🎯 CV mirato e
+        ''' nella ✉️ lettera (R7, 2026-08-23): quel che di questi documenti non l'ha
+        ''' scritto l'AI.
+        ''' </summary>
+        ''' <remarks>
+        ''' Vivono qui, e da qui vanno nello <c>stato.json</c>, perché sono una proprietà
+        ''' <b>del documento</b> e non della sessione: il pannello che li mostrava se ne
+        ''' dimenticava al primo rientro, e con lui se ne dimenticava l'avviso di
+        ''' «Rigenera» (v. <see cref="RiscrittureAMano"/>).
+        ''' </remarks>
+        Public ReadOnly Property RiscrittureDelCv As New RiscrittureAMano
+
+        ''' <inheritdoc cref="RiscrittureDelCv"/>
+        Public ReadOnly Property RiscrittureDellaLettera As New RiscrittureAMano
+
+        ''' <summary>
+        ''' Quando la ✉️ lettera è stata scritta dall'AI l'ultima volta; la data vuota se
+        ''' non è mai stata scritta o se il file viene da prima di R7.
+        ''' </summary>
+        ''' <remarks>
+        ''' Non è la data di <see cref="Aggiornata"/>, che si muove a ogni salvataggio:
+        ''' serve a rispondere a una domanda sola — la lettera che c'è ha visto o no quel
+        ''' che l'utente ha riscritto nel CV (<see cref="LetteraDaRiallineare"/>). La
+        ''' scrive chi la lettera la genera, cioè la pipeline, che è il posto unico da cui
+        ''' esce (cap. 02).
+        ''' </remarks>
+        Public Property LetteraGenerata As Date
+
 
         ''' <summary>
         ''' La bozza dell'email: destinatario, oggetto, corpo e allegati scelti (T6,
@@ -198,6 +227,76 @@ Namespace Motore
                 Return Giudizi() IsNot Nothing
             End Get
         End Property
+
+        ''' <summary>
+        ''' Se la ✉️ lettera non ha ancora visto quel che l'utente ha riscritto a mano nel
+        ''' 🎯 CV: è la spia di disallineamento che P6 accende (R7, cap. 08.4).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>La regola sta qui e in nessun altro posto, perché è una sola e va detta
+        ''' una volta: c'è una lettera, nel CV c'è del testo scritto a mano, e la lettera è
+        ''' <b>più vecchia</b> di quel testo. Il verso conta: il CV racconta la storia, la
+        ''' lettera la ripete — riscrivere la lettera non disallinea il CV.</para>
+        ''' <para>Una lettera senza data — nata prima di R7, o arrivata da
+        ''' <c>salva_opportunita</c> (cap. 09.3) — vale come «non sappiamo quando»: se nel
+        ''' CV ci sono riscritture, la spia si accende. È il verso prudente, e costa un
+        ''' avviso in più a chi non ne aveva bisogno; l'altro costerebbe una lettera che
+        ''' dice ancora «trasloco» senza che nessuno lo dica.</para>
+        ''' </remarks>
+        Public ReadOnly Property LetteraDaRiallineare As Boolean
+            Get
+
+                If Lettera Is Nothing Then Return False
+                If Not RiscrittureDelCv.CEQualcosa Then Return False
+
+                Return LetteraGenerata = Nothing OrElse LetteraGenerata < RiscrittureDelCv.Quando
+
+            End Get
+        End Property
+
+        ''' <summary>Le riscritture a mano di uno dei due documenti.</summary>
+        Public Function Riscritture(ruolo As RuoloDocumento) As RiscrittureAMano
+
+            Return If(ruolo = RuoloDocumento.Lettera, RiscrittureDellaLettera, RiscrittureDelCv)
+
+        End Function
+
+        ''' <summary>
+        ''' Annota che l'utente ha riscritto a mano dei campi di prosa in uno dei due
+        ''' documenti (R7).
+        ''' </summary>
+        ''' <param name="ruolo">Quale documento ha toccato.</param>
+        ''' <param name="campi">Gli id dei campi riscritti, come li conosce <c>Rifinitura</c>.</param>
+        ''' <param name="quando">L'istante della riscrittura; se omesso, adesso.</param>
+        Public Sub SegnaRiscritture(ruolo As RuoloDocumento, campi As IEnumerable(Of String),
+                                    Optional quando As Date = Nothing)
+
+            If campi Is Nothing Then Return
+
+            Dim istante As Date = If(quando = Nothing, Date.Now, quando)
+            Dim dove As RiscrittureAMano = Riscritture(ruolo)
+
+            For Each id As String In campi
+                dove.Annota(id, istante)
+            Next
+
+        End Sub
+
+        ''' <summary>
+        ''' Annota che la ✉️ lettera è stata appena scritta dall'AI: da questo istante ha
+        ''' visto il CV com'è adesso, e la spia di disallineamento si spegne.
+        ''' </summary>
+        ''' <remarks>
+        ''' Le riscritture a mano <b>della lettera</b> se ne vanno qui, e non altrove: il
+        ''' testo che l'utente ci aveva scritto non c'è più, l'ha sostituito quello nuovo.
+        ''' Quelle del CV invece restano — il CV nessuno l'ha toccato.
+        ''' </remarks>
+        Public Sub SegnaLetteraGenerata(Optional quando As Date = Nothing)
+
+            LetteraGenerata = If(quando = Nothing, Date.Now, quando)
+            RiscrittureDellaLettera.Dimentica()
+
+        End Sub
 
         ''' <summary>
         ''' Porta la candidatura allo stato successivo, annotando quando (cap. 07.3).

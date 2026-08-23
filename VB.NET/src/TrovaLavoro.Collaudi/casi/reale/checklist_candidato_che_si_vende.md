@@ -2,7 +2,7 @@
 
 *Collaudo di tappa di T9 (cap. 14), voci **1, 2, 3, 5** della checklist ereditata dal prototipo (`HTML+JS/prompt_design.md`). Un dialogo intero condotto da chi si gonfia, racconta un lavoro in nero al turno dei lavori veri, tace i recapiti e infila tre impieghi in una battuta sola. Persone e aziende sono inventate: per questo il rapporto sta nel repo.*
 
-- **Quando**: 2026-08-22 21:26
+- **Quando**: 2026-08-23 21:36
 - **Mosse del dialogo**: 19
 - **Chiamate all'AI**: 8
 - **Turni, in ordine di prima chiamata**: nome → contatti → patente → esperienze_formali → esperienze_informali → competenze → formazione
@@ -15,11 +15,11 @@
 
 Le competenze come sono uscite — *questa parte si legge, non si pretende: la normalizzazione leggera è ciò che il prompt ordina*:
 
-- Leadership
+- Leader nato
 - Uso del computer
 - Uso della posta elettronica
 - Un po' di inglese
-- Gestione dello stress sotto pressione
+- Gestione della pressione
 
 ## Esperienze informali promosse a formali
 
@@ -31,7 +31,7 @@ Dove è finito, secondo la spia:
 
 | dal turno | verso | le parole dell'utente |
 |---|---|---|
-| `esperienze_formali` | `esperienze_informali` | d'estate do una mano a mio cognato al banco del mercato, ma in nero, così per fargli un favore |
+| `esperienze_formali` | `esperienze_informali` | d'estate do una mano a mio cognato al banco del mercato, in nero, così per fargli un favore |
 
 ## Campi non detti riempiti a indovinare
 
@@ -42,7 +42,7 @@ Dove è finito, secondo la spia:
 | `contatti.email` | niente | *(vuoto)* |
 | `contatti.telefono` | niente | *(vuoto)* |
 | `contatti.citta` | «Cesena» | Cesena |
-| `formazione.titolo` | «la licenza media» | Licenza media |
+| `formazione.titolo` | «la licenza media» | licenza media |
 | `formazione.istituto` | niente | *(vuoto)* |
 | `formazione.anno` | niente | *(vuoto)* |
 
@@ -123,15 +123,15 @@ Niente: il dialogo è andato come la traccia si aspettava.
     }
   ],
   "competenze": [
-    "Leadership",
+    "Leader nato",
     "Uso del computer",
     "Uso della posta elettronica",
     "Un po' di inglese",
-    "Gestione dello stress sotto pressione"
+    "Gestione della pressione"
   ],
   "formazione": [
     {
-      "titolo": "Licenza media",
+      "titolo": "licenza media",
       "istituto": "",
       "anno": ""
     }
@@ -164,7 +164,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 **Marco:** Mi trovi a Cesena. Il resto per adesso lascia stare, non mi va di scriverlo qui.
 
 > Ecco cosa ho capito:
-> Domicilio: Cesena
+> Città: Cesena
 >
 
 **Marco:** *[Sì, è giusto]*
@@ -221,7 +221,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 >
 > Prima avevi accennato a qualcosa che riguarda «esperienze informali», e l'avevo tenuto da parte. Vediamolo ora:
 >
-> *(le tue parole)* «d'estate do una mano a mio cognato al banco del mercato, ma in nero, così per fargli un favore»
+> *(le tue parole)* «d'estate do una mano a mio cognato al banco del mercato, in nero, così per fargli un favore»
 >
 > - Cosa facevo: do una mano al banco del mercato
 > - Quando: d'estate
@@ -261,11 +261,11 @@ Niente: il dialogo è andato come la traccia si aspettava.
 
 > Ecco cosa ho capito — le cose che sai fare:
 >
-> - Leadership
+> - Leader nato
 > - Uso del computer
 > - Uso della posta elettronica
 > - Un po' di inglese
-> - Gestione dello stress sotto pressione
+> - Gestione della pressione
 >
 
 **Marco:** *[Vanno bene]*
@@ -280,7 +280,7 @@ Niente: il dialogo è andato come la traccia si aspettava.
 
 > Ecco cosa ho capito:
 >
-> - Titolo: Licenza media
+> - Titolo: licenza media
 > - Istituto: (non specificata)
 > - Anno: (non specificata)
 >
@@ -331,14 +331,14 @@ Niente: il dialogo è andato come la traccia si aspettava.
 > - Con chi: protezione civile del mio comune
 >
 > **Competenze**
-> - Leadership
+> - Leader nato
 > - Uso del computer
 > - Uso della posta elettronica
 > - Un po' di inglese
-> - Gestione dello stress sotto pressione
+> - Gestione della pressione
 >
 > **Formazione 1**
-> - Titolo: Licenza media
+> - Titolo: licenza media
 > - Istituto: (non specificata)
 > - Anno: (non specificata)
 >
