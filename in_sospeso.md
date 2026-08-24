@@ -175,10 +175,15 @@ e la riserva si dichiara qui invece di lasciarla implicita (regola 15).*
   ce l'ha, e qui c'è solo LibreOffice. Con quella macchina si chiudono in un giro solo la
   **prova dell'exe su un PC pulito** (voce di T1), il **DOCX e il PDF aperti in Word** (voce
   di T4) e il **`.docx` salvato da Word e reimportato nel profilo** (voce di T3), che sono
-  già aperte qui sopra e restano tali. L'eseguibile di rilascio è pronto e non aspetta
-  altro: `VB.NET\src\pubblicazione\TrovaLavoro.exe`, un file solo, ProductVersion 0.3.041.
-  Il giro D si può fare prima del sesto tempo o subito dopo; quel che non si può è darlo per
-  fatto. *(cap. 13.5; cap. 14, T9e.)*
+  già aperte qui sopra e restano tali. Il giro D si può fare prima del sesto tempo o subito
+  dopo; quel che non si può è darlo per fatto. *(cap. 13.5; cap. 14, T9e.)*
+  **Aggiornamento del 2026-08-24**: l'eseguibile che stava lì pronto —
+  `VB.NET\src\pubblicazione\TrovaLavoro.exe`, un file solo — porta **ProductVersion
+  0.3.041** ed è del 22 agosto, cioè **precedente alle cure del quinto tempo**: non ha le
+  tre cure di scala, né R6, né R7, né la domanda di approfondimento. Provarlo adesso
+  misurerebbe una versione superata, e proprio sul difetto — il comportamento a DPI alti —
+  che quelle cure hanno tolto. Il giro D si fa quindi con l'eseguibile del **sesto tempo**
+  (1.0.000), che va ripubblicato prima di portarlo sull'altra macchina.
 
 ## Da revisione adversariale (2026-08-09)
 

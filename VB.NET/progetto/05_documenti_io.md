@@ -123,6 +123,23 @@ il primo giorno in cui divergono il DOCX e il PDF della stessa candidatura direb
 diverse. Così invece il contenuto è identico **per costruzione**, e un collaudo mette le
 due uscite una accanto all'altra a verificarlo (cap. 14).
 
+*Il JSON non è più tutto quel che si stampa (2026-08-24, R6 e R7 del quinto tempo di T9e).*
+Fra il JSON e la pagina si è messo un filtro, `VociDelCv.ComeSiVede`: un CV mandato a
+un'azienda non è l'inventario di una vita, e una voce che a quell'annuncio non dice niente
+si lascia fuori da *quel* documento. Il `cv.json` **resta intero** — la scelta vive
+accanto, così rimettere è gratis e un «Rigenera» non se la porta via — e la voce si
+riconosce dall'**impronta dei suoi fatti**, mai dalla posizione o dalla prosa, che il
+modello riscrive a ogni giro. La cosa che conta per questo capitolo è **dove** sta il
+filtro: davanti all'impaginazione, quindi prima del bivio delle stampanti. Vale per il
+DOCX, il PDF, l'anteprima, il prompt della lettera e il tool MCP nello stesso identico
+modo, e per la stessa ragione per cui la pagina esiste — se ogni uscita decidesse da sé
+cosa mostrare, la finestra e il server racconterebbero due documenti diversi, e chi legge
+non saprebbe quale dei due è vero. Nella stessa famiglia sta la prosa **riscritta a mano**:
+quel che l'utente cambia in «Modifica i testi» entra nel JSON che si stampa, e vive accanto
+al documento invece che nella sessione, così sopravvive alla chiusura del programma. Il
+disegno per esteso è in cap. 08.4, dove nasce; qui basta sapere che il modello di contenuto
+in uscita non coincide più, riga per riga, col JSON generato.
+
 ## 5.4 Uscita DOCX
 
 - **Scrittore interno**: un `.docx` viene costruito componendo lo ZIP OOXML con gli

@@ -143,8 +143,10 @@ insieme al resto:
 | Descrizione | Trova annunci, prepara CV e lettera su misura |
 
 - La versione dell'app vive in **un solo file sorgente** (`Versione.vb`): formato
-  `1.0.012` (maggiore.minore.build), mostrata nel pannello logo insieme alla versione
-  del pool (`Ver. 1.0.012 · Pool 1.03`) — schema confermato in cap. 15, voce 5.
+  `maggiore.minore.build`, mostrata nel pannello logo insieme alla versione del pool —
+  oggi `Ver. 0.3.046 · Pool 1.13` — schema confermato in cap. 15, voce 5. Le due versioni
+  corrono separate di proposito: il pool ha una storia sua (cap. 04.1), e l'etichetta
+  dichiara da sé sorgente e stato («integrato», l'asterisco di chi sperimenta).
 - Ogni modifica al codice incrementa il numero di build; la storia delle release sta
   nei tag Git del repo.
 - Il logo è lo **scudo di Aviolab AI**, incorporato **in forma binaria nel sorgente**

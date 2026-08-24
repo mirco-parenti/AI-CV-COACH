@@ -27,9 +27,14 @@ torna vuota e il sospetto che cade sulla pagina. Qui invece si scopre subito.
 
 **La lettura della pagina** — che due blocchi separati dal layout non finiscano attaccati
 (il difetto da cui è nato lo strumento); che il testo appeso direttamente a un contenitore
-non sparisca; che ciò che il foglio di stile spegne resti fuori; che una pagina senza
-corpo non faccia cadere il copione; che titolo e indirizzo arrivino insieme al testo; che
-un testo più lungo del massimo si tronchi **e lo dichiari**.
+non sparisca; che i **separatori grafici** non entrino nel testo — la linea grigia, il
+pallino e lo spazio unificatore che Indeed mette fra una sezione e l'altra, che a video
+sono un disegno e nel testo arrivano scritti per esteso (22-08-2026); che una riga vera
+che ne contiene uno **per caso** non se ne vada con loro, perché le entità si tolgono per
+*decidere* e non dentro un pezzo che è già entrato; che ciò che il foglio di stile spegne
+resti fuori; che una pagina senza corpo non faccia cadere il copione; che titolo e
+indirizzo arrivino insieme al testo; che un testo più lungo del massimo si tronchi **e lo
+dichiari**.
 
 **Lo scorrimento** — che un passo muova davvero la pagina e non si dichiari in fondo
 prima di esserci; e che il fondo, quando arriva, venga riconosciuto.

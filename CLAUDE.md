@@ -35,7 +35,8 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    file di progetto nel working tree (tracciati o no)** — incluso questo `CLAUDE.md` —
    al livello a cui siamo arrivati. Il perimetro è la **fase viva**: tutto `VB.NET/`
    (progetto *e* codice), `strumenti/` (gli attrezzi di sviluppo, dal 2026-08-10),
-   `README.md`, `diario_di_bordo.md`, `idee_future.md`, `in_sospeso.md`, questo
+   `immagini/` (gli asset del marchio, dal 2026-08-22), `README.md`,
+   `diario_di_bordo.md`, `idee_future.md`, `in_sospeso.md`, questo
    `CLAUDE.md` e ogni altra regola o documentazione di progetto che nascerà.
    **`HTML+JS/` è fuori dal rito** *(dal 2026-08-06)*: il prototipo è congelato, non è
    più la fase in cui lavoro, e riverificarlo a ogni giro costerebbe senza rendere. Si

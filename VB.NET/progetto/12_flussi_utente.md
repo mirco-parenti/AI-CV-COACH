@@ -131,8 +131,26 @@ del profilo alla conversazione su una candidatura.
    l'utente vede il prima/dopo e può intervenire a mano su ogni campo. *A T7b
    (2026-08-18) la rifinitura c'è e avviene dentro la generazione, subito dopo ogni
    documento — i passi diventano sei — e il prima/dopo si guarda spuntando la casella in
-   P6; l'intervento **a mano** campo per campo è rimandato (`in_sospeso.md`).*
-4. Alla conferma, l'app produce i file: **DOCX e/o PDF** del CV, testo della lettera
+   P6; l'intervento **a mano** campo per campo è rimandato. **Da T9d** (2026-08-22) arriva
+   la finestra **«Modifica i testi»**, ed è lì che si riscrive a mano, campo per campo. Ma
+   delle tre cose promesse qui sopra ne restano **due** — accettare e riscrivere: il
+   **prima/dopo è stato tolto del tutto**, casella di P6 compresa, dopo aver misurato che
+   su una candidatura vera cambiava cinque parole e nessun fatto. Un confronto che l'utente
+   non riesce a distinguere non è una garanzia che usa, è un comando in più da capire; la
+   garanzia vera è che se l'anti-slop tocca un fatto si corregge il prompt nel pool, e chi
+   vuole il testo grezzo ha l'interruttore in P8. **Dal quinto tempo di T9e** (2026-08-24,
+   R7) la riscrittura **si ricorda**: vive accanto al documento e non in un booleano di
+   sessione, così «Rigenera» dice **quali** testi butterebbe via e la lettera si accorge
+   quando il CV è più recente di lei (cap. 08.4).*
+4. Dalla stessa finestra si sceglie anche **quali voci** il documento porta: una voce che a
+   quell'annuncio non dice niente si lascia fuori da *quel* CV senza toccare il profilo,
+   dove continua a valere per le altre candidature. *Da **R6** (2026-08-24, quinto tempo di
+   T9e): il `cv.json` resta intero e la scelta vive accanto — rimettere è gratis — e la
+   voce si riconosce dall'impronta dei suoi **fatti**, mai dalla posizione o dalla prosa,
+   che il modello riscrive a ogni giro. Il filtro è **uno solo** per anteprima, DOCX, PDF,
+   prompt della lettera e tool MCP: se ognuno decidesse da sé, la finestra e il server
+   racconterebbero due documenti diversi (cap. 08.4).*
+5. Alla conferma, l'app produce i file: **DOCX e/o PDF** del CV, testo della lettera
    (nel corpo email e/o come allegato).
 
 **A8. La candidatura (F5 + F6)**

@@ -404,6 +404,18 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   `Get-Process TrovaLavoro | Select Id, StartTime, MainWindowTitle` — il server è quello
   **senza titolo di finestra**; per chiudere solo l'applicazione si usa `CloseMainWindow()`,
   che è la chiusura gentile, non `taskkill /F`.
+- **Rimettere a posto un file falsificato con `mv` non fa ricompilare.** *(2026-08-24, dal
+  quinto tempo di T9e.)* Falsificare vuol dire rompere apposta il codice e guardare se il
+  collaudo diventa rosso (regola 14): si mette da parte l'originale, si guasta il file, si
+  lancia il banco, si ripristina. Se il ripristino si fa con `mv file.bak file`, l'orario
+  del file torna **indietro** — `mv` conserva l'mtime dell'originale — e MSBuild, che
+  confronta i tempi, vede un sorgente più vecchio della DLL e **salta la compilazione**:
+  `compila` e `collaudi` dicono «riuscita» su un binario che è ancora quello guasto. Il
+  banco va rosso su un collaudo appena visto verde, e il sospetto cade sul codice invece
+  che sullo strumento. Si ripristina con **`cp file.bak file`**, che l'orario lo aggiorna.
+  Vale la pena aggiungere che se ne esce **strumentando** — facendo stampare al confronto i
+  valori veri — e non ipotizzando: quando la realtà smentisce due volte di fila, la cosa da
+  mettere in dubbio è la misura, non il codice.
 - **Avviare l'applicazione da WSL con `cmd.exe /c start` resta appeso.** *(2026-08-21.)*
   `cmd.exe /c start "" "…\TrovaLavoro.exe"` non ritorna: la chiamata sembra bloccata e finisce
   in background solo allo scadere del timeout. Funziona invece invocare l'eseguibile

@@ -1421,10 +1421,12 @@ Public Class PannelloDocumenti
     ''' <summary>Un documento come si legge, o il motivo per cui non c'è ancora.</summary>
     ''' <remarks>
     ''' Fino a T9d qui si attaccava in coda il prima/dopo della rifinitura, quando la
-    ''' casella di P6 era spuntata. Quel confronto si guarda adesso dentro «Modifica i
-    ''' testi», campo per campo e col bottone che va avanti e indietro fra il testo
-    ''' rifinito e quello di prima: leggerlo lì costa un clic in meno e non allunga
-    ''' l'anteprima del documento, che è la cosa che l'utente sta guardando (cap. 08.4).
+    ''' casella di P6 era spuntata. Quel confronto adesso non c'è più da nessuna parte:
+    ''' è stato tolto del tutto poche ore dopo averlo finito (2026-08-22), misurando che
+    ''' su una candidatura vera cambiava cinque parole e nessun fatto — un confronto che
+    ''' non si riesce a distinguere non è una garanzia che si usa, è un comando in più da
+    ''' capire. Delle tre cose promesse ne restano due, accettare e riscrivere a mano, e
+    ''' la seconda vive nella finestra «Modifica i testi» (cap. 08.4).
     ''' </remarks>
     Private Function Anteprima(documento As JsonNode,
                                impagina As Func(Of JsonNode, PaginaDocumento),

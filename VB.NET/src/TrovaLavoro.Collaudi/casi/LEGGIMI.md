@@ -37,19 +37,41 @@ pool sia carattere per carattere quello del prototipo. Gira con la batteria norm
 (`dotnet test` da `VB.NET/src`) e resterà verde anche quando il prototipo non sarà
 più avviabile.
 
-**Con l'API vera** — la categoria `Reale`, fuori dalla batteria di tutti i giorni: si
-lancia da `VB.NET/src` passando a `dotnet test` l'opzione `settings` con il file
+**La categoria `Reale`** — fuori dalla batteria di tutti i giorni: si lancia da
+`VB.NET/src` passando a `dotnet test` l'opzione `settings` con il file
 `TrovaLavoro.Collaudi/collaudi-reali.runsettings`. Ognuno ha i suoi prerequisiti, e
 quando ne manca uno **si dichiara inconcludente invece di fallire**: sull'altra
 postazione non c'è né la chiave né il CV.
+
+Il nome dice «reale», non «con l'API»: la categoria raccoglie i collaudi che vogliono
+**qualcosa di vero** che la batteria di tutti i giorni non deve pretendere per girare
+ovunque e in pochi secondi. Per la maggior parte è l'API; per quattro classi è invece la
+**macchina** — il motore Edge/Chromium di Windows e un thread STA con la sua pompa di
+messaggi — senza spendere un token né toccare la rete. Vale la pena tenerle distinte,
+perché i secondi girano anche dove la chiave non c'è.
+
+*Chi chiede l'**API vera*** (nove classi):
 
 | Classe | Cosa chiede | Chiave | CV vero | Prototipo |
 |---|---|---|---|---|
 | `CollaudiConfrontoReale` | gli stessi due casi al prototipo (`POST /confronta`) e alla pipeline dell'app | sì | — | sì |
 | `CollaudiImportReale` | lo stesso CV importato dalle due parti | sì | sì | sì |
 | `CollaudiFormatiReale` | lo stesso CV dalle quattro porte (PDF, DOCX, TXT, MD) | sì | sì | — |
-| `CollaudiDialogoReale` | il dialogo guidato da zero; e un turno solo chiesto anche al prototipo | sì | — | solo per il turno di parità |
+| `CollaudiImportProfilo` | il CV vero in PDF che diventa un profilo | sì | sì | — |
+| `CollaudiDialogoReale` | il dialogo guidato da zero; un turno solo chiesto anche al prototipo; e la voce mezza vuota che si completa davanti al modello vero | sì | — | solo per il turno di parità |
 | `CollaudiChecklistReale` | le tre prove della checklist «Problemi e mitigazioni» (cap. 14, T9) | sì | — | — |
+| `CollaudiCurePromptReale` | le cure del Pool 1.13 provate sull'AI vera: il mestiere detto nudo, il posto che non è un ruolo, la via che non sparisce, la lettera che recepisce un fatto riscritto a mano (R1, R3, R4, R7) | sì | — | — |
+| `CollaudiAnalizzatoreAnnuncio` | su un annuncio vero: le priorità riconosciute dal senso della frase, e il campo azienda del Pool 1.03 | sì | — | — |
+| `CollaudiStrutturatoreTurni` | la catena pool → client → estrattore, e l'**anti-perdita** che arriva fino in fondo (`altrove` pieno, con le parole dell'utente) | sì | — | — |
+
+*Chi chiede la **macchina**, non la rete* (quattro classi — niente chiave, niente token):
+
+| Classe | Cosa chiede |
+|---|---|
+| `CollaudiMotoreBrowser` | il cancello di T5a: browser in vista e stampa fuori schermo convivono su un **solo** ambiente WebView2 |
+| `CollaudiStampaPdf` | che dalla WebView esca un PDF con **testo vero** e font incorporati, non un'immagine (cap. 05.5) |
+| `CollaudiLettorePagina` | il copione JavaScript che porta fuori titolo, indirizzo e testo visibile, e che un testo oltre il massimo si tronchi **dichiarandolo** — su una pagina scritta qui e caricata con `NavigateToString`, non su un portale vero, che misurerebbe il portale (cap. 06.4) |
+| `CollaudiToolDiScrittura` | che il PDF esca **anche** dal tool MCP `esporta_documento`, cioè dalla seconda porta (cap. 09.3) |
 
 Il **CV vero** si indica con la variabile `CV_DI_PROVA` (la cartella che lo contiene);
 il **prototipo** si accende con `npm start` dentro `HTML+JS/`; la **chiave** sta in

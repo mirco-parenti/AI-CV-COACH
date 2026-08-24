@@ -100,7 +100,12 @@ ogni modulo abbia **un compito solo**:
     sono nati. È ciò che `Dati/ArchivioOpportunita` scrive nella cartella del cap. 11.1.
     *Da T5b porta anche **da dove viene**: fonte e link della pagina catturata
     (cap. 11.1), e sa dire se l'annuncio è uscito **vuoto** dall'analisi — cioè se quella
-    pagina un annuncio non lo conteneva (cap. 06.4);*
+    pagina un annuncio non lo conteneva (cap. 06.4). Dal **2026-08-24** (quinto tempo di
+    T9e) porta anche le **scelte fatte sui suoi documenti**: la prosa riscritta a mano
+    (`RiscrittureDelCv`, `RiscrittureDellaLettera`) e le voci lasciate fuori dal CV
+    (`VociTolteDalCv`). Stanno qui, e non nella sessione né nel profilo, perché sono
+    scelte **su questo documento**: valgono per questa candidatura e non per le altre, e
+    devono sopravvivere alla chiusura del programma (cap. 08.4, cap. 11.1);*
   - `VistaConfronto`, `VistaAnnuncio` *(T4c)*: le due **viste di sola lettura** promesse
     a T4a. Gli artefatti nuovi restano JSON grezzo — il profilo è tipizzato perché P2 lo
     edita campo per campo, un annuncio e dei giudizi si mostrano e basta — ma un pannello
@@ -190,7 +195,12 @@ ogni modulo abbia **un compito solo**:
   sola che dipenda da un pezzo di Windows che potrebbe mancare. *La «vista tipizzata del
   CV» promessa qui a T4a è la pagina stessa*: una classe intermedia che ricalcasse lo
   schema del CV, per poi tradurlo comunque in blocchi, sarebbe stata un terzo modello da
-  tenere allineato agli altri due.
+  tenere allineato agli altri due. *Col quinto tempo di T9e (2026-08-24, R6) ci nasce
+  anche un guardiano*: `VociDelCv` è il filtro che decide **che cosa del CV si vede**, e
+  `Impaginazione` lo interroga prima di costruire la pagina. Sta davanti al bivio delle
+  stampanti di proposito: lì è **uno solo** per DOCX, PDF, anteprima, prompt della lettera
+  e tool MCP, mentre messo dopo sarebbe stato uno per uscita, da tenere allineato a mano
+  (cap. 05.3, cap. 08.4).
 - **`Web/`** *(nata a T5a, cresciuta a T5b)* — quel che riguarda il browser dentro
   l'applicazione (cap. 06). Ci stanno `MotoreBrowser`, che accende e custodisce
   l'**unico** ambiente WebView2 — lo chiedono la stampa PDF, che lavora fuori schermo, e
@@ -223,6 +233,12 @@ ogni modulo abbia **un compito solo**:
   legge quella cartella e ne assaggia i file: sta **qui** e non in `Documenti/` per la
   stessa divisione di sempre — tocca il disco e non chiama nessuno, come
   `LettoreDocumenti`, mentre `Documenti/` resta il posto di chi **scrive**.
+  *Col quinto tempo di T9e (2026-08-24) ci nascono `RiscrittureAMano` (R7) e `VociTolte`
+  (R6)*: due memorie piccole e della stessa specie — quel che la persona ha deciso sul suo
+  documento, che non è un fatto del profilo e non è un capriccio della sessione. Vivono in
+  `Dati/` perché il criterio che vale qui è **cosa si scrive su disco**, e sono l'una
+  gemella dell'altra: entrambe si portano dietro **quando** la scelta è stata fatta, che è
+  ciò che permette poi di dire se la lettera è rimasta indietro rispetto al CV.
 - **`Mcp/`** — il server MCP: traduce le richieste del protocollo in chiamate al
   motore (cap. 09).
   *Nata a **T8** (2026-08-19), in tre gambe, e la divisione ricalca quella di sempre:*
@@ -247,7 +263,7 @@ ogni modulo abbia **un compito solo**:
 | `calcolaMatch` + costanti (server.js) | `Motore/CalcoloMatch`, trascrizione 1:1 verificata con casi di collaudo identici |
 | `estraiJson` (server.js) | `Motore/EstrattoreJson`, stessa strategia (percorso felice intatto, ripiego solo nel catch) |
 | Criterio due modelli (Haiku estrazione / Sonnet ragionamento) | metadato `modello:` di ogni prompt del pool (cap. 04) |
-| Macchina a stati del dialogo + magazzino `pending` (index.html) | rinasce nel motore (`Motore/DialogoProfilo`) — stessa logica e **stessi testi**: schede di conferma, instradamento `altrove`, guardia anti-rimbalzo, «lasciato fuori» esplicito. Là ogni passo disegnava da sé la pagina; qui produce una **`Mossa`** (cosa dire, cosa mostrare, cosa aspettarsi) e chi la mostra torna con una risposta o una scelta. La conseguenza è doppia: il pannello si limita a disegnare, e il dialogo intero si collauda senza interfaccia (cap. 14, T3). *Dal 2026-08-09 (revisione adversariale) la `Mossa` porta anche le **eco ancorate**: le parole dell'utente riproposte nel punto giusto della sequenza — prima del verdetto, non dopo — così il pannello disegna nell'ordine in cui il dialogo pensa, e nella passata finale ogni recupero ha la sua eco.* *Dal 2026-08-22 (T9e) alla stessa passata finale è appesa la **ripresa delle domande saltate**, che il prototipo non ha: un turno chiuso con «passiamo oltre» torna una volta sola prima del riepilogo — col permesso dell'utente, e solo se nessun frammento recuperato l'ha già riempito. Su questo pezzo la non-regressione non ha metro (cap. 04.7): la sua rete è il banco headless* |
+| Macchina a stati del dialogo + magazzino `pending` (index.html) | rinasce nel motore (`Motore/DialogoProfilo`) — stessa logica e **stessi testi**: schede di conferma, instradamento `altrove`, guardia anti-rimbalzo, «lasciato fuori» esplicito. Là ogni passo disegnava da sé la pagina; qui produce una **`Mossa`** (cosa dire, cosa mostrare, cosa aspettarsi) e chi la mostra torna con una risposta o una scelta. La conseguenza è doppia: il pannello si limita a disegnare, e il dialogo intero si collauda senza interfaccia (cap. 14, T3). *Dal 2026-08-09 (revisione adversariale) la `Mossa` porta anche le **eco ancorate**: le parole dell'utente riproposte nel punto giusto della sequenza — prima del verdetto, non dopo — così il pannello disegna nell'ordine in cui il dialogo pensa, e nella passata finale ogni recupero ha la sua eco.* *Dal 2026-08-22 (T9e) alla stessa passata finale è appesa la **ripresa delle domande saltate**, che il prototipo non ha: un turno chiuso con «passiamo oltre» torna una volta sola prima del riepilogo — col permesso dell'utente, e solo se nessun frammento recuperato l'ha già riempito. Su questo pezzo la non-regressione non ha metro (cap. 04.7): la sua rete è il banco headless.* *Dal 2026-08-24 (quinto tempo di T9e) la macchina ha un'attesa in più, `Attesa.Approfondimento`: quando una voce entra con vuoto un campo che **pesa nel CV**, la domanda si fa subito — in linea, appena dopo la conferma — e **una volta sola**, perché esce dall'elenco quando viene offerta e non quando riesce, o la stessa voce si farebbe richiedere all'infinito. È la seconda metà della voce 4 della checklist ereditata dal prototipo, di cui il terzo tempo aveva costruito la prima; e siccome dipende da come il modello vero reagisce a una risposta nuda, accanto ai collaudi offline ha un collaudo **reale** (cap. 14)* |
 | Soglia 1,5 stelle (index.html) | costante del motore, stesso comportamento (sconsiglia, non impedisce) |
 | Banchi `test-*.html` | rinascono come collaudi del cap. 14 (per-anello, sugli stessi casi) |
 
