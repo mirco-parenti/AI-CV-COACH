@@ -334,6 +334,70 @@ Namespace Ui
             Return DirectCast(finestra.Controls.Find(nome, searchAllChildren:=True).Single(), CheckBox)
         End Function
 
+        ' ==================================================================
+        ' La barra di scorrimento che non ne chiama una seconda (2026-08-24)
+        ' ==================================================================
+
+        ''' <summary>
+        ''' Curato lo scorrimento verticale (R11), a 150% compariva <b>anche</b> quello
+        ''' orizzontale: la barra verticale si prende una fetta di larghezza, e il
+        ''' contenuto messo in fila senza saperlo le finisce sotto. Nessun comando diventa
+        ''' irraggiungibile — è rifinitura — ma una barra che non ha niente da mostrare
+        ''' dice a chi guarda che qualcosa è fuori posto.
+        ''' </summary>
+        <TestMethod>
+        Public Sub QuandoSiScorreNienteFinisceSottoLaBarra()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        ' Un'altezza che il contenuto non può rispettare: è la condizione in
+                        ' cui la finestra scorre, e l'unica in cui quella barra esiste.
+                        finestra.DisponiIn(200)
+
+                        Assert.IsTrue(finestra.AutoScroll, "con così poco spazio si scorre")
+
+                        Dim quantoResta As Integer =
+                            finestra.ClientSize.Width - SystemInformation.VerticalScrollBarWidth
+
+                        For Each controllo As Control In finestra.Controls
+                            Assert.IsTrue(controllo.Right <= quantoResta,
+                                          $"«{controllo.Name}» arriva a {controllo.Right}, " &
+                                          $"oltre i {quantoResta} che restano accanto alla barra")
+                        Next
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub QuandoCiStaTuttoNonSiRiservaNiente()
+
+            ' Il rovescio, e serve: una riserva presa sempre stringerebbe la finestra di
+            ' tre pixel per una barra che non c'è, tutte le volte.
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        finestra.DisponiIn(4000)
+
+                        Assert.IsFalse(finestra.AutoScroll, "con tutto questo spazio non si scorre")
+
+                        Assert.AreEqual(finestra.ClientSize.Width - StileApp.MargineRiquadro,
+                                        Comando(finestra, "btnChiudi").Right,
+                                        "«Chiudi» sta al suo margine, senza riserve per una barra che non c'è")
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
     End Class
 
 End Namespace

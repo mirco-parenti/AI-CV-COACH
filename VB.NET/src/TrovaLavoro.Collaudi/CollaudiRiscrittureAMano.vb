@@ -147,6 +147,22 @@ Namespace Dati
 
         End Sub
 
+        <TestMethod>
+        Public Sub SiChiedeDiUnCampoAllaVolta()
+
+            ' Il segno ✎ della finestra di modifica ha bisogno di sapere se «questo» campo
+            ' è stato riscritto, non se ne è stato riscritto qualcuno: la domanda si fa
+            ' qui, così l'elenco e l'avviso di «Rigenera» rispondono uguale.
+            Dim riscritture As New RiscrittureAMano
+
+            riscritture.Annota("sommario", Oggi)
+
+            Assert.IsTrue(riscritture.Contiene("sommario"), "questo l'ha riscritto")
+            Assert.IsFalse(riscritture.Contiene("esperienza.1"), "questo no")
+            Assert.IsFalse(riscritture.Contiene(Nothing), "e a un campo senza nome si dice di no")
+
+        End Sub
+
     End Class
 
 End Namespace

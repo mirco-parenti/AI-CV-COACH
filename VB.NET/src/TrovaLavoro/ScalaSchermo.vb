@@ -102,4 +102,26 @@ Public Module ScalaSchermo
 
     End Function
 
+    ''' <summary>
+    ''' La larghezza che resta al contenuto quando si scorre: la barra verticale si prende
+    ''' la sua, e quel che viene messo in fila senza saperlo le finisce sotto — allora si
+    ''' accende anche la barra <b>orizzontale</b>, che non ha niente da mostrare
+    ''' (cap. 03.4).
+    ''' </summary>
+    ''' <remarks>
+    ''' Quanto sia larga quella barra si <b>riceve</b>, come il DPI: dipende dal tema e
+    ''' dalla scala di Windows — a 96 DPI sono 17 pixel, a 150% ne diventano 26 — e i
+    ''' margini del disegno, che di pixel ne valgono 14, non bastano a coprirla in nessuno
+    ''' dei due casi. Una barra di larghezza non nota (zero o negativa) non toglie niente:
+    ''' meglio un contenuto largo che un contenuto sparito.
+    ''' </remarks>
+    Public Function LarghezzaSenzaLaBarra(larghezza As Integer, siScorre As Boolean,
+                                          larghezzaBarra As Integer) As Integer
+
+        If Not siScorre OrElse larghezzaBarra <= 0 Then Return larghezza
+
+        Return Math.Max(0, larghezza - larghezzaBarra)
+
+    End Function
+
 End Module

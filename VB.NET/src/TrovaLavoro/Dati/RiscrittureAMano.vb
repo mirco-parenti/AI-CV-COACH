@@ -72,6 +72,23 @@ Namespace Dati
         End Property
 
         ''' <summary>
+        ''' Se <b>questo</b> campo risulta riscritto a mano.
+        ''' </summary>
+        ''' <remarks>
+        ''' Chiederlo qui invece di frugare in <see cref="Campi"/> tiene in un posto solo
+        ''' cosa voglia dire «l'ha scritto l'utente»: il segno ✎ della finestra di modifica
+        ''' e l'avviso di «Rigenera» fanno la stessa domanda, e devono avere la stessa
+        ''' risposta.
+        ''' </remarks>
+        Public Function Contiene(id As String) As Boolean
+
+            If String.IsNullOrWhiteSpace(id) Then Return False
+
+            Return Campi.Contains(id)
+
+        End Function
+
+        ''' <summary>
         ''' Annota un campo riscritto a mano. Ripassare dallo stesso campo non lo duplica
         ''' — riscriverlo due volte è pur sempre un campo riscritto — ma aggiorna la data,
         ''' che è quella dell'<b>ultima</b> volta che l'utente ci ha messo mano.

@@ -510,16 +510,64 @@ Public Class FinestraImpostazioni
     End Sub
 
     ''' <summary>
-    ''' Mette in fila le sezioni. Il conto lo fa il codice e non il designer, perché i
-    ''' testi qui dentro cambiano lunghezza con quel che c'è nella cartella dati.
+    ''' Mette in fila le sezioni nello spazio che lo schermo concede.
     ''' </summary>
     Private Sub Disponi()
 
-        Dim sinistra As Integer = StileApp.MargineRiquadro
+        DisponiIn(ScalaSchermo.SpazioClienteDisponibile(
+            Screen.FromControl(Me).WorkingArea.Height, Me.Height - Me.ClientSize.Height))
+
+    End Sub
+
+    ''' <summary>
+    ''' Mette in fila le sezioni come se in altezza ci fosse questo spazio.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Un tetto sullo spazio che c'è, e lo scorrimento per quel che non ci sta: le
+    ''' due cose insieme, perché il tetto da solo taglierebbe e lo scorrimento da solo
+    ''' lascerebbe la finestra fuori schermo. Senza, a 150% questa finestra si dimensionava
+    ''' sul proprio contenuto e il sistema la troncava: quel che restava fuori cadeva fuori
+    ''' dalla <i>finestra</i>, non dallo schermo, e nessuno spostamento lo recuperava
+    ''' (cap. 03.4, decisione 15.7).</para>
+    ''' <para><b>Quando si scorre, la fila si fa due volte.</b> La barra verticale si
+    ''' prende una fetta di larghezza, e il contenuto messo in fila senza saperlo le va a
+    ''' finire sotto: allora si accende anche la barra orizzontale, che non ha niente da
+    ''' mostrare. La seconda fila sta dentro quel che resta. La domanda non si riapre:
+    ''' righe che vanno a capo prima possono solo far crescere l'altezza, e uno scorrimento
+    ''' che serviva serve ancora.</para>
+    ''' <para>Lo spazio si <b>riceve</b> invece di leggerlo qui dentro: quello vero lo
+    ''' detta lo schermo su cui la finestra si apre, e un collaudo non può cambiare
+    ''' schermo — mentre è proprio quando il contenuto non ci sta che questa disposizione
+    ''' fa qualcosa di diverso.</para>
+    ''' </remarks>
+    Public Sub DisponiIn(altezzaDisponibile As Integer)
+
         ' La larghezza di progetto in pixel veri: dichiararla cruda stringeva la finestra
         ' di un terzo mentre i testi dentro crescevano col DPI, e a mandare a capo il
         ' doppio delle righe era proprio questo (decisione 15.7).
         Dim larghezza As Integer = ScalaSchermo.InPixelDelloSchermo(LarghezzaFinestra, Me.DeviceDpi)
+
+        Dim voluta As Integer = MettiInFila(larghezza)
+        Dim siScorre As Boolean = ScalaSchermo.ServeScorrimento(voluta, altezzaDisponibile)
+
+        If siScorre Then
+            voluta = MettiInFila(ScalaSchermo.LarghezzaSenzaLaBarra(
+                larghezza, siScorre, SystemInformation.VerticalScrollBarWidth))
+        End If
+
+        Me.AutoScroll = siScorre
+        ClientSize = New Size(larghezza, ScalaSchermo.AltezzaSostenibile(voluta, altezzaDisponibile))
+
+    End Sub
+
+    ''' <summary>
+    ''' Mette i controlli in colonna dentro questa larghezza, e dice fin dove arrivano. Il
+    ''' conto lo fa il codice e non il designer, perché i testi qui dentro cambiano
+    ''' lunghezza con quel che c'è nella cartella dati.
+    ''' </summary>
+    Private Function MettiInFila(larghezza As Integer) As Integer
+
+        Dim sinistra As Integer = StileApp.MargineRiquadro
         Dim larghezzaUtile As Integer = larghezza - 2 * StileApp.MargineRiquadro
 
         For Each testo As Label In {lblSpiegazione, lblStatoChiave, lblRifinituraNota,
@@ -575,19 +623,8 @@ Public Class FinestraImpostazioni
         btnChiudi.Location = New Point(larghezza - StileApp.MargineRiquadro - btnChiudi.Width,
                                        lblStato.Bottom + StileApp.MargineRiquadro)
 
-        ' Un tetto sullo spazio che c'è, e lo scorrimento per quel che non ci sta: le due
-        ' cose insieme, perché il tetto da solo taglierebbe e lo scorrimento da solo
-        ' lascerebbe la finestra fuori schermo. Senza, a 150% questa finestra si dimensionava
-        ' sul proprio contenuto e il sistema la troncava: quel che restava fuori cadeva fuori
-        ' dalla <i>finestra</i>, non dallo schermo, e nessuno spostamento lo recuperava
-        ' (cap. 03.4, decisione 15.7).
-        Dim voluta As Integer = btnChiudi.Bottom + StileApp.MargineRiquadro
-        Dim disponibile As Integer = ScalaSchermo.SpazioClienteDisponibile(
-            Screen.FromControl(Me).WorkingArea.Height, Me.Height - Me.ClientSize.Height)
+        Return btnChiudi.Bottom + StileApp.MargineRiquadro
 
-        Me.AutoScroll = ScalaSchermo.ServeScorrimento(voluta, disponibile)
-        ClientSize = New Size(larghezza, ScalaSchermo.AltezzaSostenibile(voluta, disponibile))
-
-    End Sub
+    End Function
 
 End Class

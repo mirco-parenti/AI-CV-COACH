@@ -39,6 +39,17 @@ Public Class DocumentoDaRiscrivere
     ''' </summary>
     Public Property Tolte As VociTolte
 
+    ''' <summary>
+    ''' I campi di prosa che in questo documento risultano <b>già</b> riscritti a mano
+    ''' (R7): quelli annotati nei file, che sopravvivono alla sessione.
+    ''' </summary>
+    ''' <remarks>
+    ''' Servono al segno ✎. Senza, la finestra conoscerebbe solo le riscritture di questo
+    ''' giro e di un testo scritto dall'utente ieri direbbe che non l'ha mai toccato —
+    ''' mentre l'avviso di «Rigenera», che i file li legge, dice il contrario.
+    ''' </remarks>
+    Public Property Riscritte As RiscrittureAMano
+
 End Class
 
 ''' <summary>Un campo che l'utente ha riscritto davvero, e in quale documento (R7).</summary>
@@ -88,7 +99,7 @@ End Class
 ''' </remarks>
 Public Class FinestraModificaTesti
 
-    ''' <summary>Il segno che marca, nell'elenco, i campi riscritti a mano in questo giro.</summary>
+    ''' <summary>Il segno che marca, nell'elenco, i campi scritti a mano dall'utente.</summary>
     Private Const SegnoRiscritto As String = "✎"
 
     ''' <summary>Un campo di prosa aperto alla riscrittura, con tutto ciò che lo riguarda.</summary>
@@ -109,10 +120,35 @@ Public Class FinestraModificaTesti
         ''' <summary>Il testo com'è adesso nella casella.</summary>
         Public Property Testo As String
 
-        ''' <summary>Se in questo giro l'utente l'ha cambiato.</summary>
-        Public ReadOnly Property Riscritto As Boolean
+        ''' <summary>
+        ''' Se risultava riscritto a mano <b>prima</b> che questa finestra si aprisse
+        ''' (R7): è quel che sta nei file, non quel che si è fatto adesso.
+        ''' </summary>
+        Public Property GiaRiscritto As Boolean
+
+        ''' <summary>
+        ''' Se in questo giro l'utente l'ha cambiato. È questo — e non
+        ''' <see cref="RiscrittoAMano"/> — a dire cosa va rimesso nel documento: un testo
+        ''' riscritto in un giro precedente e non toccato oggi nel file c'è già.
+        ''' </summary>
+        Public ReadOnly Property CambiatoInQuestoGiro As Boolean
             Get
                 Return Not String.Equals(Testo, Originale, StringComparison.Ordinal)
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' Se questo testo l'ha scritto l'utente: adesso, oppure in un giro precedente.
+        ''' </summary>
+        ''' <remarks>
+        ''' È la domanda del segno ✎, ed è la stessa a cui risponde l'avviso di
+        ''' «Rigenera» leggendo i file: due risposte diverse alla stessa domanda facevano
+        ''' sparire il segno alla riapertura della finestra, mentre l'avviso continuava —
+        ''' giustamente — a promettere che quel testo si sarebbe perso.
+        ''' </remarks>
+        Public ReadOnly Property RiscrittoAMano As Boolean
+            Get
+                Return CambiatoInQuestoGiro OrElse GiaRiscritto
             End Get
         End Property
 
@@ -285,7 +321,7 @@ Public Class FinestraModificaTesti
 
         For Each voce As Voce In _voci
 
-            If Not voce.Riscritto Then Continue For
+            If Not voce.CambiatoInQuestoGiro Then Continue For
             If Rifinitura.Riscrivi(voce.Documento, voce.Id, voce.Testo) Then
                 scritti.Add(New RiscritturaFatta With {.Ruolo = voce.Ruolo, .Id = voce.Id})
             End If
@@ -407,7 +443,9 @@ Public Class FinestraModificaTesti
                     .Id = campo.Id,
                     .Etichetta = campo.Etichetta,
                     .Originale = campo.Testo,
-                    .Testo = campo.Testo})
+                    .Testo = campo.Testo,
+                    .GiaRiscritto = documento.Riscritte IsNot Nothing AndAlso
+                                    documento.Riscritte.Contiene(campo.Id)})
 
             Next
 
@@ -444,12 +482,28 @@ Public Class FinestraModificaTesti
 
     End Sub
 
-    ''' <summary>Riempie i due elenchi e sceglie la prima riga di quello di sinistra.</summary>
+    ''' <summary>
+    ''' Riempie i due elenchi tenendo ferma la scelta di chi ci sta lavorando.
+    ''' </summary>
+    ''' <remarks>
+    ''' Gli elenchi si rifanno da capo a ogni «Togli» e a ogni «Rimetti», e una
+    ''' ricostruzione non ha memoria: la scelta ripartiva sempre dalla prima riga, così
+    ''' togliere la sesta voce di dieci riportava in cima, e chi ne toglieva tre di fila
+    ''' doveva ritrovare il punto ogni volta. La riga si ritrova per <b>identità</b> e non
+    ''' per posizione, perché intanto le altre si sono spostate.
+    ''' </remarks>
     Private Sub MostraICampi()
 
         _riempimenti += 1
 
         Try
+            ' Chi era scelto, e dove stava: il primo serve a ritrovarlo se c'è ancora, il
+            ' secondo a scegliere chi ha preso il suo posto quando non c'è più.
+            Dim eraASinistra As RigaElenco = RigaSceltaASinistra()
+            Dim postoASinistra As Integer = PostoScelto(lvwCampi)
+            Dim eraADestra As RigaElenco = RigaSceltaADestra()
+            Dim postoADestra As Integer = PostoScelto(lvwFuori)
+
             lvwCampi.Items.Clear()
             lvwFuori.Items.Clear()
 
@@ -470,13 +524,78 @@ Public Class FinestraModificaTesti
 
             Next
 
-            If lvwCampi.Items.Count > 0 Then lvwCampi.Items(0).Selected = True
+            RimettiLaScelta(lvwCampi, eraASinistra, postoASinistra)
+            RimettiLaScelta(lvwFuori, eraADestra, postoADestra)
 
         Finally
             _riempimenti -= 1
         End Try
 
         AggiornaIComandi()
+
+    End Sub
+
+    ''' <summary>
+    ''' La riga scelta in un elenco, o <c>Nothing</c>.
+    ''' </summary>
+    ''' <remarks>
+    ''' Si guardano le righe una a una invece di chiedere <c>SelectedItems</c>, che è la
+    ''' strada breve ma risponde soltanto quando l'elenco è <b>nato</b>: su una finestra
+    ''' mai mostrata — cioè al banco — direbbe sempre «non è scelto niente», e un collaudo
+    ''' sulla scelta sarebbe verde per il motivo sbagliato. Il <c>Selected</c> di una riga
+    ''' invece risponde in tutti e due i casi: dal controllo di Windows quando c'è, dallo
+    ''' stato tenuto da parte quando non c'è ancora.
+    ''' </remarks>
+    Private Shared Function SceltaIn(elenco As ListView) As ListViewItem
+
+        For Each riga As ListViewItem In elenco.Items
+            If riga.Selected Then Return riga
+        Next
+
+        Return Nothing
+
+    End Function
+
+    ''' <summary>Dov'era la riga scelta in un elenco, o -1 se non era scelto niente.</summary>
+    Private Shared Function PostoScelto(elenco As ListView) As Integer
+
+        Dim scelta As ListViewItem = SceltaIn(elenco)
+        If scelta Is Nothing Then Return -1
+
+        Return elenco.Items.IndexOf(scelta)
+
+    End Function
+
+    ''' <summary>
+    ''' Rimette la scelta dov'era: sulla stessa riga se c'è ancora, altrimenti su quella
+    ''' che ne ha preso il posto — e sull'ultima, quando quella sparita era in coda.
+    ''' </summary>
+    ''' <remarks>
+    ''' Un elenco appena riempito, su cui prima non era scelto niente, parte dalla prima
+    ''' riga: è il caso dell'apertura, ed è giusto che cominci da lì.
+    ''' </remarks>
+    Private Shared Sub RimettiLaScelta(elenco As ListView, era As RigaElenco, posto As Integer)
+
+        If elenco.Items.Count = 0 Then Return
+
+        If era IsNot Nothing Then
+            For Each riga As ListViewItem In elenco.Items
+                If riga.Tag Is era Then
+                    Scegli(riga)
+                    Return
+                End If
+            Next
+        End If
+
+        Scegli(elenco.Items(Math.Min(Math.Max(posto, 0), elenco.Items.Count - 1)))
+
+    End Sub
+
+    ''' <summary>Sceglie una riga e la porta in vista: una scelta che non si vede non serve.</summary>
+    Private Shared Sub Scegli(riga As ListViewItem)
+
+        riga.Selected = True
+        riga.EnsureVisible()
 
     End Sub
 
@@ -500,11 +619,11 @@ Public Class FinestraModificaTesti
 
     End Function
 
-    ''' <summary>Il segno ✎, che vale per la prosa riscritta in questo giro.</summary>
+    ''' <summary>Il segno ✎, che vale per la prosa scritta a mano dall'utente.</summary>
     Private Function SegnoDellaRiga(riga As RigaElenco) As String
 
         If riga.IndiceProsa < 0 Then Return String.Empty
-        Return If(_voci(riga.IndiceProsa).Riscritto, SegnoRiscritto, String.Empty)
+        Return If(_voci(riga.IndiceProsa).RiscrittoAMano, SegnoRiscritto, String.Empty)
 
     End Function
 
@@ -532,16 +651,14 @@ Public Class FinestraModificaTesti
     ''' <summary>La riga scelta nell'elenco di sinistra, o <c>Nothing</c>.</summary>
     Private Function RigaSceltaASinistra() As RigaElenco
 
-        If lvwCampi.SelectedItems.Count = 0 Then Return Nothing
-        Return TryCast(lvwCampi.SelectedItems(0).Tag, RigaElenco)
+        Return TryCast(SceltaIn(lvwCampi)?.Tag, RigaElenco)
 
     End Function
 
     ''' <summary>La riga scelta nell'elenco di destra, o <c>Nothing</c>.</summary>
     Private Function RigaSceltaADestra() As RigaElenco
 
-        If lvwFuori.SelectedItems.Count = 0 Then Return Nothing
-        Return TryCast(lvwFuori.SelectedItems(0).Tag, RigaElenco)
+        Return TryCast(SceltaIn(lvwFuori)?.Tag, RigaElenco)
 
     End Function
 
@@ -613,7 +730,7 @@ Public Class FinestraModificaTesti
                 If quale Is Nothing OrElse quale.IndiceProsa <> indice Then Continue For
 
                 riga.SubItems(1).Text = UnaRiga(_voci(indice).Testo)
-                riga.SubItems(2).Text = If(_voci(indice).Riscritto, SegnoRiscritto, String.Empty)
+                riga.SubItems(2).Text = If(_voci(indice).RiscrittoAMano, SegnoRiscritto, String.Empty)
                 Exit For
 
             Next

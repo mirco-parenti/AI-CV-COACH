@@ -119,10 +119,11 @@ espone, ed è in «Chiuse».*
 
 *Le voci qui sotto sono nate guardando l'applicazione mentre si chiudevano altre cose: non
 erano in nessun piano, e nessuna è grave. La voce sulla finestra a misura ridotta è stata
-verificata il 2026-08-23 dal collaudo dal vivo di T9e ed è in «Chiuse». Altre due — le
-**parole incollate** fra un blocco e l'altro della pagina letta e il **404 raccontato come un
-guasto di rete** — sono state chiuse il 2026-08-24 rileggendo il codice: le aveva curate T9d
-il 22 agosto, e nessuno le aveva spostate.*
+verificata il 2026-08-23 dal collaudo dal vivo di T9e ed è in «Chiuse». Altre tre — le
+**parole incollate** fra un blocco e l'altro della pagina letta, il **404 raccontato come un
+guasto di rete** e il **markdown grezzo** nelle bolle del brainstorming — sono state chiuse il
+2026-08-24 rileggendo il codice: le aveva curate T9d il 22 agosto, e nessuno le aveva
+spostate.*
 
 - **La traccia del dialogo reale non ha più nessuna trappola che sfugga.** Curato il «corso
   senza nome» (Pool 1.12), tutte e quattro le trappole della traccia vengono instradate ogni
@@ -130,12 +131,6 @@ il 22 agosto, e nessuno le aveva spostate.*
   collaudo che passa sempre smette di misurare. Serve una trappola nuova, più difficile di
   quelle di adesso, scritta apposta per il modello di oggi. *(cap. 14, T3;
   `CollaudiDialogoReale`; `casi/reale/dialogo_guidato.md`.)*
-- **Nel brainstorming il markdown si vede grezzo.** L'AI risponde con `**grassetto**` e
-  `## titoli`, e la chat di P5 mostra gli asterischi e i cancelletti così come sono. Non
-  rompe niente e il testo si capisce, ma è l'unico posto del programma in cui si vede la
-  scrittura di una macchina invece di un testo: gli appunti di mira che ne escono, invece,
-  sono già puliti. O si rende la bolla capace di leggerlo, o si dice al prompt di non
-  scriverlo. *(cap. 03.5; `PannelloDialogo`.)*
 
 ## Dal collaudo di tappa di T8 — il gruppo C (2026-08-21)
 
@@ -219,6 +214,10 @@ su cui verificarla.*
 *Le tre cure sono fatte e verificate dal vivo a 150% (decisione 15.7). Quel che segue è ciò che
 si è deciso di **non** fare adesso, e va scritto per non spacciarlo per finito.*
 
+*La voce sulla **barra orizzontale** delle Impostazioni è stata chiusa il 2026-08-24, primo
+lavoro del ramo delle rifiniture prima del giro D, ed è in «Chiuse»: resta la specie da cui
+veniva, che è la voce qui sotto.*
+
 - **Le costanti di `StileApp` sommate a misure già scalate.** Curati i tre difetti, resta la
   specie da cui venivano: `MargineRiquadro` (14), `DistanzaControlli` (12), `InterlineaMinima`
   (8) e le misure dei bottoni sono in unità di progetto, e il codice che dispone a mano le
@@ -231,17 +230,12 @@ si è deciso di **non** fare adesso, e va scritto per non spacciarlo per finito.
   come verrebbe da dire: `PannelloEmail` sta fra i dieci senza e `FormPrincipale` fra i
   sette con. Il danno è cosmetico
   (spaziature compresse a DPI alti, non comandi irraggiungibili); il rischio di toccarle non
-  lo è, perché sarebbe rimettere mano al posizionamento di sedici file e **il banco non ha un
-  solo collaudo di misure d'interfaccia** — una regressione non la vedrebbe nessuno fino al
-  prossimo collaudo dal vivo. Rimandate di proposito, non dimenticate: con `ScalaSchermo` ora
+  lo è, perché sarebbe rimettere mano al posizionamento di sedici file e il banco **quasi non
+  ha collaudi di misure d'interfaccia**: dal 2026-08-24 ce ne sono due, e guardano una finestra
+  sola — le Impostazioni quando scorrono. Su tutto il resto una regressione non la vedrebbe
+  nessuno fino al prossimo collaudo dal vivo. Rimandate di proposito, non dimenticate: con `ScalaSchermo` ora
   esiste il posto dove passerebbero, e le funzioni pure che le renderebbero collaudabili.
   *(cap. 03.4 e 15.7.)*
-- **Nelle Impostazioni compare una barra di scorrimento orizzontale che non serve.** Curato
-  R11, la finestra scorre come deve in verticale, ma la barra verticale ruba larghezza
-  all'area cliente e fa scattare anche quella orizzontale, che non ha niente da mostrare. È
-  rifinitura, non funzione: tutti i comandi si raggiungono. Si chiude riservando la larghezza
-  della barra quando lo scorrimento si accende. *(cap. 03.4; visto il 2026-08-23 nella
-  verifica della cura.)*
 
 ## Dal quinto tempo di T9e — le cure dei reperti (2026-08-24, alla chiusura)
 
@@ -251,6 +245,10 @@ annotati qui prima che in ogni altro posto. Il **riordino** delle voci di un doc
 R6 nominava accanto alla rimozione, non sta qui ma in `idee_future.md`: la forma di R6 è stata
 decisa — si toglie e si rimette — e riordinare è un raffinamento in più, non un debito.*
 
+*Due dei quattro — il **segno ✎** che non sapeva del disco e la **selezione** che tornava in
+cima — sono stati curati il 2026-08-24, primo lavoro del ramo delle rifiniture prima del giro
+D, e sono in «Chiuse».*
+
 - **Rigenerare la lettera di una candidatura costruita con un altro profilo dà un errore
   criptico.** «⚠ Rigenera la lettera» su una candidatura i cui documenti nacquero da una
   versione di profilo diversa da quella di adesso finisce in «L'AI ha risposto in una forma
@@ -258,16 +256,6 @@ decisa — si toglie e si rimette — e riordinare è un raffinamento in più, n
   utente non vuol dire niente. Il dato per dirlo bene c'è già ed è a portata: la
   `versione_profilo` annotata nello `stato.json`. *(cap. 08.4; cap. 11.1; visto il 2026-08-24
   provando R7 dal vivo.)*
-- **Il segno ✎ e l'avviso di «Rigenera» non conoscono le stesse riscritture.** Nell'elenco
-  della finestra «Modifica i testi» il ✎ marca le riscritture del **giro corrente**; l'avviso
-  di «Rigenera», che legge il disco, conosce anche quelle di ieri (R7). Le due cose rispondono
-  alla stessa domanda — «questo l'ho scritto io?» — e danno due risposte diverse. O il segno
-  impara a leggere il disco, o si dichiara che marca solo la sessione. *(cap. 03.6; cap. 08.4;
-  visto il 2026-08-24.)*
-- **Dopo aver tolto una voce, la selezione dell'elenco torna alla prima riga.** In «Modifica
-  i testi», premuto «Togli →», la riga scelta se ne va e l'elenco si riposiziona in cima
-  invece che sulla voce vicina: chi ne toglie tre di fila deve ritrovare il punto ogni volta.
-  Rifinitura, non funzione. *(cap. 03.6; visto il 2026-08-24 provando R6 dal vivo.)*
 - **`scegli_riga` dello strumento di collaudo tocca solo il primo elenco della finestra.** I
   due elenchi di «Modifica i testi» sono esposti all'accessibilità come **Table** e non come
   List, e l'attrezzo prende sempre la prima che trova: la colonna «Lasciate fuori» non si può
@@ -303,6 +291,53 @@ decisa — si toglie e si rimette — e riordinare è un raffinamento in più, n
   pagina non c'è», invece di mandare a controllare il modem. È la stessa passata che ha
   smesso di incolpare la cosa sbagliata pannello per pannello. *(cap. 06.6;
   `EsitoNavigazione`.)*
+- ✅ **Nel brainstorming il markdown si vede grezzo** *(aperta il 2026-08-19, **curata** il
+  2026-08-22 da T9d, spostata qui il 2026-08-24)*. Le bolle di P5 non mostrano più gli
+  asterischi e i cancelletti: `ProsaDellAssistente.SenzaMarkdown` è una funzione pura che
+  toglie i segni — grassetto, corsivo, titoli, elenchi, recinzioni di codice — e di un
+  collegamento tiene **il testo e l'indirizzo**, perché buttarne via uno dei due
+  nasconderebbe qualcosa a chi legge. Delle due strade che la voce immaginava non se n'è
+  presa nessuna: la bolla non impara a leggere il markdown — le bolle sono `Label` — e al
+  prompt non si chiede niente, che sarebbe stato un bump del pool e una fiducia. La cautela
+  che conta è un'altra: la ripulitura gira sul testo **intero accumulato**, mai sul
+  frammento, perché la risposta arriva a pezzi e un `**` spezzato fra due di essi non si
+  riconoscerebbe mai — e il collaudo lo prova con un finto che consegna **parola per
+  parola**. *(cap. 03.5; `ProsaDellAssistente`; `PannelloDialogo.CresciLaBolla`.)*
+- ✅ **Il segno ✎ e l'avviso di «Rigenera» non conoscono le stesse riscritture** *(aperta il
+  2026-08-24 dal quinto tempo di T9e, chiusa lo stesso giorno aprendo le rifiniture pre-giro
+  D)*. Delle due strade che la voce lasciava aperte si è presa la prima: **il segno legge la
+  stessa fonte del disco**. Insieme al documento la finestra riceve ora i campi che vi
+  risultano **già** riscritti a mano (R7), e il ✎ vale per «questo testo l'hai scritto tu» —
+  adesso, o in un giro precedente: esattamente la domanda dell'avviso di «Rigenera». Quel che
+  **non** è cambiato è cosa rientra nel documento al «Salva»: lì conta solo ciò che è stato
+  toccato in questo giro, o un documento che nessuno ha modificato si farebbe risalvare a ogni
+  visita. Erano due risposte a una domanda sola per sbaglio; adesso sono due domande distinte
+  per disegno, e il collaudo tiene ferma anche la seconda. *(cap. 03.6; cap. 08.4;
+  `FinestraModificaTesti`; `RiscrittureAMano.Contiene`.)*
+- ✅ **Dopo aver tolto una voce, la selezione dell'elenco torna alla prima riga** *(aperta il
+  2026-08-24 dal quinto tempo di T9e, chiusa lo stesso giorno aprendo le rifiniture pre-giro
+  D)*. Gli elenchi si rifanno da capo a ogni «Togli» e a ogni «Rimetti», e una ricostruzione
+  non ha memoria. Adesso la riga scelta si ritrova **per identità** — è la stessa voce, che
+  intanto si è spostata — e quando quella riga non c'è più la scelta cade su chi ha preso il
+  suo posto, o sull'ultima rimasta se era in coda. Vale per **tutti e due** gli elenchi, perché
+  chi rimette dentro le voci una a una lavora in quello di destra, dove la fila si accorcia
+  allo stesso modo. Per poterlo collaudare la finestra ha smesso di chiedere a
+  `SelectedItems` chi è scelto — quella strada risponde solo a elenco già nato, cioè mai al
+  banco — e guarda le righe una a una: stesso esito nell'applicazione, ma verificabile.
+  *(cap. 03.6; `FinestraModificaTesti.MostraICampi`.)*
+- ✅ **Nelle Impostazioni compare una barra di scorrimento orizzontale che non serve** *(aperta
+  il 2026-08-23 verificando la cura di R11, chiusa il 2026-08-24 col ramo delle rifiniture
+  prima del giro D)*. Quando si scorre, la fila dei controlli **si fa due volte**: la prima
+  dice quanto verrebbe alta la finestra, la seconda la rifà dentro la larghezza che resta
+  tolta la barra verticale (`ScalaSchermo.LarghezzaSenzaLaBarra`). Prima il contenuto arrivava
+  fino al margine di 14 pixel del disegno, mentre quella barra ne prende **17** a 96 DPI e
+  **26** a 150%: di lì la seconda barra, che non aveva niente da mostrare. La domanda non si
+  riapre — righe che vanno a capo prima possono solo far crescere l'altezza, e uno scorrimento
+  che serviva serve ancora — e la riserva si prende **solo** quando si scorre, o stringerebbe
+  la finestra per una barra che non c'è. Per poterlo collaudare la disposizione **riceve** lo
+  spazio in altezza invece di leggerlo dallo schermo: un banco non può cambiare schermo, ed è
+  proprio quando il contenuto non ci sta che questa disposizione fa qualcosa di diverso.
+  *(cap. 03.4; `FinestraImpostazioni.DisponiIn`; `ScalaSchermo`.)*
 
 - ✅ **Il pannello del logo a DPI alti** *(aperta il 2026-08-09 dalla revisione adversariale,
   misurata il 2026-08-23 dal collaudo dal vivo di T9e, **chiusa lo stesso giorno** dal quinto

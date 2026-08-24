@@ -333,6 +333,207 @@ Namespace Ui
 
         End Sub
 
+        ' ==================================================================
+        ' La scelta resta dov'era (2026-08-24)
+        ' ==================================================================
+
+        ''' <summary>
+        ''' Sceglie una riga, come farebbe un clic.
+        ''' </summary>
+        ''' <remarks>
+        ''' La riga scelta prima si toglie a mano: i due elenchi hanno
+        ''' <c>MultiSelect = False</c> e nell'applicazione ci pensa Windows, ma su una
+        ''' finestra mai mostrata quel controllo non c'è ancora e resterebbero scelte in
+        ''' due. Qui si fa quel che farebbe lui, non qualcosa di diverso.
+        ''' </remarks>
+        Private Shared Sub Scegli(elenco As ListView, riga As Integer)
+
+            For Each voce As ListViewItem In elenco.Items
+                voce.Selected = False
+            Next
+
+            elenco.Items(riga).Selected = True
+
+        End Sub
+
+        ''' <summary>
+        ''' Come si chiama la riga scelta, o vuoto se non è scelto niente.
+        ''' </summary>
+        ''' <remarks>
+        ''' Si scorrono le righe invece di chiedere <c>SelectedItems</c> per la stessa
+        ''' ragione per cui lo fa la finestra: su un elenco mai nato quella scorciatoia
+        ''' risponde «niente scelto» qualunque cosa sia scelta.
+        ''' </remarks>
+        Private Shared Function Scelta(elenco As ListView) As String
+
+            For Each riga As ListViewItem In elenco.Items
+                If riga.Selected Then Return riga.Text
+            Next
+
+            Return String.Empty
+
+        End Function
+
+        ''' <summary>
+        ''' Togliere una voce rifà gli elenchi, e una ricostruzione non ha memoria: la
+        ''' scelta ripartiva dalla prima riga, così chi toglieva la sesta voce di dieci si
+        ''' ritrovava in cima, e chi ne toglieva tre di fila doveva ricercare il punto ogni
+        ''' volta.
+        ''' </summary>
+        <TestMethod>
+        Public Sub TogliendoUnaVoceLaSceltaNonTornaInCima()
+
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                Scegli(Elenco(finestra), 2)
+
+                Assert.IsTrue(finestra.Togli(finestra.ImprontaDi("Esperienza 2")), "la si toglie")
+
+                Assert.AreEqual("Competenza 1", Scelta(Elenco(finestra)),
+                                "la scelta è su chi ha preso quel posto, non sul sommario in cima")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub TogliendoLUltimaVoceLaSceltaCadeSullUltimaRimasta()
+
+            ' Il posto che quella riga occupava adesso non esiste più: si scende di uno,
+            ' invece di risalire in cima.
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                Scegli(Elenco(finestra), 3)
+
+                Assert.IsTrue(finestra.Togli(finestra.ImprontaDi("Competenza 1")), "la si toglie")
+
+                Assert.AreEqual("Esperienza 2", Scelta(Elenco(finestra)), "l'ultima rimasta")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub RimettendoUnaVoceLaSceltaADestraNonTornaInCima()
+
+            ' Lo stesso, dall'altra parte: chi rimette dentro le voci una a una lavora
+            ' nell'elenco di destra, e anche lì la fila si accorcia sotto le sue mani.
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                finestra.Togli(finestra.ImprontaDi("Esperienza 1"))
+                finestra.Togli(finestra.ImprontaDi("Esperienza 2"))
+                finestra.Togli(finestra.ImprontaDi("Competenza 1"))
+
+                Scegli(Fuori(finestra), 1)
+
+                Assert.IsTrue(finestra.Rimetti(finestra.ImprontaDi("Esperienza 2")), "la si rimette")
+
+                Assert.AreEqual("Competenza 1", Scelta(Fuori(finestra)),
+                                "a destra la scelta è su chi ha preso quel posto")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LaRigaSiRitrovaPerIdentitaENonPerPosizione()
+
+            ' Una voce che rientra sposta tutte quelle che vengono dopo: cercare la riga
+            ' scelta al numero in cui stava riporterebbe su un'altra voce, con lo stesso
+            ' aplomb di una scelta giusta.
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                finestra.Togli(finestra.ImprontaDi("Esperienza 1"))
+
+                ' Adesso a sinistra ci sono Sommario, Esperienza 2, Competenza 1.
+                Scegli(Elenco(finestra), 1)
+                Assert.AreEqual("Esperienza 2", Scelta(Elenco(finestra)), "è lei che si sta guardando")
+
+                Assert.IsTrue(finestra.Rimetti(finestra.ImprontaDi("Esperienza 1")), "l'altra rientra")
+
+                Assert.AreEqual("Esperienza 2", Scelta(Elenco(finestra)),
+                                "l'ha spostata di un posto, ma la riga scelta è sempre la sua")
+
+            End Using
+
+        End Sub
+
+        ' ==================================================================
+        ' Il segno ✎: chi ha scritto questo testo (R7)
+        ' ==================================================================
+
+        ''' <summary>Un documento che si riapre con dei campi già riscritti a mano (R7).</summary>
+        Private Shared Function ConRiscritture(documento As JsonNode,
+                                               ParamArray campi As String()) As List(Of DocumentoDaRiscrivere)
+
+            Dim riscritte As New RiscrittureAMano
+
+            For Each id As String In campi
+                riscritte.Annota(id, New Date(2026, 8, 23, 18, 40, 0))
+            Next
+
+            Return New List(Of DocumentoDaRiscrivere) From {
+                New DocumentoDaRiscrivere With {.Documento = documento, .Riscritte = riscritte}}
+
+        End Function
+
+        ''' <summary>Il segno nella terza colonna di una riga: «✎», o niente.</summary>
+        Private Shared Function Segno(elenco As ListView, riga As Integer) As String
+
+            Return elenco.Items(riga).SubItems(2).Text
+
+        End Function
+
+        ''' <summary>
+        ''' Il ✎ valeva per «riscritto in questo giro», e riaprendo la finestra spariva: di
+        ''' un testo scritto dall'utente il giorno prima l'elenco diceva che non l'aveva
+        ''' mai toccato, mentre l'avviso di «Rigenera» — che i file li legge — continuava a
+        ''' promettere che quel testo si sarebbe perso. Due risposte alla stessa domanda.
+        ''' </summary>
+        <TestMethod>
+        Public Sub IlSegnoRestaSuUnTestoRiscrittoInUnAltroGiro()
+
+            Using finestra As New FinestraModificaTesti(ConRiscritture(Cv(), "sommario"))
+
+                Assert.AreEqual("✎", Segno(Elenco(finestra), 0), "il sommario l'ha scritto l'utente")
+                Assert.AreEqual(String.Empty, Segno(Elenco(finestra), 1), "l'esperienza no")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnTestoGiaRiscrittoNonSiRimetteNelDocumentoDaSolo()
+
+            ' Il segno dice chi ha scritto quel testo; a decidere cosa torna nel documento
+            ' resta quel che è cambiato adesso. Nel file quel testo c'è già, e riscriverlo
+            ' farebbe contare come «modificato» un documento che nessuno ha toccato.
+            Using finestra As New FinestraModificaTesti(ConRiscritture(Cv(), "sommario"))
+
+                Assert.IsEmpty(finestra.Applica(), "niente da rimettere")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaAnnotazioniIlSegnoCompareSoloDopoLaRiscrittura()
+
+            ' Un documento che nessuno ha mai toccato a mano non si porta dietro segni: le
+            ' candidature scritte prima di R7 si riaprono così, e vale come «mai toccate».
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                Assert.AreEqual(String.Empty, Segno(Elenco(finestra), 0),
+                                "all'apertura non l'ha riscritto nessuno")
+
+                Assert.IsTrue(finestra.Riscrivi(0, "L'ho riscritto io."), "lo riscrive adesso")
+
+                Assert.AreEqual("✎", Segno(Elenco(finestra), 0), "e il segno compare")
+
+            End Using
+
+        End Sub
+
     End Class
 
 End Namespace

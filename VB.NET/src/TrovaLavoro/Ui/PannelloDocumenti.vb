@@ -1244,7 +1244,7 @@ Public Class PannelloDocumenti
             If _cvBase IsNot Nothing Then
                 aperti.Add(New DocumentoDaRiscrivere With {
                     .Documento = _cvBase, .Ruolo = RuoloDocumento.Cv,
-                    .Tolte = _vociTolteDalCvBase})
+                    .Tolte = _vociTolteDalCvBase, .Riscritte = _riscrittureDelCvBase})
             End If
 
             Return aperti
@@ -1256,12 +1256,14 @@ Public Class PannelloDocumenti
         If _candidatura.Cv IsNot Nothing Then
             aperti.Add(New DocumentoDaRiscrivere With {
                 .Documento = _candidatura.Cv, .Ruolo = RuoloDocumento.Cv,
-                .Tolte = _candidatura.VociTolteDalCv})
+                .Tolte = _candidatura.VociTolteDalCv,
+                .Riscritte = _candidatura.RiscrittureDelCv})
         End If
 
         If _candidatura.Lettera IsNot Nothing Then
             aperti.Add(New DocumentoDaRiscrivere With {
-                .Documento = _candidatura.Lettera, .Ruolo = RuoloDocumento.Lettera})
+                .Documento = _candidatura.Lettera, .Ruolo = RuoloDocumento.Lettera,
+                .Riscritte = _candidatura.RiscrittureDellaLettera})
         End If
 
         Return aperti

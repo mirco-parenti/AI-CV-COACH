@@ -121,6 +121,34 @@ Namespace Ui
 
         End Sub
 
+        <TestMethod>
+        Public Sub QuandoSiScorreLaBarraSiPrendeLaSuaLarghezza()
+
+            ' 660 è la larghezza di progetto della finestra delle Impostazioni, 17 la barra
+            ' a 96 DPI: i 14 pixel di margine del disegno non bastavano a coprirla, e il
+            ' contenuto le finiva sotto.
+            Assert.AreEqual(643, ScalaSchermo.LarghezzaSenzaLaBarra(660, siScorre:=True, larghezzaBarra:=17))
+
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaScorrimentoLaLarghezzaResta()
+
+            Assert.AreEqual(660, ScalaSchermo.LarghezzaSenzaLaBarra(660, siScorre:=False, larghezzaBarra:=17),
+                            "una barra che non c'è non toglie niente")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaBarraDiLarghezzaIgnotaNonStringeIlContenuto()
+
+            ' Meglio un contenuto largo che un contenuto sparito: è la stessa scelta di
+            ' AltezzaSostenibile davanti a uno spazio non noto.
+            Assert.AreEqual(660, ScalaSchermo.LarghezzaSenzaLaBarra(660, siScorre:=True, larghezzaBarra:=0))
+            Assert.AreEqual(660, ScalaSchermo.LarghezzaSenzaLaBarra(660, siScorre:=True, larghezzaBarra:=-8))
+
+        End Sub
+
     End Class
 
 End Namespace
