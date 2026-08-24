@@ -281,3 +281,137 @@ sequenza è il resoconto di come è andata: **1110 collaudi verdi**, cartella sv
 tempo e nient'altro — proprietà rilette dall'eseguibile, e l'avvio provato su
 `C:\Temp\tl-rilascio-10` con il pannello logo che diceva `Ver. 1.0.000 · Pool 1.13
 (integrato)`.*
+
+## 13.10 Il copione del giro D
+
+*Il 13.9 finisce dove l'eseguibile è pronto e verificato **qui**. Il giro D è il passo dopo:
+portarlo su una macchina che non ha mai visto questo progetto — **senza SDK .NET 10, con
+Word** — e guardare se il vincolo più rigido regge davvero. Fin qui è dimostrato al 90%: la
+pubblicazione single-file è stata provata sulla macchina che ha l'SDK installato, e non è la
+stessa cosa. Questo paragrafo è il **copione**: cosa si prova, in che ordine, con quali dati.
+Si scrive **prima** di partire, perché il giro C di T9e ha già mostrato cosa costa
+improvvisare — un giro intero condotto sul profilo sbagliato.*
+
+> **Da non confondere con i «copioni» di `strumenti/collauda-copioni/`**, che sono i due
+> script JavaScript di `LettorePagina` provati su DOM finti (i «copioni 10 su 10» del
+> diario). Stessa parola, due cose senza parentela: quelli sono un banco automatico, questo
+> è un giro fatto da persone.
+
+**Che cosa il giro D deve dimostrare.** Quattro debiti aperti da tappe diverse, che si
+chiudono tutti con **una** macchina sola — più tre riserve del ramo delle rifiniture, curate
+al banco e mai viste dal vivo:
+
+| # | Che cosa | Aperta da | Si dice passata quando |
+|---|---|---|---|
+| **D1** | L'exe parte su un PC **davvero pulito** | T1 *(2026-08-06)* | un file solo, copiato e avviato, arriva alla finestra principale su una macchina senza SDK né runtime .NET |
+| **D2** | I documenti prodotti si aprono **in Word** | T4 *(2026-08-10)* | DOCX e PDF aperti in Word: **114 campi su 114** ritrovati, i due identici fra loro, accenti e simboli intatti — lo stesso criterio con cui passò LibreOffice |
+| **D3** | Un `.docx` **salvato davvero da Word** si reimporta nel profilo | T3 *(2026-08-07)* | il profilo estratto da quel file è quello di partenza: finora i DOCX di prova erano fabbricati da noi, e provavano la strada di lettura, non l'impaginazione di Word |
+| **D4** | La voce madre: quella macchina esiste ed è stata usata | T9e *(2026-08-23)* | D1, D2 e D3 sono state fatte **lì**, non raccontate |
+| **R-a** | La selezione nel `ListView` **vero** | rifiniture *(2026-08-24)* | in «Modifica i testi», dopo un «Togli» e un «Rimetti», la riga scelta segue la voce e non torna in cima — al banco la finestra non viene mai mostrata |
+| **R-b** | La barra delle Impostazioni **a 150%** | rifiniture *(2026-08-24)* | a scala 150% le Impostazioni scorrono **senza** barra orizzontale; a 96 DPI il difetto non compare affatto |
+| **R-c** | Il messaggio davanti a una **candidatura orfana** | rifiniture *(2026-08-24)* | eliminato e rifatto il profilo, «Rigenera la lettera» su una candidatura vecchia dice cos'è successo invece di un errore di lettura |
+
+*Le tre `R` si possono provare anche qui, e la `R-b` vuole comunque una disconnessione per
+cambiare scala. Stanno in questo elenco perché se il giro D capita prima, tanto vale
+chiuderle nello stesso viaggio.*
+
+**Prima di partire, da fare qui.** Nessuno di questi passi si può recuperare là.
+
+1. **L'eseguibile giusto, verificato per numero e per byte.** Non «l'exe che sta in
+   `pubblicazione\`»: quella cartella ha già ospitato una **0.3.041** del 22 agosto rimasta
+   lì a sembrare pronta, e portarla avrebbe misurato una versione superata proprio sul
+   difetto che le cure avevano tolto. Si leggono `ProductVersion` **dall'exe** e la dimensione
+   in byte, e si confrontano con quelle annotate al rilascio (13.9): la 1.0.000 è
+   **118.707.086 byte**.
+2. **I dati finti, costruiti e provati qui** *(decisione del 2026-08-24)*. Sulla macchina di
+   qualcun altro non vanno né il mio CV né i miei recapiti: il giro si fa con un profilo
+   inventato ma verosimile — nome parlante, `333 0000000`, un percorso di lavoro coerente —
+   e un annuncio altrettanto finto, salvati come file da copiare insieme all'exe. Vanno
+   **provati qui prima**: un profilo finto che l'estrazione non digerisce brucerebbe il giro
+   là, e si scoprirebbe di aver misurato il dato, non il programma. Serve anche il CV finto
+   in **PDF**, perché è da lì che il profilo entra.
+3. **La chiave API.** Non si trasferisce copiando `segreti.bin`: è cifrato con DPAPI e legato
+   all'utente Windows che l'ha scritto (cap. 11.3). Là si digita nella finestra del primo
+   avvio, e la si decide **prima** di partire — quale chiave, e che si toglie andando via. Nel
+   copione non si scrive mai.
+4. **⚠ L'SDK .NET 10 su quella macchina si installa *dopo*, mai prima.** La voce di T1 lo
+   chiede perché il tutor possa compilare, ed è giusta — ma il giro D vuole esattamente una
+   macchina che non ce l'ha, ed è l'unica disponibile. Installarlo prima brucia la prova e
+   non si torna indietro.
+
+**Là: l'allestimento** *(dieci minuti, prima che cominci il giro).*
+
+1. Si copia **il solo `TrovaLavoro.exe`** e la cartella dei dati finti. Se accanto all'exe
+   finisce qualcos'altro, D1 non è più una prova.
+2. Primo avvio: compare lo **SmartScreen** — l'eseguibile non è firmato (13.6) — e si passa
+   con «Ulteriori informazioni → Esegui comunque». *Vale la pena farlo vedere al tutor: è la
+   prima cosa che vedrebbe chiunque ricevesse questo file, ed è la faccia meno amichevole del
+   progetto.*
+3. Poi lo splash, e la **finestra della chiave** prima dei pannelli (cap. 03.4). Si inserisce
+   la chiave. «Non adesso» è legittimo ma qui non serve: senza AI metà del giro non si fa.
+4. Si avvia con **`--dati`** su una cartella dedicata di quella macchina, così tutto quel che
+   il giro produce sta in un posto solo e si cancella in un gesto. La radice non predefinita
+   l'applicazione la dichiara da sé nel titolo e nella barra di stato.
+5. **Una finestra sola, aperta una volta.** È la trappola del giro C: due istanze si
+   distinguono **solo dalla barra del titolo**, e un giro intero è finito sul profilo
+   sbagliato senza che nessuno se ne accorgesse mentre andava.
+
+**Primo tempo — guidi tu.** Serve a chiudere i debiti tecnici, che vogliono mano ferma e
+ordine preciso. Il tutor guarda.
+
+| Passo | Cosa si fa | Chiude |
+|---|---|---|
+| 1 | L'app parte, si legge nel pannello logo `Ver. 1.0.000 · Pool 1.13 (integrato)` | **D1** |
+| 2 | Si importa il CV finto in PDF, si completa il profilo e si salva | *(prepara il resto)* |
+| 3 | Si incolla l'annuncio finto, «Analizza», confronto e stelle | *(prepara il resto)* |
+| 4 | Si generano 🎯 CV-2 e ✉️ lettera, si esportano **DOCX e PDF** | *(prepara D2)* |
+| 5 | **Si aprono tutt'e due in Word** e si contano i campi: 114 su 114, i due identici | **D2** |
+| 6 | Da Word si fa **«Salva con nome»** su un `.docx` nuovo, e lo si **reimporta** nel profilo | **D3** |
+| 7 | In «Modifica i testi»: un «Togli», un «Rimetti», si guarda dove va la selezione | **R-a** |
+| 8 | Si eliminano i dati del profilo, si rifà il profilo, si riapre la candidatura di prima e si preme «Rigenera la lettera» | **R-c** |
+| 9 | Se quella macchina è a **150%** (o la si porta lì, con la disconnessione che serve): Impostazioni, si scorre | **R-b** |
+
+*I passi 5 e 6 sono **la catena di Word**, ed è il cuore del giro: l'unica cosa che qui non si
+può fare in nessun modo. Se il tempo stringe, si taglia tutto il resto e si tengono quelli.*
+
+**Secondo tempo — le mani al tutor.** Qui non si chiude nessun debito: si scopre cosa capisce
+chi non ha costruito l'applicazione. Vale se e solo se si rispetta una regola.
+
+- Si dà **un compito solo**, detto in una frase e senza istruzioni: *«fatti un profilo e
+  preparati una candidatura per questo annuncio»*. Niente di più.
+- **Tu stai zitto.** Ogni volta che spieghi, cancelli il dato che sei venuto a prendere. Se si
+  blocca del tutto, si annota **dove** e solo allora si aiuta.
+- Si annota **dove esita**, non cosa sbaglia: un'esitazione di tre secondi davanti a un
+  bottone dice più di un errore, perché l'errore lo racconterebbe lui e l'esitazione no.
+- Il profilo del tutor è **suo**: se preferisce dati finti anche per sé, si usano quelli
+  preparati. Quel che scrive resta sulla sua macchina e si cancella andando via.
+
+**Come si annota un reperto.** Come nei giri A, B e C: sigla progressiva (`D-R1`, `D-R2`…),
+una riga su cosa è successo, una sulla gravità, e — quando c'è — la fotografia. Si annota
+**mentre il giro va**, su un file **fuori dal repo**: un reperto ricostruito a casa la sera è
+già un ricordo, e i dettagli che contano sono i primi a sbiadire. Entrano nel repo dopo,
+quando diventano voci di `in_sospeso.md` o cure.
+
+**Prima di andare via.**
+
+1. Si cancella la **cartella dati** del giro e i documenti esportati (Desktop compreso: gli
+   export chiedono dove salvare e la prima volta propongono lì).
+2. Si toglie la **chiave API**: dalle Impostazioni, o eliminando la cartella dati che contiene
+   `segreti.bin`.
+3. Si porta a casa: l'elenco dei reperti, le fotografie, e **quali delle sette voci** della
+   tabella sono passate. Una voce non provata si dichiara tale — è la regola 15, e vale
+   soprattutto per il giro che nasce apposta per chiudere le riserve altrui.
+4. **Solo adesso**, se serve, si installa l'SDK .NET 10 e si chiude la voce di T1.
+
+**Le trappole già pagate**, che questo copione esiste per non ripetere:
+
+- **due finestre aperte si distinguono solo dal titolo** — giro C, condotto per intero sul
+  profilo sbagliato;
+- **l'exe che sembra pronto può essere di ieri** — la 0.3.041 trovata in `pubblicazione\`;
+- **il DPI di sistema mente a chi non si è dichiarato DPI-aware**: `GetDpiForSystem` risponde
+  96 anche a 150%, e la scala non cambia davvero senza **disconnessione**;
+- **lo strumento di collaudo, a 150%, può dire «Premuto» senza aver premuto** — qui non serve
+  (il giro è a mano), ma se lo si usa per fotografare, le immagini escono virtualizzate;
+- **una voce data per aperta può essere già chiusa nel codice**: prima di portarsi dietro un
+  elenco, lo si confronta con il codice. È costato dieci minuti scoprirlo, e due giorni non
+  saperlo.

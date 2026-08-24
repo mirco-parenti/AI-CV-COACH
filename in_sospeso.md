@@ -269,15 +269,15 @@ difetto: sono cose che aspettano una mano o una macchina.*
   orfana**, che vuole un profilo eliminato e rifatto con una candidatura vecchia ancora in
   casa. Si chiudono in una passata sola, su questa macchina, cambiando la scala di Windows —
   che chiede una disconnessione. *(cap. 03.4, 03.6, 08.4, 11.1; regola 15.)*
-- **Manca il copione del giro D.** Non esiste un elenco scritto di cosa provare, in che
-  ordine e con quali dati: il giro C di T9e ha già mostrato cosa costa improvvisare. È la cosa
-  da scrivere **prima** di portare l'eseguibile sull'altra macchina, perché lì il tempo è di
-  qualcun altro e non si ripete. *(cap. 13.9; cap. 14, T9e.)*
-- **La chiave API sulla postazione del tutor, e i dati con cui provare.** Senza chiave
-  l'applicazione si apre ma non ragiona, e metà del giro D non si può fare; però la chiave non
-  viaggia in chiaro e i dati veri di un CV non si portano su una macchina altrui senza
-  deciderlo prima. Vanno decise tutt'e due le cose insieme — quale chiave, e se il giro si fa
-  su dati finti costruiti apposta o su dati veri poi tolti. *(cap. 11.3.)*
+- **La chiave API sulla postazione del tutor** — e i **dati finti** da costruire. Senza chiave
+  l'applicazione si apre ma non ragiona, e metà del giro D non si può fare; `segreti.bin` non
+  si trasferisce copiandolo, perché è cifrato con DPAPI e legato all'utente Windows che l'ha
+  scritto, quindi là la chiave si digita a mano e si toglie andando via. **Quale** chiave usare
+  resta da decidere. *La metà sui dati è invece decisa il 2026-08-24: si va con dati **finti**
+  costruiti apposta — nome parlante, `333 0000000`, un percorso coerente — così sulla macchina
+  di qualcun altro non finisce niente di mio e il giro resta ripetibile. Restano da
+  **costruire**, e da provare qui prima di partire: un profilo finto che l'estrazione non
+  digerisce brucerebbe il giro là.* *(cap. 11.3; cap. 13.10.)*
 - **⚠ L'ordine che non si può sbagliare: l'SDK .NET 10 sulla postazione del tutor si installa
   *dopo* il giro D.** La voce di T1 qui sopra lo chiede perché quella macchina possa
   compilare, ed è giusta — ma il giro D vuole esattamente una macchina **senza** quell'SDK,
@@ -296,6 +296,16 @@ difetto: sono cose che aspettano una mano o una macchina.*
 
 ## Chiuse
 
+- ✅ **Il copione del giro D** *(aperta il 2026-08-24 aprendo le rifiniture pre-giro D,
+  **scritta** lo stesso giorno)*. È il **§13.10** del cap. 13, accanto alla procedura di
+  rilascio, perché il giro D è il passo dopo il rilascio: pubblicato l'eseguibile, lo si porta
+  e lo si prova. Dice **cosa** si prova — le quattro voci D1-D4 con il criterio per dirle
+  passate, più le tre riserve del ramo mai viste dal vivo —, **in che ordine** e **con quali
+  dati**. Due tempi, decisi con lui: prima il giro guidato, che chiude i debiti tecnici e ha
+  al centro la **catena di Word** (esporta → apri in Word → salva da Word → reimporta), poi le
+  mani al tutor su un compito solo, dove la regola è che io stia zitto. In fondo le trappole
+  già pagate che il copione esiste per non ripetere — le due finestre che si distinguono solo
+  dal titolo, l'exe che sembra pronto ed è di ieri, il DPI che mente. *(cap. 13.10.)*
 - ✅ **L'icona dell'eseguibile** *(aperta il 2026-08-06 da T1, **fatta** il 2026-08-22 dal
   primo tempo di T9e, spostata qui il 2026-08-24)*. Viene dallo stesso scudo Aviolab già
   incorporato nel sorgente: `TrovaLavoro.ico` è incorporato due volte — come icona di Windows
