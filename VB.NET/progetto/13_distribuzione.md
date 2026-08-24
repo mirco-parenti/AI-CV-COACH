@@ -144,7 +144,7 @@ insieme al resto:
 
 - La versione dell'app vive in **un solo file sorgente** (`Versione.vb`): formato
   `maggiore.minore.build`, mostrata nel pannello logo insieme alla versione del pool —
-  oggi `Ver. 0.3.046 · Pool 1.13` — schema confermato in cap. 15, voce 5. Le due versioni
+  oggi `Ver. 1.0.000 · Pool 1.13` — schema confermato in cap. 15, voce 5. Le due versioni
   corrono separate di proposito: il pool ha una storia sua (cap. 04.1), e l'etichetta
   dichiara da sé sorgente e stato («integrato», l'asterisco di chi sperimenta).
 - Ogni modifica al codice incrementa il numero di build; la storia delle release sta
@@ -223,3 +223,61 @@ Prima versione: aggiornamento **manuale** — si scarica il nuovo exe e si sosti
 il vecchio; i dati in `%APPDATA%` non si toccano e il programma riparte da dove era.
 Niente auto-update in perimetro: per un'app personale è complessità senza guadagno
 (annotato comunque tra le idee future).
+
+## 13.9 Come si fa un rilascio
+
+*Fin qui il capitolo ha detto **con che parametri** si pubblica e **che aspetto** ha il
+risultato; questo paragrafo dice **in che ordine** si fanno le cose, perché un rilascio non
+è un gesto — è una sequenza, e la parte che si dimentica è sempre la stessa: la verifica
+dell'eseguibile vero, che nessun collaudo automatico copre.*
+
+**I passi, nell'ordine.**
+
+1. **Si parte dal pulito.** Working tree senza modifiche pendenti, sul ramo della tappa. Un
+   rilascio fatto sopra a un lavoro a metà non si sa più che cosa contenga.
+2. **Il numero si cambia in un posto solo** — la costante di `Versione.vb` (13.5). Il
+   `.vbproj` la rilegge da lì con una regex, quindi le proprietà dell'eseguibile seguono da
+   sé e non c'è un secondo posto da tenere allineato.
+3. **Il pool si chiude prima.** Se un prompt è stato toccato, il rito del bump (cap. 04.5)
+   va finito adesso: l'etichetta che l'utente leggerà dev'essere `Pool x.yy (integrato)`,
+   senza l'asterisco di chi sperimenta.
+4. **Il banco intero, prima di pubblicare.** `dotnet test` da `VB.NET/src`: il
+   `collaudi.runsettings` dichiarato nel progetto tiene già fuori i collaudi che vogliono
+   l'API vera, quindi il comando nudo è quello giusto. Non si pubblica una versione che non
+   è stata provata. *Se il **server MCP del prodotto** è vivo (modalità `--mcp`, cap. 09)
+   tiene bloccato l'eseguibile e la compilazione si ferma: va chiuso per PID prima di
+   cominciare, sapendo che i suoi tool spariranno fino al riavvio del client.*
+5. **La cartella di pubblicazione si svuota prima.** Altrimenti «un solo file» non è una
+   verifica ma un'ispezione su una cartella già sporca: un `.pdb` o un `.xml` rimasto da un
+   publish precedente passerebbe per assenza di problema. Il vincolo del 13.2 si prova solo
+   partendo dal vuoto.
+6. **Si pubblica con `publish.bat`**, mai a mano: i parametri del 13.2 stanno lì perché
+   la pubblicazione non dipenda dalla memoria di nessuno (13.7).
+7. **Le quattro verifiche sull'eseguibile.** Sono la ragione d'essere di questo paragrafo,
+   perché nessuna di esse è nel banco:
+
+   | Verifica | Come | Perché |
+   |---|---|---|
+   | **Un solo file** | contare i file della cartella, non guardarli | è il vincolo più rigido del progetto (13.2) |
+   | **Le proprietà** | leggerle **dall'exe**, non dal `.vbproj` | `ProductVersion`, `ProductName`, `Company`, `Copyright`, `Descrizione` (13.5): quel che conta è ciò che Windows mostra, non ciò che si è scritto |
+   | **L'avvio vero** | lanciarlo con `--dati` su una cartella usa-e-getta e leggere la riga del pannello logo | un exe che si compila non è un exe che parte; e la riga dice insieme versione e pool |
+   | **La dimensione** | annotarla in byte | si confronta con quella del rilascio prima: uno scarto grosso è una dipendenza entrata di nascosto |
+
+8. **Poi la documentazione**, non prima: README (lo stato), `diario_di_bordo.md` (lo Step),
+   i capitoli che il rilascio smentisce, `in_sospeso.md` (quel che resta).
+9. **Commit, merge e tag.** Il tag si mette sul commit di `main` dopo il merge, nella forma
+   `v<maggiore>.<minore>`. Il push è un gesto separato e lo decide Mirco: un tag spinto
+   per inerzia pubblica una versione che nessuno ha ancora deciso di pubblicare.
+
+**Che cosa un rilascio non fa**, e va detto perché la parola promette più di quel che qui
+significa: non **firma** il codice — SmartScreen avviserà (13.6); non pubblica niente
+online — l'eseguibile si porta a mano sulla macchina che deve provarlo; e non aggiorna
+nessuno — l'aggiornamento è manuale (13.8).
+
+*La prima volta è stata la **1.0.000**, il 2026-08-24 (sesto tempo di T9e), e questa
+sequenza è il resoconto di come è andata: **1110 collaudi verdi**, cartella svuotata,
+`publish.bat`, **118.707.086 byte in un file solo** (113,2 MiB) contro i 118.633.358 della
+0.3.041 di due giorni prima — **73.728 byte** di differenza, cioè le cure del quinto
+tempo e nient'altro — proprietà rilette dall'eseguibile, e l'avvio provato su
+`C:\Temp\tl-rilascio-10` con il pannello logo che diceva `Ver. 1.0.000 · Pool 1.13
+(integrato)`.*

@@ -7,7 +7,7 @@
 Public Module Versione
 
     ''' <summary>Numero di versione mostrato nell'interfaccia e nell'eseguibile.</summary>
-    Public Const Numero As String = "0.3.046"
+    Public Const Numero As String = "1.0.000"
 
     ''' <summary>
     ''' La riga che l'utente legge: versione dell'applicazione e versione della libreria

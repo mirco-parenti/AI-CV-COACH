@@ -184,6 +184,29 @@ e la riserva si dichiara qui invece di lasciarla implicita (regola 15).*
   misurerebbe una versione superata, e proprio sul difetto — il comportamento a DPI alti —
   che quelle cure hanno tolto. Il giro D si fa quindi con l'eseguibile del **sesto tempo**
   (1.0.000), che va ripubblicato prima di portarlo sull'altra macchina.
+  **Aggiornamento del 2026-08-24, la sera**: *quella metà è pagata.* Il sesto tempo ha
+  pubblicato la **1.0.000** — `VB.NET\src\pubblicazione\TrovaLavoro.exe`, un file solo da
+  118.707.086 byte, proprietà verificate e avvio provato qui su una cartella dati
+  usa-e-getta — e l'exe pronto da portare è adesso quello giusto. Quel che manca è **solo la
+  macchina**: la voce resta aperta per intero, e con lei le tre che il giro D chiuderebbe.
+  Con questa riserva **T9e e T9 si chiudono** (cap. 13.9; cap. 14, il sesto tempo).
+
+## Dal sesto tempo di T9e — il rilascio (2026-08-24, alla chiusura)
+
+*Il rilascio non ha lasciato indietro niente di suo: il numero, il banco, la pubblicazione e
+le quattro verifiche sull'eseguibile sono state fatte e sono scritte nel §13.9. La **riserva
+della tappa** è il **giro D** qui sopra — non una voce nuova, la stessa di due giorni fa, che
+adesso però ha l'eseguibile giusto ad aspettarla. Restano aperti anche i quattro reperti del
+quinto tempo e le due voci di scala/interfaccia elencati più sotto: nessuno di essi è del
+rilascio, e nessuno impediva di rilasciare.*
+
+- **La demo (video) per il portfolio.** T9 la dichiarava fin dal 5 agosto, in una riga
+  accanto al diario, al README e al tag: nessun tempo l'ha fatta e nessuno l'aveva annotata.
+  L'ha trovata la rilettura di quel che la tappa prometteva, alla chiusura — che è il motivo
+  per cui la regola 15 chiede di rileggere il **dichiarato**, non solo il fatto. A differenza
+  del giro D non aspetta una macchina: aspetta un pomeriggio, un giro registrato
+  sull'applicazione vera e un posto dove metterlo. *(cap. 14, T9; visto mancante il
+  2026-08-24 chiudendo il sesto tempo.)*
 
 ## Da revisione adversariale (2026-08-09)
 

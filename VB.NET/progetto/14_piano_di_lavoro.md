@@ -642,7 +642,7 @@ cui l'interfaccia non sa rientrare, ed è roba della revisione dei pannelli di T
 giudizi di «contesto» saltati dal confronto in un giro su quattro, da misurare prima di
 curare. Con questo T8 è chiusa per intero.
 
-### T9 — Rifinitura e rilascio 1.0
+### T9 — Rifinitura e rilascio 1.0 — ✔ **CHIUSA con riserva il 2026-08-24**
 Backup/ripristino (F7); Impostazioni complete; pulizia dati; gestione errori rivista
 pannello per pannello; **collaudo generale condotto da Mirco su candidature reali**;
 aggiornamento del diario e del README; demo (video) per il portfolio; tag `v1.0`.
@@ -1114,6 +1114,62 @@ un bump solo, come previsto, e nessun prompt toccato dopo di quello. Restano fuo
 **riordino** delle voci di R6 e il **giro D** (l'exe su una macchina senza runtime .NET 10, e i
 due debiti di Word), che questa postazione non può fare: è la **riserva** con cui la tappa si
 chiuderà, regola 15. Il sesto tempo è il rilascio.
+
+
+### Il sesto tempo — il rilascio — ✔ **CHIUSO il 2026-08-24**
+
+**Il primo passo non era nel codice.** `main` era fermo a due giorni prima sul remoto: il
+merge del rito era stato fatto e il push no, e un rilascio che parte da un `origin` indietro
+mette il tag su una storia che nessun altro ha. Prima riga del tempo, perciò, `git push
+origin main` — e col rimando esplicito, perché si lavorava dal ramo della tappa.
+
+**Il numero.** `0.3.046` → **`1.0.000`**, cambiato dove vive: la costante di `Versione.vb`.
+Il `.vbproj` la rilegge da lì, quindi le proprietà dell'eseguibile sono seguite da sé — che
+è la ragione per cui a T1 si decise di tenerla in un posto solo, e si vede solo il giorno in
+cui il numero cambia davvero.
+
+**La procedura di rilascio, che il progetto non aveva.** Il cap. 13 diceva con che parametri
+si pubblica e che aspetto ha il risultato, ma non **in che ordine** si fanno le cose: è il
+buco che questo tempo doveva chiudere, ed è ora il **13.9**. Non è stato scritto prima e
+seguito dopo, ma il contrario — si è fatto il rilascio annotando i passi, così il paragrafo
+racconta una sequenza percorsa e non una immaginata. Due passi ci sono finiti proprio perché
+sbagliarli non fa rumore: il **banco intero prima di pubblicare** (col server MCP del
+prodotto da chiudere, o l'exe resta bloccato) e la **cartella svuotata prima del publish** —
+senza quello, «un solo file» non è una verifica ma un'ispezione su una cartella già sporca,
+e un `.pdb` rimasto da ieri passerebbe per assenza di problema.
+
+**L'eseguibile, e le quattro cose che nessun collaudo automatico sa dire.** `publish.bat` su
+cartella vuota: **118.707.086 byte in un file solo**. Le proprietà rilette **dall'eseguibile**
+e non dal `.vbproj` — `1.0.000`, TrovaLavoro, Aviolab AI, `© 2026 Aviolab AI`, la descrizione
+— e qui la console ha provato a mentire, mostrando `c 2026` dove l'exe dice `©`: era la
+codifica del terminale, e la si è smascherata leggendo il valore due volte per due strade.
+Poi l'avvio vero, che è la prova che un exe compilato non è un exe che parte: lanciato con
+`--dati` su una cartella usa-e-getta, la Home è comparsa, la coda vuota, il pannello logo con
+`Ver. 1.0.000 · Pool 1.13 (integrato)`. Infine la dimensione, confrontata con la 0.3.041 del
+22 agosto: **73.728 byte in più**, cioè le cure del quinto tempo e nient'altro — nessuna
+dipendenza entrata di nascosto.
+
+**Il bilancio, e la riserva.** **1110 collaudi verdi** con il numero nuovo, versione
+**1.0.000**, Pool **1.13** invariato — in questo tempo non si è toccato un prompt. Il tag
+`v1.0` si mette sul commit di `main` dopo il merge, che è dove la storia delle release vive
+(13.5). Resta fuori il **giro D**: l'eseguibile su una macchina senza
+runtime .NET 10, e con lui i due debiti di Word (il DOCX aperto in Word, il `.docx` salvato da
+Word e reimportato). Quella macchina qui non c'è, e adesso almeno l'exe da portarle è quello
+giusto — il debito annotato il 24 agosto era proprio che la copia pronta fosse anteriore alle
+cure. **E c'è una seconda riserva, che il bilancio del quinto tempo non nominava**: la
+**demo (video) per il portfolio**, dichiarata in questa stessa tappa fin dal 5 agosto e mai
+fatta — non è emersa da sola, l'ha trovata la rilettura di quel che T9 prometteva. Non
+dipende da una macchina che manca, e proprio per questo era la più facile da lasciar
+scivolare via in silenzio. **T9e si chiude con due riserve** (regola 15), scritte tutt'e due
+in `in_sospeso.md`: non sono una formula di cortesia.
+
+**Con T9e si chiude T9, e con T9 il piano.** Le cinque gambe — i dati, le Impostazioni, «a
+che punto sono», la rifinitura, il rilascio — sono tutte fuse in `main`, l'ultima col merge
+che chiude il tempo. Il percorso T0→T9
+disegnato il 5 agosto è percorso per intero: diciannove giorni, **1110 collaudi offline** più
+i reali, **29 file di prompt** nel pool, un eseguibile da un file solo che parte su un PC
+Windows 11 e un server MCP che espone tredici tool. Quel che resta non è una tappa ma
+manutenzione e raffinamento: `in_sospeso.md` per i debiti, `idee_future.md` per il resto.
 
 
 ## Ordine e dipendenze

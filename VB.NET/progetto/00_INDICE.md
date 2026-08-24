@@ -26,7 +26,7 @@ riferimento è quello del perito, non dell'ingegnere: se un capitolo non si capi
 | [10](10_multilingua.md) | Multilingua | italiano/inglese per CV e lettere, senza tradire il profilo |
 | [11](11_dati_sicurezza_backup.md) | Dati, sicurezza, backup | cartella dati, segreti cifrati, export/import JSON |
 | [12](12_flussi_utente.md) | Flussi utente | la sceneggiatura: dal primo avvio all'ultima candidatura |
-| [13](13_distribuzione.md) | Distribuzione | un solo exe: publish single-file, WebView2, versioni |
+| [13](13_distribuzione.md) | Distribuzione | un solo exe: publish single-file, WebView2, versioni, come si fa un rilascio |
 | [14](14_piano_di_lavoro.md) | Piano di lavoro | le tappe T0–T9, ognuna con il suo collaudo |
 | [15](15_decisioni_aperte.md) | Decisioni aperte | ciò che spetta all'utente decidere prima di partire |
 
