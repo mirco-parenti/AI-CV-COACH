@@ -115,6 +115,17 @@ perde contro la forma.*
   una volta sola; se anche lei era stata riscritta a mano si chiede prima, e se l'AI fallisce
   lo si dice e la spia resta. Il salvataggio, infine, aggiunge una riga che dice dove valgono
   le modifiche: in questo documento, mentre **i fatti si correggono nel profilo**.
+- **Quella memoria aveva un cliente cieco: il segno ✎** *(rifiniture prima del giro D,
+  2026-08-24)*. La finestra «Modifica i testi» lo metteva sulle sole riscritture del **giro
+  corrente**, che viveva ancora in una spia di sessione: chi riapriva un documento riscritto
+  ieri lo trovava senza segno, mentre l'avviso di «Rigenera» — che il disco lo legge —
+  continuava, giustamente, a promettere che l'avrebbe perso. Due risposte diverse alla stessa
+  domanda, «questo l'ho scritto io?», date da due parti della stessa applicazione. Ora la
+  finestra riceve con ogni documento i campi che vi risultano **già** riscritti a mano
+  (`RiscrittureAMano.Contiene`), e il segno vuol dire «questo l'hai scritto tu», adesso o in
+  un giro precedente. **Non** è cambiato cosa rientra nel documento al «Salva»: resta solo ciò
+  che si è toccato in **questo** giro, o un documento che nessuno ha modificato risulterebbe
+  modificato a ogni visita. Sono due domande distinte, e vanno tenute tali (cap. 03.6).
 - **E il prompt della lettera impara a distinguere due CV** *(R7)*. Fin dal Pool 1.00 il
   `<cv>` non era fonte di fatti, ed era giusto finché a scriverlo era solo il modello: farglielo
   confermare da sé stesso non aggiunge niente. Ma un testo riscritto **a mano** è una
@@ -154,6 +165,26 @@ perde contro la forma.*
   come riscriverne un testo, e la spia «⚠ Rigenera la lettera» guarda la più recente delle
   due date. Il sommario e il corpo della lettera, invece, impronta non ne hanno e non si
   tolgono: non sono voci del documento, **sono** il documento.
+- **Una candidatura può sopravvivere al profilo da cui è nata, e allora non si riscrive**
+  *(rifiniture prima del giro D, 2026-08-24)*. Alla generazione arrivano tre cose: il profilo
+  di **oggi**, il CV e i giudizi di **allora**. Se quel profilo è stato eliminato e rifatto, le
+  tre parlano di due persone diverse, e il modello risponde con delle spiegazioni invece che
+  col documento chiesto — che all'utente arrivava come «l'AI ha risposto in una forma che non
+  riesco a leggere», cioè mandandolo a cercare il guasto dalla parte sbagliata. Il segno è **la
+  versione che manca dallo storico** (`ArchivioProfilo.CELaVersione`), non una versione
+  diversa: lo storico non si pota mai, quindi una versione assente vuol dire eliminato e
+  rifatto, mentre un profilo che **cresce** ne cambia una a ogni salvataggio e lascia i vecchi
+  documenti spiegabili — fermarsi anche lì sarebbe un avviso a ogni giro per un caso che
+  funziona, e un collaudo tiene quella linea. La guardia (`PannelloDocumenti.MotivoProfiloSparito`)
+  sta su **tutte e quattro** le strade che chiamano l'AI per quella candidatura: la generazione
+  che parte da sola su una candidatura senza documenti, «Rigenera», «⚠ Rigenera la lettera» e
+  il cambio di lingua. Su «Rigenera» viene **prima** che i documenti di allora siano buttati —
+  sono tutto quel che resta di quella candidatura — e sul cambio lingua **prima** della domanda,
+  che altrimenti verrebbe posta per niente con la lingua nuova già salvata. Il messaggio non
+  offre di rifare il confronto, perché non si può: una candidatura già confrontata non ha un
+  «riconfronta», e indicare un gesto che non esiste sarebbe peggio del silenzio — dice la cosa
+  onesta, rifare la candidatura dal suo annuncio (cap. 11.1; il gesto mancante sta in
+  `idee_future.md`, col motivo per cui va maneggiato con cura).
 - **Il confronto dice «prima» e «adesso»** *(T9d)*, non più «prima» e «dopo». Il secondo
   termine è il documento **com'è in questo momento**: se in mezzo è passata anche la mano
   dell'utente, «adesso» resta vero e «dopo la rifinitura» no. Il «prima» invece non si

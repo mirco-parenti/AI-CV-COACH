@@ -150,6 +150,17 @@ del profilo alla conversazione su una candidatura.
    che il modello riscrive a ogni giro. Il filtro è **uno solo** per anteprima, DOCX, PDF,
    prompt della lettera e tool MCP: se ognuno decidesse da sé, la finestra e il server
    racconterebbero due documenti diversi (cap. 08.4).*
+
+   *E una candidatura può restare ferma a un profilo che non c'è più* (rifiniture prima del
+   giro D, 2026-08-24). Se il profilo con cui fu **confrontata** è stato eliminato e rifatto
+   (cap. 11.5), i suoi documenti raccontano ancora la persona di allora: riscriverli sul
+   profilo di oggi mescolerebbe due storie, e senza una guardia il modello rispondeva con
+   delle spiegazioni al posto del documento chiesto — un errore che sembrava un guasto di
+   lettura e non lo era. Adesso il pannello se ne accorge **prima** di chiamare l'AI e lo dice
+   in chiaro, da qualunque parte ci si arrivi: quel che l'utente legge è cos'è successo e qual
+   è l'unica strada, rifare la candidatura dal suo annuncio, che è lì, salvato, a un passo.
+   Dove sta la guardia, su quali comandi e perché il segno è la versione **mancante** e non
+   una versione diversa: cap. 08.4 e cap. 11.1.*
 5. Alla conferma, l'app produce i file: **DOCX e/o PDF** del CV, testo della lettera
    (nel corpo email e/o come allegato).
 

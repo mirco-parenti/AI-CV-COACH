@@ -23,9 +23,6 @@ di cose da fare. Aggiornato con "aggiorna-tutto".
   che un PC senza niente. È il collaudo dichiarato di T1 (cap. 14) e serve una seconda
   macchina, quindi tocca a Mirco. *Fino ad allora il vincolo più rigido del progetto è
   dimostrato al 90%, non al 100%.*
-- **L'icona dell'eseguibile.** Oggi l'exe ha l'icona predefinita di Windows. Va prodotta,
-  idealmente dallo stesso scudo Aviolab già incorporato nel sorgente. È una scelta di
-  prodotto, non di codice. *(cap. 13.5; cap. 15, voce 4.)*
 - **L'SDK .NET 10 sulla postazione del tutor.** Lì c'è ancora l'SDK 9: quella macchina
   oggi non compila il progetto. *(cap. 13.1; regola 11 — le due postazioni.)*
 - **La cartella `VB.NET/src/pubblicazione/`** (111 MB, ignorata da git) è rimasta su
@@ -257,8 +254,56 @@ un debito dell'attrezzo di collaudo.*
   pesa sul prodotto — quella parte di finestra oggi nessun collaudo automatico la tocca.
   *(`strumenti/mcp-collaudi/README.md`.)*
 
+## Da questa passata di rifiniture prima del giro D (2026-08-24)
+
+*I cinque difetti visibili sono chiusi e stanno in «Chiuse». Quel che resta è di due specie:
+le **riserve** delle cure appena fatte — provate al banco ma non ancora dal vivo (regola 15) —
+e quel che va **preparato** perché il giro D si possa fare davvero. Nessuna delle due è un
+difetto: sono cose che aspettano una mano o una macchina.*
+
+- **Le tre cure di questo ramo non sono ancora state viste dal vivo.** Il banco le tiene tutte
+  e tre, ma nessuna delle tre prove che contano è stata fatta su un'applicazione aperta: la
+  **selezione** nel `ListView` **vero** — al banco la finestra non viene mai mostrata, e la
+  logica gira su un elenco che non ha mai avuto un handle —, la **barra delle Impostazioni a
+  150%**, che a 96 DPI non compare affatto, e il **messaggio nuovo davanti a una candidatura
+  orfana**, che vuole un profilo eliminato e rifatto con una candidatura vecchia ancora in
+  casa. Si chiudono in una passata sola, su questa macchina, cambiando la scala di Windows —
+  che chiede una disconnessione. *(cap. 03.4, 03.6, 08.4, 11.1; regola 15.)*
+- **Manca il copione del giro D.** Non esiste un elenco scritto di cosa provare, in che
+  ordine e con quali dati: il giro C di T9e ha già mostrato cosa costa improvvisare. È la cosa
+  da scrivere **prima** di portare l'eseguibile sull'altra macchina, perché lì il tempo è di
+  qualcun altro e non si ripete. *(cap. 13.9; cap. 14, T9e.)*
+- **La chiave API sulla postazione del tutor, e i dati con cui provare.** Senza chiave
+  l'applicazione si apre ma non ragiona, e metà del giro D non si può fare; però la chiave non
+  viaggia in chiaro e i dati veri di un CV non si portano su una macchina altrui senza
+  deciderlo prima. Vanno decise tutt'e due le cose insieme — quale chiave, e se il giro si fa
+  su dati finti costruiti apposta o su dati veri poi tolti. *(cap. 11.3.)*
+- **⚠ L'ordine che non si può sbagliare: l'SDK .NET 10 sulla postazione del tutor si installa
+  *dopo* il giro D.** La voce di T1 qui sopra lo chiede perché quella macchina possa
+  compilare, ed è giusta — ma il giro D vuole esattamente una macchina **senza** quell'SDK,
+  perché è l'unica prova possibile del vincolo più rigido del progetto (un exe che parte dove
+  non c'è niente). Installarlo prima brucia la sola macchina disponibile per quella prova, e
+  non si torna indietro. *(cap. 13.1; cap. 14, T1 e T9e.)*
+- **La passata della regola 16 su T1→T8, mai fatta.** La regola — una tappa si chiude
+  rileggendo anche quel che aveva **promesso** — è nata chiudendo T9e ed è stata applicata
+  alla tappa che l'ha fatta nascere. Le otto prima non sono mai state rilette con quel metro:
+  quel che nessun tempo ha preso in mano non lascia traccia da nessuna parte, quindi se lì è
+  rimasto qualcosa non lo sa nessuno. *(regola 16 del `CLAUDE.md`; cap. 14.)*
+- **Il tag `v1.0` è rimandato, non dimenticato.** Va sul commit di `main`, e si mette **dopo**
+  il giro D: se quella prova trovasse qualcosa, la 1.0 taggata sarebbe una versione che si sa
+  già di dover correggere. Oggi il repository non ha nessun tag di rilascio. *(cap. 13.9;
+  cap. 14, il sesto tempo di T9e.)*
+
 ## Chiuse
 
+- ✅ **L'icona dell'eseguibile** *(aperta il 2026-08-06 da T1, **fatta** il 2026-08-22 dal
+  primo tempo di T9e, spostata qui il 2026-08-24)*. Viene dallo stesso scudo Aviolab già
+  incorporato nel sorgente: `TrovaLavoro.ico` è incorporato due volte — come icona di Windows
+  e come risorsa per «Informazioni su…» — e `<ApplicationIcon>` nel `.vbproj` la rende
+  vincolante, non una deroga di comodo. La voce era rimasta nell'elenco attivo di T1 mentre
+  l'icona era a posto da due giorni: **era aperta per svista, non per una riserva**, e da lì è
+  finita in una nota di ripresa come cosa da fare. È lo stesso inciampo del markdown grezzo,
+  nello stesso giorno: un elenco aperto non è una prova. *(cap. 13.5; cap. 15, voce 4.)*
 - ✅ **La modifica a mano dei testi in P6** *(aperta il 2026-08-18 alla chiusura di T7b,
   **fatta** il 2026-08-22 da T9d, spostata qui il 2026-08-24)*. **Costruita**, e in una forma
   diversa da come la voce la immaginava. Delle tre cose che il cap. 8.4 prometteva davanti al

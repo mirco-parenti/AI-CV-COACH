@@ -1171,6 +1171,45 @@ i reali, **29 file di prompt** nel pool, un eseguibile da un file solo che parte
 Windows 11 e un server MCP che espone tredici tool. Quel che resta non è una tappa ma
 manutenzione e raffinamento: `in_sospeso.md` per i debiti, `idee_future.md` per il resto.
 
+*Dopo T9 — **le rifiniture prima del giro D** (2026-08-24).* Non è una tappa e non ne prende
+il nome: il piano è chiuso, e questo lavoro vive sul ramo `rifiniture-pre-giro-d` per
+arrivare pronti al **giro D**, la revisione col tutor sul suo PC. Il punto di partenza non è
+un file da rileggere, come nelle due passate qui sopra, ma i **cinque difetti visibili**
+annotati usando la 1.0. Il primo si è chiuso senza scrivere una riga: il **markdown grezzo
+nelle bolle** del brainstorming era già curato da T9d il 22 agosto, e a darlo per aperto era
+`in_sospeso.md`, che non aveva spostato la voce insieme alle due sorelle — un elenco aperto
+non è una prova, e confrontarlo col codice costa dieci minuti. Gli altri quattro hanno
+chiesto codice. La **barra orizzontale delle Impostazioni**: quando la finestra scorre, la
+fila dei controlli si dispone due volte, la seconda dentro la larghezza che resta tolta la
+barra verticale — 17 px a 96 DPI, 26 a 150%, contro i 14 del margine di disegno — e `Disponi`
+è diventata `DisponiIn(altezzaDisponibile)`, perché un banco non può cambiare schermo ed è
+proprio lì che quella disposizione fa qualcosa di diverso (cap. 03.4). La **selezione che
+tornava in cima** nella finestra «Modifica i testi»: i due elenchi si rifanno a ogni «Togli» e
+ogni «Rimetti», e la riga scelta si ritrova adesso per **identità** invece di chiedere a
+`SelectedItems`, che risponde solo a elenco già nato — al banco mai, dove il primo collaudo
+scritto era verde senza provare niente. Il **✎ che conosceva solo il giro corrente**, mentre
+l'avviso di «Rigenera» rispondeva alla stessa domanda leggendo il disco (cap. 08.4). E la
+**candidatura sopravvissuta al suo profilo**: rigenerarne i documenti dopo che quel profilo è
+stato eliminato e rifatto mandava al modello due persone diverse, e la risposta tornava come
+errore di lettura; il segno è la **versione che manca dallo storico**, non una versione
+diversa, e la guardia sta su tutte e quattro le strade che chiamano l'AI (cap. 11.1 e 12, A7).
+
+**Venti collaudi nuovi, 1130 verdi** (erano 1110), ognuno visto rosso prima di dirlo buono:
+**sedici falsificazioni**, e una di esse non diventa rossa ma cade come **timeout** — tolta la
+guardia sul cambio di lingua, la finestra di conferma si apre senza nessuno che risponda. Non
+è più vero che il banco non abbia collaudi di misura dell'interfaccia: ce ne sono **due**, e
+guardano una finestra sola. Nessun prompt toccato, quindi **Pool 1.13** e versione **1.0.000**
+restano dove erano: questo non è un rilascio. **Tre riserve dichiarate** (regola 15), tutte da
+provare dal vivo: la selezione nel `ListView` **vero** — il banco prova la logica su una
+finestra mai mostrata —, la **barra a 150%** e il messaggio nuovo davanti a una candidatura
+orfana; per il secondo elenco di quella finestra resta il debito già noto dello strumento di
+collaudo. E prima del giro D restano da preparare il suo **copione**, che non esiste, la
+**chiave API** sulla macchina del tutor con la decisione sui dati di prova, e la **passata
+della regola 16 su T1→T8**, mai fatta — con un ordine che non si può sbagliare: l'**SDK .NET
+10 sulla postazione del tutor si installa dopo**, perché il giro D vuole proprio una macchina
+che non ce l'ha. Fuori dal giro D restano, come dichiarato chiudendo T9e, la **demo video** e
+il **tag `v1.0`**.
+
 
 ## Ordine e dipendenze
 

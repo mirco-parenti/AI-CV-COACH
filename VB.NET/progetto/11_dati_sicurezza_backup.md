@@ -118,6 +118,17 @@ TrovaLavoro\
   aggiornamento) salva una copia datata nello storico; `stato.json` di ogni
   opportunità annota **con quale versione** del profilo furono generati i documenti.
   Così un CV inviato resta sempre spiegabile, anche a profilo evoluto.
+- **E una versione che manca non è una versione diversa** *(rifiniture prima del giro D,
+  2026-08-24)*. Lo storico **non si pota mai** — ogni salvataggio ne aggiunge una copia,
+  nessuno ne toglie — quindi chi cerca una versione e non la trova sa che quel profilo non è
+  invecchiato: è stato **eliminato e rifatto** (v. 11.5), o è arrivato da un ripristino con
+  un'altra storia dentro. È la differenza fra un profilo che **cresce**, con cui i vecchi
+  documenti restano spiegabili, e un profilo **altro**, che di quei documenti non sa più
+  niente — e fermarsi anche al primo caso sarebbe un avviso a ogni giro per una cosa che
+  funziona. `ArchivioProfilo.CELaVersione` è quella domanda fatta a modo; chi la pone da
+  fuori — il pannello Documenti, prima di chiamare l'AI (cap. 12, A7) — tratta una versione
+  **non annotata** come «non lo so» e risponde di sì, perché un dubbio non deve fermare
+  niente.
 - **Il 📄 CV-1 base sta col profilo, non con le opportunità** *(deciso il 2026-08-10:
   il disegno non gli aveva mai dato una casa, e T4 è la tappa che lo genera)*. Nasce
   senza alcun annuncio, da P2, ed è il ritratto del profilo in forma di CV: metterlo in
@@ -364,6 +375,15 @@ Due conseguenze accettate a occhi aperti:
   sceglie vuole proprio quello;
 - il 📄 CV-1 base se ne va con il profilo, e non perché sta nella sua cartella: contiene
   nome, contatti ed esperienze. Lasciarlo lì vorrebbe dire non aver cancellato niente.
+
+*Dal 2026-08-24 (rifiniture prima del giro D) la prima conseguenza non resta più muta se
+qualcuno la tocca.* Chi prova a riscrivere i documenti di una candidatura così trova una
+guardia prima che l'AI venga chiamata: senza, al modello arrivavano il profilo di oggi e i
+documenti di allora, cioè due persone diverse, e la risposta tornava come spiegazioni invece
+che come documento — un errore che all'utente sembrava un guasto di lettura e non lo era. Il
+segno che la riconosce è la **versione mancante dallo storico**, non una versione diversa (v.
+11.1); dove sta la guardia e cosa dice è nel **cap. 08.4**, che è dove vive il resto di questo
+comportamento.
 
 **La conferma è di livello 6** (cap. 03.3), la prima del progetto: una finestra che
 elenca cosa sparisce e cosa resta, e per procedere chiede di **ridigitare `TrovaLavoro`**
