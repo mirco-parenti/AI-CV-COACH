@@ -188,6 +188,24 @@ portato su desktop:
    esperienze lavorative → esperienze informali → competenze → formazione.
 2. Ogni risposta viene strutturata dall'AI e mostrata in una **scheda di conferma**
    («ho capito questo: giusto?») prima di entrare nel profilo.
+   *(T9e, 2026-08-24: e se una voce è entrata con vuoto un campo che **pesa nel CV**, subito
+   dopo il «Sì, è giusto» arriva lì in linea una domanda sola — «Del lavoro «magazziniere»
+   non mi hai detto quanto è durato né cosa facevi. Me li dici?». È la ri-domanda della
+   categoria patente, che era già questa stessa cosa fatta per un turno solo. I campi che
+   pesano sono cinque in tutto: **ruolo, durata, cosa facevo** per un'esperienza formale,
+   **cosa facevo** per una informale, il **titolo** per la formazione; azienda, istituto,
+   anno, quando e con chi non si chiedono — un CV si legge bene lo stesso, e domandarli
+   allungherebbe il dialogo senza rendere. Quattro proprietà la tengono: **niente entra a
+   metà**, perché la risposta completa il frammento prima che la voce entri nel profilo, che
+   resta un ingresso solo; **l'occasione è una**, perché la voce esce dall'elenco quando la
+   domanda le viene offerta e non quando la risposta riesce; della risposta si prende **solo
+   il campo che mancava**, mai una voce nuova, o ogni risposta ne vorrebbe una sua e il giro
+   non finirebbe; e l'**anti-perdita resta intatta**, perché quel che riguarda un'altra
+   categoria va nel magazzino come sempre. Non sapere è una risposta e non blocca niente. Se
+   invece la risposta **ridice diverso** un campo che non era stato chiesto, vale quello già
+   confermato — correggere non è completare, e una correzione entrata senza scheda cambierebbe
+   il profilo alle spalle di chi l'ha confermato — ma il dialogo **lo dice**, e manda al
+   profilo: è la famiglia di difetti che tutto questo tempo sta curando.)*
 3. Ciò che l'utente dice «nel turno sbagliato» non si perde: viene parcheggiato e
    riproposto al turno giusto (convenzione anti-perdita, campo `altrove`); ciò che non
    trova posto viene dichiarato «lasciato fuori», mai perso in silenzio.
@@ -198,7 +216,12 @@ portato su desktop:
    (revisione adversariale) questa porta unica ha anche la sua rete: un dialogo finito
    ma **non ancora consegnato** a P2 viene dichiarato se si prova a chiudere l'app —
    prima si perdeva in silenzio, ed era il paradosso peggiore: a metà racconto l'avviso
-   c'era, a racconto completo no.*
+   c'era, a racconto completo no.* *(T9e, 2026-08-22: prima del riepilogo, e appesa alla
+   passata finale dell'anti-perdita, c'è ora la **ripresa delle domande saltate** — un turno
+   chiuso con «passiamo oltre» torna **una volta sola**, chiedendo il permesso invece di
+   riaprirsi da solo, e non torna affatto se un frammento ripescato dal magazzino l'ha già
+   riempito. È la voce 4 della checklist ereditata dal prototipo, che di questo pezzo non ha
+   nulla; l'altra sua metà è la domanda di approfondimento del punto 2. Cap. 02 e 14.)*
 5. Da lì si può già generare il 📄 CV-1 base (senza alcun annuncio) o proseguire con il
    Flusso A dal punto A3.
    *(T7d, 2026-08-18: dalla seconda volta in poi quel bottone non genera più — porta in P6

@@ -76,12 +76,10 @@ in «Chiuse».*
 
 ## Da T7 — multilingua e qualità (2026-08-15, alla chiusura di T7a)
 
-- **La modifica a mano dei testi in P6** (2026-08-18, alla chiusura di T7b). Il cap. 8.4
-  promette che davanti al prima/dopo l'utente possa «accettare, modificare a mano o
-  tornare alla versione non rifinita»: il prima/dopo c'è, la modifica a mano no — le tre
-  caselle di P6 sono `ReadOnly`, e renderle scrivibili vuol dire decidere che cosa
-  succede al documento salvato, agli export e alla rigenerazione. È **disegno di P6**, non
-  anti-slop, e apparteneva a T7b solo per vicinanza. *(cap. 08.4; cap. 08.6; cap. 03.6.)*
+*La voce sulla **modifica a mano dei testi in P6** è stata chiusa il 2026-08-24, in ritardo
+sui fatti: la costruiva T9d il 22 agosto, e il quinto tempo di T9e l'ha estesa due volte.
+Sta in «Chiuse».*
+
 - **Il prima/dopo dell'email in P7** (2026-08-18). Il corpo del messaggio passa
   dall'anti-slop come gli altri testi, ma com'era prima non si conserva e non si mostra:
   la casella del confronto vive in P6, e in P7 l'utente ha davanti una casella che può già
@@ -121,7 +119,10 @@ espone, ed è in «Chiuse».*
 
 *Le voci qui sotto sono nate guardando l'applicazione mentre si chiudevano altre cose: non
 erano in nessun piano, e nessuna è grave. La voce sulla finestra a misura ridotta è stata
-verificata il 2026-08-23 dal collaudo dal vivo di T9e ed è in «Chiuse».*
+verificata il 2026-08-23 dal collaudo dal vivo di T9e ed è in «Chiuse». Altre due — le
+**parole incollate** fra un blocco e l'altro della pagina letta e il **404 raccontato come un
+guasto di rete** — sono state chiuse il 2026-08-24 rileggendo il codice: le aveva curate T9d
+il 22 agosto, e nessuno le aveva spostate.*
 
 - **La traccia del dialogo reale non ha più nessuna trappola che sfugga.** Curato il «corso
   senza nome» (Pool 1.12), tutte e quattro le trappole della traccia vengono instradate ogni
@@ -135,16 +136,6 @@ verificata il 2026-08-23 dal collaudo dal vivo di T9e ed è in «Chiuse».*
   scrittura di una macchina invece di un testo: gli appunti di mira che ne escono, invece,
   sono già puliti. O si rende la bolla capace di leggerlo, o si dice al prompt di non
   scriverlo. *(cap. 03.5; `PannelloDialogo`.)*
-- **Le parole si incollano fra un blocco e l'altro della pagina letta.** Nel testo che l'app
-  ricava da una pagina web, la fine di un blocco e l'inizio del successivo finiscono
-  attaccate: «Pubblica AmministrazioneDue suite specializzate». Sul sito provato il modello
-  ha capito lo stesso, ma è fortuna, non progetto: basta un separatore fra i nodi di testo.
-  *(cap. 06.7; il lettore di pagina di T5a.)*
-- **Un 404 viene raccontato come un problema di rete.** Aprendo un indirizzo che il server
-  non ha, la fascia dice «La pagina non si è caricata. Controlla il collegamento a Internet»
-  — mentre il collegamento c'era e il server ha risposto benissimo, dicendo che quella
-  pagina non esiste. È il tipo di messaggio che manda l'utente a controllare il modem invece
-  che l'indirizzo. *(cap. 06.6; rientra nella revisione della gestione errori, T9.)*
 
 ## Dal collaudo di tappa di T8 — il gruppo C (2026-08-21)
 
@@ -224,7 +215,66 @@ si è deciso di **non** fare adesso, e va scritto per non spacciarlo per finito.
   della barra quando lo scorrimento si accende. *(cap. 03.4; visto il 2026-08-23 nella
   verifica della cura.)*
 
+## Dal quinto tempo di T9e — le cure dei reperti (2026-08-24, alla chiusura)
+
+*Dodici reperti su dodici curati, più due difetti trovati a mano nel pannello del profilo.
+Quel che resta sono **quattro reperti nuovi**, visti provando le cure dal vivo: nati qui, e
+annotati qui prima che in ogni altro posto. Il **riordino** delle voci di un documento, che
+R6 nominava accanto alla rimozione, non sta qui ma in `idee_future.md`: la forma di R6 è stata
+decisa — si toglie e si rimette — e riordinare è un raffinamento in più, non un debito.*
+
+- **Rigenerare la lettera di una candidatura costruita con un altro profilo dà un errore
+  criptico.** «⚠ Rigenera la lettera» su una candidatura i cui documenti nacquero da una
+  versione di profilo diversa da quella di adesso finisce in «L'AI ha risposto in una forma
+  che non riesco a leggere» — che manda a cercare il guasto dalla parte sbagliata, e per un
+  utente non vuol dire niente. Il dato per dirlo bene c'è già ed è a portata: la
+  `versione_profilo` annotata nello `stato.json`. *(cap. 08.4; cap. 11.1; visto il 2026-08-24
+  provando R7 dal vivo.)*
+- **Il segno ✎ e l'avviso di «Rigenera» non conoscono le stesse riscritture.** Nell'elenco
+  della finestra «Modifica i testi» il ✎ marca le riscritture del **giro corrente**; l'avviso
+  di «Rigenera», che legge il disco, conosce anche quelle di ieri (R7). Le due cose rispondono
+  alla stessa domanda — «questo l'ho scritto io?» — e danno due risposte diverse. O il segno
+  impara a leggere il disco, o si dichiara che marca solo la sessione. *(cap. 03.6; cap. 08.4;
+  visto il 2026-08-24.)*
+- **Dopo aver tolto una voce, la selezione dell'elenco torna alla prima riga.** In «Modifica
+  i testi», premuto «Togli →», la riga scelta se ne va e l'elenco si riposiziona in cima
+  invece che sulla voce vicina: chi ne toglie tre di fila deve ritrovare il punto ogni volta.
+  Rifinitura, non funzione. *(cap. 03.6; visto il 2026-08-24 provando R6 dal vivo.)*
+- **`scegli_riga` dello strumento di collaudo tocca solo il primo elenco della finestra.** I
+  due elenchi di «Modifica i testi» sono esposti all'accessibilità come **Table** e non come
+  List, e l'attrezzo prende sempre la prima che trova: la colonna «Lasciate fuori» non si può
+  guidare da lì, e R6 è stato provato a mano. È un debito dell'attrezzo, non del prodotto, ma
+  pesa sul prodotto — quella parte di finestra oggi nessun collaudo automatico la tocca.
+  *(`strumenti/mcp-collaudi/README.md`.)*
+
 ## Chiuse
+
+- ✅ **La modifica a mano dei testi in P6** *(aperta il 2026-08-18 alla chiusura di T7b,
+  **fatta** il 2026-08-22 da T9d, spostata qui il 2026-08-24)*. **Costruita**, e in una forma
+  diversa da come la voce la immaginava. Delle tre cose che il cap. 8.4 prometteva davanti al
+  prima/dopo — accettare, riscrivere a mano, tornare al testo non rifinito — la seconda è
+  arrivata con la finestra «Modifica i testi» di T9d, e la terza è stata **ritirata** poche
+  ore dopo insieme al prima/dopo stesso: su dati veri quel confronto cambiava cinque parole e
+  nessun fatto, e un confronto che l'utente non distingue è un comando in più da capire, non
+  una garanzia. Le tre promesse restano due, ed è scritto nel capitolo. Il quinto tempo di T9e
+  ha poi esteso la finestra due volte: la riscrittura **si ricorda** e la lettera lo viene a
+  sapere (R7), e da lì si sceglie anche **quali voci** il documento porta (R6). La voce era
+  rimasta aperta per svista, non per una riserva: si chiude in ritardo sui fatti.
+  *(cap. 08.4; cap. 03.6.)*
+- ✅ **Le parole si incollano fra un blocco e l'altro della pagina letta** *(aperta il
+  2026-08-19, **curata** il 2026-08-22 da T9d, spostata qui il 2026-08-24)*. Il lettore
+  chiedeva `innerText` al solo `body`, e la fine di un blocco usciva attaccata all'inizio del
+  successivo. Adesso scende fino ai **blocchi foglia** — quelli che dentro non contengono
+  altri blocchi — e ne unisce i testi con un a capo: la fonte resta `innerText`, coi suoi
+  pregi, ma fra un pezzo e l'altro un confine c'è sempre. Resta il limite dichiarato: dentro
+  un `iframe` non si entra, perché quella è un'altra pagina. *(cap. 06.7; `LettorePagina`.)*
+- ✅ **Un 404 viene raccontato come un problema di rete** *(aperta il 2026-08-19, **curata**
+  il 2026-08-22 da T9d, spostata qui il 2026-08-24)*. La frase adesso la sceglie
+  `EsitoNavigazione` guardando cos'è successo davvero — esito, errore di rete e **stato
+  HTTP** — e con una risposta d'errore del server dice «Il server ha risposto «404»: questa
+  pagina non c'è», invece di mandare a controllare il modem. È la stessa passata che ha
+  smesso di incolpare la cosa sbagliata pannello per pannello. *(cap. 06.6;
+  `EsitoNavigazione`.)*
 
 - ✅ **Il pannello del logo a DPI alti** *(aperta il 2026-08-09 dalla revisione adversariale,
   misurata il 2026-08-23 dal collaudo dal vivo di T9e, **chiusa lo stesso giorno** dal quinto

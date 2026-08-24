@@ -126,13 +126,13 @@ Fuori perimetro ora: il **multi-annuncio** (un profilo confrontato con più annu
   (sommario, dettaglio delle voci); far variare ordine/enfasi delle sezioni in base al
   confronto (anello 3) è rimandato. *(2026-06-09 — deciso nel design dell'anello 4:
   ordine fisso per semplicità e verificabilità.)*
-- **Omissione mirata di contenuti off-target nel 🎯 CV-2**: nell'MVP il CV-2 **tiene tutte
-  le voci** del profilo e mira solo con l'**enfasi** (cosa il sommario mette in risalto,
-  quanto dettaglio dà a una descrizione), a ordine fisso. Poter **omettere** le voci non
-  pertinenti all'annuncio renderebbe il CV più incisivo (come i CV mirati veri), ma
-  l'omissione è già una *scelta* che complica la verifica 1:1 e apre una porta
-  all'anti-invenzione "per sottrazione". Rimandato. *(2026-06-11 — deciso nel design del
-  CV-2, bivio 3: tenere tutto, ri-pesare l'enfasi.)*
+- **Riordinare a mano le voci di un singolo documento**: R6 (2026-08-24) ha dato all'utente il
+  gesto di **togliere** una voce da un CV senza toccare il profilo; il reperto ne nominava un
+  secondo, **spostarla**, e non è entrato. Vale la stessa regola — il `cv.json` non si tocca,
+  la scelta vive accanto — ma l'impronta da sola non basta: serve un **ordine** da mantenere, e
+  va deciso che ne è di una voce che dopo un «Rigenera» non c'è più. Cugino della voce qui
+  sopra e da non confondere: lì a riordinare sarebbe il confronto, qui la mano di chi si
+  candida. *(2026-08-24 — quinto tempo di T9e; cap. 08.4.)*
 
 ## Fase VB.NET (applicazione desktop)
 
@@ -358,6 +358,17 @@ giudice per la prima volta.
 
 Idee del backlog ormai costruite. Si tengono qui (con il puntatore a dove sono narrate o
 implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
+- ✅ **Omissione mirata di contenuti off-target nel 🎯 CV-2** — realizzata, e in una forma che
+  scioglie l'obiezione che l'aveva rimandata. Il dubbio del 2026-06-11 era che omettere fosse
+  «già una *scelta*», che complica la verifica 1:1 e apre una porta all'anti-invenzione **per
+  sottrazione**: vero finché a scegliere è il modello. A scegliere invece è **l'utente**, voce
+  per voce, da «Modifica i testi» — e allora non è una porta aperta ma la stessa libertà che
+  ha di riscrivere un testo: dei suoi fatti decide anche quali raccontare a chi. Il documento
+  non si taglia (il `cv.json` resta intero, la scelta vive accanto), la voce si riconosce per
+  l'impronta dei suoi **fatti** e non per posizione, e il filtro è uno solo per la finestra e
+  per il server MCP. Resta futuro il gemello vero dell'idea originaria — l'omissione decisa
+  dal **confronto** — e resta futuro il **riordino a mano** (v. «Generazione (anello 4)»).
+  *(2026-08-24, R6, quinto tempo di T9e; cap. 08.4; cap. 11.1; `Documenti/VociDelCv.vb`.)*
 - ✅ **`pending_questions`** — le domande saltate o rimaste senza risposta si riprendono, una
   volta sola, **prima del riepilogo** e chiedendo il permesso («Vuoi provarci ora?» → *Ci
   provo* / *Lasciamo così*). Vale per i quattro turni-contenuto, gli unici che passano dallo
@@ -369,6 +380,16 @@ implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
   con la stessa disciplina del tentativo unico che la fa convergere. *(2026-08-22, terzo tempo
   di T9e: era la voce 4 della checklist «Problemi e mitigazioni», ratificata fuori dalla 1.0
   al mattino e costruita il pomeriggio; cap. 14, sezione T9; `DialogoProfilo.RiprendiSaltateAsync`.)*
+  **E il 2026-08-24 la voce 4 si completa**, col quinto tempo: quella sopra era la metà del
+  **turno saltato**, questa è la metà della **voce mezza vuota**. Una voce entrata con vuoto un
+  campo che pesa nel CV — *ruolo, durata, cosa facevo* per un'esperienza formale, *cosa facevo*
+  per una informale, il *titolo* per la formazione — se lo sente chiedere **in linea**, subito
+  dopo la conferma, sul modello della ri-domanda della categoria patente, che era già questa
+  stessa cosa fatta per un turno solo. Stessa disciplina della gemella: **occasione unica** (la
+  voce esce dall'elenco quando la domanda è offerta, non quando riesce) e **terminazione** (della
+  risposta si prende solo il campo che mancava, mai una voce nuova). E niente entra a metà: la
+  risposta completa il frammento *prima* che la voce entri nel profilo. *(cap. 12.2;
+  `DialogoProfilo.ProssimoApprofondimento`.)*
 - ✅ **Il CV più recente della cartella, che nessuno usava** — la porta «qui c'è tutto» del
   profilo (cap. 05.2) è aperta: premendo «IMPORTA CV DA UN FILE» il programma **propone per
   nome** il CV che la classificazione aveva già indicato come il più aggiornato, e lascia tre

@@ -122,6 +122,38 @@ perde contro la forma.*
   inventare, non all'utente di dichiarare. Al prompt arriva perciò un blocco nuovo,
   `<riscritture>`, coi soli campi che l'utente ha davvero riscritto (Pool 1.13): vale come le
   sue parole e niente di più, e nel caso normale è una lista vuota.
+- **Una voce si può lasciare fuori da un documento, e resta fuori** *(R6, 2026-08-24)*.
+  Fin qui il controllo dell'utente riguardava **come** il documento dice le cose; questa è
+  la prima volta che riguarda **cosa** dice. Un 🎯 CV-2 nasce con tutto quel che il profilo
+  dichiara — ed è la regola giusta, perché il profilo è la fonte e niente si inventa — ma un
+  CV mandato a un'azienda **non è l'inventario di una vita**: tre esperienze su dieci a
+  quell'annuncio non dicono niente, e chi si candida le vuole lasciare fuori. Fuori **da quel
+  documento**, non dal profilo, dove continuano a valere per le altre candidature. Il gesto
+  sta nella finestra «Modifica i testi», che per l'occasione prende un secondo elenco — «Nel
+  documento» e «Lasciate fuori», con «Togli →» e «← Rimetti» in mezzo (cap. 03.6). Non è
+  l'anti-invenzione a essere in gioco, come non lo era per la riscrittura a mano: quel
+  vincolo tiene la macchina dentro i fatti dichiarati, e qui a scegliere è la persona, che
+  dei suoi fatti decide anche **quali raccontare a chi**.
+- **Tre proprietà la tengono su, e la quarta è una conseguenza** *(R6)*. **Il documento non
+  si taglia mai**: il `cv.json` conserva ogni voce e la scelta vive accanto, nello
+  `stato.json` e in `cv_base.json` (cap. 11.1) — è questo che rende gratis il rimettere, e
+  che impedisce a un «Rigenera» di portarsi via il lavoro. **Si riconosce per fatti e non per
+  posizione**: l'impronta di una voce si prende dai suoi fatti — ruolo|azienda|durata, il
+  testo stesso per una competenza, titolo|istituto|anno per un titolo — e **mai dalla prosa**,
+  che il modello riscrive a ogni giro e che l'utente può riscrivere a mano (R7); un'impronta
+  che la contenesse smetterebbe di riagganciarsi dopo la prima rigenerazione. Una sola voce
+  fa eccezione, ed è dichiarata invece che scoperta: le «altre esperienze» hanno per fatto il
+  solo `quando`, e quando manca anche quello si ripiega sulla descrizione — lì l'esclusione
+  vale per il documento di adesso e non sopravvive a una rigenerazione. L'indice non
+  serve per la stessa ragione: il documento nuovo lo scrive il modello, e l'esperienza numero
+  due può benissimo essere un'altra. **Il filtro è uno solo**: `Impaginazione.PaginaCv` copre
+  anteprima, DOCX, PDF e HTML in un colpo, e i due che leggono il JSON grezzo — il prompt
+  della lettera e il tool `leggi_opportunita` — ricevono anch'essi il CV filtrato, perché due
+  porte della stessa applicazione non devono descrivere due documenti diversi (cap. 09.3).
+  Da tutto questo discende la quarta: **togliere una voce invecchia la lettera** esattamente
+  come riscriverne un testo, e la spia «⚠ Rigenera la lettera» guarda la più recente delle
+  due date. Il sommario e il corpo della lettera, invece, impronta non ne hanno e non si
+  tolgono: non sono voci del documento, **sono** il documento.
 - **Il confronto dice «prima» e «adesso»** *(T9d)*, non più «prima» e «dopo». Il secondo
   termine è il documento **com'è in questo momento**: se in mezzo è passata anche la mano
   dell'utente, «adesso» resta vero e «dopo la rifinitura» no. Il «prima» invece non si

@@ -101,6 +101,19 @@ TrovaLavoro\
   prima di R7 si riapre come «mai toccata» invece di indovinare una storia che nessuno ha
   registrato. Backup e ripristino non hanno avuto bisogno di sapere niente: copiano i file
   grezzi (11.4), e i tool di lettura li restituiscono com'è (cap. 09.3).
+- **E si ricorda anche quali voci ha lasciato fuori** *(R6, 2026-08-24)*: accanto alle
+  riscritture, il blocco `voci_tolte` — le **impronte** delle voci che l'utente non vuole in
+  *quel* documento, con la data in cui le ha tolte (cap. 08.4); nello `stato.json` per una
+  candidatura, in `cv_base.json` per il 📄 CV-1. Il `cv.json` **resta intero**: si annota la
+  scelta, non si taglia il documento — è per questo che rimettere una voce non costa niente e
+  che un «Rigenera» non se la porta via. Come il suo gemello, il blocco **tace quando non ha
+  niente da dire**: un CV che nessuno ha sfrondato si riapre esattamente com'era, e uno
+  scritto prima di R6 vale «documento intero» invece di indovinare una scelta che nessuno ha
+  fatto. Backup e ripristino, ancora una volta, non hanno avuto bisogno di sapere niente. Il
+  tool `leggi_opportunita`, che invece il CV lo restituisce, adesso lo restituisce
+  **filtrato**: su disco il documento è intero, ma chi legge da fuori deve vederlo **come lo
+  vede l'utente**, o le due porte dell'applicazione racconterebbero due documenti diversi — e
+  la seconda proprio quello che è stato scartato (cap. 09.3).
 - **Il profilo è versionato**: ogni modifica confermata (editing, sessione di
   aggiornamento) salva una copia datata nello storico; `stato.json` di ogni
   opportunità annota **con quale versione** del profilo furono generati i documenti.

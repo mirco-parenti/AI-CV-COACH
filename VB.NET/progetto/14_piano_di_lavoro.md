@@ -855,7 +855,7 @@ rieseguibili (`CollaudiChecklistReale`, categoria `Reale`) con il loro rapporto 
 | 1 | Gonfiamento delle competenze | prova A, con l'AI vera | ✅ «leader nato» resta «leader nato», «un po' di inglese» resta attenuato |
 | 2 | Informali promosse a formali | prova A | ✅ il banco del cognato «in nero» è stato instradato alle informali |
 | 3 | Campi indovinati | prova A | ✅ email, telefono, scuola e anno taciuti restano vuoti; città e titolo detti ci sono |
-| 4 | `pending_questions` | decisione, poi **costruita** | ✅ **entrata nella 1.0**: la ripresa delle domande saltate (vedi sotto) |
+| 4 | `pending_questions` | decisione, poi **costruita** | ✅ **entrata nella 1.0**, in due metà: la ripresa delle domande saltate (terzo tempo) e la domanda di approfondimento sulla voce mezza vuota (quinto tempo) — v. sotto |
 | 5 | Più voci in una risposta | prova A | ✅ tre impieghi in una battuta sola restano tre |
 | 6 | Scoring della famiglia A | rilettura del codice + banco | ✅ architettura ibrida intatta; sei casi dell'hard-gate più la parità deterministica |
 | 7 | Requisiti «tipici» non scritti | prova B, con l'AI vera | ✅ da quattro righe escono quattro liste vuote, azienda vuota, e l'email ricopiata |
@@ -1006,7 +1006,7 @@ Con lei T9e diventa di **sei tempi**: l'identità visiva, la checklist, la ripre
 **collaudo dal vivo**, **le cure dei reperti con la domanda di approfondimento**, e il
 rilascio.
 
-### Il quinto tempo — le cure (2026-08-23, in corso)
+### Il quinto tempo — le cure — ✔ **CHIUSO il 2026-08-24** (aperto il 23)
 
 **La decisione a monte, e perché non è andata come sembrava.** La domanda era se curare i tre
 difetti di scala uno per uno o dare all'interfaccia un modo unico di dichiarare le misure
@@ -1046,8 +1046,74 @@ prima che si confermi. Guardando il codice è saltato fuori un secondo caso dell
 famiglia, più insidioso: una patente non colta in una correzione vale «no», e la patente è
 spesso il requisito eliminatorio di un annuncio. Avvisata anche quella.
 
-Restano i reperti R1, R3-R9 e la domanda di approfondimento, e **un bump solo del Pool** a
-chiudere il tempo. Banco a **1010 collaudi verdi**.
+**Con R2 escono gli altri sei della prima passata**, e sono tutti della stessa famiglia —
+difetti di silenzio. R1: una via di casa che spariva senza dirlo. R3: un ruolo nudo scartato,
+mentre la regola dell'`altrove` dice di parcheggiarlo. R4: un luogo finito nel campo «Ruolo».
+R5: la cattura che su una pagina di **risultati** prendeva tutto — adesso una pagina-elenco si
+riconosce, e una selezione dell'utente batte la pagina intera. R8: i documenti esportabili
+**uno per uno** invece che in blocco. R9: l'avviso quando il programma di posta parte da
+freddo. Il Pool si sigilla a **1.13**, e la falsificazione dice qui una cosa che altrimenti
+non si sarebbe saputa: rimettendo i prompt di prima cadono R1 e R3, mentre **R4 resta verde
+comunque** — è una cintura, non una cura misurata; le soglie di R5 sono severe di proposito ma
+non tarate su pagine vere, e R9 un collaudo non ce l'ha perché è una stringa. **1019 collaudi
+verdi**, versione **0.3.042**.
+
+**R7 — la modifica a mano che si ricorda** *(2026-08-23)*, il più grosso dei dodici. Due strade
+cieche che partivano dallo stesso punto: modificato un testo del 🎯 CV-2 la ✉️ lettera
+continuava a raccontare la storia di prima, e «Rigenera» si riprendeva la modifica — in
+silenzio tutte e due, perché la memoria di una riscrittura viveva in un **booleano di
+sessione** che il rientro in P6 azzerava. Ora vive dove vive il documento (cap. 11.1), e da lì
+discendono l'avviso che **nomina** i testi a rischio, la spia «⚠ Rigenera la lettera» che
+esiste solo quando il CV è più recente della lettera — il verso conta — il riallineamento
+automatico alla chiusura della finestra, e un prompt della lettera che sa distinguere una prosa
+scritta dal modello da una scritta dalla persona (blocco `<riscritture>`, Pool 1.13). Sette
+difetti rimessi sotto il codice, **sei rossi**; il settimo è il prompt, e per farlo cadere è
+servito il modello vero. **1058 collaudi**, 16 reali, versione **0.3.043**.
+
+**Due difetti trovati a mano nel pannello del profilo** *(2026-08-24)*, che nei dodici non
+c'erano: in sei delle diciotto caselle scrivere «abc» lasciava a video «cba», e senza una voce
+scelta i campi della scheda erano scrivibili ma senza destinazione (cap. 03.6). Il primo è
+istruttivo più della sua cura: una riga sola in tutto il progetto, `Items(i) = etichetta`, che
+in WinForms non riscrive la riga ma la toglie e la rimette — e nel farlo alza un evento di
+selezione che ricarica i campi sotto la mano che scrive. Una **passata statica** su tutti e
+diciotto i file di `Ui/` più una prova di digitazione su ogni casella di ogni schermata dice
+che quella forma non esiste altrove. Quattro collaudi nuovi, ognuno **visto rosso** col difetto
+rimesso. **1062 collaudi**, versione **0.3.044**.
+
+**R6 — una voce si lascia fuori da un documento** *(2026-08-24)*, nella forma decisa con Mirco:
+non si tocca il profilo, si sceglie cosa **quel** CV racconta (cap. 08.4). Tre decisioni la
+reggono, e ognuna esclude una strada più corta: il documento **non si taglia mai** (la scelta
+vive accanto al `cv.json`, ed è per questo che rimettere è gratis); la voce si riconosce per
+**impronta dei fatti** e non per posizione né per prosa, perché il documento nuovo lo scrive il
+modello; il filtro è **uno solo** e serve anche i due che leggono il JSON grezzo — il prompt
+della lettera e il tool `leggi_opportunita` — perché due porte della stessa applicazione non
+possono descrivere due documenti diversi (cap. 09.3). La falsificazione ha trovato qui un buco
+vero: tolta la guardia contro un'impronta estranea al documento, **il banco restava tutto
+verde** — un altro collaudo la copriva per caso, da un'altra strada. **1094 collaudi**, versione
+**0.3.045**. Del reperto resta fuori il **riordino** delle voci, che era nominato insieme alla
+rimozione: si toglie e si rimette, non si sposta. Non è un debito ma un raffinamento — la
+forma di R6 è stata decisa, e questa le sta accanto: sta in `idee_future.md`.
+
+**La domanda di approfondimento sui campi mancanti** *(2026-08-24)* chiude il tempo, ed è la
+voce 4 della checklist nella sua **forma piena**: il terzo tempo aveva costruito la metà del
+turno saltato, questa è la metà della **voce mezza vuota** (cap. 12.2). Il prompt del turno
+formale prometteva esattamente questo — «una voce INCOMPLETA è comunque una voce … sarà
+l'utente, con la voce davanti, a completarla o lasciarla» — e fino a qui nessuno manteneva la
+promessa. La sua rete è tutta nel banco, perché nel prototipo questa cosa non esiste e la
+non-regressione non la può coprire (cap. 04.7): **otto falsificazioni, otto rosse**. Un collaudo
+`Reale` in più perché l'assunto centrale del disegno riguarda il **modello** e non il codice —
+una risposta nuda ha prodotto la domanda da sé, e «tre anni circa» è finito in `durata` col
+resto della voce fermo. Nella stessa gamba il conduttore dei collaudi reali impara a
+riconoscere la domanda **senza spendere una battuta della traccia** (la frase fissa si legge dal
+prodotto, non si ricopia) e ha finalmente un suo banco offline.
+
+**Il bilancio del quinto tempo.** Dodici reperti su dodici curati, più i due trovati a mano nel
+pannello del profilo e un debito vecchio di T9b chiuso di conseguenza; **1110 collaudi verdi**
+(erano 995 all'apertura del tempo), copioni **10/10**, versione **0.3.046**, Pool **1.13** —
+un bump solo, come previsto, e nessun prompt toccato dopo di quello. Restano fuori il
+**riordino** delle voci di R6 e il **giro D** (l'exe su una macchina senza runtime .NET 10, e i
+due debiti di Word), che questa postazione non può fare: è la **riserva** con cui la tappa si
+chiuderà, regola 15. Il sesto tempo è il rilascio.
 
 
 ## Ordine e dipendenze

@@ -80,6 +80,14 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
 
 ## Quel che ancora non sa fare
 
+- **Di due elenchi nella stessa finestra ne guida solo il primo.** *(2026-08-24, T9e/R6.)*
+  «Modifica i testi» ha adesso due liste affiancate — «Nel documento» e «Lasciate fuori» — e
+  `scegli_riga` prende sempre quella di sinistra: l'altra non si raggiunge, e il giro del
+  «Togli →/← Rimetti» è stato provato **a mano**. La causa è nell'accessibilità, non nel
+  nome: tutte e due si presentano come **Table**, e la ricerca si ferma alla prima che
+  incontra. Finché non gli si insegna a distinguerle — per posizione, o per il nome
+  accessibile del controllo — quella metà di finestra nessun collaudo automatico la tocca.
+
 - **Le voci di un menù contestuale non si premono.** *(2026-08-21, T9c.)* Il menù di
   «Com'è andata…» in P4 si apre benissimo con `clic` sul bottone, le sue voci compaiono
   nella fotografia — e `clic` su «Colloquio» risponde **«Premuto»** senza che succeda
