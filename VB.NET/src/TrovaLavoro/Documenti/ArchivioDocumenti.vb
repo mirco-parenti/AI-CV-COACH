@@ -87,13 +87,14 @@ Namespace Documenti
         Public Function ScriviCvBaseAsync(cv As JsonNode,
                                           Optional quando As Date = Nothing,
                                           Optional formati As FormatiDocumento = FormatiDocumento.Entrambi,
-                                          Optional lingua As String = Nothing) _
+                                          Optional lingua As String = Nothing,
+                                          Optional tolte As VociTolte = Nothing) _
                                           As Task(Of IReadOnlyList(Of String))
 
             If cv Is Nothing Then Throw New ArgumentNullException(NameOf(cv))
 
             Dim scritta As String = LinguaDocumenti.PerDocumenti(lingua)
-            Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(cv, scritta)
+            Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(cv, scritta, tolte)
             Dim giorno As Date = If(quando = Nothing, Date.Today, quando)
 
             ' Nessuna azienda: il CV base non nasce da un annuncio, e il suo nome lo dice
@@ -131,7 +132,8 @@ Namespace Documenti
             Dim lingua As String = LinguaDocumenti.PerDocumenti(opportunita.Lingua)
 
             If opportunita.Cv IsNot Nothing AndAlso quali <> DocumentiDaScrivere.Lettera Then
-                Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(opportunita.Cv, lingua)
+                Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(
+                    opportunita.Cv, lingua, opportunita.VociTolteDalCv)
                 lavori.Add(New Lavoro(pagina, NomiDocumenti.Cv(
                     DiChiE(pagina), opportunita.Azienda, opportunita.Creata, lingua)))
             End If

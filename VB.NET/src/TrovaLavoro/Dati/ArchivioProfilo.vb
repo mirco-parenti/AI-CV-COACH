@@ -41,6 +41,12 @@ Namespace Dati
         ''' </remarks>
         Public ReadOnly Property Riscritture As New RiscrittureAMano
 
+        ''' <summary>
+        ''' Le voci che l'utente ha tolto da questo CV (R6, 2026-08-24): vuoto nei file
+        ''' nati prima, che è come dire «documento intero».
+        ''' </summary>
+        Public ReadOnly Property Tolte As New VociTolte
+
     End Class
 
     ''' <summary>
@@ -251,7 +257,8 @@ Namespace Dati
         Public Function SalvaCvBase(cv As JsonNode, versioneProfilo As String,
                                     Optional lingua As String = Nothing,
                                     Optional generato As Date? = Nothing,
-                                    Optional riscritture As RiscrittureAMano = Nothing) As String
+                                    Optional riscritture As RiscrittureAMano = Nothing,
+                                    Optional tolte As VociTolte = Nothing) As String
 
             If cv Is Nothing Then Throw New ArgumentNullException(NameOf(cv))
 
@@ -267,6 +274,11 @@ Namespace Dati
             ' un CV base che nessuno ha toccato resta scritto esattamente com'era.
             Dim aMano As JsonObject = riscritture?.ComeJson()
             If aMano IsNot Nothing Then involucro("riscritture") = aMano
+
+            ' Da R6 (T9e), con la stessa regola: il blocco c'è solo se qualcosa è stato
+            ' tolto dal documento.
+            Dim viaDaQui As JsonObject = tolte?.ComeJson()
+            If viaDaQui IsNot Nothing Then involucro("voci_tolte") = viaDaQui
 
             ScriviInModoAtomico(_cartella.FileCvBase, involucro.ToJsonString(FormatoLeggibile))
 
@@ -304,6 +316,7 @@ Namespace Dati
                 .Lingua = Campo(involucro, "lingua")}
 
             letto.Riscritture.Rileggi(TryCast(CampiJson.Nodo(involucro, "riscritture"), JsonObject))
+            letto.Tolte.Rileggi(TryCast(CampiJson.Nodo(involucro, "voci_tolte"), JsonObject))
 
             Return letto
 

@@ -107,6 +107,19 @@ Namespace Mcp
 
                 Next
 
+                ' Da R6 (T9e). Su disco il `cv.json` resta intero e il taglio dell'utente
+                ' vive accanto, in `stato.json`: è quel che rende gratis rimettere una
+                ' voce. Ma chi legge da fuori deve vedere il CV **come lo vede lui**, o le
+                ' due porte dell'applicazione — la finestra e il server — racconterebbero
+                ' due documenti diversi, e la seconda quello che l'utente ha già scartato.
+                Dim tolte As New Dati.VociTolte()
+                tolte.Rileggi(TryCast(Dati.CampiJson.Nodo(
+                    TryCast(raccolto("stato"), JsonObject), "voci_tolte"), JsonObject))
+
+                If tolte.CEQualcosa AndAlso raccolto.ContainsKey("cv") Then
+                    raccolto("cv") = Documenti.VociDelCv.ComeSiVede(raccolto("cv"), tolte)
+                End If
+
                 raccolto("documenti") = Prodotti(cartella)
 
                 Return EsitoTool.Riuscito(raccolto)

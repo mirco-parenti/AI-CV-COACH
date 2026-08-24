@@ -267,6 +267,11 @@ Namespace Dati
             If riscritture.Count > 0 Then scritto("riscritture") = riscritture
             If o.LetteraGenerata <> Nothing Then scritto("lettera_generata") = CampiJson.Quando(o.LetteraGenerata)
 
+            ' Da R6 (T9e). Le voci che l'utente ha tolto da questo CV: tace anche lei
+            ' quando non c'è stato tolto niente, che è il caso normale.
+            Dim tolte As JsonObject = o.VociTolteDalCv.ComeJson()
+            If tolte IsNot Nothing Then scritto("voci_tolte") = tolte
+
             Return scritto
 
         End Function
@@ -324,6 +329,9 @@ Namespace Dati
             o.RiscrittureDelCv.Rileggi(TryCast(CampiJson.Nodo(riscritture, "cv"), JsonObject))
             o.RiscrittureDellaLettera.Rileggi(TryCast(CampiJson.Nodo(riscritture, "lettera"), JsonObject))
             o.LetteraGenerata = CampiJson.Istante(stato, "lettera_generata")
+
+            ' Da R6 (T9e). Assente nei file di prima, e l'assenza vale «documento intero».
+            o.VociTolteDalCv.Rileggi(TryCast(CampiJson.Nodo(stato, "voci_tolte"), JsonObject))
 
             Dim match As JsonObject = TryCast(CampiJson.Nodo(stato, "match"), JsonObject)
             If match Is Nothing Then Return

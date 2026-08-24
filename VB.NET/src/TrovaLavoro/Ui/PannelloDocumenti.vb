@@ -139,6 +139,13 @@ Public Class PannelloDocumenti
     Private ReadOnly _riscrittureDelCvBase As New RiscrittureAMano
 
     ''' <summary>
+    ''' Le voci che l'utente ha lasciato fuori dal 📄 CV base (R6): la copia in mano al
+    ''' pannello di quel che sta scritto in <c>cv_base.json</c>, che a differenza di una
+    ''' candidatura non ha un oggetto suo in memoria.
+    ''' </summary>
+    Private ReadOnly _vociTolteDalCvBase As New VociTolte
+
+    ''' <summary>
     ''' Vero mentre è il pannello a muovere la tendina della lingua, non l'utente.
     ''' </summary>
     ''' <remarks>
@@ -275,6 +282,7 @@ Public Class PannelloDocumenti
         _versioneDelCvBase = Nothing
         _generatoIlCvBase = Nothing
         _riscrittureDelCvBase.Dimentica()
+        _vociTolteDalCvBase.Dimentica()
 
     End Sub
 
@@ -399,6 +407,7 @@ Public Class PannelloDocumenti
         ' E con loro quel che l'utente ci aveva riscritto a mano (R7): senza, «Rigenera»
         ' tornerebbe a portarselo via in silenzio a ogni rientro in P6.
         _riscrittureDelCvBase.Prendi(salvato.Riscritture)
+        _vociTolteDalCvBase.Prendi(salvato.Tolte)
 
         Mostra()
         RaccontaLoStato(DaDoveViene(salvato), StileApp.TestoSecondario)
@@ -470,6 +479,9 @@ Public Class PannelloDocumenti
                 ' Si dimenticano qui e non prima di chiamare: se la generazione fosse
                 ' andata storta, a video sarebbe rimasto quello vecchio — con dentro il
                 ' lavoro dell'utente — e la prossima conferma avrebbe smesso di nominarlo.
+                ' Le voci lasciate fuori invece restano: togliere una voce non è un
+                ' testo vecchio da incollare in un documento nuovo, è una scelta su cosa
+                ' questo CV deve dire — e vale anche sul CV rifatto (R6).
                 _riscrittureDelCvBase.Dimentica()
 
                 Await RifinisciIlCvBaseAsync(filo.Token).ConfigureAwait(True)
@@ -662,13 +674,37 @@ Public Class PannelloDocumenti
             campi.AddRange(_candidatura.RiscrittureDellaLettera.Campi)
         End If
 
-        If campi.Count = 0 Then Return String.Empty
+        Dim detto As String = String.Empty
 
-        ' Come si leggono lo sa Rifinitura, che è l'unico posto a conoscere i campi di
-        ' prosa: un secondo elenco di nomi qui divergerebbe al primo campo nuovo.
-        Dim nomi As String = String.Join(", ", campi.Select(AddressOf Rifinitura.ComeSiLegge))
+        If campi.Count > 0 Then
+            ' Come si leggono lo sa Rifinitura, che è l'unico posto a conoscere i campi di
+            ' prosa: un secondo elenco di nomi qui divergerebbe al primo campo nuovo.
+            Dim nomi As String = String.Join(", ", campi.Select(AddressOf Rifinitura.ComeSiLegge))
+            detto &= vbLf & "Compresi i testi che hai riscritto a mano: " & nomi & "."
+        End If
 
-        Return vbLf & "Compresi i testi che hai riscritto a mano: " & nomi & "."
+        ' Le voci lasciate fuori non si perdono — restano fuori anche dal CV rifatto (R6)
+        ' — ma chi sta per rigenerare deve saperlo lo stesso: il documento nuovo non sarà
+        ' il CV intero, e senza questa riga sembrerebbe che manchi qualcosa.
+        Dim quante As Integer = VociLasciateFuori().Impronte.Count
+
+        If quante > 0 Then
+            detto &= vbLf & If(quante = 1,
+                               "La voce che hai lasciato fuori resta fuori anche dal CV rifatto.",
+                               $"Le {quante} voci che hai lasciato fuori restano fuori anche dal CV rifatto.")
+        End If
+
+        Return detto
+
+    End Function
+
+    ''' <summary>Le voci lasciate fuori dal documento in mostra adesso (R6).</summary>
+    Private Function VociLasciateFuori() As VociTolte
+
+        If _sulCvBase Then Return _vociTolteDalCvBase
+        If _candidatura IsNot Nothing Then Return _candidatura.VociTolteDalCv
+
+        Return New VociTolte()
 
     End Function
 
@@ -683,7 +719,8 @@ Public Class PannelloDocumenti
             _generatoIlCvBase = Date.Now
 
             _contesto.Archivio.SalvaCvBase(_cvBase, _versioneDelCvBase,
-                                           _linguaCvBase, _generatoIlCvBase, _riscrittureDelCvBase)
+                                           _linguaCvBase, _generatoIlCvBase, _riscrittureDelCvBase,
+                                           _vociTolteDalCvBase)
             Return $"Il 📄 CV base è pronto{InQuestaLingua()} ed è salvato col tuo profilo." & vbLf &
                    "Esportalo in DOCX o PDF quando ti va bene." & LaRifinituraSeENonRiuscita()
 
@@ -970,11 +1007,17 @@ Public Class PannelloDocumenti
 
         If AiAlLavoro OrElse Not CEQualcosaDaRiscrivere() Then Return
 
+        Dim fuori As List(Of String) = Nothing
         Dim fatte As List(Of RiscritturaFatta) =
-            FinestraModificaTesti.Chiedi(FindForm(), DocumentiDaRiscrivere())
-        If fatte.Count = 0 Then Return
+            FinestraModificaTesti.Chiedi(FindForm(), DocumentiDaRiscrivere(), fuori)
 
-        Await ConfermaLeRiscrittureAsync(fatte).ConfigureAwait(True)
+        ' Due lavori diversi tornano dalla stessa finestra, e l'uno senza l'altro è
+        ' possibile: si può uscire avendo solo tolto una voce, senza aver riscritto niente.
+        Dim cambiate As Boolean = SegnaLeVociLasciateFuori(fuori)
+
+        If fatte.Count = 0 AndAlso Not cambiate Then Return
+
+        Await ConfermaLeRiscrittureAsync(fatte, cambiate).ConfigureAwait(True)
 
     End Function
 
@@ -994,14 +1037,51 @@ Public Class PannelloDocumenti
     ''' sopravvivere l'avviso di «Rigenera» al primo cambio di pannello, e a dire alla
     ''' lettera che il CV da cui discende è cambiato sotto di lei.</para>
     ''' </remarks>
-    Public Async Function ConfermaLeRiscrittureAsync(fatte As IList(Of RiscritturaFatta)) As Task
+    ''' <summary>
+    ''' Mette per iscritto le voci che l'utente ha lasciato fuori dal documento (R6).
+    ''' </summary>
+    ''' <remarks>
+    ''' La finestra dice qual è il taglio <b>di adesso</b>, non cosa è cambiato: si
+    ''' confronta con quello di prima, perché la data di questo elenco è ciò che dice alla
+    ''' lettera che il CV è cambiato sotto di lei, e una data che si muove a ogni apertura
+    ''' della finestra accenderebbe la spia anche quando nessuno ha toccato niente.
+    ''' </remarks>
+    ''' <returns>Vero se il taglio è cambiato davvero.</returns>
+    Public Function SegnaLeVociLasciateFuori(fuori As IList(Of String)) As Boolean
 
-        If fatte Is Nothing OrElse fatte.Count = 0 Then Return
+        If fuori Is Nothing Then Return False
 
-        Annota(fatte)
+        Dim dove As VociTolte = VociLasciateFuori()
+        Dim prima As New HashSet(Of String)(dove.Impronte, StringComparer.Ordinal)
+        Dim adesso As New HashSet(Of String)(fuori, StringComparer.Ordinal)
+
+        If prima.SetEquals(adesso) Then Return False
+
+        Dim quando As Date = Date.Now
+
+        For Each impronta As String In prima.Except(adesso).ToList()
+            dove.Rimetti(impronta, quando)
+        Next
+
+        For Each impronta As String In adesso.Except(prima).ToList()
+            dove.Togli(impronta, quando)
+        Next
+
+        Return True
+
+    End Function
+
+    Public Async Function ConfermaLeRiscrittureAsync(fatte As IList(Of RiscritturaFatta),
+                                                     Optional vociCambiate As Boolean = False) As Task
+
+        Dim quante As Integer = If(fatte Is Nothing, 0, fatte.Count)
+
+        If quante = 0 AndAlso Not vociCambiate Then Return
+
+        If quante > 0 Then Annota(fatte)
 
         Mostra()
-        RaccontaLoStato(ArchiviaLeRiscritture(fatte.Count), StileApp.TestoSecondario)
+        RaccontaLoStato(ArchiviaLeRiscritture(quante), StileApp.TestoSecondario)
 
         ' Toccato il CV, la lettera che ne discende è rimasta indietro: si riallinea da
         ' sé, subito e una volta sola (R7). Non è un automatismo di comodo — è il rimedio
@@ -1012,7 +1092,10 @@ Public Class PannelloDocumenti
         ' conferma del salvataggio, non un errore rosso al posto suo per un lavoro che non
         ' aveva chiesto. Il disallineamento resta detto dalla spia, che è lì col suo
         ' comando e non ha bisogno di nessuno.
-        If _pipeline IsNot Nothing AndAlso fatte.Any(Function(f) f.Ruolo = RuoloDocumento.Cv) Then
+        ' Vale per le due strade: toccare un testo del CV e togliergli una voce lo
+        ' cambiano allo stesso modo agli occhi della lettera (R6).
+        If _pipeline IsNot Nothing AndAlso
+           (vociCambiate OrElse fatte.Any(Function(f) f.Ruolo = RuoloDocumento.Cv)) Then
             Await RiallineaLaLetteraAsync().ConfigureAwait(True)
         End If
 
@@ -1160,7 +1243,8 @@ Public Class PannelloDocumenti
 
             If _cvBase IsNot Nothing Then
                 aperti.Add(New DocumentoDaRiscrivere With {
-                    .Documento = _cvBase, .Ruolo = RuoloDocumento.Cv})
+                    .Documento = _cvBase, .Ruolo = RuoloDocumento.Cv,
+                    .Tolte = _vociTolteDalCvBase})
             End If
 
             Return aperti
@@ -1171,7 +1255,8 @@ Public Class PannelloDocumenti
 
         If _candidatura.Cv IsNot Nothing Then
             aperti.Add(New DocumentoDaRiscrivere With {
-                .Documento = _candidatura.Cv, .Ruolo = RuoloDocumento.Cv})
+                .Documento = _candidatura.Cv, .Ruolo = RuoloDocumento.Cv,
+                .Tolte = _candidatura.VociTolteDalCv})
         End If
 
         If _candidatura.Lettera IsNot Nothing Then
@@ -1193,8 +1278,12 @@ Public Class PannelloDocumenti
     ''' </remarks>
     Private Function CEQualcosaDaRiscrivere() As Boolean
 
+        ' Da R6 (2026-08-24) non basta più chiedere della prosa: un CV tutto fatti — che
+        ' prima apriva una finestra vuota, e per questo il bottone restava spento — ha
+        ' comunque delle voci che si possono lasciare fuori da questo documento.
         Return DocumentiDaRiscrivere().Any(
-            Function(aperto) Rifinitura.CampiDiProsa(aperto.Documento).Count > 0)
+            Function(aperto) Rifinitura.CampiDiProsa(aperto.Documento).Count > 0 OrElse
+                             VociDelCv.Elenca(aperto.Documento).Count > 0)
 
     End Function
 
@@ -1251,7 +1340,8 @@ Public Class PannelloDocumenti
             AllestisciLaTendina(_linguaCvBase)
             txtAnnuncio.Text = "Il 📄 CV base non nasce da un annuncio: è il ritratto del tuo profilo."
             txtCv.Text = Anteprima(_cvBase,
-                                   Function(d) Impaginazione.PaginaCv(d, _linguaCvBase),
+                                   Function(d) Impaginazione.PaginaCv(d, _linguaCvBase,
+                                                                      _vociTolteDalCvBase),
                                    "Il CV non è ancora stato scritto.")
             txtLettera.Text = "La lettera si scrive su un annuncio: qui non ce n'è uno."
             AggiornaComandi()
@@ -1278,7 +1368,8 @@ Public Class PannelloDocumenti
         ' blocchi che finirà nel DOCX e nel PDF (cap. 05.3), e vederla qui con le etichette
         ' sbagliate vorrebbe dire scoprire l'errore solo aprendo il file.
         txtCv.Text = Anteprima(_candidatura.Cv,
-                               Function(d) Impaginazione.PaginaCv(d, lingua),
+                               Function(d) Impaginazione.PaginaCv(d, lingua,
+                                                                  _candidatura.VociTolteDalCv),
                                "Il CV non è ancora stato scritto.")
         txtLettera.Text = Anteprima(_candidatura.Lettera,
                                     Function(d) Impaginazione.PaginaLettera(d, lingua),

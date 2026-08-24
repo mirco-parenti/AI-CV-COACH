@@ -1,6 +1,7 @@
 Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
+Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Documenti
 
 Namespace Documenti
@@ -233,6 +234,40 @@ Namespace Documenti
             CollectionAssert.AreEqual(
                 {Impaginazione.SezioneEsperienze, Impaginazione.SezioneAltreEsperienze},
                 Sezioni(pagina))
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaVoceToltaNonDiventaUnBlocco()
+
+            ' R6: il taglio si decide una volta sola (VociDelCv.ComeSiVede), e tutte
+            ' le stampanti passano da qui. Se l'impaginazione lo ignorasse, il PDF
+            ' mostrerebbe una voce che l'utente ha già tolto dall'anteprima.
+            Dim cv As JsonObject = CType(CvDiProva(), JsonObject)
+            Dim tolte As New VociTolte()
+            tolte.Togli("competenze¦servizio ai tavoli", New Date(2026, 8, 24))
+
+            Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(cv, tolte:=tolte)
+
+            Dim competenze As Blocco = pagina.Blocchi.First(Function(b) b.Genere = GenereBlocco.Elenco)
+            CollectionAssert.AreEqual({"Uso del registratore di cassa"}, competenze.Voci.ToArray(),
+                                      "la voce tolta non compare, l'altra sì")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub TogliereLUnicaVoceDiUnaSezioneNePortaViaAncheIlTitolo()
+
+            ' Il gemello di UnaSezioneVuotaSeNePortaViaIlTitolo, ma svuotata dal
+            ' taglio dell'utente e non dal modello: un «Formazione» seguito dal
+            ' nulla è peggio che non averlo, qualunque sia la ragione per cui è vuoto.
+            Dim cv As JsonObject = CType(CvDiProva(), JsonObject)
+            Dim tolte As New VociTolte()
+            tolte.Togli("formazione¦diploma alberghiero¦ipssar modena¦2018", New Date(2026, 8, 24))
+
+            Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(cv, tolte:=tolte)
+
+            Assert.IsFalse(Sezioni(pagina).Contains(Impaginazione.SezioneFormazione))
 
         End Sub
 

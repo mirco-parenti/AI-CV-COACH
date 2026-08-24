@@ -2,6 +2,7 @@
 Imports System.Text.Json.Nodes
 Imports System.Windows.Forms
 Imports TrovaLavoro.Dati
+Imports TrovaLavoro.Documenti
 Imports TrovaLavoro.Motore
 
 ''' <summary>Cosa l'utente ha deciso davanti ai testi che stava riscrivendo.</summary>
@@ -30,6 +31,13 @@ Public Class DocumentoDaRiscrivere
     ''' lettera che ne discende, e per accorgersene bisogna sapere dove è stato scritto.
     ''' </summary>
     Public Property Ruolo As RuoloDocumento
+
+    ''' <summary>
+    ''' Le voci già lasciate fuori da questo documento (R6): la finestra le mostra
+    ''' nell'elenco di destra, così chi riapre ritrova il taglio che aveva scelto invece
+    ''' di doverlo rifare.
+    ''' </summary>
+    Public Property Tolte As VociTolte
 
 End Class
 
@@ -110,7 +118,36 @@ Public Class FinestraModificaTesti
 
     End Class
 
+    ''' <summary>
+    ''' Una riga dell'elenco. Le due cose che si fanno qui dentro — riscrivere un testo e
+    ''' togliere una voce dal documento — non stanno sulle stesse righe: il sommario si
+    ''' riscrive ma non si toglie (un CV senza sommario non è un CV con una voce in meno,
+    ''' è un CV rotto); una competenza si toglie ma non si riscrive, perché è un fatto e i
+    ''' fatti stanno nel profilo; un'esperienza fa tutt'e due. Perciò una riga porta quel
+    ''' che ha: la prosa, l'impronta, o entrambe.
+    ''' </summary>
+    Private Class RigaElenco
+
+        ''' <summary>Il campo di prosa, e dov'è in <c>_voci</c>; -1 se questa riga non ne ha.</summary>
+        Public Property IndiceProsa As Integer = -1
+
+        ''' <summary>Chi è la voce, se si può togliere; <c>Nothing</c> se non si può.</summary>
+        Public Property Impronta As String
+
+        Public Property Etichetta As String
+
+        ''' <summary>Cosa dice: il testo di prosa, o il riepilogo dei suoi fatti.</summary>
+        Public Property Riepilogo As String
+
+    End Class
+
     Private ReadOnly _voci As New List(Of Voce)
+
+    ''' <summary>Le righe dei due elenchi, nell'ordine in cui si leggono nel documento.</summary>
+    Private ReadOnly _righe As New List(Of RigaElenco)
+
+    ''' <summary>Le impronte delle voci che in questo momento sono lasciate fuori.</summary>
+    Private ReadOnly _fuori As New HashSet(Of String)(StringComparer.Ordinal)
 
     Private ReadOnly _suggerimenti As New ToolTip()
 
@@ -138,12 +175,13 @@ Public Class FinestraModificaTesti
         If documenti Is Nothing Then Throw New ArgumentNullException(NameOf(documenti))
 
         RaccogliLaProsa(documenti)
+        ComponiLeRighe(documenti)
 
         lblSpiegazione.Text =
-            "Qui riscrivi i testi che ho scritto io: il sommario, le descrizioni delle esperienze, " &
-            "il corpo della lettera." & vbLf &
-            "I fatti — nomi, aziende, date, competenze, titoli — vengono dal tuo profilo e si " &
-            "cambiano di là, o alla prossima rigenerazione tornerebbero com'erano."
+            "Qui riscrivi i testi che ho scritto io — il sommario, le descrizioni delle " &
+            "esperienze, il corpo della lettera — e scegli quali voci mettere in questo documento." & vbLf &
+            "I fatti vengono dal tuo profilo e si cambiano di là: quel che lasci fuori esce da " &
+            "questo documento soltanto, e resta nel profilo per le altre candidature."
 
         Vesti()
         MostraICampi()
@@ -165,13 +203,20 @@ Public Class FinestraModificaTesti
     ''' salva è la stessa cosa.
     ''' </returns>
     Public Shared Function Chiedi(proprietario As IWin32Window,
-                                  documenti As IEnumerable(Of DocumentoDaRiscrivere)) _
+                                  documenti As IEnumerable(Of DocumentoDaRiscrivere),
+                                  <Runtime.InteropServices.Out> ByRef fuori As List(Of String)) _
                                   As List(Of RiscritturaFatta)
+
+        fuori = Nothing
 
         Using finestra As New FinestraModificaTesti(documenti)
 
             finestra.ShowDialog(proprietario)
             If finestra.Esito <> EsitoModifica.Confermato Then Return New List(Of RiscritturaFatta)
+
+            ' Annullando non torna niente, né i testi né il taglio: è il senso di
+            ' «Annulla», e vale per tutti e due i lavori che si fanno lì dentro (R6).
+            fuori = finestra.VociFuori()
 
             Return finestra.Applica()
 
@@ -251,6 +296,102 @@ Public Class FinestraModificaTesti
 
     End Function
 
+    ''' <summary>
+    ''' Mette in fila le righe dei due elenchi: per ogni documento, prima la sua prosa —
+    ''' nell'ordine in cui la dà <c>Rifinitura</c> — e poi le voci che quella prosa non
+    ''' copre, cioè competenze e titoli di studio, che di descrizione non ne hanno.
+    ''' </summary>
+    ''' <remarks>
+    ''' La riga di un'esperienza è <b>una sola</b>: la stessa si riscrive e si toglie.
+    ''' Farne due — «Esperienza 2» fra i testi e «Esperienza 2» fra le voci — lascerebbe a
+    ''' chi legge il compito di capire che parlano della stessa cosa.
+    ''' </remarks>
+    Private Sub ComponiLeRighe(documenti As IEnumerable(Of DocumentoDaRiscrivere))
+
+        For Each documento As DocumentoDaRiscrivere In documenti
+
+            If documento Is Nothing OrElse documento.Documento Is Nothing Then Continue For
+
+            Dim voci As List(Of VoceDelCv) = VociDelCv.Elenca(documento.Documento)
+
+            ' Quel che era già fuori resta fuori: chi riapre la finestra ritrova il taglio
+            ' che aveva scelto, invece di doverlo rifare da capo.
+            If documento.Tolte IsNot Nothing Then
+                For Each impronta As String In documento.Tolte.Impronte
+                    _fuori.Add(impronta)
+                Next
+            End If
+
+            Dim gia As New HashSet(Of String)(StringComparer.Ordinal)
+
+            For indice As Integer = 0 To _voci.Count - 1
+
+                If Not ReferenceEquals(_voci(indice).Documento, documento.Documento) Then Continue For
+
+                Dim accoppiata As VoceDelCv = VoceDellaProsa(voci, _voci(indice).Id)
+                If accoppiata IsNot Nothing Then gia.Add(accoppiata.Impronta)
+
+                _righe.Add(New RigaElenco With {
+                    .IndiceProsa = indice,
+                    .Impronta = accoppiata?.Impronta,
+                    .Etichetta = _voci(indice).Etichetta,
+                    .Riepilogo = _voci(indice).Testo})
+
+            Next
+
+            For Each voce As VoceDelCv In voci
+
+                If gia.Contains(voce.Impronta) Then Continue For
+
+                _righe.Add(New RigaElenco With {
+                    .Impronta = voce.Impronta,
+                    .Etichetta = voce.Etichetta,
+                    .Riepilogo = voce.Riepilogo})
+
+            Next
+
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' La voce a cui appartiene un campo di prosa. I due mondi si nominano diversamente —
+    ''' <c>esperienza.1</c> il testo, l'impronta la voce — ma dentro un documento la
+    ''' seconda esperienza è una sola, e il numero basta a ritrovarla.
+    ''' </summary>
+    Private Shared Function VoceDellaProsa(voci As List(Of VoceDelCv), idProsa As String) As VoceDelCv
+
+        If String.IsNullOrEmpty(idProsa) Then Return Nothing
+
+        Dim sezione As String
+
+        If idProsa.StartsWith("esperienza.", StringComparison.Ordinal) Then
+            sezione = "esperienze_professionali"
+        ElseIf idProsa.StartsWith("altra.", StringComparison.Ordinal) Then
+            sezione = "altre_esperienze"
+        Else
+            ' Il sommario e il corpo della lettera non sono voci: si riscrivono e basta.
+            Return Nothing
+        End If
+
+        Dim numero As Integer
+        If Not Integer.TryParse(idProsa.Substring(idProsa.IndexOf("."c) + 1), numero) Then Return Nothing
+
+        Return voci.FirstOrDefault(Function(v) v.Sezione = sezione AndAlso v.Indice = numero)
+
+    End Function
+
+    ''' <summary>Le voci che l'utente ha lasciato fuori dal documento, come impronte.</summary>
+    ''' <remarks>
+    ''' È quel che la finestra consegna a chi l'ha aperta, insieme alle riscritture: chi
+    ''' salva le mette in <see cref="VociTolte"/>, che vive dove vive il documento.
+    ''' </remarks>
+    Public Function VociFuori() As List(Of String)
+
+        Return _fuori.ToList()
+
+    End Function
+
     ''' <summary>Mette in fila i campi di prosa di tutti i documenti.</summary>
     Private Sub RaccogliLaProsa(documenti As IEnumerable(Of DocumentoDaRiscrivere))
 
@@ -287,23 +428,46 @@ Public Class FinestraModificaTesti
         lblModifica.ForeColor = StileApp.TestoPrimario
 
         lvwCampi.BackColor = StileApp.SfondoContenuto
+        lvwFuori.BackColor = StileApp.SfondoContenuto
         txtTesto.BackColor = StileApp.SfondoContenuto
+
+        lblNelDocumento.ForeColor = StileApp.TestoPrimario
+        lblFuori.ForeColor = StileApp.TestoPrimario
+
+        ' Togliere e rimettere sono due gesti reversibili, e nessuno dei due distrugge
+        ' niente: il documento resta intero, cambia solo quel che se ne mostra.
+        StileApp.VestiBottone(btnTogli, LivelloBottone.Neutro)
+        StileApp.VestiBottone(btnRimetti, LivelloBottone.Neutro)
 
         StileApp.VestiBottone(btnSalva, LivelloBottone.SicuroPositivo)
         StileApp.VestiBottone(btnAnnulla, LivelloBottone.Neutro)
 
     End Sub
 
-    ''' <summary>Riempie l'elenco dei campi e sceglie il primo.</summary>
+    ''' <summary>Riempie i due elenchi e sceglie la prima riga di quello di sinistra.</summary>
     Private Sub MostraICampi()
 
         _riempimenti += 1
 
         Try
             lvwCampi.Items.Clear()
+            lvwFuori.Items.Clear()
 
-            For Each voce As Voce In _voci
-                lvwCampi.Items.Add(New ListViewItem({voce.Etichetta, UnaRiga(voce.Testo), String.Empty}))
+            For Each riga As RigaElenco In _righe
+
+                If riga.Impronta IsNot Nothing AndAlso _fuori.Contains(riga.Impronta) Then
+
+                    Dim fuori As New ListViewItem({riga.Etichetta, UnaRiga(riga.Riepilogo)}) With {.Tag = riga}
+                    lvwFuori.Items.Add(fuori)
+
+                Else
+
+                    Dim dentro As New ListViewItem({riga.Etichetta, UnaRiga(TestoDellaRiga(riga)),
+                                                    SegnoDellaRiga(riga)}) With {.Tag = riga}
+                    lvwCampi.Items.Add(dentro)
+
+                End If
+
             Next
 
             If lvwCampi.Items.Count > 0 Then lvwCampi.Items(0).Selected = True
@@ -311,6 +475,8 @@ Public Class FinestraModificaTesti
         Finally
             _riempimenti -= 1
         End Try
+
+        AggiornaIComandi()
 
     End Sub
 
@@ -326,16 +492,132 @@ Public Class FinestraModificaTesti
 
     End Function
 
+    ''' <summary>Cosa si legge nella colonna del testo: la prosa se c'è, altrimenti i fatti.</summary>
+    Private Function TestoDellaRiga(riga As RigaElenco) As String
+
+        If riga.IndiceProsa >= 0 Then Return _voci(riga.IndiceProsa).Testo
+        Return riga.Riepilogo
+
+    End Function
+
+    ''' <summary>Il segno ✎, che vale per la prosa riscritta in questo giro.</summary>
+    Private Function SegnoDellaRiga(riga As RigaElenco) As String
+
+        If riga.IndiceProsa < 0 Then Return String.Empty
+        Return If(_voci(riga.IndiceProsa).Riscritto, SegnoRiscritto, String.Empty)
+
+    End Function
+
+    ''' <summary>
+    ''' Accende i due comandi su quel che si può fare adesso. «Togli» vuole una riga
+    ''' scelta a sinistra che sia una voce — il sommario e il corpo della lettera non lo
+    ''' sono — e «Rimetti» vuole una riga scelta a destra.
+    ''' </summary>
+    Private Sub AggiornaIComandi()
+
+        Dim scelta As RigaElenco = RigaSceltaASinistra()
+
+        btnTogli.Enabled = scelta IsNot Nothing AndAlso scelta.Impronta IsNot Nothing
+        btnRimetti.Enabled = RigaSceltaADestra() IsNot Nothing
+
+        If scelta IsNot Nothing AndAlso scelta.Impronta Is Nothing Then
+            _suggerimenti.SetToolTip(btnTogli,
+                $"«{scelta.Etichetta}» fa parte del documento: si riscrive, non si toglie.")
+        Else
+            _suggerimenti.SetToolTip(btnTogli, "Lascia questa voce fuori da questo documento.")
+        End If
+
+    End Sub
+
+    ''' <summary>La riga scelta nell'elenco di sinistra, o <c>Nothing</c>.</summary>
+    Private Function RigaSceltaASinistra() As RigaElenco
+
+        If lvwCampi.SelectedItems.Count = 0 Then Return Nothing
+        Return TryCast(lvwCampi.SelectedItems(0).Tag, RigaElenco)
+
+    End Function
+
+    ''' <summary>La riga scelta nell'elenco di destra, o <c>Nothing</c>.</summary>
+    Private Function RigaSceltaADestra() As RigaElenco
+
+        If lvwFuori.SelectedItems.Count = 0 Then Return Nothing
+        Return TryCast(lvwFuori.SelectedItems(0).Tag, RigaElenco)
+
+    End Function
+
+    ''' <summary>
+    ''' Toglie dal documento la voce con questa impronta. Il documento non si tocca: quel
+    ''' che cambia è l'elenco di ciò che non va mostrato, e si rimette con un clic (R6).
+    ''' </summary>
+    ''' <remarks>
+    ''' Prende l'impronta invece di leggere la riga scelta perché è l'unico modo di
+    ''' collaudarlo: su una finestra mai mostrata i controlli non si lasciano pilotare
+    ''' (v. <see cref="FinestraAppunti.RiscriviLAppunto"/>).
+    ''' </remarks>
+    ''' <returns>Falso se quell'impronta non è di una voce che si può togliere.</returns>
+    Public Function Togli(impronta As String) As Boolean
+
+        If String.IsNullOrEmpty(impronta) Then Return False
+        If Not _righe.Any(Function(r) r.Impronta = impronta) Then Return False
+        If Not _fuori.Add(impronta) Then Return False
+
+        MostraICampi()
+        MostraIlCampoScelto()
+
+        Return True
+
+    End Function
+
+    ''' <summary>Rimette nel documento una voce lasciata fuori.</summary>
+    ''' <returns>Falso se quella voce non era fuori.</returns>
+    Public Function Rimetti(impronta As String) As Boolean
+
+        If String.IsNullOrEmpty(impronta) Then Return False
+        If Not _fuori.Remove(impronta) Then Return False
+
+        MostraICampi()
+        MostraIlCampoScelto()
+
+        Return True
+
+    End Function
+
+    ''' <summary>
+    ''' L'impronta della riga che si chiama così, o <c>Nothing</c> se quella riga non è
+    ''' una voce che si può togliere — il sommario e il corpo della lettera non lo sono.
+    ''' </summary>
+    Public Function ImprontaDi(etichetta As String) As String
+
+        Return _righe.FirstOrDefault(Function(r) r.Etichetta = etichetta)?.Impronta
+
+    End Function
+
     ''' <summary>Rimette in riga quello che di un campo si vede nell'elenco.</summary>
+    ''' <remarks>
+    ''' La riga non sta più dov'era: da R6 l'elenco di sinistra mostra anche le voci senza
+    ''' prosa e non mostra quelle lasciate fuori, quindi l'indice di <c>_voci</c> e quello
+    ''' della riga a video non coincidono. La riga si ritrova per <c>Tag</c>, che è il solo
+    ''' legame che resta vero mentre le righe vanno e vengono.
+    ''' </remarks>
     Private Sub AggiornaLaRiga(indice As Integer)
 
-        If indice < 0 OrElse indice >= lvwCampi.Items.Count Then Return
+        If Not CE(indice) Then Return
 
         _riempimenti += 1
 
         Try
-            lvwCampi.Items(indice).SubItems(1).Text = UnaRiga(_voci(indice).Testo)
-            lvwCampi.Items(indice).SubItems(2).Text = If(_voci(indice).Riscritto, SegnoRiscritto, String.Empty)
+
+            For Each riga As ListViewItem In lvwCampi.Items
+
+                Dim quale As RigaElenco = TryCast(riga.Tag, RigaElenco)
+                If quale Is Nothing OrElse quale.IndiceProsa <> indice Then Continue For
+
+                riga.SubItems(1).Text = UnaRiga(_voci(indice).Testo)
+                riga.SubItems(2).Text = If(_voci(indice).Riscritto, SegnoRiscritto, String.Empty)
+                Exit For
+
+            Next
+
         Finally
             _riempimenti -= 1
         End Try
@@ -345,7 +627,8 @@ Public Class FinestraModificaTesti
     ''' <summary>Porta nella casella il campo scelto, e dice cosa se ne può fare.</summary>
     Private Sub MostraIlCampoScelto()
 
-        Dim indice As Integer = IndiceScelto
+        Dim scelta As RigaElenco = RigaSceltaASinistra()
+        Dim indice As Integer = If(scelta Is Nothing, -1, scelta.IndiceProsa)
 
         _riempimenti += 1
 
@@ -353,9 +636,16 @@ Public Class FinestraModificaTesti
             txtTesto.Enabled = CE(indice)
             txtTesto.Text = If(CE(indice), _voci(indice).Testo, String.Empty)
 
-            lblModifica.Text = If(CE(indice),
-                                  $"Il testo di «{_voci(indice).Etichetta}» (puoi riscriverlo):",
-                                  "Scegli un campo dall'elenco.")
+            If CE(indice) Then
+                lblModifica.Text = $"Il testo di «{_voci(indice).Etichetta}» (puoi riscriverlo):"
+            ElseIf scelta IsNot Nothing Then
+                ' Una competenza o un titolo di studio sono fatti, e i fatti stanno nel
+                ' profilo: di qui si può solo lasciarli fuori da questo documento.
+                lblModifica.Text = $"«{scelta.Etichetta}» viene dal profilo: qui puoi solo toglierla " &
+                                   "da questo documento."
+            Else
+                lblModifica.Text = "Scegli una riga dall'elenco."
+            End If
 
         Finally
             _riempimenti -= 1
@@ -363,15 +653,16 @@ Public Class FinestraModificaTesti
 
     End Sub
 
-    ''' <summary>La riga scelta, o -1.</summary>
+    ''' <summary>La riga di prosa scelta, o -1 se quella scelta non ha prosa.</summary>
     Private ReadOnly Property IndiceScelto As Integer
         Get
-            If lvwCampi.SelectedIndices.Count = 0 Then Return -1
-            Return lvwCampi.SelectedIndices(0)
+            Dim scelta As RigaElenco = RigaSceltaASinistra()
+            If scelta Is Nothing Then Return -1
+            Return scelta.IndiceProsa
         End Get
     End Property
 
-    ''' <summary>Se quell'indice è una riga che esiste.</summary>
+    ''' <summary>Se quell'indice è un campo di prosa che esiste.</summary>
     Private Function CE(indice As Integer) As Boolean
 
         Return indice >= 0 AndAlso indice < _voci.Count
@@ -381,8 +672,28 @@ Public Class FinestraModificaTesti
     Private Sub lvwCampi_SelectedIndexChanged(sender As Object, e As EventArgs) _
         Handles lvwCampi.SelectedIndexChanged
 
-        MostraIlCampoScelto()
+        If _riempimenti > 0 Then Return
 
+        MostraIlCampoScelto()
+        AggiornaIComandi()
+
+    End Sub
+
+    Private Sub lvwFuori_SelectedIndexChanged(sender As Object, e As EventArgs) _
+        Handles lvwFuori.SelectedIndexChanged
+
+        If _riempimenti > 0 Then Return
+
+        AggiornaIComandi()
+
+    End Sub
+
+    Private Sub btnTogli_Click(sender As Object, e As EventArgs) Handles btnTogli.Click
+        Togli(RigaSceltaASinistra()?.Impronta)
+    End Sub
+
+    Private Sub btnRimetti_Click(sender As Object, e As EventArgs) Handles btnRimetti.Click
+        Rimetti(RigaSceltaADestra()?.Impronta)
     End Sub
 
     Private Sub txtTesto_TextChanged(sender As Object, e As EventArgs) Handles txtTesto.TextChanged

@@ -397,6 +397,57 @@ Namespace Dati
 
         End Sub
 
+        ' ==================================================================
+        ' Le voci tolte dal CV (R6, 2026-08-24)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Sub LeVociTolteTornanoDalDisco()
+
+            ' Gemella di LeRiscrittureAManoTornanoDalDisco, e per lo stesso motivo:
+            ' il taglio che l'utente ha scelto su questo CV deve sopravvivere a un
+            ' rientro in P6, e per farlo deve prima sopravvivere a un giro su disco.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim o As Opportunita = OpportunitaDiProva()
+                    o.VociTolteDalCv.Togli("competenze¦uso del muletto", New Date(2026, 8, 24, 10, 0, 0))
+
+                    Dim riletta As Opportunita = archivio.Carica(archivio.Salva(o))
+
+                    Assert.IsTrue(riletta.VociTolteDalCv.Contiene("competenze¦uso del muletto"),
+                                  "l'impronta della voce tolta")
+                    Assert.AreEqual(New Date(2026, 8, 24, 10, 0, 0), riletta.VociTolteDalCv.Quando,
+                                    "e quando l'utente l'ha tolta")
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaCartellaScrittaPrimaDiR6SiRiapreComeDocumentoIntero()
+
+            ' Come UnaCartellaScrittaPrimaDiR7SiRiapreComeMaiToccataAMano: uno
+            ' stato.json senza «voci_tolte» — tutti quelli scritti prima di R6 — non
+            ' deve inventare un taglio che nessuno ha mai fatto.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim o As Opportunita = OpportunitaDiProva()
+                    o.VociTolteDalCv.Togli("competenze¦uso del muletto", New Date(2026, 8, 24, 10, 0, 0))
+
+                    Dim dove As String = archivio.Salva(o)
+                    Dim stato As String = Path.Combine(dove, ArchivioOpportunita.FileStato)
+
+                    Dim vecchio As JsonObject = TryCast(JsonNode.Parse(File.ReadAllText(stato)), JsonObject)
+                    vecchio.Remove("voci_tolte")
+                    File.WriteAllText(stato, vecchio.ToJsonString())
+
+                    Dim riletta As Opportunita = archivio.Carica(dove)
+
+                    Assert.IsFalse(riletta.VociTolteDalCv.CEQualcosa,
+                                   "documento intero, com'era prima che R6 esistesse")
+                End Sub)
+
+        End Sub
+
         ''' <summary>
         ''' Salva l'opportunità e le toglie di dosso ciò che T4 non scriveva, poi la
         ''' rilegge: è il modo di avere in mano una cartella com'era prima di T5c.

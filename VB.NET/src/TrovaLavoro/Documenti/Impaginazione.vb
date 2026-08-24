@@ -136,13 +136,19 @@ Namespace Documenti
         ''' La lingua del documento, che decide le etichette stampate (cap. 10.1). Chi non
         ''' la dichiara ottiene l'italiano, che è la lingua di casa.
         ''' </param>
+        ''' <param name="tolte">
+        ''' Le voci che l'utente ha tolto da questo documento (R6, cap. 08.4). Passa di qui
+        ''' perché di qui passano tutti — anteprima, DOCX, PDF e HTML: un taglio deciso in
+        ''' un posto solo non può mostrare nel PDF quel che l'anteprima non fa vedere.
+        ''' </param>
         Public Shared Function PaginaCv(cv As JsonNode,
-                                        Optional lingua As String = "it") As PaginaDocumento
+                                        Optional lingua As String = "it",
+                                        Optional tolte As Dati.VociTolte = Nothing) As PaginaDocumento
 
             If cv Is Nothing Then Throw New ArgumentNullException(NameOf(cv))
 
             Dim etichette As Etichette = Etichette.PerLingua(lingua)
-            Dim radice As JsonObject = TryCast(cv, JsonObject)
+            Dim radice As JsonObject = TryCast(VociDelCv.ComeSiVede(cv, tolte), JsonObject)
             Dim pagina As New PaginaDocumento With {.Titolo = etichette.TitoloCv}
             If radice Is Nothing Then Return pagina
 

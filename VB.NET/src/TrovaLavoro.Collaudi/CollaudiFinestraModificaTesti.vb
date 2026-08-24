@@ -3,6 +3,7 @@ Imports System.Text.Json.Nodes
 Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro
+Imports TrovaLavoro.Dati
 
 Namespace Ui
 
@@ -45,6 +46,143 @@ Namespace Ui
 
         End Function
 
+        ' ==================================================================
+        ' Le voci che si lasciano fuori dal documento (R6)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Sub UnaVoceSenzaProsaStaNellElencoMaNonFraITesti()
+
+            ' Una competenza è un fatto: viene dal profilo e di qui non si riscrive. Ma
+            ' nell'elenco c'è, perché da questo documento la si può lasciare fuori.
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                Assert.AreEqual(3, finestra.Quanti, "i testi restano il sommario e le due esperienze")
+                Assert.HasCount(4, Elenco(finestra).Items, "ma a video c'è anche la competenza")
+                Assert.AreEqual("Competenza 1", Elenco(finestra).Items(3).Text, "in fondo, dopo la prosa")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub TogliereUnaVoceLaSpostaNellAltroElenco()
+
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                Assert.IsTrue(finestra.Togli(finestra.ImprontaDi("Competenza 1")),
+                              "la competenza si può togliere")
+
+                Assert.HasCount(3, Elenco(finestra).Items, "dall'elenco di sinistra è sparita")
+                Assert.HasCount(1, Fuori(finestra).Items, "ed è comparsa in quello di destra")
+                Assert.AreEqual("Competenza 1", Fuori(finestra).Items(0).Text, "ed è lei")
+                Assert.Contains("competenze¦haccp", finestra.VociFuori(), "e la finestra lo dichiara a chi salva")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub RimettereUnaVoceLaRiportaNelDocumento()
+
+            ' L'andata e il ritorno: senza il ritorno, l'unico modo di rimettere una voce
+            ' sarebbe rigenerare il documento, cioè perdere anche tutto il resto.
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                Dim quale As String = finestra.ImprontaDi("Competenza 1")
+                finestra.Togli(quale)
+
+                Assert.IsTrue(finestra.Rimetti(quale), "e si rimette")
+
+                Assert.HasCount(4, Elenco(finestra).Items, "è tornata a sinistra")
+                Assert.IsEmpty(Fuori(finestra).Items, "e a destra non c'è più niente")
+                Assert.IsEmpty(finestra.VociFuori(), "chi salva non deve togliere niente")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IlSommarioNonSiToglie()
+
+            ' Un CV senza sommario non è un CV con una voce in meno: è un CV rotto. Il
+            ' sommario e il corpo della lettera si riscrivono, e basta.
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                Assert.AreEqual("Sommario", Elenco(finestra).Items(0).Text, "è proprio lui")
+                Assert.IsNull(finestra.ImprontaDi("Sommario"), "non è una voce da togliere")
+                Assert.IsFalse(finestra.Togli(finestra.ImprontaDi("Sommario")), "e non si toglie")
+                Assert.IsEmpty(finestra.VociFuori(), "niente è uscito dal documento")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaVoceCheInQuestoDocumentoNonCEsisteNonSiToglie()
+
+            ' L'impronta è una stringa, e una stringa può arrivare da qualunque parte: da
+            ' un altro documento, da un file scritto a mano, da un giro precedente. Se la
+            ' finestra la accettasse senza guardare, l'elenco delle voci lasciate fuori si
+            ' riempirebbe di fantasmi — voci che nessuno vede e che nessuno può rimettere,
+            ' perché a video non compaiono da nessuna delle due parti.
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                Assert.IsFalse(finestra.Togli("competenze¦saldatura a filo continuo"),
+                               "questa competenza in questo CV non c'è")
+                Assert.IsEmpty(finestra.VociFuori(), "e non è finita nell'elenco di quelle tolte")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub QuelCheEraGiaFuoriSiRitrovaFuori()
+
+            ' Chi riapre la finestra deve ritrovare il taglio che aveva scelto: se le voci
+            ' tolte tornassero dentro a ogni apertura, la memoria su disco non servirebbe
+            ' a niente e il lavoro andrebbe rifatto ogni volta.
+            Dim tolte As New VociTolte()
+            tolte.Togli("competenze¦haccp", New Date(2026, 8, 24))
+
+            Dim documenti As New List(Of DocumentoDaRiscrivere) From {
+                New DocumentoDaRiscrivere With {.Documento = Cv(), .Tolte = tolte}}
+
+            Using finestra As New FinestraModificaTesti(documenti)
+
+                Assert.HasCount(3, Elenco(finestra).Items, "a sinistra la competenza non c'è")
+                Assert.HasCount(1, Fuori(finestra).Items, "sta di là, dov'era stata messa")
+                Assert.Contains("competenze¦haccp", finestra.VociFuori(), "e ci resta se non si tocca niente")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnEsperienzaSiToglieERiscriveDallaStessaRiga()
+
+            ' Le due cose che si fanno qui dentro non fanno due righe: «Esperienza 1» è
+            ' una sola, e porta con sé il suo testo e la sua impronta.
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                Assert.AreEqual("Esperienza 1", Elenco(finestra).Items(1).Text)
+                Assert.IsTrue(finestra.Riscrivi(1, "Servizio ai tavoli e alla cassa."),
+                              "la sua prosa si riscrive")
+                Assert.IsTrue(finestra.Togli(finestra.ImprontaDi("Esperienza 1")),
+                              "e la sua voce si toglie")
+
+                Assert.HasCount(3, Elenco(finestra).Items, "una riga in meno a sinistra")
+                Assert.Contains("esperienze_professionali¦cameriere¦trattoria da gino",
+                                finestra.VociFuori(), "ed è quella tolta")
+
+            End Using
+
+        End Sub
+
+        Private Shared Function Fuori(finestra As Control) As ListView
+            Return DirectCast(finestra.Controls.Find("lvwFuori", searchAllChildren:=True).Single(), ListView)
+        End Function
+
         ''' <summary>I documenti da riscrivere, col «prima» che si vuole dare a ciascuno.</summary>
         Private Shared Function Aperti(ParamArray documenti As JsonNode()) As List(Of DocumentoDaRiscrivere)
 
@@ -80,7 +218,12 @@ Namespace Ui
                 Assert.AreEqual("Esperienza 2", finestra.Etichetta(2))
                 Assert.AreEqual("Corpo della lettera", finestra.Etichetta(3), "poi la lettera")
 
-                Assert.HasCount(4, Elenco(finestra).Items, "e l'elenco a video li mostra tutti")
+                ' A video le righe sono cinque, non quattro: da R6 (2026-08-24) l'elenco
+                ' mostra anche le voci che si possono lasciare fuori dal documento, e la
+                ' competenza «HACCP» è una di quelle — si toglie, non si riscrive, e
+                ' infatti fra i campi di prosa non compare.
+                Assert.HasCount(5, Elenco(finestra).Items,
+                                "i quattro testi più la competenza, che è una voce togliibile")
 
             End Using
 

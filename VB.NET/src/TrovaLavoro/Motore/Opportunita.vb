@@ -80,6 +80,17 @@ Namespace Motore
         Public ReadOnly Property RiscrittureDellaLettera As New RiscrittureAMano
 
         ''' <summary>
+        ''' Le voci che l'utente ha tolto dal 🎯 CV-2 di questa candidatura (R6, cap. 08.4).
+        ''' </summary>
+        ''' <remarks>
+        ''' Vivono qui accanto alle riscritture, e per la stessa ragione: sono una scelta
+        ''' <b>su questo documento</b>, non sulla sessione né sul profilo. La lettera non
+        ''' ne ha di sue — non è fatta di elenchi — ma le subisce, perché è dal CV che
+        ''' prende la storia da raccontare (v. <see cref="LetteraDaRiallineare"/>).
+        ''' </remarks>
+        Public ReadOnly Property VociTolteDalCv As New VociTolte
+
+        ''' <summary>
         ''' Quando la ✉️ lettera è stata scritta dall'AI l'ultima volta; la data vuota se
         ''' non è mai stata scritta o se il file viene da prima di R7.
         ''' </summary>
@@ -247,9 +258,19 @@ Namespace Motore
             Get
 
                 If Lettera Is Nothing Then Return False
-                If Not RiscrittureDelCv.CEQualcosa Then Return False
 
-                Return LetteraGenerata = Nothing OrElse LetteraGenerata < RiscrittureDelCv.Quando
+                ' Due modi di cambiare la storia che il CV racconta, e la lettera resta
+                ' indietro allo stesso modo: riscrivere un testo a mano (R7) e togliere
+                ' una voce dal documento (R6). Conta la più recente delle due.
+                Dim toccato As Date = Nothing
+                If RiscrittureDelCv.CEQualcosa Then toccato = RiscrittureDelCv.Quando
+                If VociTolteDalCv.CEQualcosa AndAlso VociTolteDalCv.Quando > toccato Then
+                    toccato = VociTolteDalCv.Quando
+                End If
+
+                If toccato = Nothing Then Return False
+
+                Return LetteraGenerata = Nothing OrElse LetteraGenerata < toccato
 
             End Get
         End Property

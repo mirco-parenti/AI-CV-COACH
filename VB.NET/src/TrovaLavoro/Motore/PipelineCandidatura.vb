@@ -258,10 +258,13 @@ Namespace Motore
 
             ' La lettera riceve il CV **già rifinito**: le serve come riferimento di
             ' coerenza, e dargli quello grezzo vorrebbe dire farle raccontare la stessa
-            ' storia con parole che nel CV non ci sono più.
+            ' storia con parole che nel CV non ci sono più. E lo riceve **come si vede**,
+            ' senza le voci che l'utente ha tolto (R6): una lettera che rimanda a
+            ' un'esperienza che dal CV è sparita manderebbe chi legge a cercarla invano.
             Annuncia(avanzamento, passo, "Scrivo la lettera", totale)
             opportunita.Lettera = Await _generatore.GeneraLetteraAsync(
-                profiloJson, opportunita.Annuncio, giudizi, opportunita.Cv,
+                profiloJson, opportunita.Annuncio, giudizi,
+                Documenti.VociDelCv.ComeSiVede(opportunita.Cv, opportunita.VociTolteDalCv),
                 ElencoMitigazioni(opportunita.Mitigazioni), annulla, lingua, appunti,
                 Rifinitura.RiscrittiAMano(opportunita.Cv, opportunita.RiscrittureDelCv.Campi)).ConfigureAwait(False)
 

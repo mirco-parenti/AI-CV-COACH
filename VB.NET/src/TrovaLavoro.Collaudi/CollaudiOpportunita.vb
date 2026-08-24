@@ -184,6 +184,33 @@ Namespace Motore
 
         End Sub
 
+        <TestMethod>
+        Public Sub TogliereUnaVoceDopoLaLetteraLaLasciaIndietro()
+
+            ' Il gemello di R6: togliere una voce dal CV cambia la storia che il CV
+            ' racconta tanto quanto riscriverne un campo a mano, e la lettera che la
+            ' ripete resta indietro allo stesso modo.
+            Dim candidatura As Opportunita = ConDocumenti()
+            candidatura.SegnaLetteraGenerata(Ieri)
+            candidatura.VociTolteDalCv.Togli("competenze¦uso del muletto", Oggi)
+
+            Assert.IsTrue(candidatura.LetteraDaRiallineare)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaLetteraScrittaDopoLaVoceToltaLHaGiaVista()
+
+            ' E il verso normale: se il taglio è avvenuto prima della lettera, la
+            ' lettera l'ha già vista, e la spia resta spenta.
+            Dim candidatura As Opportunita = ConDocumenti()
+            candidatura.VociTolteDalCv.Togli("competenze¦uso del muletto", Ieri)
+            candidatura.SegnaLetteraGenerata(Oggi)
+
+            Assert.IsFalse(candidatura.LetteraDaRiallineare)
+
+        End Sub
+
         Private Shared ReadOnly Ieri As New Date(2026, 8, 22, 10, 0, 0)
         Private Shared ReadOnly Oggi As New Date(2026, 8, 23, 18, 40, 0)
 

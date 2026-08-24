@@ -1243,6 +1243,38 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function LAvvisoDiRigeneraNominaAncheLeVociLasciateFuori() As Task
+
+            ' R6: le voci lasciate fuori non si perdono — restano fuori anche dal CV
+            ' rifatto — ma chi sta per rigenerare deve saperlo lo stesso, o il
+            ' documento nuovo sembrerebbe mancante di qualcosa che nessuno ha chiesto
+            ' di togliere. Il singolare e il plurale sono la parte che si sbaglia più
+            ' facilmente copiando la riga delle riscritture a mano.
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = GiaScritta(contesto, "it")
+                    candidatura.Cv = JsonNode.Parse(
+                        "{""tipo"": ""cv_mirato"", ""intestazione"": {""nome"": ""Luca Ferrari""}," &
+                        """competenze"": [""Uso del muletto"", ""Gestione del magazzino""]}")
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim fuori As New List(Of String) From {"competenze¦uso del muletto"}
+                    pannello.SegnaLeVociLasciateFuori(fuori)
+
+                    Assert.Contains("La voce che hai lasciato fuori resta fuori anche dal CV rifatto.",
+                                    pannello.AncheQuelliRiscrittiAMano(), "il singolare con una voce sola")
+
+                    fuori.Add("competenze¦gestione del magazzino")
+                    pannello.SegnaLeVociLasciateFuori(fuori)
+
+                    Assert.Contains("Le 2 voci che hai lasciato fuori restano fuori anche dal CV rifatto.",
+                                    pannello.AncheQuelliRiscrittiAMano(), "il plurale con più di una")
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Async Function LAvvisoNonScadeAlRientroInP6() As Task
 
             ' È il difetto di R7 preso di petto: prima bastava tornare al profilo e
