@@ -322,6 +322,78 @@ Namespace NonRegressione
 
         End Function
 
+        ''' <summary>
+        ''' La domanda di approfondimento davanti al modello vero: una voce raccontata
+        ''' scarna deve far nascere la domanda, e la risposta deve finire nel campo giusto.
+        ''' </summary>
+        ''' <remarks>
+        ''' È l'ipotesi su cui poggia tutto il disegno, e il banco senza rete non la può
+        ''' provare: lì i frammenti sono preparati a mano, e «tre anni» finisce in
+        ''' <c>durata</c> perché l'ha scritto il collaudo. Qui a deciderlo è il modello, a
+        ''' cui si manda la voce già confermata seguita dalle parole nuove. Come per la
+        ''' ripresa del terzo tempo, questa funzione nel prototipo non esiste: non c'è
+        ''' termine di paragone, e la sola rete è questa.
+        ''' </remarks>
+        <TestMethod, TestCategory("Reale")>
+        Public Async Function LaVoceMezzaVuotaSiCompletaAncheDavantiAlModelloVero() As Task
+
+            Dim chiave As String = CollaudoReale.ChiaveOppureRinuncia()
+
+            Dim libreria As LibreriaPrompt = CollaudoReale.PoolIntegrato()
+
+            Using client As New ClientClaude(chiave)
+
+                Dim dialogo As New DialogoProfilo(New StrutturatoreTurni(libreria, client))
+
+                ' I tre turni singoli, sbrigati: qui interessa il quarto.
+                Await dialogo.AvviaAsync()
+                Await dialogo.RispondiAsync("Mi chiamo Luca Ferrari")
+                Await dialogo.ScegliAsync(Scelte.Conferma)
+                Await dialogo.RispondiAsync("luca.ferrari@example.it, 333 0000000, Forlì")
+                Await dialogo.ScegliAsync(Scelte.Conferma)
+                Await dialogo.RispondiAsync("No, non ho la patente")
+                Await dialogo.ScegliAsync(Scelte.Conferma)
+
+                ' Un lavoro raccontato senza dire quanto è durato: il prompt deve creare la
+                ' voce lo stesso («una voce INCOMPLETA è comunque una voce») e lasciare
+                ' vuota la durata invece di indovinarla.
+                Await dialogo.RispondiAsync("Ho fatto il magazziniere alla Romagna Logistica")
+                Dim mossa As Mossa = Await dialogo.ScegliAsync(Scelte.Conferma)
+
+                Dim domanda As String = String.Join(" ", mossa.Detto)
+                Console.WriteLine($"Dopo la conferma il dialogo ha detto: {domanda}")
+
+                If mossa.Tipo <> TipoMossa.ChiediRisposta OrElse
+                   Not domanda.Contains(DialogoProfilo.NonMiHaiDetto) Then
+                    Assert.Inconclusive(
+                        "Il modello non ha lasciato vuoto nessun campo che pesa, quindi non c'è " &
+                        "niente da approfondire: la prova non dice né sì né no. Detto: " & domanda)
+                End If
+
+                ' Il nome viene dal ruolo, che ha la precedenza sull'azienda; il modello
+                ' può renderlo minuscolo, e la maiuscola non è ciò che si sta misurando.
+                Assert.Contains("magazziniere", domanda.ToLowerInvariant(),
+                                "la domanda nomina la voce di cui parla")
+
+                mossa = Await dialogo.RispondiAsync("tre anni circa")
+
+                Console.WriteLine($"Alla risposta «tre anni circa» ha risposto: {String.Join(" ", mossa.Detto)}")
+                Console.WriteLine($"La voce ora è: {CollaudoReale.Ripulito(
+                    dialogo.Profilo.EsperienzeFormali(0).Ruolo & " | " &
+                    dialogo.Profilo.EsperienzeFormali(0).Azienda & " | " &
+                    dialogo.Profilo.EsperienzeFormali(0).Durata)}")
+
+                Assert.HasCount(1, dialogo.Profilo.EsperienzeFormali, "la voce è entrata una volta sola")
+                Assert.Contains("anni", dialogo.Profilo.EsperienzeFormali(0).Durata,
+                                "e la risposta è finita nella durata, non altrove")
+                Assert.AreEqual("Romagna Logistica",
+                                CollaudoReale.Ripulito(dialogo.Profilo.EsperienzeFormali(0).Azienda),
+                                "senza che il resto della voce si sia mosso")
+
+            End Using
+
+        End Function
+
         ' ==================================================================
         ' I giudizi che non guardano il contenuto
         ' ==================================================================

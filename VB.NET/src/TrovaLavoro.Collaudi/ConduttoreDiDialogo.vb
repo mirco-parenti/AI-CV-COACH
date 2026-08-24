@@ -58,6 +58,18 @@ Friend Class ConduttoreDiDialogo
     ''' </remarks>
     Private Const RipiegoCategoria As String = "La B."
 
+    ''' <summary>
+    ''' La risposta di ripiego se il dialogo chiede di completare un campo rimasto vuoto.
+    ''' </summary>
+    ''' <remarks>
+    ''' La traccia è scritta turno per turno e non ha una battuta per queste domande: si
+    ''' risponde di non ricordarlo — che è una risposta prevista, e non blocca niente — e
+    ''' lo si annota, perché il rapporto dica quale campo il modello non aveva colto. Come
+    ''' per la categoria della patente, la traccia <b>non si consuma</b>: mandarle la
+    ''' battuta del turno dopo sballerebbe tutto il resto.
+    ''' </remarks>
+    Private Const RipiegoApprofondimento As String = "Non me lo ricordo."
+
     Private ReadOnly _traccia As List(Of Gruppo)
 
     ''' <param name="traccia">Cosa direbbe l'utente, turno per turno.</param>
@@ -112,6 +124,13 @@ Friend Class ConduttoreDiDialogo
                     Stranezze.Add("Il modello non ha colto la categoria della patente dalla " &
                                   "risposta, e il dialogo l'ha richiesta.")
                     testo = RipiegoCategoria
+
+                ElseIf ChiedeUnApprofondimento(mossa) Then
+                    ' Una voce è entrata senza un campo che pesa nel CV, e il dialogo lo
+                    ' sta chiedendo. Non è nella traccia: si risponde di ripiego.
+                    Stranezze.Add("Il dialogo ha chiesto di completare un campo rimasto vuoto: " &
+                                  $"«{Accorcia(String.Join(" ", mossa.Detto))}». Non si è saputo dire.")
+                    testo = RipiegoApprofondimento
 
                 Else
                     ' La prossima battuta: se il gruppo è finito, si passa al turno dopo.
@@ -256,6 +275,20 @@ Friend Class ConduttoreDiDialogo
     Private Shared Function ChiedeLaCategoriaDellaPatente(mossa As Mossa) As Boolean
 
         Return mossa.Detto.Any(Function(d) d.Contains("Una cosa sola:"))
+
+    End Function
+
+    ''' <summary>Se questa mossa è una domanda di approfondimento su un campo vuoto.</summary>
+    ''' <remarks>
+    ''' Il pezzo di frase da cercare vive nel prodotto (<see cref="DialogoProfilo.NonMiHaiDetto"/>)
+    ''' e non è ricopiato qui: due copie divergerebbero, e un conduttore che non riconosce
+    ''' più una domanda non si vede — risponderebbe con la battuta del turno dopo e
+    ''' sballerebbe tutto ciò che segue, restando verde. È la trappola pagata con
+    ''' <see cref="ChiedeLaCategoriaDellaPatente"/>.
+    ''' </remarks>
+    Private Shared Function ChiedeUnApprofondimento(mossa As Mossa) As Boolean
+
+        Return mossa.Detto.Any(Function(d) d.Contains(DialogoProfilo.NonMiHaiDetto))
 
     End Function
 

@@ -58,6 +58,33 @@ Namespace Motore
                    " ""anno"": ""2018""}], ""altrove"": " & altrove & "}"
         End Function
 
+        ''' <summary>
+        ''' Una voce di lavoro campo per campo: serve a lasciarne vuoto qualcuno, che è la
+        ''' materia della domanda di approfondimento.
+        ''' </summary>
+        Private Shared Function VoceLavoro(ruolo As String, azienda As String,
+                                           durata As String, cosa As String) As String
+            Return "{""ruolo"": """ & ruolo & """, ""azienda"": """ & azienda & """, ""durata"": """ &
+                   durata & """, ""cosa_facevo"": """ & cosa & """, ""tipo"": """"}"
+        End Function
+
+        ''' <summary>Un frammento di esperienze formali fatto delle voci date.</summary>
+        Private Shared Function FrLavori(altrove As String, ParamArray voci As String()) As String
+            Return "{""esperienze_formali"": [" & String.Join(", ", voci) & "], ""altrove"": " & altrove & "}"
+        End Function
+
+        ''' <summary>Un titolo di studio campo per campo.</summary>
+        Private Shared Function FrFormazioneCampi(titolo As String, istituto As String, anno As String) As String
+            Return "{""formazione"": [{""titolo"": """ & titolo & """, ""istituto"": """ & istituto &
+                   """, ""anno"": """ & anno & """}], ""altrove"": {}}"
+        End Function
+
+        ''' <summary>Un'esperienza informale campo per campo.</summary>
+        Private Shared Function FrInformaleCampi(cosa As String, quando As String, conChi As String) As String
+            Return "{""esperienze_informali"": [{""cosa_facevo"": """ & cosa & """, ""quando"": """ &
+                   quando & """, ""con_chi"": """ & conChi & """}], ""altrove"": {}}"
+        End Function
+
         ''' <summary>Un frammento che non ha colto nulla per il suo turno.</summary>
         Private Shared Function FrVuoto(chiave As String, Optional altrove As String = "{}") As String
             Return "{""" & chiave & """: [], ""altrove"": " & altrove & "}"
@@ -838,6 +865,399 @@ Namespace Motore
             Assert.HasCount(1, dialogo.Profilo.Competenze, "e stavolta la competenza entra")
             Assert.AreEqual("Uso del muletto", dialogo.Profilo.Competenze(0), "con le parole dell'utente")
             Assert.AreEqual(TipoMossa.Fine, mossa.Tipo, "poi il dialogo chiude")
+
+        End Function
+
+        ' ------------------------------------------------------------------
+        ' La domanda di approfondimento: la voce mezza vuota
+        ' ------------------------------------------------------------------
+
+        <TestMethod>
+        Public Async Function UnaVoceMezzaVuotaSiFaCompletare() As Task
+
+            ' Il prompt del turno crea la voce anche quando è incompleta («una voce
+            ' INCOMPLETA è comunque una voce») e promette che sarà l'utente, con la voce
+            ' davanti, a completarla. Questo è chi mantiene quella promessa.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavori("{}", VoceLavoro("Magazziniere", "Romagna Logistica", "", "Carico e scarico"))).
+                  Dara(FrLavori("{}", VoceLavoro("Magazziniere", "Romagna Logistica", "tre anni circa", "Carico e scarico")))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+
+            Dim mossa As Mossa = Await ConfermaAsync(dialogo, "Ho fatto il magazziniere alla Romagna Logistica")
+
+            Assert.AreEqual(TipoMossa.ChiediRisposta, mossa.Tipo, "la voce incompleta fa una domanda")
+            Assert.Contains("Del lavoro «Magazziniere» non mi hai detto quanto è durato",
+                            String.Join(" ", mossa.Detto), "che nomina la voce e il campo che manca")
+            Assert.IsEmpty(dialogo.Profilo.EsperienzeFormali, "e niente entra nel profilo prima della risposta")
+
+            mossa = Await dialogo.RispondiAsync("tre anni circa")
+
+            Assert.Contains("Perfetto: tre anni circa.", String.Join(" ", mossa.Detto), "la risposta si rilegge")
+            Assert.AreEqual(TipoMossa.ChiediScelta, mossa.Tipo, "e il turno riprende dal suo ponte")
+            Assert.HasCount(1, dialogo.Profilo.EsperienzeFormali, "la voce è entrata una volta sola")
+            Assert.AreEqual("tre anni circa", dialogo.Profilo.EsperienzeFormali(0).Durata, "completata")
+            Assert.AreEqual("Carico e scarico", dialogo.Profilo.EsperienzeFormali(0).CosaFacevo,
+                            "senza perdere quello che c'era già")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaVoceCompletaNonFaDomande() As Task
+
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).Dara(FrLavoro("Magazziniere"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+
+            Dim mossa As Mossa = Await ConfermaAsync(dialogo, "Magazziniere per tre anni")
+
+            Assert.AreEqual(TipoMossa.ChiediScelta, mossa.Tipo, "si va dritti al ponte")
+            Assert.Contains("Perfetto, segnata.", String.Join(" ", mossa.Detto), "con le parole di sempre")
+            Assert.HasCount(1, dialogo.Profilo.EsperienzeFormali, "e la voce è entrata subito")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlCampoCheNonPesaNelCvNonSiChiede() As Task
+
+            ' L'azienda vuota non vale una domanda: un CV senza il nome del posto si legge
+            ' lo stesso, e il confronto con l'annuncio non la guarda. Se un giorno la si
+            ' aggiungesse ai campi che contano, questo collaudo lo direbbe.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavori("{}", VoceLavoro("Magazziniere", "", "3 anni", "Carico e scarico")))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+
+            Dim mossa As Mossa = Await ConfermaAsync(dialogo, "Ho fatto il magazziniere per tre anni")
+
+            Assert.AreEqual(TipoMossa.ChiediScelta, mossa.Tipo, "nessuna domanda: si va al ponte")
+            Assert.IsEmpty(dialogo.Profilo.EsperienzeFormali(0).Azienda, "l'azienda resta vuota, e va bene così")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaDomandaDiApprofondimentoSiFaUnaVoltaSola() As Task
+
+            ' La guardia di terminazione, la stessa della ripresa: la voce esce dall'elenco
+            ' quando la domanda le viene offerta, non quando la risposta riesce. Senza,
+            ' una voce che resta incompleta se la farebbe richiedere all'infinito.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavori("{}", VoceLavoro("Magazziniere", "Romagna Logistica", "", "Carico e scarico"))).
+                  Dara(FrLavori("{}", VoceLavoro("Magazziniere", "Romagna Logistica", "", "Carico e scarico")))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+            Await ConfermaAsync(dialogo, "Ho fatto il magazziniere")
+
+            Dim mossa As Mossa = Await dialogo.RispondiAsync("Non me lo ricordo")
+
+            Assert.Contains("Va bene, proseguiamo così.", String.Join(" ", mossa.Detto), "non si insiste")
+            Assert.AreEqual(TipoMossa.ChiediScelta, mossa.Tipo, "e la domanda non torna una seconda volta")
+            Assert.HasCount(1, dialogo.Profilo.EsperienzeFormali, "la voce entra comunque, com'era")
+            Assert.IsEmpty(dialogo.Profilo.EsperienzeFormali(0).Durata, "con il suo campo ancora vuoto")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function OgniVoceIncompletaHaLaSuaDomanda() As Task
+
+            ' Tre lavori raccontati in una battuta sola, due dei quali scarni: le domande
+            ' sono due, una per voce, e ognuna nomina la sua.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavori("{}",
+                       VoceLavoro("Magazziniere", "Romagna Logistica", "", "Carico e scarico"),
+                       VoceLavoro("Cameriere", "Bar Centrale", "2 anni", "Sala e cassa"),
+                       VoceLavoro("Imbianchino", "Colorificio Rossi", "6 mesi", ""))).
+                  Dara(FrLavori("{}", VoceLavoro("", "", "tre anni", ""))).
+                  Dara(FrLavori("{}", VoceLavoro("", "", "", "Tinteggiavo appartamenti")))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+
+            Dim mossa As Mossa = Await ConfermaAsync(dialogo, "Magazziniere, poi cameriere, poi imbianchino")
+            Assert.Contains("«Magazziniere»", String.Join(" ", mossa.Detto), "la prima domanda è per il magazziniere")
+
+            mossa = Await dialogo.RispondiAsync("tre anni")
+            Assert.AreEqual(TipoMossa.ChiediRisposta, mossa.Tipo, "e subito dopo arriva la seconda")
+            Assert.Contains("«Imbianchino» non mi hai detto cosa facevi", String.Join(" ", mossa.Detto),
+                            "che salta il cameriere, completo, e va sull'imbianchino")
+
+            mossa = Await dialogo.RispondiAsync("Tinteggiavo appartamenti")
+
+            Assert.AreEqual(TipoMossa.ChiediScelta, mossa.Tipo, "finite le voci, il turno riprende")
+            Assert.HasCount(3, dialogo.Profilo.EsperienzeFormali, "e le tre voci entrano insieme")
+            Assert.AreEqual("tre anni", dialogo.Profilo.EsperienzeFormali(0).Durata, "la prima completata")
+            Assert.AreEqual("Tinteggiavo appartamenti", dialogo.Profilo.EsperienzeFormali(2).CosaFacevo,
+                            "la terza pure, ognuna nel suo campo")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnApprofondimentoNonPuoGenerareUnaVoceNuova() As Task
+
+            ' La seconda guardia di terminazione: della risposta si prende solo il campo
+            ' che mancava. Se ne nascessero voci, ognuna vorrebbe la sua domanda e il giro
+            ' non finirebbe più. Quel che l'utente ha detto in più non si perde: il ponte
+            ' del turno sta per chiederglielo, e glielo si dice.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavori("{}", VoceLavoro("Magazziniere", "Romagna Logistica", "", "Carico e scarico"))).
+                  Dara(FrLavori("{}",
+                       VoceLavoro("Magazziniere", "Romagna Logistica", "tre anni", "Carico e scarico"),
+                       VoceLavoro("Cameriere", "Bar Centrale", "un'estate", "Sala")))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+            Await ConfermaAsync(dialogo, "Ho fatto il magazziniere")
+
+            Dim mossa As Mossa = Await dialogo.RispondiAsync("Tre anni, e prima ho fatto un'estate da cameriere")
+
+            Assert.AreEqual(TipoMossa.ChiediScelta, mossa.Tipo, "il giro finisce qui")
+            Assert.HasCount(1, dialogo.Profilo.EsperienzeFormali, "e di voci ne è entrata una sola")
+            Assert.AreEqual("tre anni", dialogo.Profilo.EsperienzeFormali(0).Durata, "col campo che mancava")
+            Assert.Contains("tienilo lì", String.Join(" ", mossa.Detto), "il resto non sparisce in silenzio")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaCorrezioneDettaDentroUnApprofondimentoNonSpariceInSilenzio() As Task
+
+            ' «Tre anni, ma non ero magazziniere, ero mulettista»: della risposta si prende
+            ' solo il campo che mancava — correggere non è completare, e una correzione
+            ' entrata senza scheda di conferma cambierebbe il profilo alle spalle di chi
+            ' l'ha confermato. Il punto è che non lo si faccia in silenzio.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavori("{}", VoceLavoro("Magazziniere", "Romagna Logistica", "", "Carico e scarico"))).
+                  Dara(FrLavori("{}", VoceLavoro("Mulettista", "Romagna Logistica", "tre anni", "Carico e scarico")))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+            Await ConfermaAsync(dialogo, "Ho fatto il magazziniere")
+
+            Dim mossa As Mossa = Await dialogo.RispondiAsync("Tre anni, ma non ero magazziniere, ero mulettista")
+
+            Assert.AreEqual("tre anni", dialogo.Profilo.EsperienzeFormali(0).Durata, "il campo che mancava entra")
+            Assert.AreEqual("Magazziniere", dialogo.Profilo.EsperienzeFormali(0).Ruolo,
+                            "il ruolo confermato resta quello, senza cambiare alle spalle")
+            Assert.Contains("Ruolo: Magazziniere", String.Join(" ", mossa.Detto), "ma glielo si dice")
+            Assert.Contains("si fa dal profilo", String.Join(" ", mossa.Detto), "indicando dove si corregge")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function QuelCheUnApprofondimentoAccennaAdAltroNonSiPerde() As Task
+
+            ' Una risposta di approfondimento è una risposta come le altre: se accenna a
+            ' un'altra categoria, quel frammento va nel magazzino e viene ripescato al
+            ' turno giusto, con le parole dell'utente rimesse in bocca.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavori("{}", VoceLavoro("Magazziniere", "Romagna Logistica", "", "Carico e scarico"))).
+                  Dara(FrLavori("{""formazione"": [""ho anche il patentino del muletto""]}",
+                       VoceLavoro("Magazziniere", "Romagna Logistica", "tre anni", "Carico e scarico"))).
+                  Dara(FrVuoto("esperienze_informali")).
+                  Dara(FrCompetenze("{}", "Uso del muletto")).
+                  Dara(FrFormazione("Patentino del muletto"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+            Await ConfermaAsync(dialogo, "Ho fatto il magazziniere")
+            Await dialogo.RispondiAsync("Tre anni, e ho anche il patentino del muletto")
+            Await dialogo.ScegliAsync(Scelte.Procedi)
+            Await dialogo.RispondiAsync("Nessuna")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+            Await dialogo.RispondiAsync("Muletto")
+
+            Dim mossa As Mossa = Await dialogo.ScegliAsync(Scelte.Conferma)
+
+            Assert.Contains("studi e formazione", String.Join(" ", mossa.Detto),
+                            "all'ingresso del suo turno il patentino viene ripescato")
+            Assert.Contains("patentino del muletto", mossa.EcoUtente, "con le parole dell'utente")
+
+            Await dialogo.ScegliAsync(Scelte.Conferma)
+
+            Assert.HasCount(1, dialogo.Profilo.Formazione, "e con il suo sì entra nel profilo")
+            Assert.AreEqual("Patentino del muletto", dialogo.Profilo.Formazione(0).Titolo, "dove doveva stare")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaRispostaVaAllAiConLaVoceDavanti() As Task
+
+            ' «Tre anni» da solo non è un'esperienza di lavoro, e il prompt del turno
+            ' potrebbe non ricavarne niente. Gli si mette davanti la voce già confermata —
+            ' campi dell'utente, niente di inventato — perché la risposta si collochi nel
+            ' campo giusto.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavori("{}", VoceLavoro("Magazziniere", "Romagna Logistica", "", "Carico e scarico"))).
+                  Dara(FrLavori("{}", VoceLavoro("Magazziniere", "Romagna Logistica", "tre anni", "Carico e scarico")))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+            Await ConfermaAsync(dialogo, "Ho fatto il magazziniere")
+            Await dialogo.RispondiAsync("tre anni")
+
+            Dim chiesto As String = finto.Chiamate.Last().Risposta
+
+            Assert.Contains("Ruolo: Magazziniere", chiesto, "la voce va davanti alla risposta")
+            Assert.Contains("Azienda: Romagna Logistica", chiesto, "campo per campo")
+            Assert.DoesNotContain("Durata:", chiesto, "tranne quello vuoto, che è ciò che si sta chiedendo")
+            Assert.Contains("tre anni", chiesto, "e in fondo le parole nuove")
+            Assert.AreEqual("esperienze_formali", finto.Chiamate.Last().Turno, "col prompt del turno, non un altro")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlNomeDellaVoceVieneDallAziendaQuandoIlRuoloManca() As Task
+
+            ' Il nome con cui si chiama la voce non può venire da un campo che si sta
+            ' chiedendo: quello è vuoto per definizione. Si scende al successivo.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavori("{}", VoceLavoro("", "Romagna Logistica", "3 anni", "")))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+
+            Dim mossa As Mossa = Await ConfermaAsync(dialogo, "Ho lavorato alla Romagna Logistica per tre anni")
+
+            Assert.Contains("Del lavoro «Romagna Logistica» non mi hai detto che ruolo avevi né cosa facevi",
+                            String.Join(" ", mossa.Detto), "la nomina col posto, e chiede i due campi insieme")
+            Assert.Contains("Me li dici?", String.Join(" ", mossa.Detto), "al plurale, perché i campi sono due")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaVoceSenzaNienteSiChiamaComunqueInQualcheModo() As Task
+
+            ' Non dovrebbe nascerne una così, ma se nasce la frase deve reggere lo stesso:
+            ' senza un campo da cui prendere il nome, la voce si chiama come il turno dice.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavori("{}", VoceLavoro("", "", "", "")))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+
+            Dim mossa As Mossa = Await ConfermaAsync(dialogo, "Ho lavorato")
+
+            Assert.Contains("Di quel lavoro non mi hai detto che ruolo avevi, quanto è durato né cosa facevi",
+                            String.Join(" ", mossa.Detto), "tre campi in fila, con l'ultimo legato da «né»")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function AncheLaFormazioneSenzaTitoloSiFaCompletare() As Task
+
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrVuoto("esperienze_formali")).Dara(FrVuoto("esperienze_informali")).
+                  Dara(FrCompetenze("{}", "Uso del muletto")).
+                  Dara(FrFormazioneCampi("", "ITIS Marconi", "2018")).
+                  Dara(FrFormazioneCampi("Perito elettrotecnico", "ITIS Marconi", "2018"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+            Await dialogo.RispondiAsync("Nessun lavoro")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+            Await dialogo.RispondiAsync("Niente")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+            Await dialogo.RispondiAsync("Muletto")
+            Await dialogo.ScegliAsync(Scelte.Conferma)
+
+            Dim mossa As Mossa = Await ConfermaAsync(dialogo, "Ho studiato all'ITIS Marconi fino al 2018")
+
+            Assert.Contains("Di quello che hai studiato «ITIS Marconi» non mi hai detto che titolo o corso era",
+                            String.Join(" ", mossa.Detto), "lo studio si nomina con l'istituto")
+
+            Await dialogo.RispondiAsync("Perito elettrotecnico")
+
+            Assert.AreEqual("Perito elettrotecnico", dialogo.Profilo.Formazione(0).Titolo, "e il titolo entra")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function AncheLEsperienzaInformaleSenzaCosaFacevoSiFaCompletare() As Task
+
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrVuoto("esperienze_formali")).
+                  Dara(FrInformaleCampi("", "l'estate scorsa", "mio cugino")).
+                  Dara(FrInformaleCampi("Davo una mano nei traslochi", "l'estate scorsa", "mio cugino"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+            Await dialogo.RispondiAsync("Nessun lavoro")
+            Await dialogo.ScegliAsync(Scelte.Oltre)
+
+            Dim mossa As Mossa = Await ConfermaAsync(dialogo, "L'estate scorsa ho aiutato mio cugino")
+
+            Assert.Contains("Di quell'esperienza «mio cugino» non mi hai detto cosa facevi",
+                            String.Join(" ", mossa.Detto), "l'informale si nomina con chi c'era")
+
+            Await dialogo.RispondiAsync("Davo una mano nei traslochi")
+
+            Assert.AreEqual("Davo una mano nei traslochi", dialogo.Profilo.EsperienzeInformali(0).CosaFacevo,
+                            "e la voce si completa")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SeLAiCadeSullApprofondimentoSiRichiedeLaStessaRisposta() As Task
+
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavori("{}", VoceLavoro("Magazziniere", "Romagna Logistica", "", "Carico e scarico"))).
+                  Fallira(New ErroreAi(CausaErroreAi.Rete,
+                                       "Non riesco a raggiungere l'AI: controlla la connessione a Internet."))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await PrimiTreTurniAsync(dialogo)
+            Await ConfermaAsync(dialogo, "Ho fatto il magazziniere")
+
+            Dim mossa As Mossa = Await dialogo.RispondiAsync("tre anni")
+
+            Assert.AreEqual(TipoMossa.ChiediRisposta, mossa.Tipo, "si resta sulla domanda")
+            Assert.Contains("Riprova pure", String.Join(" ", mossa.Detto), "dicendo cosa è successo")
+            Assert.IsEmpty(dialogo.Profilo.EsperienzeFormali, "e niente è entrato nel profilo")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function AncheLaVoceDiUnaRipresaHaLaSuaDomanda() As Task
+
+            ' Chi accetta una ripresa rientra nel turno vero: ci trova anche la domanda di
+            ' approfondimento, e finito il turno si torna comunque alla passata finale.
+            Dim finto As New StrutturatoreFinto
+            finto.Dara(FrNome).Dara(FrContatti()).Dara(FrPatente("no")).
+                  Dara(FrLavoro("Magazziniere")).Dara(FrVuoto("esperienze_informali")).
+                  Dara(FrCompetenze("{}", "Uso del muletto")).Dara(FrFormazione("Diploma")).
+                  Dara(FrInformaleCampi("", "l'estate scorsa", "mio cugino")).
+                  Dara(FrInformaleCampi("Traslochi", "l'estate scorsa", "mio cugino"))
+
+            Dim dialogo As New DialogoProfilo(finto)
+            Await FinoAllaRipresaAsync(dialogo)
+            Await dialogo.ScegliAsync(Scelte.Riprendi)
+
+            Dim mossa As Mossa = Await ConfermaAsync(dialogo, "Ho aiutato mio cugino l'estate scorsa")
+            Assert.AreEqual(TipoMossa.ChiediRisposta, mossa.Tipo, "anche qui la voce mezza vuota si fa chiedere")
+
+            Await dialogo.RispondiAsync("Traslochi")
+            mossa = Await dialogo.ScegliAsync(Scelte.Procedi)
+
+            Assert.HasCount(1, dialogo.Profilo.EsperienzeInformali, "la voce recuperata entra completata")
+            Assert.AreEqual("Traslochi", dialogo.Profilo.EsperienzeInformali(0).CosaFacevo, "col campo riempito")
+            Assert.AreEqual(TipoMossa.Fine, mossa.Tipo, "e il dialogo chiude")
 
         End Function
 

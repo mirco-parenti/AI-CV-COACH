@@ -17,6 +17,26 @@ Namespace Motore
         Blocco
     End Enum
 
+    ''' <summary>
+    ''' Un campo che pesa nel CV: se una voce lo lascia vuoto, vale una domanda in più.
+    ''' </summary>
+    ''' <remarks>
+    ''' Non tutti i campi la meritano. Ci sono quelli che il CV non sa surrogare — il ruolo,
+    ''' che è il titolo della riga; il «cosa facevo», che diventa la descrizione e che il
+    ''' confronto legge per le mansioni; la durata, che risponde al requisito «X anni di
+    ''' esperienza» — e ci sono quelli il cui vuoto non toglie niente a nessuno (l'azienda,
+    ''' l'anno, l'istituto). Chiedere anche quelli allungherebbe il dialogo senza rendere.
+    ''' </remarks>
+    Friend Class CampoCheConta
+
+        ''' <summary>La chiave del campo nel frammento JSON del turno.</summary>
+        Public Property Chiave As String
+
+        ''' <summary>Come si dice dentro la frase: «non mi hai detto <b>quanto è durato</b>».</summary>
+        Public Property ComeChiederlo As String
+
+    End Class
+
     ''' <summary>Un turno: cosa chiede, come si comporta, cosa dice quando le cose vanno storte.</summary>
     Friend Class Turno
         Public Property Chiave As String
@@ -28,6 +48,22 @@ Namespace Motore
         Public Property TestoRiprova As String
         Public Property TestoCorrezione As String
         Public Property Campi As New List(Of RigaScheda)
+
+        ''' <summary>I campi che, restando vuoti, valgono la domanda di approfondimento.</summary>
+        Public Property CampiCheContano As New List(Of CampoCheConta)
+
+        ''' <summary>
+        ''' I campi da cui prendere il nome con cui chiamare la voce, in ordine di
+        ''' preferenza: si usa il primo compilato.
+        ''' </summary>
+        Public Property CampiDelNome As String() = {}
+
+        ''' <summary>Come si nomina la voce quando un nome c'è: «Del lavoro «{0}»».</summary>
+        Public Property VoceConNome As String
+
+        ''' <summary>Come si nomina quando nessun campo del nome è compilato.</summary>
+        Public Property VoceSenzaNome As String
+
     End Class
 
     ''' <summary>
@@ -76,6 +112,7 @@ Namespace Motore
             NienteColto
             ConfermaVoci
             AltraVoce
+            Approfondimento
             Competenze
             AggiuntaCompetenze
             ConfermaPending
@@ -89,6 +126,15 @@ Namespace Motore
             ChiediIlTurno
             PassataFinale
         End Enum
+
+        ''' <summary>
+        ''' Il pezzo fisso della domanda di approfondimento, in un posto solo perché serve
+        ''' due volte: al dialogo per comporre la frase, e a chi conduce un dialogo di
+        ''' collaudo per riconoscerla e non consumarci una battuta della sua traccia. Due
+        ''' copie divergerebbero, e un conduttore fuori passo non si vede — è la trappola
+        ''' già pagata con «Una cosa sola:» della patente.
+        ''' </summary>
+        Public Const NonMiHaiDetto As String = "non mi hai detto"
 
         ' --- Le categorie del profilo che possono ricevere materiale «da altrove». ---
         ' L'ordine conta: è quello in cui la passata finale li ripesca.
@@ -160,6 +206,13 @@ Namespace Motore
                 .Riapertura = "Raccontami la prossima.",
                 .Ponte = "Hai un'altra esperienza di lavoro da raccontarmi, o procediamo?",
                 .TestoVuoto = "Non ho colto un'esperienza di lavoro in quello che hai scritto.",
+                .CampiCheContano = New List(Of CampoCheConta) From {
+                    New CampoCheConta With {.Chiave = "ruolo", .ComeChiederlo = "che ruolo avevi"},
+                    New CampoCheConta With {.Chiave = "durata", .ComeChiederlo = "quanto è durato"},
+                    New CampoCheConta With {.Chiave = "cosa_facevo", .ComeChiederlo = "cosa facevi"}},
+                .CampiDelNome = {"ruolo", "azienda"},
+                .VoceConNome = "Del lavoro «{0}»",
+                .VoceSenzaNome = "Di quel lavoro",
                 .TestoRiprova = "Va bene, raccontamela come viene.",
                 .TestoCorrezione = "Va bene, raccontamela di nuovo.",
                 .Campi = New List(Of RigaScheda) From {
@@ -178,6 +231,11 @@ Namespace Motore
                 .Riapertura = "Raccontami la prossima.",
                 .Ponte = "Hai un'altra esperienza informale, o procediamo?",
                 .TestoVuoto = "Non ho colto un'esperienza informale in quello che hai scritto.",
+                .CampiCheContano = New List(Of CampoCheConta) From {
+                    New CampoCheConta With {.Chiave = "cosa_facevo", .ComeChiederlo = "cosa facevi"}},
+                .CampiDelNome = {"con_chi", "quando"},
+                .VoceConNome = "Di quell'esperienza «{0}»",
+                .VoceSenzaNome = "Di quell'esperienza",
                 .TestoRiprova = "Va bene, raccontamela come viene.",
                 .TestoCorrezione = "Va bene, raccontamela di nuovo.",
                 .Campi = New List(Of RigaScheda) From {
@@ -205,6 +263,11 @@ Namespace Motore
                 .Riapertura = "Raccontami la prossima.",
                 .Ponte = "Hai un'altra esperienza di studio o formazione, o abbiamo finito?",
                 .TestoVuoto = "Non ho colto un titolo di studio o un corso in quello che hai scritto.",
+                .CampiCheContano = New List(Of CampoCheConta) From {
+                    New CampoCheConta With {.Chiave = "titolo", .ComeChiederlo = "che titolo o corso era"}},
+                .CampiDelNome = {"istituto", "anno"},
+                .VoceConNome = "Di quello che hai studiato «{0}»",
+                .VoceSenzaNome = "Di quello che hai studiato",
                 .TestoRiprova = "Va bene, raccontamela come viene.",
                 .TestoCorrezione = "Va bene, raccontamela di nuovo.",
                 .Campi = New List(Of RigaScheda) From {
@@ -225,6 +288,19 @@ Namespace Motore
 
         ''' <summary>Se il turno in corso è stato riaperto dalla ripresa.</summary>
         Private _inRipresa As Boolean
+
+        ''' <summary>
+        ''' Le voci appena confermate che aspettano la loro domanda di approfondimento:
+        ''' sono indici dentro <see cref="_voci"/>, perché è lì che la voce si completa
+        ''' prima di entrare nel profilo.
+        ''' </summary>
+        Private _daApprofondire As New List(Of Integer)
+
+        ''' <summary>A quale voce si riferisce la domanda in corso.</summary>
+        Private _voceApprofondita As Integer
+
+        ''' <summary>Quali campi ha chiesto la domanda in corso.</summary>
+        Private _campiChiesti As New List(Of CampoCheConta)
 
         Private _indice As Integer
         Private _attesa As Attesa
@@ -288,6 +364,8 @@ Namespace Motore
                     Return RispostaAggiuntaCompetenzeAsync(testo, annulla)
                 Case Attesa.CorrezionePending
                     Return RispostaCorrezionePendingAsync(testo, annulla)
+                Case Attesa.Approfondimento
+                    Return RispostaApprofondimentoAsync(testo, annulla)
                 Case Else
                     Throw New InvalidOperationException(
                         "Il dialogo non sta aspettando una risposta scritta in questo momento.")
@@ -773,13 +851,18 @@ Namespace Motore
                     Return Task.FromResult(ChiediRisposta(mossa, Attesa.RispostaTurno))
 
                 Case Scelte.Conferma
-                    AggiungiAlProfilo(turno.Chiave, _voci)
                     RaccogliAltrove(_frammento, Nothing)
 
-                    mossa.Detto.Add("Perfetto, segnata." & vbLf & vbLf & turno.Ponte)
-                    _attesa = Attesa.AltraVoce
-                    Return Task.FromResult(
-                        DueScelte(mossa, "Ne ho un'altra", Scelte.Altra, "Procediamo", Scelte.Procedi))
+                    _daApprofondire = VociDaApprofondire(turno, _voci)
+                    If _daApprofondire.Count = 0 Then
+                        Return Task.FromResult(ChiudiLeVoci(mossa, turno, conSegnata:=True))
+                    End If
+
+                    ' Le voci entrano nel profilo solo dopo le domande: a completarsi è il
+                    ' frammento, e il profilo continua ad avere un ingresso solo — quello
+                    ' che passa dal lettore tollerante e dal suo filtro anti-invenzione.
+                    mossa.Detto.Add("Perfetto, segnata.")
+                    Return Task.FromResult(ProssimoApprofondimento(mossa, turno))
 
                 Case Else
                     Throw SceltaSconosciuta(scelta)
@@ -802,6 +885,246 @@ Namespace Motore
                 Case Else
                     Throw SceltaSconosciuta(scelta)
             End Select
+
+        End Function
+
+        ' --- La domanda di approfondimento: la voce mezza vuota ----------------------
+
+        ''' <summary>Le voci entrano nel profilo, e il turno offre il suo ponte.</summary>
+        ''' <param name="conSegnata">
+        ''' Se dire anche «Perfetto, segnata»: quando ci sono state domande di
+        ''' approfondimento l'ha già detto la conferma, e ridirlo qui sembrerebbe una
+        ''' seconda voce entrata.
+        ''' </param>
+        Private Function ChiudiLeVoci(mossa As Mossa, turno As Turno, conSegnata As Boolean) As Mossa
+
+            AggiungiAlProfilo(turno.Chiave, _voci)
+
+            mossa.Detto.Add(If(conSegnata, "Perfetto, segnata." & vbLf & vbLf, "") & turno.Ponte)
+            _attesa = Attesa.AltraVoce
+            Return DueScelte(mossa, "Ne ho un'altra", Scelte.Altra, "Procediamo", Scelte.Procedi)
+
+        End Function
+
+        ''' <summary>
+        ''' Quali delle voci appena confermate hanno lasciato vuoto un campo che pesa nel
+        ''' CV, nell'ordine in cui l'utente le ha raccontate.
+        ''' </summary>
+        Private Shared Function VociDaApprofondire(turno As Turno, voci As JsonArray) As List(Of Integer)
+
+            Dim quali As New List(Of Integer)
+            If voci Is Nothing Then Return quali
+
+            For i As Integer = 0 To voci.Count - 1
+                If CampiVuoti(turno, TryCast(voci(i), JsonObject)).Count > 0 Then quali.Add(i)
+            Next
+
+            Return quali
+
+        End Function
+
+        ''' <summary>I campi che pesano e che questa voce ha lasciato vuoti.</summary>
+        Private Shared Function CampiVuoti(turno As Turno, voce As JsonObject) As List(Of CampoCheConta)
+
+            Dim oggetto As JsonObject = If(voce, New JsonObject())
+            Return turno.CampiCheContano.Where(Function(c) Testo(oggetto, c.Chiave) = "").ToList()
+
+        End Function
+
+        ''' <summary>
+        ''' Offre la domanda alla prossima voce incompleta, o chiude il turno se non ne
+        ''' restano.
+        ''' </summary>
+        ''' <remarks>
+        ''' Una voce esce dall'elenco <b>quando la domanda le viene offerta</b>, non quando
+        ''' la risposta riesce: è la disciplina della ripresa (v.
+        ''' <see cref="RiprendiSaltateAsync"/>) e della guardia anti-rimbalzo del magazzino,
+        ''' applicata qui. L'occasione è una — se una risposta andata di nuovo a vuoto ne
+        ''' guadagnasse un'altra, la stessa voce si farebbe richiedere all'infinito.
+        ''' </remarks>
+        Private Function ProssimoApprofondimento(mossa As Mossa, turno As Turno) As Mossa
+
+            Do While _daApprofondire.Count > 0
+
+                _voceApprofondita = _daApprofondire(0)
+                _daApprofondire.RemoveAt(0)
+
+                Dim voce As JsonObject = TryCast(_voci(_voceApprofondita), JsonObject)
+                _campiChiesti = CampiVuoti(turno, voce)
+
+                ' Una voce completata nel frattempo non si chiede: senza questa uscita la
+                ' frase resterebbe monca, «non mi hai detto .».
+                If _campiChiesti.Count = 0 Then Continue Do
+
+                mossa.Detto.Add(
+                    $"{ComeSiChiama(turno, voce)} {NonMiHaiDetto} {ElencoDeiCampi(_campiChiesti)}. " &
+                    If(_campiChiesti.Count = 1, "Te lo ricordi?", "Me li dici?"))
+
+                Return ChiediRisposta(mossa, Attesa.Approfondimento)
+
+            Loop
+
+            Return ChiudiLeVoci(mossa, turno, conSegnata:=False)
+
+        End Function
+
+        ''' <summary>
+        ''' Come si chiama la voce dentro la domanda: «Del lavoro «Magazziniere»». Il nome
+        ''' si prende dal primo campo compilato fra quelli che il turno indica — mai da un
+        ''' campo che la domanda sta chiedendo, che per definizione è vuoto.
+        ''' </summary>
+        Private Shared Function ComeSiChiama(turno As Turno, voce As JsonObject) As String
+
+            Dim oggetto As JsonObject = If(voce, New JsonObject())
+
+            For Each campo As String In turno.CampiDelNome
+                Dim valore As String = Testo(oggetto, campo)
+                If valore <> "" Then Return String.Format(turno.VoceConNome, valore)
+            Next
+
+            Return turno.VoceSenzaNome
+
+        End Function
+
+        ''' <summary>«quanto è durato»; «cosa facevi né quanto è durato»; e così via.</summary>
+        Private Shared Function ElencoDeiCampi(campi As List(Of CampoCheConta)) As String
+
+            Dim voci As List(Of String) = campi.Select(Function(c) c.ComeChiederlo).ToList()
+            If voci.Count = 1 Then Return voci(0)
+
+            Return String.Join(", ", voci.Take(voci.Count - 1)) & " né " & voci.Last()
+
+        End Function
+
+        ''' <summary>
+        ''' La risposta a una domanda di approfondimento: si struttura col prompt del turno
+        ''' e del frammento che torna si prende <b>soltanto</b> il campo che mancava.
+        ''' </summary>
+        ''' <remarks>
+        ''' Mai una voce nuova, ed è la seconda guardia di terminazione: se una risposta
+        ''' potesse generare voci, ognuna vorrebbe la sua domanda e il giro non finirebbe.
+        ''' Quel che l'utente ha detto in più non si perde comunque — ciò che appartiene ad
+        ''' altre categorie va nel magazzino come sempre, e se dalla risposta è uscita più
+        ''' di un'esperienza glielo si dice, perché il ponte del turno sta per chiedergliela.
+        ''' </remarks>
+        ''' <param name="risposta">
+        ''' Le parole dell'utente. Si chiama così e non «testo» come nelle sorelle perché
+        ''' qui serve la funzione <see cref="Testo"/>, e in VB un parametro omonimo la
+        ''' coprirebbe — senza errori di nome, con la chiamata letta come indicizzazione
+        ''' della stringa.
+        ''' </param>
+        Private Async Function RispostaApprofondimentoAsync(risposta As String,
+                                                            annulla As CancellationToken) As Task(Of Mossa)
+
+            Dim turno As Turno = Turni(_indice)
+            Dim mossa As New Mossa
+            Dim voce As JsonObject = TryCast(_voci(_voceApprofondita), JsonObject)
+
+            Dim frammento As JsonObject = Await StrutturaAsync(
+                turno.Chiave, ConLaVoceDavanti(turno, voce, risposta), mossa, annulla).ConfigureAwait(False)
+            If frammento Is Nothing Then Return mossa   ' l'AI non ha risposto: si richiede la stessa cosa
+
+            Dim voci As JsonArray = Elenco(frammento, turno.Chiave)
+            Dim letta As JsonObject = If(voci.Count > 0, TryCast(voci(0), JsonObject), New JsonObject())
+
+            Dim valori As New List(Of String)
+            Dim righe As New List(Of String)
+
+            For Each campo As CampoCheConta In _campiChiesti
+                Dim valore As String = Testo(If(letta, New JsonObject()), campo.Chiave)
+                If valore = "" Then Continue For
+                voce(campo.Chiave) = valore
+                valori.Add(valore)
+                righe.Add($"{EtichettaDelCampo(turno, campo.Chiave)}: {valore}")
+            Next
+
+            If righe.Count = 0 Then
+                ' Le parole della ri-domanda della patente, che è questa stessa cosa fatta
+                ' per un turno solo: non sapere è una risposta, e non blocca niente.
+                mossa.Detto.Add("Va bene, proseguiamo così.")
+            ElseIf righe.Count = 1 Then
+                mossa.Detto.Add($"Perfetto: {valori(0)}.")
+            Else
+                mossa.Detto.Add("Perfetto, ho segnato:" & vbLf & String.Join(vbLf, righe))
+            End If
+
+            ' Nella risposta l'utente può aver ridetto diverso un campo che non gli era
+            ' stato chiesto — «tre anni, ma non ero magazziniere, ero mulettista». Qui si
+            ' prende solo ciò che mancava, ed è la regola giusta: correggere non è
+            ' completare, e una correzione che entrasse senza scheda di conferma
+            ' cambierebbe il profilo alle spalle di chi l'ha confermato. Ma non si tace:
+            ' i difetti di silenzio sono la famiglia curata in tutto questo tempo.
+            Dim ridetti As List(Of String) = CampiRidettiDiverso(turno, voce, letta)
+            If ridetti.Count > 0 Then
+                mossa.Detto.Add(
+                    "Questi invece li tengo come me li avevi già detti: " &
+                    String.Join("; ", ridetti) & ". Se volevi correggerli, si fa dal profilo.")
+            End If
+
+            RaccogliAltrove(frammento, Nothing)
+
+            If voci.Count > 1 Then
+                mossa.Detto.Add("Se mi hai detto anche altro, tienilo lì: te lo chiedo fra un momento.")
+            End If
+
+            Return ProssimoApprofondimento(mossa, turno)
+
+        End Function
+
+        ''' <summary>
+        ''' I campi che la risposta ha ridetto <b>diversi</b> da come erano stati
+        ''' confermati, in forma leggibile. Non guarda i campi che la domanda ha chiesto:
+        ''' quelli sono appena stati riempiti con ciò che è arrivato, quindi coincidono.
+        ''' Il confronto perdona spazi e maiuscole, che non sono una correzione.
+        ''' </summary>
+        Private Shared Function CampiRidettiDiverso(turno As Turno, voce As JsonObject,
+                                                    letta As JsonObject) As List(Of String)
+
+            Dim diversi As New List(Of String)
+            Dim prima As JsonObject = If(voce, New JsonObject())
+            Dim dopo As JsonObject = If(letta, New JsonObject())
+
+            For Each campo As RigaScheda In turno.Campi
+                Dim confermato As String = Testo(prima, campo.Valore)
+                Dim ridetto As String = Testo(dopo, campo.Valore)
+                If confermato = "" OrElse ridetto = "" Then Continue For
+                If String.Equals(confermato.Trim(), ridetto.Trim(),
+                                 StringComparison.OrdinalIgnoreCase) Then Continue For
+                diversi.Add($"{campo.Etichetta}: {confermato}")
+            Next
+
+            Return diversi
+
+        End Function
+
+        ''' <summary>
+        ''' Il testo che va al prompt del turno: la voce già confermata, campo per campo, e
+        ''' in fondo le parole nuove. Niente di inventato — sono i campi che l'utente ha
+        ''' appena confermato — e serve a far collocare la risposta nel posto giusto:
+        ''' «tre anni circa», da solo, non è un'esperienza di lavoro, e il prompt potrebbe
+        ''' non ricavarne niente.
+        ''' </summary>
+        Private Shared Function ConLaVoceDavanti(turno As Turno, voce As JsonObject,
+                                                 risposta As String) As String
+
+            Dim oggetto As JsonObject = If(voce, New JsonObject())
+            Dim righe As New List(Of String)
+
+            For Each campo As RigaScheda In turno.Campi
+                Dim valore As String = Testo(oggetto, campo.Valore)
+                If valore <> "" Then righe.Add($"{campo.Etichetta}: {valore}")
+            Next
+
+            If righe.Count = 0 Then Return risposta
+            Return String.Join(vbLf, righe) & vbLf & vbLf & "In più: " & risposta
+
+        End Function
+
+        ''' <summary>L'etichetta con cui il turno chiama un suo campo: «durata» → «Durata».</summary>
+        Private Shared Function EtichettaDelCampo(turno As Turno, chiave As String) As String
+
+            Dim campo As RigaScheda = turno.Campi.FirstOrDefault(Function(c) c.Valore = chiave)
+            Return If(campo?.Etichetta, chiave)
 
         End Function
 
