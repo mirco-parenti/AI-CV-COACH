@@ -245,17 +245,11 @@ annotati qui prima che in ogni altro posto. Il **riordino** delle voci di un doc
 R6 nominava accanto alla rimozione, non sta qui ma in `idee_future.md`: la forma di R6 è stata
 decisa — si toglie e si rimette — e riordinare è un raffinamento in più, non un debito.*
 
-*Due dei quattro — il **segno ✎** che non sapeva del disco e la **selezione** che tornava in
-cima — sono stati curati il 2026-08-24, primo lavoro del ramo delle rifiniture prima del giro
-D, e sono in «Chiuse».*
+*Tre dei quattro — il **segno ✎** che non sapeva del disco, la **selezione** che tornava in
+cima e l'**errore criptico** rigenerando la lettera — sono stati curati il 2026-08-24, primo
+lavoro del ramo delle rifiniture prima del giro D, e sono in «Chiuse». Resta il quarto, che è
+un debito dell'attrezzo di collaudo.*
 
-- **Rigenerare la lettera di una candidatura costruita con un altro profilo dà un errore
-  criptico.** «⚠ Rigenera la lettera» su una candidatura i cui documenti nacquero da una
-  versione di profilo diversa da quella di adesso finisce in «L'AI ha risposto in una forma
-  che non riesco a leggere» — che manda a cercare il guasto dalla parte sbagliata, e per un
-  utente non vuol dire niente. Il dato per dirlo bene c'è già ed è a portata: la
-  `versione_profilo` annotata nello `stato.json`. *(cap. 08.4; cap. 11.1; visto il 2026-08-24
-  provando R7 dal vivo.)*
 - **`scegli_riga` dello strumento di collaudo tocca solo il primo elenco della finestra.** I
   due elenchi di «Modifica i testi» sono esposti all'accessibilità come **Table** e non come
   List, e l'attrezzo prende sempre la prima che trova: la colonna «Lasciate fuori» non si può
@@ -338,6 +332,23 @@ D, e sono in «Chiuse».*
   spazio in altezza invece di leggerlo dallo schermo: un banco non può cambiare schermo, ed è
   proprio quando il contenuto non ci sta che questa disposizione fa qualcosa di diverso.
   *(cap. 03.4; `FinestraImpostazioni.DisponiIn`; `ScalaSchermo`.)*
+- ✅ **Rigenerare la lettera di una candidatura costruita con un altro profilo dà un errore
+  criptico** *(aperta il 2026-08-24 dal quinto tempo di T9e, chiusa lo stesso giorno col ramo
+  delle rifiniture prima del giro D)*. Adesso non ci si arriva: prima di chiamare l'AI il
+  pannello guarda se il profilo con cui quella candidatura fu **confrontata** esiste ancora, e
+  se non c'è più lo dice in chiaro — cos'è successo, e qual è l'unica strada, rifare la
+  candidatura dal suo annuncio. Il segno è **la versione che manca dallo storico**, non la
+  versione diversa: lo storico non si pota mai, quindi una versione assente vuol dire «profilo
+  eliminato e rifatto», mentre un profilo semplicemente cresciuto ne cambia una a ogni
+  salvataggio e con lui i vecchi documenti restano spiegabili — fermarsi anche lì sarebbe
+  stato un avviso a ogni giro per un caso che funziona, e un collaudo lo tiene fermo. Il
+  controllo sta su **tutte** le strade che chiamano l'AI su quella candidatura: la generazione
+  che parte da sola, «Rigenera», «⚠ Rigenera la lettera» e il cambio di lingua — e su
+  «Rigenera» sta *prima* che i documenti di allora vengano buttati, perché sono tutto quel che
+  resta di quella candidatura. Non si propone di rifare il confronto perché **non si può**:
+  una candidatura già confrontata non si riconfronta, e indicare un gesto che non esiste
+  sarebbe peggio del silenzio; l'idea è annotata in `idee_future.md`. *(cap. 08.4; cap. 11.1;
+  `PannelloDocumenti.MotivoProfiloSparito`; `ArchivioProfilo.CELaVersione`.)*
 
 - ✅ **Il pannello del logo a DPI alti** *(aperta il 2026-08-09 dalla revisione adversariale,
   misurata il 2026-08-23 dal collaudo dal vivo di T9e, **chiusa lo stesso giorno** dal quinto

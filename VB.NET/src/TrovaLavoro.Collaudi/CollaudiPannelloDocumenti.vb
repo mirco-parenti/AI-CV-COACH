@@ -1560,6 +1560,153 @@ Namespace Ui
 
         End Sub
 
+        ' ==================================================================
+        ' La candidatura di un profilo che non c'è più (2026-08-24)
+        ' ==================================================================
+
+        ''' <summary>Una versione di profilo che nello storico non c'è mai stata.</summary>
+        Private Const ProfiloSparito As String = "2026-07-01_090000"
+
+        ''' <summary>
+        ''' Alla generazione arrivano il profilo di <b>oggi</b> e i giudizi di
+        ''' <b>allora</b>: se quel profilo è stato eliminato e rifatto, i due parlano di due
+        ''' persone diverse e il modello risponde con delle spiegazioni invece che col
+        ''' documento — che l'utente leggeva come «l'AI ha risposto in una forma che non
+        ''' riesco a leggere». Adesso non ci si arriva.
+        ''' </summary>
+        <TestMethod>
+        Public Async Function UnaCandidaturaDiUnProfiloSparitoNonSiGenera() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.VersioneProfilo = ProfiloSparito
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.IsEmpty(generatore.LavoriChiesti(), "l'AI non è stata chiamata affatto")
+                    Assert.Contains("non c'è più", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "e il pannello dice cos'è successo")
+                    Assert.Contains("rifai la candidatura", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "e cosa si può fare")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function RigenerareNonButtaViaIDocumentiDiUnProfiloSparito() As Task
+
+            ' Quei documenti sono tutto quel che resta di quella candidatura: «Rigenera» li
+            ' azzera prima di riscriverli, e fermarsi dopo li avrebbe distrutti per niente.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(), "i documenti ci sono")
+
+                    ' E adesso il profilo di allora sparisce.
+                    candidatura.VersioneProfilo = ProfiloSparito
+                    Await pannello.RigeneraAsync()
+
+                    Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(),
+                                    "l'AI non è stata chiamata una seconda volta")
+                    Assert.IsNotNull(candidatura.Cv, "e il CV di allora è ancora lì")
+                    Assert.IsNotNull(candidatura.Lettera, "e la lettera pure")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaLetteraNonSiRiallineaSuUnProfiloSparito() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    candidatura.VersioneProfilo = ProfiloSparito
+
+                    Await pannello.RiallineaLaLetteraAsync()
+
+                    Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(),
+                                    "la lettera non è stata riscritta")
+                    Assert.Contains("non c'è più", Etichetta(pannello, "lblStatoDocumenti").Text)
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnProfiloSoloCresciutoNonFermaLaRigenerazione() As Task
+
+            ' Il rovescio, ed è il caso frequente: il profilo cambia versione a ogni
+            ' salvataggio, e i vecchi documenti restano spiegabili. Fermarsi anche qui
+            ' sarebbe un avviso a ogni giro, per qualcosa che funziona.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera).Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.VersioneProfilo = contesto.Archivio.Versioni().Last()
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    ' Il profilo cresce: versione nuova, ma quella di allora è ancora lì.
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+                    Await pannello.RigeneraAsync()
+
+                    Assert.AreEqual("cv_mirato → lettera → cv_mirato → lettera",
+                                    generatore.LavoriChiesti(), "il giro si rifà tutto, come sempre")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        <Timeout(15000)>
+        Public Async Function CambiareLinguaSuUnProfiloSparitoNonChiedeNiente() As Task
+
+            ' Chiedere «li riscrivo in inglese?» per poi rispondere che non si possono
+            ' riscrivere sarebbe una domanda a vuoto, e la lingua nuova sarebbe già finita
+            ' su disco. Il tetto di tempo è la rete di sicurezza: senza la guardia, qui si
+            ' apre una conferma e il banco si fermerebbe invece di diventare rosso.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    candidatura.VersioneProfilo = ProfiloSparito
+
+                    Scelta(pannello, "cmbLingua").SelectedIndex = 1
+
+                    Assert.AreEqual("it", candidatura.Lingua, "la lingua non è cambiata")
+                    Assert.AreEqual("Italiano", Scelta(pannello, "cmbLingua").Text,
+                                    "e la tendina è tornata dov'era")
+                    Assert.Contains("non c'è più", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "al posto della domanda c'è il motivo")
+                    Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(),
+                                    "e l'AI non è stata richiamata")
+                End Function)
+
+        End Function
+
     End Class
 
 End Namespace

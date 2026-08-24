@@ -371,6 +371,43 @@ Namespace Dati
 
         End Sub
 
+        <TestMethod>
+        Public Sub UnaVersioneEliminataNonCEPiu()
+
+            ' È la domanda che una candidatura fa prima di farsi riscrivere: il profilo da
+            ' cui nasco c'è ancora, o è stato eliminato e rifatto da capo? Lo storico non si
+            ' pota mai, quindi una versione che manca ha una causa sola (cap. 11.1, 11.5).
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim versione As String = archivio.Salva(ProfiloDiProva())
+
+                    Assert.IsTrue(archivio.CELaVersione(versione), "appena salvata, c'è")
+                    Assert.IsFalse(archivio.CELaVersione("2026-07-01_090000"),
+                                   "una versione mai esistita, no")
+
+                    archivio.EliminaTutto()
+
+                    Assert.IsFalse(archivio.CELaVersione(versione),
+                                   "e dopo «Elimina profilo» non c'è più nemmeno la sua")
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaVersioneNonAnnotataNonFermaNiente()
+
+            ' Le candidature nate prima che la versione si annotasse non hanno niente da
+            ' cercare, e un dubbio non deve fermare un lavoro.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    archivio.Salva(ProfiloDiProva())
+
+                    Assert.IsTrue(archivio.CELaVersione(Nothing), "senza versione si passa")
+                    Assert.IsTrue(archivio.CELaVersione(""), "e con la stringa vuota pure")
+                End Sub)
+
+        End Sub
+
     End Class
 
 End Namespace

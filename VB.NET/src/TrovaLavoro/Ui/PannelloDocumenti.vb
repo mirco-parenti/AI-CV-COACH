@@ -441,6 +441,39 @@ Public Class PannelloDocumenti
 
     End Function
 
+    ''' <summary>
+    ''' Perché questa candidatura non si può riscrivere, o <c>Nothing</c> se si può: il
+    ''' profilo con cui fu confrontata non c'è più.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Cosa succedeva senza.</b> Alla generazione arrivano tre cose: il profilo
+    ''' di <i>oggi</i>, il CV della candidatura e i giudizi del suo confronto — questi due
+    ''' di <i>allora</i>. Se il profilo di allora è stato eliminato e rifatto, i tre pezzi
+    ''' parlano di due persone diverse, e il modello risponde con delle spiegazioni invece
+    ''' che col documento chiesto: quel che l'utente leggeva era «l'AI ha risposto in una
+    ''' forma che non riesco a leggere», che manda a cercare il guasto dalla parte
+    ''' sbagliata.</para>
+    ''' <para><b>Perché la versione mancante e non quella diversa.</b> Un profilo che
+    ''' <i>cresce</i> cambia versione a ogni salvataggio, e con lui i vecchi documenti
+    ''' restano spiegabili: fermarsi lì sarebbe un avviso a ogni giro, per un caso che
+    ''' funziona (v. <see cref="Dati.ArchivioProfilo.CELaVersione"/>).</para>
+    ''' <para><b>Perché non si propone di rifare il confronto.</b> Perché non si può: una
+    ''' candidatura già confrontata non si riconfronta, e l'unica strada onesta è rifarla
+    ''' dal suo annuncio. Indicare un gesto che non esiste sarebbe peggio del silenzio.</para>
+    ''' </remarks>
+    Private Function MotivoProfiloSparito() As String
+
+        If _sulCvBase OrElse _candidatura Is Nothing OrElse _contesto Is Nothing Then Return Nothing
+        If _contesto.Archivio.CELaVersione(_candidatura.VersioneProfilo) Then Return Nothing
+
+        Return "Questa candidatura è stata confrontata con un profilo che adesso non c'è più: " &
+               "quello di allora è stato eliminato, e i giudizi e i documenti raccontano ancora lui." &
+               vbLf &
+               "Riscriverli sul profilo di oggi mescolerebbe due storie diverse. Per averne di " &
+               "nuovi, rifai la candidatura da «📋 Candidatura», incollando di nuovo l'annuncio."
+
+    End Function
+
     ''' <summary>Se il profilo ha avuto altre versioni dopo quella da cui nacque il CV.</summary>
     Private Function ProfiloCambiatoDopo(versioneDelCv As String) As Boolean
 
@@ -522,6 +555,15 @@ Public Class PannelloDocumenti
 
         If _pipeline Is Nothing Then
             RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
+            Return
+        End If
+
+        ' L'ultimo cancello prima dell'AI, e vale anche per la generazione che parte da
+        ' sola aprendo una candidatura senza documenti: quelli di «Rigenera» e della
+        ' lingua stanno più a monte perché là c'è dell'altro da non fare.
+        Dim sparito As String = MotivoProfiloSparito()
+        If sparito IsNot Nothing Then
+            RaccontaLoStato(sparito, StileApp.Pericolo)
             Return
         End If
 
@@ -1123,6 +1165,12 @@ Public Class PannelloDocumenti
             Return
         End If
 
+        Dim sparito As String = MotivoProfiloSparito()
+        If sparito IsNot Nothing Then
+            RaccontaLoStato(sparito, StileApp.Pericolo)
+            Return
+        End If
+
         If _candidatura.RiscrittureDellaLettera.CEQualcosa AndAlso
            MessageBox.Show(
                "Il CV è cambiato: riscrivo la lettera perché racconti la stessa storia?" & vbLf &
@@ -1500,6 +1548,14 @@ Public Class PannelloDocumenti
 
         If _candidatura Is Nothing Then Return
 
+        ' Prima di buttare via quel che c'è: se non si può riscrivere, i documenti di
+        ' allora sono tutto quel che resta di quella candidatura.
+        Dim sparito As String = MotivoProfiloSparito()
+        If sparito IsNot Nothing Then
+            RaccontaLoStato(sparito, StileApp.Pericolo)
+            Return
+        End If
+
         ' I documenti di prima si buttano adesso: se la generazione fallisce a metà, il
         ' pannello non deve mostrare un CV vecchio accanto a una lettera nuova.
         _candidatura.Cv = Nothing
@@ -1551,6 +1607,16 @@ Public Class PannelloDocumenti
             _candidatura.Lingua = scelta
             RicordaLaLingua()
             RaccontaLoStato($"Quando li scriverò, saranno in {nome}.", StileApp.TestoSecondario)
+            Return
+        End If
+
+        ' Qui la guardia sta prima della domanda: chiedere «li riscrivo in inglese?» per poi
+        ' dire che non si possono riscrivere sarebbe una domanda a vuoto. La tendina torna
+        ' dov'era, come quando è l'utente a dire di no.
+        Dim sparito As String = MotivoProfiloSparito()
+        If sparito IsNot Nothing Then
+            AllestisciLaTendina(comEra)
+            RaccontaLoStato(sparito, StileApp.Pericolo)
             Return
         End If
 

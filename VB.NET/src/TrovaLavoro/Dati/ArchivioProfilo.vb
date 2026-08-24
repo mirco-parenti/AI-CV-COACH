@@ -351,6 +351,29 @@ Namespace Dati
 
         End Function
 
+        ''' <summary>
+        ''' Se quella versione del profilo è ancora nello storico.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Serve a chi ha annotato una versione tempo fa — una candidatura, un CV —
+        ''' per sapere se il profilo da cui nasceva esiste ancora. Lo storico <b>non si
+        ''' pota mai</b>: ogni salvataggio ne aggiunge una copia e nessuno ne toglie, quindi
+        ''' una versione che manca non vuol dire «è passato troppo tempo», vuol dire che il
+        ''' profilo è stato <b>eliminato</b> e rifatto da capo (cap. 11.1 e 11.5) — o che è
+        ''' arrivato da un ripristino con un'altra storia dentro.</para>
+        ''' <para>È la differenza fra un profilo <i>cresciuto</i>, con cui i vecchi
+        ''' documenti restano spiegabili, e un profilo <i>altro</i>, con cui parlano di
+        ''' un'altra persona. Una versione non annotata (vuota) non si può cercare e vale
+        ''' come «non lo so»: risponde di sì, perché un dubbio non deve fermare niente.</para>
+        ''' </remarks>
+        Public Function CELaVersione(versione As String) As Boolean
+
+            If String.IsNullOrEmpty(versione) Then Return True
+
+            Return Versioni().Contains(versione, StringComparer.Ordinal)
+
+        End Function
+
         ''' <summary>Il profilo di una versione dello storico, così com'era quel giorno.</summary>
         Public Function CaricaVersione(versione As String) As Profilo
             Return Profilo.DaTesto(File.ReadAllText(PercorsoVersione(versione), Encoding.UTF8))

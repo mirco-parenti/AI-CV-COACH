@@ -303,6 +303,18 @@ di difetti prima della 1.0.
   adesso; ma è la cura vera se un domani i portali moltiplicano le pagine che ingannano la
   lettura di oggi. *(2026-08-23 — collaudo dal vivo di T9e, giro C; cap. 06.4;
   `LettorePagina`.)*
+- **Riconfrontare una candidatura già confrontata.** Oggi il confronto si fa una volta sola:
+  `ConfrontaLaRiapertaAsync` serve una candidatura riaperta che il confronto non ce l'ha, e su
+  una che ce l'ha non esiste nessun «confronta di nuovo». Finché il profilo cresce va bene —
+  i giudizi di allora restano spiegabili, ed è la ragione per cui la `versione_profilo` si
+  annota. Ma quando il profilo è stato **eliminato e rifatto**, quella candidatura resta
+  ferma a una persona che non c'è più: i documenti non si possono riscrivere (dal 2026-08-24
+  il pannello lo dice invece di finire in un errore dell'AI), e l'unica strada è rifarla
+  incollando di nuovo l'annuncio — che è lì, salvato, a un passo. Un «confronta di nuovo»
+  chiuderebbe il giro; da progettare con cura, perché rifare i giudizi cambia le **stelle** di
+  una candidatura che l'utente potrebbe aver già spedito, e quel numero è la cosa che non deve
+  cambiare sotto le mani senza che nessuno lo dica. *(2026-08-24 — emersa curando l'errore
+  criptico della lettera, ramo delle rifiniture prima del giro D; cap. 07.3, cap. 11.1.)*
 
 ## Collaudi e non-regressione (Fase VB.NET)
 
