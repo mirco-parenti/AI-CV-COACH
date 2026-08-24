@@ -461,26 +461,35 @@ Public Class PannelloProfilo
 
     End Sub
 
+    ' Le quattro guardie qui sotto valgono tutte per la stessa ragione: quando è il
+    ' programma a scrivere nell'elenco (vedi «RinominaVoce»), la selezione non è
+    ' cambiata davvero — è Windows che toglie e rimette la riga. Ricaricare i campi
+    ' allora significa riscriverli sotto le dita di chi sta digitando.
+
     Private Sub lstLavoro_SelectedIndexChanged(sender As Object, e As EventArgs) _
         Handles lstLavoro.SelectedIndexChanged
+        If InCaricamento Then Return
         MostraLavoroScelto()
         AggiornaComandi()
     End Sub
 
     Private Sub lstInformali_SelectedIndexChanged(sender As Object, e As EventArgs) _
         Handles lstInformali.SelectedIndexChanged
+        If InCaricamento Then Return
         MostraInformaleScelta()
         AggiornaComandi()
     End Sub
 
     Private Sub lstCompetenze_SelectedIndexChanged(sender As Object, e As EventArgs) _
         Handles lstCompetenze.SelectedIndexChanged
+        If InCaricamento Then Return
         MostraCompetenzaScelta()
         AggiornaComandi()
     End Sub
 
     Private Sub lstStudi_SelectedIndexChanged(sender As Object, e As EventArgs) _
         Handles lstStudi.SelectedIndexChanged
+        If InCaricamento Then Return
         MostraStudioScelto()
         AggiornaComandi()
     End Sub
@@ -608,7 +617,7 @@ Public Class PannelloProfilo
     ''' Riscrive la riga selezionata dell'elenco quando i suoi campi cambiano: l'elenco
     ''' deve dire sempre quello che c'è nella scheda, non quello che c'era prima.
     ''' </summary>
-    Private Shared Sub RinominaVoce(elenco As ListBox, etichetta As String)
+    Private Sub RinominaVoce(elenco As ListBox, etichetta As String)
 
         Dim indice As Integer = elenco.SelectedIndex
         If indice < 0 Then Return
@@ -616,7 +625,15 @@ Public Class PannelloProfilo
         ' Riscrivere una riga con lo stesso testo la farebbe solo sfarfallare.
         If String.Equals(elenco.Items(indice).ToString(), etichetta, StringComparison.Ordinal) Then Return
 
-        elenco.Items(indice) = etichetta
+        ' Assegnare una riga non la riscrive: WinForms la toglie e la rimette nel
+        ' controllo di Windows, e rimettendola ridà la selezione. Ne esce un
+        ' «SelectedIndexChanged» che l'utente non ha chiesto — prima con la riga
+        ' sparita (nessuna voce scelta, campi svuotati), poi con la riga tornata — e
+        ' chi lo ascolta ricarica i campi. Ricaricarli mentre l'utente digita gli
+        ' riporta il cursore a zero: la lettera dopo entra a sinistra della
+        ' precedente, e scrivendo «abc» resta scritto «cba». Perciò qui il programma
+        ' dichiara che sta scrivendo lui, e chi ascolta la selezione se ne sta fermo.
+        Riempiendo(Sub() elenco.Items(indice) = etichetta)
 
     End Sub
 
@@ -1326,9 +1343,16 @@ Public Class PannelloProfilo
         btnEliminaCompetenza.Enabled = Not occupato AndAlso lstCompetenze.SelectedIndex >= 0
         btnEliminaStudio.Enabled = Not occupato AndAlso lstStudi.SelectedIndex >= 0
 
+        ' Una casella di scheda serve a correggere la voce scelta nell'elenco: senza una
+        ' voce scelta non ha dove mettere quel che si scrive. Finora lo prendeva lo
+        ' stesso e lo perdeva in silenzio — al primo «Aggiungi» i campi si ripuliscono,
+        ' e chi aveva scritto prima di premerlo si ritrovava la casella vuota senza che
+        ' nessuno gli avesse detto niente. Un campo che non può tenere niente lo deve
+        ' dire prima, come già fa l'«Elimina» spento davanti a un elenco vuoto.
         For Each casella As TextBox In CampiDelProfilo()
-            casella.ReadOnly = occupato
-            casella.BackColor = If(occupato, StileApp.SfondoBase, StileApp.SfondoContenuto)
+            Dim scrivibile As Boolean = Not occupato AndAlso ConVoceDoveScrivere(casella)
+            casella.ReadOnly = Not scrivibile
+            casella.BackColor = If(scrivibile, StileApp.SfondoContenuto, StileApp.SfondoBase)
         Next
 
         cmbPatente.Enabled = Not occupato
@@ -1346,6 +1370,34 @@ Public Class PannelloProfilo
                 txtRuolo, txtAzienda, txtDurata, txtTipo, txtCosaFacevoLavoro,
                 txtQuando, txtConChi, txtCosaFacevoInformale, txtCompetenza,
                 txtTitoloStudio, txtIstituto, txtAnno}
+
+    End Function
+
+    ''' <summary>
+    ''' Se la casella ha, in questo momento, una voce dove scrivere. I dati personali
+    ''' stanno nel profilo e ci sono sempre; i campi delle quattro schede vivono invece
+    ''' dentro una voce dell'elenco accanto, e senza riga scelta non hanno destinazione.
+    ''' </summary>
+    Private Function ConVoceDoveScrivere(casella As TextBox) As Boolean
+
+        If casella Is txtRuolo OrElse casella Is txtAzienda OrElse casella Is txtDurata OrElse
+           casella Is txtTipo OrElse casella Is txtCosaFacevoLavoro Then
+            Return lstLavoro.SelectedIndex >= 0
+        End If
+
+        If casella Is txtQuando OrElse casella Is txtConChi OrElse
+           casella Is txtCosaFacevoInformale Then
+            Return lstInformali.SelectedIndex >= 0
+        End If
+
+        If casella Is txtCompetenza Then Return lstCompetenze.SelectedIndex >= 0
+
+        If casella Is txtTitoloStudio OrElse casella Is txtIstituto OrElse
+           casella Is txtAnno Then
+            Return lstStudi.SelectedIndex >= 0
+        End If
+
+        Return True
 
     End Function
 

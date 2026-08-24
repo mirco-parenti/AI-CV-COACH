@@ -521,6 +521,121 @@ Namespace Ui
         End Sub
 
         ' ==================================================================
+        ' Correggere una voce a mano, tasto per tasto
+        ' ==================================================================
+
+        <TestMethod>
+        Public Sub CorreggereUnCampoNonRicaricaGliAltriDellaScheda()
+
+            ' Il difetto che questo collaudo sorveglia si vedeva solo digitando:
+            ' scrivendo «abc» nel ruolo restava scritto «cba». La causa sta due passi
+            ' più in là del sintomo. Aggiornare la riga dell'elenco vuol dire
+            ' assegnarla, e WinForms per assegnarla la toglie e la rimette: nel mezzo
+            ' la voce scelta sparisce e poi torna, e chi ascolta la selezione ricarica
+            ' i campi. Ricaricarli mentre l'utente scrive gli riporta il cursore a
+            ' zero, così la lettera dopo entra a sinistra della precedente.
+            '
+            ' Il cursore non si misura in un banco senza tastiera; il ricaricamento
+            ' sì, e è lui la causa: se mentre correggo il ruolo anche le altre caselle
+            ' della scheda vengono riscritte, quel giro è ripartito.
+            Using pannello As New TrovaLavoro.PannelloProfilo()
+
+                ' Senza handle la riga non passa dal controllo di Windows, e il giro
+                ' che rompe tutto non parte nemmeno: il collaudo sarebbe verde per il
+                ' motivo sbagliato.
+                pannello.CreateControl()
+                pannello.Mostra(ProfiloDiProva())
+
+                Dim durata As TextBox = Casella(pannello, "txtDurata")
+                Dim tipo As TextBox = Casella(pannello, "txtTipo")
+
+                Dim ricariche As Integer = 0
+                AddHandler durata.TextChanged, Sub() ricariche += 1
+                AddHandler tipo.TextChanged, Sub() ricariche += 1
+
+                Casella(pannello, "txtRuolo").Text = "Capo reparto"
+
+                Assert.AreEqual(0, ricariche,
+                                "correggendo il ruolo, le altre caselle della scheda non si toccano")
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub CorreggereIlRuoloAggiornaLaRigaDellElenco()
+
+            ' La cintura del collaudo qui sopra: si poteva stare fermi anche non
+            ' aggiornando più niente, e sarebbe stata una cura peggiore del male.
+            ' L'elenco deve continuare a dire quello che c'è nella scheda.
+            Using pannello As New TrovaLavoro.PannelloProfilo()
+
+                pannello.CreateControl()
+                pannello.Mostra(ProfiloDiProva())
+
+                Casella(pannello, "txtRuolo").Text = "Capo reparto"
+
+                Assert.AreEqual("Capo reparto — Romagna Logistica S.r.l.",
+                                Elenco(pannello, "lstLavoro").Items(0).ToString(),
+                                "la riga segue il campo")
+                Assert.AreEqual(0, Elenco(pannello, "lstLavoro").SelectedIndex,
+                                "e la voce scelta resta quella")
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaVoceSceltaICampiDellaSchedaNonSiScrivono()
+
+            ' L'altra metà del difetto, e la più silenziosa: con l'elenco vuoto i campi
+            ' erano scrivibili, ma quello che ci si scriveva non aveva dove andare —
+            ' e al primo «Aggiungi» spariva senza che nessuno lo dicesse. Un campo che
+            ' non può tenere niente si spegne, come l'«Elimina» accanto.
+            Using pannello As New TrovaLavoro.PannelloProfilo()
+
+                pannello.CreateControl()
+                pannello.Mostra(New TrovaLavoro.Dati.Profilo())
+
+                For Each nome As String In {"txtRuolo", "txtAzienda", "txtDurata", "txtTipo",
+                                            "txtCosaFacevoLavoro", "txtQuando", "txtConChi",
+                                            "txtCosaFacevoInformale", "txtCompetenza",
+                                            "txtTitoloStudio", "txtIstituto", "txtAnno"}
+                    Assert.IsTrue(Casella(pannello, nome).ReadOnly,
+                                  $"«{nome}» non ha una voce dove scrivere")
+                Next
+
+                ' I dati personali non stanno in un elenco: quelli restano scrivibili
+                ' anche su un profilo appena nato, ed è da lì che si comincia.
+                For Each nome As String In {"txtNome", "txtEmail", "txtTelefono",
+                                            "txtDomicilio", "txtLink"}
+                    Assert.IsFalse(Casella(pannello, nome).ReadOnly,
+                                   $"«{nome}» si scrive sempre")
+                Next
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub ConLaVoceSceltaICampiDellaSchedaTornanoScrivibili()
+
+            ' La controprova: spenti quando non servono, accesi quando servono. Senza
+            ' questa, «spegnili tutti» passerebbe il collaudo qui sopra.
+            Using pannello As New TrovaLavoro.PannelloProfilo()
+
+                pannello.CreateControl()
+                pannello.Mostra(ProfiloDiProva())
+
+                For Each nome As String In {"txtRuolo", "txtAzienda", "txtDurata", "txtTipo",
+                                            "txtCosaFacevoLavoro", "txtQuando", "txtConChi",
+                                            "txtCosaFacevoInformale", "txtCompetenza",
+                                            "txtTitoloStudio", "txtIstituto", "txtAnno"}
+                    Assert.IsFalse(Casella(pannello, nome).ReadOnly,
+                                   $"«{nome}» ha la sua voce e si scrive")
+                Next
+            End Using
+
+        End Sub
+
+        ' ==================================================================
         ' Il CV che arriva da una pagina (cap. 06.7 — T5d)
         ' ==================================================================
 
