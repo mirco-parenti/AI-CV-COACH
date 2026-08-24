@@ -121,6 +121,19 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    suo collaudo spostato in `in_sospeso.md`, e due giorni dopo quel collaudo trovò due
    difetti che 817 collaudi verdi non potevano vedere — uno vive nello spazio fra le due
    porte, l'altro è il modello che disobbedisce a una riga del prompt.)*
+16. **Una tappa si chiude rileggendo anche quel che aveva *promesso***: la regola 15 dice di
+   dichiarare la riserva, questa dice **dove cercarla**. Alla chiusura si torna all'elenco con
+   cui la tappa era stata **aperta** — la sua riga nel cap. 14, impegno per impegno — e si
+   spunta ciascuno, non solo quelli che qualche tempo ha raccolto per strada. Perché un
+   impegno che **nessun tempo ha preso in mano** non lascia traccia da nessuna parte: non è un
+   difetto, non è un debito annotato in `in_sospeso.md`, non è un collaudo rosso. Semplicemente
+   non esiste, e sparisce in silenzio — mentre tutto il resto del metodo (i collaudi, le
+   falsificazioni, il rito, `in_sospeso.md`) sorveglia solo ciò che si è **fatto**. Quel che
+   manca si annota in `in_sospeso.md` come le altre riserve. *(Ratificata 2026-08-24,
+   chiudendo T9e: la **demo (video) per il portfolio**, dichiarata da T9 il 5 agosto nella
+   stessa riga del diario, del README e del tag `v1.0`, era rimasta invisibile per diciannove
+   giorni. Non l'ha trovata nessun controllo su quel che era stato fatto: l'ha trovata la
+   rilettura di quel che era stato promesso.)*
 
 ## Contesto del progetto (fatti stabili + puntatori, niente stato copiato)
 
