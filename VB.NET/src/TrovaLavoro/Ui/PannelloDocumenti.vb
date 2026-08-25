@@ -22,9 +22,10 @@ Imports TrovaLavoro.Motore
 ''' <remarks>
 ''' <para><b>Nato intero nella struttura, riempito una tappa alla volta</b> (cap. 03.6):
 ''' anteprime ed esportazioni funzionavano dal primo giorno, «Prepara email» si è acceso
-''' con T6, la scelta della lingua e il prima/dopo dell'anti-slop con T7. Chi guarda
-''' l'applicazione a metà strada deve vedere dove sta andando, e i comandi che ancora non
-''' fanno niente si mostrano spenti, non nascosti.</para>
+''' con T6, la scelta della lingua con T7 (il prima/dopo dell'anti-slop si accese lì e fu
+''' tolto a T9d, e con lui la sua casella). Chi guarda l'applicazione a metà strada deve
+''' vedere dove sta andando, e i comandi che ancora non fanno niente si mostrano spenti,
+''' non nascosti.</para>
 ''' <para><b>Le anteprime passano dalla pagina di blocchi</b>, non dal JSON: le stampanti
 ''' sono tre — DOCX, PDF e questa, a video — e leggono tutte lo stesso modello (cap. 05.3).
 ''' Se l'anteprima leggesse il JSON per conto suo, mostrerebbe un documento che i file non
@@ -268,7 +269,7 @@ Public Class PannelloDocumenti
     End Sub
 
     ''' <summary>
-    ''' Lascia andare il 📄 CV base che era in mostra: il documento, il suo prima/dopo e
+    ''' Lascia andare il 📄 CV base che era in mostra: il documento, le riscritture a mano e
     ''' la provenienza che gli apparteneva.
     ''' </summary>
     ''' <remarks>
@@ -2034,8 +2035,8 @@ Public Class PannelloDocumenti
         ' «CV e lettera»: chi non tocca la tendina ottiene quel che otteneva prima di R8.
         cmbEsporta.SelectedIndex = 0
 
-        ' Nemmeno il prima/dopo della rifinitura: T7b è arrivata, e la casella la accende
-        ' AggiornaComandi quando c'è un confronto da mostrare.
+        ' Il prima/dopo della rifinitura non sta più qui, e non sta più da nessuna parte: la
+        ' casella che lo accendeva è stata tolta a T9d, insieme al confronto che mostrava.
 
         ' «Prepara email» non sta più qui: T6 è arrivata, e il bottone lo accende
         ' AggiornaComandi quando c'è una candidatura con la sua lettera.

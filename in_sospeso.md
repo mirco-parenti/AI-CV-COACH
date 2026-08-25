@@ -281,17 +281,47 @@ difetto: sono cose che aspettano una mano o una macchina.*
   perché è l'unica prova possibile del vincolo più rigido del progetto (un exe che parte dove
   non c'è niente). Installarlo prima brucia la sola macchina disponibile per quella prova, e
   non si torna indietro. *(cap. 13.1; cap. 14, T1 e T9e.)*
-- **La passata della regola 16 su T1→T8, mai fatta.** La regola — una tappa si chiude
-  rileggendo anche quel che aveva **promesso** — è nata chiudendo T9e ed è stata applicata
-  alla tappa che l'ha fatta nascere. Le otto prima non sono mai state rilette con quel metro:
-  quel che nessun tempo ha preso in mano non lascia traccia da nessuna parte, quindi se lì è
-  rimasto qualcosa non lo sa nessuno. *(regola 16 del `CLAUDE.md`; cap. 14.)*
 - **Il tag `v1.0` è rimandato, non dimenticato.** Va sul commit di `main`, e si mette **dopo**
   il giro D: se quella prova trovasse qualcosa, la 1.0 taggata sarebbe una versione che si sa
   già di dover correggere. Oggi il repository non ha nessun tag di rilascio. *(cap. 13.9;
   cap. 14, il sesto tempo di T9e.)*
 
+## Da questa passata della regola 16 su T1→T8 (2026-08-25)
+
+*La passata è stata fatta ed è in «Chiuse»: 250 impegni riletti su dieci tappe, **nessuno mai
+preso in mano**. I tre testi che ha trovato falsi erano tutti di documentazione e sono stati
+curati lo stesso giorno. Resta una cosa sola, e non è un difetto: una prova che in questo repo
+non si può rendere ripetibile.*
+
+- **Il profilo da LinkedIn non ha un collaudo che lo confronti col CV in PDF.** La coerenza fra
+  le due strade — la stessa persona letta dalla sua pagina e dal suo curriculum — è stata
+  verificata **una volta sola e a mano**, il 2026-08-14 (diario Step 2.14: 2196 caratteri contro
+  9681, una esperienza contro tre, né email né telefono «perché quel sito non li pubblica»). Un
+  collaudo ripetibile vorrebbe la pagina vera di una persona vera, e in un repo pubblico non ci
+  può stare: la strada, se si vuole chiudere, è una pagina **finta e parlante** come i dati del
+  giro D, non quelli di qualcuno. Finché non si fa, quella coerenza è **testimoniata, non
+  sorvegliata** — ed è il solo punto di T5d che il codice da solo non prova. *(cap. 06.7;
+  vista dalla passata della regola 16, che l'ha giudicata ✅ con riserva dichiarata.)*
+
 ## Chiuse
+
+- ✅ **La passata della regola 16 su T1→T8** *(aperta il 2026-08-24, **chiusa il 2026-08-25**)*.
+  Le nove tappe più il cancello T0 sono state rilette impegno per impegno contro il
+  **dichiarato** — il testo di apertura e la riga `Collaudo:` — e non contro il «Fatto:», che è
+  il racconto di ciò che si è fatto e quindi lo specchio in cui un impegno mai preso in mano non
+  si vede. **250 impegni**: 238 mantenuti, 9 fatti diversamente con la decisione tracciata (e
+  quasi sempre dichiarata nello stesso paragrafo che li prometteva), 3 già annotati qui.
+  **Nessun impegno sparito in silenzio**: quel che la regola 16 esiste per stanare, da T1 a T8
+  non c'era. Ha trovato invece **tre testi che dicevano il falso**, tutti curati lo stesso
+  giorno: l'**icona dell'eseguibile** data per mancante nel cap. 15 e nel cap. 14 mentre è
+  nell'exe dal primo tempo di T9e; il **cap. 14 che rinviava al cap. 02.5** per l'interruttore
+  del ragionamento esteso «che lì va acceso», mentre il 02.5 — e il codice — lo vogliono
+  **spento**; e **tre commenti** di `PannelloDocumenti.vb` che descrivevano la casella del
+  prima/dopo, tolta a T9d, uno dei quali al presente. Due dei tre li ha trovati il **secondo
+  controllo**, non la prima passata. Verificati anche i due impegni **trasversali** del
+  capitolo, che non appartengono a nessuna tappa: ogni tappa ha il suo Step nel diario, e il
+  rito del pool regge — 29 file, zero fuori impronta, ricalcolando gli SHA-256 senza passare da
+  `Sigilla`. *(regola 16 del `CLAUDE.md`; cap. 14; capp. 14 e 15 annotati, non riscritti.)*
 
 - ✅ **I dati finti del giro D, costruiti e provati** *(aperta il 2026-08-24 come metà della
   voce sulla chiave API, **chiusa il 2026-08-25**)*. Stanno in

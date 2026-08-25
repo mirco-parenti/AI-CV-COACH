@@ -35,6 +35,10 @@ verificate. Il logo è lo scudo Aviolab incorporato in forma binaria nel sorgent
 il segnaposto tipografico previsto (cap. 15, voce 4). **Restano in coda a Mirco**: la
 prova dell'exe su un PC davvero pulito, l'icona dell'eseguibile e l'SDK sulla postazione
 del tutor.
+*Aggiornamento del 2026-08-25 (passata della regola 16): delle tre, l'**icona è stata
+fatta** — è arrivata col primo tempo di T9e (`Risorse/TrovaLavoro.ico`, dichiarata nel
+`.vbproj` e incorporata nell'eseguibile), e questa riga ha continuato a darla per mancante
+per un giorno. Le altre due restano, e stanno in `in_sospeso.md`: le chiude il giro D.*
 
 ### T2 — Il motore e il pool — ✔ **CHIUSO il 2026-08-07**
 `Ai/LibreriaPrompt` (pool esterno + integrato, manifest, segnaposto);
@@ -43,8 +47,16 @@ del tutor.
 il confronto si fa a parità di modello, così una differenza nei risultati è una
 differenza di codice e non del modello sotto. Il salto a **Sonnet 5** (cap. 15, voce 6)
 è il **secondo esperimento**: si fa da `modelli.json` senza ricompilare e porta con sé
-l'interruttore del ragionamento esteso, che lì va acceso (cap. 02.5). Lo **streaming non
-è di questa tappa**: arriva con T4/T7, quando ci sarà un pannello che lo mostra.
+l'interruttore del ragionamento esteso, che lì va acceso (cap. 02.5).
+*Aggiornamento del 2026-08-25 (passata della regola 16): **è andata al contrario**, e il
+cap. 02.5 — citato qui sopra come fonte — dice l'opposto di questa riga. Su Sonnet 5
+l'interruttore va **spento** (`thinking: {"type": "disabled"}`), perché `max_tokens`
+limita ragionamento e risposta **insieme**: lasciarlo acceso tronca le risposte senza che
+l'API dia errore, e un confronto troncato produce JSON invalido. Così è stato fatto il
+2026-08-18 (`Ai/Modelli.vb`, `RagionamentoEsteso = False`). La frase resta com'era scritta,
+perché è quel che si credeva a T2; il rinvio, però, mandava a un capitolo che la smentisce.*
+Lo **streaming non è di questa tappa**: arriva con T4/T7, quando ci sarà un pannello
+che lo mostra.
 `Motore/EstrattoreJson`; `Motore/CalcoloMatch` che legge i valori da `taratura.json`
 (cap. 11.6); migrazione dei 15 prompt del prototipo nel pool (`Pool 1.00`).
 **Collaudo:** batteria di **non-regressione contro il prototipo** — stessi input degli
