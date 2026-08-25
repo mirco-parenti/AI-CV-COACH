@@ -1210,6 +1210,39 @@ della regola 16 su T1→T8**, mai fatta — con un ordine che non si può sbagli
 che non ce l'ha. Fuori dal giro D restano, come dichiarato chiudendo T9e, la **demo video** e
 il **tag `v1.0`**.
 
+*Dopo T9 — **i dati del giro D, provati prima del viaggio** (2026-08-25).* Delle tre cose che
+il paragrafo qui sopra dava per da fare, due si chiudono qui. Il **copione esiste**: è il
+**§13.10** del cap. 13, messo accanto alla procedura di rilascio perché il giro D è il passo
+*dopo* — sette voci col criterio per dirle passate (`D1` l'exe su un PC pulito, `D2` i
+documenti aperti in Word, `D3` un `.docx` salvato **davvero da Word** e reimportato, `D4` che
+D1-D3 siano avvenute lì, più le tre riserve `R-a/b/c`) e due tempi, prima il giro guidato con
+al centro la **catena di Word**, poi le mani al tutor su un compito solo. E i **dati non sono
+più da decidere**: sono in `casi/giro-d/` — un CV finto in PDF col suo sorgente, tre annunci e
+il `LEGGIMI` che dice cosa deve uscirne — e sono stati **provati qui con l'AI vera** prima di
+salire in valigia, perché un profilo che l'estrazione non digerisce misurerebbe il dato invece
+del programma, su una macchina che non è mia e in un tempo che non si ripete. Verdi, con le
+due insidie che hanno retto: la città esce **Forlì**, cioè il domicilio e non la residenza di
+Cesena, e i **traslochi** stampati sotto «Altre esperienze» finiscono fra le informali.
+
+Il seguito non era in programma, e viene dalla domanda su **quale** delle due insidie fosse
+davvero sorvegliata. La prima sì, ha un `Assert` in `CollaudiImportReale`; la seconda passava
+fra le maglie di tutti i controlli — `ControlloCollocazione` cerca la parola «volontario», che
+un trasloco non dice mai, `ControlloDoppioni` vede solo la voce contata due volte, e il
+conteggio delle formali sarebbe rimasto dentro la tolleranza. Nasce così **`ControlloCriterio`**,
+il **terzo** controllo che guarda dentro un profilo: confronta l'importato con
+`casi/profilo.json` sui **fatti** e non sulla prosa — le durate tengono le parole del CV, le
+descrizioni il modello le riformula — e appaia un'attività informale promossa a lavoro con
+**due parole distintive nella stessa voce**, distintive perché il contrasto lo dà il criterio
+stesso. Lo fa girare **`CollaudiGiroD`**: una prova con l'API e **nove senza rete**, e vuole
+**solo la chiave**, perché il CV sta nel repo — è inventato — e il metro non è il prototipo ma
+il criterio. **Nove collaudi nuovi, 1139 verdi** (erano 1130), con **tre falsificazioni** che
+hanno fatto cadere ogni volta solo il collaudo che sorveglia quel pezzo; due dei nove esistono
+apposta perché il controllo **non** lampeggi. Le classi che chiedono l'API vera passano da nove
+a **dieci**. Niente prompt toccati: **Pool 1.13** e versione **1.0.000** restano dove erano.
+Del paragrafo precedente resta aperto **quale chiave** portare sulla macchina del tutor, la
+**passata della regola 16 su T1→T8** e — fuori dal giro D — la **demo video** e il **tag
+`v1.0`**.
+
 
 ## Ordine e dipendenze
 

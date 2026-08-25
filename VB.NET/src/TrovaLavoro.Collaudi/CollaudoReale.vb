@@ -51,17 +51,21 @@ Namespace NonRegressione
         ''' una sola — il posto dove si è raggiungibili per lavorare. Il caso di confine
         ''' non è più tale, e il pass/fail è tornato: lo dà
         ''' <see cref="CittaFuoriDalDomicilio"/>. Ma il metro è il <b>CV</b>, non l'altra
-        ''' colonna: il prototipo è fermo al pool 1.00 e la residenza continua a darla,
-        ''' quindi pretendere che i due valori coincidano boccerebbe l'app proprio dove ha
+        ''' colonna: il prototipo è fermo al pool 1.00, quella regola non ce l'ha, e
+        ''' pretendere che i due valori coincidano boccerebbe l'app proprio dove ha
         ''' imparato a fare meglio. In tabella la differenza resta perciò un ⚠️ da
         ''' leggere.</para>
+        ''' <para><b>Senza quella regola non vuol dire con la regola opposta</b>: il
+        ''' 2026-08-25, sul CV del giro D, il prototipo ha dato il <b>domicilio</b> come
+        ''' l'app. Non è un difetto e non cambia il metro — dice solo che il suo esito lì
+        ''' non è garantito, e che una differenza va letta, non prevista.</para>
         ''' </remarks>
         Friend Const PerchePerLaCitta As String =
             "*La **città** è segnalata e non bocciata **in questa tabella**, ma un " &
             "pass/fail adesso ce l'ha: dal **Pool 1.02** il prompt decide — la città è il " &
             "**domicilio**, una sola — e il metro è il **CV**, non l'altra colonna. Chi " &
-            "legge lo stesso CV con un prompt precedente tiene ancora la residenza: due " &
-            "valori diversi qui non sono di per sé un difetto della lettura.*"
+            "legge lo stesso CV con un prompt precedente può ancora tenere la residenza: " &
+            "due valori diversi qui non sono di per sé un difetto della lettura.*"
 
         ''' <summary>
         ''' Perché il <b>numero</b> delle esperienze informali è segnalato e non bocciato,

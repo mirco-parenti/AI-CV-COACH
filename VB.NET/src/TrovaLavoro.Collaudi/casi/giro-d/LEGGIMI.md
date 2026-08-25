@@ -39,6 +39,16 @@ esperienza informale, le quattro competenze, i due titoli di formazione.
 Se una delle due non regge, non è il giro D a essere fallito: è un reperto, e vale il
 viaggio da sola.
 
+**A guardarle non sono più io: è `CollaudiGiroD`** *(2026-08-25)*. Importa questo PDF con
+l'AI vera e confronta il profilo che ne esce con `../profilo.json`, sui **fatti** e non
+sulla prosa — le durate tengono le parole del CV e le descrizioni il modello le riformula
+ogni volta. Vuole **solo la chiave**: il CV sta qui dentro perché è inventato, e il metro
+non è il prototipo ma il criterio. Prima esisteva un `Assert` per la sola insidia 1 (la
+città, in `CollaudiImportReale`): la 2 passava fra le maglie di tutti i controlli, perché
+`ControlloCollocazione` cerca la parola «volontario» — che un trasloco non dice mai — e il
+conteggio delle esperienze formali sarebbe rimasto dentro la tolleranza. Adesso la vede
+`ControlloCriterio`.
+
 ## Gli esiti attesi dei tre annunci
 
 | Annuncio | Che cosa ci si aspetta | Perché è nel giro |

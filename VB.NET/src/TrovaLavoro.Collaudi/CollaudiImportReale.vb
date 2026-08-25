@@ -29,7 +29,7 @@ Namespace NonRegressione
     ''' fra i due non è varianza dell'AI, è un difetto da guardare. La <b>città</b> ha un
     ''' pass/fail suo, e di forma diversa: dal <b>pool 1.02</b> il prompt decide che è il
     ''' domicilio e che è una sola, quindi si giudica contro il <b>CV</b> e non contro il
-    ''' prototipo, che essendo fermo al pool 1.00 continua a dare la residenza
+    ''' prototipo, che quella regola non ce l'ha e può dare la residenza
     ''' (<see cref="CollaudoReale.PerchePerLaCitta"/>). Sui conteggi delle sezioni vale
     ''' una tolleranza dichiarata (<see cref="TolleranzaVoci"/>), perché dividere o unire
     ''' una voce è un giudizio; sul resto — <c>cosa_facevo</c>, le competenze, il numero
@@ -212,9 +212,9 @@ Namespace NonRegressione
                 ' --- Passo 2: la città è il domicilio, e una sola. --------------------
                 ' Il campo è tornato un pass/fail perché dal pool 1.02 il prompt decide
                 ' quale dei due indirizzi tenere (CollaudoReale.PerchePerLaCitta). Si
-                ' giudica la sola app e contro il CV: il prototipo, fermo al pool 1.00,
-                ' continua a dare la residenza, e pretendere che coincidano boccerebbe
-                ' l'app proprio dove ha imparato a fare meglio.
+                ' giudica la sola app e contro il CV: il prototipo quella regola non ce
+                ' l'ha, e pretendere che i due coincidano boccerebbe l'app proprio dove ha
+                ' imparato a fare meglio.
                 Assert.IsEmpty(cittaFuoriPosto, "contatti.citta: " & cittaFuoriPosto)
 
                 ' --- Passo 2: quante voci per sezione, entro la tolleranza. -----------

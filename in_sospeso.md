@@ -269,15 +269,12 @@ difetto: sono cose che aspettano una mano o una macchina.*
   orfana**, che vuole un profilo eliminato e rifatto con una candidatura vecchia ancora in
   casa. Si chiudono in una passata sola, su questa macchina, cambiando la scala di Windows —
   che chiede una disconnessione. *(cap. 03.4, 03.6, 08.4, 11.1; regola 15.)*
-- **La chiave API sulla postazione del tutor** — e i **dati finti** da costruire. Senza chiave
-  l'applicazione si apre ma non ragiona, e metà del giro D non si può fare; `segreti.bin` non
-  si trasferisce copiandolo, perché è cifrato con DPAPI e legato all'utente Windows che l'ha
-  scritto, quindi là la chiave si digita a mano e si toglie andando via. **Quale** chiave usare
-  resta da decidere. *La metà sui dati è invece decisa il 2026-08-24: si va con dati **finti**
-  costruiti apposta — nome parlante, `333 0000000`, un percorso coerente — così sulla macchina
-  di qualcun altro non finisce niente di mio e il giro resta ripetibile. Restano da
-  **costruire**, e da provare qui prima di partire: un profilo finto che l'estrazione non
-  digerisce brucerebbe il giro là.* *(cap. 11.3; cap. 13.10.)*
+- **La chiave API sulla postazione del tutor.** Senza chiave l'applicazione si apre ma non
+  ragiona, e metà del giro D non si può fare; `segreti.bin` non si trasferisce copiandolo,
+  perché è cifrato con DPAPI e legato all'utente Windows che l'ha scritto, quindi là la chiave
+  si digita a mano e si toglie andando via. **Quale** chiave usare resta da decidere. *L'altra
+  metà di questa voce — i dati finti da costruire e da provare — si è chiusa il 2026-08-25 ed
+  è in fondo.* *(cap. 11.3; cap. 13.10.)*
 - **⚠ L'ordine che non si può sbagliare: l'SDK .NET 10 sulla postazione del tutor si installa
   *dopo* il giro D.** La voce di T1 qui sopra lo chiede perché quella macchina possa
   compilare, ed è giusta — ma il giro D vuole esattamente una macchina **senza** quell'SDK,
@@ -296,6 +293,19 @@ difetto: sono cose che aspettano una mano o una macchina.*
 
 ## Chiuse
 
+- ✅ **I dati finti del giro D, costruiti e provati** *(aperta il 2026-08-24 come metà della
+  voce sulla chiave API, **chiusa il 2026-08-25**)*. Stanno in
+  `VB.NET/src/TrovaLavoro.Collaudi/casi/giro-d/`: un CV in PDF di due pagine col suo sorgente
+  HTML — così il PDF si rifà invece di essere un binario di cui nessuno sa l'origine — tre
+  annunci (alto, medio, eliminatorio) e il `LEGGIMI` che dice cosa deve uscirne. Il candidato è
+  lo **stesso Luca Ferrari** di `casi/profilo.json`, e non per pigrizia: quel file diventa così
+  il **criterio** con cui si dice se l'import ha funzionato, invece di giudicare a occhio.
+  **Provati qui prima di partire**, come la voce chiedeva — `CollaudiImportReale` puntato su
+  quella cartella, con l'AI vera: verde, e le due insidie messe apposta hanno retto (la città
+  esce **Forlì**, cioè il domicilio e non la residenza di Cesena; i **traslochi** stampati
+  sotto «Altre esperienze» finiscono fra le informali). Dalla domanda su quale delle due fosse
+  davvero sorvegliata è poi nato `ControlloCriterio` con il suo `CollaudiGiroD`, perché la
+  seconda non lo era da nessuno. *(cap. 13.10; cap. 14, «Dopo T9»; `casi/giro-d/LEGGIMI.md`.)*
 - ✅ **Il copione del giro D** *(aperta il 2026-08-24 aprendo le rifiniture pre-giro D,
   **scritta** lo stesso giorno)*. È il **§13.10** del cap. 13, accanto alla procedura di
   rilascio, perché il giro D è il passo dopo il rilascio: pubblicato l'eseguibile, lo si porta
