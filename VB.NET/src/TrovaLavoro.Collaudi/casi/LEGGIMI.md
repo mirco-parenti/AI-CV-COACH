@@ -28,6 +28,7 @@ resta traccia.
 | `reale/confronto_*.json` | L'esito del collaudo reale di T2: risposta del prototipo, risposta dell'app, e il ricalcolo. |
 | `reale/dialogo_guidato.md` | Il collaudo di tappa di T3, gamba C: il dialogo guidato condotto per intero con l'AI vera sulla traccia di **Anna Ricci**, che non esiste. Si legge come una conversazione, e dice dove è finito ogni frammento detto nel turno sbagliato. |
 | `reale/checklist_*.md` | Il collaudo di tappa di T9: la checklist «Problemi e mitigazioni» del prototipo ripercorsa con l'AI vera. Tre rapporti — il candidato che si vende (voci 1, 2, 3, 5), l'annuncio scarno (voce 7), il confronto con le lacune (voce 8) — e ognuno dice in testa quali voci copre. Le persone e le aziende sono inventate. |
+| `giro-d/` | Il materiale del **giro D** (cap. 13.10): il CV finto in PDF col suo sorgente e tre annunci, più il `LEGGIMI.md` che dice cosa deve uscirne. Il criterio dell'import è `profilo.json` qui accanto, e a sorvegliarlo c'è `CollaudiGiroD`. |
 | `reale/dialogo_turno_formali.json` | Lo stesso turno «esperienze formali» chiesto all'app e al prototipo con la **stessa identica risposta**: la prova di parità della gamba C. |
 
 ## Le due batterie
@@ -50,7 +51,7 @@ ovunque e in pochi secondi. Per la maggior parte è l'API; per quattro classi è
 messaggi — senza spendere un token né toccare la rete. Vale la pena tenerle distinte,
 perché i secondi girano anche dove la chiave non c'è.
 
-*Chi chiede l'**API vera*** (nove classi):
+*Chi chiede l'**API vera*** (dieci classi):
 
 | Classe | Cosa chiede | Chiave | CV vero | Prototipo |
 |---|---|---|---|---|
@@ -58,6 +59,7 @@ perché i secondi girano anche dove la chiave non c'è.
 | `CollaudiImportReale` | lo stesso CV importato dalle due parti | sì | sì | sì |
 | `CollaudiFormatiReale` | lo stesso CV dalle quattro porte (PDF, DOCX, TXT, MD) | sì | sì | — |
 | `CollaudiImportProfilo` | il CV vero in PDF che diventa un profilo | sì | sì | — |
+| `CollaudiGiroD` | il CV finto del giro D contro il suo criterio (`profilo.json`): le due insidie del CV, e i fatti del profilo | sì | — | — |
 | `CollaudiDialogoReale` | il dialogo guidato da zero; un turno solo chiesto anche al prototipo; e la voce mezza vuota che si completa davanti al modello vero | sì | — | solo per il turno di parità |
 | `CollaudiChecklistReale` | le tre prove della checklist «Problemi e mitigazioni» (cap. 14, T9) | sì | — | — |
 | `CollaudiCurePromptReale` | le cure del Pool 1.13 provate sull'AI vera: il mestiere detto nudo, il posto che non è un ruolo, la via che non sparisce, la lettera che recepisce un fatto riscritto a mano (R1, R3, R4, R7) | sì | — | — |

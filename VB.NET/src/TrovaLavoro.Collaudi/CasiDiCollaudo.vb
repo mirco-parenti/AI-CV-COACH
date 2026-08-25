@@ -62,6 +62,24 @@ Friend Module CasiDiCollaudo
     End Function
 
     ''' <summary>
+    ''' Il CV del <b>giro D</b> (cap. 13.10): due pagine in PDF, lo stesso Luca Ferrari
+    ''' inventato di <see cref="Profilo"/> — che di quell'import è il criterio. Sta nel
+    ''' repo, e non fuori come il CV vero, proprio perché è inventato.
+    ''' </summary>
+    Public Function CvDelGiroD() As String
+
+        Dim pdf As String = Path.Combine(Cartella, "giro-d", "cv_luca_ferrari.pdf")
+
+        If Not File.Exists(pdf) Then
+            Throw New FileNotFoundException(
+                "Non trovo il CV del giro D: dovrebbe stare in casi/giro-d/.", pdf)
+        End If
+
+        Return pdf
+
+    End Function
+
+    ''' <summary>
     ''' I giudizi dell'anello 3 per uno dei due casi: la <b>lista</b> che il confronto
     ''' produce e che la mitigazione riceve.
     ''' </summary>
