@@ -177,7 +177,9 @@ fiducia di quanta ne serva qui.
 
 In *Informazioni* c'è **«Cerca aggiornamenti»**: premuto, chiede a GitHub qual è l'ultima
 versione pubblicata e te lo dice. Se ce n'è una nuova, si scarica il nuovo `.exe` e si
-**sostituisce il vecchio**: i tuoi dati non si toccano e il programma riparte da dov'era.
+**sostituisce il vecchio**: i tuoi dati non si toccano e il programma riparte da dov'era. Se
+ti risponde che *non risulta pubblicata nessuna versione*, non è un guasto: vuol dire che
+quella che hai è l'unica che esiste.
 
 Finché non lo premi, verso GitHub non parte niente.
 

@@ -62,7 +62,16 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
 | E il messaggio dice **quale** | `TrovaLavoro/Ai/ClientClaude.vb` | `SpiegaIlModello` scrive sempre «richiesto» invece del nome | `UnModelloRitiratoNonEUnaRichiestaSbagliata` |
 | Riempire le tendine non è scegliere | `TrovaLavoro/Ui/FinestraImpostazioni.vb` | in `RiempiLeTendine` la guardia diventa `_sto = False` | `AprirlaNonScriveModelliJson`, `LElencoArrivatoAllungaLeTendineSenzaCambiareLaScelta`, `DiceCosaGiraSottoIlCofano`, `SalvareUnaPreferenzaAccendeIlBottoneCheEliminaTutto`, `IBottoniDistruttiviSonoSpentiQuandoNonCENiente` |
 
-## Due cose imparate falsificando, che valgono più della tabella
+| L'alias e la versione datata sono lo stesso modello | `TrovaLavoro/Ai/ElencoModelli.vb` | in `ConQuelloInUso` il confronto torna `v.Id = cercato` | `LAliasNonSiRaddoppiaConLaSuaVersioneDatata` |
+| Il listino riconosce l'alias di quel che ha risposto | `TrovaLavoro/Ai/Listino.vb` | si toglie da `PerModello` il ciclo su `IdModello.StessoModello` | `IlPrezzoSiTrovaAncheConLIdentificativoDatato` |
+| Si toglie la data, e **solo** la data | `TrovaLavoro/Ai/IdModello.vb` | la regex diventa `-\d+$` invece di `-\d{8}$` | `QuelCheNonEUnaDataResta`, `DueModelliDiversiRestanoDiversi`, `LAliasNonSiRaddoppiaConLaSuaVersioneDatata`, `UnRitiratoEntraLoStessoAncheOraCheSiRiconosconoGliAlias` |
+| In «Informazioni» nessun controllo ne copre un altro | `TrovaLavoro/Ui/FinestraInformazioni.Designer.vb` | `btnControllaVersione` torna in `Point(120, 464)`, sopra la riga del copyright | `NessunControlloNeCopreUnAltro` |
+| E nessuno esce dalla finestra | `TrovaLavoro/Ui/FinestraInformazioni.Designer.vb` | `btnComeFunziona` va in `Point(14, 700)`, sotto il bordo | `TuttoStaDentroLaFinestra` |
+| Un 404 non è un guasto: è «non c'è nessuna versione» | `TrovaLavoro/Motore/ControlloVersione.vb` | si toglie il ramo `If risposta.StatusCode = HttpStatusCode.NotFound` | `SenzaNessunaVersionePubblicataNonSiParlaDiGuasti` |
+| «Chiudi» delle Impostazioni non scorre via | `TrovaLavoro/Ui/FinestraImpostazioni.Designer.vb` | `btnChiudi` torna dentro `pnlContenuto` invece che nella fascia | `ChiudiRestaInVistaAncheQuandoIlContenutoNonCiSta`, `QuandoSiScorreNienteFinisceSottoLaBarra` |
+| E la fascia si ancora davvero al fondo | `TrovaLavoro/Ui/FinestraImpostazioni.Designer.vb` | `pnlFascia.Dock` diventa `DockStyle.None` | `ChiudiRestaInVistaAncheQuandoIlContenutoNonCiSta` |
+
+## Tre cose imparate falsificando, che valgono più della tabella
 
 - **Un collaudo può restare verde per il motivo sbagliato.** Il primo collaudo dell'a capo
   nell'`.eml` spezzava le righe solo su `CRLF`: col codice rotto e un a capo isolato (`LF`)
@@ -83,6 +92,16 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
   rimettere le guardie: è stata **togliere l'anello**, separando chi riempie le tendine da
   chi aggiorna le righe sotto. Poi una guardia sola è bastata, ed è diventata falsificabile
   per davvero — cinque rossi. *(2026-08-27.)*
+
+- **Un dato di prova più gentile della realtà rende il banco cieco, e nessuna falsificazione
+  lo stana.** La risposta finta dell'elenco modelli dichiarava `claude-haiku-4-5`, che è
+  l'alias con cui il programma *chiede*; l'API vera dichiara `claude-haiku-4-5-20251001`. Con
+  quel dato ogni collaudo era verde e ogni falsificazione produceva il suo rosso, mentre
+  nell'applicazione l'alias e la versione datata venivano trattati come **due modelli
+  diversi** — la tendina mostrava Haiku 4.5 due volte e il contatore di spesa non prezzava le
+  chiamate del modello predefinito. La falsificazione difende il collaudo dal codice, non il
+  collaudo dai propri dati: quelli si difendono solo **guardando la cosa vera** — qui, aprendo
+  le Impostazioni e leggendo che cosa c'è scritto nelle tendine. *(2026-08-27.)*
 
 ## Quel che manca
 

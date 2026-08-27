@@ -297,6 +297,24 @@ riporta dove si era (candidatura, profilo o Home).*
   finestra continua a non ripetere le Impostazioni: sono due porte, non due vetrine degli
   stessi valori.
 
+- **Guardate a occhio, quelle due finestre avevano quattro difetti** *(2026-08-27, Step 2.50)*.
+  Erano provate al banco e mai **viste**, ed è la specie di riserva che solo un paio d'occhi
+  scioglie. In «Informazioni» la riga del copyright e la fila dei bottoni stavano sulla stessa
+  banda: «Cerca aggiornamenti» si leggeva a metà e, nei tre quarti coperti, **non si poteva
+  premere** — il clic lo prendeva la scritta davanti, che a video non sembra un controllo. Ora
+  le tre righe di testo, i due comandi, l'esito e la coppia «Come funziona»/«Chiudi» stanno su
+  bande separate, e **due collaudi** difendono la disposizione: nessun controllo ne copre un
+  altro, nessuno esce dalla finestra. Sono collaudi che si scrivono una volta e valgono per
+  sempre, perché confrontano rettangoli e non pixel.
+- **In P8 la fascia dei comandi non scorre** *(stesso giorno)*. La finestra si apre alta quanto
+  l'area di lavoro e il suo contenuto è più alto: «Chiudi» nasceva **145 pixel sotto il bordo**
+  dello schermo, e per premerlo bisognava prima scoprire che la finestra si scorreva. Adesso a
+  scorrere è un pannello di dentro, e in fondo resta ferma una fascia con «Chiudi» — separata
+  da un filo, perché il testo che le passa sotto non sembri tagliato da niente. È la stessa
+  regola dei pannelli principali (3.4, la fascia dei comandi), applicata alla finestra che ne
+  aveva più bisogno. Le due pulizie restano dov'erano, dentro «I tuoi dati»: un'azione critica
+  si spiega col contesto in cui sta, e in una fascia sempre a video sarebbe sempre a portata.
+
 ## 3.5 Il pannello del logo (in basso a sinistra)
 
 Elemento identitario irrinunciabile, presente in ogni momento nell'angolo in basso a

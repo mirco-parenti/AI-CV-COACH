@@ -52,6 +52,19 @@ Namespace Ai
         End Class
 
         ''' <summary>Una risposta come quella vera dell'API, ridotta a due modelli.</summary>
+        ''' <summary>
+        ''' Com'è fatto davvero l'elenco dell'API: Haiku 4.5 lo dichiara <b>datato</b>,
+        ''' non con l'alias. Questa costante è nata il 2026-08-27 perché quella qui sotto
+        ''' era più gentile della realtà — scriveva <c>claude-haiku-4-5</c> — e con un
+        ''' dato di prova così nessun collaudo poteva accorgersi che l'alias e la versione
+        ''' datata venivano trattati come due modelli diversi.
+        ''' </summary>
+        Private Const RispostaComeQuellaVera As String =
+            "{""data"":[" &
+            "{""type"":""model"",""id"":""claude-sonnet-5"",""display_name"":""Claude Sonnet 5""}," &
+            "{""type"":""model"",""id"":""claude-haiku-4-5-20251001"",""display_name"":""Claude Haiku 4.5""}]," &
+            """has_more"":false}"
+
         Private Const RispostaVera As String =
             "{""data"":[" &
             "{""type"":""model"",""id"":""claude-sonnet-5"",""display_name"":""Claude Sonnet 5""}," &
@@ -221,6 +234,41 @@ Namespace Ai
 
             Assert.AreEqual(3, conRitirato.Count, "l'elenco si allunga di uno")
             Assert.AreEqual("claude-sonnet-4-6", conRitirato(0).Id, "e sta in cima: è quello da sostituire")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LAliasNonSiRaddoppiaConLaSuaVersioneDatata()
+
+            ' Il difetto che ha fatto nascere IdModello: il programma chiede
+            ' claude-haiku-4-5, l'API elenca claude-haiku-4-5-20251001, e la tendina
+            ' mostrava Haiku 4.5 due volte — una col nome e una con l'identificativo
+            ' crudo, senza modo di capire che era lo stesso modello (2026-08-27).
+            Dim daApi As IReadOnlyList(Of ModelloDisponibile) =
+                ElencoModelli.DalCorpo(RispostaComeQuellaVera).Modelli
+
+            Dim voci As IReadOnlyList(Of ModelloDisponibile) =
+                ElencoModelli.ConQuelloInUso(daApi, "claude-haiku-4-5")
+
+            Assert.AreEqual(2, voci.Count, "l'elenco non si allunga: è lo stesso modello")
+            Assert.AreEqual("claude-haiku-4-5-20251001", voci(1).Id, "e resta quello che l'API dichiara")
+            Assert.AreEqual("Claude Haiku 4.5", voci(1).Nome, "col suo nome, non con l'identificativo crudo")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnRitiratoEntraLoStessoAncheOraCheSiRiconosconoGliAlias()
+
+            ' La cura non deve costare la promessa di prima: di un modello ritirato
+            ' nell'elenco non c'è nessuna versione, e lui in cima ci va.
+            Dim daApi As IReadOnlyList(Of ModelloDisponibile) =
+                ElencoModelli.DalCorpo(RispostaComeQuellaVera).Modelli
+
+            Dim voci As IReadOnlyList(Of ModelloDisponibile) =
+                ElencoModelli.ConQuelloInUso(daApi, "claude-sonnet-4-6")
+
+            Assert.AreEqual(3, voci.Count, "l'elenco si allunga di uno")
+            Assert.AreEqual("claude-sonnet-4-6", voci(0).Id, "e sta in cima: è quello da sostituire")
 
         End Sub
 

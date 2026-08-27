@@ -463,8 +463,12 @@ Public Class FinestraImpostazioni
             tendina.Items.Add(voce)
         Next
 
+        ' Si sceglie per modello e non per identificativo: quello in uso è l'alias
+        ' (claude-haiku-4-5), quello elencato dall'API è la sua versione datata
+        ' (claude-haiku-4-5-20251001), e cercando l'uguaglianza esatta la tendina restava
+        ' senza niente di scelto proprio sul modello di casa (2026-08-27).
         For posto As Integer = 0 To voci.Count - 1
-            If voci(posto).Id = idInUso Then
+            If Ai.IdModello.StessoModello(voci(posto).Id, idInUso) Then
                 tendina.SelectedIndex = posto
                 Return
             End If
@@ -748,6 +752,17 @@ Public Class FinestraImpostazioni
         BackColor = StileApp.SfondoContenuto
         Font = StileApp.FontTesto
 
+        ' Un filo sopra la fascia: senza, il testo che le scorre sotto sembra tagliato a
+        ' metà da niente, invece che passare dietro a qualcosa (2026-08-27).
+        pnlContenuto.BackColor = StileApp.SfondoContenuto
+        pnlFascia.BackColor = StileApp.SfondoContenuto
+        AddHandler pnlFascia.Paint,
+            Sub(mittente As Object, disegno As PaintEventArgs)
+                Using filo As New Pen(StileApp.BordoLeggero)
+                    disegno.Graphics.DrawLine(filo, 0, 0, pnlFascia.Width, 0)
+                End Using
+            End Sub
+
         lblTitolo.Font = StileApp.FontTitoloPannello
         lblTitolo.ForeColor = StileApp.RossoTitoli
 
@@ -831,18 +846,38 @@ Public Class FinestraImpostazioni
         ' doppio delle righe era proprio questo (decisione 15.7).
         Dim larghezza As Integer = ScalaSchermo.InPixelDelloSchermo(LarghezzaFinestra, Me.DeviceDpi)
 
-        Dim voluta As Integer = MettiInFila(larghezza)
+        ' La fascia si misura sul bottone che porta: a DPI alti cresce con lui.
+        pnlFascia.Height = 2 * StileApp.MargineRiquadro + btnChiudi.Height
+
+        Dim voluta As Integer = MettiInFila(larghezza) + pnlFascia.Height
         Dim siScorre As Boolean = ScalaSchermo.ServeScorrimento(voluta, altezzaDisponibile)
 
         If siScorre Then
             voluta = MettiInFila(ScalaSchermo.LarghezzaSenzaLaBarra(
-                larghezza, siScorre, SystemInformation.VerticalScrollBarWidth))
+                larghezza, siScorre, SystemInformation.VerticalScrollBarWidth)) + pnlFascia.Height
         End If
 
-        Me.AutoScroll = siScorre
+        ' Scorre il contenuto, non la finestra: la fascia in fondo deve restare dov'è
+        ' anche quando sopra di lei si scorre (2026-08-27).
+        pnlContenuto.AutoScroll = siScorre
         ClientSize = New Size(larghezza, ScalaSchermo.AltezzaSostenibile(voluta, altezzaDisponibile))
 
+        ' La barra di scorrimento vive dentro il contenuto e non tocca la fascia: qui
+        ' «Chiudi» sta al suo margine, sempre.
+        btnChiudi.Location = New Point(larghezza - StileApp.MargineRiquadro - btnChiudi.Width,
+                                       StileApp.MargineRiquadro)
+
     End Sub
+
+    ''' <summary>
+    ''' Vero quando il contenuto non ci sta e scorre. Pubblica per il banco: adesso a
+    ''' scorrere è il pannello di dentro, e da fuori non si vedrebbe più.
+    ''' </summary>
+    Public ReadOnly Property SiScorre As Boolean
+        Get
+            Return pnlContenuto.AutoScroll
+        End Get
+    End Property
 
     ''' <summary>
     ''' Mette i controlli in colonna dentro questa larghezza, e dice fin dove arrivano. Il
@@ -927,10 +962,8 @@ Public Class FinestraImpostazioni
 
         lblStato.Location = New Point(sinistra, btnEliminaTutto.Bottom + StileApp.MargineRiquadro)
 
-        btnChiudi.Location = New Point(larghezza - StileApp.MargineRiquadro - btnChiudi.Width,
-                                       lblStato.Bottom + StileApp.MargineRiquadro)
-
-        Return btnChiudi.Bottom + StileApp.MargineRiquadro
+        ' «Chiudi» non sta più in coda al contenuto: vive nella fascia, che non scorre.
+        Return lblStato.Bottom + StileApp.MargineRiquadro
 
     End Function
 

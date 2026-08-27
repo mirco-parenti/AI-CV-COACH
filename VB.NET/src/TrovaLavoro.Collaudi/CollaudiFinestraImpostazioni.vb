@@ -361,16 +361,54 @@ Namespace Ui
                         ' cui la finestra scorre, e l'unica in cui quella barra esiste.
                         finestra.DisponiIn(200)
 
-                        Assert.IsTrue(finestra.AutoScroll, "con così poco spazio si scorre")
+                        Assert.IsTrue(finestra.SiScorre, "con così poco spazio si scorre")
 
                         Dim quantoResta As Integer =
                             finestra.ClientSize.Width - SystemInformation.VerticalScrollBarWidth
 
-                        For Each controllo As Control In finestra.Controls
+                        ' A scorrere è il pannello del contenuto, non più la finestra: la
+                        ' barra si prende la sua fetta lì dentro (2026-08-27).
+                        Dim contenuto As Control =
+                            finestra.Controls.Find("pnlContenuto", searchAllChildren:=False).Single()
+
+                        For Each controllo As Control In contenuto.Controls
                             Assert.IsTrue(controllo.Right <= quantoResta,
                                           $"«{controllo.Name}» arriva a {controllo.Right}, " &
                                           $"oltre i {quantoResta} che restano accanto alla barra")
                         Next
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub ChiudiRestaInVistaAncheQuandoIlContenutoNonCiSta()
+
+            ' Guardando la finestra a occhio, il 2026-08-27: appena aperta su uno schermo
+            ' da 1080, «Chiudi» stava 145 pixel sotto il bordo — c'era, era acceso, e
+            ' l'elenco dei controlli lo confermava, ma per premerlo bisognava prima
+            ' scoprire che la finestra si scorreva. Ora vive nella fascia, che non scorre.
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        finestra.DisponiIn(200)
+                        finestra.PerformLayout()
+
+                        Dim chiudi As Button = Comando(finestra, "btnChiudi")
+                        Dim fascia As Control = chiudi.Parent
+
+                        Assert.IsTrue(finestra.SiScorre, "con così poco spazio si scorre")
+                        Assert.AreEqual("pnlFascia", fascia.Name,
+                                        "«Chiudi» non sta nel pannello che scorre")
+                        Assert.IsTrue(fascia.Top > 0,
+                                      "la fascia ha preso il suo posto in fondo alla finestra")
+                        Assert.IsTrue(fascia.Top + chiudi.Bottom <= finestra.ClientSize.Height,
+                                      $"«Chiudi» arriva a {fascia.Top + chiudi.Bottom}, " &
+                                      $"oltre i {finestra.ClientSize.Height} della finestra")
 
                     End Using
 
@@ -390,7 +428,7 @@ Namespace Ui
 
                         finestra.DisponiIn(4000)
 
-                        Assert.IsFalse(finestra.AutoScroll, "con tutto questo spazio non si scorre")
+                        Assert.IsFalse(finestra.SiScorre, "con tutto questo spazio non si scorre")
 
                         Assert.AreEqual(finestra.ClientSize.Width - StileApp.MargineRiquadro,
                                         Comando(finestra, "btnChiudi").Right,

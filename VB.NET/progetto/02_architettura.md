@@ -312,6 +312,20 @@ i tool MCP).
   `not_found_error` diventano la causa `ModelloRitirato`, che **nomina il modello** e dice
   dove si cambia. Il nome viene dalla richiesta, non dall'eco dell'API: è la differenza fra
   dirlo e ripeterlo.
+- **L'alias e la versione datata sono lo stesso modello** *(2026-08-27, guardando le
+  Impostazioni a occhio)*. Il programma chiede i modelli per **alias** — `claude-haiku-4-5`,
+  `claude-sonnet-5` — che è la forma dichiarata dal cap. 15 voce 6 e quella che non invecchia
+  a ogni versione nuova. L'API però *elenca* e *risponde* con l'identificativo pieno:
+  `claude-haiku-4-5-20251001`. Finché nessuno gliel'ha detto, il programma li trattava da due
+  modelli diversi, e si vedeva in due punti lontani fra loro: nella tendina, dove Haiku 4.5
+  compariva **due volte** — la voce dell'API col nome, e l'alias in uso con l'identificativo
+  crudo, inserito in cima come si fa con i ritirati (cap. 02.5, `ConQuelloInUso`) —; e nel
+  conto della spesa, dove le chiamate al livello semplice risultavano **senza prezzo**, perché
+  nel `chiamate_ai.csv` si scrive il modello che ha risposto mentre il listino conosce l'alias.
+  La riconciliazione sta in un posto solo (`Ai/IdModello`) e toglie **solo il suffisso della
+  data**: `claude-opus-4-5` e `claude-opus-4-6` restano due modelli diversi. La scelta
+  alternativa — cambiare i predefiniti negli identificativi datati — curava il sintomo al
+  prezzo di una build nuova a ogni versione di Haiku, e contraddiceva la voce 6.
 - **L'interruttore del ragionamento esteso.** Haiku 4.5 lo tiene spento di suo e il
   prototipo non ne parla affatto: sul livello semplice la richiesta **non dichiara nulla**,
   e così resta identica a quella del prototipo. Su Sonnet 5 il valore predefinito è

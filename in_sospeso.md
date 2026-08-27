@@ -290,7 +290,11 @@ lavoro che la revisione ha lasciato, nell'ordine di priorità in cui l'ha lascia
 **Aggiornamento del 2026-08-27**: delle quattordici voci ne restano **due**, ed erano le due
 che non dipendono da noi — il giro D da rifare e la firma del codice. Le altre dodici sono in
 «Chiuse», undici chiuse in due sessioni di lavoro e una il giorno stesso in cui fu annotata.
-Sotto, insieme alle due che restano, ci sono **due voci nuove** nate da quel lavoro.
+Sotto, insieme alle due che restano, ci sono le voci **nuove** nate da quel lavoro: la
+scadenza del prezzo di Sonnet 5 e — dalla giornata in cui le tre cose nuove sono state
+finalmente **guardate** — quel che lo strumento di collaudo non sa ancora fare. La riserva
+sul guardarle si è chiusa il giorno stesso, ed è in «Chiuse»: guardare ha trovato quattro
+difetti, curati nella stessa sessione (Step 2.50).
 
 - ⚠ **Il giro D è aperto: due voci non provate, e tre riserve provate su un eseguibile che non
   le conteneva.** `D1` (l'exe su un PC senza runtime) e `R-b` (la barra delle Impostazioni a
@@ -314,6 +318,19 @@ Sotto, insieme alle due che restano, ci sono **due voci nuove** nate da quel lav
   2026-08-27: lì stava dal 5 agosto con la condizione «quando l'app circolerà oltre il
   portfolio», e la revisione dichiara quel momento arrivato. *(cap. 13.6.)*
 
+- **Il `clic` dello strumento di collaudo dice «Premuto» anche quando non ha premuto**
+  *(2026-08-27)*. A 96 DPI le due trappole note sono sparite — la fotografia virtualizzata e
+  il clic che manca il bersaglio a scala 150 % — ma ne resta una terza, che col DPI non
+  c'entra: se il controllo è **fuori dallo schermo** (il «Chiudi» delle Impostazioni lo era,
+  145 pixel sotto il bordo) o se un'altra finestra è passata davanti fra una fotografia e il
+  clic, lo strumento porta il puntatore lì e riferisce un successo che non c'è stato.
+  Guardando le tre cose nuove è costato tre clic andati a vuoto e una diagnosi sbagliata
+  sfiorata. La ricetta che regge è già scritta nel README dello strumento: portare
+  l'applicazione davanti con ALT + `SetForegroundWindow` e **verificare** con
+  `GetForegroundWindow` prima di premere, rifiutandosi di premere quel che non è in vista.
+  Va insegnata a `clic`, che oggi non fa né l'una né l'altra cosa.
+  *(`strumenti/mcp-collaudi/server.mjs`.)*
+
 - **Il prezzo di Sonnet 5 dopo il 31 agosto 2026** *(2026-08-27)*. Il contatore di spesa
   (cap. 13.11) valuta i token con un listino compilato dentro, e uno di quei numeri ha una
   data: il cap. 15, voce 6, annota che i **$2/$10** di Sonnet 5 sono un prezzo
@@ -324,18 +341,22 @@ Sotto, insieme alle due che restano, ci sono **due voci nuove** nate da quel lav
   `prezzi` di `modelli.json` — ma serve **guardare**, e nessun collaudo può accorgersene.
   *(cap. 13.11; cap. 15 voce 6; `Ai/Listino.vb`, dove la scadenza è annotata.)*
 
-- **Le tre cose nuove non sono state viste a occhio** *(2026-08-27)*. Le due tendine dei
-  modelli, la sezione «Quanto è costato» e i due bottoni nuovi di «Informazioni» sono
-  provati **al banco** — 66 collaudi, 17 falsificazioni — e verificati **vivi** solo per
-  quel che si può interrogare senza guardare: l'informativa compare al primo avvio su una
-  cartella nuova e non ricompare al secondo. Ma nessuno li ha **guardati**: in quella
-  sessione lo strumento di collaudo non ha potuto né fotografare (la `schermata`
-  riprendeva la finestra in primo piano invece dell'applicazione) né premere (il `clic`
-  dice «Premuto» senza premere, la trappola già nota a scala 150%). Restano quindi da
-  vedere con gli occhi — è la stessa specie di riserva che il giro D esiste per sciogliere.
-  *(cap. 03.4, 03.6; `strumenti/mcp-collaudi/`.)*
-
 ## Chiuse
+
+- ✅ **Le tre cose nuove viste a occhio** *(aperta il 2026-08-27 chiudendo la revisione del
+  giro D, **chiusa lo stesso giorno**)*. Le due tendine dei modelli, «Quanto è costato» e i
+  due bottoni di «Informazioni» sono stati guardati sull'applicazione vera — build fresca dal
+  commit `67e6f13`, cartella dati vera, schermo al 100 % (le due trappole dello strumento
+  erano figlie del 150 %). Il conto della spesa dice il vero (17 chiamate e 118.629 token,
+  ricontati sul CSV) e «Copia diagnostica» copia quel che promette, senza segreti. Guardare
+  ha però trovato **quattro difetti che il banco non poteva vedere**, tutti curati nella
+  stessa sessione: l'alias `claude-haiku-4-5` trattato come un modello diverso dalla versione
+  datata che l'API dichiara — da cui Haiku 4.5 due volte nella stessa tendina e **tre
+  chiamate su diciassette senza prezzo** —; la riga del copyright che in «Informazioni»
+  copriva «Cerca aggiornamenti», rendendolo illeggibile e per tre quarti non premibile; il
+  404 di GitHub raccontato come un guasto invece che come «non c'è ancora nessuna versione
+  pubblicata»; e il «Chiudi» delle Impostazioni che nasceva 145 pixel sotto il bordo dello
+  schermo. Otto falsificazioni, 1257 verdi. *(Step 2.50 del diario; cap. 03.4, 13.11.)*
 
 - ✅ **Il giro D, cioè la macchina che qui non c'era** *(aperta il 2026-08-23 chiudendo il
   quarto tempo di T9e, **chiusa il 2026-08-25**)*. Serviva un PC senza SDK .NET 10 e con Word,

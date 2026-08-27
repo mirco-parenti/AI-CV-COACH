@@ -213,11 +213,18 @@ Namespace Ai
         ''' L'elenco con dentro, garantito, il modello che si sta usando adesso.
         ''' </summary>
         ''' <remarks>
-        ''' Un modello <b>ritirato</b> sparisce dall'elenco dell'API mentre resta scritto
-        ''' in <c>modelli.json</c> e in uso a ogni chiamata. Se la tendina lo omettesse
-        ''' mostrerebbe come scelto un modello diverso da quello vero, e chi guarda non
-        ''' avrebbe modo di accorgersene: sta in cima proprio perché è quello da
-        ''' sostituire.
+        ''' <para>Un modello <b>ritirato</b> sparisce dall'elenco dell'API mentre resta
+        ''' scritto in <c>modelli.json</c> e in uso a ogni chiamata. Se la tendina lo
+        ''' omettesse mostrerebbe come scelto un modello diverso da quello vero, e chi
+        ''' guarda non avrebbe modo di accorgersene: sta in cima proprio perché è quello
+        ''' da sostituire.</para>
+        ''' <para><b>Ritirato non vuol dire scritto in un altro modo</b> (2026-08-27). Il
+        ''' confronto passa da <see cref="IdModello.StessoModello"/>: l'alias con cui il
+        ''' programma chiede il modello e l'identificativo datato con cui l'API lo elenca
+        ''' sono la stessa cosa, e prima di saperlo la tendina del livello semplice
+        ''' mostrava Haiku 4.5 <b>due volte</b> — una col nome e una con l'identificativo
+        ''' crudo, che è la voce inserita qui. Un modello davvero ritirato continua a
+        ''' entrare, perché di lui nell'elenco non c'è nessuna versione.</para>
         ''' </remarks>
         Public Shared Function ConQuelloInUso(elenco As IReadOnlyList(Of ModelloDisponibile),
                                               idInUso As String) As IReadOnlyList(Of ModelloDisponibile)
@@ -226,7 +233,7 @@ Namespace Ai
             Dim cercato As String = If(idInUso, String.Empty).Trim()
 
             If cercato.Length = 0 Then Return voci
-            If voci.Any(Function(v) v.Id = cercato) Then Return voci
+            If voci.Any(Function(v) IdModello.StessoModello(v.Id, cercato)) Then Return voci
 
             voci.Insert(0, New ModelloDisponibile(cercato, String.Empty))
             Return voci

@@ -1,4 +1,5 @@
 Imports System.Globalization
+Imports System.Net
 Imports System.Net.Http
 Imports System.Text.Json
 Imports System.Text.Json.Nodes
@@ -108,6 +109,18 @@ Namespace Motore
 
                             Using risposta As HttpResponseMessage =
                                 Await http.SendAsync(richiesta, insieme.Token).ConfigureAwait(False)
+
+                                ' Un 404 su «releases/latest» non è un guasto: è GitHub che
+                                ' dice che di release pubblicate non ce n'è nessuna. Dirlo
+                                ' col numero — «il servizio ha risposto 404» — manda a
+                                ' cercare un guasto dove non c'è, e capita esattamente a
+                                ' chi ha in mano la prima versione (2026-08-27).
+                                If risposta.StatusCode = HttpStatusCode.NotFound Then
+                                    Return EsitoVersione.NonSiSa(
+                                        "Non risulta pubblicata nessuna versione: quella che hai è " &
+                                        "l'unica che esiste. Se cerchi il programma altrove, la pagina " &
+                                        "delle versioni è quella qui sotto.")
+                                End If
 
                                 If Not risposta.IsSuccessStatusCode Then
                                     Return EsitoVersione.NonSiSa(

@@ -46,6 +46,37 @@ Namespace Dati
         End Sub
 
         <TestMethod>
+        Public Sub IlPrezzoSiTrovaAncheConLIdentificativoDatato()
+
+            ' Nel chiamate_ai.csv finisce il modello che ha risposto, e l'API risponde
+            ' con l'identificativo pieno: prima che il listino lo riconoscesse, le
+            ' chiamate al livello semplice risultavano senza prezzo a ogni installazione
+            ' — il buco del cap. 13.11 aperto sul modello di casa (2026-08-27).
+            Dim listino As Listino = Listino.Predefinito()
+
+            Assert.IsNotNull(listino.PerModello("claude-haiku-4-5-20251001"),
+                             "l'alias del listino e la versione datata sono lo stesso modello")
+            Assert.AreEqual(listino.PerModello("claude-haiku-4-5").Uscita,
+                            listino.PerModello("claude-haiku-4-5-20251001").Uscita,
+                            "e costano uguale")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LIdentificativoEsattoVinceSulSuoAlias()
+
+            ' Chi in modelli.json dichiara il prezzo di una versione precisa vuole quello.
+            Dim m As Modelli = Modelli.DaJson(
+                "{ ""prezzi"": { ""claude-haiku-4-5-20251001"": { ""ingresso"": 9, ""uscita"": 99 } } }")
+
+            Assert.AreEqual(99D, m.Prezzi.PerModello("claude-haiku-4-5-20251001").Uscita,
+                            "la versione dichiarata")
+            Assert.AreEqual(5D, m.Prezzi.PerModello("claude-haiku-4-5").Uscita,
+                            "e l'alias resta al prezzo di casa, che è dichiarato anche lui")
+
+        End Sub
+
+        <TestMethod>
         Public Sub UnModelloSconosciutoNonHaPrezzo()
 
             ' Non vale zero: vale «non lo so», ed è tutta un'altra cosa quando si somma.

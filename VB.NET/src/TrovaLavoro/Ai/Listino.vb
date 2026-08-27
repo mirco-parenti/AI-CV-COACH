@@ -123,9 +123,21 @@ Namespace Ai
             If String.IsNullOrWhiteSpace(id) Then Return Nothing
 
             Dim prezzo As PrezzoModello = Nothing
-            _prezzi.TryGetValue(id.Trim(), prezzo)
+            If _prezzi.TryGetValue(id.Trim(), prezzo) Then Return prezzo
 
-            Return prezzo
+            ' Secondo giro, sull'alias. Nel chiamate_ai.csv finisce il modello che ha
+            ' risposto — datato, come lo scrive l'API — mentre il listino conosce l'alias
+            ' con cui il programma lo chiede (cap. 15, voce 6). Senza questo giro il
+            ' modello predefinito risulterebbe senza prezzo a ogni installazione, e il
+            ' buco che il cap. 13.11 riserva ai modelli sconosciuti si aprirebbe sul
+            ' modello di casa. L'identificativo esatto viene prima: chi in modelli.json
+            ' dichiara il prezzo di una versione precisa vuole quello, non quello del suo
+            ' alias.
+            For Each voce As KeyValuePair(Of String, PrezzoModello) In _prezzi
+                If IdModello.StessoModello(voce.Key, id) Then Return voce.Value
+            Next
+
+            Return Nothing
 
         End Function
 

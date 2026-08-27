@@ -178,6 +178,22 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   da 96, degli attrezzi che muovono il puntatore non ci si fida, di quelli che passano da UI
   Automation sì.
 
+- **`clic` dice «Premuto» anche quando il bersaglio è fuori dallo schermo.** *(2026-08-27,
+  guardando a occhio le tre cose nuove.)* È la terza sorella delle due voci qui sopra, e
+  l'unica che **col DPI non c'entra**: quel giorno lo schermo era al 100 % — `LogPixels` = 96
+  e `GetDpiForSystem` = 96 dopo `SetProcessDPIAware`, due misure indipendenti — e sia
+  `schermata` sia `clic` avevano ripreso a funzionare. Poi «Chiudi» delle Impostazioni non si
+  lasciava premere: due colpi, due «Premuto», nessun effetto. Il bottone stava a **y = 1177**
+  su un'area di lavoro alta 1032, cioè 145 pixel **sotto il bordo dello schermo**: lo
+  strumento ci ha portato il puntatore e ha riferito il successo. Un terzo clic è andato a
+  Esplora file, che era passato davanti fra una fotografia e l'altra. La regola pratica:
+  **prima di credere a un «Premuto», chiedere a `controlli` se è successo qualcosa**; e per
+  premere davvero, uno script che porta l'applicazione in primo piano con ALT +
+  `SetForegroundWindow`, **verifica** con `GetForegroundWindow` e solo allora clicca al centro
+  del rettangolo letto da UI Automation. Nota su ALT: senza quel colpo di tastiera Windows
+  rifiuta `SetForegroundWindow` a un processo che non è già davanti, e il primo tentativo
+  della giornata era fallito proprio così.
+
 ## Le trappole già pagate
 
 - **Il primo `clic` su un bottone che apre una finestra non la apre** *(2026-08-21, T9b)*.

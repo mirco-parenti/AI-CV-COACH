@@ -229,7 +229,7 @@ vero il pezzo difficile — chi non guarda il repository non sa mai che è uscit
 nuova — e la cura è piccola: in «Informazioni» c'è **«Cerca aggiornamenti»**, che chiede a
 GitHub qual è l'ultima release pubblicata e confronta il numero con quello di questa copia.
 
-Tre scelte dentro quelle poche righe.
+Quattro scelte dentro quelle poche righe — l'ultima aggiunta dopo averlo premuto davvero.
 
 - **Parte solo premendolo.** Non all'avvio, non una volta al giorno, mai da sola: il cap. 11.2
   promette «niente aggiornamenti automatici silenziosi», e una domanda che l'utente pone è il
@@ -241,6 +241,13 @@ Tre scelte dentro quelle poche righe.
 - **Ha un terzo esito oltre a «aggiornata» e «ce n'è una nuova»**: *più avanti del pubblicato*,
   cioè la macchina di chi costruisce il programma. Dirle «sei aggiornata» sarebbe falso e
   dirle «scarica la nuova» assurdo.
+- **Un 404 non è un guasto** *(2026-08-27, premendo il bottone per la prima volta)*. Finché di
+  release pubblicate non ce n'è nessuna — cioè finché il tag `v1.0` aspetta il giro D rifatto
+  — GitHub risponde `404` a `releases/latest`, ed è la risposta che tocca **a chi ha in mano
+  la prima versione**. Raccontargliela col numero («il servizio ha risposto 404») lo manda a
+  cercare un difetto che non c'è: adesso quel caso ha una riga sua, «non risulta pubblicata
+  nessuna versione», mentre un guasto vero porta ancora il proprio numero, che lì è la sola
+  cosa da riferire.
 
 Se c'è davvero una versione nuova, il programma apre la pagina delle release: a scaricare e a
 sostituire l'eseguibile ci pensa la persona. Resta fuori perimetro l'auto-update, e resta
@@ -465,3 +472,20 @@ colonna. Quattro cautele, tutte della stessa famiglia:
 Il conto non è un registro contabile e non pretende di esserlo: una riga storta nel file si
 salta e le altre valgono, perché quel CSV si apre in un foglio di calcolo e chiunque può
 averci messo dentro una riga a mano.
+
+*Aggiunta del 2026-08-27, guardando il contatore a occhio.* La terza cautela — «un modello
+senza prezzo non vale zero» — è giusta e resta, ma quel giorno si stava applicando al posto
+sbagliato: il buco si apriva sul **modello predefinito**, cioè su ogni installazione. La
+ragione è nel cap. 02.5: nel CSV si scrive il modello che *ha risposto* (`claude-haiku-4-5-20251001`),
+il listino conosce quello che *si chiede* (`claude-haiku-4-5`), e i due non si riconoscevano.
+Adesso il prezzo si cerca prima per identificativo esatto — così chi in `modelli.json`
+dichiara il prezzo di una versione precisa ottiene quello — e poi per modello, ignorando il
+suffisso della data. Sui dati veri di questa macchina il conto è passato da $0,38 a $0,40, e
+la riga «di 3 chiamate non conosco il prezzo del modello» è sparita perché non aveva più
+niente da dichiarare.
+
+*Su come è stato trovato* c'è poco da aggiungere e molto da ricordare: 66 collaudi verdi,
+tutti falsificati, non potevano vederlo, perché la risposta finta dell'elenco modelli
+dichiarava l'alias — la mia idea di come si chiamasse il modello. È bastato aprire le
+Impostazioni e leggere le due tendine.
+

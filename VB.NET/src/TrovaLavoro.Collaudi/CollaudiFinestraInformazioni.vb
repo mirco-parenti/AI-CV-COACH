@@ -1,3 +1,5 @@
+Imports System.Drawing
+Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro
 
@@ -193,6 +195,80 @@ Namespace Ui
             End Using
 
         End Function
+
+        ' ==================================================================
+        ' Come sta insieme (2026-08-27, guardando la finestra a occhio)
+        ' ==================================================================
+
+        ''' <summary>
+        ''' I controlli di una finestra, coi rettangoli che occupano davvero. Il banco non
+        ''' mostra le modali, e <c>Visible</c> su una finestra mai mostrata è falso per
+        ''' tutti: quel che si può leggere sono i <c>Bounds</c>, che ci sono lo stesso.
+        ''' </summary>
+        Private Shared Function Rettangoli(finestra As FinestraInformazioni) As List(Of KeyValuePair(Of String, Rectangle))
+
+            Dim presi As New List(Of KeyValuePair(Of String, Rectangle))
+
+            For Each figlio As Control In finestra.Controls
+                ' Senza immagine la finestra si accorcia e tutto sale: il riquadro del
+                ' marchio resta dov'era, e conterebbe come una sovrapposizione che a
+                ' video non c'è.
+                If TypeOf figlio Is PictureBox AndAlso finestra.ImmagineDelMarchio Is Nothing Then Continue For
+                presi.Add(New KeyValuePair(Of String, Rectangle)(figlio.Name, figlio.Bounds))
+            Next
+
+            Return presi
+
+        End Function
+
+        <TestMethod>
+        Public Sub NessunControlloNeCopreUnAltro()
+
+            ' Il difetto che ha fatto nascere questo collaudo: le tre righe di testo e la
+            ' fila dei bottoni stavano sulla stessa banda, e la riga del copyright
+            ' copriva «Cerca aggiornamenti» — che si leggeva a metà e, nei tre quarti
+            ' coperti, non si poteva nemmeno premere, perché il clic lo prendeva la
+            ' scritta davanti. Al banco non si vedeva niente: i controlli c'erano tutti,
+            ' col loro nome, accesi.
+            Using finestra As New FinestraInformazioni("Pool 1.13 (integrato)", Function() "diagnostica")
+
+                Dim presi As List(Of KeyValuePair(Of String, Rectangle)) = Rettangoli(finestra)
+
+                For primo As Integer = 0 To presi.Count - 2
+                    For secondo As Integer = primo + 1 To presi.Count - 1
+
+                        ' IntersectsWith e non Intersect().IsEmpty: due controlli che si
+                        ' toccano sul bordo danno un rettangolo comune alto zero, che
+                        ' però «vuoto» per Rectangle non è — lo è solo quello tutto a
+                        ' zero — e il collaudo accuserebbe una sovrapposizione che non c'è.
+                        Assert.IsFalse(presi(primo).Value.IntersectsWith(presi(secondo).Value),
+                                       $"«{presi(primo).Key}» e «{presi(secondo).Key}» si sovrappongono " &
+                                       $"({presi(primo).Value} e {presi(secondo).Value}): a video uno copre l'altro")
+
+                    Next
+                Next
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub TuttoStaDentroLaFinestra()
+
+            ' Un comando fuori dal bordo non è un difetto minore: è un comando che non
+            ' c'è, e nessuno può accorgersene leggendo l'elenco dei controlli.
+            Using finestra As New FinestraInformazioni("Pool 1.13 (integrato)", Function() "diagnostica")
+
+                Dim dentro As Rectangle = finestra.ClientRectangle
+
+                For Each preso As KeyValuePair(Of String, Rectangle) In Rettangoli(finestra)
+                    Assert.IsTrue(dentro.Contains(preso.Value),
+                                  $"«{preso.Key}» {preso.Value} esce dalla finestra {dentro}")
+                Next
+
+            End Using
+
+        End Sub
 
     End Class
 

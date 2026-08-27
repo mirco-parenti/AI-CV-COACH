@@ -173,6 +173,38 @@ Namespace Motore
 
         End Function
 
+        <TestMethod>
+        Public Async Function SenzaNessunaVersionePubblicataNonSiParlaDiGuasti() As Task
+
+            ' GitHub risponde 404 a «releases/latest» quando di release non ce n'è
+            ' nessuna: è la risposta che tocca a chi ha in mano la prima versione, e
+            ' raccontargliela col numero — «il servizio ha risposto 404» — lo manda a
+            ' cercare un guasto che non c'è (2026-08-27, guardando la finestra a occhio).
+            Dim finto As New GitHubFinto(HttpStatusCode.NotFound)
+
+            Dim esito As EsitoVersione = Await ControlloVersione.ChiediAsync("1.0.000", finto)
+
+            Assert.AreEqual(StatoVersione.NonSiSa, esito.Stato, "non si sa, e non si promette niente")
+            Assert.IsFalse(esito.Messaggio.Contains("404"), "senza numeri da diagnostica")
+            StringAssert.Contains(esito.Messaggio, "nessuna versione",
+                                  "e con la ragione vera: non ce n'è nessuna pubblicata")
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnGuastoVeroPortaAncoraIlSuoNumero() As Task
+
+            ' La cura del 404 non deve togliere l'informazione a chi un guasto ce l'ha
+            ' davvero: lì il numero è la sola cosa da riferire.
+            Dim finto As New GitHubFinto(HttpStatusCode.ServiceUnavailable)
+
+            Dim esito As EsitoVersione = Await ControlloVersione.ChiediAsync("1.0.000", finto)
+
+            Assert.AreEqual(StatoVersione.NonSiSa, esito.Stato)
+            StringAssert.Contains(esito.Messaggio, "503", "il numero del guasto resta")
+
+        End Function
+
     End Class
 
 End Namespace

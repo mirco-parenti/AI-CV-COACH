@@ -60,6 +60,8 @@ Partial Class FinestraImpostazioni
         Me.btnEliminaTutto = New System.Windows.Forms.Button()
         Me.lblStato = New System.Windows.Forms.Label()
         Me.btnChiudi = New System.Windows.Forms.Button()
+        Me.pnlContenuto = New System.Windows.Forms.Panel()
+        Me.pnlFascia = New System.Windows.Forms.Panel()
         CType(Me.numFollowUp, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -335,48 +337,68 @@ Partial Class FinestraImpostazioni
         Me.btnChiudi.Size = New System.Drawing.Size(110, 32)
         Me.btnChiudi.TabIndex = 24
         Me.btnChiudi.Text = "Chiudi"
+        Me.ClientSize = New System.Drawing.Size(660, 760)
+        '
+        'pnlContenuto
+        '
+        Me.pnlContenuto.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlContenuto.Name = "pnlContenuto"
+        Me.pnlContenuto.TabIndex = 0
+        '
+        'pnlFascia
+        '
+        ' La fascia sta fuori da quel che scorre: «Chiudi» è il comando che chiude questa
+        ' finestra e non può essere il primo a finire sotto il bordo quando il contenuto
+        ' non ci sta (2026-08-27). Il contenuto si aggiunge per primo di proposito: il
+        ' docking parte dall'ultimo arrivato, così la fascia si prende il fondo e il
+        ' contenuto quel che resta.
+        Me.pnlFascia.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.pnlFascia.Height = StileApp.MargineRiquadro * 2 + 32
+        Me.pnlFascia.Name = "pnlFascia"
+        Me.pnlFascia.TabIndex = 1
         '
         'FinestraImpostazioni
         '
-        Me.ClientSize = New System.Drawing.Size(660, 760)
-        Me.Controls.Add(Me.lblTitolo)
-        Me.Controls.Add(Me.lblSpiegazione)
-        Me.Controls.Add(Me.btnComeFunziona)
-        Me.Controls.Add(Me.lblSezioneChiave)
-        Me.Controls.Add(Me.lblStatoChiave)
-        Me.Controls.Add(Me.btnCambiaChiave)
-        Me.Controls.Add(Me.lblSezioneDocumenti)
-        Me.Controls.Add(Me.lblLingua)
-        Me.Controls.Add(Me.cmbLingua)
-        Me.Controls.Add(Me.chkRifinitura)
-        Me.Controls.Add(Me.lblRifinituraNota)
-        Me.Controls.Add(Me.lblSezioneCandidature)
-        Me.Controls.Add(Me.lblFollowUp)
-        Me.Controls.Add(Me.numFollowUp)
-        Me.Controls.Add(Me.lblGiorni)
-        Me.Controls.Add(Me.lblFollowUpNota)
-        Me.Controls.Add(Me.lblSezioneCartelle)
-        Me.Controls.Add(Me.lblCartellaDati)
-        Me.Controls.Add(Me.btnApriCartellaDati)
-        Me.Controls.Add(Me.lblCartellaDocumenti)
-        Me.Controls.Add(Me.btnGestisciDocumenti)
-        Me.Controls.Add(Me.lblSezioneMotore)
-        Me.Controls.Add(Me.lblModelloRagionamento)
-        Me.Controls.Add(Me.cmbModelloRagionamento)
-        Me.Controls.Add(Me.lblModelloSemplice)
-        Me.Controls.Add(Me.cmbModelloSemplice)
-        Me.Controls.Add(Me.lblModelli)
-        Me.Controls.Add(Me.lblPool)
-        Me.Controls.Add(Me.btnApriModelli)
-        Me.Controls.Add(Me.lblSezioneConsumo)
-        Me.Controls.Add(Me.lblConsumo)
-        Me.Controls.Add(Me.btnApriChiamate)
-        Me.Controls.Add(Me.lblSezioneDati)
-        Me.Controls.Add(Me.btnBackup)
-        Me.Controls.Add(Me.btnSvuotaNavigazione)
-        Me.Controls.Add(Me.btnEliminaTutto)
-        Me.Controls.Add(Me.lblStato)
-        Me.Controls.Add(Me.btnChiudi)
+        Me.pnlContenuto.Controls.Add(Me.lblTitolo)
+        Me.pnlContenuto.Controls.Add(Me.lblSpiegazione)
+        Me.pnlContenuto.Controls.Add(Me.btnComeFunziona)
+        Me.pnlContenuto.Controls.Add(Me.lblSezioneChiave)
+        Me.pnlContenuto.Controls.Add(Me.lblStatoChiave)
+        Me.pnlContenuto.Controls.Add(Me.btnCambiaChiave)
+        Me.pnlContenuto.Controls.Add(Me.lblSezioneDocumenti)
+        Me.pnlContenuto.Controls.Add(Me.lblLingua)
+        Me.pnlContenuto.Controls.Add(Me.cmbLingua)
+        Me.pnlContenuto.Controls.Add(Me.chkRifinitura)
+        Me.pnlContenuto.Controls.Add(Me.lblRifinituraNota)
+        Me.pnlContenuto.Controls.Add(Me.lblSezioneCandidature)
+        Me.pnlContenuto.Controls.Add(Me.lblFollowUp)
+        Me.pnlContenuto.Controls.Add(Me.numFollowUp)
+        Me.pnlContenuto.Controls.Add(Me.lblGiorni)
+        Me.pnlContenuto.Controls.Add(Me.lblFollowUpNota)
+        Me.pnlContenuto.Controls.Add(Me.lblSezioneCartelle)
+        Me.pnlContenuto.Controls.Add(Me.lblCartellaDati)
+        Me.pnlContenuto.Controls.Add(Me.btnApriCartellaDati)
+        Me.pnlContenuto.Controls.Add(Me.lblCartellaDocumenti)
+        Me.pnlContenuto.Controls.Add(Me.btnGestisciDocumenti)
+        Me.pnlContenuto.Controls.Add(Me.lblSezioneMotore)
+        Me.pnlContenuto.Controls.Add(Me.lblModelloRagionamento)
+        Me.pnlContenuto.Controls.Add(Me.cmbModelloRagionamento)
+        Me.pnlContenuto.Controls.Add(Me.lblModelloSemplice)
+        Me.pnlContenuto.Controls.Add(Me.cmbModelloSemplice)
+        Me.pnlContenuto.Controls.Add(Me.lblModelli)
+        Me.pnlContenuto.Controls.Add(Me.lblPool)
+        Me.pnlContenuto.Controls.Add(Me.btnApriModelli)
+        Me.pnlContenuto.Controls.Add(Me.lblSezioneConsumo)
+        Me.pnlContenuto.Controls.Add(Me.lblConsumo)
+        Me.pnlContenuto.Controls.Add(Me.btnApriChiamate)
+        Me.pnlContenuto.Controls.Add(Me.lblSezioneDati)
+        Me.pnlContenuto.Controls.Add(Me.btnBackup)
+        Me.pnlContenuto.Controls.Add(Me.btnSvuotaNavigazione)
+        Me.pnlContenuto.Controls.Add(Me.btnEliminaTutto)
+        Me.pnlContenuto.Controls.Add(Me.lblStato)
+        Me.pnlFascia.Controls.Add(Me.btnChiudi)
+        Me.Controls.Add(Me.pnlContenuto)
+        Me.Controls.Add(Me.pnlFascia)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.MaximizeBox = False
         Me.MinimizeBox = False
@@ -427,5 +449,7 @@ Partial Class FinestraImpostazioni
     Friend WithEvents btnEliminaTutto As System.Windows.Forms.Button
     Friend WithEvents lblStato As System.Windows.Forms.Label
     Friend WithEvents btnChiudi As System.Windows.Forms.Button
+    Friend WithEvents pnlContenuto As System.Windows.Forms.Panel
+    Friend WithEvents pnlFascia As System.Windows.Forms.Panel
 
 End Class
