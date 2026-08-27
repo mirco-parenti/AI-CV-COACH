@@ -183,13 +183,21 @@ Namespace Documenti
         End Sub
 
         ''' <summary>
-        ''' Un indirizzo come lo vuole l'intestazione. Qui non si valida niente: un
+        ''' Un indirizzo come lo vuole l'intestazione. Qui non si <b>valida</b> niente: un
         ''' indirizzo storto è un problema dell'utente e del suo programma di posta, che
         ''' glielo dirà — rifiutarlo qui vorrebbe dire buttare via l'email intera per una
         ''' virgola, e la bozza esiste proprio per essere corretta.
         ''' </summary>
+        ''' <remarks>
+        ''' Un <b>a capo</b> però non è un indirizzo storto: è un'intestazione in più. In un
+        ''' file di posta le intestazioni sono righe, e chi controlla il testo di questo
+        ''' campo — l'utente che lo digita, o l'AI che lo propone — potrebbe scriverci
+        ''' dentro un «Bcc:» che nessuno ha chiesto. Per questo l'a capo si toglie, come si
+        ''' toglie già dall'oggetto: non è una validazione, è il confine fra un valore e
+        ''' una riga nuova. <i>(2026-08-27, dalla revisione del giro D.)</i>
+        ''' </remarks>
         Private Function Indirizzo(valore As String) As String
-            Return If(valore, "").Trim()
+            Return SenzaACapo(valore)
         End Function
 
         ''' <summary>

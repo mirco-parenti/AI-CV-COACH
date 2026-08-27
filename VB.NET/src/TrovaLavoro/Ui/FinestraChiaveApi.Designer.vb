@@ -29,6 +29,8 @@ Partial Class FinestraChiaveApi
         Me.txtChiave = New System.Windows.Forms.TextBox()
         Me.chkMostra = New System.Windows.Forms.CheckBox()
         Me.lblForma = New System.Windows.Forms.Label()
+        Me.lblEsitoProva = New System.Windows.Forms.Label()
+        Me.btnProva = New System.Windows.Forms.Button()
         Me.btnSalva = New System.Windows.Forms.Button()
         Me.btnNonAdesso = New System.Windows.Forms.Button()
         Me.SuspendLayout()
@@ -101,13 +103,31 @@ Partial Class FinestraChiaveApi
         Me.lblForma.Text = "Forma"
         Me.lblForma.Visible = False
         '
+        'lblEsitoProva
+        '
+        Me.lblEsitoProva.AutoSize = True
+        Me.lblEsitoProva.Location = New System.Drawing.Point(14, 290)
+        Me.lblEsitoProva.Name = "lblEsitoProva"
+        Me.lblEsitoProva.Size = New System.Drawing.Size(592, 15)
+        Me.lblEsitoProva.TabIndex = 7
+        Me.lblEsitoProva.Text = ""
+        Me.lblEsitoProva.Visible = False
+        '
+        'btnProva
+        '
+        Me.btnProva.Location = New System.Drawing.Point(150, 324)
+        Me.btnProva.Name = "btnProva"
+        Me.btnProva.Size = New System.Drawing.Size(160, 32)
+        Me.btnProva.TabIndex = 8
+        Me.btnProva.Text = "Prova la chiave"
+        '
         'btnSalva
         '
         Me.btnSalva.Enabled = False
         Me.btnSalva.Location = New System.Drawing.Point(320, 300)
         Me.btnSalva.Name = "btnSalva"
         Me.btnSalva.Size = New System.Drawing.Size(160, 32)
-        Me.btnSalva.TabIndex = 7
+        Me.btnSalva.TabIndex = 9
         Me.btnSalva.Text = "Salva la chiave"
         '
         'btnNonAdesso
@@ -115,7 +135,7 @@ Partial Class FinestraChiaveApi
         Me.btnNonAdesso.Location = New System.Drawing.Point(492, 300)
         Me.btnNonAdesso.Name = "btnNonAdesso"
         Me.btnNonAdesso.Size = New System.Drawing.Size(110, 32)
-        Me.btnNonAdesso.TabIndex = 8
+        Me.btnNonAdesso.TabIndex = 10
         Me.btnNonAdesso.Text = "Non adesso"
         '
         'FinestraChiaveApi
@@ -128,6 +148,8 @@ Partial Class FinestraChiaveApi
         Me.Controls.Add(Me.txtChiave)
         Me.Controls.Add(Me.chkMostra)
         Me.Controls.Add(Me.lblForma)
+        Me.Controls.Add(Me.lblEsitoProva)
+        Me.Controls.Add(Me.btnProva)
         Me.Controls.Add(Me.btnSalva)
         Me.Controls.Add(Me.btnNonAdesso)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
@@ -148,6 +170,8 @@ Partial Class FinestraChiaveApi
     Friend WithEvents txtChiave As System.Windows.Forms.TextBox
     Friend WithEvents chkMostra As System.Windows.Forms.CheckBox
     Friend WithEvents lblForma As System.Windows.Forms.Label
+    Friend WithEvents lblEsitoProva As System.Windows.Forms.Label
+    Friend WithEvents btnProva As System.Windows.Forms.Button
     Friend WithEvents btnSalva As System.Windows.Forms.Button
     Friend WithEvents btnNonAdesso As System.Windows.Forms.Button
 

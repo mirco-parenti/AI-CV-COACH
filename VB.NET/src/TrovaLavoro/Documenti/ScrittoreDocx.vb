@@ -54,6 +54,7 @@ Namespace Documenti
             {"content-types.xml", "[Content_Types].xml"},
             {"rels.xml", "_rels/.rels"},
             {"document-rels.xml", "word/_rels/document.xml.rels"},
+            {"settings.xml", "word/settings.xml"},
             {"styles.xml", "word/styles.xml"},
             {"numbering.xml", "word/numbering.xml"}}
 
@@ -90,6 +91,7 @@ Namespace Documenti
                     AggiungiXml(archivio, "docProps/core.xml", Proprieta(pagina))
                     AggiungiXml(archivio, "word/document.xml", Documento(pagina))
                     AggiungiTesto(archivio, PartiFisse("document-rels.xml"), Risorsa("document-rels.xml"))
+                    AggiungiTesto(archivio, PartiFisse("settings.xml"), Risorsa("settings.xml"))
                     AggiungiTesto(archivio, PartiFisse("styles.xml"), Risorsa("styles.xml"))
                     AggiungiTesto(archivio, PartiFisse("numbering.xml"), Risorsa("numbering.xml"))
 

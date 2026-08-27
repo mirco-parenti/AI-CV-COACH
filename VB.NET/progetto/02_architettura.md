@@ -299,6 +299,19 @@ i tool MCP).
   programma, file che li scavalca, ripiego dichiarato se il file è illeggibile. Cambiare
   modello — in avanti come all'indietro, ed è così che si è fatto il secondo tempo —
   costa **una riga**, non una nuova build.
+- **I modelli si scelgono dalle Impostazioni** *(2026-08-27, dalla revisione del giro D)*: due
+  tendine, una per livello, con l'elenco chiesto all'API (`/v1/models`, che non consuma token)
+  e il ripiego sui modelli conosciuti quando la rete non c'è. La scelta finisce in
+  `modelli.json` — che resta la casa, cap. 11.6 — e vale **dalla chiamata dopo**, senza
+  riavviare: quella mappa è l'oggetto che il client interroga a ogni richiesta. Fino alla 1.0
+  quel file si poteva solo aprire a mano, e bastava a chi il programma l'aveva scritto.
+- **Un modello ritirato adesso si riconosce** *(stesso giorno)*. I modelli escono dal listino
+  con l'unico preavviso di una data su una pagina web, e il programma se ne accorgeva il
+  giorno in cui smetteva di funzionare — con un «l'AI ha rifiutato la richiesta» in mezzo agli
+  altri, cioè mandando l'utente a cercare un difetto nostro. Adesso un `404` o un
+  `not_found_error` diventano la causa `ModelloRitirato`, che **nomina il modello** e dice
+  dove si cambia. Il nome viene dalla richiesta, non dall'eco dell'API: è la differenza fra
+  dirlo e ripeterlo.
 - **L'interruttore del ragionamento esteso.** Haiku 4.5 lo tiene spento di suo e il
   prototipo non ne parla affatto: sul livello semplice la richiesta **non dichiara nulla**,
   e così resta identica a quella del prototipo. Su Sonnet 5 il valore predefinito è
@@ -373,7 +386,8 @@ i tool MCP).
   subito, invece di lasciarlo scoprire a valle sotto forma di JSON invalido senza sapere
   perché. Le risposte JSON passano da `EstrattoreJson`; se il JSON resta invalido si
   mostra il testo grezzo in un riquadro «cosa ha risposto il modello», mai un crash.
-- **Quanto è costata ogni chiamata si annota** *(2026-08-18)*: ogni chiamata lascia una
+- **Quanto è costata ogni chiamata si annota** *(2026-08-18; dal 2026-08-27 lo legge anche
+  l'utente, v. cap. 13.11)*: ogni chiamata lascia una
   riga in `chiamate_ai.csv` nella cartella dati (cap. 11.1) — quale prompt, il tetto che
   quel prompt dichiara, i token andati e venuti, e la **percentuale del tetto** consumata.
   Serve a una cosa sola: ritarare i `max_token` del pool (cap. 04.4) sui numeri veri invece

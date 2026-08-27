@@ -1,0 +1,46 @@
+# Il banco, a ogni push.
+#
+# Fino al 2026-08-27 il rigore di questo progetto era affidato alla disciplina: la
+# batteria si lanciava a mano, su una postazione sola, quando ci si ricordava. Funziona
+# finché chi se ne ricorda è uno solo e non ha fretta — e la revisione del giro D lo ha
+# detto senza giri di parole: «il rigore è affidato alla disciplina, non a uno strumento».
+# Questo file è lo strumento.
+#
+# Gira solo la batteria SENZA RETE: i collaudi della categoria «Reale» vogliono l'API
+# vera, e una chiave non entra in un repository pubblico (regola dei segreti). Restano
+# quelli che si lanciano a mano da aviolab03, come dice collaudi.runsettings.
+
+name: Collaudi
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  banco:
+    # Windows e non Linux: il prodotto è Windows Forms, e i collaudi dell'interfaccia
+    # costruiscono finestre vere (senza mostrarle).
+    runs-on: windows-latest
+
+    steps:
+      - name: Prendi il codice
+        uses: actions/checkout@v4
+
+      - name: Metti l'SDK .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Il banco, con la copertura misurata
+        working-directory: VB.NET/src
+        run: dotnet test TrovaLavoro.sln --collect:"XPlat Code Coverage" --logger "console;verbosity=normal"
+
+      - name: Tieni da parte la copertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: copertura
+          path: VB.NET/src/TrovaLavoro.Collaudi/TestResults/**/coverage.cobertura.xml
+          if-no-files-found: warn

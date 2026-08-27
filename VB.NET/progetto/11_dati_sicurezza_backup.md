@@ -15,12 +15,14 @@ scelta resta.)*
 
 ```
 TrovaLavoro\
-├── impostazioni.json      le preferenze dell'utente: lingua predefinita dei documenti,
+├── impostazioni.json      le preferenze dell'utente — lingua predefinita dei documenti,
 │                          interruttore della rifinitura e giorni del promemoria di
-│                          follow-up (cap. 03, P8; cap. 07.3; v. 11.6)
+│                          follow-up — più il fatto che l'informativa è già comparsa
+│                          (cap. 03, P8; cap. 07.3; cap. 11.2; v. 11.6)
 ├── ricerche.json          preferenze di ricerca, ricerche salvate e tabella dei portali
 ├── taratura.json          soglia, pesi e limiti del match (v. 11.6)
-├── modelli.json           mappa livello → modello AI (v. 11.6, cap. 02.5)
+├── modelli.json           mappa livello → modello AI, e i prezzi con cui si stima la
+│                          spesa (v. 11.6, cap. 02.5, cap. 13.11)
 ├── documenti.json         la cartella documenti dell'utente e cosa c'è dentro (cap. 05.2)
 ├── segreti.bin            chiave API Anthropic, cifrata (v. 11.3)
 ├── profilo\
@@ -206,6 +208,7 @@ TrovaLavoro\
 |---|---|---|
 | Testi per l'elaborazione (profilo, annuncio, PDF da trascrivere) | sì | solo API Anthropic, via HTTPS |
 | Pagine dei portali visitate nel browser incorporato | sì, come in un browser qualunque | i portali stessi; le credenziali le digita l'utente e l'app non le vede (cap. 06.6) |
+| La domanda «c'è una versione nuova?» | sì, **solo se si preme il bottone** | `api.github.com`, senza credenziali e senza nulla dell'utente (v. 13.8) |
 | Tutto il resto (registro, documenti, email, configurazione, log) | **no** | — |
 
 L'email di candidatura **non esce dal programma**: viene scritta come file `.eml` nella
@@ -214,6 +217,24 @@ cartella dell'opportunità, e a spedirla è il programma di posta dell'utente
 
 Niente telemetria, niente servizi del produttore, niente aggiornamenti automatici
 silenziosi.
+
+**E dal 2026-08-27 questa tabella non vive più solo qui** *(revisione del giro D)*. Il
+progetto sapeva da sempre che cosa esce e che cosa no; chi stava davanti alla finestra no, e
+finché l'unico utente era Mirco la differenza non si vedeva. Adesso c'è una finestra —
+«Come funziona, e cosa esce dal tuo PC» — che dice le stesse cose a chi usa il programma:
+compare **una volta sola al primo avvio, prima della richiesta della chiave** (è lì che si
+decide se fidarsi, e informare dopo quel momento è informare tardi), e si riapre quando la si
+cerca, da «Informazioni» e dalle Impostazioni. Il suo testo sta in un posto solo,
+`FinestraInformativa.Voci()`, ed è **collaudato**: un collaudo verifica che nomini ogni porta
+da cui qualcosa esce, così una porta nuova aggiunta al programma e dimenticata
+nell'informativa diventa un rosso invece di una bugia.
+
+La terza riga della tabella è arrivata lo stesso giorno, ed è l'unica chiamata del programma
+che non va all'API di Anthropic: **«Cerca aggiornamenti»** in «Informazioni» chiede a GitHub
+qual è l'ultima versione pubblicata (cap. 13.8). Parte **solo premendo il bottone** — mai
+all'avvio, mai da sola — e questo tiene vera la promessa qui sotto: «niente aggiornamenti
+automatici silenziosi» non è una frase, è un collaudo che diventa rosso se qualcuno chiama
+quel controllo dal costruttore della finestra.
 
 ## 11.3 I segreti
 
@@ -453,6 +474,38 @@ lo si annota. Anche qui il motivo è pratico: cambiare modello — o fare il sec
 esperimento su Sonnet 5 — deve costare una riga, non una nuova build da reinstallare
 su due macchine. *(Realizzato a T2 in `Ai/Modelli.vb`.)*
 
+**Dal 2026-08-27 i modelli si scelgono anche dalle Impostazioni** *(revisione del giro D)*.
+Il file resta il posto dove la scelta **vive** — la regola della riga invece della build non
+cambia — ma non è più l'unico modo di cambiarla: sotto «Sotto il cofano» ci sono due tendine,
+una per livello, e l'elenco dei modelli fra cui scegliere il programma lo **chiede all'API**
+(`/v1/models`, la stessa porta di «Prova la chiave», che non consuma token). Tre conseguenze
+volute:
+
+- **l'elenco non invecchia mai**, e un modello ritirato sparisce da sé invece di restare lì a
+  promettere una chiamata che fallirebbe;
+- **quello in uso c'è sempre**, anche se l'API non lo offre più: se la tendina lo omettesse
+  mostrerebbe come scelto un modello diverso da quello vero;
+- **senza rete o senza chiave si sceglie lo stesso**, fra i modelli che il programma conosce
+  da sé, dicendo perché l'elenco è corto.
+
+La scelta si scrive **cambiando un campo, non riscrivendo il file**: l'interruttore del
+ragionamento e qualunque altra chiave messa lì a mano restano dove sono, e la forma — breve o
+estesa — si conserva. C'è un caso che merita la sua riga: quando un livello nel file **non
+c'è**, si scrive con l'interruttore **che vale adesso**, non con il solo identificativo. Il
+predefinito del ragionamento dichiara l'interruttore *spento* (cap. 02.5), e la forma breve lo
+riporterebbe a «non dichiarato» — cioè acceso, su Sonnet 5 — troncando le risposte senza
+errore. Cambiare modello non deve cambiare di nascosto una seconda cosa.
+
+**E `modelli.json` ha adesso un secondo inquilino: i prezzi** *(2026-08-27)*. Un blocco
+`prezzi` facoltativo dice quanto costa un milione di token, in ingresso e in uscita, modello
+per modello; vale la regola di sempre — predefiniti dentro il programma, il file li scavalca —
+e serve al contatore di spesa (cap. 13.8). I prezzi l'API non li dice, si leggono su una
+pagina web e cambiano quando vuole chi li fa: perciò il programma ne conosce **tre**, quelli
+che ha davvero usato, e di un modello che non conosce **conta i token e non i soldi,
+dichiarandolo**. Un totale che tace su una parte delle chiamate sembra completo, ed è il modo
+più educato di dire una cifra sbagliata. Mezzo prezzo — solo l'ingresso, o solo l'uscita — non
+è un prezzo e si scarta: completarlo con uno zero darebbe un conto più basso del vero.
+
 **E c'è un terzo file che di numeri non ne ha: `impostazioni.json`** *(T9b,
 2026-08-21)*. Vale la pena dire perché non sta qui dentro, visto che si legge allo stesso
 modo — ripiego sui predefiniti, avviso quando ci si cade, e nessun avvio impedito. Perché
@@ -461,7 +514,12 @@ che il punteggio misuri l'ottimismo di quel giorno invece dell'attinenza al post
 preferenze sono scelte che *solo* l'utente può fare — in che lingua scrive di solito, se
 vuole che una macchina gli ritocchi la prosa, e dopo quanti giorni di silenzio vuole che gli
 si ricordi una candidatura spedita *(quest'ultima da **T9c**, 2026-08-21: `giorni_follow_up`,
-quattordici di casa e zero per spegnere il promemoria — cap. 07.3)*. Si toccano con mani
+quattordici di casa e zero per spegnere il promemoria — cap. 07.3)*. *(Dal 2026-08-27 c'è
+un quarto campo, `informativa_vista`, e non è una preferenza: è un **fatto che il programma
+ricorda** — l'informativa del cap. 11.2 è già comparsa una volta — e infatti nelle
+Impostazioni non c'è nessun interruttore per rimetterlo a falso. Sta qui perché qui stanno le
+cose che sopravvivono alla chiusura; se il file non si lascia scrivere, l'informativa
+ricompare, che è la conseguenza giusta.)* Si toccano con mani
 diverse, e quindi stanno in file diversi. Con una differenza anche in lettura: una mappa di
 taratura storta si scarta **intera**, perché le sue voci si compongono in un punteggio solo e
 tenerne metà lo falserebbe in silenzio; le tre preferenze invece non si parlano, e una lingua

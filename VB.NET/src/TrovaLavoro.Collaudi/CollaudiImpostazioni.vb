@@ -213,6 +213,28 @@ Namespace Motore
 
         End Sub
 
+        ''' <summary>
+        ''' Gli altri due campi la rete ce l'avevano, questo no: un «lingua_predefinita: 5»
+        ''' faceva salire un'eccezione che nessuno raccoglieva — né qui né in
+        ''' <c>Carica</c>, che filtra solo le eccezioni del JSON — mentre questa classe
+        ''' promette di non sollevare mai (cap. 11.6). <i>(Revisione del giro D.)</i>
+        ''' </summary>
+        <TestMethod>
+        Public Sub UnaLinguaCheNonEUnaStringaSiScartaSenzaEsplodere()
+
+            For Each storto As String In New String() {"5", "true", "[]", "{}"}
+
+                Dim letto As Impostazioni = Impostazioni.DaJson("{ ""lingua_predefinita"": " & storto & " }")
+
+                Assert.AreEqual(Impostazioni.Predefinite().LinguaPredefinita, letto.LinguaPredefinita,
+                                $"con «{storto}» vale il predefinito")
+                StringAssert.Contains(letto.Avviso, "lingua_predefinita",
+                                      "e l'avviso dice quale campo ha scartato")
+
+            Next
+
+        End Sub
+
     End Class
 
 End Namespace

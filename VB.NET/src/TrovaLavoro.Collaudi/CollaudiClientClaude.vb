@@ -303,6 +303,77 @@ Namespace Ai
         End Function
 
         <TestMethod>
+        Public Async Function UnModelloRitiratoNonEUnaRichiestaSbagliata() As Task
+            ' I modelli si ritirano dal listino con l'unico preavviso di una data su una
+            ' pagina web, e il programma se ne accorge il giorno in cui smette di
+            ' funzionare. Finire nel mucchio dei «richiesta rifiutata» lascerebbe chi lo
+            ' incontra senza sapere che la cura è a due clic di distanza.
+            Dim finta As New ApiFinta(New Passo With {
+                .Stato = 404,
+                .Corpo = "{""type"":""error"",""error"":{""type"":""not_found_error""," &
+                         """message"":""non lo conosco""}}"})
+
+            ' Il corpo NON nomina il modello, di proposito: se lo nominasse, l'assert qui
+            ' sotto passerebbe grazie all'eco dell'API invece che grazie a noi — ed è
+            ' successo, alla prima falsificazione.
+
+            Using client As ClientClaude = ClientDiProva(finta, DaJsonDiProva("claude-sonnet-4-6"))
+                Try
+                    Await client.ChiediAsync(Modelli.Ragionamento, JsonValue.Create("ciao"), 1500)
+                    Assert.Fail("un 404 doveva sollevare")
+                Catch ex As ErroreAi
+                    Assert.AreEqual(CausaErroreAi.ModelloRitirato, ex.Causa, "causa")
+                    StringAssert.Contains(ex.Message, "claude-sonnet-4-6", "dice quale modello")
+                    StringAssert.Contains(ex.Message, "Impostazioni", "e dove si cambia")
+                End Try
+            End Using
+
+            Assert.AreEqual(1, finta.Chiamate, "un modello che non c'è non ricompare riprovando")
+        End Function
+
+        <TestMethod>
+        Public Async Function IlModelloRitiratoSiRiconosceDalTipoAncheSenza404() As Task
+            ' Il 404 è il segno di oggi; il tipo dichiarato dall'API vale anche se un
+            ' giorno arrivasse con un altro stato.
+            Dim finta As New ApiFinta(New Passo With {
+                .Stato = 400,
+                .Corpo = "{""type"":""error"",""error"":{""type"":""not_found_error""}}"})
+
+            Using client As ClientClaude = ClientDiProva(finta)
+                Try
+                    Await client.ChiediAsync(Modelli.Semplice, JsonValue.Create("ciao"), 1500)
+                    Assert.Fail("doveva sollevare")
+                Catch ex As ErroreAi
+                    Assert.AreEqual(CausaErroreAi.ModelloRitirato, ex.Causa, "causa")
+                End Try
+            End Using
+
+        End Function
+
+        <TestMethod>
+        Public Async Function AncheInStreamingIlModelloRitiratoSiRiconosce() As Task
+            Dim finta As New ApiCheFluisce(New PassoFlusso With {
+                .Stato = 404,
+                .Corpo = "{""type"":""error"",""error"":{""type"":""not_found_error""}}"})
+
+            Using client As ClientClaude = ClientInAscolto(finta)
+                Try
+                    Await client.ChiediInStreamingAsync(
+                        Modelli.Ragionamento, Conversazione("ciao"), 2000, Nothing)
+                    Assert.Fail("un 404 doveva sollevare")
+                Catch ex As ErroreAi
+                    Assert.AreEqual(CausaErroreAi.ModelloRitirato, ex.Causa, "causa")
+                End Try
+            End Using
+
+        End Function
+
+        ''' <summary>Una mappa che manda il ragionamento su questo modello.</summary>
+        Private Shared Function DaJsonDiProva(id As String) As Modelli
+            Return Modelli.DaJson($"{{ ""ragionamento"": ""{id}"" }}")
+        End Function
+
+        <TestMethod>
         Public Async Function DueGuastiDiFilaArrivanoAllUtente() As Task
             Dim finta As New ApiFinta(
                 New Passo With {.Stato = 503, .Corpo = "{}"},

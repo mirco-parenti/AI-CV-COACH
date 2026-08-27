@@ -145,14 +145,14 @@ Namespace Documenti
         End Function
 
         <TestMethod>
-        Public Sub IlPacchettoHaLeSetteParti()
+        Public Sub IlPacchettoHaLeOttoParti()
 
             ConDocx(Impaginazione.PaginaCv(CvDiProva()),
                 Sub(percorso)
                     CollectionAssert.AreEquivalent(
                         {"[Content_Types].xml", "_rels/.rels", "docProps/core.xml",
                          "word/document.xml", "word/_rels/document.xml.rels",
-                         "word/styles.xml", "word/numbering.xml"},
+                         "word/settings.xml", "word/styles.xml", "word/numbering.xml"},
                         Parti(percorso))
                 End Sub)
 
@@ -306,6 +306,31 @@ Namespace Documenti
             Assert.Throws(Of ArgumentNullException)(Sub() ScrittoreDocx.Componi(Nothing))
             Assert.Throws(Of ArgumentException)(
                 Sub() ScrittoreDocx.Scrivi(New PaginaDocumento(), "  "))
+
+        End Sub
+
+        ''' <summary>
+        ''' Senza <c>word/settings.xml</c> Word apre il documento in «modalità
+        ''' compatibilità»: il testo c'è tutto, ma la barra del titolo dichiara un file
+        ''' vecchio e qualche funzione resta spenta. Il valore 15 è Word 2013 e successivi,
+        ''' cioè il formato che l'applicazione scrive davvero.
+        ''' <i>(Reperto D-R3 del giro D, 2026-08-25.)</i>
+        ''' </summary>
+        <TestMethod>
+        Public Sub IlPacchettoDichiaraLaVersioneDelFormato()
+
+            ConDocx(Impaginazione.PaginaCv(CvDiProva()),
+                Sub(percorso)
+                    Dim impostazioni As XDocument = Parte(percorso, "word/settings.xml")
+                    Dim w As XNamespace = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+
+                    Dim modalita As XElement = impostazioni.Descendants(w + "compatSetting").
+                        FirstOrDefault(Function(v) v.Attribute(w + "name")?.Value = "compatibilityMode")
+
+                    Assert.IsNotNull(modalita, "il pacchetto dichiara con che versione del formato è scritto")
+                    Assert.AreEqual("15", modalita.Attribute(w + "val")?.Value,
+                                    "Word 2013 e successivi, non la modalità compatibilità")
+                End Sub)
 
         End Sub
 

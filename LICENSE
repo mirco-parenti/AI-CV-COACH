@@ -1,0 +1,29 @@
+Copyright © 2026 Aviolab AI. Tutti i diritti riservati.
+
+Questo repository contiene il codice sorgente di TrovaLavoro (AI-CV-COACH) ed è
+pubblicato per essere LETTO: come portfolio, per studio e per verifica del lavoro
+svolto. La pubblicazione del sorgente non è una concessione di licenza.
+
+Senza autorizzazione scritta di Aviolab AI non è permesso:
+
+  - usare il software, in tutto o in parte, per scopi personali o commerciali;
+  - copiarlo, modificarlo, tradurlo o creare opere derivate;
+  - ridistribuirlo, pubblicarlo o rivenderlo, in forma sorgente o eseguibile.
+
+Restano salvi i diritti che la legge riconosce indipendentemente dal consenso del
+titolare, fra cui la citazione a fini di critica, discussione e insegnamento.
+
+IL SOFTWARE È FORNITO «COSÌ COM'È», SENZA GARANZIA DI ALCUN TIPO, ESPRESSA O
+IMPLICITA, COMPRESE FRA LE ALTRE LE GARANZIE DI COMMERCIABILITÀ E DI IDONEITÀ A
+UNO SCOPO PARTICOLARE. IN NESSUN CASO IL TITOLARE POTRÀ ESSERE RITENUTO
+RESPONSABILE PER DANNI DERIVANTI DALL'USO DEL SOFTWARE.
+
+Per chiedere un permesso: aprire una issue su
+https://github.com/mirco-parenti/AI-CV-COACH
+
+
+COMPONENTI DI TERZE PARTI
+
+L'applicazione usa Microsoft.Web.WebView2 e gira sul runtime .NET, entrambi di
+Microsoft e distribuiti con le loro licenze, che restano quelle dei rispettivi
+titolari. L'eseguibile pubblicato include il runtime .NET al proprio interno.

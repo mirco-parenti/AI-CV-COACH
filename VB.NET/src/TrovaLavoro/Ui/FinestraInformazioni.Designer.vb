@@ -25,6 +25,11 @@ Partial Class FinestraInformazioni
         Me.picMarchio = New System.Windows.Forms.PictureBox()
         Me.lblVersione = New System.Windows.Forms.Label()
         Me.lblCopyright = New System.Windows.Forms.Label()
+        Me.lblSorgente = New System.Windows.Forms.Label()
+        Me.btnCopiaDiagnostica = New System.Windows.Forms.Button()
+        Me.lblEsitoVersione = New System.Windows.Forms.Label()
+        Me.btnControllaVersione = New System.Windows.Forms.Button()
+        Me.btnComeFunziona = New System.Windows.Forms.Button()
         Me.btnChiudi = New System.Windows.Forms.Button()
         CType(Me.picMarchio, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -57,20 +62,67 @@ Partial Class FinestraInformazioni
         Me.lblCopyright.TabIndex = 2
         Me.lblCopyright.Text = "Copyright"
         '
+        'lblSorgente
+        '
+        Me.lblSorgente.AutoSize = True
+        Me.lblSorgente.Location = New System.Drawing.Point(14, 497)
+        Me.lblSorgente.Name = "lblSorgente"
+        Me.lblSorgente.Size = New System.Drawing.Size(300, 15)
+        Me.lblSorgente.TabIndex = 3
+        Me.lblSorgente.Text = "Codice sorgente"
+        '
+        'btnCopiaDiagnostica
+        '
+        Me.btnCopiaDiagnostica.Location = New System.Drawing.Point(280, 464)
+        Me.btnCopiaDiagnostica.Name = "btnCopiaDiagnostica"
+        Me.btnCopiaDiagnostica.Size = New System.Drawing.Size(134, 32)
+        Me.btnCopiaDiagnostica.TabIndex = 4
+        Me.btnCopiaDiagnostica.Text = "Copia diagnostica"
+        '
+        'lblEsitoVersione
+        '
+        Me.lblEsitoVersione.AutoSize = False
+        Me.lblEsitoVersione.Location = New System.Drawing.Point(14, 521)
+        Me.lblEsitoVersione.Name = "lblEsitoVersione"
+        Me.lblEsitoVersione.Size = New System.Drawing.Size(520, 40)
+        Me.lblEsitoVersione.TabIndex = 5
+        Me.lblEsitoVersione.Text = ""
+        '
+        'btnControllaVersione
+        '
+        Me.btnControllaVersione.Location = New System.Drawing.Point(120, 464)
+        Me.btnControllaVersione.Name = "btnControllaVersione"
+        Me.btnControllaVersione.Size = New System.Drawing.Size(150, 32)
+        Me.btnControllaVersione.TabIndex = 6
+        Me.btnControllaVersione.Text = "Cerca aggiornamenti"
+        '
+        'btnComeFunziona
+        '
+        Me.btnComeFunziona.Location = New System.Drawing.Point(14, 569)
+        Me.btnComeFunziona.Name = "btnComeFunziona"
+        Me.btnComeFunziona.Size = New System.Drawing.Size(260, 32)
+        Me.btnComeFunziona.TabIndex = 7
+        Me.btnComeFunziona.Text = "Come funziona, e cosa esce dal tuo PC"
+        '
         'btnChiudi
         '
-        Me.btnChiudi.Location = New System.Drawing.Point(424, 455)
+        Me.btnChiudi.Location = New System.Drawing.Point(424, 464)
         Me.btnChiudi.Name = "btnChiudi"
         Me.btnChiudi.Size = New System.Drawing.Size(110, 32)
-        Me.btnChiudi.TabIndex = 3
+        Me.btnChiudi.TabIndex = 5
         Me.btnChiudi.Text = "Chiudi"
         '
         'FinestraInformazioni
         '
-        Me.ClientSize = New System.Drawing.Size(548, 501)
+        Me.ClientSize = New System.Drawing.Size(548, 615)
         Me.Controls.Add(Me.picMarchio)
         Me.Controls.Add(Me.lblVersione)
         Me.Controls.Add(Me.lblCopyright)
+        Me.Controls.Add(Me.lblSorgente)
+        Me.Controls.Add(Me.btnCopiaDiagnostica)
+        Me.Controls.Add(Me.lblEsitoVersione)
+        Me.Controls.Add(Me.btnControllaVersione)
+        Me.Controls.Add(Me.btnComeFunziona)
         Me.Controls.Add(Me.btnChiudi)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.MaximizeBox = False
@@ -87,6 +139,11 @@ Partial Class FinestraInformazioni
     Friend WithEvents picMarchio As System.Windows.Forms.PictureBox
     Friend WithEvents lblVersione As System.Windows.Forms.Label
     Friend WithEvents lblCopyright As System.Windows.Forms.Label
+    Friend WithEvents lblSorgente As System.Windows.Forms.Label
+    Friend WithEvents lblEsitoVersione As System.Windows.Forms.Label
+    Friend WithEvents btnControllaVersione As System.Windows.Forms.Button
+    Friend WithEvents btnComeFunziona As System.Windows.Forms.Button
+    Friend WithEvents btnCopiaDiagnostica As System.Windows.Forms.Button
     Friend WithEvents btnChiudi As System.Windows.Forms.Button
 
 End Class

@@ -24,6 +24,11 @@ opportunità sono esaurite.
    arrivate e la cartella dati **non si cambia** nemmeno lì: la si vede e la si apre, ma
    spostarla resta un mestiere dell'avvio, perché il lucchetto è preso all'apertura e per
    tutta la sessione (cap. 09.4). `--dati` non è più un ripiego provvisorio: è la strada.*
+   *Dal **2026-08-27** prima della chiave c'è un passo in più, e non chiede niente:
+   l'**informativa** — che cosa esce dal PC, dove restano i dati, che spesa comporta un
+   giro (cap. 11.2, cap. 03.4). Sta lì e non dopo perché è quello il momento della
+   decisione: chi ha appena incollato una chiave a pagamento ha già scelto di fidarsi.
+   Compare una volta sola, e da allora in poi si riapre solo chiedendola.*
 2. L'app carica la libreria prompt — quella integrata nell'exe o, se presente, la
    cartella `prompt-pool/` accanto all'exe (cap. 04.2) — e ne mostra versione e
    sorgente nel riquadro del logo, in basso a sinistra.

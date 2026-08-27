@@ -258,6 +258,44 @@ Namespace Documenti
 
         End Function
 
+        ''' <summary>
+        ''' In un file di posta le intestazioni sono <b>righe</b>: un a capo dentro un
+        ''' indirizzo non è un indirizzo storto, è una riga nuova — cioè un'intestazione
+        ''' che nessuno ha chiesto. Chi scrive quei campi è l'utente, o l'AI che glieli
+        ''' propone. <i>(Reperto M1 della revisione del giro D, 2026-08-27.)</i>
+        ''' </summary>
+        <TestMethod>
+        Public Sub UnACapoNelDestinatarioNonApreUnaRigaNuova()
+
+            Dim eml As String = ScrittoreEml.Componi(
+                "io@example.it", "loro@example.it" & vbCrLf & "Bcc: nascosto@example.it",
+                "Oggetto", "Corpo", Nothing)
+
+            For Each riga As String In eml.Split(New String() {vbCrLf, vbCr, vbLf}, StringSplitOptions.None)
+                Assert.IsFalse(riga.StartsWith("Bcc:", StringComparison.Ordinal),
+                               "nessuna riga nuova: l'a capo è diventato uno spazio")
+            Next
+
+            Assert.Contains("To: loro@example.it Bcc: nascosto@example.it", eml,
+                            "e il testo non si perde per strada: resta dentro il valore")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnACapoNelMittenteNonApreUnaRigaNuova()
+
+            ' Le porte sono due, e ne bastava una aperta.
+            Dim eml As String = ScrittoreEml.Componi(
+                "io@example.it" & vbLf & "Reply-To: altro@example.it", "loro@example.it",
+                "Oggetto", "Corpo", Nothing)
+
+            For Each riga As String In eml.Split(New String() {vbCrLf, vbCr, vbLf}, StringSplitOptions.None)
+                Assert.IsFalse(riga.StartsWith("Reply-To:", StringComparison.Ordinal),
+                               "vale per il mittente come per il destinatario")
+            Next
+
+        End Sub
+
     End Class
 
 End Namespace

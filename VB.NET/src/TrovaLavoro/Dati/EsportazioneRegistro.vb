@@ -147,11 +147,32 @@ Namespace Dati
         ''' </summary>
         Private Function ProtettoPerCsv(campo As String) As String
 
-            Dim valore As String = If(campo, "")
+            Dim valore As String = NonUnaFormula(If(campo, ""))
 
             If valore.IndexOfAny({";"c, """"c, ControlChars.Cr, ControlChars.Lf}) < 0 Then Return valore
 
             Return """" & valore.Replace("""", """""") & """"
+
+        End Function
+
+        ''' <summary>
+        ''' Un campo che comincia con <c>=</c>, <c>+</c>, <c>-</c> o <c>@</c>, preceduto da un
+        ''' apostrofo — che nei fogli di calcolo vuol dire «questo è testo».
+        ''' </summary>
+        ''' <remarks>
+        ''' Il titolo e il nome dell'azienda arrivano dall'annuncio, cioè da un testo che ha
+        ''' scritto qualcun altro. Aprendo il CSV in Excel, una cella che comincia con uno di
+        ''' quei quattro caratteri non è un titolo: è una <b>formula</b>, e viene eseguita. Le
+        ''' virgolette del CSV non bastano, perché proteggono le colonne e non il foglio.
+        ''' L'apostrofo si vede, ed è un prezzo che pago volentieri: capita su pochissimi
+        ''' titoli, e l'alternativa è un file che esegue quel che l'annuncio gli ha scritto
+        ''' dentro. <i>(2026-08-27, dalla revisione del giro D.)</i>
+        ''' </remarks>
+        Private Function NonUnaFormula(valore As String) As String
+
+            If valore.Length = 0 Then Return valore
+            If "=+-@".IndexOf(valore(0)) < 0 Then Return valore
+            Return "'" & valore
 
         End Function
 

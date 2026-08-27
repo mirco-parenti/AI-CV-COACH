@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Le impostazioni del documento. Serve a una cosa sola, ed è quella per cui è nata:
+     dire a Word con quale versione del formato è scritto questo file. Senza questa
+     parte Word apre il documento in «modalità compatibilità» — non è un errore, il
+     testo è tutto lì, ma la barra del titolo dichiara un file vecchio e alcune
+     funzioni restano spente. Il valore 15 è Word 2013 e successivi, cioè il formato
+     che l'applicazione scrive davvero. (2026-08-27, reperto D-R3 del giro D.)
+     Entra nello ZIP come «word/settings.xml». -->
+<w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:compat>
+    <w:compatSetting w:name="compatibilityMode"
+                     w:uri="http://schemas.microsoft.com/office/word"
+                     w:val="15"/>
+  </w:compat>
+</w:settings>

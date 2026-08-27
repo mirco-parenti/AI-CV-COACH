@@ -115,6 +115,141 @@ Namespace Ai
                 "un livello inventato doveva sollevare")
         End Sub
 
+        ' ==================================================================
+        ' Scrivere il file dalle Impostazioni (2026-08-27)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Sub CambiareUnLivelloNonToccaIlResto()
+
+            ' Le Impostazioni conoscono i due identificativi e nient'altro: l'interruttore
+            ' del ragionamento e qualunque campo messo lì a mano non sono roba loro.
+            Dim prima As String =
+                "{ ""semplice"": ""claude-haiku-4-5""," &
+                "  ""ragionamento"": { ""id"": ""claude-sonnet-5"", ""ragionamento_esteso"": true," &
+                "                      ""nota"": ""esperimento"" } }"
+
+            Dim dopo As String = Modelli.ConLivello(prima, Modelli.Ragionamento, "claude-opus-4-8", Nothing)
+            Dim riletti As Modelli = Modelli.DaJson(dopo)
+
+            Assert.AreEqual("claude-opus-4-8", riletti.ModelloRagionamento.Id, "l'identificativo è cambiato")
+            Assert.IsTrue(riletti.ModelloRagionamento.RagionamentoEsteso.Value,
+                          "l'interruttore è rimasto acceso com'era")
+            StringAssert.Contains(dopo, "esperimento", "e il campo che non capisco è ancora lì")
+            Assert.AreEqual("claude-haiku-4-5", riletti.ModelloSemplice.Id, "l'altro livello non si tocca")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LaFormaBreveRestaBreve()
+
+            ' Chi ha scritto quel file a mano deve ritrovarlo come lo aveva lasciato.
+            Dim dopo As String = Modelli.ConLivello(
+                "{ ""semplice"": ""claude-haiku-4-5"" }", Modelli.Semplice, "claude-haiku-9", Nothing)
+
+            Assert.AreEqual("claude-haiku-9", Modelli.DaJson(dopo).ModelloSemplice.Id)
+            Assert.IsFalse(dopo.Contains("ragionamento_esteso"), "nessun campo comparso dal nulla")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnLivelloAssenteSiScriveConLInterruttoreInVigore()
+
+            ' Il caso più insidioso, ed è quello di tutti i giorni: il file non c'è
+            ' ancora. Il predefinito del ragionamento dichiara l'interruttore SPENTO, e
+            ' scrivere il solo identificativo lo riporterebbe a «non dichiarato» — cioè
+            ' acceso, su Sonnet 5 — troncando le risposte senza errore. Cambiare modello
+            ' non deve cambiare di nascosto una seconda cosa.
+            Dim inVigore As Modelli = Modelli.Predefiniti()
+
+            Dim dopo As String = Modelli.ConLivello(Nothing, Modelli.Ragionamento, "claude-sonnet-5-1",
+                                                    inVigore.ModelloRagionamento.RagionamentoEsteso)
+            Dim riletti As Modelli = Modelli.DaJson(dopo)
+
+            Assert.AreEqual("claude-sonnet-5-1", riletti.ModelloRagionamento.Id, "il modello nuovo")
+            Assert.IsTrue(riletti.ModelloRagionamento.RagionamentoEsteso.HasValue,
+                          "l'interruttore è dichiarato")
+            Assert.IsFalse(riletti.ModelloRagionamento.RagionamentoEsteso.Value,
+                           "e vale quel che valeva: spento")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnFileCheNonSiCapisceNonSiSostituisce()
+
+            ' Quel file è dell'utente: riscriverlo sopra perché non lo si capisce sarebbe
+            ' il modo più veloce di perdere quel che c'era dentro.
+            Assert.Throws(Of Text.Json.JsonException)(
+                Sub() Modelli.ConLivello("[1,2,3]", Modelli.Semplice, "claude-haiku-4-5", Nothing),
+                "un JSON che non è un oggetto doveva sollevare")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub CambiareModelloValeSuDiscoESubito()
+
+            ConFileDiProva(
+                Sub(percorso)
+
+                    Dim inVigore As Modelli = Modelli.Predefiniti()
+
+                    inVigore.CambiaModello(Modelli.Ragionamento, "claude-opus-4-8", percorso)
+
+                    ' In vigore: è l'oggetto che il client interroga a ogni chiamata, e
+                    ' la prossima deve partire col modello nuovo senza riavviare niente.
+                    Assert.AreEqual("claude-opus-4-8", inVigore.PerLivello(Modelli.Ragionamento).Id,
+                                    "in vigore")
+                    Assert.AreEqual(OrigineModelli.File, inVigore.Origine,
+                                    "e la provenienza adesso è il file")
+
+                    ' Su disco: se restasse solo in memoria, al riavvio tornerebbe
+                    ' indietro da solo senza che nessuno capisca perché.
+                    Assert.AreEqual("claude-opus-4-8",
+                                    Modelli.Carica(percorso).ModelloRagionamento.Id, "su disco")
+
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnDiscoCheRifiutaNonCambiaNienteInVigore()
+
+            ConFileDiProva(
+                Sub(percorso)
+
+                    ' Un percorso impossibile: il file di prova fa da cartella, e nessuna
+                    ' cartella può nascere lì dentro.
+                    File.WriteAllText(percorso, "{}")
+                    Dim impossibile As String = Path.Combine(percorso, "dentro", "modelli.json")
+
+                    Dim inVigore As Modelli = Modelli.Predefiniti()
+
+                    Assert.Throws(Of IOException)(
+                        Sub() inVigore.CambiaModello(Modelli.Semplice, "claude-haiku-9", impossibile),
+                        "il disco doveva rifiutare")
+
+                    Assert.AreEqual("claude-haiku-4-5", inVigore.PerLivello(Modelli.Semplice).Id,
+                                    "e in vigore non è cambiato niente")
+                    Assert.AreEqual(OrigineModelli.Predefinita, inVigore.Origine, "nemmeno la provenienza")
+
+                End Sub)
+
+        End Sub
+
+        ''' <summary>Un percorso in una cartella usa-e-getta, portata via alla fine.</summary>
+        Private Shared Sub ConFileDiProva(prova As Action(Of String))
+
+            Dim radice As String = Path.Combine(Path.GetTempPath(), "modelli-" & Guid.NewGuid().ToString("N"))
+            Directory.CreateDirectory(radice)
+
+            Try
+                prova(Path.Combine(radice, "modelli.json"))
+            Finally
+                CartelleDiProva.PortaVia(radice)
+            End Try
+
+        End Sub
+
     End Class
 
 End Namespace

@@ -21,8 +21,24 @@ Namespace Dati
     ''' </remarks>
     Friend NotInheritable Class CampiJson
 
-        ''' <summary>Il formato delle date su disco: ordinabile e leggibile a occhio.</summary>
-        Private Const FormatoIstante As String = "yyyy-MM-dd HH:mm:ss"
+        ''' <summary>
+        ''' Il formato delle date su disco: ordinabile, leggibile a occhio, e <b>col fuso</b>.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il fuso è arrivato il 2026-08-27, dalla revisione del giro D. Prima si scriveva
+        ''' l'ora locale nuda: rileggendola non si sapeva più di dove fosse, e un file portato
+        ''' su un'altra macchina — o riletto dopo il cambio dell'ora — diceva un istante
+        ''' diverso da quello che era stato scritto, senza che nulla lo segnalasse. Scrivere
+        ''' «+02:00» costa sei caratteri e toglie l'ambiguità per sempre.
+        ''' </remarks>
+        Private Const FormatoIstante As String = "yyyy-MM-dd HH:mm:sszzz"
+
+        ''' <summary>
+        ''' Il formato di prima, senza fuso. Non si scrive più, ma si legge ancora: i file
+        ''' già su disco — e i backup già fatti — sono scritti così, e un dato che smette
+        ''' di leggersi è un dato perso.
+        ''' </summary>
+        Private Const FormatoIstanteSenzaFuso As String = "yyyy-MM-dd HH:mm:ss"
 
         Private Sub New()
         End Sub
@@ -99,11 +115,20 @@ Namespace Dati
         Friend Shared Function Istante(oggetto As JsonObject, campo As String) As Date
 
             Dim scritto As String = Testo(oggetto, campo)
-            Dim letto As Date
+            If scritto Is Nothing Then Return Nothing
 
-            If scritto IsNot Nothing AndAlso Date.TryParseExact(
+            ' Prima la forma col fuso, che è quella che scriviamo oggi.
+            Dim conFuso As DateTimeOffset
+            If DateTimeOffset.TryParseExact(
                 scritto, FormatoIstante, CultureInfo.InvariantCulture,
-                DateTimeStyles.None, letto) Then Return letto
+                DateTimeStyles.None, conFuso) Then Return conFuso.LocalDateTime
+
+            ' Poi quella di prima. «AssumeLocal» non è una scommessa: quelle date le ha
+            ' scritte questo programma, su questa macchina, con l'ora locale.
+            Dim letto As Date
+            If Date.TryParseExact(
+                scritto, FormatoIstanteSenzaFuso, CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeLocal, letto) Then Return letto
 
             Return Nothing
 
@@ -117,7 +142,15 @@ Namespace Dati
 
             If istante = Nothing Then Return Nothing
 
-            Return istante.ToString(FormatoIstante, CultureInfo.InvariantCulture)
+            ' Un istante senza Kind lo trattiamo come locale, che è quel che è: tutti i
+            ' produttori di questo programma scrivono Date.Now. Se invece arriva già in
+            ' UTC — non succede oggi, ma un domani — si converte, invece di stamparlo
+            ' come se fosse l'ora di casa.
+            Dim locale As Date = If(istante.Kind = DateTimeKind.Utc,
+                                    istante.ToLocalTime(),
+                                    Date.SpecifyKind(istante, DateTimeKind.Local))
+
+            Return New DateTimeOffset(locale).ToString(FormatoIstante, CultureInfo.InvariantCulture)
 
         End Function
 

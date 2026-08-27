@@ -31,12 +31,25 @@ Namespace Motore
         Private ReadOnly _avvisi As New List(Of String)
         Private _smaltito As Boolean
 
+        ''' <summary>
+        ''' La chiave con cui il motore è montato, qualunque delle tre porte l'abbia
+        ''' portata (v. <see cref="LeggiChiave"/>). Resta privata: chi ha bisogno di
+        ''' parlare con l'API passa da un metodo di questa classe, non dalla chiave.
+        ''' </summary>
+        Private _chiaveInUso As String
+
         Private Sub New(cartella As CartellaDati)
             _Cartella = cartella
             _Segreti = New ArchivioSegreti(cartella)
         End Sub
 
         ''' <summary>Dove vivono i file dell'utente (cap. 11.1).</summary>
+        ''' <summary>
+        ''' Il diario tecnico di questa applicazione (cap. 11.1): dove finiscono i guasti,
+        ''' senza segreti, perché qualcuno possa mandarli invece di descriverli.
+        ''' </summary>
+        Public Property Diario As Dati.DiarioTecnico
+
         Public ReadOnly Property Cartella As CartellaDati
 
         ''' <summary>
@@ -55,6 +68,21 @@ Namespace Motore
 
         ''' <summary>La mappa livello → modello in uso (cap. 02.5).</summary>
         Public ReadOnly Property Modelli As Ai.Modelli
+
+        ''' <summary>
+        ''' Chiede all'API quali modelli esistono, per le tendine delle Impostazioni. Non
+        ''' consuma token e non solleva: l'esito è il valore.
+        ''' </summary>
+        ''' <remarks>
+        ''' Sta qui e non nelle Impostazioni perché serve la <b>chiave in uso</b>, che può
+        ''' venire da una qualsiasi delle tre porte — l'avvio, il file cifrato, la
+        ''' variabile d'ambiente — e che di qui non esce (cap. 11.3). Una finestra che se
+        ''' la facesse dare per chiamare l'API da sé funzionerebbe identica e allargherebbe
+        ''' di una stanza il giro della credenziale.
+        ''' </remarks>
+        Public Function ModelliDisponibiliAsync() As Task(Of EsitoElenco)
+            Return ElencoModelli.ChiediAsync(_chiaveInUso)
+        End Function
 
         ''' <summary>Il client dell'AI; <c>Nothing</c> se la chiave non c'è.</summary>
         Public ReadOnly Property Client As ClientClaude
@@ -243,6 +271,14 @@ Namespace Motore
                                 $"uso «{contesto.Cartella.Radice}».")
             End If
 
+            ' Il diario per primo: da qui in poi ogni guasto ha un posto dove finire, e i
+            ' guasti del montaggio sono i più difficili da farsi raccontare a voce. Aprirlo
+            ' però non scrive niente, e non crea nemmeno la cartella: un avvio andato bene
+            ' non lascia traccia, e la cartella dati di chi non ha ancora fatto niente resta
+            ' vuota davvero (cap. 11.1).
+            contesto.Diario = New Dati.DiarioTecnico(contesto.Cartella)
+            Dati.DiarioTecnico.Corrente = contesto.Diario
+
             contesto.MontaPool(cartellaPool)
             contesto.MontaNumeri()
             contesto.MontaPreferenze()
@@ -386,6 +422,7 @@ Namespace Motore
                 Return
             End If
 
+            _chiaveInUso = chiaveInUso
             _Client = New ClientClaude(chiaveInUso, Modelli)
 
             ' Il conto di quanto costa ogni chiamata e di quanto sfiora il tetto del suo

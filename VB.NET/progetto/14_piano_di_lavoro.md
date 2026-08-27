@@ -724,6 +724,10 @@ e le ragioni stanno nei capitoli: la **cartella dati** si mostra ma non si spost
 documenti** si gestisce in P7 dove quel giro sa aspettare l'AI (cap. 05.2). In compenso
 `config.json`, che il cap. 11.1 prometteva dal principio e nessuno aveva mai scritto, si
 scopre non servire più: le sue due voci avevano trovato case migliori da sole.
+*(Annotato il 2026-08-27, non riscritto: delle tre forme diverse qui sopra una è stata
+**rovesciata** dalla revisione del giro D — i **modelli** adesso si scelgono dalle
+Impostazioni, perché chi il programma non l'ha scritto non apre un file JSON. Il **pool**
+no, e per la sua ragione: si sigilla dal repo. V. «Dopo T9 — l'esito del giro D».)*
 
 Con questa gamba si chiude anche un **debito di T7b**: l'interruttore dell'anti-slop
 (cap. 08.4). Vale subito e da entrambe le porte — anche via MCP, perché il cap. 09.3 vuole
@@ -1254,6 +1258,42 @@ a **dieci**. Niente prompt toccati: **Pool 1.13** e versione **1.0.000** restano
 Del paragrafo precedente resta aperto **quale chiave** portare sulla macchina del tutor, la
 **passata della regola 16 su T1→T8** e — fuori dal giro D — la **demo video** e il **tag
 `v1.0`**.
+
+
+*Dopo T9 — **l'esito del giro D** (2026-08-27).* Il giro D si è fatto il 25 agosto sulla
+postazione del tutor, e la revisione che ne è uscita ha lasciato un elenco di lavoro: quattordici
+voci in `in_sospeso.md`, in ordine di priorità. Non è una tappa — il piano T0→T9 è chiuso — ma è
+la prima volta che il perimetro cresce per una **lettura da fuori** invece che per una decisione
+di dentro, e vale la pena dire com'è andata.
+
+Delle quattordici, **dodici sono state fatte** in due sessioni. La prima ha chiuso il gruppo
+«indispensabile» e «fortemente consigliato»: il commit dentro l'eseguibile (D-R1, il difetto che
+il giro D ha pagato di persona), il `LICENSE` e il copyright allineato, le sanificazioni di
+`.eml` e CSV, il DOCX che Word non apre più in modalità compatibilità, i quattro difetti minori,
+il log diagnostico che il cap. 11 prometteva e non esisteva, «Prova la chiave», il segno visibile
+mentre l'AI lavora (D-R2), la copertura misurata e l'integrazione continua, e l'elenco versionato
+delle falsificazioni. La seconda — questa — ha chiuso le tre che restavano, e sono tutte e tre
+della stessa famiglia: **il programma smette di dare per scontato chi lo usa**.
+
+- **I modelli si scelgono dalle Impostazioni**, il **modello ritirato** si riconosce e si dice, e
+  **quanto si è speso** si legge senza uscire dal programma (capp. 02.5, 11.6, 13.8, 13.11). Più
+  l'**avviso di versione**, che parte solo premendolo.
+- **L'informativa dentro l'applicazione** (cap. 03.4, cap. 11.2): che cosa esce dal PC, dove
+  restano i dati, che spesa comporta un giro. Compare al primo avvio, prima della chiave.
+- **La guida per chi il programma non l'ha scritto** (`GUIDA.md`): requisiti, primo avvio, chiave
+  API, dati, backup, che fare quando qualcosa va storto.
+
+**66 collaudi nuovi, 1243 verdi** (erano 1177), e **17 falsificazioni** annotate in
+`falsificazioni.md`, che passa da 15 righe a 32. Due di quelle falsificazioni hanno trovato un
+difetto vero invece di confermare una difesa: una **ricorsione senza fondo** fra il riempimento
+delle tendine e l'evento che ne nasceva — due guardie che si coprivano a vicenda, e il banco
+restava verde finché non si rompevano insieme — e un **assert verde per il motivo sbagliato**,
+che leggeva l'identificativo del modello nell'eco dell'API invece che nella riga scritta da noi.
+La prima non si è curata rimettendo le guardie: si è tolto l'anello.
+
+Restano aperte **due** voci, e nessuna delle due dipende da noi: il **giro D da rifare**
+sull'eseguibile giusto (§13.10) e la **firma del codice** (§13.6). Il tag `v1.0` aspetta la
+prima. Niente prompt toccati: **Pool 1.13** e versione **1.0.000** restano dove erano.
 
 
 ## Ordine e dipendenze

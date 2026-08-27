@@ -200,24 +200,28 @@ Namespace Ui
         End Sub
 
         <TestMethod>
-        Public Sub DiceCosaGiraSottoIlCofanoSenzaLasciarloToccare()
+        Public Sub DiceCosaGiraSottoIlCofano()
 
             ConMotore(
                 Sub(contesto)
 
                     Using finestra As New FinestraImpostazioni(contesto)
 
-                        Dim motore As String = Etichetta(finestra, "lblModelli").Text
+                        Assert.Contains("predefiniti", Etichetta(finestra, "lblModelli").Text,
+                                        "da dove viene la scelta dei modelli")
 
-                        Assert.Contains(contesto.Modelli.ModelloSemplice.Id, motore,
-                                        "il modello dell'estrazione si legge")
-                        Assert.Contains(contesto.Modelli.ModelloRagionamento.Id, motore,
-                                        "e quello del ragionamento")
-                        Assert.Contains("predefiniti", motore, "e da dove viene")
+                        ' Fino alla 1.0 questo collaudo difendeva il contrario — nessun
+                        ' controllo per cambiare i modelli, si toccano da modelli.json — e
+                        ' la revisione del giro D ha rovesciato la decisione: chi il
+                        ' programma non l'ha scritto non apre un file JSON. Il file resta
+                        ' il posto dove la scelta vive (cap. 11.6), e le due tendine hanno
+                        ' i loro collaudi più sotto.
+                        Assert.IsNotEmpty(finestra.Controls.Find("cmbModelloSemplice", searchAllChildren:=True),
+                                          "i modelli adesso si scelgono da qui")
 
-                        ' Nessun controllo per cambiarli: si toccano da modelli.json, che
-                        ' è la regola del cap. 11.6 — una riga, non una nuova build.
-                        Assert.IsEmpty(finestra.Controls.Find("cmbModelloSemplice", searchAllChildren:=True))
+                        ' Quel che di sola lettura è rimasto: il pool si sigilla dal repo e
+                        ' non da un eseguibile distribuito, e la taratura non compare affatto.
+                        Assert.IsNotEmpty(Etichetta(finestra, "lblPool").Text, "il pool si legge")
                         Assert.IsEmpty(finestra.Controls.Find("txtTaratura", searchAllChildren:=True),
                                        "e la taratura non compare affatto")
 
@@ -397,6 +401,296 @@ Namespace Ui
                 End Sub)
 
         End Sub
+
+        ' ==================================================================
+        ' Quanto è costato (2026-08-27)
+        ' ==================================================================
+
+        Private Shared Function ContoDiProva(ParamArray righe As String()) As ContoDoppio
+            Return ContoDelleChiamate.DalleRighe(
+                righe, TrovaLavoro.Ai.Listino.Predefinito(), New Date(2026, 8, 27))
+        End Function
+
+        Private Shared Function RigaDiProva(modello As String, ingresso As Integer, uscita As Integer) As String
+            Return $"2026-08-26 10:00:00;confronto;{modello};4000;{ingresso};{uscita};12,5;end_turn"
+        End Function
+
+        <TestMethod>
+        Public Sub SenzaChiamateNonSiInventaUnoZero()
+
+            Dim detto As String = FinestraImpostazioni.InParole(ContoDiProva())
+
+            StringAssert.Contains(detto, "Nessuna chiamata", "si dice che non c'è ancora niente")
+            Assert.IsFalse(detto.Contains("$0,00"), "e non si scrive un totale che sembra un fatto")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IlContoDiceChiamateTokenESpesa()
+
+            Dim detto As String = FinestraImpostazioni.InParole(
+                ContoDiProva(RigaDiProva("claude-haiku-4-5", 1000000, 0)))
+
+            StringAssert.Contains(detto, "1 chiamata", "una sola, e al singolare")
+            StringAssert.Contains(detto, "$", "la spesa in dollari, che è la valuta della fattura")
+            StringAssert.Contains(detto, "30 giorni", "e la finestra recente")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub SottoIlCentesimoNonSiScriveZero()
+
+            ' «$0,00» si legge come «gratis», e non è la stessa cosa di «pochissimo».
+            Dim detto As String = FinestraImpostazioni.InParole(
+                ContoDiProva(RigaDiProva("claude-haiku-4-5", 100, 10)))
+
+            StringAssert.Contains(detto, "meno di $0,01", "si dice quanto è piccolo, non zero")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IlBucoSiDichiara()
+
+            ' Un totale che tace su una parte delle chiamate sembra completo: è il modo
+            ' più educato di dire una cifra sbagliata.
+            Dim detto As String = FinestraImpostazioni.InParole(
+                ContoDiProva(RigaDiProva("claude-haiku-4-5", 1000000, 0),
+                             RigaDiProva("claude-domani-1", 9000000, 9000000)))
+
+            StringAssert.Contains(detto, "non conosco il prezzo", "si dice che una non è valutata")
+            StringAssert.Contains(detto, "stima", "e che il resto è comunque una stima")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IlBottoneDelConteggioSiAccendeSoloSeCEQualcosa()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        ' Cartella dati appena nata: nessuna chiamata all'AI è mai partita.
+                        Assert.IsFalse(Comando(finestra, "btnApriChiamate").Enabled,
+                                       "non si apre un file che non esiste")
+                        StringAssert.Contains(Etichetta(finestra, "lblConsumo").Text, "Nessuna chiamata")
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        ' ==================================================================
+        ' Le tendine dei modelli (2026-08-27, dalla revisione del giro D)
+        ' ==================================================================
+
+        ''' <summary>Un elenco finto come quello che l'API restituisce.</summary>
+        Private Shared Function ElencoFinto(ParamArray id As String()) As Func(Of Task(Of TrovaLavoro.Ai.EsitoElenco))
+            Return Function() Task.FromResult(
+                TrovaLavoro.Ai.EsitoElenco.Riuscito(id.Select(Function(uno) New TrovaLavoro.Ai.ModelloDisponibile(uno, "")).ToArray()))
+        End Function
+
+        <TestMethod>
+        Public Sub AprirlaNonScriveModelliJson()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Assert.IsFalse(File.Exists(contesto.Cartella.FileModelli), "prima non c'è nessun file")
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+                        Assert.IsNotNull(finestra)
+                    End Using
+
+                    ' Riempire una tendina fa scattare il suo evento: senza la guardia, il
+                    ' solo guardare le impostazioni scriverebbe modelli.json e la
+                    ' provenienza direbbe «dal file» invece di «predefiniti».
+                    Assert.IsFalse(File.Exists(contesto.Cartella.FileModelli),
+                                   "guardare i modelli non è cambiarli")
+
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LeTendineMostranoQuelChEInVigore()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        ' Prima ancora di chiedere l'elenco all'API: senza rete la
+                        ' finestra si apre lo stesso, coi modelli che il programma
+                        ' conosce da sé.
+                        Assert.AreEqual("claude-sonnet-5", Scelto(finestra, "cmbModelloRagionamento"),
+                                        "il ragionamento")
+                        Assert.AreEqual("claude-haiku-4-5", Scelto(finestra, "cmbModelloSemplice"),
+                                        "le elaborazioni testuali")
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub SceglierUnModelloLoScriveEValeSubito()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        ' Il nome della locale non può essere «tendina»: coprirebbe la
+                        ' funzione omonima, e VB leggerebbe la chiamata come un indice.
+                        Dim ragionamento As ComboBox = Tendina(finestra, "cmbModelloRagionamento")
+                        ragionamento.SelectedIndex = Posto(ragionamento, "claude-haiku-4-5")
+
+                        ' In vigore: è l'oggetto che il client interroga a ogni chiamata,
+                        ' e la prossima deve partire col modello nuovo.
+                        Assert.AreEqual("claude-haiku-4-5",
+                                        contesto.Modelli.PerLivello(TrovaLavoro.Ai.Modelli.Ragionamento).Id,
+                                        "vale già, senza riavviare niente")
+
+                    End Using
+
+                    ' Su disco: se restasse solo in memoria, al riavvio tornerebbe
+                    ' indietro da solo senza che nessuno capisca perché.
+                    Assert.IsTrue(File.Exists(contesto.Cartella.FileModelli), "il file è nato")
+                    Assert.AreEqual("claude-haiku-4-5",
+                                    TrovaLavoro.Ai.Modelli.Carica(contesto.Cartella.FileModelli).ModelloRagionamento.Id,
+                                    "su disco")
+
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LaSceltaDelRagionamentoNonTrascinaLAltroLivello()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        ' Il nome della locale non può essere «tendina»: coprirebbe la
+                        ' funzione omonima, e VB leggerebbe la chiamata come un indice.
+                        Dim ragionamento As ComboBox = Tendina(finestra, "cmbModelloRagionamento")
+                        ragionamento.SelectedIndex = Posto(ragionamento, "claude-haiku-4-5")
+
+                        Assert.AreEqual("claude-haiku-4-5", Scelto(finestra, "cmbModelloSemplice"),
+                                        "l'altra tendina non si è mossa")
+                        Assert.AreEqual("claude-haiku-4-5",
+                                        contesto.Modelli.PerLivello(TrovaLavoro.Ai.Modelli.Semplice).Id,
+                                        "e il livello semplice è quello di prima")
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Async Function SenzaElencoRestanoIModelliConosciuti() As Task
+
+            Await ConMotoreAsync(
+                Async Function(contesto)
+
+                    Using finestra As New FinestraImpostazioni(
+                        contesto, Function() Task.FromResult(TrovaLavoro.Ai.EsitoElenco.Fallito(TrovaLavoro.Ai.CausaErroreAi.Rete)))
+
+                        Await finestra.AggiornaLElencoDeiModelli()
+
+                        Assert.AreEqual(2, Tendina(finestra, "cmbModelloRagionamento").Items.Count,
+                                        "i due modelli conosciuti, e si sceglie lo stesso")
+                        StringAssert.Contains(Etichetta(finestra, "lblModelli").Text, "connessione",
+                                              "e la riga dice perché l'elenco è corto")
+
+                    End Using
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LElencoArrivatoAllungaLeTendineSenzaCambiareLaScelta() As Task
+
+            Await ConMotoreAsync(
+                Async Function(contesto)
+
+                    Using finestra As New FinestraImpostazioni(
+                        contesto, ElencoFinto("claude-sonnet-5", "claude-haiku-4-5", "claude-opus-4-8"))
+
+                        Await finestra.AggiornaLElencoDeiModelli()
+
+                        Assert.AreEqual(3, Tendina(finestra, "cmbModelloRagionamento").Items.Count,
+                                        "adesso ci sono i modelli veri")
+                        Assert.AreEqual("claude-sonnet-5", Scelto(finestra, "cmbModelloRagionamento"),
+                                        "e la scelta di prima è rimasta quella")
+                        Assert.IsFalse(File.Exists(contesto.Cartella.FileModelli),
+                                       "rifare le tendine non è scegliere: niente è stato scritto")
+
+                    End Using
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnModelloRitiratoRestaNellaTendina() As Task
+
+            Await ConMotoreAsync(
+                Async Function(contesto)
+
+                    ' L'API non lo offre più, ma è quello scritto in modelli.json e quello
+                    ' che parte a ogni chiamata: se la tendina lo omettesse mostrerebbe
+                    ' come scelto un modello diverso da quello vero.
+                    contesto.Modelli.CambiaModello(TrovaLavoro.Ai.Modelli.Ragionamento, "claude-sonnet-4-6",
+                                                   contesto.Cartella.FileModelli)
+
+                    Using finestra As New FinestraImpostazioni(
+                        contesto, ElencoFinto("claude-sonnet-5", "claude-haiku-4-5"))
+
+                        Await finestra.AggiornaLElencoDeiModelli()
+
+                        Assert.AreEqual("claude-sonnet-4-6", Scelto(finestra, "cmbModelloRagionamento"),
+                                        "quello in uso si vede, anche se ritirato")
+
+                    End Using
+
+                End Function)
+
+        End Function
+
+        Private Shared Function Scelto(finestra As Control, nome As String) As String
+            Dim voce As TrovaLavoro.Ai.ModelloDisponibile = TryCast(Tendina(finestra, nome).SelectedItem, TrovaLavoro.Ai.ModelloDisponibile)
+            Return If(voce Is Nothing, Nothing, voce.Id)
+        End Function
+
+        Private Shared Function Posto(tendina As ComboBox, id As String) As Integer
+            For quale As Integer = 0 To tendina.Items.Count - 1
+                If DirectCast(tendina.Items(quale), TrovaLavoro.Ai.ModelloDisponibile).Id = id Then Return quale
+            Next
+            Throw New AssertFailedException($"«{id}» non è fra le voci della tendina.")
+        End Function
+
+        ''' <summary>Come <see cref="ConMotore"/>, per una prova che deve aspettare l'AI.</summary>
+        Private Shared Async Function ConMotoreAsync(prova As Func(Of ContestoApp, Task)) As Task
+
+            Dim radice As String = Path.Combine(Path.GetTempPath(),
+                                                "finestra-impostazioni-" & Guid.NewGuid().ToString("N"))
+
+            Try
+                Using contesto As ContestoApp = ContestoApp.Monta(radice, ChiaveFinta)
+                    Await prova(contesto)
+                End Using
+            Finally
+                CartelleDiProva.PortaVia(radice)
+            End Try
+
+        End Function
 
     End Class
 

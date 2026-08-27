@@ -73,6 +73,20 @@ Namespace Motore
         ''' <summary>Oltre un anno non è più un promemoria.</summary>
         Public Const GiorniFollowUpMassimi As Integer = 365
 
+        ''' <summary>
+        ''' Se l'informativa su cosa esce dal PC è già stata mostrata una volta
+        ''' (cap. 11.2, cap. 13). Nasce falsa: al primo avvio compare, e da lì in poi la
+        ''' si riapre solo chiedendola.
+        ''' </summary>
+        ''' <remarks>
+        ''' Non è una preferenza che l'utente sceglie — nelle Impostazioni non c'è nessun
+        ''' interruttore per rimetterla a falso — ma un fatto che il programma ricorda, e
+        ''' sta qui perché qui stanno le cose che sopravvivono alla chiusura. Se il file
+        ''' non si lascia scrivere l'informativa ricomparirà al prossimo avvio: è la
+        ''' conseguenza giusta, perché il dubbio va a favore di chi deve essere informato.
+        ''' </remarks>
+        Public Property InformativaVista As Boolean
+
         ''' <summary>Da dove vengono i valori in uso.</summary>
         Public Property Origine As OrigineImpostazioni = OrigineImpostazioni.Predefinite
 
@@ -145,20 +159,36 @@ Namespace Motore
 
             Dim scartate As New List(Of String)
 
-            Dim lingua As String = TryCast(radice("lingua_predefinita")?.GetValue(Of String)(), String)
-            If lingua IsNot Nothing Then
-                If EUnaLinguaAmmessa(lingua) Then
-                    letto.LinguaPredefinita = lingua.Trim().ToLowerInvariant()
-                Else
-                    scartate.Add($"lingua_predefinita «{lingua}» non è fra le lingue che so scrivere")
+            ' Il Try non è simmetria per bellezza: senza, un «lingua_predefinita: 5» fa
+            ' salire una InvalidOperationException che nessuno raccoglie — nemmeno Carica,
+            ' che filtra solo JsonException — e questa classe promette di non sollevare mai
+            ' (cap. 11.6). Gli altri due campi la rete ce l'avevano già.
+            ' (2026-08-27, dalla revisione del giro D.)
+            Try
+                Dim lingua As String = TryCast(radice("lingua_predefinita")?.GetValue(Of String)(), String)
+                If lingua IsNot Nothing Then
+                    If EUnaLinguaAmmessa(lingua) Then
+                        letto.LinguaPredefinita = lingua.Trim().ToLowerInvariant()
+                    Else
+                        scartate.Add($"lingua_predefinita «{lingua}» non è fra le lingue che so scrivere")
+                    End If
                 End If
-            End If
+            Catch ex As Exception When TypeOf ex Is FormatException OrElse TypeOf ex Is InvalidOperationException
+                scartate.Add("lingua_predefinita non è il nome di una lingua")
+            End Try
 
             Try
                 Dim rifinitura As JsonNode = radice("rifinitura_attiva")
                 If rifinitura IsNot Nothing Then letto.RifinituraAttiva = rifinitura.GetValue(Of Boolean)()
             Catch ex As Exception When TypeOf ex Is FormatException OrElse TypeOf ex Is InvalidOperationException
                 scartate.Add("rifinitura_attiva non è né vero né falso")
+            End Try
+
+            Try
+                Dim vista As JsonNode = radice("informativa_vista")
+                If vista IsNot Nothing Then letto.InformativaVista = vista.GetValue(Of Boolean)()
+            Catch ex As Exception When TypeOf ex Is FormatException OrElse TypeOf ex Is InvalidOperationException
+                scartate.Add("informativa_vista non è né vero né falso")
             End Try
 
             Try
@@ -190,7 +220,8 @@ Namespace Motore
             Return New JsonObject From {
                 {"lingua_predefinita", LinguaPredefinita},
                 {"rifinitura_attiva", RifinituraAttiva},
-                {"giorni_follow_up", GiorniFollowUp}
+                {"giorni_follow_up", GiorniFollowUp},
+                {"informativa_vista", InformativaVista}
             }
         End Function
 

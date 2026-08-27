@@ -1,6 +1,7 @@
 Imports System.Diagnostics
 Imports System.Drawing
 Imports System.IO
+Imports System.Text.Json
 Imports System.Windows.Forms
 Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Motore
@@ -27,10 +28,16 @@ Imports TrovaLavoro.Motore
 ''' ma non si sposta: il lucchetto è preso all'avvio e per tutta la sessione (cap. 09.4),
 ''' e cambiarla a metà partita vorrebbe dire spostare file sotto i piedi di chi ci sta
 ''' scrivendo — la si sceglie all'avvio con <c>--dati</c>, che è il momento in cui nessuno
-''' ci sta lavorando. I <i>modelli</i> e il <i>pool</i> si leggono e basta (cap. 11.6): i
-''' primi vivono in <c>modelli.json</c> apposta perché cambiarli costi una riga e non una
-''' nuova build, e il secondo si sigilla dal repo, non da un eseguibile distribuito. La
-''' <i>taratura</i> non compare affatto, che è la sua regola da sempre.</para>
+''' ci sta lavorando. Il <i>pool</i> si legge e basta: si sigilla dal repo, non da un
+''' eseguibile distribuito (cap. 04.5). La <i>taratura</i> non compare affatto, che è la
+''' sua regola da sempre.</para>
+''' <para><b>I modelli invece si scelgono</b> <i>(2026-08-27, dalla revisione del giro
+''' D)</i>. Due tendine, una per livello, e la scelta finisce in <c>modelli.json</c> —
+''' che resta il posto dove vive, perché cambiare modello continui a costare una riga
+''' anche senza aprire le Impostazioni (cap. 11.6). Fino alla 1.0 quel file si poteva
+''' solo aprire a mano: bastava a me, non a chi il programma non l'ha scritto. Le tendine
+''' <b>non</b> mostrano l'interruttore del ragionamento esteso, che resta nel file: è la
+''' manopola di chi sa cosa sta facendo, e chi la cerca sa già dove guardare.</para>
 ''' </remarks>
 Public Class FinestraImpostazioni
 
@@ -39,6 +46,19 @@ Public Class FinestraImpostazioni
 
     Private ReadOnly _contesto As ContestoApp
     Private ReadOnly _pulizia As PuliziaDati
+
+    ''' <summary>
+    ''' Chi va a chiedere all'API quali modelli esistono. È una porta e non una chiamata
+    ''' diretta per la stessa ragione della prova della chiave: il banco ci mette un finto
+    ''' e collauda le tendine senza rete (cap. 14).
+    ''' </summary>
+    Private ReadOnly _elenco As Func(Of Task(Of Ai.EsitoElenco))
+
+    ''' <summary>I modelli che l'API dichiara disponibili; <c>Nothing</c> finché non arrivano.</summary>
+    Private _disponibili As IReadOnlyList(Of Ai.ModelloDisponibile)
+
+    ''' <summary>Perché l'elenco vero non c'è; stringa vuota quando c'è o quando si sta chiedendo.</summary>
+    Private _perche As String = String.Empty
 
     ''' <summary>Vero mentre si riempiono i controlli: gli eventi non devono salvare nulla.</summary>
     Private _sto As Boolean = True
@@ -63,13 +83,18 @@ Public Class FinestraImpostazioni
     ''' Prepara la finestra. È pubblica perché il banco la costruisce e la interroga senza
     ''' mostrarla: di una finestra modale non si può aspettare la chiusura.
     ''' </summary>
-    Public Sub New(contesto As ContestoApp)
+    ''' <param name="elenco">
+    ''' Chi chiede all'API l'elenco dei modelli; se omesso lo chiede davvero, con la
+    ''' chiave salvata. Il banco ce ne mette uno finto.
+    ''' </param>
+    Public Sub New(contesto As ContestoApp, Optional elenco As Func(Of Task(Of Ai.EsitoElenco)) = Nothing)
 
         InitializeComponent()
 
         If contesto Is Nothing Then Throw New ArgumentNullException(NameOf(contesto))
         _contesto = contesto
         _pulizia = New PuliziaDati(contesto.Cartella)
+        _elenco = If(elenco, AddressOf contesto.ModelliDisponibiliAsync)
 
         lblSpiegazione.Text =
             "Qui stanno le scelte che valgono per tutto il programma. Le preferenze si " &
@@ -95,6 +120,7 @@ Public Class FinestraImpostazioni
         RaccontaLePreferenze()
         RaccontaLeCartelle()
         RaccontaIlMotore()
+        RaccontaIlConsumo()
         RaccontaCosaSiPuoPulire()
 
     End Sub
@@ -140,10 +166,15 @@ Public Class FinestraImpostazioni
 
     End Function
 
+    Private Sub btnComeFunziona_Click(sender As Object, e As EventArgs) Handles btnComeFunziona.Click
+        FinestraInformativa.Mostra(Me)
+    End Sub
+
     Private Sub btnCambiaChiave_Click(sender As Object, e As EventArgs) Handles btnCambiaChiave.Click
 
         Dim illeggibile As Boolean
-        Dim digitata As String = FinestraChiaveApi.Chiedi(Me, _contesto.Segreti.LeggiChiaveApi(illeggibile))
+        Dim digitata As String = FinestraChiaveApi.Chiedi(Me, _contesto.Segreti.LeggiChiaveApi(illeggibile),
+                                                     Function(daProvare As String) Ai.ProvaChiave.ProvaAsync(daProvare))
         If digitata Is Nothing Then Return
 
         Try
@@ -302,18 +333,34 @@ Public Class FinestraImpostazioni
     End Sub
 
     ' ==================================================================
-    ' Sotto il cofano: si legge, non si tocca
+    ' Sotto il cofano: i modelli si scelgono, il pool si legge
     ' ==================================================================
 
     Private Sub RaccontaIlMotore()
 
-        Dim daFile As String = If(_contesto.Modelli.Origine = Ai.OrigineModelli.File,
-                                  "da modelli.json", "predefiniti")
+        RiempiLeTendine()
+        RaccontaDaDoveVengono()
 
-        lblModelli.Text =
-            $"Modelli AI ({daFile}):" & vbLf &
-            $"   estrazione → {_contesto.Modelli.ModelloSemplice.Id}" & vbLf &
-            $"   ragionamento → {_contesto.Modelli.ModelloRagionamento.Id}"
+    End Sub
+
+    ''' <summary>
+    ''' Le due righe sotto le tendine: dove vive la scelta, e da dove viene l'elenco.
+    ''' </summary>
+    ''' <remarks>
+    ''' Sta staccata dal riempimento, e non per ordine: chi ha appena scelto un modello
+    ''' deve aggiornare <b>queste righe</b> e non le tendine. Rifare le tendine da dentro
+    ''' l'evento di una tendina è un anello chiuso — riempire fa scattare l'evento, che
+    ''' riempie — e lo si è visto per davvero, falsificando le due guardie insieme: non
+    ''' un file scritto per sbaglio, ma una ricorsione senza fondo. Meglio non avere il
+    ''' ciclo che sorvegliarlo.
+    ''' </remarks>
+    Private Sub RaccontaDaDoveVengono()
+
+        Dim dove As String = If(_contesto.Modelli.Origine = Ai.OrigineModelli.File,
+                                "La scelta è scritta in modelli.json, nella cartella dati.",
+                                "Nessuno li ha ancora scelti: valgono i predefiniti, e la prima scelta scriverà modelli.json.")
+
+        lblModelli.Text = dove & vbLf & ProvenienzaDellElenco()
 
         If _contesto.Libreria Is Nothing Then
             lblPool.Text = "Pool dei prompt: non si è lasciato aprire."
@@ -328,6 +375,153 @@ Public Class FinestraImpostazioni
             lblPool.Text &= vbLf & _contesto.Libreria.Avviso
         End If
 
+    End Sub
+
+    ''' <summary>Da dove viene l'elenco che le tendine offrono, detto a chi guarda.</summary>
+    Private Function ProvenienzaDellElenco() As String
+
+        If _disponibili IsNot Nothing Then Return "Nelle tendine ci sono i modelli che l'AI dichiara oggi."
+        If _perche.Length > 0 Then Return $"Nelle tendine ci sono solo i modelli che conosco: {_perche}."
+
+        Return "Sto chiedendo all'AI quali modelli ci sono…"
+
+    End Function
+
+    ''' <summary>
+    ''' Chiede l'elenco dei modelli e rifà le tendine con quel che è arrivato.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Sta in un metodo suo, staccato dall'evento della finestra, per la ragione di
+    ''' sempre: di una finestra modale il banco non può aspettare la chiusura, e questo è
+    ''' l'unico modo di collaudarlo senza mostrarla (cap. 14).</para>
+    ''' <para><b>Le tendine non restano spente ad aspettare.</b> Nascono subito coi
+    ''' modelli che il programma conosce da sé, e l'elenco vero le rifà quando arriva:
+    ''' senza rete si sceglie lo stesso fra quelli, e con la rete lenta non c'è una
+    ''' finestra bloccata a fissare il vuoto. Il prezzo è che l'elenco può allungarsi un
+    ''' istante dopo l'apertura, ed è un prezzo piccolo — la scelta di prima resta
+    ''' selezionata.</para>
+    ''' </remarks>
+    Public Async Function AggiornaLElencoDeiModelli() As Task
+
+        Dim esito As Ai.EsitoElenco = Nothing
+
+        Try
+            esito = Await _elenco().ConfigureAwait(True)
+        Catch ex As Exception
+            ' Un elenco che non arriva non è un guasto del programma: è un esito, e la
+            ' finestra funziona lo stesso. Chi guarda merita una riga, non un errore.
+            Dati.DiarioTecnico.Corrente?.AnnotaGuasto("l'elenco dei modelli disponibili", ex)
+        End Try
+
+        ' Nel frattempo la finestra può essere stata chiusa: toccare i controlli di una
+        ' finestra smaltita solleverebbe, e per giunta in un punto che nessuno guarda.
+        If IsDisposed Then Return
+
+        If esito IsNot Nothing AndAlso esito.Riuscita Then
+            _disponibili = esito.Modelli
+            _perche = String.Empty
+        Else
+            _disponibili = Nothing
+            _perche = Ai.ElencoModelli.Perche(If(esito Is Nothing, Ai.CausaErroreAi.RispostaInattesa, esito.Causa))
+        End If
+
+        RaccontaIlMotore()
+        Disponi()
+
+    End Function
+
+    ''' <summary>Rifà le due tendine, tenendo scelto quel che è in vigore.</summary>
+    Private Sub RiempiLeTendine()
+
+        Dim offerti As IReadOnlyList(Of Ai.ModelloDisponibile) =
+            If(_disponibili, Ai.ElencoModelli.Conosciuti(_contesto.Modelli))
+
+        ' Riempire una tendina fa scattare il suo evento: senza questa guardia, aprire le
+        ' Impostazioni scriverebbe modelli.json due volte senza che nessuno abbia scelto
+        ' niente. Si ripristina invece di azzerare, perché qui si passa anche durante la
+        ' costruzione, quando la guardia è già alzata per tutti.
+        Dim guardiaDiPrima As Boolean = _sto
+        _sto = True
+
+        Try
+            Riempi(cmbModelloRagionamento, offerti, _contesto.Modelli.ModelloRagionamento.Id)
+            Riempi(cmbModelloSemplice, offerti, _contesto.Modelli.ModelloSemplice.Id)
+        Finally
+            _sto = guardiaDiPrima
+        End Try
+
+    End Sub
+
+    ''' <summary>Una tendina con dentro questi modelli, e scelto quello in uso.</summary>
+    Private Shared Sub Riempi(tendina As ComboBox, offerti As IReadOnlyList(Of Ai.ModelloDisponibile),
+                              idInUso As String)
+
+        Dim voci As IReadOnlyList(Of Ai.ModelloDisponibile) = Ai.ElencoModelli.ConQuelloInUso(offerti, idInUso)
+
+        tendina.Items.Clear()
+        For Each voce As Ai.ModelloDisponibile In voci
+            tendina.Items.Add(voce)
+        Next
+
+        For posto As Integer = 0 To voci.Count - 1
+            If voci(posto).Id = idInUso Then
+                tendina.SelectedIndex = posto
+                Return
+            End If
+        Next
+
+    End Sub
+
+    Private Sub cmbModelloRagionamento_SelectedIndexChanged(sender As Object, e As EventArgs) _
+        Handles cmbModelloRagionamento.SelectedIndexChanged
+        CambiaIlModello(Ai.Modelli.Ragionamento, cmbModelloRagionamento, "il ragionamento")
+    End Sub
+
+    Private Sub cmbModelloSemplice_SelectedIndexChanged(sender As Object, e As EventArgs) _
+        Handles cmbModelloSemplice.SelectedIndexChanged
+        CambiaIlModello(Ai.Modelli.Semplice, cmbModelloSemplice, "le elaborazioni testuali")
+    End Sub
+
+    ''' <summary>
+    ''' Porta la scelta nel file e in vigore. Come ogni preferenza di questa finestra si
+    ''' salva da sé, appena si cambia.
+    ''' </summary>
+    Private Sub CambiaIlModello(livello As String, tendina As ComboBox, perChe As String)
+
+        If _sto Then Return
+
+        Dim scelto As Ai.ModelloDisponibile = TryCast(tendina.SelectedItem, Ai.ModelloDisponibile)
+        If scelto Is Nothing Then Return
+
+        Try
+            _contesto.Modelli.CambiaModello(livello, scelto.Id, _contesto.Cartella.FileModelli)
+
+        Catch ex As JsonException
+            RiempiLeTendine()
+            Racconta("Il file modelli.json c'è ma non si lascia leggere: aprilo e correggilo " &
+                     "(o cancellalo, e torneranno i predefiniti). La scelta non è stata cambiata.",
+                     StileApp.RossoTitoli)
+            Return
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            ' La tendina torna su quel che vale davvero: lasciarla sul modello nuovo
+            ' direbbe che il cambio è avvenuto, e non è avvenuto né qui né sul disco.
+            RiempiLeTendine()
+            Racconta($"La scelta non si è potuta salvare ({ex.Message}): resta quella di prima.",
+                     StileApp.RossoTitoli)
+            Return
+        End Try
+
+        RaccontaDaDoveVengono()
+        Disponi()
+        Racconta($"D'ora in poi {perChe} usa {scelto.Id}: vale già dalla prossima chiamata all'AI.",
+                 StileApp.TestoSecondario)
+
+    End Sub
+
+    Private Async Sub Mostrata(mittente As Object, e As EventArgs) Handles Me.Shown
+        Await AggiornaLElencoDeiModelli()
     End Sub
 
     Private Sub btnApriModelli_Click(sender As Object, e As EventArgs) Handles btnApriModelli.Click
@@ -346,6 +540,89 @@ Public Class FinestraImpostazioni
                 Racconta("Un modelli.json non c'è ancora: valgono i predefiniti. " &
                          "Ti ho aperto la cartella dove metterlo.", StileApp.TestoSecondario)
             End If
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException OrElse
+                                   TypeOf ex Is System.ComponentModel.Win32Exception
+            Racconta($"Non si è lasciato aprire ({ex.Message}).", StileApp.RossoTitoli)
+        End Try
+
+    End Sub
+
+    ' ==================================================================
+    ' Quanto è costato (2026-08-27, dalla revisione del giro D)
+    ' ==================================================================
+
+    ''' <summary>
+    ''' Il conto dell'uso dell'AI, letto da <c>chiamate_ai.csv</c>.
+    ''' </summary>
+    ''' <remarks>
+    ''' Sta qui e non sotto gli occhi mentre si lavora: chi vuole sapere viene a vedere,
+    ''' chi lavora non ha un contatore che gli gira davanti — che è il modo migliore di
+    ''' rendere ansiogeno un programma che costa pochi centesimi al giro.
+    ''' </remarks>
+    Private Sub RaccontaIlConsumo()
+
+        Dim conto As ContoDoppio = ContoDelleChiamate.Leggi(
+            _contesto.Cartella.FileChiamateAi, _contesto.Modelli.Prezzi, Date.Now)
+
+        btnApriChiamate.Enabled = conto.Tutte.CEQualcosa
+        lblConsumo.Text = InParole(conto)
+
+    End Sub
+
+    ''' <summary>Il conto in una manciata di righe. Sta fuori dalla finestra per collaudarlo.</summary>
+    Public Shared Function InParole(conto As ContoDoppio) As String
+
+        If conto Is Nothing OrElse Not conto.Tutte.CEQualcosa Then
+            Return "Nessuna chiamata all'AI, per ora: qui comparirà quanto costa usarlo."
+        End If
+
+        Dim righe As New List(Of String) From {
+            $"Da sempre: {Chiamate(conto.Tutte)}, {Token(conto.Tutte)}, {Spesa(conto.Tutte)}." &
+            If(conto.Tutte.DalGiorno.HasValue, $" La prima il {conto.Tutte.DalGiorno.Value:d MMMM yyyy}.", ""),
+            $"Ultimi {conto.GiorniRecenti} giorni: {Chiamate(conto.Recenti)}, {Spesa(conto.Recenti)}."}
+
+        ' Il buco si dichiara: un totale che tace su una parte delle chiamate sembra
+        ' completo, ed è il modo più educato di dire una cifra sbagliata.
+        If conto.Tutte.SenzaPrezzo > 0 Then
+            righe.Add($"Di {conto.Tutte.SenzaPrezzo} chiamate non conosco il prezzo del modello: " &
+                      "i loro token sono contati, i loro soldi no.")
+        End If
+
+        righe.Add("È una stima ai prezzi di listino: non sa di sconti né della cache dei " &
+                  "prompt, e la verità resta la fattura di Anthropic.")
+
+        Return String.Join(vbLf, righe)
+
+    End Function
+
+    Private Shared Function Chiamate(conto As Conto) As String
+        Return If(conto.Chiamate = 1, "1 chiamata", $"{conto.Chiamate:N0} chiamate")
+    End Function
+
+    Private Shared Function Token(conto As Conto) As String
+        Return $"{conto.TokenIngresso + conto.TokenUscita:N0} token"
+    End Function
+
+    Private Shared Function Spesa(conto As Conto) As String
+
+        ' Sotto il centesimo non si scrive «$0,00», che si legge come «gratis»: si dice
+        ' che è meno di un centesimo, che è la cosa vera.
+        If conto.Chiamate > conto.SenzaPrezzo AndAlso conto.Spesa < 0.01D Then Return "meno di $0,01"
+
+        Return $"≈ ${conto.Spesa:N2}"
+
+    End Function
+
+    Private Sub btnApriChiamate_Click(sender As Object, e As EventArgs) Handles btnApriChiamate.Click
+
+        Dim percorso As String = _contesto.Cartella.FileChiamateAi
+
+        Try
+            Process.Start(New ProcessStartInfo(percorso) With {.UseShellExecute = True})
+            Racconta("Ogni riga è una chiamata: si apre in un foglio di calcolo e si ordina per colonna.",
+                     StileApp.TestoSecondario)
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException OrElse
@@ -475,33 +752,40 @@ Public Class FinestraImpostazioni
         lblTitolo.ForeColor = StileApp.RossoTitoli
 
         For Each sezione As Label In {lblSezioneChiave, lblSezioneDocumenti, lblSezioneCandidature,
-                                      lblSezioneCartelle, lblSezioneMotore, lblSezioneDati}
+                                      lblSezioneCartelle, lblSezioneMotore, lblSezioneConsumo,
+                                      lblSezioneDati}
             sezione.Font = StileApp.FontTitoloGruppo
             sezione.ForeColor = StileApp.TestoPrimario
         Next
 
         For Each testo As Label In {lblSpiegazione, lblStatoChiave, lblLingua, lblFollowUp,
-                                    lblGiorni, lblCartellaDati, lblCartellaDocumenti}
+                                    lblGiorni, lblCartellaDati, lblCartellaDocumenti,
+                                    lblModelloRagionamento, lblModelloSemplice}
             testo.ForeColor = StileApp.TestoPrimario
         Next
 
-        For Each minore As Label In {lblRifinituraNota, lblFollowUpNota, lblModelli, lblPool}
+        For Each minore As Label In {lblRifinituraNota, lblFollowUpNota, lblModelli, lblPool,
+                                     lblConsumo}
             minore.ForeColor = StileApp.TestoSecondario
         Next
 
         chkRifinitura.ForeColor = StileApp.TestoPrimario
         chkRifinitura.BackColor = StileApp.SfondoContenuto
 
-        cmbLingua.BackColor = StileApp.SfondoContenuto
-        cmbLingua.ForeColor = StileApp.TestoPrimario
+        For Each tendina As ComboBox In {cmbLingua, cmbModelloRagionamento, cmbModelloSemplice}
+            tendina.BackColor = StileApp.SfondoContenuto
+            tendina.ForeColor = StileApp.TestoPrimario
+        Next
 
         numFollowUp.BackColor = StileApp.SfondoContenuto
         numFollowUp.ForeColor = StileApp.TestoPrimario
 
+        StileApp.VestiBottone(btnComeFunziona, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnCambiaChiave, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnApriCartellaDati, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnGestisciDocumenti, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnApriModelli, LivelloBottone.Esplorativo)
+        StileApp.VestiBottone(btnApriChiamate, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnBackup, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnSvuotaNavigazione, LivelloBottone.Distruttivo)
         StileApp.VestiBottone(btnEliminaTutto, LivelloBottone.Critico)
@@ -572,14 +856,24 @@ Public Class FinestraImpostazioni
 
         For Each testo As Label In {lblSpiegazione, lblStatoChiave, lblRifinituraNota,
                                     lblFollowUpNota, lblCartellaDati, lblCartellaDocumenti,
-                                    lblModelli, lblPool, lblStato}
+                                    lblModelloRagionamento, lblModelloSemplice,
+                                    lblModelli, lblPool, lblConsumo, lblStato}
             testo.MaximumSize = New Size(larghezzaUtile, 0)
+        Next
+
+        ' Le tendine dei modelli si prendono tutta la larghezza: un identificativo con
+        ' accanto il nome leggibile non sta in una casella da 180 pixel, e una tendina che
+        ' tronca proprio l'id è una tendina che nasconde la cosa che conta.
+        For Each tendina As ComboBox In {cmbModelloRagionamento, cmbModelloSemplice}
+            tendina.Width = larghezzaUtile
         Next
 
         lblTitolo.Location = New Point(sinistra, StileApp.MargineRiquadro)
         lblSpiegazione.Location = New Point(sinistra, lblTitolo.Bottom + StileApp.DistanzaControlli)
 
-        lblSezioneChiave.Location = New Point(sinistra, lblSpiegazione.Bottom + StileApp.MargineRiquadro)
+        btnComeFunziona.Location = New Point(sinistra, lblSpiegazione.Bottom + StileApp.DistanzaControlli)
+
+        lblSezioneChiave.Location = New Point(sinistra, btnComeFunziona.Bottom + StileApp.MargineRiquadro)
         lblStatoChiave.Location = New Point(sinistra, lblSezioneChiave.Bottom + StileApp.InterlineaMinima)
         btnCambiaChiave.Location = New Point(sinistra, lblStatoChiave.Bottom + StileApp.InterlineaMinima)
 
@@ -605,11 +899,24 @@ Public Class FinestraImpostazioni
         btnGestisciDocumenti.Location = New Point(sinistra, lblCartellaDocumenti.Bottom + StileApp.InterlineaMinima)
 
         lblSezioneMotore.Location = New Point(sinistra, btnGestisciDocumenti.Bottom + StileApp.MargineRiquadro)
-        lblModelli.Location = New Point(sinistra, lblSezioneMotore.Bottom + StileApp.InterlineaMinima)
+
+        ' Etichetta sopra e tendina sotto, e non affiancate come la lingua: qui
+        ' l'etichetta è una frase e il valore un identificativo lungo, e in fila
+        ' finirebbero fuori dalla larghezza di progetto proprio a DPI alti.
+        lblModelloRagionamento.Location = New Point(sinistra, lblSezioneMotore.Bottom + StileApp.InterlineaMinima)
+        cmbModelloRagionamento.Location = New Point(sinistra, lblModelloRagionamento.Bottom + StileApp.InterlineaMinima)
+        lblModelloSemplice.Location = New Point(sinistra, cmbModelloRagionamento.Bottom + StileApp.DistanzaControlli)
+        cmbModelloSemplice.Location = New Point(sinistra, lblModelloSemplice.Bottom + StileApp.InterlineaMinima)
+
+        lblModelli.Location = New Point(sinistra, cmbModelloSemplice.Bottom + StileApp.InterlineaMinima)
         lblPool.Location = New Point(sinistra, lblModelli.Bottom + StileApp.InterlineaMinima)
         btnApriModelli.Location = New Point(sinistra, lblPool.Bottom + StileApp.InterlineaMinima)
 
-        lblSezioneDati.Location = New Point(sinistra, btnApriModelli.Bottom + StileApp.MargineRiquadro)
+        lblSezioneConsumo.Location = New Point(sinistra, btnApriModelli.Bottom + StileApp.MargineRiquadro)
+        lblConsumo.Location = New Point(sinistra, lblSezioneConsumo.Bottom + StileApp.InterlineaMinima)
+        btnApriChiamate.Location = New Point(sinistra, lblConsumo.Bottom + StileApp.InterlineaMinima)
+
+        lblSezioneDati.Location = New Point(sinistra, btnApriChiamate.Bottom + StileApp.MargineRiquadro)
         btnBackup.Location = New Point(sinistra, lblSezioneDati.Bottom + StileApp.InterlineaMinima)
         btnSvuotaNavigazione.Location = New Point(sinistra, btnBackup.Bottom + StileApp.DistanzaControlli)
 

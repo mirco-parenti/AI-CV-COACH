@@ -144,6 +144,23 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   un attrezzo indipendente: per il giro B sono bastati quattro script PowerShell
   usa-e-getta che chiamano `SetProcessDPIAware()` e leggono i rettangoli da UI Automation.
 
+- **`schermata` può fotografare la finestra sbagliata, e non lo dice.** *(2026-08-27,
+  provando le tre voci finali del giro D.)* L'applicazione era viva — `controlli` ne
+  elencava i bottoni, uno per uno, compresi quelli di una finestra modale appena aperta —
+  e `schermata` ha restituito tre volte di fila **il terminale in primo piano**, con la
+  didascalia «Finestra ripresa: 1936 × 1048», che è la misura del terminale e non quella
+  dell'applicazione. Nemmeno `schermo_intero` mostrava TrovaLavoro: la finestra c'era ma
+  stava sotto altre. Il guaio è che l'esito **sembra buono** — arriva un PNG, con tanto di
+  misure — e chi guarda deve accorgersi da sé che quella non è l'applicazione. Due modi per
+  non cascarci: **guardare la didascalia**, perché una misura che non somiglia a nessuna
+  finestra dell'app è già la risposta, e **fidarsi di `controlli`**, che legge da UI
+  Automation e in quella sessione diceva la verità — è così che si è potuto verificare, senza
+  vedere niente, che l'informativa compare al primo avvio e non al secondo. Quando le due
+  cose si sommano — questa e la voce qui sopra sul `clic` — lo strumento resta capace di
+  **interrogare** l'applicazione e non più di **guardarla** o di **premerla**: allora si
+  dichiara la riserva e si passa la mano a chi ha gli occhi davanti allo schermo, invece di
+  chiamare fatta una prova che non si è fatta.
+
 - **A DPI alto `clic` dichiara «Premuto» senza aver premuto.** *(2026-08-23, il quinto tempo
   di T9e.)* È la sorella cattiva della voce qui sopra, e va saputa prima di fidarsi di un
   esito. Con lo schermo al 150%, `clic` su «Svuota i dati di navigazione» ha risposto

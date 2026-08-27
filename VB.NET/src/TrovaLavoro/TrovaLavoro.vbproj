@@ -44,6 +44,19 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
+  <!-- Il codice del commit che ha prodotto questo eseguibile (cap. 13.9; reperto D-R1 del
+       giro D). Non è la versione, ed è il punto: la versione è un'etichetta che si scrive
+       a mano, e il 24 agosto 2026 due file diversi hanno portato lo stesso «1.0.000».
+       Lo passa publish.bat con -p:CodiceSorgente=...; chi compila per provare non lo
+       passa, e allora l'attributo non c'è affatto — una compilazione di sviluppo non
+       corrisponde a nessun commit, e dirlo è più onesto che inventarne uno. -->
+  <ItemGroup Condition="'$(CodiceSorgente)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>CodiceSorgente</_Parameter1>
+      <_Parameter2>$(CodiceSorgente)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
   <!-- L'interfaccia sta tutta in Ui\ (cap. 02.3). In VB le cartelle non toccano i
        namespace: i form e i pannelli restano in TrovaLavoro, come i loro designer. -->
   <ItemGroup>
@@ -64,6 +77,12 @@
     </Compile>
     <Compile Update="Ui\FinestraChiaveApi.Designer.vb">
       <DependentUpon>FinestraChiaveApi.vb</DependentUpon>
+    </Compile>
+    <Compile Update="Ui\FinestraInformativa.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Ui\FinestraInformativa.Designer.vb">
+      <DependentUpon>FinestraInformativa.vb</DependentUpon>
     </Compile>
     <Compile Update="Ui\FinestraDocumenti.vb">
       <SubType>Form</SubType>

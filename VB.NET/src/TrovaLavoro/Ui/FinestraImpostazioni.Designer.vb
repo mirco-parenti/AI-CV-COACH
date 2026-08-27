@@ -24,6 +24,7 @@ Partial Class FinestraImpostazioni
     Private Sub InitializeComponent()
         Me.lblTitolo = New System.Windows.Forms.Label()
         Me.lblSpiegazione = New System.Windows.Forms.Label()
+        Me.btnComeFunziona = New System.Windows.Forms.Button()
         Me.lblSezioneChiave = New System.Windows.Forms.Label()
         Me.lblStatoChiave = New System.Windows.Forms.Label()
         Me.btnCambiaChiave = New System.Windows.Forms.Button()
@@ -43,9 +44,16 @@ Partial Class FinestraImpostazioni
         Me.lblCartellaDocumenti = New System.Windows.Forms.Label()
         Me.btnGestisciDocumenti = New System.Windows.Forms.Button()
         Me.lblSezioneMotore = New System.Windows.Forms.Label()
+        Me.lblModelloRagionamento = New System.Windows.Forms.Label()
+        Me.cmbModelloRagionamento = New System.Windows.Forms.ComboBox()
+        Me.lblModelloSemplice = New System.Windows.Forms.Label()
+        Me.cmbModelloSemplice = New System.Windows.Forms.ComboBox()
         Me.lblModelli = New System.Windows.Forms.Label()
         Me.lblPool = New System.Windows.Forms.Label()
         Me.btnApriModelli = New System.Windows.Forms.Button()
+        Me.lblSezioneConsumo = New System.Windows.Forms.Label()
+        Me.lblConsumo = New System.Windows.Forms.Label()
+        Me.btnApriChiamate = New System.Windows.Forms.Button()
         Me.lblSezioneDati = New System.Windows.Forms.Label()
         Me.btnBackup = New System.Windows.Forms.Button()
         Me.btnSvuotaNavigazione = New System.Windows.Forms.Button()
@@ -69,6 +77,13 @@ Partial Class FinestraImpostazioni
         Me.lblSpiegazione.Name = "lblSpiegazione"
         Me.lblSpiegazione.TabIndex = 1
         Me.lblSpiegazione.Text = "Spiegazione"
+        '
+        'btnComeFunziona
+        '
+        Me.btnComeFunziona.Name = "btnComeFunziona"
+        Me.btnComeFunziona.Size = New System.Drawing.Size(300, 32)
+        Me.btnComeFunziona.TabIndex = 2
+        Me.btnComeFunziona.Text = "Come funziona, e cosa esce dal tuo PC"
         '
         'lblSezioneChiave
         '
@@ -207,6 +222,36 @@ Partial Class FinestraImpostazioni
         Me.lblSezioneMotore.TabIndex = 15
         Me.lblSezioneMotore.Text = "Sotto il cofano"
         '
+        'lblModelloRagionamento
+        '
+        Me.lblModelloRagionamento.AutoSize = True
+        Me.lblModelloRagionamento.Name = "lblModelloRagionamento"
+        Me.lblModelloRagionamento.TabIndex = 16
+        Me.lblModelloRagionamento.Text = "Ragionamento (confronto, mitigazione, testi):"
+        '
+        'cmbModelloRagionamento
+        '
+        Me.cmbModelloRagionamento.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbModelloRagionamento.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.cmbModelloRagionamento.Name = "cmbModelloRagionamento"
+        Me.cmbModelloRagionamento.Size = New System.Drawing.Size(330, 24)
+        Me.cmbModelloRagionamento.TabIndex = 17
+        '
+        'lblModelloSemplice
+        '
+        Me.lblModelloSemplice.AutoSize = True
+        Me.lblModelloSemplice.Name = "lblModelloSemplice"
+        Me.lblModelloSemplice.TabIndex = 18
+        Me.lblModelloSemplice.Text = "Elaborazioni testuali (estrazioni, strutturazioni):"
+        '
+        'cmbModelloSemplice
+        '
+        Me.cmbModelloSemplice.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmbModelloSemplice.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.cmbModelloSemplice.Name = "cmbModelloSemplice"
+        Me.cmbModelloSemplice.Size = New System.Drawing.Size(330, 24)
+        Me.cmbModelloSemplice.TabIndex = 19
+        '
         'lblModelli
         '
         Me.lblModelli.AutoSize = True
@@ -227,6 +272,27 @@ Partial Class FinestraImpostazioni
         Me.btnApriModelli.Size = New System.Drawing.Size(230, 32)
         Me.btnApriModelli.TabIndex = 18
         Me.btnApriModelli.Text = "Apri modelli.json"
+        '
+        'lblSezioneConsumo
+        '
+        Me.lblSezioneConsumo.AutoSize = True
+        Me.lblSezioneConsumo.Name = "lblSezioneConsumo"
+        Me.lblSezioneConsumo.TabIndex = 20
+        Me.lblSezioneConsumo.Text = "Quanto è costato"
+        '
+        'lblConsumo
+        '
+        Me.lblConsumo.AutoSize = True
+        Me.lblConsumo.Name = "lblConsumo"
+        Me.lblConsumo.TabIndex = 21
+        Me.lblConsumo.Text = ""
+        '
+        'btnApriChiamate
+        '
+        Me.btnApriChiamate.Name = "btnApriChiamate"
+        Me.btnApriChiamate.Size = New System.Drawing.Size(230, 32)
+        Me.btnApriChiamate.TabIndex = 22
+        Me.btnApriChiamate.Text = "Apri il conto delle chiamate"
         '
         'lblSezioneDati
         '
@@ -275,6 +341,7 @@ Partial Class FinestraImpostazioni
         Me.ClientSize = New System.Drawing.Size(660, 760)
         Me.Controls.Add(Me.lblTitolo)
         Me.Controls.Add(Me.lblSpiegazione)
+        Me.Controls.Add(Me.btnComeFunziona)
         Me.Controls.Add(Me.lblSezioneChiave)
         Me.Controls.Add(Me.lblStatoChiave)
         Me.Controls.Add(Me.btnCambiaChiave)
@@ -294,9 +361,16 @@ Partial Class FinestraImpostazioni
         Me.Controls.Add(Me.lblCartellaDocumenti)
         Me.Controls.Add(Me.btnGestisciDocumenti)
         Me.Controls.Add(Me.lblSezioneMotore)
+        Me.Controls.Add(Me.lblModelloRagionamento)
+        Me.Controls.Add(Me.cmbModelloRagionamento)
+        Me.Controls.Add(Me.lblModelloSemplice)
+        Me.Controls.Add(Me.cmbModelloSemplice)
         Me.Controls.Add(Me.lblModelli)
         Me.Controls.Add(Me.lblPool)
         Me.Controls.Add(Me.btnApriModelli)
+        Me.Controls.Add(Me.lblSezioneConsumo)
+        Me.Controls.Add(Me.lblConsumo)
+        Me.Controls.Add(Me.btnApriChiamate)
         Me.Controls.Add(Me.lblSezioneDati)
         Me.Controls.Add(Me.btnBackup)
         Me.Controls.Add(Me.btnSvuotaNavigazione)
@@ -317,6 +391,7 @@ Partial Class FinestraImpostazioni
 
     Friend WithEvents lblTitolo As System.Windows.Forms.Label
     Friend WithEvents lblSpiegazione As System.Windows.Forms.Label
+    Friend WithEvents btnComeFunziona As System.Windows.Forms.Button
     Friend WithEvents lblSezioneChiave As System.Windows.Forms.Label
     Friend WithEvents lblStatoChiave As System.Windows.Forms.Label
     Friend WithEvents btnCambiaChiave As System.Windows.Forms.Button
@@ -336,9 +411,16 @@ Partial Class FinestraImpostazioni
     Friend WithEvents lblCartellaDocumenti As System.Windows.Forms.Label
     Friend WithEvents btnGestisciDocumenti As System.Windows.Forms.Button
     Friend WithEvents lblSezioneMotore As System.Windows.Forms.Label
+    Friend WithEvents lblModelloRagionamento As System.Windows.Forms.Label
+    Friend WithEvents cmbModelloRagionamento As System.Windows.Forms.ComboBox
+    Friend WithEvents lblModelloSemplice As System.Windows.Forms.Label
+    Friend WithEvents cmbModelloSemplice As System.Windows.Forms.ComboBox
     Friend WithEvents lblModelli As System.Windows.Forms.Label
     Friend WithEvents lblPool As System.Windows.Forms.Label
     Friend WithEvents btnApriModelli As System.Windows.Forms.Button
+    Friend WithEvents lblSezioneConsumo As System.Windows.Forms.Label
+    Friend WithEvents lblConsumo As System.Windows.Forms.Label
+    Friend WithEvents btnApriChiamate As System.Windows.Forms.Button
     Friend WithEvents lblSezioneDati As System.Windows.Forms.Label
     Friend WithEvents btnBackup As System.Windows.Forms.Button
     Friend WithEvents btnSvuotaNavigazione As System.Windows.Forms.Button

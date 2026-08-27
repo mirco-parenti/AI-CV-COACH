@@ -117,8 +117,18 @@ Namespace Documenti
             Await MostraAsync(ScrittoreHtml.Componi(pagina)).ConfigureAwait(True)
 
             Dim temporaneo As String = percorso & ".tmp"
-            Dim fatto As Boolean = Await _vista.CoreWebView2.
-                PrintToPdfAsync(temporaneo, Impostazioni()).ConfigureAwait(True)
+
+            Dim fatto As Boolean
+            Try
+                fatto = Await Motore.Attese.EntroIlTetto(
+                    _vista.CoreWebView2.PrintToPdfAsync(temporaneo, Impostazioni()),
+                    TettoDellaStampa, "La stampa del PDF").ConfigureAwait(True)
+            Catch scaduta As TimeoutException
+                If File.Exists(temporaneo) Then File.Delete(temporaneo)
+                Throw New ErroreStampa(CausaStampa.StampaFallita,
+                                       "La stampa del PDF non è finita entro il tempo massimo. " &
+                                       "Il documento in DOCX c'è comunque.", scaduta)
+            End Try
 
             If Not fatto Then
                 If File.Exists(temporaneo) Then File.Delete(temporaneo)
@@ -191,12 +201,35 @@ Namespace Documenti
             AddHandler _vista.NavigationCompleted, aCaricamentoFinito
             _vista.NavigateToString(html)
 
-            If Not Await caricata.Task.ConfigureAwait(True) Then
+            ' Il tetto non è prudenza generica: senza, questa riga aspetta un evento del
+            ' browser che potrebbe non arrivare mai, e la finestra resta appesa senza un
+            ' modo di finire. (2026-08-27, dalla revisione del giro D.)
+            Dim riuscita As Boolean
+            Try
+                riuscita = Await Motore.Attese.EntroIlTetto(
+                    caricata.Task, TettoDellaPagina, "La pagina da stampare").ConfigureAwait(True)
+            Catch scaduta As TimeoutException
+                Throw New ErroreStampa(CausaStampa.StampaFallita,
+                                       "La pagina da stampare non si è caricata entro il tempo " &
+                                       "massimo. Il documento in DOCX c'è comunque.", scaduta)
+            End Try
+
+            If Not riuscita Then
                 Throw New ErroreStampa(CausaStampa.StampaFallita,
                                        "Non sono riuscita a preparare la pagina da stampare.")
             End If
 
         End Function
+
+        ''' <summary>
+        ''' Quanto si aspetta che la pagina si carichi, e quanto che il PDF esca. Sono
+        ''' generosi apposta: devono scattare quando qualcosa si è rotto, non quando una
+        ''' macchina lenta ci sta mettendo il suo tempo.
+        ''' </summary>
+        Private Shared ReadOnly TettoDellaPagina As TimeSpan = TimeSpan.FromSeconds(30)
+
+        ''' <summary>Il tetto della stampa vera e propria (v. <see cref="TettoDellaPagina"/>).</summary>
+        Private Shared ReadOnly TettoDellaStampa As TimeSpan = TimeSpan.FromSeconds(60)
 
         ''' <summary>Il foglio della stampa: A4 in verticale con i margini del DOCX.</summary>
         Private Function Impostazioni() As CoreWebView2PrintSettings

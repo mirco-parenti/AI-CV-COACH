@@ -266,7 +266,7 @@ Namespace Dati
 
             Dim involucro As New JsonObject From {
                 {"versione_profilo", versioneProfilo},
-                {"generato", If(generato, Date.Now).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)},
+                {"generato", CampiJson.Quando(If(generato, Date.Now))},
                 {"lingua", lingua},
                 {"cv", cv.DeepClone()}}
 
@@ -302,9 +302,10 @@ Namespace Dati
                 Throw New JsonException("Il CV base non ha la forma attesa.")
             End If
 
-            Dim generato As Date
-            Date.TryParseExact(Campo(involucro, "generato"), "yyyy-MM-dd HH:mm:ss",
-                               CultureInfo.InvariantCulture, DateTimeStyles.None, generato)
+            ' Il formato delle date lo conosce CampiJson, ed è l'unico a conoscerlo: qui
+            ' ce n'era una seconda copia, che dal 2026-08-27 avrebbe smesso di capire quel
+            ' che l'altra scrive. (Revisione del giro D.)
+            Dim generato As Date = CampiJson.Istante(involucro, "generato")
 
             Dim cv As JsonNode = Nothing
             involucro.TryGetPropertyValue("cv", cv)

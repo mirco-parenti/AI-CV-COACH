@@ -140,8 +140,16 @@ Idee emerse **scrivendo il progetto dettagliato** della Fase 3 (`VB.NET/progetto
 dichiarate «rimandate» (cap. 15.3-15.4): qui il puntatore, perché il backlog resta uno.
 - **Auto-update dell'applicazione** — per un'app personale è complessità senza guadagno;
   aggiornamento manuale (si sostituisce l'exe). *(2026-08-05 — progetto VB.NET, cap. 13.8/15.3.)*
-- **Firma del codice** (certificato, per evitare l'avviso SmartScreen) — quando l'app
-  circolerà oltre il portfolio. *(2026-08-05 — cap. 13.6/15.3.)*
+  *Resta futura, e adesso serve meno: dal **2026-08-27** «Informazioni» ha «Cerca
+  aggiornamenti», che chiede a GitHub qual è l'ultima versione pubblicata e apre la pagina da
+  cui scaricarla (cap. 13.8). Metà del problema — sapere che è uscita — è risolta; l'altra
+  metà, sostituire l'eseguibile da solo, chiede più fiducia di quanta ne serva qui.*
+- ~~**Firma del codice**~~ — **migrata in `in_sospeso.md`** *(2026-08-27)*. Stava qui dal 5
+  agosto con una condizione dentro: «quando l'app circolerà oltre il portfolio». La revisione
+  del giro D dichiara quel momento arrivato e la mette fra le cose **indispensabili**: senza
+  un certificato per organizzazione, SmartScreen ferma chiunque scarichi l'eseguibile. Da idea
+  che poteva non farsi mai è diventata un debito che va fatto, e allora il suo posto è l'altro
+  file (regole 7 e 13). *(2026-08-05 — cap. 13.6/15.3.)*
 - **MCP: trasporto HTTP locale + invio con conferma** — la prima versione espone via stdio
   solo lettura e generazione; email e modifica del profilo restano nell'app.
   *(2026-08-05 — cap. 09/15.3.)* **Ridotta da T8c** *(2026-08-19)*: la metà «tool di
@@ -315,6 +323,17 @@ di difetti prima della 1.0.
   una candidatura che l'utente potrebbe aver già spedito, e quel numero è la cosa che non deve
   cambiare sotto le mani senza che nessuno lo dica. *(2026-08-24 — emersa curando l'errore
   criptico della lettera, ramo delle rifiniture prima del giro D; cap. 07.3, cap. 11.1.)*
+- **Spezzare i pannelli monolitici, rompere il ciclo `Dati` ↔ `Motore`, tipizzare gli
+  artefatti JSON.** Tre debiti di **struttura** che la revisione del giro D elenca insieme e
+  mette per ultimi, come opzionali. Il primo si misura: `Ui/PannelloDocumenti.vb` è di **2188
+  righe** (verificato il 2026-08-27), e sotto non ha presentatori che si possano collaudare
+  senza aprire una finestra. Gli altri due sono la dipendenza circolare fra `Dati` e `Motore`
+  e gli artefatti JSON che viaggiano come testo invece che come tipi. Nessuno dei tre si vede
+  usando il programma: sono manutenibilità, cioè il costo della **prossima** modifica, non di
+  questa. E il motivo per cui restano qui invece di passare fra i debiti è lo stesso che tiene
+  ferme le costanti di `StileApp`: il banco quasi non ha collaudi d'interfaccia, quindi
+  rimettere mano a una quindicina di file di UI oggi costerebbe più di quanto protegga.
+  *(2026-08-27 — revisione del giro D; cap. 02, cap. 03.)*
 
 ## Collaudi e non-regressione (Fase VB.NET)
 

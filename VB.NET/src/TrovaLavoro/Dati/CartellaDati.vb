@@ -277,6 +277,42 @@ Namespace Dati
         End Property
 
         ''' <summary>
+        ''' La cartella del diario tecnico (cap. 11.1). Non contiene niente dell'utente: solo
+        ''' quel che serve a capire perché una volta è andata storta. Non la crea
+        ''' <see cref="Assicura"/>: la crea il diario la prima volta che ha qualcosa da
+        ''' scrivere, così una cartella dati dove non è mai andato storto niente non porta
+        ''' in giro una cartella vuota.
+        ''' </summary>
+        Public ReadOnly Property CartellaLog As String
+            Get
+                Return Path.Combine(Radice, "log")
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' Il diario tecnico, promesso dal cap. 11.1 fin dall'inizio e nato solo il
+        ''' 2026-08-27, dalla revisione del giro D. Ci finiscono i guasti — <b>senza
+        ''' segreti</b> (cap. 11.3) — perché un utente che chiama dicendo «non funziona»
+        ''' abbia qualcosa da mandare oltre a quella frase.
+        ''' </summary>
+        Public ReadOnly Property FileLog As String
+            Get
+                Return Path.Combine(CartellaLog, "app.log")
+            End Get
+        End Property
+
+        ''' <summary>
+        ''' Il diario di prima, da quando l'ultimo è diventato troppo grosso. Sono due e
+        ''' non di più: un diario che cresce senza fine è un altro modo di riempire il
+        ''' disco di qualcuno.
+        ''' </summary>
+        Public ReadOnly Property FileLogPrecedente As String
+            Get
+                Return Path.Combine(CartellaLog, "app.log.1")
+            End Get
+        End Property
+
+        ''' <summary>
         ''' Crea le cartelle nominate qui sopra se non ci sono già. È l'unico punto che
         ''' le crea: chi scrive un file la chiama prima e non si preoccupa d'altro.
         ''' </summary>

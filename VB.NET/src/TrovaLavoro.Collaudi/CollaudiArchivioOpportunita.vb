@@ -475,6 +475,53 @@ Namespace Dati
                 End Sub)
         End Sub
 
+        ''' <summary>
+        ''' Le date su disco portano il loro fuso, e le vecchie si leggono ancora. Prima del
+        ''' 2026-08-27 si scriveva l'ora locale nuda: rileggendola non si sapeva più di dove
+        ''' fosse, e <c>Assert.AreEqual</c> fra due date non se ne accorge — confronta i
+        ''' tick, non il <c>Kind</c>. Per questo qui il <c>Kind</c> si guarda apposta.
+        ''' <i>(Revisione del giro D.)</i>
+        ''' </summary>
+        <TestMethod>
+        Public Sub LaDataScrittaSuDiscoPortaIlSuoFuso()
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim dove As String = archivio.Salva(OpportunitaDiProva())
+
+                    Dim scritto As String = File.ReadAllText(Path.Combine(dove, "stato.json"))
+                    Assert.Contains("2026-08-10 09:30:00", scritto, "l'istante resta leggibile a occhio")
+                    Assert.IsTrue(Text.RegularExpressions.Regex.IsMatch(
+                                      scritto, "2026-08-10 09:30:00[+-]\d\d:\d\d"),
+                                  "e si porta dietro il fuso di chi l'ha scritto")
+
+                    Dim riletta As Opportunita = archivio.Carica(dove)
+                    Assert.AreEqual(New Date(2026, 8, 10, 9, 30, 0), riletta.Creata, "lo stesso istante")
+                    Assert.AreEqual(DateTimeKind.Local, riletta.Creata.Kind,
+                                    "e si sa ancora di dove sia: era ora locale, e resta ora locale")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub LeDateScritteDallaVersionePrecedenteSiLeggonoAncora()
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim dove As String = archivio.Salva(OpportunitaDiProva())
+                    Dim percorsoStato As String = Path.Combine(dove, "stato.json")
+
+                    ' Il formato di prima: la stessa data, senza fuso. È così che sono
+                    ' scritti i file già sul disco dell'utente, e i backup già fatti.
+                    File.WriteAllText(percorsoStato, Text.RegularExpressions.Regex.Replace(
+                        File.ReadAllText(percorsoStato), "(2026-08-10 09:30:00)[+-]\d\d:\d\d", "$1"))
+
+                    Dim riletta As Opportunita = archivio.Carica(dove)
+
+                    Assert.AreEqual(New Date(2026, 8, 10, 9, 30, 0), riletta.Creata,
+                                    "un dato che smette di leggersi è un dato perso")
+                    Assert.AreEqual(DateTimeKind.Local, riletta.Creata.Kind,
+                                    "e la si prende per quel che era: ora locale")
+                End Sub)
+        End Sub
+
     End Class
 
 End Namespace

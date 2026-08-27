@@ -29,8 +29,22 @@ Friend Module Programma
         Dim letti As ArgomentiAvvio = ArgomentiAvvio.Leggi(argomenti)
 
         If letti.ModalitaMcp Then
-            ServiIlClient(letti)
+
+            ' Anche il server ha bisogno della sua rete, e non può essere la stessa: qui
+            ' non ci sono finestre. Un guasto si racconta su stderr — dove il client
+            ' raccoglie il diario — e si esce con un codice che dice che è andata male,
+            ' invece di morire con lo stack trace di .NET su un canale che nessuno legge.
+            ' (2026-08-27, dalla revisione del giro D.)
+            Try
+                ServiIlClient(letti)
+            Catch ex As Exception
+                Console.Error.WriteLine("TrovaLavoro: " & UltimaRete.MessaggioPerIlDiario(ex))
+                Dati.DiarioTecnico.Corrente?.AnnotaGuasto("il ciclo del server MCP", ex)
+                Environment.ExitCode = 1
+            End Try
+
             Return
+
         End If
 
         Application.SetHighDpiMode(HighDpiMode.SystemAware)
@@ -43,6 +57,15 @@ Friend Module Programma
         ' profilo su disco è al sicuro per costruzione (scritture atomiche, cap. 11.1).
         Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException)
         AddHandler Application.ThreadException, AddressOf MostraErroreImprevisto
+
+        ' ThreadException però è solo il ciclo dei messaggi. Un'eccezione che scoppia su
+        ' un altro filo, o dentro un Task che nessuno ha atteso, gli passa accanto — e fa
+        ' morire il processo con la finestra tecnica di .NET, cioè esattamente quel che
+        ' le due righe qui sopra esistono per evitare. Le tre reti insieme coprono i tre
+        ' modi in cui un'eccezione può arrivare fin qui.
+        ' (2026-08-27, dalla revisione del giro D.)
+        AddHandler AppDomain.CurrentDomain.UnhandledException, AddressOf MostraErroreDalDominio
+        AddHandler TaskScheduler.UnobservedTaskException, AddressOf ScordaIlTaskNonAtteso
 
         ' La schermata di avvio copre il montaggio (cap. 03.4). Nasce di qua e non dentro
         ' la finestra principale perché deve essere a video *prima* che il montaggio
@@ -108,17 +131,39 @@ Friend Module Programma
     End Sub
 
     Private Sub MostraErroreImprevisto(mittente As Object, e As ThreadExceptionEventArgs)
+        MostraLErrore(e.Exception)
+    End Sub
 
-        ' Prima di tutto la schermata di avvio, se è ancora lì: sta sopra ogni altra
-        ' finestra, e un messaggio d'errore che nessuno vede è peggio dell'errore.
+    ''' <summary>La rete del dominio: quel che ThreadException non vede (v. Main).</summary>
+    Private Sub MostraErroreDalDominio(mittente As Object, e As UnhandledExceptionEventArgs)
+        MostraLErrore(TryCast(e.ExceptionObject, Exception))
+    End Sub
+
+    ''' <summary>
+    ''' Un <c>Task</c> andato a male che nessuno stava aspettando. Non c'è niente da
+    ''' mostrare — quel risultato non interessava più a nessuno — ma va dichiarato
+    ''' «osservato»: altrimenti .NET lo rilancia al passaggio del raccoglitore, e il
+    ''' programma muore per un'eccezione che nessuno aveva chiesto.
+    ''' </summary>
+    Private Sub ScordaIlTaskNonAtteso(mittente As Object, e As UnobservedTaskExceptionEventArgs)
+        e.SetObserved()
+        Dati.DiarioTecnico.Corrente?.AnnotaGuasto("un compito che nessuno stava aspettando", e.Exception)
+    End Sub
+
+    ''' <summary>Mostra l'errore all'utente, dopo aver tolto di mezzo la schermata di avvio.</summary>
+    Private Sub MostraLErrore(eccezione As Exception)
+
+        ' Prima di tutto il diario: la finestra qui sotto aspetta un clic, e fra il
+        ' guasto e quel clic può succedere di tutto — compreso che l'utente chiuda la
+        ' finestra senza leggerla. Quel che è scritto su disco resta.
+        Dati.DiarioTecnico.Corrente?.AnnotaGuasto("l'ultima rete", eccezione)
+
+        ' Poi la schermata di avvio, se è ancora lì: sta sopra ogni altra finestra, e un
+        ' messaggio d'errore che nessuno vede è peggio dell'errore.
         _schermataDiAvvio?.ChiudiSubito()
 
-        MessageBox.Show(
-            "È successo qualcosa che il programma non aveva previsto:" & vbLf &
-            e.Exception.Message & vbLf & vbLf &
-            "Il tuo profilo salvato su disco non è stato toccato. " &
-            "Se il problema si ripete, chiudi e riapri il programma.",
-            "TrovaLavoro", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        MessageBox.Show(UltimaRete.MessaggioImprevisto(eccezione),
+                        "TrovaLavoro", MessageBoxButtons.OK, MessageBoxIcon.Error)
 
     End Sub
 

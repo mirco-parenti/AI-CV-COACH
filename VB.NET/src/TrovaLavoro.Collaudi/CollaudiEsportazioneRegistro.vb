@@ -161,6 +161,37 @@ Namespace Dati
             Return testo.Split({vbCrLf, vbLf}, StringSplitOptions.RemoveEmptyEntries)
         End Function
 
+        ''' <summary>
+        ''' Titolo e azienda arrivano dall'annuncio, cioè da un testo scritto da qualcun
+        ''' altro. Aperto in Excel, un campo che comincia con <c>=</c> non è un titolo: è una
+        ''' formula, e viene eseguita. <i>(Reperto M2 della revisione del giro D.)</i>
+        ''' </summary>
+        <TestMethod>
+        Public Sub UnaCellaCheSembraUnaFormulaNonLoDiventa()
+
+            For Each inizio As String In New String() {"=", "+", "-", "@"}
+
+                Dim testo As String = EsportazioneRegistro.Componi(
+                    {Voce("Rossi S.p.A.", inizio & "CMD()", 4.1)}, FormatoEsportazione.Csv)
+
+                Assert.Contains("'" & inizio & "CMD()", testo,
+                                $"la cella che comincia con «{inizio}» si dichiara testo")
+
+            Next
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnTitoloNormaleNonSiPortaViaUnApostrofo()
+
+            ' La cura costa un carattere visibile: che si paghi solo dove serve.
+            Dim testo As String = EsportazioneRegistro.Componi(
+                {Voce("Rossi S.p.A.", "Magazziniere", 4.1)}, FormatoEsportazione.Csv)
+
+            Assert.DoesNotContain("'Magazziniere", testo, "l'apostrofo si mette solo dove serve")
+
+        End Sub
+
     End Class
 
 End Namespace

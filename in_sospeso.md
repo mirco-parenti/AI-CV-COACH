@@ -36,23 +36,13 @@ in «Chiuse».*
 
 ## Da T3 — il profilo (2026-08-07 · integrata alla chiusura, 2026-08-09)
 
-- **Un `.docx` salvato davvero da Word.** La gamba A del collaudo di tappa ha provato le
-  quattro porte d'ingresso, ma i file DOCX, TXT e MD sono stati **fabbricati** dal testo
-  trascritto dal PDF: provano le *strade di lettura*, non l'impaginazione di Word, che su
-  questa postazione non c'è. Serve una macchina che ce l'abbia. *(cap. 05.1; cap. 14, T3,
-  gamba A — il limite è dichiarato anche nel collaudo.)*
+*Chiusa il 2026-08-25 dal **giro D**: il `.docx` salvato davvero da Word è stato provato sulla
+postazione del tutor — voce `D3` del copione — ed è in «Chiuse».*
 
 ## Da T4 — la pipeline di candidatura (2026-08-10 · integrata alla chiusura, 2026-08-11)
 
-- **I documenti prodotti aperti in Word.** La gamba C del collaudo di tappa (cap. 14)
-  chiede DOCX e PDF aperti **in Word e in LibreOffice**: LibreOffice c'è su questa
-  postazione e ha detto la sua — apre entrambi, li riconverte, accenti e simboli intatti —
-  ma Word qui non è installato. È il gemello in **scrittura** della voce di T3 qui sopra,
-  che riguarda la **lettura** di un `.docx` salvato da Word: serve la stessa macchina, e
-  conviene chiuderle insieme. *(cap. 05.7; cap. 14, T4 gamba C.)* **Riconfermata alla
-  chiusura di T4** *(2026-08-11)*: il collaudo di tappa ha ripercorso la gamba per intero —
-  114 campi su 114 ritrovati, DOCX e PDF identici — ma la metà di Word è di nuovo rimasta
-  fuori, per la stessa ragione.
+*Chiusa il 2026-08-25 dal **giro D**: DOCX e PDF sono stati aperti in Word sulla postazione
+del tutor — voce `D2` del copione — ed è in «Chiuse».*
 
 ## Da T5 — la ricerca annunci e il registro (2026-08-13, alla chiusura di T5c)
 
@@ -159,29 +149,9 @@ parallelismo e la sua storia è nella chiusura della gamba (cap. 14).*
 
 ## Dal collaudo dal vivo di T9e — il giro D, rimasto fuori (2026-08-23)
 
-*Il quarto tempo di T9e prevedeva un **giro D** apposta per chiudere in un colpo tre debiti
-vecchi: tutti e tre vogliono una macchina che questa postazione non è. Non si è potuto fare,
-e la riserva si dichiara qui invece di lasciarla implicita (regola 15).*
-
-- **Serve una macchina senza l'SDK .NET 10 e con Word.** Non può essere AVIOLAB03, che l'SDK
-  ce l'ha, e qui c'è solo LibreOffice. Con quella macchina si chiudono in un giro solo la
-  **prova dell'exe su un PC pulito** (voce di T1), il **DOCX e il PDF aperti in Word** (voce
-  di T4) e il **`.docx` salvato da Word e reimportato nel profilo** (voce di T3), che sono
-  già aperte qui sopra e restano tali. Il giro D si può fare prima del sesto tempo o subito
-  dopo; quel che non si può è darlo per fatto. *(cap. 13.5; cap. 14, T9e.)*
-  **Aggiornamento del 2026-08-24**: l'eseguibile che stava lì pronto —
-  `VB.NET\src\pubblicazione\TrovaLavoro.exe`, un file solo — porta **ProductVersion
-  0.3.041** ed è del 22 agosto, cioè **precedente alle cure del quinto tempo**: non ha le
-  tre cure di scala, né R6, né R7, né la domanda di approfondimento. Provarlo adesso
-  misurerebbe una versione superata, e proprio sul difetto — il comportamento a DPI alti —
-  che quelle cure hanno tolto. Il giro D si fa quindi con l'eseguibile del **sesto tempo**
-  (1.0.000), che va ripubblicato prima di portarlo sull'altra macchina.
-  **Aggiornamento del 2026-08-24, la sera**: *quella metà è pagata.* Il sesto tempo ha
-  pubblicato la **1.0.000** — `VB.NET\src\pubblicazione\TrovaLavoro.exe`, un file solo da
-  118.707.086 byte, proprietà verificate e avvio provato qui su una cartella dati
-  usa-e-getta — e l'exe pronto da portare è adesso quello giusto. Quel che manca è **solo la
-  macchina**: la voce resta aperta per intero, e con lei le tre che il giro D chiuderebbe.
-  Con questa riserva **T9e e T9 si chiudono** (cap. 13.9; cap. 14, il sesto tempo).
+*Chiusa il 2026-08-25: la macchina è arrivata e il giro D si è fatto. È in «Chiuse», con le
+due voci che ha chiuso con sé; quel che il giro ha lasciato aperto — e il motivo per cui va
+rifatto — sta nella sezione della **revisione**, più sotto.*
 
 ## Dal sesto tempo di T9e — il rilascio (2026-08-24, alla chiusura)
 
@@ -284,7 +254,10 @@ difetto: sono cose che aspettano una mano o una macchina.*
 - **Il tag `v1.0` è rimandato, non dimenticato.** Va sul commit di `main`, e si mette **dopo**
   il giro D: se quella prova trovasse qualcosa, la 1.0 taggata sarebbe una versione che si sa
   già di dover correggere. Oggi il repository non ha nessun tag di rilascio. *(cap. 13.9;
-  cap. 14, il sesto tempo di T9e.)*
+  cap. 14, il sesto tempo di T9e.)* **Aggiornamento del 2026-08-27**: quella prova **ha
+  trovato qualcosa** — non nel prodotto, nel legame fra eseguibile e commit — quindi il tag
+  aspetta ancora; e quando arriverà dovrà andare sul commit **effettivamente pubblicato**,
+  con l'impronta SHA-256 dell'eseguibile annotata accanto.
 
 ## Da questa passata della regola 16 su T1→T8 (2026-08-25)
 
@@ -303,7 +276,94 @@ non si può rendere ripetibile.*
   sorvegliata** — ed è il solo punto di T5d che il codice da solo non prova. *(cap. 06.7;
   vista dalla passata della regola 16, che l'ha giudicata ✅ con riserva dichiarata.)*
 
+## Dalla revisione del giro D, sulla postazione del tutor (2026-08-25 · annotata il 2026-08-27)
+
+*Il giro D si è fatto: l'applicazione è arrivata sulla macchina senza SDK e con Word, e il
+copione del §13.10 è stato percorso voce per voce. **Cinque voci su sette sono passate** — i
+documenti aperti in Word (25 campi su 25 e 6 su 6 ritrovati, DOCX e PDF identici fra loro), il
+DOCX salvato da Word e reimportato con esito uguale al criterio, la selezione in «Modifica i
+testi» — e i dati finti hanno retto entrambe le insidie, con i tre annunci a **4,4 · 2,1 · 1,0**
+stelle. Il giro però **non chiude**, e la ragione non sta nel prodotto: l'eseguibile portato non
+conteneva le cure che il giro doveva provare. La prima voce è quella; le altre sono l'elenco di
+lavoro che la revisione ha lasciato, nell'ordine di priorità in cui l'ha lasciato.*
+
+**Aggiornamento del 2026-08-27**: delle quattordici voci ne restano **due**, ed erano le due
+che non dipendono da noi — il giro D da rifare e la firma del codice. Le altre dodici sono in
+«Chiuse», undici chiuse in due sessioni di lavoro e una il giorno stesso in cui fu annotata.
+Sotto, insieme alle due che restano, ci sono **due voci nuove** nate da quel lavoro.
+
+- ⚠ **Il giro D è aperto: due voci non provate, e tre riserve provate su un eseguibile che non
+  le conteneva.** `D1` (l'exe su un PC senza runtime) e `R-b` (la barra delle Impostazioni a
+  scala 150 %) su quella macchina non si sono potute fare. Le altre tre riserve stanno peggio
+  che non fatte: l'eseguibile portato è quello pubblicato il **24 agosto alle 17:52** (commit
+  `23f4df7`, 118.707.086 byte), cioè **prima** delle cure delle 19:05 e 19:26 (`2d95698`,
+  `ea077ab`) — e siccome la versione non è cambiata, **1.0.000** stava scritto su tutti e due.
+  Il conto si rifà a mano: fra quel commit e oggi il **prodotto** cambia in sei file, e sono
+  tutti e soli quelli delle cure — `FinestraModificaTesti.vb` (la selezione, `R-a`),
+  `ScalaSchermo.vb` e `FinestraImpostazioni.vb` (la barra a 150 %, `R-b`),
+  `PannelloDocumenti.vb` (la candidatura orfana, `R-c`), `ArchivioProfilo.vb` e
+  `RiscrittureAMano.vb` (il segno ✎ che non sapeva del disco); l'unica altra modifica al
+  prodotto dopo di allora sono **tre commenti** (`0cf983d`). Quindi `D2` e `D3` **valgono** —
+  quel codice non l'ha toccato nessuno — mentre `R-a`, `R-b` e `R-c` **no**: il giro si rifà
+  con l'eseguibile ripubblicato dal commit vero, e sono quattro voci, non sette.
+  *(cap. 13.10; reperto D-R1 della revisione.)*
+
+- **La firma del codice.** Senza un certificato per organizzazione SmartScreen ferma chiunque
+  scarichi l'eseguibile, e un avviso di quel genere — su un programma che poi chiede una chiave
+  API — brucia la fiducia prima ancora dell'avvio. **Migrata da `idee_future.md`** il
+  2026-08-27: lì stava dal 5 agosto con la condizione «quando l'app circolerà oltre il
+  portfolio», e la revisione dichiara quel momento arrivato. *(cap. 13.6.)*
+
+- **Il prezzo di Sonnet 5 dopo il 31 agosto 2026** *(2026-08-27)*. Il contatore di spesa
+  (cap. 13.11) valuta i token con un listino compilato dentro, e uno di quei numeri ha una
+  data: il cap. 15, voce 6, annota che i **$2/$10** di Sonnet 5 sono un prezzo
+  **promozionale fino al 31/08/2026**, contro i $3/$15 di listino. Il 18 agosto la
+  promozione sembrava diventata il prezzo nuovo, ma dopo quella data nessuno ha
+  riverificato. Va guardato **il primo settembre**: se il listino è tornato su, il conto
+  che il programma mostra è basso di un terzo. Non serve una nuova build — basta il blocco
+  `prezzi` di `modelli.json` — ma serve **guardare**, e nessun collaudo può accorgersene.
+  *(cap. 13.11; cap. 15 voce 6; `Ai/Listino.vb`, dove la scadenza è annotata.)*
+
+- **Le tre cose nuove non sono state viste a occhio** *(2026-08-27)*. Le due tendine dei
+  modelli, la sezione «Quanto è costato» e i due bottoni nuovi di «Informazioni» sono
+  provati **al banco** — 66 collaudi, 17 falsificazioni — e verificati **vivi** solo per
+  quel che si può interrogare senza guardare: l'informativa compare al primo avvio su una
+  cartella nuova e non ricompare al secondo. Ma nessuno li ha **guardati**: in quella
+  sessione lo strumento di collaudo non ha potuto né fotografare (la `schermata`
+  riprendeva la finestra in primo piano invece dell'applicazione) né premere (il `clic`
+  dice «Premuto» senza premere, la trappola già nota a scala 150%). Restano quindi da
+  vedere con gli occhi — è la stessa specie di riserva che il giro D esiste per sciogliere.
+  *(cap. 03.4, 03.6; `strumenti/mcp-collaudi/`.)*
+
 ## Chiuse
+
+- ✅ **Il giro D, cioè la macchina che qui non c'era** *(aperta il 2026-08-23 chiudendo il
+  quarto tempo di T9e, **chiusa il 2026-08-25**)*. Serviva un PC senza SDK .NET 10 e con Word,
+  e per due giorni la voce è stata solo un'attesa: prima con l'eseguibile sbagliato da
+  portare (la 0.3.041 del 22 agosto, precedente alle cure di scala), poi con quello giusto —
+  la **1.0.000** pubblicata dal sesto tempo — fermo a aspettare la macchina. Il 25 agosto la
+  macchina c'è stata: l'applicazione è girata sulla postazione del tutor e il copione del
+  §13.10 è stato percorso. Delle tre voci che il giro chiudeva in un colpo se ne chiudono
+  **due** — il `.docx` salvato da Word (T3) e i documenti aperti in Word (T4), qui sotto —
+  mentre la terza, **l'exe su un PC davvero pulito (T1), resta aperta**: `D1` non si è potuta
+  provare. Quel che il giro ha lasciato da fare è una sezione a sé, qui sopra.
+  *(cap. 13.5, 13.10; cap. 14, T9e.)*
+
+- ✅ **Un `.docx` salvato davvero da Word** *(aperta il 2026-08-07 da T3, **chiusa il
+  2026-08-25** dal giro D)*. Sulla postazione del tutor il DOCX prodotto dall'applicazione è
+  stato aperto in Word, **salvato da Word** e poi **reimportato** nel profilo: l'esito
+  coincide col criterio. Era l'unica prova possibile dell'impaginazione vera — quella che una
+  macchina con solo LibreOffice non può dare — ed è la voce `D3` del copione. Vale anche se
+  l'eseguibile portato non era quello giusto: le cure che gli mancavano stanno tutte in altri
+  file, e la lettura di un `.docx` non l'hanno sfiorata. *(cap. 05.1; cap. 14, T3 gamba A.)*
+
+- ✅ **I documenti prodotti aperti in Word** *(aperta il 2026-08-10 da T4, riconfermata
+  l'11, **chiusa il 2026-08-25** dal giro D)*. Word ha aperto DOCX e PDF: **25 campi su 25** e
+  **6 su 6** ritrovati, e i due documenti identici fra loro. Era il gemello in **scrittura**
+  della voce di T3, e come si era previsto le due si sono chiuse insieme, nello stesso giro.
+  Resta un difetto di **forma**, non di contenuto — il DOCX Word lo apre in «modalità
+  compatibilità» — che è aperto come voce sua. *(cap. 05.7; cap. 14, T4 gamba C.)*
+
 
 - ✅ **La passata della regola 16 su T1→T8** *(aperta il 2026-08-24, **chiusa il 2026-08-25**)*.
   Le nove tappe più il cancello T0 sono state rilette impegno per impegno contro il
@@ -977,3 +1037,81 @@ non si può rendere ripetibile.*
   sequenza, così l'utente rivede le proprie parole *prima* del «lo lascio fuori» — e nella
   passata finale ogni recupero ha la sua eco, dove prima un campo singolo le sovrascriveva.
   *(cap. 02.4; commit `a813253`.)*
+
+- ✅ **Legare ogni eseguibile al suo commit** *(D-R1, aperta il 2026-08-25, **chiusa il
+  2026-08-26**)*. `publish.bat` passa il commit a MSBuild (`-p:CodiceSorgente`), che lo scrive
+  nell'eseguibile come `AssemblyMetadata`; «Informazioni» lo mostra, con `+modificato` se
+  l'albero era sporco, e a pubblicazione fatta lo script stampa versione, dimensione e SHA-256.
+  Chi compila per provare non lo passa, e allora la riga **dichiara di non saperlo** invece di
+  sparire: una riga assente si legge come «va tutto bene», ed è l'equivoco che ha prodotto
+  D-R1. *(cap. 13.9; `Versione.vb`.)*
+
+- ✅ **Un `LICENSE`, e un solo copyright** *(aperta il 2026-08-25, **chiusa il 2026-08-26**)*.
+  Il file c'è, la licenza è «tutti i diritti riservati» e il copyright è **Aviolab AI**
+  ovunque — deciso da Mirco: il README era l'unico fuori riga, con «Mirco Parenti».
+  *(cap. 13.)*
+
+- ✅ **Una guida per chi il programma non l'ha scritto** *(aperta il 2026-08-25, **chiusa il
+  2026-08-27**)*. È **`GUIDA.md`** in radice, linkata dal README: requisiti, primo avvio con
+  SmartScreen, come si ottiene la chiave API e quanto costa, il giro in cinque passi, dove
+  finiscono i dati, il backup, che fare quando qualcosa va storto, e cosa il programma **non**
+  fa. È scritta per chi usa, non per chi costruisce — che è precisamente la ragione per cui i
+  sedici capitoli di `VB.NET/progetto/` non bastavano. *(cap. 13; cap. 12 per i flussi.)*
+
+- ✅ **L'informativa e le istruzioni d'uso dentro l'applicazione** *(aperta il 2026-08-25,
+  **chiusa il 2026-08-27**)*. `FinestraInformativa`, «Come funziona, e cosa esce dal tuo PC»:
+  compare **una volta sola al primo avvio, prima della richiesta della chiave**, e si riapre da
+  «Informazioni» e dalle Impostazioni. Il testo vive in un posto solo ed è **collaudato** — un
+  collaudo verifica che nomini ogni porta da cui qualcosa esce, così una porta nuova
+  dimenticata diventa un rosso invece di una bugia. Provata dal vivo: appare su una cartella
+  dati nuova, e al secondo avvio no. *(cap. 03.4; cap. 11.2.)*
+
+- ✅ **«Prova la chiave» nel momento in cui la chiave si inserisce** *(aperta il 2026-08-25,
+  **chiusa il 2026-08-26**)*. `Ai/ProvaChiave.vb` chiede l'elenco dei modelli, che non consuma
+  token, e **distingue** una chiave rifiutata da una rete assente — che era la seconda delle
+  due ragioni per cui non si faceva; la prima è caduta da sé. *(cap. 11.3.)*
+
+- ✅ **Il log diagnostico che il cap. 11 prometteva e non esisteva** *(aperta il 2026-08-25,
+  **chiusa il 2026-08-26**)*. `Dati/DiarioTecnico.vb`: non solleva mai, non porta segreti, non
+  cresce senza fine — più `Motore/Diagnostica.vb` e il bottone «Copia diagnostica» in
+  «Informazioni». **Nasce solo quando c'è un guasto**: la cartella dati di chi non ha ancora
+  avuto problemi resta vuota davvero. *(cap. 11.1 e 11.3.)*
+
+- ✅ **Un segno visibile mentre l'AI lavora** *(D-R2, aperta il 2026-08-25, **chiusa il
+  2026-08-26**)*. La barra di stato esisteva ed era muta dall'avvio alla chiusura; adesso dice
+  che l'AI lavora, si muove, e dopo dieci secondi conta i secondi. La logica sta in
+  `Ui/SegnaleDiAttesa.vb`, separata dalla finestra e quindi collaudabile. *(cap. 03.8.)*
+
+- ✅ **Sanificare le intestazioni dell'`.eml` e le formule dell'esportazione in CSV** *(reperti
+  M1-M2, aperta il 2026-08-25, **chiusa il 2026-08-26**)*. Un a capo dentro un indirizzo non
+  apre più una riga nuova nel messaggio; una cella che comincia con `= + - @` non è più una
+  formula per il foglio di calcolo che la apre. Due lacune della stessa specie: un testo che
+  arriva dai dati e finisce in un formato che quel testo lo **interpreta**. *(cap. 07.)*
+
+- ✅ **Copertura misurata, integrazione continua, e l'elenco delle falsificazioni** *(aperta il
+  2026-08-25, **chiusa il 2026-08-26**)*. `coverlet.collector` nel banco (provato: produce
+  `coverage.cobertura.xml`), `.github/workflows/collaudi.yml` — ⚠ **mai girato**, si vedrà al
+  primo push — e `VB.NET/src/TrovaLavoro.Collaudi/falsificazioni.md`, l'elenco versionato delle
+  falsificazioni della regola 14: **32 righe** al 2026-08-27. *(cap. 14.)*
+
+- ✅ **Il README che dice come è stato sviluppato** *(aperta il 2026-08-25, **chiusa il
+  2026-08-26**)*. La sezione «Come è stato sviluppato» dichiara il ruolo dell'assistente e
+  quello di Mirco, invece di lasciarlo indovinare a chi legge 185 commit scritti in una notte.
+  *(`README.md`.)*
+
+- ✅ **Il DOCX in «modalità compatibilità», e i quattro difetti minori** *(reperto D-R3, aperta
+  il 2026-08-25, **chiusa il 2026-08-26**)*. Il pacchetto ha ora `word/settings.xml` con
+  `compatibilityMode 15` — le parti sono otto, non sette. I quattro minori: tetto di tempo
+  sulla stampa PDF (`Motore/Attese.vb`), **tre reti** per le eccezioni invece di una
+  (`UltimaRete.vb`), date **col fuso** su disco leggendo ancora il formato vecchio, e
+  `lingua_predefinita` non-stringa che non fa più saltare le impostazioni. *(cap. 05; cap. 11.)*
+
+- ✅ **Avvisi e conti dell'uso corrente** *(aperta il 2026-08-25, **chiusa il 2026-08-27**)*.
+  Le quattro cose sono tutte fatte, e in un ordine che non è quello dell'elenco perché una
+  spiega l'altra. I **modelli si scelgono dalle Impostazioni**, da due tendine con l'elenco
+  chiesto all'API — il file resta la casa, ma non è più l'unica porta (cap. 11.6). Un **modello
+  ritirato** non è più «l'AI ha rifiutato la richiesta»: ha una causa sua, nomina il modello e
+  dice dove si cambia (cap. 02.5). Il **contatore di spesa** legge il `chiamate_ai.csv` che
+  c'era già dal 18 agosto — nessun dato nuovo da annotare, bastava leggerlo (cap. 13.11).
+  L'**avviso di versione** chiede a GitHub, e **solo se lo si preme**: la promessa «niente
+  aggiornamenti automatici silenziosi» è adesso un collaudo, non una frase (cap. 13.8).

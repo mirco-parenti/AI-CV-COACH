@@ -102,9 +102,36 @@ Public Class FormPrincipale
     Private Sub ApriLeInformazioni(mittente As Object, e As EventArgs) _
         Handles pnlLogo.Click, picLogo.Click, lblMarchio.Click, lblVersione.Click, lblCopyright.Click
 
-        FinestraInformazioni.Mostra(Me, EtichettaDelPool())
+        FinestraInformazioni.Mostra(Me, EtichettaDelPool(), AddressOf ComponiLaDiagnostica)
 
     End Sub
+
+    ''' <summary>
+    ''' Il foglietto da mettere negli appunti quando si chiede «Copia diagnostica»
+    ''' (cap. 11.1). Si compone al momento del clic e non all'apertura della finestra:
+    ''' fra le due cose può esserci passato di mezzo il guasto che si vuole raccontare.
+    ''' </summary>
+    Private Function ComponiLaDiagnostica() As String
+
+        Return Diagnostica.Componi(
+            Date.Now,
+            Versione.Riga(EtichettaDelPool()),
+            Versione.RigaDelSorgente(),
+            _contesto?.Cartella?.Radice,
+            ModelliInVigore(),
+            _contesto?.Diario?.UltimeRighe(Diagnostica.RigheDiDiario))
+
+    End Function
+
+    ''' <summary>I due modelli in vigore, scritti come si leggono; <c>Nothing</c> se non ci sono.</summary>
+    Private Function ModelliInVigore() As String
+
+        Dim modelli As Ai.Modelli = _contesto?.Modelli
+        If modelli Is Nothing Then Return Nothing
+
+        Return $"{modelli.ModelloSemplice?.Id} (estrazione) · {modelli.ModelloRagionamento?.Id} (ragionamento)"
+
+    End Function
 
     ''' <summary>La schermata di avvio da togliere, se l'avvio ne ha aperta una.</summary>
     Private ReadOnly _schermataDiAvvio As ISchermataDiAvvio
@@ -144,6 +171,10 @@ Public Class FormPrincipale
         ' Non si rilascia alla rimonta del motore per la chiave: la cartella dati è la
         ' stessa, e quel che stiamo dichiarando è la sessione, non il contesto.
         _lucchetto = LucchettoDati.Prendi(_contesto.Cartella)
+
+        ' Prima ancora della chiave: si informa chi sta per decidere se fidarsi, non chi
+        ' ha già deciso (cap. 11.2).
+        MostraLInformativaLaPrimaVolta()
 
         ' Prima dei pannelli, perché una chiave data adesso rimonta il motore: collegarli
         ' a un contesto che sta per essere sostituito vorrebbe dire riaccenderli a mano
@@ -675,6 +706,57 @@ Public Class FormPrincipale
             navigazione.Enabled = libera
         Next
 
+        ' La barra di stato è l'unico posto della finestra che parla per tutti i pannelli,
+        ' e fino al 2026-08-27 diceva «Pronto» dall'avvio alla chiusura. Adesso, mentre
+        ' l'AI lavora, lo dice — e si muove, perché è il muoversi a dire che il programma
+        ' è vivo (reperto D-R2 del giro D).
+        SegnalaCheLAiLavora(Not libera)
+
+    End Sub
+
+    ''' <summary>Il segnale d'attesa in corso, quando ce n'è uno.</summary>
+    Private _segnaleDiAttesa As SegnaleDiAttesa
+
+    ''' <summary>Il battito che lo fa muovere.</summary>
+    Private _battitoDellAttesa As System.Windows.Forms.Timer
+
+    ''' <summary>
+    ''' Accende o spegne il segnale d'attesa nella barra di stato. La logica di che cosa
+    ''' scrivere sta in <see cref="SegnaleDiAttesa"/>, che si collauda senza finestre: qui
+    ''' resta solo il battito e l'etichetta da riempire.
+    ''' </summary>
+    Private Sub SegnalaCheLAiLavora(inCorso As Boolean)
+
+        If inCorso Then
+
+            If _segnaleDiAttesa IsNot Nothing AndAlso _segnaleDiAttesa.InCorso Then Return
+
+            _segnaleDiAttesa = New SegnaleDiAttesa(lblStato.Text)
+
+            If _battitoDellAttesa Is Nothing Then
+                _battitoDellAttesa = New System.Windows.Forms.Timer() With {
+                    .Interval = SegnaleDiAttesa.IntervalloInMillisecondi}
+                AddHandler _battitoDellAttesa.Tick, AddressOf UnBattitoDellAttesa
+            End If
+
+            lblStato.ForeColor = StileApp.Accento
+            lblStato.Text = _segnaleDiAttesa.Avvia(Date.Now)
+            _battitoDellAttesa.Start()
+
+        Else
+
+            If _segnaleDiAttesa Is Nothing OrElse Not _segnaleDiAttesa.InCorso Then Return
+
+            _battitoDellAttesa?.Stop()
+            lblStato.Text = _segnaleDiAttesa.Ferma()
+            lblStato.ForeColor = StileApp.TestoSecondario
+
+        End If
+
+    End Sub
+
+    Private Sub UnBattitoDellAttesa(mittente As Object, e As EventArgs)
+        lblStato.Text = _segnaleDiAttesa.Battito(Date.Now)
     End Sub
 
     ''' <summary>
@@ -758,6 +840,41 @@ Public Class FormPrincipale
     ''' chiave si digita, e <c>--chiave</c> l'unico modo di richiamarla: per questo la
     ''' richiesta esplicita vale anche a chiave presente.
     ''' </remarks>
+    ''' <summary>
+    ''' Mostra l'informativa la prima volta che il programma parte su questa cartella dati
+    ''' (cap. 11.2), e se la annota per non rifarlo più.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Sta prima della chiave perché quello è il momento della decisione: chi ha
+    ''' appena incollato una chiave a pagamento ha già scelto di fidarsi, e dirgli allora
+    ''' che cosa esce dal suo PC è arrivare tardi.</para>
+    ''' <para>Se il file delle preferenze non si lascia scrivere l'informativa <b>ricompare
+    ''' al prossimo avvio</b>: un fastidio, ma dalla parte giusta — il dubbio va a favore di
+    ''' chi deve essere informato, non della nostra voglia di non ripeterci.</para>
+    ''' </remarks>
+    Private Sub MostraLInformativaLaPrimaVolta()
+
+        If _contesto.Impostazioni.InformativaVista Then Return
+
+        ' Come per la chiave: la schermata di avvio non può restare davanti a una finestra
+        ' che aspetta una risposta.
+        _schermataDiAvvio?.ChiudiSubito()
+
+        FinestraInformativa.Mostra(Me)
+
+        _contesto.Impostazioni.InformativaVista = True
+
+        Try
+            _contesto.ArchivioImpostazioni.Salva(_contesto.Impostazioni)
+        Catch ex As Exception When TypeOf ex Is System.IO.IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            ' Non è un guasto che meriti una finestra: l'unica conseguenza è che
+            ' l'informativa si rivedrà, e non è un danno.
+            Dati.DiarioTecnico.Corrente?.AnnotaGuasto("il salvataggio dell'informativa vista", ex)
+        End Try
+
+    End Sub
+
     Private Sub ChiediLaChiaveApiSeServe()
 
         If _contesto.Client IsNot Nothing AndAlso Not _argomenti.ChiediLaChiave Then Return
@@ -770,7 +887,8 @@ Public Class FormPrincipale
         _schermataDiAvvio?.ChiudiSubito()
 
         Dim illeggibile As Boolean
-        Dim digitata As String = FinestraChiaveApi.Chiedi(Me, _contesto.Segreti.LeggiChiaveApi(illeggibile))
+        Dim digitata As String = FinestraChiaveApi.Chiedi(Me, _contesto.Segreti.LeggiChiaveApi(illeggibile),
+                                                     Function(daProvare As String) Ai.ProvaChiave.ProvaAsync(daProvare))
         If digitata Is Nothing Then Return
 
         ' Se il salvataggio non riesce — disco pieno, cartella di sola lettura — la

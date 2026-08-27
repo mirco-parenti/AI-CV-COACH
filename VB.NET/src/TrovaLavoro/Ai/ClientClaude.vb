@@ -18,6 +18,14 @@ Namespace Ai
         Chiave
         ''' <summary>L'API ha rifiutato la richiesta: è un errore nostro, non suo.</summary>
         Richiesta
+        ''' <summary>
+        ''' Il modello richiesto non esiste (più): è stato ritirato dal listino, o questa
+        ''' chiave non può usarlo. Si distingue da <see cref="Richiesta"/> perché la cura
+        ''' è una sola e precisa — sceglierne un altro nelle Impostazioni — mentre una
+        ''' richiesta rifiutata è un difetto nostro, e mandare l'utente a cercarlo sarebbe
+        ''' mandarlo a cercare quel che non troverà.
+        ''' </summary>
+        ModelloRitirato
         ''' <summary>Troppe richieste: si è superato il limite di frequenza.</summary>
         Limite
         ''' <summary>Guasto temporaneo dalla parte dell'API.</summary>
@@ -470,7 +478,7 @@ Namespace Ai
                 End If
 
                 Try
-                    Return Await UnTentativoAsync(testoCorpo, attesa, annulla).ConfigureAwait(False)
+                    Return Await UnTentativoAsync(testoCorpo, modello.Id, attesa, annulla).ConfigureAwait(False)
                 Catch ex As ErroreAi When ex.Ritentabile AndAlso tentativo = 1
                     primoErrore = ex
                 End Try
@@ -536,7 +544,7 @@ Namespace Ai
                 End If
 
                 Try
-                    Return Await UnFlussoAsync(testoCorpo, consegna, annulla).ConfigureAwait(False)
+                    Return Await UnFlussoAsync(testoCorpo, modello.Id, consegna, annulla).ConfigureAwait(False)
 
                     ' Il ritentativo automatico vale finché non è comparso niente. Dopo il
                     ' primo pezzo di testo riprovare vorrebbe dire o scrivere due volte la
@@ -569,7 +577,8 @@ Namespace Ai
         End Function
 
         ''' <summary>Un singolo tentativo di flusso: prepara, manda, legge man mano.</summary>
-        Private Async Function UnFlussoAsync(testoCorpo As String, consegna As Action(Of String),
+        Private Async Function UnFlussoAsync(testoCorpo As String, modello As String,
+                                             consegna As Action(Of String),
                                              annulla As CancellationToken) As Task(Of RispostaAi)
 
             Using richiesta As New HttpRequestMessage(HttpMethod.Post, Indirizzo)
@@ -606,7 +615,7 @@ Namespace Ai
                             Catch ex As IOException
                                 Throw ErroreDiRete(ex)
                             End Try
-                            Throw ErroreDaStato(risposta, corpo)
+                            Throw ErroreDaStato(risposta, corpo, modello)
                         End If
 
                         Return Await LeggiIlFlussoAsync(risposta, consegna, scadenza, annulla).ConfigureAwait(False)
@@ -802,6 +811,13 @@ Namespace Ai
                     Return New ErroreAi(CausaErroreAi.Richiesta,
                         $"L'AI ha rifiutato la richiesta.{dettaglio}")
 
+                Case "not_found_error"
+                    ' Di qui non ci si passa quasi mai — un modello che non esiste si
+                    ' scopre prima che il flusso cominci — ma se ci si passa la cura è
+                    ' la stessa, e dirla diversamente sarebbe dire due cose per una.
+                    Return New ErroreAi(CausaErroreAi.ModelloRitirato,
+                        SpiegaIlModello(Nothing) & dettaglio)
+
             End Select
 
             Return New ErroreAi(CausaErroreAi.Servizio,
@@ -811,7 +827,8 @@ Namespace Ai
 
         ''' <summary>Un singolo tentativo: prepara, manda, classifica.</summary>
         ''' <param name="attesa">Il tempo concesso a questa chiamata (v. <see cref="AttesaPer"/>).</param>
-        Private Async Function UnTentativoAsync(testoCorpo As String, attesa As TimeSpan,
+        Private Async Function UnTentativoAsync(testoCorpo As String, modello As String,
+                                                attesa As TimeSpan,
                                                 annulla As CancellationToken) As Task(Of RispostaAi)
 
             Using richiesta As New HttpRequestMessage(HttpMethod.Post, Indirizzo)
@@ -853,7 +870,7 @@ Namespace Ai
                             ReadAsStringAsync(scadenza.Token).ConfigureAwait(False)
 
                         If Not risposta.IsSuccessStatusCode Then
-                            Throw ErroreDaStato(risposta, testo)
+                            Throw ErroreDaStato(risposta, testo, modello)
                         End If
 
                         Return InterpretaRisposta(testo)
@@ -887,10 +904,15 @@ Namespace Ai
         End Function
 
         ''' <summary>Traduce uno stato HTTP di errore in un errore leggibile.</summary>
-        Private Shared Function ErroreDaStato(risposta As HttpResponseMessage, corpo As String) As ErroreAi
+        Private Shared Function ErroreDaStato(risposta As HttpResponseMessage, corpo As String,
+                                              modello As String) As ErroreAi
 
             Dim stato As Integer = CInt(risposta.StatusCode)
             Dim dettaglio As String = Sintesi(corpo)
+
+            If ParlaDiUnModelloCheNonCE(stato, corpo) Then
+                Return New ErroreAi(CausaErroreAi.ModelloRitirato, SpiegaIlModello(modello) & dettaglio)
+            End If
 
             If stato = 401 OrElse stato = 403 Then
                 Return New ErroreAi(CausaErroreAi.Chiave,
@@ -914,6 +936,44 @@ Namespace Ai
 
             Return New ErroreAi(CausaErroreAi.Richiesta,
                 $"L'AI ha rifiutato la richiesta (HTTP {stato}).{dettaglio}")
+
+        End Function
+
+        ''' <summary>
+        ''' Se questa risposta d'errore parla di un modello che non c'è.
+        ''' </summary>
+        ''' <remarks>
+        ''' Due segni, e basta uno. Il primo è il <b>404</b>: l'indirizzo a cui si scrive è
+        ''' una costante di questa classe e non è mai cambiato, quindi «non trovato» non
+        ''' può riferirsi alla porta — l'unica cosa nominata nella richiesta che possa non
+        ''' esistere è il modello. Il secondo è il tipo dichiarato dall'API,
+        ''' <c>not_found_error</c>, che vale anche se un giorno arrivasse con uno stato
+        ''' diverso.
+        ''' </remarks>
+        Private Shared Function ParlaDiUnModelloCheNonCE(stato As Integer, corpo As String) As Boolean
+
+            If stato = 404 Then Return True
+
+            Return If(corpo, String.Empty).Contains("not_found_error", StringComparison.OrdinalIgnoreCase)
+
+        End Function
+
+        ''' <summary>
+        ''' La riga da mostrare quando il modello non c'è più: cos'è successo, e la sola
+        ''' strada per uscirne.
+        ''' </summary>
+        ''' <remarks>
+        ''' Fino alla 1.0 questo caso finiva nel mucchio dei «rifiutata la richiesta», e chi
+        ''' lo incontrava non aveva modo di sapere che la cura era a due clic di distanza: i
+        ''' modelli si ritirano dal listino con l'unico preavviso di una data su una pagina
+        ''' web, e il programma se ne accorge il giorno in cui smette di funzionare.
+        ''' </remarks>
+        Private Shared Function SpiegaIlModello(modello As String) As String
+
+            Dim quale As String = If(String.IsNullOrWhiteSpace(modello), "richiesto", $"«{modello}»")
+
+            Return $"Il modello {quale} non è più disponibile, oppure questa chiave API non " &
+                   "può usarlo. Scegline un altro in Impostazioni, sotto «Sotto il cofano»."
 
         End Function
 

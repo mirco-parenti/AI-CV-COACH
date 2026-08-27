@@ -66,7 +66,15 @@ Public Class FinestraChiaveApi
     ''' per far capire che quella nuova prende il posto di una che c'era. <c>Nothing</c>
     ''' al primo avvio.
     ''' </param>
-    Public Sub New(Optional giaSalvata As String = Nothing)
+    ''' <param name="prova">
+    ''' Come si prova una chiave, o <c>Nothing</c> se in questo contesto non si può
+    ''' provare — e allora il bottone non compare affatto, invece di comparire e
+    ''' non fare niente.
+    ''' </param>
+    Public Sub New(Optional giaSalvata As String = Nothing,
+                   Optional prova As Func(Of String, Task(Of Ai.EsitoProva)) = Nothing)
+
+        _prova = prova
 
         InitializeComponent()
 
@@ -110,12 +118,13 @@ Public Class FinestraChiaveApi
     ''' smaltisce da sé.
     ''' </summary>
     Public Shared Function Chiedi(proprietario As IWin32Window,
-                                  Optional giaSalvata As String = Nothing) As String
+                                  Optional giaSalvata As String = Nothing,
+                                  Optional prova As Func(Of String, Task(Of Ai.EsitoProva)) = Nothing) As String
 
         ' Quel che conta è la chiave, non l'esito della finestra: a riempirla è il solo
         ' bottone «Salva», quindi Esc, la X e «Non adesso» tornano tutti Nothing senza
         ' che nessuno debba ricordarsi di controllare il DialogResult.
-        Using finestra As New FinestraChiaveApi(giaSalvata)
+        Using finestra As New FinestraChiaveApi(giaSalvata, prova)
             finestra.ShowDialog(proprietario)
             Return finestra.ChiaveDigitata
         End Using
@@ -143,6 +152,11 @@ Public Class FinestraChiaveApi
         ' flusso: è una conferma senza conseguenze (livello 1, cap. 03.3).
         StileApp.VestiBottone(btnSalva, LivelloBottone.SicuroPositivo)
         StileApp.VestiBottone(btnNonAdesso, LivelloBottone.Neutro)
+
+        ' Provare la chiave non cambia niente e non costa niente: è il livello più basso.
+        StileApp.VestiBottone(btnProva, LivelloBottone.Neutro)
+        btnProva.Visible = _prova IsNot Nothing
+        lblEsitoProva.ForeColor = StileApp.TestoSecondario
 
     End Sub
 
@@ -190,9 +204,16 @@ Public Class FinestraChiaveApi
         ' incollato si legge peggio di una riga vuota.
         lblForma.Location = New Point(sinistra, txtChiave.Bottom + StileApp.InterlineaMinima)
 
-        Dim riga As Integer = lblForma.Bottom + StileApp.MargineRiquadro
+        ' L'esito della prova sta sotto l'avvertimento di forma, e come lui tiene il suo
+        ' spazio anche quando non c'è: sono due righe che compaiono e spariscono, e una
+        ' finestra che sussulta si legge peggio di una riga vuota.
+        lblEsitoProva.MaximumSize = New Size(larghezzaUtile, 0)
+        lblEsitoProva.Location = New Point(sinistra, lblForma.Bottom + StileApp.InterlineaMinima)
+
+        Dim riga As Integer = lblEsitoProva.Bottom + StileApp.MargineRiquadro
         btnNonAdesso.Location = New Point(larghezza - StileApp.MargineRiquadro - btnNonAdesso.Width, riga)
         btnSalva.Location = New Point(btnNonAdesso.Left - StileApp.DistanzaControlli - btnSalva.Width, riga)
+        btnProva.Location = New Point(btnSalva.Left - StileApp.DistanzaControlli - btnProva.Width, riga)
 
         ' Un tetto sullo spazio che c'è, e lo scorrimento per quel che non ci sta: le due
         ' cose insieme, perché il tetto da solo taglierebbe e lo scorrimento da solo
@@ -272,6 +293,62 @@ Public Class FinestraChiaveApi
     Private Sub btnNonAdesso_Click(sender As Object, e As EventArgs) Handles btnNonAdesso.Click
         DialogResult = DialogResult.Cancel
         Close()
+    End Sub
+
+    ''' <summary>Come si prova una chiave, o <c>Nothing</c> se qui non si può.</summary>
+    Private ReadOnly _prova As Func(Of String, Task(Of Ai.EsitoProva))
+
+    ''' <summary>Se in questa finestra la chiave si può provare (per il banco).</summary>
+    Public ReadOnly Property PuoProvareLaChiave As Boolean
+        Get
+            Return _prova IsNot Nothing
+        End Get
+    End Property
+
+    ''' <summary>L'esito dell'ultima prova come è mostrato, o stringa vuota.</summary>
+    Public ReadOnly Property EsitoMostrato As String
+        Get
+            Return If(lblEsitoProva.Visible, lblEsitoProva.Text, "")
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Prova la chiave scritta nella casella e mostra com'è andata. Sta in un metodo suo,
+    ''' staccato dal bottone, per la stessa ragione di <see cref="PrendiLaChiaveScritta"/>:
+    ''' è l'unico modo di collaudarlo senza mostrare una finestra modale.
+    ''' </summary>
+    Public Async Function ProvaLaChiaveScritta() As Task
+
+        If _prova Is Nothing Then Return
+
+        Dim scritta As String = txtChiave.Text.Trim()
+        If scritta.Length = 0 Then Return
+
+        Mostra("Sto provando…")
+        btnProva.Enabled = False
+
+        Try
+            Dim esito As Ai.EsitoProva = Await _prova(scritta).ConfigureAwait(True)
+            Mostra(If(esito Is Nothing, Ai.ProvaChiave.Spiega(False, Ai.CausaErroreAi.RispostaInattesa), esito.Messaggio))
+        Catch ex As Exception
+            ' Una prova che va a male non è un guasto del programma: è un esito. Chi ha
+            ' premuto vuole una riga, non una finestra d'errore.
+            Mostra(Ai.ProvaChiave.Spiega(False, Ai.CausaErroreAi.RispostaInattesa))
+            Dati.DiarioTecnico.Corrente?.AnnotaGuasto("la prova della chiave API", ex)
+        Finally
+            btnProva.Enabled = True
+        End Try
+
+    End Function
+
+    ''' <summary>Mostra una riga di esito, facendole posto se non c'era.</summary>
+    Private Sub Mostra(riga As String)
+        lblEsitoProva.Text = riga
+        lblEsitoProva.Visible = True
+    End Sub
+
+    Private Async Sub btnProva_Click(sender As Object, e As EventArgs) Handles btnProva.Click
+        Await ProvaLaChiaveScritta()
     End Sub
 
 End Class

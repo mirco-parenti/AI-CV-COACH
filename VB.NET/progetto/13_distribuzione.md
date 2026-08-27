@@ -224,6 +224,29 @@ il vecchio; i dati in `%APPDATA%` non si toccano e il programma riparte da dove 
 Niente auto-update in perimetro: per un'app personale è complessità senza guadagno
 (annotato comunque tra le idee future).
 
+**Dal 2026-08-27 l'aggiornamento manuale ha un avviso** *(revisione del giro D)*. Restava
+vero il pezzo difficile — chi non guarda il repository non sa mai che è uscita una versione
+nuova — e la cura è piccola: in «Informazioni» c'è **«Cerca aggiornamenti»**, che chiede a
+GitHub qual è l'ultima release pubblicata e confronta il numero con quello di questa copia.
+
+Tre scelte dentro quelle poche righe.
+
+- **Parte solo premendolo.** Non all'avvio, non una volta al giorno, mai da sola: il cap. 11.2
+  promette «niente aggiornamenti automatici silenziosi», e una domanda che l'utente pone è il
+  contrario del silenzio. Chi non lo preme non manda niente a nessuno — e un collaudo lo
+  sorveglia, perché una promessa senza collaudo dura fino alla prossima distrazione.
+- **Confronta numeri, non stringhe.** «1.0.000» è la costante di `Versione.vb`, «v1.0» è il
+  tag del rilascio: sono la stessa versione scritta in due posti, e a caratteri direbbero di
+  no. I pezzi che mancano valgono zero.
+- **Ha un terzo esito oltre a «aggiornata» e «ce n'è una nuova»**: *più avanti del pubblicato*,
+  cioè la macchina di chi costruisce il programma. Dirle «sei aggiornata» sarebbe falso e
+  dirle «scarica la nuova» assurdo.
+
+Se c'è davvero una versione nuova, il programma apre la pagina delle release: a scaricare e a
+sostituire l'eseguibile ci pensa la persona. Resta fuori perimetro l'auto-update, e resta
+fuori per la stessa ragione di sempre — un programma che si riscrive da solo chiede più
+fiducia di quanta ne serva qui.
+
 ## 13.9 Come si fa un rilascio
 
 *Fin qui il capitolo ha detto **con che parametri** si pubblica e **che aspetto** ha il
@@ -415,3 +438,30 @@ quando diventano voci di `in_sospeso.md` o cure.
 - **una voce data per aperta può essere già chiusa nel codice**: prima di portarsi dietro un
   elenco, lo si confronta con il codice. È costato dieci minuti scoprirlo, e due giorni non
   saperlo.
+
+## 13.11 Quanto è costato: il contatore di spesa
+
+*Aggiunto il 2026-08-27, dalla revisione del giro D.* Il programma usa una chiave che
+l'utente paga a consumo, e fino alla 1.0 non gli diceva mai quanto stesse spendendo: lo si
+poteva sapere solo dalla console di Anthropic, cioè altrove.
+
+Il dato però c'era già. Dal 2026-08-18 ogni chiamata lascia una riga in `chiamate_ai.csv`
+(cap. 11.1) con modello, token andati e venuti: nata per ritarare i `max_token` del pool, quel
+file risponde anche all'altra domanda. Non si annota niente di nuovo — **bastava leggerlo**.
+
+In *Impostazioni → Quanto è costato* compaiono chiamate, token e una **stima in dollari**, in
+totale e negli ultimi trenta giorni, con il bottone che apre il CSV per chi vuole ordinarlo per
+colonna. Quattro cautele, tutte della stessa famiglia:
+
+- **è una stima e lo dice** — prezzi di listino, che non sanno di sconti né della cache dei
+  prompt; la verità resta la fattura;
+- **i dollari, non gli euro**: è la valuta in cui Anthropic fattura, e convertirla vorrebbe
+  dire inventare un cambio;
+- **un modello senza prezzo non vale zero**: i suoi token si contano, i suoi soldi no, e il
+  buco si dichiara (cap. 11.6);
+- **sotto il centesimo non si scrive «$0,00»**, che si legge come «gratis»: si dice *meno di
+  un centesimo*, che è la cosa vera.
+
+Il conto non è un registro contabile e non pretende di esserlo: una riga storta nel file si
+salta e le altre valgono, perché quel CSV si apre in un foglio di calcolo e chiunque può
+averci messo dentro una riga a mano.
