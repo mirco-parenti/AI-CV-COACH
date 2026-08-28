@@ -296,6 +296,11 @@ finalmente **guardate** — quel che lo strumento di collaudo non sa ancora fare
 sul guardarle si è chiusa il giorno stesso, ed è in «Chiuse»: guardare ha trovato quattro
 difetti, curati nella stessa sessione (Step 2.50).
 
+**Aggiornamento del 2026-08-28**: delle due voci nuove ne resta **una**. La scadenza del
+prezzo di Sonnet 5 si è sciolta guardandola tre giorni prima che scadesse — i $2/$10 sono
+diventati il listino, l'aumento del primo settembre non avverrà — e la voce è in «Chiuse»
+senza che si sia toccato niente. Resta quel che lo strumento di collaudo non sa ancora fare.
+
 - ⚠ **Il giro D è aperto: due voci non provate, e tre riserve provate su un eseguibile che non
   le conteneva.** `D1` (l'exe su un PC senza runtime) e `R-b` (la barra delle Impostazioni a
   scala 150 %) su quella macchina non si sono potute fare. Le altre tre riserve stanno peggio
@@ -331,17 +336,18 @@ difetti, curati nella stessa sessione (Step 2.50).
   Va insegnata a `clic`, che oggi non fa né l'una né l'altra cosa.
   *(`strumenti/mcp-collaudi/server.mjs`.)*
 
-- **Il prezzo di Sonnet 5 dopo il 31 agosto 2026** *(2026-08-27)*. Il contatore di spesa
-  (cap. 13.11) valuta i token con un listino compilato dentro, e uno di quei numeri ha una
-  data: il cap. 15, voce 6, annota che i **$2/$10** di Sonnet 5 sono un prezzo
-  **promozionale fino al 31/08/2026**, contro i $3/$15 di listino. Il 18 agosto la
-  promozione sembrava diventata il prezzo nuovo, ma dopo quella data nessuno ha
-  riverificato. Va guardato **il primo settembre**: se il listino è tornato su, il conto
-  che il programma mostra è basso di un terzo. Non serve una nuova build — basta il blocco
-  `prezzi` di `modelli.json` — ma serve **guardare**, e nessun collaudo può accorgersene.
-  *(cap. 13.11; cap. 15 voce 6; `Ai/Listino.vb`, dove la scadenza è annotata.)*
-
 ## Chiuse
+
+- ✅ **Il prezzo di Sonnet 5 dopo il 31 agosto 2026** *(aperta il 2026-08-27, **chiusa il
+  2026-08-28** guardando il listino)*. La scadenza non c'è più: la pagina dei prezzi
+  dichiara che i **$2/$10** per milione di token di Sonnet 5, annunciati al lancio come
+  prezzo introduttivo fino al 31 agosto 2026, **sono diventati il listino**, e che
+  l'aumento a $3/$15 previsto per il primo settembre **non avverrà**. Verificato su due
+  fonti indipendenti — la tabella dei modelli e la pagina dei prezzi, che porta la nota per
+  esteso. Il listino compilato in `Ai/Listino.vb` è dunque già quello giusto e non ha più
+  una data addosso: niente riga da scrivere nel blocco `prezzi` di `modelli.json`, niente
+  build. Si chiude **senza toccare codice**: bastava guardare, che era esattamente ciò che
+  la voce chiedeva. *(cap. 13.11; cap. 15 voce 6; `Ai/Listino.vb`.)*
 
 - ✅ **Le tre cose nuove viste a occhio** *(aperta il 2026-08-27 chiudendo la revisione del
   giro D, **chiusa lo stesso giorno**)*. Le due tendine dei modelli, «Quanto è costato» e i

@@ -55,18 +55,19 @@ Namespace Ai
         End Sub
 
         ''' <summary>
-        ''' I prezzi noti al 2026-08-27, in dollari per milione di token. Ci sono i tre
+        ''' I prezzi noti al 2026-08-28, in dollari per milione di token. Ci sono i tre
         ''' modelli che questo programma ha davvero usato: i due di casa e quello del
         ''' prototipo, che resta il termine di paragone dei collaudi (cap. 04.7).
         ''' </summary>
         ''' <remarks>
-        ''' <b>Uno di questi numeri ha una data di scadenza.</b> Il cap. 15, voce 6, annota
-        ''' che i $2/$10 di Sonnet 5 sono un prezzo promozionale <b>fino al 31/08/2026</b>,
-        ''' contro i $3/$15 di listino; il 18 agosto la promozione sembrava diventata il
-        ''' prezzo nuovo, ma nessuno l'ha verificato dopo quella data. Se dal primo
-        ''' settembre il conto delle Impostazioni sembra basso di un terzo, è questa la
-        ''' ragione — e la cura non è una nuova build: basta il blocco <c>prezzi</c> di
-        ''' <c>modelli.json</c> (cap. 11.6).
+        ''' <b>Un numero aveva una data di scadenza, e non ce l'ha più.</b> Il cap. 15,
+        ''' voce 6, annotava che i $2/$10 di Sonnet 5 erano un prezzo introduttivo
+        ''' <b>fino al 31/08/2026</b>, contro i $3/$15 di listino. Il 2026-08-28 quella
+        ''' data è stata guardata: la pagina dei prezzi dichiara che i $2/$10 sono
+        ''' diventati il listino e che l'aumento del primo settembre non avverrà. Restano
+        ''' però numeri letti su una pagina web e non chiesti all'API: se un giorno il
+        ''' conto delle Impostazioni sembrerà sbagliato, la cura non è una nuova build —
+        ''' basta il blocco <c>prezzi</c> di <c>modelli.json</c> (cap. 11.6).
         ''' </remarks>
         Public Shared Function Predefinito() As Listino
 
