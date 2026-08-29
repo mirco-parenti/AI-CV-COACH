@@ -58,6 +58,15 @@ public class Finestre {
     [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
     [DllImport("user32.dll")] public static extern void mouse_event(uint f, uint dx, uint dy, uint d, IntPtr e);
     [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+
+    // Le quattro che servono a non riferire un successo che non c'è stato: chi sta
+    // davvero davanti, di chi è il pixel che sto per premere, di quale finestra fa parte
+    // quel pixel, e il colpo di ALT senza il quale Windows rifiuta SetForegroundWindow a
+    // un processo che non è già in primo piano.
+    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] public static extern IntPtr WindowFromPoint(Punto p);
+    [DllImport("user32.dll")] public static extern IntPtr GetAncestor(IntPtr h, uint quale);
+    [DllImport("user32.dll")] public static extern void keybd_event(byte tasto, byte scansione, uint flag, IntPtr extra);
     [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr h, uint m, IntPtr w, IntPtr l);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr SendMessage(IntPtr h, uint m, IntPtr w, string l);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr SendMessage(IntPtr h, uint m, IntPtr w, StringBuilder l);
@@ -73,11 +82,15 @@ public class Finestre {
     [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out Rettangolo r);
 
     public struct Rettangolo { public int Sinistra, Alto, Destra, Basso; }
+    public struct Punto { public int X, Y; }
 
     public const uint SWP_NOMOVE = 0x0002;
     public const uint SWP_NOZORDER = 0x0004;
     public const int SW_RESTORE = 9;
     public const int SW_MAXIMIZE = 3;
+    public const uint GA_ROOT = 2;
+    public const byte VK_ALT = 0x12;
+    public const uint TASTO_SU = 0x0002;   // KEYEVENTF_KEYUP
 
     public const uint GIU = 0x0002;   // MOUSEEVENTF_LEFTDOWN
     public const uint SU  = 0x0004;   // MOUSEEVENTF_LEFTUP
@@ -144,6 +157,31 @@ public class Finestre {
         mouse_event(GIU, 0, 0, 0, IntPtr.Zero);
         mouse_event(SU, 0, 0, 0, IntPtr.Zero);
     }
+
+    /// <summary>Il processo a cui una finestra appartiene.</summary>
+    public static uint ProcessoDi(IntPtr h) { uint suo; GetWindowThreadProcessId(h, out suo); return suo; }
+
+    /// <summary>
+    /// La finestra che sta sotto un punto dello schermo: quella che il clic prenderebbe
+    /// davvero. È la domanda giusta da fare prima di premere, perché una sola risposta
+    /// copre i due modi di sbagliare bersaglio — il controllo fuori dallo schermo e
+    /// l'altra finestra passata davanti.
+    /// </summary>
+    public static IntPtr SottoIlPunto(int x, int y) { Punto p; p.X = x; p.Y = y; return WindowFromPoint(p); }
+
+    /// <summary>La finestra di primo livello di cui un controllo fa parte, per poterne dire il titolo.</summary>
+    public static IntPtr FinestraMadre(IntPtr h) { IntPtr r = GetAncestor(h, GA_ROOT); return r == IntPtr.Zero ? h : r; }
+
+    /// <summary>
+    /// Un colpo di ALT, giù e su. Serve a sciogliere il rifiuto di SetForegroundWindow:
+    /// Windows non lascia che un processo che sta dietro si porti davanti da solo, ma
+    /// dopo un tasto glielo concede. Si dà solo quando davanti c'è qualcun altro —
+    /// all'applicazione già in primo piano quel tasto aprirebbe la barra dei menù.
+    /// </summary>
+    public static void ColpoDiAlt() {
+        keybd_event(VK_ALT, 0, 0, IntPtr.Zero);
+        keybd_event(VK_ALT, 0, TASTO_SU, IntPtr.Zero);
+    }
 }
 "@
 
@@ -179,6 +217,103 @@ if ($radici.Count -eq 0) {
 }
 
 $radice = $radici[0]
+
+<#
+.SYNOPSIS
+Descrive la finestra che in questo momento sta davanti a tutte.
+.DESCRIPTION
+Serve nei messaggi di rifiuto: dire «non ho premuto» senza dire **chi c'era davanti**
+lascia chi legge a indovinare, e la prima ipotesi sbagliata costa il giro dopo.
+#>
+function ChiStaDavanti {
+
+    $davanti = [Finestre]::GetForegroundWindow()
+    if ($davanti -eq [IntPtr]::Zero) { return "nessuna finestra" }
+
+    $suo = [Finestre]::ProcessoDi($davanti)
+    $chi = Get-Process -Id $suo -ErrorAction SilentlyContinue
+    $nome = if ($chi) { $chi.ProcessName } else { "processo $suo" }
+
+    return "«$([Finestre]::Titolo($davanti))» ($nome)"
+}
+
+<#
+.SYNOPSIS
+Porta l'applicazione in primo piano **e verifica** che ci sia riuscita; $false se non ce l'ha fatta.
+.DESCRIPTION
+Fino al 2026-08-29 qui c'era una `SetForegroundWindow` sola, senza guardarne l'esito: se
+Windows la rifiutava — e la rifiuta a un processo che non è già davanti, finché non passa
+un tasto — il clic partiva lo stesso e lo prendeva un'altra finestra, mentre l'attrezzo
+riferiva «Premuto». Costò tre clic andati a vuoto e una diagnosi sbagliata sfiorata.
+
+Due accorgimenti, pagati entrambi. Il **colpo di ALT** è ciò che scioglie il rifiuto, e si
+dà solo quando davanti c'è qualcun altro: all'applicazione già in primo piano quel tasto
+aprirebbe la barra dei menù. E la verifica guarda il **processo** di chi sta davanti, non
+la singola finestra: una finestra di messaggio dell'applicazione è lei quanto la principale,
+e pretendere l'una escluderebbe l'altra.
+#>
+function PortaDavanti([IntPtr]$Finestra = [IntPtr]::Zero) {
+
+    if ($Finestra -eq [IntPtr]::Zero) { $Finestra = [IntPtr]$radice.Current.NativeWindowHandle }
+    $nostro = [uint32]$processo.Id
+
+    # Tre tentativi con attesa crescente: il primo colpo della giornata è quello che
+    # fallisce più spesso, perché il fuoco sta ancora al terminale che ci ha lanciati.
+    for ($colpo = 1; $colpo -le 3; $colpo++) {
+
+        $davanti = [Finestre]::GetForegroundWindow()
+        if ($davanti -ne [IntPtr]::Zero -and [Finestre]::ProcessoDi($davanti) -eq $nostro) { return $true }
+
+        [Finestre]::ColpoDiAlt()
+        [Finestre]::SetForegroundWindow($Finestra) | Out-Null
+        Start-Sleep -Milliseconds (150 * $colpo)
+    }
+
+    $davanti = [Finestre]::GetForegroundWindow()
+    return ($davanti -ne [IntPtr]::Zero -and [Finestre]::ProcessoDi($davanti) -eq $nostro)
+}
+
+<#
+.SYNOPSIS
+Perché quel punto non si può cliccare; $null se invece si può.
+.DESCRIPTION
+Il rettangolo che UI Automation dichiara **non** vuol dire che quel punto sia raggiungibile:
+un controllo può stare sotto il bordo dello schermo (il «Chiudi» delle Impostazioni stava
+145 pixel più in basso dell'area di lavoro) o dietro un'altra finestra passata davanti fra
+una fotografia e il clic. In tutti e due i casi lo strumento portava lì il puntatore e
+riferiva un successo che non c'era stato.
+
+Una domanda sola li copre entrambi — «di chi è il pixel che sto per premere?» —
+e la risposta la dà `WindowFromPoint`. Il confronto è per **processo**: così restano leciti
+i clic sui popup che l'applicazione apre fuori dalla sua finestra (la tendina di un menù è
+una finestra a sé, e sarebbe fuori da qualunque rettangolo si volesse pretendere).
+#>
+function OstacoloAlClic([int]$X, [int]$Y) {
+
+    $schermo = [System.Windows.Forms.SystemInformation]::VirtualScreen
+
+    if ($X -lt $schermo.Left -or $X -ge $schermo.Right -or $Y -lt $schermo.Top -or $Y -ge $schermo.Bottom) {
+        return ("il punto da premere è ($X, $Y), FUORI DALLO SCHERMO, che va da " +
+                "($($schermo.Left), $($schermo.Top)) a ($($schermo.Right), $($schermo.Bottom)). " +
+                "Portalo in vista — «ridimensiona» la finestra, o scorri il pannello — e riprova")
+    }
+
+    $sotto = [Finestre]::SottoIlPunto($X, $Y)
+    if ($sotto -eq [IntPtr]::Zero) {
+        return "sotto il punto da premere ($X, $Y) non c'è nessuna finestra"
+    }
+
+    $suo = [Finestre]::ProcessoDi($sotto)
+    if ($suo -ne [uint32]$processo.Id) {
+        $chi = Get-Process -Id $suo -ErrorAction SilentlyContinue
+        $nome = if ($chi) { $chi.ProcessName } else { "processo $suo" }
+        $titolo = [Finestre]::Titolo([Finestre]::FinestraMadre($sotto))
+        return ("sotto il punto da premere ($X, $Y) non c'è TrovaLavoro ma «$titolo» ($nome): " +
+                "il colpo lo prenderebbe quella finestra")
+    }
+
+    return $null
+}
 
 <#
 .SYNOPSIS
@@ -509,15 +644,31 @@ switch ($azione) {
         # una finestra modale — «Importa da un CV…», una conferma — bloccano Invoke
         # finché quella finestra non si chiude, e dopo un minuto muore di timeout COM. Un
         # clic vero non aspetta niente, ed è anche ciò che fa una persona.
+        #
+        # Il prezzo del mouse è che il colpo va dove gli si dice, non dove si crede: prima
+        # di darlo si pretende il primo piano (verificato) e si guarda di chi è il pixel
+        # sotto il puntatore. Senza quelle due domande l'attrezzo diceva «Premuto» anche
+        # quando aveva premuto il desktop o la finestra di qualcun altro.
         $area = $elemento.Current.BoundingRectangle
         $etichetta = $elemento.Current.Name
 
         if ($area.Width -gt 0 -and $area.Height -gt 0) {
 
-            [Finestre]::SetForegroundWindow($radice.Current.NativeWindowHandle) | Out-Null
-            Start-Sleep -Milliseconds 200
+            if (-not (PortaDavanti)) {
+                Write-Output "NON ho premuto «$etichetta»: non riesco a portare TrovaLavoro in primo piano, e davanti c'è $(ChiStaDavanti). Un clic dato adesso lo prenderebbe quella finestra."
+                exit 1
+            }
 
-            [Finestre]::Clic([int]($area.X + $area.Width / 2), [int]($area.Y + $area.Height / 2))
+            $x = [int]($area.X + $area.Width / 2)
+            $y = [int]($area.Y + $area.Height / 2)
+
+            $ostacolo = OstacoloAlClic $x $y
+            if ($ostacolo) {
+                Write-Output "NON ho premuto «$etichetta»: $ostacolo."
+                exit 1
+            }
+
+            [Finestre]::Clic($x, $y)
             Start-Sleep -Milliseconds 700
 
             # Il nome si legge prima del clic: «Analizza» diventa «Annulla» appena il
@@ -569,7 +720,19 @@ switch ($azione) {
         $schema = $null
 
         if ($casella.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$schema)) {
-            $schema.SetValue($contenuto)
+
+            # Una casella può avere lo schema e rifiutare lo stesso di farsi scrivere: è di
+            # sola lettura finché una condizione manca — «Cosa facevo» senza un'esperienza
+            # scelta, per dirne una. Senza questo Catch usciva l'eccezione COM con tutto il
+            # suo stack, che sembra un guasto dell'attrezzo mentre è una risposta legittima
+            # dell'applicazione: la stessa cosa che per i bottoni si dice con «è SPENTO».
+            try {
+                $schema.SetValue($contenuto)
+            } catch {
+                Write-Output "«$etichetta» non si lascia scrivere: la casella c'è ma è di sola lettura (manca una condizione? con «controlli» si vede se è accesa)."
+                exit 1
+            }
+
             Write-Output "Scritti $($contenuto.Length) caratteri in «$etichetta»."
             exit 0
         }
@@ -590,10 +753,26 @@ switch ($azione) {
             exit 1
         }
 
-        # Il clic serve a due cose insieme: dare il fuoco alla casella e portare avanti la
-        # finestra. SetFocus di UI Automation qui non basta — Windows non lascia che un
-        # processo che sta dietro si prenda lo stato attivo, e fallisce.
-        [Finestre]::Clic([int]($area.X + $area.Width / 2), [int]($area.Y + $area.Height / 2))
+        # Il clic serve a dare il fuoco alla casella: SetFocus di UI Automation qui non
+        # basta — Windows non lascia che un processo che sta dietro si prenda lo stato
+        # attivo, e fallisce. A portare avanti la finestra pensa «PortaDavanti», che a
+        # differenza del clic si accorge quando non ci è riuscita: un Ctrl+V dato alla
+        # finestra sbagliata scrive il testo a casa d'altri, e qui il testo è lungo.
+        if (-not (PortaDavanti)) {
+            Write-Output "NON ho scritto in «$etichetta»: non riesco a portare TrovaLavoro in primo piano, e davanti c'è $(ChiStaDavanti). Il testo finirebbe in quella finestra."
+            exit 1
+        }
+
+        $x = [int]($area.X + $area.Width / 2)
+        $y = [int]($area.Y + $area.Height / 2)
+
+        $ostacolo = OstacoloAlClic $x $y
+        if ($ostacolo) {
+            Write-Output "NON ho scritto in «$etichetta»: $ostacolo."
+            exit 1
+        }
+
+        [Finestre]::Clic($x, $y)
         Start-Sleep -Milliseconds 400
 
         [System.Windows.Forms.SendKeys]::SendWait("^a")
@@ -625,9 +804,12 @@ switch ($azione) {
 
         # Prima davanti, poi si apre: una tendina aperta mentre la finestra sta dietro si
         # richiude da sola nell'istante in cui la si porta avanti, e la scelta cadrebbe nel
-        # vuoto senza che nessuno spieghi perché.
-        [Finestre]::SetForegroundWindow($radice.Current.NativeWindowHandle) | Out-Null
-        Start-Sleep -Milliseconds 250
+        # vuoto senza che nessuno spieghi perché. E se davanti non ci arriva, non si apre
+        # niente: meglio dirlo che scegliere a vuoto in casa di un'altra finestra.
+        if (-not (PortaDavanti)) {
+            Write-Output "NON ho aperto «$etichetta»: non riesco a portare TrovaLavoro in primo piano, e davanti c'è $(ChiStaDavanti)."
+            exit 1
+        }
 
         $apertura = $null
         $siApre = $menu.TryGetCurrentPattern(
@@ -645,7 +827,16 @@ switch ($azione) {
                     Write-Output "«$etichetta» non si apre e non ha una posizione sullo schermo: non so come guardarci dentro."
                     exit 1
                 }
-                [Finestre]::Clic([int]($suo.X + $suo.Width - 10), [int]($suo.Y + $suo.Height / 2))
+                $xFreccia = [int]($suo.X + $suo.Width - 10)
+                $yFreccia = [int]($suo.Y + $suo.Height / 2)
+
+                $ostacolo = OstacoloAlClic $xFreccia $yFreccia
+                if ($ostacolo) {
+                    Write-Output "NON ho aperto «$etichetta»: $ostacolo."
+                    exit 1
+                }
+
+                [Finestre]::Clic($xFreccia, $yFreccia)
             }
 
             Start-Sleep -Milliseconds 500
@@ -703,7 +894,20 @@ switch ($azione) {
             $area = $scelta.Current.BoundingRectangle
 
             if (($area.Width -gt 0) -and ($area.Height -gt 0)) {
-                [Finestre]::Clic([int]($area.X + $area.Width / 2), [int]($area.Y + $area.Height / 2))
+
+                $x = [int]($area.X + $area.Width / 2)
+                $y = [int]($area.Y + $area.Height / 2)
+
+                # La tendina aperta è una finestra a sé, che sta fuori dal rettangolo
+                # dell'applicazione: per questo l'ostacolo si misura sul processo, non sul
+                # perimetro della finestra principale — che qui direbbe di no a ragione.
+                $ostacolo = OstacoloAlClic $x $y
+                if ($ostacolo) {
+                    Write-Output "NON ho scelto «$etichettaVoce»: $ostacolo."
+                    exit 1
+                }
+
+                [Finestre]::Clic($x, $y)
 
             } else {
                 $selezione = $null
@@ -878,14 +1082,22 @@ switch ($azione) {
             exit 1
         }
 
-        [Finestre]::SetForegroundWindow($radice.Current.NativeWindowHandle) | Out-Null
-        Start-Sleep -Milliseconds 250
+        if (-not (PortaDavanti)) {
+            Write-Output "NON ho scelto la riga «$suoTesto»: non riesco a portare TrovaLavoro in primo piano, e davanti c'è $(ChiStaDavanti)."
+            exit 1
+        }
 
         # Si sceglie col mouse per la stessa ragione dei bottoni e delle tendine: la
         # Select() dello schema cambia la selezione senza far scattare gli eventi
         # dell'applicazione, e allora il collaudo direbbe una bugia.
         $x = [int]($area.X + 40)
         $y = [int]($area.Y + $area.Height / 2)
+
+        $ostacolo = OstacoloAlClic $x $y
+        if ($ostacolo) {
+            Write-Output "NON ho scelto la riga «$suoTesto»: $ostacolo."
+            exit 1
+        }
 
         [Finestre]::Clic($x, $y)
         Start-Sleep -Milliseconds 400

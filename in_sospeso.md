@@ -301,6 +301,11 @@ prezzo di Sonnet 5 si è sciolta guardandola tre giorni prima che scadesse — i
 diventati il listino, l'aumento del primo settembre non avverrà — e la voce è in «Chiuse»
 senza che si sia toccato niente. Resta quel che lo strumento di collaudo non sa ancora fare.
 
+**Aggiornamento del 2026-08-29**: delle voci nuove **non ne resta nessuna**. Il `clic` che
+diceva «Premuto» senza aver premuto è curato e in «Chiuse», insieme a due difetti che la sua
+cura ha stanato per strada. Qui sotto restano perciò **soltanto le due che non dipendono da
+noi**: il giro D da rifare sulla macchina del tutor, e il certificato per la firma.
+
 - ⚠ **Il giro D è aperto: due voci non provate, e tre riserve provate su un eseguibile che non
   le conteneva.** `D1` (l'exe su un PC senza runtime) e `R-b` (la barra delle Impostazioni a
   scala 150 %) su quella macchina non si sono potute fare. Le altre tre riserve stanno peggio
@@ -323,20 +328,24 @@ senza che si sia toccato niente. Resta quel che lo strumento di collaudo non sa 
   2026-08-27: lì stava dal 5 agosto con la condizione «quando l'app circolerà oltre il
   portfolio», e la revisione dichiara quel momento arrivato. *(cap. 13.6.)*
 
-- **Il `clic` dello strumento di collaudo dice «Premuto» anche quando non ha premuto**
-  *(2026-08-27)*. A 96 DPI le due trappole note sono sparite — la fotografia virtualizzata e
-  il clic che manca il bersaglio a scala 150 % — ma ne resta una terza, che col DPI non
-  c'entra: se il controllo è **fuori dallo schermo** (il «Chiudi» delle Impostazioni lo era,
-  145 pixel sotto il bordo) o se un'altra finestra è passata davanti fra una fotografia e il
-  clic, lo strumento porta il puntatore lì e riferisce un successo che non c'è stato.
-  Guardando le tre cose nuove è costato tre clic andati a vuoto e una diagnosi sbagliata
-  sfiorata. La ricetta che regge è già scritta nel README dello strumento: portare
-  l'applicazione davanti con ALT + `SetForegroundWindow` e **verificare** con
-  `GetForegroundWindow` prima di premere, rifiutandosi di premere quel che non è in vista.
-  Va insegnata a `clic`, che oggi non fa né l'una né l'altra cosa.
-  *(`strumenti/mcp-collaudi/server.mjs`.)*
-
 ## Chiuse
+
+- ✅ **Il `clic` che diceva «Premuto» senza aver premuto** *(aperta il 2026-08-27, **chiusa il
+  2026-08-29** insegnandogli a rifiutare)*. Adesso `clic`, `scrivi`, `scegli_voce` e
+  `scegli_riga` — tutti gli attrezzi che muovono il puntatore — prima di colpire pretendono il
+  **primo piano verificato** (colpo di ALT, `SetForegroundWindow`, controllo con
+  `GetForegroundWindow`, confronto sul **processo**) e che il **pixel da premere sia
+  dell'applicazione** (`WindowFromPoint`): se una delle due manca, dichiarano che **non** hanno
+  premuto e dicono perché. Provata dal vivo sull'applicazione vera — clic normale, clic con
+  un'altra finestra davanti, bottone spinto 540 pixel sotto il bordo dello schermo — e
+  **falsificata** rimettendo il codice di prima, che sullo stesso bottone risponde «Premuto»:
+  quel colpo, clampato al bordo da `SetCursorPos`, finisce sulla barra delle applicazioni, e
+  alla prova ha minimizzato l'applicazione. Per strada la cura ne ha stanati altri due, curati
+  con lei: `schermata` portava la finestra davanti senza verificarlo (adesso ci prova tre volte
+  e, se non ci riesce, **lo dichiara**) e non impostava l'`OutputEncoding`, così il suo primo
+  messaggio accentato usciva illeggibile. **Resta aperto** il caso del DPI alto, che è un'altra
+  cosa e non è coperto da queste guardie: sta scritto nel README dello strumento.
+  *(`strumenti/mcp-collaudi/`.)*
 
 - ✅ **Il prezzo di Sonnet 5 dopo il 31 agosto 2026** *(aperta il 2026-08-27, **chiusa il
   2026-08-28** guardando il listino)*. La scadenza non c'è più: la pagina dei prezzi

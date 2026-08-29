@@ -259,7 +259,9 @@ const ATTREZZI = [
     name: "schermata",
     description:
       "Cattura una schermata e la restituisce come immagine. Senza argomenti riprende la finestra di " +
-      "TrovaLavoro; con «schermo_intero» tutto il desktop. È il modo di guardare l'applicazione in faccia.",
+      "TrovaLavoro; con «schermo_intero» tutto il desktop. È il modo di guardare l'applicazione in faccia. " +
+      "Se non riesce a portarla davanti lo dichiara nella risposta: la fotografia riprende quel rettangolo " +
+      "dello schermo, e potrebbe mostrare la finestra che le sta sopra.",
     inputSchema: {
       type: "object",
       properties: {
@@ -323,7 +325,10 @@ const ATTREZZI = [
     name: "clic",
     description:
       "Preme un bottone o sceglie una scheda dell'applicazione, cercandolo per etichetta. Se il " +
-      "controllo è spento lo dice invece di fingere di averlo premuto.",
+      "controllo è spento lo dice invece di fingere di averlo premuto. E prima di premere pretende " +
+      "due cose: che l'applicazione sia davvero in primo piano (verificato, non solo chiesto) e che " +
+      "il punto da premere appartenga a lei — non fuori dallo schermo, non coperto da un'altra " +
+      "finestra. Se una delle due manca dichiara che NON ha premuto, e dice perché.",
     inputSchema: {
       type: "object",
       properties: {
@@ -342,7 +347,9 @@ const ATTREZZI = [
     description:
       "Scrive un testo in una casella dell'applicazione (per esempio l'annuncio da incollare in P4). " +
       "Se una casella non si lascia scrivere, il testo ci arriva incollato come lo incollerebbe una " +
-      "persona — appunti e Ctrl+V — così scattano gli eventi che accendono i bottoni.",
+      "persona — appunti e Ctrl+V — così scattano gli eventi che accendono i bottoni. Una casella di " +
+      "sola lettura lo dice; e quando passa dagli appunti valgono le stesse due pretese di «clic», " +
+      "perché un Ctrl+V dato alla finestra sbagliata scrive il testo a casa d'altri.",
     inputSchema: {
       type: "object",
       properties: {
@@ -363,7 +370,8 @@ const ATTREZZI = [
       "Sceglie una voce in un menù a tendina dell'applicazione — per esempio il portale in «Cerca su» " +
       "di P3. Lo apre e ci clicca dentro come farebbe una persona, così scattano gli eventi veri, e " +
       "poi verifica che il menù mostri davvero la voce chiesta. Senza «voce» non sceglie niente: " +
-      "elenca le voci che ci sono, con una freccia su quella di adesso.",
+      "elenca le voci che ci sono, con una freccia su quella di adesso. Come «clic», non sceglie al " +
+      "buio: se l'applicazione non viene davanti, o il punto non è suo, dichiara che non ha scelto.",
     inputSchema: {
       type: "object",
       properties: {
@@ -391,7 +399,8 @@ const ATTREZZI = [
       "per un pezzo di quello che c'è scritto nelle sue celle, non solo nella prima. Ci clicca sopra " +
       "come farebbe una persona, e poi verifica che risulti davvero scelta. Senza «testo» non sceglie " +
       "niente: elenca le righe che ci sono, con una freccia su quella di adesso. Con «doppio» fa il " +
-      "doppio clic, che nella coda apre la candidatura.",
+      "doppio clic, che nella coda apre la candidatura. Come «clic», non sceglie al buio: se " +
+      "l'applicazione non viene davanti, o il punto non è suo, dichiara che non ha scelto.",
     inputSchema: {
       type: "object",
       properties: {

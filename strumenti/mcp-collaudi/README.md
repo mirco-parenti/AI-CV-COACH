@@ -37,9 +37,14 @@ curl -s -X POST http://127.0.0.1:3300/mcp -H 'content-type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
-**Dopo aver toccato `server.mjs` o gli script il server va riacceso**, altrimenti
-continua a rispondere col codice di prima — e si finisce per diagnosticare una modifica
-che non è mai entrata in servizio. Si spegne **dalla porta**, non dal nome:
+**Dopo aver toccato `server.mjs` il server va riacceso**, altrimenti continua a
+rispondere col codice di prima — e si finisce per diagnosticare una modifica che non è mai
+entrata in servizio. Gli **script `.ps1`, invece, no**: il server li lancia da capo a ogni
+chiamata, e una modifica a `interfaccia.ps1` o a `schermata.ps1` è viva al comando
+successivo. *(Verificato il 2026-08-29 curando `clic`: le prove giravano su un server
+acceso da prima, e le modifiche si vedevano subito. Quel che il riavvio serve a rileggere
+sono le **descrizioni** degli attrezzi, che stanno in `server.mjs`.)* Il server si spegne
+**dalla porta**, non dal nome:
 
 ```bash
 fuser -k 3300/tcp && node strumenti/mcp-collaudi/server.mjs &
@@ -57,12 +62,12 @@ comando **uccide sé stesso** prima di arrivare al server.
 | `collaudi` | Fa girare il banco (`dotnet test`); con `filtro` ne esegue solo una parte. |
 | `avvia_app` | Avvia TrovaLavoro.exe con la chiave API presa dal `.env` del prototipo. Con `dati` lo fa partire su una **cartella usa-e-getta** (`--dati`), che è il modo di provare ciò che cancella senza toccare i dati veri. |
 | `stato_app` · `chiudi_app` | Se è viva; e la chiude. |
-| `schermata` | Riprende la finestra dell'applicazione (o tutto il desktop) e restituisce il PNG. |
+| `schermata` | Riprende la finestra dell'applicazione (o tutto il desktop) e restituisce il PNG. Se non riesce a portarla davanti lo **dichiara**: la fotografia riprende quel rettangolo di schermo, e potrebbe ritrarre la finestra che le sta sopra. |
 | `ridimensiona` | Cambia la misura della finestra, o la rimette massimizzata. È il modo di guardare i difetti di impaginazione che si vedono **solo stretti**. |
 | `controlli` | Elenca bottoni, caselle e schede dicendo per ciascuno se è **acceso o SPENTO**; dei menù a tendina dice anche **la voce che mostrano**, e marca `[pagina]` quel che è del sito aperto nel browser. |
-| `clic` · `scrivi` | Preme un controllo per etichetta; scrive in una casella. Se il controllo è spento lo dichiara invece di fingere. |
-| `scegli_voce` | Sceglie una voce in un menù a tendina — il portale in «Cerca su» — aprendolo e cliccandoci dentro come farebbe una persona, e poi verificando che il menù la mostri davvero. Senza la voce, le **elenca**. |
-| `scegli_riga` | Sceglie una riga di una lista — la coda delle candidature in P1 — cercandola per un pezzo di quel che c'è scritto **in una qualsiasi delle sue celle**, e verificando poi che risulti scelta. Senza il testo, le **elenca**; con `doppio`, fa il doppio clic (che nella coda apre la candidatura). |
+| `clic` · `scrivi` | Preme un controllo per etichetta; scrive in una casella. Se il controllo è spento — o la casella è di sola lettura — lo dichiara invece di fingere. **Prima di muovere il puntatore pretende due cose**: il primo piano *verificato*, e che il pixel da premere appartenga all'applicazione (non fuori schermo, non coperto). Se una manca, dice che **non** ha premuto e perché. |
+| `scegli_voce` | Sceglie una voce in un menù a tendina — il portale in «Cerca su» — aprendolo e cliccandoci dentro come farebbe una persona, e poi verificando che il menù la mostri davvero. Senza la voce, le **elenca**. Stesse due pretese di `clic` prima di ogni colpo di mouse. |
+| `scegli_riga` | Sceglie una riga di una lista — la coda delle candidature in P1 — cercandola per un pezzo di quel che c'è scritto **in una qualsiasi delle sue celle**, e verificando poi che risulti scelta. Senza il testo, le **elenca**; con `doppio`, fa il doppio clic (che nella coda apre la candidatura). Stesse due pretese di `clic` prima di ogni colpo di mouse. |
 | `rispondi_finestra` | Risponde a una finestra di messaggio premendo il bottone per nome («Sì», «No», «OK»). Senza il bottone **legge cosa chiede** e quali scelte dà, così si sa cosa si sta per confermare. |
 | `scegli_file` | Risponde alla finestra di scelta file che l'applicazione ha aperto: il file da prendere (anche in forma `/mnt/c/…`), oppure `annulla`. |
 | `cartella_dati` | Cosa l'applicazione ha scritto su disco: profilo, storico, opportunità, documenti. |
@@ -176,25 +181,42 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   al primo colpo. Alla conferma, invece, `rispondi_finestra` ha risposto benissimo: **legge e
   preme via UI Automation**, e il DPI non lo tocca. La regola pratica è quella: a DPI diverso
   da 96, degli attrezzi che muovono il puntatore non ci si fida, di quelli che passano da UI
-  Automation sì.
-
-- **`clic` dice «Premuto» anche quando il bersaglio è fuori dallo schermo.** *(2026-08-27,
-  guardando a occhio le tre cose nuove.)* È la terza sorella delle due voci qui sopra, e
-  l'unica che **col DPI non c'entra**: quel giorno lo schermo era al 100 % — `LogPixels` = 96
-  e `GetDpiForSystem` = 96 dopo `SetProcessDPIAware`, due misure indipendenti — e sia
-  `schermata` sia `clic` avevano ripreso a funzionare. Poi «Chiudi» delle Impostazioni non si
-  lasciava premere: due colpi, due «Premuto», nessun effetto. Il bottone stava a **y = 1177**
-  su un'area di lavoro alta 1032, cioè 145 pixel **sotto il bordo dello schermo**: lo
-  strumento ci ha portato il puntatore e ha riferito il successo. Un terzo clic è andato a
-  Esplora file, che era passato davanti fra una fotografia e l'altra. La regola pratica:
-  **prima di credere a un «Premuto», chiedere a `controlli` se è successo qualcosa**; e per
-  premere davvero, uno script che porta l'applicazione in primo piano con ALT +
-  `SetForegroundWindow`, **verifica** con `GetForegroundWindow` e solo allora clicca al centro
-  del rettangolo letto da UI Automation. Nota su ALT: senza quel colpo di tastiera Windows
-  rifiuta `SetForegroundWindow` a un processo che non è già davanti, e il primo tentativo
-  della giornata era fallito proprio così.
+  Automation sì. **Nota del 2026-08-29**: le due guardie nuove di `clic` (primo piano
+  verificato, pixel che appartiene all'applicazione) **non** coprono questo caso. A DPI alto
+  le coordinate virtualizzate cadono quasi sempre dentro la finestra lo stesso, solo su un
+  altro punto: `WindowFromPoint` risponde «è tua» e il colpo parte, addosso a un altro
+  controllo. Qui l'unica difesa resta quella scritta sopra — a DPI diverso da 96, degli
+  attrezzi che muovono il puntatore non ci si fida.
 
 ## Le trappole già pagate
+
+- **Il «Premuto» che non aveva premuto.** *(Trappola del 2026-08-27, guardando a occhio le
+  tre cose nuove; **curata il 2026-08-29**.)* Per tutta la sua vita `clic` aveva riferito un
+  successo ogni volta che **trovava** il controllo, qualunque cosa poi succedesse al colpo.
+  Quel giorno «Chiudi» delle Impostazioni stava a **y = 1177** su un'area di lavoro alta
+  1032 — 145 pixel **sotto il bordo dello schermo** — e due tentativi hanno risposto
+  «Premuto» senza che accadesse niente; un terzo è finito a Esplora file, passato davanti fra
+  una fotografia e l'altra. Col DPI non c'entrava nulla: lo schermo era al 100 %.
+
+  Adesso ogni attrezzo che muove il puntatore — `clic`, `scrivi`, `scegli_voce`,
+  `scegli_riga` — prima di colpire pretende **due cose**, e se una manca dichiara che non ha
+  premuto:
+  1. **il primo piano, verificato**: `SetForegroundWindow` preceduta da un **colpo di ALT**
+     (senza, Windows lo rifiuta a un processo che non è già davanti) e poi controllata con
+     `GetForegroundWindow`, fino a tre tentativi. Il confronto è sul **processo**, non sulla
+     singola finestra: una finestra di messaggio dell'applicazione è lei quanto la principale.
+  2. **che il pixel sia suo**: `WindowFromPoint` sul punto da premere, e di nuovo confronto
+     per processo. Una domanda sola copre i due modi di sbagliare bersaglio — il controllo
+     fuori dallo schermo e l'altra finestra passata davanti — e resta lecito il clic sui
+     popup che l'applicazione apre **fuori** dalla sua finestra, come la tendina di un menù.
+
+  Falsificata lo stesso giorno rimettendo il codice di prima: sullo stesso bottone spinto
+  fuori schermo risponde «Premuto «Backup…»», e il colpo — che `SetCursorPos` **clampa** al
+  bordo — finisce sulla **barra delle applicazioni**, dove alla prova ha minimizzato
+  l'applicazione. Non era soltanto un successo riferito a vuoto: era un clic a caso su
+  Windows. *(Il vecchio consiglio — «prima di credere a un “Premuto”, chiedi a `controlli`
+  se è successo qualcosa» — resta buono lo stesso: vale per tutto ciò che le due guardie
+  non possono vedere, a cominciare dal DPI alto qui sopra.)*
 
 - **Il primo `clic` su un bottone che apre una finestra non la apre** *(2026-08-21, T9b)*.
   Premendo «⚙ Impostazioni» su un'applicazione appena avviata lo strumento risponde
@@ -326,16 +348,21 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   **elenca quelli che l'attrezzo vuole**: è l'informazione con cui si rimedia al primo
   colpo, invece di indovinare. Chi parla col server via `curl` i nomi giusti li vede da
   `tools/list`, ed è lì che conviene guardare **prima**.
-- **La fotografia può ritrarre la finestra sbagliata.** *(2026-08-14, T5d.)* `schermata`
-  porta l'applicazione davanti e poi riprende **quel che sta davanti**: se il sistema non
-  le ha ancora dato il primo piano, quel che sta davanti è la finestra da cui si stava
-  lavorando — il terminale — e ne esce una fotografia che sembra un difetto
-  dell'applicazione mentre è solo la finestra sbagliata. Il rimedio è chiamarla **due
-  volte di fila** con `porta_in_primo_piano`: la seconda trova l'applicazione già davanti.
-  Non capita sempre — dipende da chi aveva il fuoco un attimo prima, e nella sessione del
-  14/08 la prima chiamata è andata a segno — ed è proprio l'intermittenza a renderla
-  insidiosa: prima di credere a quel che si vede, si guarda **di chi** è la finestra
-  fotografata.
+- **La fotografia può ritrarre la finestra sbagliata.** *(2026-08-14, T5d; **curata il
+  2026-08-29**.)* `schermata` porta l'applicazione davanti e poi riprende **quel che sta
+  davanti**: se il sistema non le ha ancora dato il primo piano, quel che sta davanti è la
+  finestra da cui si stava lavorando — il terminale — e ne esce una fotografia che sembra un
+  difetto dell'applicazione mentre è solo la finestra sbagliata. Il rimedio era chiamarla
+  **due volte di fila**; adesso lo fa lo script, con la stessa ricetta di `clic` — colpo di
+  ALT, `SetForegroundWindow`, verifica con `GetForegroundWindow`, fino a tre tentativi — e se
+  proprio non ci riesce **lo scrive nella risposta**, dicendo chi è rimasto davanti. Resta
+  vero il vecchio consiglio, perché la fotografia arriva comunque: prima di credere a quel
+  che si vede, si guarda **di chi** è la finestra ritratta.
+
+  *(Curandola è saltato fuori un secondo difetto, invisibile finché lo script non ha avuto
+  una parola con l'accento da scrivere: `schermata.ps1` non impostava l'`OutputEncoding`, e
+  il primo messaggio accentato è uscito «l� c'� rimasta». Adesso ce l'ha, come
+  `interfaccia.ps1`.)*
 - **Il caso stretto non si ricava da quello largo.** *(2026-08-14, misurando la fascia dei
   comandi di P2.)* Sotto i **1350 px** di larghezza il pannello del logo passa in modalità
   compatta e si stringe da 261 a 130 px: la fascia dei comandi comincia a 142 invece che a
