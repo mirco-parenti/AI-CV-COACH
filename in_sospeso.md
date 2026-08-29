@@ -301,10 +301,11 @@ prezzo di Sonnet 5 si è sciolta guardandola tre giorni prima che scadesse — i
 diventati il listino, l'aumento del primo settembre non avverrà — e la voce è in «Chiuse»
 senza che si sia toccato niente. Resta quel che lo strumento di collaudo non sa ancora fare.
 
-**Aggiornamento del 2026-08-29**: delle voci nuove **non ne resta nessuna**. Il `clic` che
-diceva «Premuto» senza aver premuto è curato e in «Chiuse», insieme a due difetti che la sua
-cura ha stanato per strada. Qui sotto restano perciò **soltanto le due che non dipendono da
-noi**: il giro D da rifare sulla macchina del tutor, e il certificato per la firma.
+**Aggiornamento del 2026-08-29**: il `clic` che diceva «Premuto» senza aver premuto è curato
+e in «Chiuse», insieme a due difetti che la sua cura ha stanato per strada. Al suo posto ne
+nasce una sola, più stretta — la **sorella cattiva col DPI alto**, che quella cura non copre e
+che qui non si può provare — così sotto restano le due che non dipendono da noi (il giro D e
+il certificato per la firma) più quella.
 
 - ⚠ **Il giro D è aperto: due voci non provate, e tre riserve provate su un eseguibile che non
   le conteneva.** `D1` (l'exe su un PC senza runtime) e `R-b` (la barra delle Impostazioni a
@@ -327,6 +328,20 @@ noi**: il giro D da rifare sulla macchina del tutor, e il certificato per la fir
   API — brucia la fiducia prima ancora dell'avvio. **Migrata da `idee_future.md`** il
   2026-08-27: lì stava dal 5 agosto con la condizione «quando l'app circolerà oltre il
   portfolio», e la revisione dichiara quel momento arrivato. *(cap. 13.6.)*
+
+- **A DPI alto il `clic` dello strumento di collaudo manca ancora il bersaglio**
+  *(annotata il 2026-08-29, la trappola è del 2026-08-23)*. È la sorella della voce chiusa
+  oggi, e le due guardie nuove **non** la coprono: lo script non si dichiara DPI-aware,
+  così a 150 % le coordinate che `SetCursorPos` riceve vengono virtualizzate e il colpo
+  cade dentro la finestra lo stesso, solo su un altro punto — `WindowFromPoint` risponde
+  «è tua» e nessuno si accorge di niente. La cura sarebbe di tre righe
+  (`SetProcessDPIAware` all'avvio dello script), ma **provarla vuole una macchina a 150 % e
+  una disconnessione** — il DPI di sistema non cambia senza — e non si tocca ciò che a 96
+  DPI funziona senza poterlo collaudare: è per questo che oggi è rimasta fuori. Fino ad
+  allora vale la regola scritta nel README dello strumento: a DPI diverso da 96 non ci si
+  fida degli attrezzi che muovono il puntatore, mentre quelli che passano da UI Automation
+  (`controlli`, `rispondi_finestra`) vanno benissimo.
+  *(`strumenti/mcp-collaudi/interfaccia.ps1`; README dello strumento.)*
 
 ## Chiuse
 
