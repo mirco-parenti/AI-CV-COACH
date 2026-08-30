@@ -46,13 +46,16 @@ funzionare.
 2. **Al primo doppio clic Windows può avvisarti** che «il PC è protetto» e che
    l'applicazione non è riconosciuta. Succede a ogni programma non firmato con un
    certificato commerciale. Per procedere: *Ulteriori informazioni* → *Esegui comunque*.
-3. **Si apre l'informativa**: che cosa esce dal tuo PC, che cosa no, dove restano i dati,
+3. **Compare la schermata di avvio** — il marchio del programma — e resta qualche secondo,
+   il tempo di leggerla, mentre TrovaLavoro si prepara. Non c'è niente da fare: se c'è
+   qualcosa da chiederti se ne va da sola, senza farti aspettare.
+4. **Si apre l'informativa**: che cosa esce dal tuo PC, che cosa no, dove restano i dati,
    che spesa comporta. Compare **una volta sola**, ed è il momento giusto per leggerla:
    subito dopo il programma ti chiede la chiave. La ritrovi quando vuoi da *Informazioni* o
    dalle *Impostazioni*.
-4. **Incolli la chiave API** e premi «Prova la chiave»: in due secondi sai se funziona,
+5. **Incolli la chiave API** e premi «Prova la chiave»: in due secondi sai se funziona,
    senza consumare niente. Se non ce l'hai ancora, il paragrafo dopo dice come si prende.
-5. **Racconti il tuo profilo.** Due strade, e la seconda è più veloce: rispondere alle
+6. **Racconti il tuo profilo.** Due strade, e la seconda è più veloce: rispondere alle
    domande del programma, oppure dargli un **CV che hai già** (anche in PDF) e lasciare che
    lo legga. Poi controlli quel che ha capito e correggi.
 

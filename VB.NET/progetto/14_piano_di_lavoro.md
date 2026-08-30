@@ -1295,6 +1295,41 @@ Restano aperte **due** voci, e nessuna delle due dipende da noi: il **giro D da 
 sull'eseguibile giusto (§13.10) e la **firma del codice** (§13.6). Il tag `v1.0` aspetta la
 prima. Niente prompt toccati: **Pool 1.13** e versione **1.0.000** restano dove erano.
 
+*Dopo T9 — **quel che ha trovato l'occhio, e il marchio** (2026-08-27 → 2026-08-30).* Tre
+giornate senza tappa e senza rilascio, che il piano registra perché due di esse hanno toccato
+il prodotto.
+
+- **Le tre novità del giro D guardate a occhio** *(27 agosto)*, subito dopo averle costruite.
+  Erano provate al banco e mai **viste**, ed è uscito quel che nessun collaudo poteva vedere:
+  la tendina dei modelli che mostrava lo stesso modello **due volte** — e il conto della spesa
+  che per la stessa ragione non prezzava le chiamate del predefinito (cap. 02.5) — la riga del
+  copyright che copriva un bottone di «Informazioni» rendendolo **non premibile**, il `404` di
+  GitHub raccontato come guasto invece che come «non c'è ancora nessuna versione pubblicata»
+  (cap. 13.8), e il «Chiudi» delle Impostazioni nato **sotto il bordo** dello schermo
+  (cap. 03.4). Tutti curati: **1257 collaudi verdi** (erano 1243), ed è il numero a cui il
+  banco è fermo da allora.
+- **Due giornate sullo strumento di collaudo** *(29 agosto)*, non sul prodotto: `clic` che
+  rispondeva «Premuto» senza aver premuto, e le due liste affiancate di «Modifica i testi», di
+  cui l'attrezzo ne guidava una sola. Il prodotto non è stato toccato; quel che si è imparato
+  vive nel `README.md` dello strumento.
+- **Il marchio e l'eseguibile di riferimento** *(30 agosto)*. Dentro la cornice del marchio
+  entra la **girella a spicchi**, e poco dopo il **filetto giallo tre volte più spesso**
+  (`immagini/LEGGIMI.md`, `prompt-logo.md`); la **schermata di avvio** resta a video **cinque
+  secondi** (cap. 03.4). Nasce l'**eseguibile di riferimento** sul Desktop — uno solo, per chi
+  costruisce e per chi prova — con `strumenti/aggiorna-riferimento.bat`, che lo rifà con i
+  parametri di rilascio del 13.2 (cap. 13.7); e con lui si scopre che in `publish.bat` un
+  `git -C "%~dp0"` non ha mai funzionato, tenendo **spente due guardie** del rilascio — il
+  timbro del commit dentro l'eseguibile e l'avviso «ci sono modifiche non committate» (13.9).
+  Nessun rilascio ne era uscito mal etichettato, verificato invece che supposto.
+
+*Nello stesso 30 agosto le cartelle dati di prova hanno smesso di contenere dati veri: profilo,
+candidature e documenti sono ora quelli di una persona inventata. Non tocca il repo — quelle
+cartelle vivono in `%APPDATA%` — ma è la condizione che rende mostrabile una schermata.*
+
+Versione **1.0.000** e **Pool 1.13** restano dove erano: nessun prompt è stato toccato dal 24
+agosto. Le due voci aperte dal giro D — rifarlo sull'eseguibile giusto e la firma del codice —
+restano tali, e con la prima aspetta ancora il tag `v1.0`.
+
 
 ## Ordine e dipendenze
 

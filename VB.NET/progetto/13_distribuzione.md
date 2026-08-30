@@ -211,6 +211,20 @@ VB.NET/
   *E a **T9b** (2026-08-21) si è deciso che nelle Impostazioni non ci andrà mai: il
   manifest sta nel repo, non nella cartella dati, e un exe distribuito non avrebbe nulla di
   utile da sigillare (cap. 04.5). Questo strumento non è più un anticipo: è il posto.*
+  *Dal **2026-08-30** gli attrezzi sono **cinque**, e due meritano una riga qui perché
+  toccano proprio questo capitolo.* **`aggiorna-riferimento.bat`** rifà in una manciata di
+  secondi l'**eseguibile di riferimento** — un file unico e autonomo sul Desktop, con **gli
+  stessi parametri del 13.2** — e alla fine ne stampa l'identità: versione, commit,
+  dimensione, SHA-256. Nasce perché fino a lì «l'eseguibile su cui si prova» erano due file
+  diversi che nessuno confrontava, e chiude quella distanza nel modo più semplice: dallo
+  stesso working tree le due ricette danno un eseguibile **identico bit per bit**, quindi il
+  riferimento non somiglia al rilascio, *è* il rilascio in un'altra cartella. La sua
+  compilazione intermedia va in **`%TEMP%`** e non in `bin\Release`, dove il server MCP del
+  prodotto tiene bloccato il proprio eseguibile: è quel dettaglio che permette di rifare il
+  riferimento senza spegnere il server. Accanto stanno **`avvia-demo.bat`**, che lancia
+  quello stesso file per mostrare l'applicazione dal vivo, e **`collauda-copioni/`**, il
+  banco dei due script di `LettorePagina` provati su DOM finti (cap. 06.4). Come gli altri,
+  nessuno di loro entra in una pubblicazione.*
 - Build di sviluppo da Visual Studio (o `dotnet build` da riga di comando Windows);
   collaudi con `dotnet test` da `VB.NET/src` (cap. 14).
 - Lo script `publish.bat` in `src/` produce l'exe di rilascio con i parametri del
@@ -274,9 +288,12 @@ dell'eseguibile vero, che nessun collaudo automatico copre.*
 4. **Il banco intero, prima di pubblicare.** `dotnet test` da `VB.NET/src`: il
    `collaudi.runsettings` dichiarato nel progetto tiene già fuori i collaudi che vogliono
    l'API vera, quindi il comando nudo è quello giusto. Non si pubblica una versione che non
-   è stata provata. *Se il **server MCP del prodotto** è vivo (modalità `--mcp`, cap. 09)
-   tiene bloccato l'eseguibile e la compilazione si ferma: va chiuso per PID prima di
-   cominciare, sapendo che i suoi tool spariranno fino al riavvio del client.*
+   è stata provata. *Il **server MCP del prodotto** (modalità `--mcp`, cap. 09) tiene
+   bloccato l'eseguibile della configurazione da cui è stato avviato: il comando qui sopra
+   compila in **Debug** e quindi convive con lui, mentre una compilazione in **Release** —
+   `dotnet test -c Release`, o l'attrezzo `collaudi` — si ferma contro quel file. In quel
+   caso va chiuso per PID prima di cominciare, sapendo che i suoi tool spariranno fino al
+   riavvio del client. Il publish del passo 6 non ha lo stesso problema: scrive altrove.*
 5. **La cartella di pubblicazione si svuota prima.** Altrimenti «un solo file» non è una
    verifica ma un'ispezione su una cartella già sporca: un `.pdb` o un `.xml` rimasto da un
    publish precedente passerebbe per assenza di problema. Il vincolo del 13.2 si prova solo

@@ -11,9 +11,15 @@ questo prompt genera ha, dentro la cornice, un fondo blu piatto; da oggi quel fo
 è sostituito in post-produzione con una **girella a spicchi** rosso `#FA0825` e argento
 `#C0CFCB`, tagliata sulle diagonali dello scudetto Aviolab e centrata sulla moneta. Il blu
 resta dov'era — cornice, fasce laterali, fondo del lettering — ed è quello dello stemma
-(`#0B06B0`), non più il blu notte `#000C38` che alla tavolozza non apparteneva. Chi
-rigenera il disegno da questo prompt ottiene perciò il disegno **prima** della lavorazione;
-la sorgente già lavorata, da cui nascono tutti i formati, è
+(`#0B06B0`), non più il blu notte `#000C38` che alla tavolozza non apparteneva.
+Nella stessa giornata la lavorazione ha fatto un secondo passo: il **filetto giallo**
+`#E2E44E` che corre dentro la cornice è stato portato a **tre volte** il suo spessore,
+cresciuto solo verso l'interno — il bordo esterno del disegno non si sposta di un pixel, e
+dove le maniche tagliano la cornice il filetto resta interrotto com'era. I numeri esatti e
+il metodo stanno in [`../../immagini/LEGGIMI.md`](../../immagini/LEGGIMI.md), che è la
+casa della lavorazione. Chi rigenera il disegno da questo prompt ottiene perciò il disegno
+**prima** della lavorazione — di **tutta** la lavorazione, girella e filetto; la sorgente
+già lavorata, da cui nascono tutti i formati, è
 [`../../immagini/MASTER-solo-disegno-1536x1024.png`](../../immagini/MASTER-solo-disegno-1536x1024.png).
 
 ---

@@ -385,6 +385,20 @@ giudice per la prima volta.
   larghezza vera dei due bottoni del brainstorming. Resta l'idea com'era — **estenderlo a tutti
   i pannelli**: oggi la misura c'è dove il difetto è stato visto, non dove potrebbe ripresentarsi.
 
+- **Il seme del profilo di prova versionato accanto agli altri casi** — il CV finto da cui si
+  rifà in un minuto il profilo di prova (Crash Bandicoot) vive in `C:\Temp`, fuori dal repo: se
+  quella cartella si svuota, il profilo si rifà a mano leggendo il diario. Accanto ci sarebbe
+  già il posto giusto — `casi/giro-d/cv_luca_ferrari.pdf` è esattamente la stessa cosa, fatta
+  bene: un dato finto e parlante, versionato, che chiunque può rimettere in circolo. Costa un
+  file e nessuna riga di codice. *(2026-08-30 — emersa ripulendo le cartelle dati, Step 2.56.)*
+- **Un attrezzo che ripulisca una cartella dati dai dati veri** — la ripulitura del 30 agosto è
+  stata fatta con uno script usa-e-getta, e le quattro trappole che ha pagato per strada — gli
+  escape del JSON che si mangiano una lettera, i confini di parola che non scattano dopo `\n`,
+  l'underscore che è carattere di parola, il protocollo preteso in un link che non ce l'ha —
+  sono esattamente quelle che si ripagherebbero la volta dopo. Se dovesse servire ancora (una
+  cartella nuova, una demo da preparare, una macchina da consegnare) vale la pena che stia in
+  `strumenti/` col suo caso di prova, invece che in `C:\Temp`. *(2026-08-30 — Step 2.56.)*
+
 ## Realizzate
 
 Idee del backlog ormai costruite. Si tengono qui (con il puntatore a dove sono narrate o

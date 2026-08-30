@@ -2682,3 +2682,93 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **La ricetta del logo si annota, non si riscrive.** Il prompt che genera il disegno non è cambiato: è cambiato quel che gli si fa dopo. Perciò `prompt-logo.md` prende una revisione in testa che dice esattamente questo, e chi lo rigenerasse sa che otterrà il disegno *prima* della lavorazione.
 
 > 💡 **Il marchio non stava dove pensavo che stesse.** Credevo di dover cambiare due immagini; erano tre file, una costante di codice e due testi che lo descrivevano — e la costante era la sola che, restando indietro, si sarebbe vista a occhio nudo al primo avvio dell'applicazione. Le cose che un progetto ripete in due posti si scoprono quando una delle due cambia: fino a quel giorno sono d'accordo per caso.
+
+
+### Step 2.54 — Un filetto tre volte più spesso, e cinque secondi per leggerlo
+
+*Due richieste fatte insieme, e che stanno insieme: il filetto giallo dentro la cornice del marchio era troppo sottile perché si notasse, e la schermata di avvio passava troppo in fretta perché la si potesse guardare. Ingrossare una riga sembrava il compito da due minuti della giornata; è quello che mi ha fatto pagare due difetti, tutti e due perché il disegno non è fatto di colori piatti come credevo.*
+
+**Cosa ho fatto**
+- **Ho ingrossato il filetto da 6-7 pixel a 20-21**, sulla sorgente a 1536×1024, facendolo crescere **solo verso l'interno**: il bordo esterno del disegno non si è mosso di un pixel. Dove le maniche della tuta tagliano la cornice a mezza altezza la crescita si ferma da sé, così la riga resta interrotta esattamente com'era.
+- **Ho preteso una prova, non un'impressione**: 63.750 pixel cambiati, di cui 62.894 blu della cornice e 856 il filo scuro di antialias fra riga e blu — zero imprevisti. Spessore minimo 20 px su tutti e quattro i lati.
+- **Ho rigenerato i formati dal disegno nuovo** con lo stesso compositore dello Step 2.53, validato prima come allora: dandogli la sorgente vecchia restituisce la testata del README e lo splash già committati, bit per bit. Cambiano tre file — la sorgente, la testata, e lo splash **dentro l'eseguibile**, che è una risorsa compilata e quindi vuole una build.
+- **Ho portato `FinestraAvvio.MinimoAVideo` da 1500 ms a 5 secondi**, e l'ho **misurato sull'applicazione viva** invece di dedurlo: comparsa a 0,47 s, sparita a 5,47 s — 5,00 s a video. Lo splash fotografato dall'eseguibile ricompilato mostra la riga nuova.
+- **Ho corretto il cap. 03.4**, che diceva che la schermata viene congedata «un secondo prima della sua scadenza»: con il minimo nuovo non era più vero. E `immagini/LEGGIMI.md` annota il filetto accanto alla girella dello stesso giorno.
+- **Provato**: banco a **1257 verdi**, 0 falliti.
+
+**Cosa ho imparato**
+- **Il filo scuro non è sempre scuro.** Fra la riga gialla e il blu c'è un filo di antialias che credevo quasi nero; alcuni suoi pixel arrivano a 90-95 su un canale, e una soglia fissata a 90 fermava la crescita lasciando striature blu **dentro** la riga. La regola che funziona non guarda il colore ma la **sottigliezza**: un filo si attraversa solo se il blu della cornice ritorna entro tre pixel — dentro una manica non ritorna mai.
+- **I bottoni dorati del polsino passavano per riga gialla.** Con una tolleranza di 40 il loro `(245,187,45)` rientrava nel giallo del filetto, e si sono ritrovati ridipinti. La riga è un colore piatto esatto: la tolleranza va tenuta stretta, e il fatto che una tolleranza generosa «funzioni» sulla riga non dice niente su cosa altro sta raccogliendo per strada.
+- **Il minimo a video non è un ostaggio.** Cinque secondi sono tanti se c'è qualcosa da chiedere all'utente: il minimo continua a cedere il passo, e al primo avvio la finestra della chiave API manda via la schermata subito, come prima.
+
+**Dove ho faticato**
+- **Le prime due passate le ho buttate**, e tutte e due per lo stesso motivo: avevo descritto il disegno come se fosse fatto di campiture piatte. Non lo è — è un'illustrazione con antialias dappertutto, e ogni regola scritta sul colore ha un'eccezione da qualche parte nell'immagine. Le regole che hanno retto sono quelle scritte sulla **forma** (quanto è sottile, da che parte cresce), non sulla tinta.
+
+**Cosa ho deciso e perché**
+- **Crescere solo verso l'interno, mai verso l'esterno.** Il bordo esterno del disegno è il punto in cui il marchio incontra tutto il resto — la testata del README, lo splash, l'icona: spostarlo di un pixel avrebbe voluto dire rifare i conti di tutti i formati. Verso l'interno c'è solo il blu della cornice, che è mio.
+- **Contare i pixel cambiati, non guardare il risultato.** «Sembra giusto» su un'immagine è un'affermazione che non si può falsificare. 62.894 blu e 856 filo, e nient'altro, sì.
+
+> 💡 **Un'immagine non si modifica: si modifica un elenco di pixel che si crede di aver capito.** Le due volte che ho sbagliato avevo in mente il disegno come lo vedo io — riga gialla, cornice blu, contorno nero — mentre il file è pieno di sfumature intermedie che appartengono ora all'una ora all'altra cosa. Il conto finale, per categoria, non serve a documentare il lavoro: serve a scoprire che si stava ridipingendo un bottone.
+
+
+### Step 2.55 — Un eseguibile solo, sul Desktop, e la riga di git che non ha mai parlato
+
+*Fino a oggi due file si chiamavano `TrovaLavoro.exe`: quello di `bin/Release`, che è quello su cui giravano le prove, e quello che aprivo a mano quando non c'era nessuna sessione in corso. Niente diceva se fossero la stessa versione. Adesso ne esiste uno solo, sul Desktop, e lo usano tutti e due i lati. Cercando di farlo, ho trovato una riga di `.bat` che non ha mai funzionato — e che zittiva proprio le due guardie messe lì per impedire un rilascio senza identità.*
+
+**Cosa ho fatto**
+- **Ho scritto `strumenti/aggiorna-riferimento.bat`**: rifà l'eseguibile di riferimento sul Desktop in circa sei secondi, file unico e autonomo, con il runtime .NET dentro e gli stessi parametri di rilascio del cap. 13.2 — 113 MiB.
+- **Gli ho fatto stampare l'identità alla fine**: versione, commit, dimensione, SHA-256. Un numero di versione è un'etichetta scritta a mano, e due file diversi hanno già portato lo stesso «1.0.000».
+- **Ho puntato lì lo strumento di collaudo**: `compila` chiama quello script invece di far girare `dotnet build`, e `avvia_app` lancia quel che ha prodotto — verificato leggendo il percorso del processo vivo, non fidandomi. Anche `avvia-demo.bat` lancia quello.
+- **Ho spostato la compilazione intermedia in `%TEMP%`**, fuori da `bin/Release`. Quel file è proprio quello che il server MCP del prodotto tiene bloccato, ed era il motivo per cui `compila` non si poteva chiamare senza sacrificare i tool della sessione. Adesso si può.
+- **Ho tolto la chiusura per nome** da `compila` e `chiudi_app`: passano da `chiudi-finestre.ps1`, che legge la riga di comando e risparmia chi ha `--mcp`. **Falsificato con una finestra davvero aperta**: la finestra si è chiusa, il server è rimasto vivo.
+- **Ho corretto `publish.bat`** e ho verificato che nessun rilascio ne fosse uscito storto.
+
+**Cosa ho imparato**
+- **`git -C "%~dp0"` non ha mai funzionato, e falliva in silenzio.** La variabile `%~dp0` finisce con una barra rovescia: dentro le virgolette quella barra si mangia la virgoletta di chiusura, git riceve un percorso malformato, fallisce senza dire niente, e il ciclo `for` che doveva raccoglierne l'uscita non assegna nulla. Scritto col punto — `git -C .` — funziona: provato da quella cartella, `[]` prima contro `[a0507f2]` dopo.
+- **Zittiva due guardie in una volta sola**: il commit timbrato dentro l'eseguibile e l'avviso «ci sono modifiche non committate». Cioè esattamente i due controlli che esistono per fermare un rilascio senza identità. Un difetto che disattiva i controlli è peggio di un difetto che rompe una funzione: la funzione rotta si vede, il controllo spento no.
+- **Nessun rilascio è però uscito mal etichettato**, e me ne sono accertato invece di supporlo: l'unico eseguibile in `pubblicazione/` è del 24 agosto, tre giorni prima che il timbro esistesse. L'ho rimesso intatto dopo la prova a fondo — stesso SHA-256, stessa dimensione, stessa data.
+- **Il riferimento non «assomiglia» al rilascio: è lo stesso file.** Dallo stesso working tree le due ricette producono un eseguibile identico bit per bit, SHA-256 `99d178e2…`. Un controllo incrociato che vale la pena rifare ogni volta che una delle due cambia.
+
+**Dove ho faticato**
+- **`collaudi` chiude ancora per nome, e non ho potuto curarlo qui.** Fa `dotnet test -c Release`, che ricompila proprio il file che il server MCP tiene bloccato: finché la compilazione dei collaudi vive in `bin/`, quel server va spento. Ho preferito scriverlo nel README dello strumento piuttosto che deciderlo di nascosto dentro il codice.
+
+**Cosa ho deciso e perché**
+- **Un solo eseguibile, e sul Desktop.** Non in `bin/Release`, che è terra della compilazione e viene sovrascritta; non in `pubblicazione/`, che è la cartella dei rilasci veri. Sul Desktop è dove lo aprirei comunque a mano, ed è l'unico posto in cui «quello che provo io» e «quello che prova l'assistente» non possono divergere senza che me ne accorga.
+- **L'identità stampata a ogni ricostruzione.** Costa una riga e toglie di mezzo la domanda «ma questo exe è aggiornato?», che negli ultimi giorni mi sono fatto tre volte.
+
+> 💡 **Le due guardie del rilascio erano spente da sempre, e nessun collaudo poteva accorgersene.** Non c'era un rosso da guardare: c'era un `for` che non assegnava, e un timbro che restava vuoto. L'ho trovato solo perché stavo riusando lo stesso idioma altrove e mi sono chiesto se funzionasse davvero — cioè per lo stesso motivo per cui il cap. 16 delle regole dice di rileggere quel che una tappa aveva *promesso*: le cose che non fanno rumore non le trova nessuno che stia guardando altrove.
+
+
+### Step 2.56 — I dati di prova senza più nessuno dentro, e le quattro volte che un a-capo mi ha ingannato
+
+*Ieri il profilo di prova è diventato Crash Bandicoot, e credevo che la faccenda finisse lì. Invece «elimina profilo» tocca solo il profilo: i miei dati veri erano ancora dentro le candidature, i documenti, i backup — e in sette cartelle, non due. Ripulirle è stato un lavoro da sostituzioni cieche, cioè il genere di lavoro che riesce quasi sempre e che quando fallisce non lo dice.*
+
+**Cosa ho fatto**
+- **Ho censito prima di toccare.** Sette cartelle dati, non le due che ricordavo. E la sorpresa: i dati veri dentro le candidature non erano di Riccardo ma **miei** — nome, email, telefono, città, in 6 CV, 6 lettere, 2 email e in `documenti.json`, ripetuti identici in tre cartelle. Di Riccardo erano il profilo di R7 e quello dentro i backup.
+- **Ho fatto una copia di sicurezza** delle sette cartelle in `C:\Temp` prima di qualunque modifica, ed è servita.
+- **Ho anonimizzato 78 file JSON** in tre cartelle: 516 sostituzioni fra nome, cognome, due email, due telefoni, città, sito e i nomi dentro gli allegati. I contatti diventano quelli di Crash Bandicoot; i **testi restano quelli veri**, perché è il nome che identifica, non il mestiere.
+- **Ho riscritto `documenti.json` da capo** invece di anonimizzarlo: conteneva i percorsi dei documenti d'identità e dei codici fiscali, miei e di Riccardo. Adesso ha 13 voci finte e parlanti — Crash e Coco Bandicoot — con le stesse categorie e gli stessi motivi di prima.
+- **Ho eliminato 62 documenti esportati** (`.docx`, `.pdf`, `.eml`): il nome vero stava anche nel nome del file, e un `.docx` non si corregge con una sostituzione di testo. Si riesportano dall'applicazione senza spendere una chiamata all'AI.
+- **Ho messo il profilo Crash in tutte e tre le cartelle**, produzione compresa — che dal 29 agosto era rimasta **senza profilo**, e il diario tecnico lo diceva: `FileNotFoundException … profilo.json`, ore 18:32:36.
+- **Ho eliminato quattro cartelle di collaudi chiusi** (T7a, T7b, T7c, il backup di T5d): 88 MB, quasi tutti cache del browser incorporato, e quattro copie del mio profilo.
+- **Ho eliminato le tre candidature TM PEDANE e i due backup del 21 agosto**, che portavano dentro il CV di Riccardo con la descrizione di TTR-SUITE — la sola cosa in tutta la faccenda coperta dalla regola 10. Le voci corrispondenti sono uscite anche dal registro: 10 → 7.
+- **Ho creato `C:\Temp\Documenti-di-prova`** con 13 file finti e PDF veri, così la cartella che `documenti.json` dichiara esiste davvero e l'applicazione non protesta più.
+- **Provato dal vivo**, con l'applicazione vera su R6: profilo Crash Bandicoot, sette candidature in elenco, confronto, 🎯 CV-2 e lettera leggibili. Nessuna chiamata all'AI spesa.
+
+**Cosa ho imparato**
+- **Nel JSON un a-capo è la coppia di caratteri `\` `n`, e questo mi ha ingannato quattro volte di fila.** *Uno*: la classe di caratteri davanti all'email si è mangiata la `n` dell'escape, lasciando una barra rovescia spaiata — nove file non erano più JSON validi. *Due*, ed è il peggiore: `\b` non scatta fra la `n` di `\n` e la `M` di `Mirco`, perché sono due caratteri di parola attaccati; così `\r\nMirco Parenti` non veniva riconosciuto come nome+cognome, passava solo la regola sul cognome, e restava **`Mirco Bandicoot`** in un file perfettamente valido. *Tre*: anche l'underscore è carattere di parola, e nei nomi degli allegati — `CV_Mirco_Parenti_…` — il confine non c'era. *Quattro*: pretendevo `https://` e nel campo link c'era `www.aviolab.ai`.
+- **Il controllo che il file sia valido non vede il difetto peggiore.** I nove file rotti li ha trovati subito; i dodici nomi rimasti in chiaro stavano in file validissimi, e li ha trovati solo il secondo controllo — fatto con un metodo diverso, cercando le parole invece di rileggere lo script.
+- **Anonimizzare i contatti non anonimizza il contenuto.** Tolti nome, email e telefono, il CV di TM PEDANE restava il curriculum di Riccardo, con dentro brevetto e architettura di TTR-SUITE. Fuori dal repo non viola niente; in uno screenshot per il diario o per la demo sarebbe una pubblicazione.
+- **La cura si prova rompendola.** Prima di applicare le sostituzioni ho verificato che, togliendo la protezione degli escape, il difetto **ritorni**: se non tornasse, il collaudo sarebbe verde per il motivo sbagliato. E che senza regole il testo torni identico su tutti e 169 i file, così una passata a vuoto non muove un byte.
+
+**Dove ho faticato**
+- **La prima versione dello script l'ho lanciata sul serio prima di provarla su un caso scritto a mano.** Ha rotto nove file, e li ho rimessi dalla copia di sicurezza in un secondo — ma la copia me l'ero fatta per prudenza, non perché sapessi cosa stavo per fare. Il caso di prova costava tre righe e sarebbe arrivato prima del danno.
+- **Il secondo controllo l'ho scritto con lo stesso difetto del primo.** Cercando «qualunque email diversa da quella finta» mi ha risposto `ncrash.bandicoot@esempio.it`: la stessa `n` di prima. Non era un dato vero, ma per un momento l'ho creduto.
+
+**Cosa ho deciso e perché**
+- **I testi restano veri, i contatti no.** Rigenerare tutto con Crash Bandicoot sarebbe costato una settantina di chiamate all'AI per riavere quel che ho già: candidature in stati diversi, alcune ferme al confronto e altre complete, che è precisamente ciò che le rende utili come banco di prova.
+- **Le TM PEDANE però via.** Lì il contenuto non era il mio mestiere ma quello di un'altra persona, e conteneva materiale che la regola 10 tiene fuori dal repo. Sette candidature bastano.
+- **Anche i due backup del 21 agosto via**, benché fossero il solo dato di prova per il ripristino: contenevano il profilo intero di Riccardo, e tenerli avrebbe reso vano tutto il resto. Un backup nuovo si rifà dall'applicazione in dieci secondi, e sarà coerente con Crash.
+- **La cartella di produzione la tratto come le altre.** Non ci lavoro più davvero da settimane, e tenerla «vera» significava solo tenere i miei dati in un posto che apro per sbaglio.
+
+> 💡 **«Elimina profilo» elimina il profilo, e questo non è un difetto: è che io leggevo quella parola come «elimina i miei dati».** Il profilo è una cosa sola in una cartella; i dati veri erano già colati nelle candidature il giorno in cui le avevo generate, nei documenti esportati, nei backup, in un `documenti.json` che si portava dietro i nomi dei file dei documenti d'identità. La domanda giusta non era «dov'è il profilo», era **«chi ha copiato il profilo, e quando»** — ed è la stessa domanda che il 29 agosto aveva trovato il colore vecchio nascosto in una costante.

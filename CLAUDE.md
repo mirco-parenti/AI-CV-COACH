@@ -37,7 +37,8 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    (progetto *e* codice), `strumenti/` (gli attrezzi di sviluppo, dal 2026-08-10),
    `immagini/` (gli asset del marchio, dal 2026-08-22), `README.md`,
    `GUIDA.md` (la guida per chi usa il programma, dal 2026-08-27),
-   `diario_di_bordo.md`, `idee_future.md`, `in_sospeso.md`, questo
+   `LICENSE` e `.github/workflows/` (dal 2026-08-26), `diario_di_bordo.md`,
+   `idee_future.md`, `in_sospeso.md`, questo
    `CLAUDE.md` e ogni altra regola o documentazione di progetto che nascerà.
    **`HTML+JS/` è fuori dal rito** *(dal 2026-08-06)*: il prototipo è congelato, non è
    più la fase in cui lavoro, e riverificarlo a ogni giro costerebbe senza rendere. Si

@@ -347,6 +347,35 @@ il certificato per la firma) più quella.
   e vuole una build, come lo splash. Finché non si fa, l'icona in barra e sul file dell'exe
   mostra un marchio che il programma non ha più. *(cap. 13.5; `immagini/LEGGIMI.md`.)*
 
+## Dal riferimento sul Desktop e dalla ripulitura dei dati di prova (2026-08-30)
+
+- **`collaudi` chiude ancora l'applicazione per nome**, e quindi spegne anche il server MCP
+  del prodotto insieme a tutto il resto. Non è una svista rimasta indietro dalla cura del 30
+  agosto: è che quell'attrezzo fa `dotnet test -c Release`, e la compilazione dei collaudi
+  ricompila proprio il file che il server tiene bloccato. Chiuderlo per nome è oggi l'unico
+  modo perché il comando arrivi in fondo. La strada, quando si vorrà, è portare anche quella
+  compilazione fuori da `bin/` come si è fatto per `compila`. *(Step 2.55;
+  `strumenti/mcp-collaudi/README.md`.)*
+- **Nelle cartelle dati non c'è più nessun backup di prova.** I due del 21 agosto sono stati
+  eliminati perché contenevano il profilo intero di Riccardo; il ripristino (F7) resta senza
+  un file su cui provarlo dal vivo. Se ne rifà uno dall'applicazione — Profilo → «Backup…» —
+  e costa dieci secondi e nessuna chiamata all'AI. *(cap. 11; Step 2.56.)*
+- **Le sette candidature non hanno più i documenti esportati.** I `.docx`, i `.pdf` e i `.eml`
+  portavano il nome vero anche nel nome del file e sono stati eliminati: quando servirà
+  riprovare l'apertura in Word si riesportano dalla scheda Documenti, che è lavoro locale e
+  non spende AI. *(Step 2.56.)*
+- **Il diario tecnico scrive «GUASTO in l'ultima rete».** `DiarioTecnico.vb` compone il
+  messaggio come `GUASTO in {dove}`, e i chiamanti passano `l'ultima rete`, `la stampa del
+  PDF`: manca la preposizione articolata, e l'italiano esce sgrammaticato. Vive nel foglio di
+  diagnostica, non nell'interfaccia, e per questo non l'ha mai visto nessuno — l'ho trovato
+  leggendo il log per un'altra ragione. *(`VB.NET/src/TrovaLavoro/Dati/DiarioTecnico.vb`;
+  Step 2.56.)*
+- **Nella candidatura HPF restano due righe che parlano della carriera di Riccardo.** Il
+  giudizio e la mitigazione citano il suo percorso in Ansaldo, perché furono scritti quando
+  il profilo era il suo. Non è materiale della regola 10 — di TTR-SUITE non resta niente — ma
+  è contenuto di un'altra persona, e quella candidatura non va fotografata per il diario o per
+  la demo finché quelle due righe stanno lì. *(Step 2.56.)*
+
 ## Chiuse
 
 - ✅ **`scegli_riga` toccava solo il primo elenco della finestra** *(aperta il 2026-08-24 col
