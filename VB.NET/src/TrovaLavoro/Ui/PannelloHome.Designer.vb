@@ -42,7 +42,7 @@ Partial Class PannelloHome
         Me.pnlAzioni = New System.Windows.Forms.Panel()
         Me.btnApriCandidatura = New System.Windows.Forms.Button()
         Me.btnNuovaRicerca = New System.Windows.Forms.Button()
-        Me.btnAggiornaProfilo = New System.Windows.Forms.Button()
+        Me.btnEliminaCandidatura = New System.Windows.Forms.Button()
         Me.btnEsportaRegistro = New System.Windows.Forms.Button()
         Me.lblStatoHome = New System.Windows.Forms.Label()
         Me.pnlIntestazione.SuspendLayout()
@@ -266,8 +266,8 @@ Partial Class PannelloHome
         ' e un'etichetta in mezzo ai bottoni finirebbe sotto di lui o sopra di loro.
         Me.pnlAzioni.Controls.Add(Me.btnApriCandidatura)
         Me.pnlAzioni.Controls.Add(Me.btnNuovaRicerca)
-        Me.pnlAzioni.Controls.Add(Me.btnAggiornaProfilo)
         Me.pnlAzioni.Controls.Add(Me.btnEsportaRegistro)
+        Me.pnlAzioni.Controls.Add(Me.btnEliminaCandidatura)
         Me.pnlAzioni.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.pnlAzioni.Location = New System.Drawing.Point(14, 682)
         Me.pnlAzioni.Name = "pnlAzioni"
@@ -284,27 +284,29 @@ Partial Class PannelloHome
         '
         'btnNuovaRicerca
         '
-        Me.btnNuovaRicerca.Location = New System.Drawing.Point(202, 12)
+        Me.btnNuovaRicerca.Location = New System.Drawing.Point(944, 12)
         Me.btnNuovaRicerca.Name = "btnNuovaRicerca"
         Me.btnNuovaRicerca.Size = New System.Drawing.Size(150, 32)
-        Me.btnNuovaRicerca.TabIndex = 1
+        Me.btnNuovaRicerca.TabIndex = 3
         Me.btnNuovaRicerca.Text = "Nuova ricerca"
-        '
-        'btnAggiornaProfilo
-        '
-        Me.btnAggiornaProfilo.Location = New System.Drawing.Point(364, 12)
-        Me.btnAggiornaProfilo.Name = "btnAggiornaProfilo"
-        Me.btnAggiornaProfilo.Size = New System.Drawing.Size(160, 32)
-        Me.btnAggiornaProfilo.TabIndex = 2
-        Me.btnAggiornaProfilo.Text = "Aggiorna profilo"
         '
         'btnEsportaRegistro
         '
-        Me.btnEsportaRegistro.Location = New System.Drawing.Point(534, 12)
+        Me.btnEsportaRegistro.Location = New System.Drawing.Point(202, 12)
         Me.btnEsportaRegistro.Name = "btnEsportaRegistro"
         Me.btnEsportaRegistro.Size = New System.Drawing.Size(170, 32)
-        Me.btnEsportaRegistro.TabIndex = 3
+        Me.btnEsportaRegistro.TabIndex = 1
         Me.btnEsportaRegistro.Text = "Esporta l'elenco…"
+        '
+        'btnEliminaCandidatura
+        '
+        ' Ultimo della fila e ultimo col tasto Tab: si accende con la stessa riga scelta
+        ' che accende «Apri la candidatura», e i due non devono stare sotto lo stesso dito.
+        Me.btnEliminaCandidatura.Location = New System.Drawing.Point(384, 12)
+        Me.btnEliminaCandidatura.Name = "btnEliminaCandidatura"
+        Me.btnEliminaCandidatura.Size = New System.Drawing.Size(190, 32)
+        Me.btnEliminaCandidatura.TabIndex = 2
+        Me.btnEliminaCandidatura.Text = "Elimina candidatura"
         '
         'lblStatoHome
         '
@@ -365,7 +367,7 @@ Partial Class PannelloHome
     Friend WithEvents pnlAzioni As System.Windows.Forms.Panel
     Friend WithEvents btnApriCandidatura As System.Windows.Forms.Button
     Friend WithEvents btnNuovaRicerca As System.Windows.Forms.Button
-    Friend WithEvents btnAggiornaProfilo As System.Windows.Forms.Button
+    Friend WithEvents btnEliminaCandidatura As System.Windows.Forms.Button
     Friend WithEvents btnEsportaRegistro As System.Windows.Forms.Button
     Friend WithEvents lblStatoHome As System.Windows.Forms.Label
 

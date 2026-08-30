@@ -200,6 +200,46 @@ Public Class PannelloEmail
     End Function
 
     ''' <summary>
+    ''' Lascia andare l'email in preparazione se era di una candidatura appena eliminata
+    ''' (cap. 11.5), e dice se l'ha fatto.
+    ''' </summary>
+    ''' <remarks>
+    ''' Come negli altri due pannelli che tengono in mano una candidatura, e per la stessa
+    ''' ragione: salvare la bozza scrive l'<c>email.json</c> <b>nella cartella della
+    ''' candidatura</b>, e una bozza sopravvissuta alla sua cartella la ricreerebbe.
+    ''' </remarks>
+    Public Function Dimentica(cartella As String) As Boolean
+
+        If AiAlLavoro OrElse _candidatura Is Nothing Then Return False
+
+        If Not String.Equals(_candidatura.Cartella, cartella, StringComparison.OrdinalIgnoreCase) Then
+            Return False
+        End If
+
+        _candidatura = Nothing
+        _destinatarioVieneDallAnnuncio = False
+        _bozza = New BozzaEmail()
+
+        _suggerimenti.SetToolTip(txtDestinatario, Nothing)
+
+        Riempiendo(
+            Sub()
+                txtDestinatario.Text = ""
+                txtOggetto.Text = ""
+                txtCorpo.Text = ""
+                lstAllegati.Items.Clear()
+            End Sub)
+
+        Racconta("La candidatura per cui era questa email è stata eliminata.",
+                 StileApp.TestoSecondario)
+
+        AggiornaComandi()
+
+        Return True
+
+    End Function
+
+    ''' <summary>
     ''' Vero quando la bozza salvata è in una lingua e i documenti della candidatura in
     ''' un'altra: succede cambiando la tendina di P6 dopo aver già preparato l'email.
     ''' </summary>

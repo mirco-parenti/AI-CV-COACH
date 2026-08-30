@@ -269,6 +269,39 @@ Public Class PannelloDocumenti
     End Sub
 
     ''' <summary>
+    ''' Lascia andare i documenti in mostra se erano di una candidatura appena eliminata
+    ''' (cap. 11.5), e dice se l'ha fatto.
+    ''' </summary>
+    ''' <remarks>
+    ''' Il gemello di <see cref="DimenticaIlCvBase"/> preso dal capo opposto: lì spariva il
+    ''' profilo e i documenti delle candidature restavano, qui sparisce una candidatura e
+    ''' resta il 📄 CV base. La ragione però è più stringente di una vista da ripulire:
+    ''' «Rigenera» e le esportazioni scrivono <b>nella cartella della candidatura</b>, e su
+    ''' un documento sopravvissuto alla sua cartella ricreerebbero quel che è stato appena
+    ''' cancellato.
+    ''' </remarks>
+    Public Function Dimentica(cartella As String) As Boolean
+
+        If AiAlLavoro OrElse _candidatura Is Nothing Then Return False
+
+        If Not String.Equals(_candidatura.Cartella, cartella, StringComparison.OrdinalIgnoreCase) Then
+            Return False
+        End If
+
+        _candidatura = Nothing
+        _sulCvBase = False
+
+        AllestisciLaTendinaDeiDocumenti()
+        Mostra()
+
+        RaccontaLoStato("La candidatura di cui erano questi documenti è stata eliminata.",
+                        StileApp.TestoSecondario)
+
+        Return True
+
+    End Function
+
+    ''' <summary>
     ''' Lascia andare il 📄 CV base che era in mostra: il documento, le riscritture a mano e
     ''' la provenienza che gli apparteneva.
     ''' </summary>

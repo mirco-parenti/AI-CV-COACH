@@ -370,6 +370,98 @@ Namespace Ui
                     Assert.IsTrue(Bottone(pannello, "btnApriCandidatura").Enabled)
                 End Sub, AddressOf TreCandidature)
         End Sub
+        ' ==================================================================
+        ' Eliminare una candidatura (cap. 11.5)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Sub SenzaUnaRigaSceltaNonCENienteDaEliminare()
+
+            ' Un bottone rosso che non ha niente da fare insegna solo a non fidarsi del
+            ' colore: è la stessa regola dell'«ELIMINA PROFILO» di P2 (cap. 03.6).
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim elimina As Button = Bottone(pannello, "btnEliminaCandidatura")
+
+                    Assert.IsFalse(elimina.Enabled, "spento finché non si sceglie")
+
+                    Coda(pannello).First().Selected = True
+                    Assert.IsTrue(elimina.Enabled, "acceso sulla riga scelta, e su quella sola")
+                End Sub, AddressOf TreCandidature)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LaConfermaDiceQualeCandidaturaSparisceECosaCEraDentro()
+
+            ' La domanda deve nominare la candidatura come la nomina la riga: chi legge
+            ' «la tua cartella» e basta non sa se sta per perdere una candidatura o tutto.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim voce As VoceRegistro = DirectCast(
+                        Coda(pannello).Single(Function(r) r.SubItems(1).Text = "Rossi S.p.A.").Tag,
+                        VoceRegistro)
+
+                    Dim domanda As String = PannelloHome.SpiegazioneDellEliminazione(voce)
+
+                    Assert.Contains("Rossi S.p.A.", domanda, "quale candidatura sparisce")
+                    Assert.Contains("Magazziniere", domanda, "detta com'è scritta nella riga")
+                    Assert.Contains("CV mirato", domanda, "e che cosa c'era dentro la cartella")
+                    Assert.Contains("Non si torna indietro", domanda, "e che non si disfa")
+                End Sub, AddressOf TreCandidature)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IlPercorsoCompostoDallaCodaEQuelloCheIPannelliHannoInMano()
+
+            ' La Home compone il percorso della candidatura mettendo insieme la cartella
+            ' delle opportunità e il nome che sta nella voce del registro; i pannelli
+            ' tengono invece quello che l'archivio ha scritto in Opportunita.Cartella. È su
+            ' quei due che si riconoscono quando una candidatura viene eliminata: se
+            ' divergessero, la scheda non capirebbe che quella era la sua — e continuerebbe
+            ' a poterla riscrivere su disco, ricreandola (cap. 11.5).
+            Dim salvata As Opportunita = Nothing
+
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim voce As VoceRegistro = DirectCast(Coda(pannello).Single().Tag, VoceRegistro)
+
+                    Assert.AreEqual(salvata.Cartella,
+                                    Path.Combine(contesto.Cartella.CartellaOpportunita, voce.Cartella),
+                                    "lo stesso percorso, composto per due strade")
+                End Sub,
+                Sub(candidature)
+                    salvata = Candidatura("Rossi S.p.A.", 10, 4.1, StatoOpportunita.Generata)
+                    candidature.Salva(salvata)
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub EliminataUnaCandidaturaLaCodaEIlRegistroNonLaNominanoPiu()
+
+            ' Il registro non si aggiorna a mano: è il riflesso delle cartelle e si rifà da
+            ' sé, perché non combacia più. Ma deve anche tornare su disco — chi lo
+            ' rileggesse (il prossimo avvio, il server MCP) troverebbe una candidatura che
+            ' non c'è.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim dove As String = contesto.Opportunita.Elenco().
+                        Single(Function(c) Path.GetFileName(c).Contains("rossi"))
+
+                    contesto.Opportunita.Elimina(dove)
+                    pannello.Aggiorna()
+
+                    Assert.HasCount(2, Coda(pannello), "una riga in meno")
+                    Assert.DoesNotContain("Rossi S.p.A.", Aziende(pannello), "e non è più in elenco")
+
+                    Assert.DoesNotContain("Rossi", File.ReadAllText(contesto.Cartella.FileRegistro),
+                                          "nemmeno nell'indice su disco")
+                End Sub, AddressOf TreCandidature)
+
+        End Sub
+
 
         <TestMethod>
         Public Sub UnaCartellaSpostataDaSottoNonFaCadereNiente()

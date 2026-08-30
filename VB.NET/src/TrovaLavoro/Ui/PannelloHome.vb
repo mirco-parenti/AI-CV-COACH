@@ -23,15 +23,40 @@ Public Class CandidaturaSceltaEventArgs
 End Class
 
 ''' <summary>
+''' Una candidatura è stata eliminata dalla coda: la sua cartella non c'è più (cap. 11.5).
+''' </summary>
+''' <remarks>
+''' Porta il <b>percorso</b> e non la candidatura, ed è il punto: di quella non resta più
+''' niente da consegnare. Serve ai pannelli che potrebbero averla in mano per riconoscere
+''' se è la loro e lasciarla andare.
+''' </remarks>
+Public Class CandidaturaEliminataEventArgs
+    Inherits EventArgs
+
+    Public Sub New(cartella As String)
+        Me.Cartella = cartella
+    End Sub
+
+    ''' <summary>La cartella che è stata mandata via, in forma piena.</summary>
+    Public ReadOnly Property Cartella As String
+
+End Class
+
+''' <summary>
 ''' Pannello P1 — la Home (cap. 03.6): lo stato del profilo, la coda delle opportunità
 ''' con stelle e stati, i contatori e le scorciatoie ai flussi. È il cruscotto che
 ''' risponde alla domanda del cap. 07.3, «a che punto sono?».
 ''' </summary>
 ''' <remarks>
-''' <para><b>Qui si guarda, non si decide.</b> Il pannello non calcola niente e non
-''' cambia lo stato di nessuna candidatura: legge il registro (cap. 07.3), lo mostra, e
-''' quando si sceglie una riga passa la palla a P4, che è dove la candidatura si tocca.
+''' <para><b>Qui si guarda, e si toglie di mezzo.</b> Il pannello non calcola niente e
+''' non cambia lo stato di nessuna candidatura: legge il registro (cap. 07.3), lo mostra,
+''' e quando si sceglie una riga passa la palla a P4, che è dove la candidatura si tocca.
 ''' Nemmeno lo scarto sta qui — sta nella scheda che si sta guardando.</para>
+''' <para>L'unica cosa che da qui si fa, e non solo si guarda, è <b>eliminare</b>
+''' (cap. 11.5). Non è uno strappo alla regola di sopra: eliminare non decide niente
+''' <i>sulla</i> candidatura, la toglie dall'archivio — e dopo non resterebbe nessuna
+''' scheda da cui farlo. La coda è anche il solo posto da cui si vedono tutte insieme,
+''' che è come ci si accorge del doppione e della prova da ripulire.</para>
 ''' <para><b>Chiude il debito di T4</b>: «la coda dell'opportunità non si riapre»
 ''' (<c>in_sospeso.md</c>). Da T4 ogni candidatura finiva nella sua cartella e ci restava
 ''' senza che l'interfaccia sapesse tornarci: la promessa «tutto riapribile» del
@@ -122,6 +147,12 @@ Public Class PannelloHome
     ''' <summary>L'utente ha scelto una candidatura della coda: si va in P4, con lei.</summary>
     Public Event CandidaturaScelta As EventHandler(Of CandidaturaSceltaEventArgs)
 
+    ''' <summary>
+    ''' Una candidatura è stata eliminata: chi ce l'aveva in mano deve dimenticarla
+    ''' (cap. 11.5).
+    ''' </summary>
+    Public Event CandidaturaEliminata As EventHandler(Of CandidaturaEliminataEventArgs)
+
     Public Sub New()
 
         InitializeComponent()
@@ -131,7 +162,6 @@ Public Class PannelloHome
 
         VestiIBottoni()
         RiempiIlFiltro()
-        DichiaraLeTappeCheMancano()
         AggiornaComandi()
 
     End Sub
@@ -566,8 +596,8 @@ Public Class PannelloHome
 
         Dim riga As New ListViewItem({
             MatchScritto(voce),
-            If(String.IsNullOrWhiteSpace(voce.Azienda), "(azienda non dichiarata)", voce.Azienda),
-            If(String.IsNullOrWhiteSpace(voce.Titolo), "(ruolo non dichiarato)", voce.Titolo),
+            AziendaDi(voce),
+            RuoloDi(voce),
             aCheStato,
             If(String.IsNullOrWhiteSpace(voce.Fonte), "incollato a mano", voce.Fonte),
             QuandoScritto(voce.Aggiornata)}) With {.Tag = voce}
@@ -641,6 +671,98 @@ Public Class PannelloHome
     Private Sub lvwCoda_DoubleClick(sender As Object, e As EventArgs) Handles lvwCoda.DoubleClick
         ApriLaCandidaturaScelta()
     End Sub
+
+    ''' <summary>
+    ''' Manda via la candidatura scelta, cartella e tutto (cap. 11.5). Prima lo chiede — e
+    ''' lo chiede dicendo <b>che cosa</b> sparisce: è una conferma di livello 5, dove il
+    ''' bottone che esegue porta il verbo dell'azione invece di un «Sì»
+    ''' (<see cref="FinestraConferma"/>).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>L'ordine conta.</b> Prima si cancella la cartella, che è la verità; poi si
+    ''' dice ai pannelli di dimenticarla, perché uno di loro potrebbe averla in mano e
+    ''' riscriverla al primo comando; per ultimo si rilegge la coda, che dell'archivio è
+    ''' solo il riflesso. Se la cancellazione fallisce non si è detto niente a nessuno, e
+    ''' quel che si vede a video è ancora vero.</para>
+    ''' <para>Il registro non si tocca qui: <see cref="Aggiorna"/> lo rilegge, si accorge
+    ''' che non combacia più con le cartelle e lo rimette su disco da sé (v.
+    ''' <c>LeggiIlRegistro</c>).</para>
+    ''' </remarks>
+    Private Sub EliminaLaCandidaturaScelta()
+
+        Dim voce As VoceRegistro = VoceScelta
+        If voce Is Nothing OrElse _contesto Is Nothing Then Return
+
+        Dim dove As String = Path.Combine(_contesto.Cartella.CartellaOpportunita, voce.Cartella)
+
+        If Not FinestraConferma.Chiedi(Me, "Elimina la candidatura",
+                                       SpiegazioneDellEliminazione(voce), "Confermo") Then Return
+
+        Try
+            _contesto.Opportunita.Elimina(dove)
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            RaccontaLoStato($"«{voce.Cartella}» non si è lasciata eliminare: {ex.Message}",
+                            StileApp.Pericolo)
+            Return
+        End Try
+
+        RaiseEvent CandidaturaEliminata(Me, New CandidaturaEliminataEventArgs(dove))
+
+        Aggiorna()
+
+        ' Dopo Aggiorna, non prima: rileggere il registro riscrive questa stessa riga.
+        RaccontaLoStato($"Eliminata: {EtichettaDellaVoce(voce)}.", StileApp.TestoSecondario)
+
+    End Sub
+
+    Private Sub btnEliminaCandidatura_Click(sender As Object, e As EventArgs) _
+        Handles btnEliminaCandidatura.Click
+
+        EliminaLaCandidaturaScelta()
+
+    End Sub
+
+    ''' <summary>
+    ''' Il testo della conferma: che cosa sparisce, detto per esteso, con sopra la
+    ''' candidatura di cui si parla. La riga d'intestazione non è un ornamento — «la tua
+    ''' cartella», da sola, si potrebbe leggere come tutta la cartella dati.
+    ''' </summary>
+    ''' <remarks>
+    ''' È pubblica perché la legge il banco: premere il bottone aprirebbe una finestra
+    ''' modale, e di quella un collaudo non può aspettare la chiusura — la stessa ragione
+    ''' per cui P2 espone <c>EliminaIlProfilo</c> accanto al bottone che la apre.
+    ''' </remarks>
+    Public Shared Function SpiegazioneDellEliminazione(voce As VoceRegistro) As String
+
+        Return EtichettaDellaVoce(voce) & vbLf & vbLf &
+               "Stai eliminando la tua cartella: annuncio, giudizi, CV mirato, lettera di " &
+               "presentazione ed email verranno cancellati dalla memoria. Non si torna " &
+               "indietro. Confermi?"
+
+    End Function
+
+    ''' <summary>Chi era, in una riga: le due colonne di mezzo della coda, unite.</summary>
+    Private Shared Function EtichettaDellaVoce(voce As VoceRegistro) As String
+        Return $"{AziendaDi(voce)} — {RuoloDi(voce)}"
+    End Function
+
+    ''' <summary>
+    ''' L'azienda com'è scritta quando l'annuncio non la dichiara. Sta in un posto solo
+    ''' perché si legge in due — nella riga della coda e nella conferma che chiede di
+    ''' eliminarla — e una candidatura che nell'elenco si chiama in un modo e nella domanda
+    ''' in un altro è una candidatura che chi guarda non riconosce.
+    ''' </summary>
+    Private Shared Function AziendaDi(voce As VoceRegistro) As String
+        Return If(String.IsNullOrWhiteSpace(voce.Azienda), "(azienda non dichiarata)", voce.Azienda)
+    End Function
+
+    ''' <summary>Il ruolo, con lo stesso ripiego dell'azienda e per la stessa ragione.</summary>
+    Private Shared Function RuoloDi(voce As VoceRegistro) As String
+        Return If(String.IsNullOrWhiteSpace(voce.Titolo), "(ruolo non dichiarato)", voce.Titolo)
+    End Function
+
 
     Private Sub lvwCoda_SelectedIndexChanged(sender As Object, e As EventArgs) _
         Handles lvwCoda.SelectedIndexChanged
@@ -810,7 +932,11 @@ Public Class PannelloHome
 
         If _comandi Is Nothing Then
             _comandi = New FasciaDeiComandi(pnlAzioni)
-            _comandi.ASinistra(btnApriCandidatura, btnAggiornaProfilo, btnEsportaRegistro)
+            ' «Elimina candidatura» è in fondo di proposito: si accende con la stessa riga
+            ' scelta che accende «Apri la candidatura», ed è la ragione per cui non deve
+            ' stargli accanto — la stessa per cui in P2 «ELIMINA PROFILO» sta all'estremo
+            ' opposto rispetto a «Salva profilo» (cap. 03.6).
+            _comandi.ASinistra(btnApriCandidatura, btnEsportaRegistro, btnEliminaCandidatura)
             _comandi.ADestra(btnNuovaRicerca)
         End If
 
@@ -854,8 +980,11 @@ Public Class PannelloHome
 
         StileApp.VestiBottone(btnApriCandidatura, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnApriProfilo, LivelloBottone.Esplorativo)
-        StileApp.VestiBottone(btnAggiornaProfilo, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnEsportaRegistro, LivelloBottone.Esplorativo)
+
+        ' Eliminare una candidatura manda via la sua cartella e non si disfa: è il livello
+        ' 5 (cap. 03.3), lo stesso dello «Scarta» di P4 — che però non cancella niente.
+        StileApp.VestiBottone(btnEliminaCandidatura, LivelloBottone.Distruttivo)
 
     End Sub
 
@@ -878,18 +1007,6 @@ Public Class PannelloHome
 
     End Sub
 
-    ''' <summary>
-    ''' Le scorciatoie che il cap. 03.6 promette sono due, e una non è ancora arrivata:
-    ''' resta visibile e spenta, col suo tooltip, come in P2 (cap. 03.8).
-    ''' </summary>
-    Private Sub DichiaraLeTappeCheMancano()
-
-        btnAggiornaProfilo.Enabled = False
-        _suggerimenti.SetToolTip(btnAggiornaProfilo,
-            "La sessione di aggiornamento del profilo arriva più avanti (flusso D).")
-
-    End Sub
-
     Private Sub RaccontaLoStato(testo As String, colore As Color)
 
         lblStatoHome.Text = testo
@@ -903,7 +1020,18 @@ Public Class PannelloHome
     ''' </summary>
     Private Sub AggiornaComandi()
 
-        btnApriCandidatura.Enabled = VoceScelta IsNot Nothing
+        Dim scelta As VoceRegistro = VoceScelta
+
+        btnApriCandidatura.Enabled = scelta IsNot Nothing
+
+        ' Rosso e premibile solo su una riga scelta: senza, non si saprebbe nemmeno che
+        ' cosa si sta per mandare via. È la stessa regola dell'«ELIMINA PROFILO» di P2 —
+        ' un bottone rosso che non ha niente da fare insegna a non fidarsi del colore.
+        btnEliminaCandidatura.Enabled = scelta IsNot Nothing
+
+        _suggerimenti.SetToolTip(btnEliminaCandidatura,
+            If(scelta Is Nothing, "Scegli prima una candidatura nell'elenco: si elimina quella.", Nothing))
+
         btnApriProfilo.Enabled = _contesto IsNot Nothing
         btnNuovaRicerca.Enabled = _contesto IsNot Nothing
 

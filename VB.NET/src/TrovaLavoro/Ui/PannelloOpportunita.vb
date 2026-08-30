@@ -501,6 +501,44 @@ Public Class PannelloOpportunita
     End Sub
 
     ''' <summary>
+    ''' Lascia andare la candidatura in mostra se è quella appena eliminata dalla Home
+    ''' (cap. 11.5), e dice se l'ha fatto: il pannello torna com'era prima di aprirne una.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Non è riguardo per l'occhio. Finché quell'oggetto resta qui, il primo comando
+    ''' che archivia lo riscriverebbe su disco — cioè <b>ricreerebbe la cartella</b> appena
+    ''' cancellata, con dentro quel che il pannello ha in memoria. Chi elimina si aspetta
+    ''' che sparisca, non che risorga al clic dopo.</para>
+    ''' <para>Con una chiamata all'AI in volo non si tocca niente e si risponde
+    ''' <c>False</c>. Il caso non si dà — mentre l'AI lavora la barra è bloccata e in Home
+    ''' non ci si arriva (cap. 02.6) — e strappare il tavolo sotto un'attesa sarebbe un
+    ''' modo nuovo di rompere una cosa che funziona.</para>
+    ''' </remarks>
+    Public Function Dimentica(cartella As String) As Boolean
+
+        If AiAlLavoro OrElse _opportunita Is Nothing Then Return False
+
+        If Not String.Equals(_opportunita.Cartella, cartella, StringComparison.OrdinalIgnoreCase) Then
+            Return False
+        End If
+
+        _opportunita = Nothing
+
+        txtAnnuncio.Clear()
+        txtAnnuncioLetto.Clear()
+        MostraLaValutazione(Nothing)
+        FasciaDIngresso(aperta:=True)
+
+        RaccontaLoStato("La candidatura che era qui è stata eliminata: incolla il testo di " &
+                        "un altro annuncio e premi «Analizza».", StileApp.TestoSecondario)
+
+        AggiornaComandi()
+
+        Return True
+
+    End Function
+
+    ''' <summary>
     ''' La versione di profilo con cui si sta confrontando: è ciò che tiene spiegabile un
     ''' CV già inviato anche a profilo evoluto (cap. 11.1). L'ultima versione dello
     ''' storico è quella corrente, perché il profilo si salva sempre da una sola porta.

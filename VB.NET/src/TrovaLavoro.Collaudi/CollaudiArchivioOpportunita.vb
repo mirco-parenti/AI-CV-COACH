@@ -521,6 +521,74 @@ Namespace Dati
                                     "e la si prende per quel che era: ora locale")
                 End Sub)
         End Sub
+        ' ==================================================================
+        ' Eliminare una candidatura (cap. 11.5)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Sub EliminareUnaCandidaturaPortaViaTuttaLaSuaCartella()
+
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim dove As String = archivio.Salva(OpportunitaDiProva())
+
+                    ' Anche i documenti già esportati, che stanno nella sottocartella
+                    ' out\: sono la cosa che l'utente ha in mano, e lasciarli sarebbe
+                    ' cancellare a metà.
+                    Directory.CreateDirectory(Path.Combine(dove, "out"))
+                    File.WriteAllText(Path.Combine(dove, "out", "cv.pdf"), "finto")
+
+                    Assert.IsTrue(archivio.Elimina(dove), "c'era qualcosa da mandare via")
+
+                    Assert.IsFalse(Directory.Exists(dove), "la cartella non c'è più")
+                    Assert.IsEmpty(archivio.Elenco(), "e l'archivio non la elenca")
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub EliminareUnaCartellaCheNonCEDiceDiNoSenzaFarsiMale()
+
+            ' L'utente è padrone dei suoi file (cap. 11.1): può averla mandata via da
+            ' Esplora file un minuto prima. Non è un errore da sollevare, è che non
+            ' c'era niente da fare.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim mai As String = Path.Combine(cartella.CartellaOpportunita,
+                                                     "2026-08-10_mai-esistita")
+
+                    Assert.IsFalse(archivio.Elimina(mai))
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub NonSiEliminaNienteFuoriDallaCartellaDelleCandidature()
+
+            ' La guardia non è diffidenza verso chi chiama: il parametro è un percorso, e
+            ' un percorso sbagliato qui non sbaglia un dato — porta via una cartella
+            ' dell'utente che non c'entra niente.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim dove As String = archivio.Salva(OpportunitaDiProva())
+
+                    Dim profilo As String = cartella.CartellaProfilo
+                    Directory.CreateDirectory(profilo)
+
+                    Assert.ThrowsExactly(Of ArgumentException)(Function() archivio.Elimina(profilo))
+                    Assert.IsTrue(Directory.Exists(profilo), "e non l'ha toccata")
+
+                    ' Nemmeno una cartella più in giù: «out\» sta dentro una candidatura,
+                    ' non dentro «opportunita\», e la si manda via solo con lei.
+                    Dim dentro As String = Path.Combine(dove, "out")
+                    Directory.CreateDirectory(dentro)
+
+                    Assert.ThrowsExactly(Of ArgumentException)(Function() archivio.Elimina(dentro))
+                    Assert.IsTrue(Directory.Exists(dentro), "nemmeno quella")
+                End Sub)
+
+        End Sub
+
 
     End Class
 

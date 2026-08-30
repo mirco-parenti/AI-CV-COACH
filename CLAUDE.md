@@ -137,6 +137,20 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    giorni. Non l'ha trovata nessun controllo su quel che era stato fatto: l'ha trovata la
    rilettura di quel che era stato promesso.)*
 
+17. 🔖 **REGOLA NUOVA/regole_di_progetto — «fammi vedde» vuol dire *aprimi l'app*, e
+   aggiornata**: quando dico **«fammi vedde»** (o «fammi vedere», «aprimi l'app»), non mi
+   mandi schermate né percorsi di immagini: **mi apri l'eseguibile che sta sul Desktop**,
+   `C:\Users\Mirco Parenti\Desktop\TrovaLavoro.exe`, dopo esserti **assicurata prima** che
+   porti dentro **tutte** le modifiche — quelle di questa sessione, quelle appena fatte e
+   quelle delle sessioni precedenti, committate o no. Si rifà con
+   `strumenti\aggiorna-riferimento.bat` (da WSL: `cmd.exe /c "<percorso completo>"`), che
+   compila in `%TEMP%` — così il file bloccato dal server MCP non c'entra —, chiude
+   **solo** l'app del Desktop riconoscendola dal percorso, e dichiara versione, commit e
+   impronta di quel che ha appena scritto: quella riga è la prova che l'exe è aggiornato,
+   e va guardata. Il riferimento sul Desktop **dev'essere pronto all'uso in ogni momento e
+   sempre aggiornato all'ultima modifica**: è *l'app*, non una copia di comodo, e un exe
+   vecchio che si apre senza dirlo è peggio di nessun exe. *(Dettata il 2026-08-31.)*
+
 ## Contesto del progetto (fatti stabili + puntatori, niente stato copiato)
 
 - **Due aree del repo** (dal 2026-08-05): `HTML+JS/` = il prototipo web validato (fase MVP,

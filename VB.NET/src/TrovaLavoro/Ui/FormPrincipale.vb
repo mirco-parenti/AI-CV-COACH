@@ -498,6 +498,26 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
+    ''' Una candidatura è stata eliminata dalla Home (cap. 11.5): chi ce l'aveva in mano la
+    ''' lascia andare. Sono i tre pannelli che ne tengono una copia in memoria — la scheda,
+    ''' i documenti, l'email — e ognuno risponde solo se era la sua.
+    ''' </summary>
+    ''' <remarks>
+    ''' Non è pulizia della vista. Quei tre <b>scrivono</b> nella cartella della
+    ''' candidatura — «Rigenera», le esportazioni, il salvataggio della bozza — e su un
+    ''' oggetto sopravvissuto alla propria cartella la ricreerebbero: l'eliminazione si
+    ''' disferebbe da sé, senza che nessuno l'abbia chiesto.
+    ''' </remarks>
+    Private Sub pnlHome_CandidaturaEliminata(sender As Object, e As CandidaturaEliminataEventArgs) _
+        Handles pnlHome.CandidaturaEliminata
+
+        pnlOpportunita.Dimentica(e.Cartella)
+        pnlDocumenti.Dimentica(e.Cartella)
+        pnlEmail.Dimentica(e.Cartella)
+
+    End Sub
+
+    ''' <summary>
     ''' La voce «📄 Documenti» della barra (T9d): porta a P6 da fermo, senza passare da un
     ''' flusso. Si torna alla Home, che è la casa di chi si sposta con la barra.
     ''' </summary>

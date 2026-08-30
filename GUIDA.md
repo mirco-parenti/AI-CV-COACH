@@ -127,6 +127,13 @@ Dentro trovi, in file di testo leggibili con qualunque editor:
 - il **registro** delle candidature e le tue **preferenze**;
 - la **chiave API**, e quello è l'unico file non leggibile — perché è una credenziale.
 
+Una candidatura che non ti serve più — una prova, un doppione, un annuncio che si è
+rivelato un'altra cosa — la togli dalla **Home**: scegli la sua riga nell'elenco e premi
+**«Elimina candidatura»**. Il programma ti dice che cosa sparisce e aspetta un «Confermo»:
+se ne va la sua cartella intera, con l'annuncio, il confronto, il CV, la lettera e l'email.
+Non c'è cestino e non si torna indietro — i file che avevi esportato altrove, sul Desktop o
+in una cartella tua, restano dove sono.
+
 Il principio è che tu resti padrone dei tuoi dati **anche senza questo programma**: se un
 giorno lo cancelli, i tuoi CV e le tue lettere restano lì, in DOCX e PDF, apribili da
 chiunque.

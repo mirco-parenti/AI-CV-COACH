@@ -958,6 +958,38 @@ Namespace Ui
 
         End Function
 
+        ' ==================================================================
+        ' La candidatura eliminata dalla Home (cap. 11.5)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function LaSchedaLasciaAndareLaCandidaturaEliminata() As Task
+
+            ' Non è pulizia della vista: finché quell'oggetto resta in mano al pannello, il
+            ' primo comando che archivia lo riscrive su disco — cioè ricrea la cartella
+            ' appena cancellata, e l'eliminazione si disfa da sé.
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto)
+                    Await IncollaEAnalizzaAsync(pannello, TestoIncollato)
+
+                    Dim dove As String = pannello.Candidatura.Cartella
+                    Assert.IsNotNull(dove, "l'analisi l'ha già scritta nella sua cartella")
+
+                    Assert.IsFalse(pannello.Dimentica(dove & "-di-un-altra"),
+                                   "una candidatura che non è la sua non lo riguarda")
+                    Assert.IsNotNull(pannello.Candidatura, "e infatti la sua ce l'ha ancora")
+
+                    contesto.Opportunita.Elimina(dove)
+
+                    Assert.IsTrue(pannello.Dimentica(dove), "questa invece era proprio la sua")
+                    Assert.IsNull(pannello.Candidatura, "e non la tiene più in mano")
+                    Assert.AreEqual(String.Empty, Casella(pannello, "txtAnnuncioLetto").Text,
+                                    "la scheda torna com'era prima di aprirne una")
+                End Function)
+
+        End Function
+
         ''' <summary>
         ''' Un pannello collegato a un motore vero — cartella dati temporanea, nessuna
         ''' chiave — con la pipeline finta che gli si vuol dare.

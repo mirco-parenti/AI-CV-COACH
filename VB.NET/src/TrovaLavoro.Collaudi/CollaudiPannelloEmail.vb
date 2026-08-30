@@ -904,6 +904,40 @@ Namespace Ui
 
         End Function
 
+        ' ==================================================================
+        ' La candidatura eliminata dalla Home (cap. 11.5)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function LEmailLasciaAndareLaCandidaturaEliminata() As Task
+
+            ' Salvare la bozza scrive l'email.json nella cartella della candidatura: una
+            ' bozza sopravvissuta alla sua cartella la ricreerebbe.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim dove As String = candidatura.Cartella
+
+                    Assert.IsFalse(pannello.Dimentica(dove & "-di-un-altra"),
+                                   "una candidatura che non è la sua non la riguarda")
+                    Assert.AreNotEqual(String.Empty, Casella(pannello, "txtCorpo").Text,
+                                       "e infatti la bozza è ancora lì")
+
+                    contesto.Opportunita.Elimina(dove)
+
+                    Assert.IsTrue(pannello.Dimentica(dove), "questa invece era proprio la sua")
+                    Assert.AreEqual(String.Empty, Casella(pannello, "txtCorpo").Text,
+                                    "la bozza sparisce con lei")
+                    Assert.IsFalse(Bottone(pannello, "btnRiscrivi").Enabled,
+                                   "e non c'è più niente da riscrivere")
+                End Function)
+
+        End Function
+
         Private Shared Async Function ConPannelloAsync(
                 compositore As CompositoreFinto,
                 prova As Func(Of PannelloEmail, ContestoApp, Opportunita, Task),

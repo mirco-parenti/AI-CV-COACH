@@ -369,6 +369,9 @@ il numero cresce solo quando lo schema cambia davvero.
 Dalle Impostazioni: «Svuota dati di navigazione» (cartella `webview2\`), «Elimina
 un'opportunità» (la sua cartella, con conferma di livello 5), «Elimina tutti i dati»
 (l'intera cartella dati, conferma di livello 6 con nome dell'app da ridigitare).
+*Delle tre, la seconda è arrivata altrove: sta nella **Home** e non nelle Impostazioni —
+v. in fondo a questo paragrafo, 2026-08-31. Il livello di conferma previsto qui, invece,
+era già quello giusto.*
 L'app non lascia nulla in giro fuori dalla cartella dati, quindi la disinstallazione
 è: cancellare l'exe e, se si vuole, la cartella dati.
 
@@ -436,6 +439,54 @@ riacceso subito dopo un'eliminazione totale — perché `CartellaDati.Assicura` 
 `profilo\`, `storico\`, `out\` e `opportunita\` vuote appena qualcuno tocca la cartella
 dati. Un bottone rosso che promette di eliminare quattro cartelle vuote insegna solo a non
 fidarsi del colore: adesso la domanda guarda i **file**, in tutto l'albero.
+
+### Eliminare una candidatura, dalla Home (2026-08-31)
+
+Il paragrafo in cima a questo capitolo la dava fra le pulizie delle Impostazioni; è
+arrivata invece dove le candidature si guardano — **P1**, la coda — e ha preso il posto di
+un bottone che non aveva mai funzionato, «Aggiorna profilo» (cap. 03.6). Il posto lo
+decidono due cose: dopo l'eliminazione non resterebbe **nessuna scheda** da cui farla, e il
+doppione o la prova da ripulire si vedono guardando l'**elenco**, non la singola
+candidatura.
+
+Il perimetro è **la cartella dell'opportunità intera**, `out\` compresa: annuncio, giudizi,
+mitigazioni, appunti, 🎯 CV-2, ✉️ lettera, bozza email, stato, e i DOCX e i PDF già
+esportati lì dentro. Non un file alla volta ma la cartella, per la stessa ragione di
+«ELIMINA PROFILO». Le **copie** che l'utente ha esportato altrove — sul Desktop, in una
+cartella sua (cap. 05.6) — restano dove sono: quelle non ce le ha messe il programma.
+
+Cosa **non** tocca: il profilo, le altre candidature, le ricerche salvate, la cartella
+documenti. E nemmeno il `registro.json`, ed è una scelta: l'indice è il riflesso delle
+cartelle, e alla prima rilettura si accorge da sé di non combaciare più e si rifà
+(cap. 07.3). Tenerlo allineato a mano vorrebbe dire avere due verità da aggiornare invece
+di una da rileggere.
+
+**La conferma è di livello 5, non 6.** Non è un'attenuazione: è la differenza fra un gesto
+che si fa una volta nella vita e uno che si **ripete**. Chi ripulisce la coda lo fa più
+volte di seguito, e chiedergli ogni volta di riscrivere `TrovaLavoro` gli insegnerebbe
+soltanto a scriverlo senza leggere — cioè a disinnescare da sé la difesa, proprio là dove
+serve. La finestra è la `FinestraConferma` (cap. 03.4): dice **quale** candidatura sparisce
+— azienda e ruolo, scritti com'è scritta la riga dell'elenco — e che cosa c'era nella
+cartella, e si accetta con un clic su «Confermo». Il bottone è rosso e premibile **solo su
+una riga scelta**: uno rosso che non ha niente da fare insegna a non fidarsi del colore.
+
+**Chi la teneva in mano la lascia andare.** Tre pannelli conservano in memoria la
+candidatura su cui si sta lavorando — la scheda (P4), i documenti (P6), l'email (P7) — e
+tutti e tre **scrivono nella sua cartella**: «Rigenera», le esportazioni, il salvataggio
+della bozza. Un oggetto sopravvissuto alla propria cartella la **ricreerebbe** al primo
+comando, e l'eliminazione si disferebbe da sé senza che nessuno l'avesse chiesto. Perciò
+l'ordine è: prima si cancella la cartella, che è la verità; poi si dice ai pannelli di
+dimenticarla; per ultimo si rilegge la coda, che è il riflesso. Se la cancellazione
+fallisce non si è detto niente a nessuno, e quel che è a video è ancora vero.
+
+L'eliminazione vive in `ArchivioOpportunita.Elimina` e non nel pannello che la chiama, per
+la ragione di `PuliziaDati`: **una cancellazione va collaudata**, e un banco non sa premere
+un bottone. Manda via **solo** dentro `opportunita\` — non per diffidenza verso chi chiama,
+ma perché il parametro è un percorso, e un percorso sbagliato qui non sbaglia un dato:
+porta via una cartella dell'utente che non c'entra niente.
+
+**Nessun cestino, nessun annulla**, come per le pulizie generali. Una rete c'è, e sta
+altrove: il **backup** (cap. 11.4), che le candidature se le porta dietro.
 
 ## 11.6 I due file dei numeri: taratura e modelli
 

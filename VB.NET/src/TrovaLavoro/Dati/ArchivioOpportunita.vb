@@ -125,6 +125,66 @@ Namespace Dati
         End Function
 
         ''' <summary>
+        ''' Manda via una cartella-opportunità con tutto quello che c'è dentro — annuncio,
+        ''' giudizi, appunti, 🎯 CV-2, ✉️ lettera, bozza email e i documenti già esportati
+        ''' in <c>out\</c> — e dice se c'era qualcosa da mandare via (cap. 11.5).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para><b>Niente cestino e niente annulla</b>, come per le pulizie generali
+        ''' (<see cref="PuliziaDati"/>): quel che si cancella qui non torna, e il modo di
+        ''' rendersene conto prima è la conferma, non un ripensamento dopo. Sta
+        ''' nell'archivio e non nel pannello che la chiama per la stessa ragione delle
+        ''' altre: una cancellazione va <b>collaudata</b>, e un banco non sa premere un
+        ''' bottone.</para>
+        ''' <para><b>Il registro non si tocca</b>: è un riflesso delle cartelle e si rifà
+        ''' da sé alla prima lettura, perché non combacia più con quel che c'è su disco
+        ''' (<see cref="ArchivioRegistro.Carica"/>). Tenerlo allineato a mano vorrebbe dire
+        ''' avere due verità da aggiornare invece di una da rileggere.</para>
+        ''' <para><b>Solo dentro <c>opportunita\</c></b>, e non per diffidenza verso chi
+        ''' chiama: il parametro è un percorso, e un percorso sbagliato qui non sbaglia un
+        ''' dato — porta via una cartella dell'utente che non c'entra niente.</para>
+        ''' </remarks>
+        Public Function Elimina(cartella As String) As Boolean
+
+            If String.IsNullOrWhiteSpace(cartella) Then
+                Throw New ArgumentException("Manca la cartella dell'opportunità.", NameOf(cartella))
+            End If
+
+            Dim piena As String = Normalizza(cartella)
+
+            If Not String.Equals(Normalizza(Path.GetDirectoryName(piena)),
+                                 Normalizza(_cartella.CartellaOpportunita),
+                                 StringComparison.OrdinalIgnoreCase) Then
+
+                Throw New ArgumentException(
+                    $"«{cartella}» non è una cartella-opportunità di questa cartella dati.",
+                    NameOf(cartella))
+
+            End If
+
+            If Not Directory.Exists(piena) Then Return False
+
+            Directory.Delete(piena, recursive:=True)
+
+            Return True
+
+        End Function
+
+        ''' <summary>
+        ''' Un percorso in forma piena e senza la barra finale: è la sola forma in cui due
+        ''' percorsi si possono confrontare, perché <c>opportunita</c> e
+        ''' <c>opportunita\</c> sono la stessa cartella e due stringhe diverse.
+        ''' </summary>
+        Private Shared Function Normalizza(percorso As String) As String
+
+            If String.IsNullOrEmpty(percorso) Then Return String.Empty
+
+            Return Path.GetFullPath(percorso).
+                   TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+
+        End Function
+
+        ''' <summary>
         ''' Le cartelle-opportunità esistenti, dalla più vecchia alla più recente: il nome
         ''' comincia con la data, quindi l'ordine alfabetico è già l'ordine del tempo.
         ''' </summary>

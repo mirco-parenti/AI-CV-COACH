@@ -376,6 +376,30 @@ il certificato per la firma) più quella.
   è contenuto di un'altra persona, e quella candidatura non va fotografata per il diario o per
   la demo finché quelle due righe stanno lì. *(Step 2.56.)*
 
+## Da «Elimina candidatura» in Home (2026-08-31)
+
+- **Il flusso D non ha più nessun segno nell'interfaccia.** «Aggiorna profilo» era il suo
+  unico segnaposto — un bottone spento in P1 col tooltip che diceva in quale tappa sarebbe
+  arrivato (regola 3.8 del cap. 03) — e ha ceduto il posto a «Elimina candidatura». La
+  sessione di aggiornamento del profilo resta prevista dal progetto (cap. 12, flusso D) e
+  in P2 il suo bottone c'è: quel che è sparito è il richiamo dalla Home. *Da decidere: o il
+  flusso D si fa, e allora la sua porta è quella di P2; o si dichiara fuori dalla 1.0, e
+  allora va scritto nel cap. 12 invece di restare implicito in un bottone che non c'è più.*
+- **Un collaudo della `FinestraConfermaCritica` è cieco, ed è stato provato.**
+  `SenzaLaParolaNemmenoUnClicConferma` preme il bottone e verifica che non abbia
+  confermato; ma `PerformClick` passa da `CanSelect`, che su una finestra **mai mostrata**
+  è falso — il clic non scatta affatto. Falsificato il 2026-08-31 togliendo la guardia dal
+  gestore: il collaudo è rimasto **verde**. Non è un difetto del prodotto (la guardia c'è
+  ed è giusta, ed è l'ultima porta davanti a un'azione che non si disfa): è un collaudo
+  che non prova quel che dice, cioè il caso della regola 14. *Da rifare in una forma che
+  possa diventare rossa, o da dichiarare esplicitamente come nota nel banco — com'è stato
+  fatto nei `CollaudiFinestraConferma`, dove quel collaudo non si è scritto affatto.*
+- **Le conferme di livello 5 ora hanno due forme.** La `FinestraConferma` (cap. 03.4) per
+  «Elimina candidatura», e la `MessageBox` Sì/No per lo «Scarta» di P4 e per «Svuota i dati
+  di navigazione» delle Impostazioni. Non è una divergenza da chiudere di corsa — il verbo
+  sul bottone serve dove il gesto cancella qualcosa — ma è una scelta da rendere esplicita:
+  o le altre conferme di livello 5 passano di lì, o il cap. 03.3 dice perché no.
+
 ## Chiuse
 
 - ✅ **`scegli_riga` toccava solo il primo elenco della finestra** *(aperta il 2026-08-24 col

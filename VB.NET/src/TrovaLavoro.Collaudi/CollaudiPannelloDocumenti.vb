@@ -1439,6 +1439,41 @@ Namespace Ui
         ''' con un profilo salvato, il generatore finto che gli si vuol dare e un archivio
         ''' documenti <b>senza stampante</b>.
         ''' </summary>
+        ' ==================================================================
+        ' La candidatura eliminata dalla Home (cap. 11.5)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Async Function IDocumentiLascianoAndareLaCandidaturaEliminata() As Task
+
+            ' Qui il rischio è il più concreto dei tre pannelli: «Rigenera» e le
+            ' esportazioni scrivono nella cartella della candidatura, e su un documento
+            ' sopravvissuto alla sua cartella la ricreerebbero.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim dove As String = candidatura.Cartella
+
+                    Assert.IsFalse(pannello.Dimentica(dove & "-di-un-altra"),
+                                   "una candidatura che non è la sua non lo riguarda")
+                    Assert.IsNotNull(pannello.Candidatura, "e infatti la sua ce l'ha ancora")
+
+                    contesto.Opportunita.Elimina(dove)
+
+                    Assert.IsTrue(pannello.Dimentica(dove), "questa invece era proprio la sua")
+                    Assert.IsNull(pannello.Candidatura, "e non la tiene più in mano")
+                    Assert.AreEqual(String.Empty, Casella(pannello, "txtCv").Text,
+                                    "le colonne tornano vuote")
+                End Function)
+
+        End Function
+
         Private Shared Async Function ConPannelloAsync(
                 generatore As GeneratoreFinto,
                 prova As Func(Of PannelloDocumenti, ContestoApp, ArchivioDocumenti, Task),
