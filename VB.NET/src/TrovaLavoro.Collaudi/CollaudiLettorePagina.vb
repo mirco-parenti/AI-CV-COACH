@@ -244,6 +244,132 @@ Namespace Web
 
         End Sub
 
+        ' --- Il contorno del portale (2026-08-30) ---------------------------------------
+
+        ''' <summary>
+        ''' Il menù del sito e il piè di pagina non entrano nel testo dell'annuncio.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il difetto era piccolo e vero: il testo catturato cominciava con «Passa a
+        ''' contenuto principale, Homepage, Recensioni aziendali…» e finiva col piè di
+        ''' pagina. L'AI lo ignora — ma la casella di P4 è dove l'utente rilegge e corregge
+        ''' quel che ha preso, e la prima cosa che ci leggeva era il menù di Indeed.
+        ''' </remarks>
+        <TestMethod, TestCategory("Reale")>
+        Public Sub IlContornoDelPortaleNonEntraNelTesto()
+
+            Dim letta As PaginaLetta = Nothing
+
+            ConVista(
+                Async Function(vista) As Task
+                    Await CaricaAsync(vista,
+                        PaginaCol("<header id='gnav'>" &
+                                  "<a href='#contenuto'>Passa a contenuto principale</a>" &
+                                  "<nav>Homepage · Recensioni aziendali · Esplora stipendi</nav>" &
+                                  "</header>" &
+                                  AnnuncioInPagina() &
+                                  "<footer>Guida alla carriera · Cerca annunci · Chi siamo</footer>"))
+                    letta = Await New LettorePagina(vista.CoreWebView2).LeggiAsync()
+                End Function)
+
+            Assert.DoesNotContain("Passa a contenuto principale", letta.Testo, "la testata resta fuori")
+            Assert.DoesNotContain("Recensioni aziendali", letta.Testo, "il menù pure")
+            Assert.DoesNotContain("Guida alla carriera", letta.Testo, "e il piè di pagina")
+            Assert.IsTrue(letta.Testo.StartsWith("Magazziniere", StringComparison.Ordinal),
+                          "così la prima riga che si legge è l'annuncio")
+
+        End Sub
+
+        ''' <summary>
+        ''' La testata <b>dentro l'articolo</b> non è la testata del sito, e lì c'è quel che
+        ''' l'annuncio dice di sé.
+        ''' </summary>
+        ''' <remarks>
+        ''' È il criterio dello standard, ed è la difesa che tiene: <c>header</c> e
+        ''' <c>footer</c> valgono per la pagina solo <b>fuori</b> da <c>article</c>,
+        ''' <c>aside</c>, <c>main</c>, <c>nav</c> e <c>section</c>. Qui dentro non c'è
+        ''' nessun <c>h1</c> apposta: se ci fosse, il collaudo resterebbe verde per l'altra
+        ''' ragione, e di questa non direbbe niente.
+        ''' </remarks>
+        <TestMethod, TestCategory("Reale")>
+        Public Sub LaTestataDentroLArticoloNonEQuellaDelSito()
+
+            Dim letta As PaginaLetta = Nothing
+
+            ConVista(
+                Async Function(vista) As Task
+                    Await CaricaAsync(vista,
+                        PaginaCol("<header id='gnav'><nav>Homepage · Esplora stipendi</nav></header>" &
+                                  "<main><article>" &
+                                  "<header><p>Rossi S.p.A. — Genova — pubblicato 2 giorni fa</p></header>" &
+                                  "<p>" & UnParagrafoLungo() & "</p>" &
+                                  "<footer><p>Codice offerta 12345</p></footer>" &
+                                  "</article></main>"))
+                    letta = Await New LettorePagina(vista.CoreWebView2).LeggiAsync()
+                End Function)
+
+            Assert.Contains("Rossi S.p.A.", letta.Testo, "chi offre il posto è dentro l'articolo")
+            Assert.Contains("Codice offerta 12345", letta.Testo, "e il suo piè di pagina è suo")
+            Assert.DoesNotContain("Esplora stipendi", letta.Testo, "mentre quella del sito se ne va")
+
+        End Sub
+
+        ''' <summary>
+        ''' Una testata che porta il <b>titolo</b> non si toglie, nemmeno se è di pagina.
+        ''' </summary>
+        ''' <remarks>
+        ''' L'asimmetria, scritta come collaudo: sbagliarsi in un verso costa il titolo
+        ''' dell'annuncio, nell'altro costa una riga di logo. Nel dubbio si tiene — e il
+        ''' menù dentro la testata risparmiata cade lo stesso, perché un <c>nav</c> resta un
+        ''' <c>nav</c> anche là dentro.
+        ''' </remarks>
+        <TestMethod, TestCategory("Reale")>
+        Public Sub UnaTestataColTitoloDellAnnuncioNonSiToglie()
+
+            Dim letta As PaginaLetta = Nothing
+
+            ConVista(
+                Async Function(vista) As Task
+                    Await CaricaAsync(vista,
+                        PaginaCol("<header><h1>Magazziniere</h1>" &
+                                  "<p>Rossi S.p.A. — Genova</p>" &
+                                  "<nav>Homepage · Esplora stipendi</nav></header>" &
+                                  "<div><p>" & UnParagrafoLungo() & "</p></div>"))
+                    letta = Await New LettorePagina(vista.CoreWebView2).LeggiAsync()
+                End Function)
+
+            Assert.Contains("Magazziniere", letta.Testo, "il titolo non si perde per un dubbio")
+            Assert.Contains("Rossi S.p.A.", letta.Testo, "e nemmeno chi offre il posto")
+            Assert.DoesNotContain("Esplora stipendi", letta.Testo,
+                                  "ma il menù lì dentro cade quando ci si scende")
+
+        End Sub
+
+        ''' <summary>
+        ''' Un contorno che dentro ha il contenuto principale non è un contorno.
+        ''' </summary>
+        <TestMethod, TestCategory("Reale")>
+        Public Sub UnContornoCheContieneIlContenutoNonSiToglie()
+
+            Dim letta As PaginaLetta = Nothing
+
+            ConVista(
+                Async Function(vista) As Task
+                    Await CaricaAsync(vista,
+                        PaginaCol("<footer role='contentinfo'>" &
+                                  "<nav>Chi siamo · Supporto</nav>" &
+                                  "<main><p>" & UnParagrafoLungo() & "</p></main>" &
+                                  "</footer>"))
+                    letta = Await New LettorePagina(vista.CoreWebView2).LeggiAsync()
+                End Function)
+
+            Assert.Contains("Cerchiamo un magazziniere", letta.Testo,
+                            "un sito fatto male non è una buona ragione per cancellargli l'annuncio")
+            Assert.DoesNotContain("Chi siamo", letta.Testo,
+                                  "e il menù lì dentro se ne va lo stesso")
+
+        End Sub
+
         ' ==================================================================
         ' Attrezzi
         ' ==================================================================

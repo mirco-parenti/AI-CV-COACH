@@ -191,6 +191,40 @@ banner lo cerca due volte: percorrendo la pagina, dove lo si toglie; e con una s
 mirata, perché quando l'utente ha selezionato il testo col mouse la pagina non si percorre
 affatto (R5) e il banner non passerebbe mai per le mani di chi lo leva.*
 
+*E c'era un rumore che si leggeva prima dell'annuncio* *(2026-08-30, stessa segnalazione)*.
+Il testo catturato cominciava col **menù del portale** — «Passa a contenuto principale,
+Homepage, Recensioni aziendali, Esplora stipendi, Accedi…» — e finiva col **piè di pagina**
+(«Guida alla carriera, Cerca annunci, Paesi, Chi siamo»). All'analisi non fa danno: l'AI lo
+ignora. Ma la casella di P4 non serve solo a passare il testo all'AI — serve a **far
+rileggere all'utente quel che si è preso**, ed è lì che si correggono le cose. La prima cosa
+che ci si leggeva non era l'annuncio.
+
+Si tolgono perciò le **regioni di contorno**, con il criterio dello standard invece che con
+un elenco di classi CSS che invecchia: `nav` e `role=navigation` sempre — la navigazione non
+contiene mai un annuncio — più `header` e `footer` **di pagina**, che per lo standard sono
+tali solo *fuori* da `article`, `aside`, `main`, `nav` e `section`. La testata dentro
+l'articolo, dov'è il titolo dell'annuncio, non è la testata del sito e non si tocca.
+
+**L'asimmetria decide i casi dubbi**, ed è la stessa dei cookie: un contorno che dentro ha il
+contenuto principale — o anche solo un `h1` — non si toglie, perché sbagliarsi in un verso
+costa il **titolo dell'annuncio** e nell'altro costa una riga di logo. E costa poco anche
+quando si sbaglia in quel verso: il menù dentro una testata risparmiata cade lo stesso
+quando ci si scende, perché un `nav` resta un `nav` anche là dentro.
+
+*Provato dal vivo su Indeed*: della testata e del piè di pagina non resta niente. Restano tre
+righe del modulo di ricerca del portale — «Cosa / Dove / Cerca lavoro» — che non stanno in
+nessuna regione di contorno: sono contenuto della pagina, e per toglierle servirebbe indovinare
+invece che leggere lo standard. **Limite dichiarato, non difetto.**
+
+*Una nota di metodo, pagata in questa stessa prova.* Confrontare due catture della stessa
+pagina di un portale per misurare l'effetto di una modifica **non è una misura**: fra un
+caricamento e l'altro Indeed cambia da sé — una volta il riquadro «Accedi con Google», una
+volta una sezione di articoli in fondo, una volta la schermata di accesso al posto
+dell'annuncio. Venti righe comparse dal nulla sembravano l'effetto di una cura, e non lo
+erano: le due catture, con e senza quella cura, erano **identiche byte per byte**. Quel che si
+misura sul portale è se il rumore che si voleva togliere è sparito; tutto il resto va misurato
+nel banco, su una pagina che sta ferma.
+
 Due cose che il programma **non** fa, e sono decisioni:
 - **non indovina** se la pagina sia un elenco. A dirlo è l'analisi, con lo schema vuoto;
   l'unica cosa che si controlla prima è che una pagina da mandare ci sia — sotto un

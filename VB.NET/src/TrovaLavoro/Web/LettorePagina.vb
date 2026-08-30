@@ -471,6 +471,23 @@ Namespace Web
         ''' <see cref="MinimoDellAvvisoSuiCookie"/>…<see cref="MassimoDellAvvisoSuiCookie"/>
         ''' caratteri. Chi lo trova non lo cancella e basta: alza <c>consenso</c>, perché a
         ''' chi ha premuto si deve poter dire <i>perché</i> non c'era niente da leggere.</para>
+        ''' <para><b>Il contorno del portale non è l'annuncio</b> <i>(2026-08-30)</i>. Il
+        ''' testo catturato cominciava col menù del sito — «Passa a contenuto principale,
+        ''' Homepage, Recensioni aziendali…» — e finiva col piè di pagina: rumore che poi
+        ''' l'AI ignora, ma che è la <b>prima cosa</b> che l'utente legge nella casella di
+        ''' P4, dove il testo lo deve poter rileggere e correggere. Si tolgono perciò le
+        ''' <b>regioni di contorno</b>: <c>nav</c> e <c>role=navigation</c> sempre — la
+        ''' navigazione non contiene mai un annuncio — più <c>header</c> e <c>footer</c>
+        ''' <i>di pagina</i>, che per lo standard sono tali solo <b>fuori</b> da
+        ''' <c>article</c>, <c>aside</c>, <c>main</c>, <c>nav</c> e <c>section</c>: la
+        ''' testata dentro l'articolo, dove sta il titolo dell'annuncio, non è la testata
+        ''' del sito e non si tocca.</para>
+        ''' <para><b>E l'asimmetria decide i casi dubbi.</b> Un contorno che dentro ha il
+        ''' contenuto principale — o anche solo un <c>h1</c> — non si toglie, perché
+        ''' sbagliarsi in un verso costa il <b>titolo dell'annuncio</b> e nell'altro costa
+        ''' una riga di logo. Del resto un menù che resta dentro una testata risparmiata
+        ''' cade lo stesso, quando ci si scende: il <c>nav</c> lì dentro è ancora un
+        ''' <c>nav</c>.</para>
         ''' <para><b>Perché togliere un ramo obbliga a scendere.</b> Quando dentro un
         ''' elemento non ci sono blocchi si prendeva il suo <c>innerText</c> in un colpo
         ''' solo, ed è ancora così — ma solo se non si è tolto niente. <c>innerText</c>
@@ -528,11 +545,22 @@ Namespace Web
                    $"    if (t.length < {minimoAvviso} || t.length > {massimoAvviso}) return false;" &
                    "    return t.toLowerCase().indexOf('cookie') >= 0;" &
                    "  }" &
+                   "  function eUnContorno(e) {" &
+                   "    var g = e.tagName, r = (e.getAttribute('role') || '').toLowerCase();" &
+                   "    if (!(g === 'NAV' || r === 'navigation' || r === 'banner' || r === 'contentinfo')) {" &
+                   "      if (g !== 'HEADER' && g !== 'FOOTER') return false;" &
+                   "      if (e.parentElement &&" &
+                   "          e.parentElement.closest('article, aside, main, nav, section')) return false;" &
+                   "    }" &
+                   "    return !e.querySelector('main, article, [role=main], h1');" &
+                   "  }" &
                    "  var trovatoUnAvviso = false;" &
                    "  function daTogliere(e) {" &
-                   "    if (!eUnAvvisoSuiCookie(e)) return false;" &
-                   "    trovatoUnAvviso = true;" &
-                   "    return true;" &
+                   "    if (eUnAvvisoSuiCookie(e)) {" &
+                   "      trovatoUnAvviso = true;" &
+                   "      return true;" &
+                   "    }" &
+                   "    return eUnContorno(e);" &
                    "  }" &
                    "  function raccogli(e, pezzi) {" &
                    "    var figli = e.childNodes, dentroCiSonoBlocchi = false, hoTolto = false;" &
