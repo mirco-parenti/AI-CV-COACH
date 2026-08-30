@@ -2653,3 +2653,32 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Agire quando il testo combacia in una sola lista, invece di chiedere sempre.** La domanda in più costa un giro e non aggiunge niente: se le parole che ho scritto io stanno in una riga sola, quella è la riga. La domanda serve quando ce ne sono due, ed è lì che l'attrezzo si ferma.
 
 > 💡 **Il difetto più grosso della giornata non stava in quel che ho curato: stava sulla strada per provarlo.** Il debito annotato era uno, e piccolo; provandolo dal vivo ne sono usciti altri due, e uno dei due — la finestra che non era una finestra — non l'avrebbe trovato nessun collaudo automatico, perché rende cieco proprio l'attrezzo con cui si guarda. È la terza volta in una settimana che *guardare* trova più di quanto trovi il banco: qui però con una torsione in più, perché a guardare era lo strumento e il difetto era **dentro l'occhio**, non davanti.
+
+
+### Step 2.53 — Il banner nuovo, e il blu che teneva in vita il vecchio
+
+*Il marchio cambia sfondo: dentro la cornice non c'è più la spirale a spire concentriche, ma una girella a spicchi rosso e argento tagliata sulle diagonali dello scudetto Aviolab. È un cambio che avevo lavorato fuori dal repo giorni fa e mai portato dentro — e proprio per questo la sostituzione ha stanato una cosa che non mi aspettavo: il vecchio marchio non viveva solo nei PNG, viveva anche in una riga di codice.*
+
+**Cosa ho fatto**
+- **Ho messo il disegno nuovo al posto del vecchio**: la sorgente (`immagini/MASTER-solo-disegno-1536x1024.png`), la testata del README e la **schermata di avvio dentro l'eseguibile**, che è una risorsa compilata e quindi vuole una build.
+- **Ho rigenerato i formati invece di ritagliarli a occhio.** I valori esatti — dove va il disegno sulla tela, il corpo del titolo e del sottotitolo, l'ancoraggio, il riempimento dei lati clonando la colonna di bordo — stavano già scritti nel `LEGGIMI.txt` della cartella di lavorazione, da quando i formati furono fatti la prima volta. Ho scritto un compositore che li applica.
+- **L'ho validato prima di fidarmene**: rigenerando con quei valori il formato *già esistente* del 24 agosto, esce la stessa immagine. Solo allora l'ho usato sul disegno nuovo.
+- **Ho allineato `StileApp.FondoMarchio`**, che valeva `#000C38`: adesso è il blu dello stemma `#0B06B0`, lo stesso dell'accento.
+- **Ho aggiornato i due testi che descrivono il marchio**: il `LEGGIMI.md` degli asset (i quattro colori, e che lo stesso disegno alimenta lo splash) e la ricetta `prompt-logo.md`, che prende una **revisione 3**: il prompt non cambia, cambia la lavorazione.
+- **Provato**: banco a **1257 verdi** prima e dopo il cambio di colore, build Release senza errori, e lo **splash guardato dal vivo** sull'applicazione avviata su una cartella dati usa-e-getta.
+
+**Cosa ho imparato**
+- **Il repository era indietro di una revisione del marchio, e nessuno se n'era accorto.** I formati «definitivi» del 24 agosto — quelli con la tavolozza Aviolab — erano rimasti nella cartella di lavoro: dentro il repo c'era ancora la versione del 22, col fondo blu notte. Non è un difetto che qualcuno potesse trovare, perché nessuno confronta due immagini che stanno in due posti diversi; l'ha trovato la sostituzione, che ha messo i due file uno accanto all'altro.
+- **Un asset non è solo un file: ha un gemello nel codice.** Il fondo del banner era scritto **due volte** — nel PNG e in `StileApp.FondoMarchio` — perché la finestra dell'applicazione tiene quel colore *sotto* l'immagine. Cambiare solo il PNG avrebbe lasciato una banda di blu diverso attorno allo splash, ed è esattamente ciò che il commento di quella costante diceva da mesi, scritto da me. L'ho ritrovato cercando chi **nominava** il vecchio colore, non rileggendo il codice.
+- **Quella che sembrava una macchia era un antialias fuori posto.** Attorno alle barre del grafico i pixel andavano `(250,8,37)` → `(166,64,51)` → `(146,116,89)` → nero: due pixel che sfumano verso il *grigio*, perché nel disegno di partenza sotto quel bordo c'era un anello argento, mentre nella girella lì adesso c'è rosso. Non era sporco depositato: era il bordo giusto di un'altra immagine.
+
+**Dove ho faticato**
+- **Ho fatto cercare la macchia sbagliata per tre giri.** «Vicino alle tacchette del grafico» per me era chiarissimo, ma le prime diagnosi cadevano su un'ombra nera che non esiste — il nero, misurato, era tutto contorno legittimo — e su una frangia che si vedeva solo ingrandendo. Se ne è usciti quando invece di ragionare sui colori si è misurato un **profilo di pixel**, riga per riga, e si è visto dove il fondo diventava grigio.
+- **La pulizia automatica l'ho poi buttata.** Ricomposta com'era giusto — misurando quanto fondo vecchio traspariva e rimettendo quella stessa trasparenza sul fondo nuovo — il risultato tecnico era corretto e il fondo arrivava pulito fino al contorno. Guardandola accanto all'originale ho scelto l'originale: i bordi erano diventati più duri, e per due pixel non vale la pena irrigidire tutta l'illustrazione.
+
+**Cosa ho deciso e perché**
+- **Il banner entra così com'è, senza ritocchi.** L'immagine che ho scelto è quella uscita dalla lavorazione del 29 agosto, non la versione «pulita»: la macchia che mi dava fastidio, vista a schermo intero e non al microscopio, costa meno del bordo indurito che la cura si portava dietro.
+- **`FondoMarchio` e `Accento` restano due costanti**, anche se oggi hanno lo stesso valore. Sono due ruoli: se un domani il marchio cambia fondo, cambia il marchio e non l'accento dei bottoni.
+- **La ricetta del logo si annota, non si riscrive.** Il prompt che genera il disegno non è cambiato: è cambiato quel che gli si fa dopo. Perciò `prompt-logo.md` prende una revisione in testa che dice esattamente questo, e chi lo rigenerasse sa che otterrà il disegno *prima* della lavorazione.
+
+> 💡 **Il marchio non stava dove pensavo che stesse.** Credevo di dover cambiare due immagini; erano tre file, una costante di codice e due testi che lo descrivevano — e la costante era la sola che, restando indietro, si sarebbe vista a occhio nudo al primo avvio dell'applicazione. Le cose che un progetto ripete in due posti si scoprono quando una delle due cambia: fino a quel giorno sono d'accordo per caso.

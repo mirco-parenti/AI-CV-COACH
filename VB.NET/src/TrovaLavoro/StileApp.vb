@@ -33,12 +33,17 @@ Public Module StileApp
     ' --- Colori (cap. 03.2) ---
 
     ''' <summary>
-    ''' Il blu notte del marchio: è il fondo della schermata di avvio e dell'immagine
+    ''' Il blu del marchio: è il fondo della schermata di avvio e dell'immagine
     ''' che apre «Informazioni su…» (cap. 13.5). Sta qui perché nessun form scriva un
     ''' colore a mano — e perché la finestra ce l'ha sotto l'immagine, dove si vedrebbe
     ''' subito una banda di un blu leggermente diverso.
+    ''' <para>Dal 2026-08-30 è il blu Aviolab, lo stesso di <see cref="Accento"/>: il
+    ''' banner nuovo porta cornice e fasce di quel blu, e il vecchio blu notte
+    ''' <c>#000C38</c> — che alla tavolozza dello stemma non apparteneva — lasciava
+    ''' una banda visibile sotto l'immagine. Restano due costanti perché sono due
+    ''' ruoli: se un domani il marchio cambia fondo, cambia questa e non l'accento.</para>
     ''' </summary>
-    Public ReadOnly FondoMarchio As Color = ColorTranslator.FromHtml("#000C38")
+    Public ReadOnly FondoMarchio As Color = ColorTranslator.FromHtml("#0B06B0")
 
     ''' <summary>Testo normale, valori, titoli di sezione.</summary>
     Public ReadOnly TestoPrimario As Color = ColorTranslator.FromHtml("#212529")

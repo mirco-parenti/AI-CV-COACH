@@ -337,6 +337,16 @@ il certificato per la firma) più quella.
   (`controlli`, `rispondi_finestra`) vanno benissimo.
   *(`strumenti/mcp-collaudi/interfaccia.ps1`; README dello strumento.)*
 
+## Dal cambio del marchio (2026-08-30)
+
+- **L'icona dell'applicazione porta ancora il disegno vecchio.** Col banner nuovo sono
+  cambiati la sorgente, la testata del README e la schermata di avvio dentro l'exe, ma
+  `VB.NET/src/TrovaLavoro/Risorse/TrovaLavoro.ico` no: è stata una scelta, per non allungare
+  la stessa passata, non una dimenticanza. La ricetta per rifarla c'è ed è fuori dal repo
+  (`LOGO PROJECT/genera-icona.ps1`); si rigenera dal nuovo `MASTER-solo-disegno-1536x1024.png`
+  e vuole una build, come lo splash. Finché non si fa, l'icona in barra e sul file dell'exe
+  mostra un marchio che il programma non ha più. *(cap. 13.5; `immagini/LEGGIMI.md`.)*
+
 ## Chiuse
 
 - ✅ **`scegli_riga` toccava solo il primo elenco della finestra** *(aperta il 2026-08-24 col

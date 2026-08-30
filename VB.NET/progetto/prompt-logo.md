@@ -6,6 +6,16 @@ Decisioni: slash = prima/dopo della stessa persona · due prompt (illustrazione 
 flat vector con glow neon solo sulle frecce · palette dei codici del progetto
 (#0B06B0 blu, #FA0825 rosso, #28A745 verde).
 
+**Revisione 3, 2026-08-30: il prompt non cambia, cambia la lavorazione.** L'immagine che
+questo prompt genera ha, dentro la cornice, un fondo blu piatto; da oggi quel fondo interno
+è sostituito in post-produzione con una **girella a spicchi** rosso `#FA0825` e argento
+`#C0CFCB`, tagliata sulle diagonali dello scudetto Aviolab e centrata sulla moneta. Il blu
+resta dov'era — cornice, fasce laterali, fondo del lettering — ed è quello dello stemma
+(`#0B06B0`), non più il blu notte `#000C38` che alla tavolozza non apparteneva. Chi
+rigenera il disegno da questo prompt ottiene perciò il disegno **prima** della lavorazione;
+la sorgente già lavorata, da cui nascono tutti i formati, è
+[`../../immagini/MASTER-solo-disegno-1536x1024.png`](../../immagini/MASTER-solo-disegno-1536x1024.png).
+
 ---
 
 ## PROMPT A — illustrazione orizzontale (key visual: splash, primo avvio, README, banner)
