@@ -86,11 +86,15 @@ Namespace Ui
 
         End Sub
 
-        ''' <summary>Lo scudo sta in mezzo, e allo schermo giusto.</summary>
+        ''' <summary>Lo scudo sta in mezzo — un filo più su — e allo schermo giusto.</summary>
         ''' <remarks>
-        ''' Il secondo monitor non è un capriccio: con due schermi il centro è quello dove
-        ''' l'utente sta guardando, e un conto fatto sulle sole misure ci metterebbe lo
-        ''' scudo sullo schermo di sinistra.
+        ''' <para>Il secondo monitor non è un capriccio: con due schermi il centro è quello
+        ''' dove l'utente sta guardando, e un conto fatto sulle sole misure ci metterebbe lo
+        ''' scudo sullo schermo di sinistra.</para>
+        ''' <para>In verticale il centro non è 540 ma <b>520</b>: il complesso sta
+        ''' <see cref="ScudoDiCaricamento.AlzataInPixel">venti pixel</see> più in alto del
+        ''' centro, perché a video una figura appesa esattamente a metà sembra cadere in
+        ''' basso <i>(chiesto da Mirco il 2026-08-31, guardandolo)</i>.</para>
         ''' </remarks>
         <TestMethod>
         Public Sub LoScudoStaInMezzoAlloSchermoCheGliSiDa()
@@ -99,8 +103,31 @@ Namespace Ui
             Dim dove As Rectangle = ScudoDiCaricamento.RiquadroSulloSchermo(secondo)
 
             Assert.AreEqual(2880, dove.Left + dove.Width \ 2, "in mezzo per il lungo")
-            Assert.AreEqual(540, dove.Top + dove.Height \ 2, "e per il largo")
+            Assert.AreEqual(540 - ScudoDiCaricamento.AlzataInPixel, dove.Top + dove.Height \ 2,
+                            "e per il largo, meno l'alzata")
             Assert.IsTrue(secondo.Contains(dove), "e tutto dentro il suo schermo")
+
+        End Sub
+
+        ''' <summary>L'alzata è un'alzata: verso l'alto, e della misura giusta.</summary>
+        ''' <remarks>
+        ''' Da sola l'asserzione qui sopra passerebbe anche con lo scudo abbassato di venti
+        ''' pixel, se il numero fosse scritto con lo stesso segno sbagliato in tutti e due i
+        ''' posti. Qui il confronto è con il centro vero dello schermo, e il verso si
+        ''' guarda per quello che è.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LAlzataVaVersoLAlto()
+
+            Dim schermo As New Rectangle(0, 0, 1920, 1080)
+            Dim dove As Rectangle = ScudoDiCaricamento.RiquadroSulloSchermo(schermo)
+
+            Dim centroDelloSchermo As Integer = 1080 \ 2
+            Dim centroDelloScudo As Integer = dove.Top + dove.Height \ 2
+
+            Assert.IsLessThan(centroDelloSchermo, centroDelloScudo, "sta più in alto del centro")
+            Assert.AreEqual(ScudoDiCaricamento.AlzataInPixel, centroDelloSchermo - centroDelloScudo,
+                            "e di esattamente venti pixel")
 
         End Sub
 

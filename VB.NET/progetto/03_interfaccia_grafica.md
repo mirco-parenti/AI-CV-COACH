@@ -506,6 +506,11 @@ Prefissi standard, nome semantico in PascalCase: `pnl` (Panel), `btn` (Button),
     lascerebbe attorno al disegno l'alone del colore reso invisibile.
   - **Sta sopra lo schermo di chi guarda**, non «sul primo»: con due monitor il centro
     dello schermo è il centro di quello dove sta la finestra principale.
+  - **Venti pixel più in alto del centro** *(chiesto da Mirco il 2026-08-31, guardandolo a
+    video)*. Non è una correzione di un conto sbagliato — il centro geometrico era esatto —
+    ma di come lo legge l'occhio: una figura appesa esattamente a metà di un rettangolo
+    sembra cadere verso il basso. L'alzata vale per il **complesso**: si sposta la
+    finestra, non il disegno dentro di lei, o la ruota si scollerebbe dallo scudo.
   - Il filo che lo accende è **uno solo** — lo stesso che spegne la barra di navigazione
     (cap. 02.6) e fa parlare la fascia di stato — così i tre segnali non possono
     smentirsi a vicenda.

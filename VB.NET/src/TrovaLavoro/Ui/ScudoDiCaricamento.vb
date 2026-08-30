@@ -38,6 +38,19 @@ Public NotInheritable Class ScudoDiCaricamento
     Public Const QuotaOrizzontale As Double = 2.0 / 10.0
     Public Const QuotaVerticale As Double = 2.0 / 6.0
 
+    ''' <summary>
+    ''' Di quanti pixel il complesso sta <b>più in alto</b> del centro dello schermo.
+    ''' </summary>
+    ''' <remarks>
+    ''' Venti pixel, chiesti da Mirco guardandolo a video il 2026-08-31. Non è una
+    ''' correzione di un conto sbagliato — il centro geometrico era giusto — ma di come lo
+    ''' legge l'occhio: una figura appesa esattamente a metà di un rettangolo sembra
+    ''' cadere verso il basso, e si guarda meglio un filo più su. Vale per il
+    ''' <b>complesso</b>, scudo e ruota insieme: si sposta la finestra, non il disegno
+    ''' dentro di lei, o la ruota si scollerebbe dallo scudo.
+    ''' </remarks>
+    Public Const AlzataInPixel As Integer = 20
+
     ''' <summary>Quanti pallini formano la ruota.</summary>
     Public Const Pallini As Integer = 12
 
@@ -87,7 +100,7 @@ Public NotInheritable Class ScudoDiCaricamento
 
         Return New Rectangle(
             schermo.Left + (schermo.Width - misura.Width) \ 2,
-            schermo.Top + (schermo.Height - misura.Height) \ 2,
+            schermo.Top + (schermo.Height - misura.Height) \ 2 - AlzataInPixel,
             misura.Width, misura.Height)
 
     End Function
