@@ -32,7 +32,7 @@ Public Class FinestraAvvio
 
     ''' <summary>
     ''' Quanta parte dello schermo può occupare al massimo. L'immagine è disegnata per
-    ''' 800x648, che su un portatile piccolo — o su uno schermo al 150% — sarebbe metà
+    ''' 800x702, che su un portatile piccolo — o su uno schermo al 150% — sarebbe metà
     ''' desktop: sotto questa quota si rimpicciolisce mantenendo le proporzioni.
     ''' </summary>
     Public Const QuotaSchermo As Double = 0.7

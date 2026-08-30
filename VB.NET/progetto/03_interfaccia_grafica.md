@@ -215,7 +215,7 @@ riporta dove si era (candidatura, profilo o Home).*
   Come le altre, non chiama l'AI: raccoglie una decisione e la restituisce al pannello.
 - **Con T9e arrivano le due che non chiedono niente a nessuno** *(2026-08-22)*. La
   **schermata di avvio** (`FinestraAvvio`) copre il montaggio: senza bordi, centrata sullo
-  schermo, sopra tutto, e con dentro il marchio disegnato per 800×648. Perché abbia senso
+  schermo, sopra tutto, e con dentro il marchio disegnato per 800×702. Perché abbia senso
   ha un **tempo minimo** a video (**cinque secondi**, dal 2026-08-30), ed è una misura e non
   un gusto: dal doppio clic alla finestra passano **265–330 ms**, e una schermata legata al
   solo caricamento lampeggerebbe senza che nessuno la legga. Ma il minimo vale per chi

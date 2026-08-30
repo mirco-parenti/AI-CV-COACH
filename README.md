@@ -1,4 +1,4 @@
-![TrovaLavoro — crea il tuo miglior CV e rispondi subito all'annuncio di lavoro perfetto per te](immagini/TrovaLavoro-readme-1200x972.png)
+![TrovaLavoro — crea il tuo miglior CV e rispondi subito all'annuncio di lavoro perfetto per te](immagini/TrovaLavoro-readme-1200x1052.png)
 
 # AI-CV-COACH
 

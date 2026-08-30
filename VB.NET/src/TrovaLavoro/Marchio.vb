@@ -66,7 +66,7 @@ Public Module Marchio
     End Property
 
     ''' <summary>
-    ''' La schermata di avvio (800x648), o <c>Nothing</c> se la risorsa non c'è.
+    ''' La schermata di avvio (800x702), o <c>Nothing</c> se la risorsa non c'è.
     ''' </summary>
     ''' <remarks>
     ''' Torna sempre la stessa immagine, che non va liberata da chi la riceve: la

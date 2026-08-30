@@ -2772,3 +2772,30 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **La cartella di produzione la tratto come le altre.** Non ci lavoro più davvero da settimane, e tenerla «vera» significava solo tenere i miei dati in un posto che apro per sbaglio.
 
 > 💡 **«Elimina profilo» elimina il profilo, e questo non è un difetto: è che io leggevo quella parola come «elimina i miei dati».** Il profilo è una cosa sola in una cartella; i dati veri erano già colati nelle candidature il giorno in cui le avevo generate, nei documenti esportati, nei backup, in un `documenti.json` che si portava dietro i nomi dei file dei documenti d'identità. La domanda giusta non era «dov'è il profilo», era **«chi ha copiato il profilo, e quando»** — ed è la stessa domanda che il 29 agosto aveva trovato il colore vecchio nascosto in una costante.
+
+### Step 2.57 — Il timbro nella fascia, e il difetto che si nascondeva dietro il proprio colore
+
+*Il banner è arrivato alla sua forma definitiva: lo scudetto Aviolab entra nella fascia del testo come timbro, il nome prende un contorno nero che salda le lettere in un blocco solo, il sottotitolo diventa bianco pieno. Per far posto al timbro la fascia si alza, e alzandosi cambia l'altezza di ogni formato — che sembrava un dettaglio di grafica ed è invece la sola cosa di tutta la giornata che ha toccato il codice. Ho trovato due cose che non stavo cercando: nel repository c'era una versione del disegno anteriore all'ultima ripulitura, e una finestra che avrebbe rimpicciolito il marchio senza che nessuno potesse vederlo.*
+
+**Cosa ho fatto**
+- **Ho messo i tre file nuovi**: la sorgente, la testata del README e la schermata di avvio dentro l'eseguibile. Tutti e tre **bit-identici** alla cartella dei definitivi, verificato con `cmp` dopo aver finito, non solo dopo aver copiato.
+- **Ho rinominato la testata** da `TrovaLavoro-readme-1200x972.png` a `-1200x1052.png`, con `git mv` invece di sovrascriverla: il nome porta la misura, e una misura sbagliata dentro il nome è una bugia che nessun controllo legge.
+- **Ho aggiornato le misure nel codice**: la finestra di avvio da 800×648 a 800×702 (due valori nel `Designer` e due commenti), e il collaudo che sorveglia l'altezza della risorsa incorporata.
+- **Ho adeguato «Informazioni su…»**: il riquadro del marchio da 520×421 a **520×456**, le otto righe sotto scalate di 35 pixel, la finestra da 548×648 a 548×683.
+- **Ho falsificato prima di dirlo fatto**: rimesso `648` nel collaudo dell'altezza, che è diventato **rosso** dicendo «Previsto `<648>`. Effettivo `<702>`». Ripristinato con `cp`, banco di nuovo verde — **1257 verdi**, 0 falliti.
+- **Ho guardato a video** sull'eseguibile di riferimento appena rifatto: la schermata di avvio col timbro, e «Informazioni su…» dove il marchio riempie il riquadro senza strisce ai lati.
+- **Ho aggiornato i testi**: `immagini/LEGGIMI.md` (misure, nome del file, il timbro e il contorno, il sottotitolo bianco), `prompt-logo.md` con la revisione 4, il cap. 03.4 e la testata del README.
+
+**Cosa ho imparato**
+- **Nel repository c'era un disegno più vecchio di quello che credevo di avere.** Confrontando pixel per pixel la sorgente committata con quella della cartella di lavoro sono usciti **1.534 pixel diversi**, tutti in un rettangolo attorno all'istogramma: residui scuri rimasti dalla lavorazione, che nella cartella di lavoro erano già stati puliti un'ora dopo il commit. Nessun controllo poteva accorgersene, perché nessuno confronta due immagini che stanno in due posti diversi — è esattamente il difetto che avevo annotato il 30 agosto e che si è ripresentato subito.
+- **Il difetto peggiore della giornata sarebbe stato invisibile per costruzione.** Il riquadro del marchio in «Informazioni su…» era tagliato sulle proporzioni vecchie: con l'immagine nuova, più alta, si sarebbe rimpicciolita lasciando due strisce ai lati. Ma lo sfondo di quel riquadro è `StileApp.FondoMarchio`, cioè **lo stesso blu del banner**: le strisce non si sarebbero viste. Il marchio sarebbe semplicemente diventato più piccolo, e nessuno avrebbe saputo dire perché.
+- **Un collaudo che diventa rosso dice più di quel che gli si chiede.** Il rosso su `648` contro `702` non prova solo che il collaudo sorveglia l'altezza: prova anche che la risorsa **dentro l'eseguibile** è quella nuova, che è la cosa che volevo davvero sapere e che non avevo modo di guardare.
+
+**Dove ho faticato**
+- **Poco, e vale la pena dire perché**: quasi tutto il lavoro era già stato fatto dal `LEGGIMI.txt` della cartella dei definitivi, che porta i valori esatti, le due impaginazioni, i controlli da rifare se si tocca una manopola. Il tempo se l'è preso la **ricognizione** — trovare i cinque posti e i dodici file che si trascinano dietro una misura — non la modifica.
+
+**Cosa ho deciso e perché**
+- **Adeguare il riquadro invece di lasciar rimpicciolire l'immagine.** Costava dieci coordinate e una finestra 35 pixel più alta; l'alternativa era un marchio più piccolo del necessario in una finestra che esiste apposta per mostrarlo.
+- **L'icona dell'eseguibile resta indietro.** Porta ancora il disegno vecchio ed è già una voce di `in_sospeso.md`: un'icona è 16 pixel, e il disegno nuovo va guardato ridotto prima di dire che regge. Non è il lavoro di oggi.
+
+> 💡 **Un difetto che si nasconde dietro il proprio colore non è un caso fortunato: è il caso normale.** Le strisce ai lati del marchio sarebbero state dello stesso blu del marchio perché qualcuno — io, in una tappa precedente — aveva fatto la cosa giusta, cioè allineare il fondo del riquadro al fondo dell'immagine. La cura di ieri è ciò che avrebbe reso muto il difetto di oggi. Non c'è modo di trovarne uno così guardando lo schermo: si trova solo chiedendosi **chi altro dipende dalla misura che sto cambiando**.

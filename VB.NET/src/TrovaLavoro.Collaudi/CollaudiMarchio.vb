@@ -71,7 +71,7 @@ Namespace Ui
 
             Assert.IsNotNull(immagine, "la schermata di avvio è incorporata")
             Assert.AreEqual(800, immagine.Width, "larghezza come disegnata")
-            Assert.AreEqual(648, immagine.Height, "altezza come disegnata")
+            Assert.AreEqual(702, immagine.Height, "altezza come disegnata")
 
         End Sub
 
@@ -115,9 +115,9 @@ Namespace Ui
         <TestMethod>
         Public Sub SuUnoSchermoGrandeLaSchermataRestaComeDisegnata()
 
-            Dim misura As Size = FinestraAvvio.MisuraDaMostrare(New Size(800, 648), New Size(1920, 1080))
+            Dim misura As Size = FinestraAvvio.MisuraDaMostrare(New Size(800, 702), New Size(1920, 1080))
 
-            Assert.AreEqual(New Size(800, 648), misura, "sta comoda: non si tocca")
+            Assert.AreEqual(New Size(800, 702), misura, "sta comoda: non si tocca")
 
         End Sub
 
@@ -125,7 +125,7 @@ Namespace Ui
         Public Sub SuUnoSchermoPiccoloSiRimpicciolisceSenzaDeformarsi()
 
             ' 1024x768: 800 di larghezza sono già oltre la quota concessa.
-            Dim misura As Size = FinestraAvvio.MisuraDaMostrare(New Size(800, 648), New Size(1024, 768))
+            Dim misura As Size = FinestraAvvio.MisuraDaMostrare(New Size(800, 702), New Size(1024, 768))
 
             Assert.IsLessThan(800, misura.Width, "si è ridotta")
             Assert.IsLessThanOrEqualTo(CInt(1024 * FinestraAvvio.QuotaSchermo), misura.Width,
@@ -133,7 +133,7 @@ Namespace Ui
             Assert.IsLessThanOrEqualTo(CInt(768 * FinestraAvvio.QuotaSchermo), misura.Height,
                                        "in altezza come in larghezza")
 
-            Dim proporzioneOriginale As Double = 800.0 / 648.0
+            Dim proporzioneOriginale As Double = 800.0 / 702.0
             Dim proporzioneRidotta As Double = misura.Width / CDbl(misura.Height)
             Assert.AreEqual(proporzioneOriginale, proporzioneRidotta, 0.01,
                             "le proporzioni non si toccano: l'immagine non si schiaccia")
@@ -143,8 +143,8 @@ Namespace Ui
         <TestMethod>
         Public Sub SenzaUnoSchermoLaMisuraRestaQuellaDellImmagine()
 
-            Assert.AreEqual(New Size(800, 648),
-                            FinestraAvvio.MisuraDaMostrare(New Size(800, 648), Size.Empty),
+            Assert.AreEqual(New Size(800, 702),
+                            FinestraAvvio.MisuraDaMostrare(New Size(800, 702), Size.Empty),
                             "senza spazio noto non si inventa una riduzione")
 
         End Sub

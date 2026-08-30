@@ -30,7 +30,7 @@ Partial Class FinestraAvvio
         '
         Me.picSchermata.Dock = System.Windows.Forms.DockStyle.Fill
         Me.picSchermata.Name = "picSchermata"
-        Me.picSchermata.Size = New System.Drawing.Size(800, 648)
+        Me.picSchermata.Size = New System.Drawing.Size(800, 702)
         Me.picSchermata.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom
         Me.picSchermata.TabIndex = 0
         Me.picSchermata.TabStop = False
@@ -38,7 +38,7 @@ Partial Class FinestraAvvio
         'FinestraAvvio
         '
         Me.BackColor = StileApp.FondoMarchio
-        Me.ClientSize = New System.Drawing.Size(800, 648)
+        Me.ClientSize = New System.Drawing.Size(800, 702)
         Me.Controls.Add(Me.picSchermata)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
         Me.MaximizeBox = False

@@ -22,6 +22,16 @@ casa della lavorazione. Chi rigenera il disegno da questo prompt ottiene perciò
 già lavorata, da cui nascono tutti i formati, è
 [`../../immagini/MASTER-solo-disegno-1536x1024.png`](../../immagini/MASTER-solo-disegno-1536x1024.png).
 
+**Revisione 4, 2026-08-30 (sera): entra il timbro, e il nome prende il contorno.** Sempre
+lavorazione, non prompt, e sempre nella fascia del testo — il disegno dentro la cornice non
+si tocca. Lo **stemma Aviolab** compare alla destra del nome come **timbro**, col bordino
+argento `#C0CFCB`; il **nome** prende un contorno **nero** spesso, chiuso sulle concavità,
+che a quello spessore salda i contorni di una lettera a quelli della vicina e fa della
+scritta un blocco unico; il **sottotitolo** passa da `#DDE5F7` a bianco pieno. La fascia si
+alza per far stare il timbro, e con lei crescono le misure di tutti i formati derivati: la
+testata del README passa a **1200×1052**, la schermata di avvio a **800×702**. Chi rigenera
+dal prompt ottiene, come sempre, il disegno **prima** della lavorazione.
+
 ---
 
 ## PROMPT A — illustrazione orizzontale (key visual: splash, primo avvio, README, banner)
