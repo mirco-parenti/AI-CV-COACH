@@ -134,6 +134,18 @@ Public Module StileApp
     ''' </remarks>
     Public ReadOnly BordoSuccesso As Color = ColorTranslator.FromHtml("#0A2C11")
 
+    ''' <summary>I pallini che girano sullo scudo mentre l'AI lavora (cap. 03.8).</summary>
+    ''' <remarks>
+    ''' Un argento freddo, non il bianco: sullo scudo passa sopra il blu, il rosso e il
+    ''' giallo del marchio, e il bianco puro sparirebbe proprio sulle stelle. Gli fa da
+    ''' contorno <see cref="OmbraDiAttesa"/>, che è quel che lo stacca dalle parti chiare —
+    ''' un pallino argento su fondo giallo, senza, non si vede affatto.
+    ''' </remarks>
+    Public ReadOnly ArgentoDiAttesa As Color = ColorTranslator.FromHtml("#E2E8F0")
+
+    ''' <summary>Il contorno dei pallini dell'attesa: un grigio di piombo (cap. 03.8).</summary>
+    Public ReadOnly OmbraDiAttesa As Color = ColorTranslator.FromHtml("#4A5568")
+
     ''' <summary>Azioni che modificano, badge attenzione.</summary>
     Public ReadOnly Avviso As Color = ColorTranslator.FromHtml("#FFC107")
 

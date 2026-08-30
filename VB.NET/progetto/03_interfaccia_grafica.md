@@ -54,6 +54,8 @@ Tutti i colori e i font dell'applicazione vengono **da questa tabella e solo da 
 | `RossoTitoli` | `#FA0825` | titoli delle finestre e dei GroupBox, marker |
 | `Successo` | `#28A745` | azioni sicure/positive, badge OK |
 | `BordoSuccesso` | `#0A2C11` | contorno della casella verde della barra (cap. 03.4) *(dal 2026-08-30 sera)* |
+| `ArgentoDiAttesa` | `#E2E8F0` | i pallini che girano sullo scudo di caricamento (cap. 03.8) *(dal 2026-08-30)* |
+| `OmbraDiAttesa` | `#4A5568` | il contorno di quei pallini, che li stacca dalle parti chiare dello scudo *(dal 2026-08-30)* |
 | `Avviso` | `#FFC107` | azioni che modificano, badge attenzione |
 | `Pericolo` | `#DC3545` | azioni distruttive, badge errore |
 | `Informazione` | `#17A2B8` | badge informativi |
@@ -479,6 +481,34 @@ Prefissi standard, nome semantico in PascalCase: `pnl` (Panel), `btn` (Button),
 - Operazioni AI in corso: indicatore nella barra di stato — che **compare per questo** e
   se ne va appena finito — + testo in streaming dove previsto (cap. 02); mai una
   finestra bloccata.
+- **Lo scudo di caricamento** *(dal 2026-08-30)*. I due segnali di prima erano entrambi
+  **piccoli**: la rotellina del puntatore, che si vede solo se il mouse è sopra la
+  finestra e lo si sta guardando, e la riga che si muove in fondo alla fascia di stato,
+  che è alta due righe in un angolo. Un'attesa di trenta secondi va detta anche a chi
+  guarda da lontano, o si è alzato: mentre l'AI lavora compare perciò lo **stemma
+  Aviolab, al centro dello schermo**, con sopra una ruota di dodici pallini d'argento che
+  gira — quello che si è sempre visto girare, disegnato invece che animato: i pallini
+  stanno fermi sul loro cerchio, e a girare è quale di loro è acceso.
+  - **La misura**: al massimo **due decimi** dello schermo in orizzontale e **due sesti**
+    in verticale. Sono due **limiti**, non due misure: lo scudo ha le sue proporzioni
+    (200 × 242, più alto che largo) e stirarlo per riempire esattamente un rettangolo che
+    non è il suo vorrebbe dire deformare il marchio — la sola cosa che il marchio non
+    tollera. Si prende perciò il più grande scudo **non deformato** che ci sta dentro
+    tutti e due: su 1920 × 1080 fanno 297 × 360 invece di 384 × 360.
+  - **È lo scudo dello sfondo**, lo stesso PNG del mega stemma del menu (cap. 03.6) e con
+    lo stesso conto — la tela si chiede in proporzione, perché attorno allo scudo c'è
+    dell'aria trasparente e chiederla della misura dello scudo lo farebbe più basso del
+    6%. Qui però non passa sotto nessun velo: deve **vedersi**.
+  - **Non ruba niente**: non prende il fuoco, non compare in Alt-Tab e soprattutto **non
+    intercetta i clic** — mentre l'AI lavora il bottone «Annulla» dev'essere premibile, ed
+    è proprio lì sotto. È una finestra a strati (*layered*), non un controllo, perché lo
+    scudo ha i bordi morbidi e il fondo trasparente: appoggiarlo su una finestra normale
+    lascerebbe attorno al disegno l'alone del colore reso invisibile.
+  - **Sta sopra lo schermo di chi guarda**, non «sul primo»: con due monitor il centro
+    dello schermo è il centro di quello dove sta la finestra principale.
+  - Il filo che lo accende è **uno solo** — lo stesso che spegne la barra di navigazione
+    (cap. 02.6) e fa parlare la fascia di stato — così i tre segnali non possono
+    smentirsi a vicenda.
 - Errori: messaggio in italiano nel contesto in cui è avvenuto (non solo un popup),
   sempre con un'azione possibile («Riprova», «Salta»). *Dal 2026-08-09 c'è anche
   l'ultima rete: un gestore globale delle eccezioni in italiano (in `Programma`),

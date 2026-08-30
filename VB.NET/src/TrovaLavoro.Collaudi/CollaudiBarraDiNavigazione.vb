@@ -92,6 +92,46 @@ Namespace Ui
 
         End Function
 
+        ''' <summary>
+        ''' Mentre l'AI lavora, lo scudo grande in mezzo allo schermo deve vedersi — e
+        ''' finito il lavoro deve sparire (cap. 03.8).
+        ''' </summary>
+        ''' <remarks>
+        ''' Si guarda la <b>decisione</b> della finestra, non la finestra: qui la
+        ''' principale è costruita e mai mostrata, e in quelle condizioni una figlia che si
+        ''' aprisse davvero comparirebbe sullo schermo di chi lancia i collaudi. Che lo
+        ''' scudo si veda, e che i pallini girino, si guarda con gli occhi; che il filo
+        ''' dall'AI allo scudo esista e si stacchi si guarda qui.
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function MentreLAiLavoraLoScudoSiDeveVedere() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Await ConLaFinestraAsync(
+                generatore,
+                Async Function(form, pannello)
+
+                    Dim durante As Boolean? = Nothing
+
+                    AddHandler pannello.LavoroAiCambiato,
+                        Sub()
+                            If pannello.AiAlLavoro Then durante = LoScudoDeveVedersi(form)
+                        End Sub
+
+                    Assert.IsFalse(LoScudoDeveVedersi(form), "prima di cominciare non c'è nessuno scudo")
+
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.IsTrue(durante.HasValue, "l'AI è stata chiamata davvero")
+                    Assert.IsTrue(durante.Value, "e mentre scriveva lo scudo doveva vedersi")
+                    Assert.IsFalse(LoScudoDeveVedersi(form), "finito il giro se ne va")
+
+                End Function)
+
+        End Function
+
         <TestMethod>
         Public Async Function FinitoIlLavoroLaBarraTornaTuttaAccesa() As Task
 
@@ -414,6 +454,23 @@ Namespace Ui
             Finally
                 If Directory.Exists(radice) Then Directory.Delete(radice, recursive:=True)
             End Try
+
+        End Function
+
+        ''' <summary>Se la finestra ha deciso che lo scudo dell'attesa deve vedersi.</summary>
+        ''' <remarks>
+        ''' Si legge per riflesso perché è roba di casa della finestra, e tale deve
+        ''' restare: aprirla al mondo per farla collaudare sarebbe pagare in progetto quel
+        ''' che qui costa tre righe.
+        ''' </remarks>
+        Private Shared Function LoScudoDeveVedersi(form As FormPrincipale) As Boolean
+
+            Dim proprieta As PropertyInfo = GetType(FormPrincipale).GetProperty(
+                "LoScudoDeveVedersi", BindingFlags.Instance Or BindingFlags.NonPublic)
+
+            Assert.IsNotNull(proprieta, "la finestra deve dire se lo scudo va mostrato")
+
+            Return CBool(proprieta.GetValue(form))
 
         End Function
 

@@ -887,6 +887,8 @@ Public Class FormPrincipale
     ''' </summary>
     Private Sub SegnalaCheLAiLavora(inCorso As Boolean)
 
+        MostraLoScudo(inCorso)
+
         If inCorso Then
 
             If _segnaleDiAttesa IsNot Nothing AndAlso _segnaleDiAttesa.InCorso Then Return
@@ -915,6 +917,56 @@ Public Class FormPrincipale
 
     Private Sub UnBattitoDellAttesa(mittente As Object, e As EventArgs)
         ScriviNellaFascia(_segnaleDiAttesa.Battito(Date.Now), StileApp.Accento)
+    End Sub
+
+    ''' <summary>Lo scudo grande in mezzo allo schermo, quando ce n'è uno.</summary>
+    Private _scudoDiCaricamento As FinestraDiCaricamento
+
+    ''' <summary>
+    ''' Se lo scudo dell'attesa <b>deve</b> vedersi adesso (cap. 03.8).
+    ''' </summary>
+    ''' <remarks>
+    ''' È la <i>decisione</i>, non lo stato della finestra, e la differenza qui non è un
+    ''' cavillo: il banco costruisce la finestra principale senza mostrarla, e in quelle
+    ''' condizioni ogni cosa che si guardi sulle finestre risponde il falso — una finestra
+    ''' mai mostrata non ha figli visibili, e una figlia mostrata di sua iniziativa
+    ''' comparirebbe davvero sullo schermo di chi lancia i collaudi. Perciò il filo che va
+    ''' dal lavoro dell'AI allo scudo si collauda <b>qui</b>, e che lo scudo si veda
+    ''' davvero — con i pallini che girano — si guarda con gli occhi.
+    ''' </remarks>
+    Friend ReadOnly Property LoScudoDeveVedersi As Boolean
+
+    ''' <summary>
+    ''' Accende o spegne lo scudo grande al centro dello schermo.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>La finestra si tiene da parte invece di rifarla ogni volta: fra la fine di
+    ''' un'attesa e l'inizio della successiva passano spesso pochi secondi — si analizza,
+    ''' si confronta, si genera — e ricostruire una finestra a strati a ogni giro
+    ''' significa rifare l'handle, il timer e le risorse grafiche per niente.</para>
+    ''' <para><b>Se la finestra principale non è a video non si apre niente</b>, e non è
+    ''' una prudenza teorica: senza questa riga il banco farebbe comparire uno scudo
+    ''' Aviolab in mezzo allo schermo di chi sta lanciando i collaudi, una volta per ogni
+    ''' collaudo che chiama l'AI.</para>
+    ''' </remarks>
+    Private Sub MostraLoScudo(acceso As Boolean)
+
+        _LoScudoDeveVedersi = acceso
+
+        If Not IsHandleCreated OrElse Not Visible Then Return
+
+        If acceso Then
+
+            If _scudoDiCaricamento Is Nothing OrElse _scudoDiCaricamento.IsDisposed Then
+                _scudoDiCaricamento = New FinestraDiCaricamento()
+            End If
+
+            _scudoDiCaricamento.Accendi(Me)
+
+        Else
+            _scudoDiCaricamento?.Spegni()
+        End If
+
     End Sub
 
     ''' <summary>
