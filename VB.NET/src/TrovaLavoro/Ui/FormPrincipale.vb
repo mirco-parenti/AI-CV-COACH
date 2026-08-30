@@ -237,13 +237,6 @@ Public Class FormPrincipale
         MostraLoStatoDellAvvio()
         DichiaraLaCartellaDati()
 
-        ' La barra di navigazione è fatta di bottoni neutri (livello 0, cap. 03.3): li
-        ' veste StileApp, che sa anche come si spegne un bottone.
-        For Each navigazione As Button In BottoniDiNavigazione()
-            StileApp.VestiBottone(navigazione, LivelloBottone.Neutro)
-        Next
-
-
         ' Un motore del browser per tutta l'applicazione, e da lui la stampante: due
         ' ambienti sulla stessa cartella di navigazione stanno buoni solo finché nessuno
         ' cambia loro un'opzione (v. MotoreBrowser, cancello di T5a).
@@ -312,6 +305,14 @@ Public Class FormPrincipale
     ''' Mostra uno dei pannelli dell'area centrale, uno solo per volta (cap. 03.4), e
     ''' segna quale bottone della barra lo sta mostrando.
     ''' </summary>
+    ''' <remarks>
+    ''' La veste si rifà a <b>tutte</b> le caselle, spente comprese: fino al 2026-08-30
+    ''' quelle spente si saltavano, perché qui si assegnava solo un fondo e riassegnarlo
+    ''' avrebbe riacceso all'occhio una destinazione chiusa. Adesso a dipingere è
+    ''' <see cref="StileApp.VestiBottoneBarra"/>, che lo spento lo sa smorzare da sé e ne
+    ''' ricorda il ruolo: saltarle vorrebbe dire che una casella spenta mentre si cambia
+    ''' pannello si risveglia con la cornice del pannello di prima.
+    ''' </remarks>
     Private Sub MostraPannello(pannello As Control, bottone As Button)
 
         SalvaChiEsce(pannello)
@@ -321,10 +322,9 @@ Public Class FormPrincipale
         Next
 
         For Each navigazione As Button In BottoniDiNavigazione()
-            ' Un bottone spento resta spento: l'evidenza del pannello attivo non deve
-            ' riaccendere il colore di una destinazione che ancora non esiste.
-            If Not navigazione.Enabled Then Continue For
-            navigazione.BackColor = If(navigazione Is bottone, StileApp.AccentoTenue, StileApp.SfondoContenuto)
+            StileApp.VestiBottoneBarra(navigazione,
+                                       RuoloDellaCasella(navigazione),
+                                       attiva:=navigazione Is bottone)
         Next
 
         pnlLogo.BringToFront()
@@ -359,6 +359,19 @@ Public Class FormPrincipale
 
     Private Function BottoniDiNavigazione() As Button()
         Return {btnMenu, btnHome, btnProfilo, btnRicerca, btnCandidatura, btnDocumenti, btnImpostazioni}
+    End Function
+
+    ''' <summary>
+    ''' Che parte fa una casella della barra: la porta di casa, o una delle sei
+    ''' destinazioni (cap. 03.4).
+    ''' </summary>
+    ''' <remarks>
+    ''' Il legame sta qui e in nessun altro posto, come quello fra le voci del menu e i
+    ''' bottoni (<see cref="BottoneDellaVoce"/>): «🎮 Menu» è l'unica casella che non
+    ''' porta a un pannello di lavoro ma alla schermata che li elenca, ed è l'unica verde.
+    ''' </remarks>
+    Private Function RuoloDellaCasella(bottone As Button) As RuoloBarra
+        Return If(bottone Is btnMenu, RuoloBarra.RitornoAlMenu, RuoloBarra.Destinazione)
     End Function
 
     ''' <summary>

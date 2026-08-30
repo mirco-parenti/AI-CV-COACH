@@ -53,6 +53,7 @@ Tutti i colori e i font dell'applicazione vengono **da questa tabella e solo da 
 | `FondoAzione` | `#C0E8FF` | fondo del bottone d'azione principale del pannello |
 | `RossoTitoli` | `#FA0825` | titoli delle finestre e dei GroupBox, marker |
 | `Successo` | `#28A745` | azioni sicure/positive, badge OK |
+| `BordoSuccesso` | `#0A2C11` | contorno della casella verde della barra (cap. 03.4) *(dal 2026-08-30 sera)* |
 | `Avviso` | `#FFC107` | azioni che modificano, badge attenzione |
 | `Pericolo` | `#DC3545` | azioni distruttive, badge errore |
 | `Informazione` | `#17A2B8` | badge informativi |
@@ -134,6 +135,33 @@ da mostrare il pannello resta vuoto e lo spiega, perché una navigazione che fa 
 generazione è una spesa non chiesta — e in barra, quando si guardano i documenti, si accende
 **sempre** «📄 Documenti», da qualunque strada si sia arrivati, mentre il «Torna indietro»
 riporta dove si era (candidatura, profilo o Home).*
+
+**I colori della barra** *(dal 2026-08-30 sera)*. La barra non è una fila di comandi
+qualunque: è l'**indice** dell'applicazione, e le sue caselle sono le stesse sei voci del
+menu d'ingresso (3.6) più la porta di casa. Prende perciò i colori di quel menu, invece
+delle sette caselle bianche di prima: **azzurro `FondoAzione`** le sei destinazioni, con
+la cornice `BordoForte` e le lettere scure — lo stesso vestito dei bottoni di P0 —
+e **verde `Successo`** la casella «🎮 Menu», col testo bianco e il contorno
+`BordoSuccesso`, che è l'unico colore nuovo di questa passata (un verde scurissimo: di
+suo stesso verde non avrebbe contorno, e il nero qui dentro è del solo marchio). Chi passa
+dal menu alla barra ritrova le stesse cose, e la casella che riporta indietro si distingue
+dalle sei che portano avanti **prima** di leggerne l'etichetta.
+
+Con il riposo azzurro, il pannello aperto **non si vede più dal fondo**: fino a qui era
+lilla (`AccentoTenue`) e le altre bianche, ma su una fila già azzurra quel lilla è quasi
+lo stesso colore. L'evidenza passa alla **cornice**: la casella aperta tiene il suo
+azzurro e prende contorno doppio, lettere e carattere del blu d'accento — gli stessi tre
+segnali insieme del livello 2 (3.3), che qui dentro vogliono già dire «questo è vivo». Il
+fondo dice **che cosa** è una casella, la cornice **dove si è**: due domande diverse, due
+segnali diversi.
+
+Il resto vale come per ogni bottone colorato dell'applicazione: **spento si smorza**
+(3.3), perché mentre l'AI lavora la barra si spegne tutta (cap. 02.6) e sette caselle
+colorate che restano colorate direbbero che si può ancora andare via. Ruolo e stato di
+ogni casella stanno nel suo `Tag`, così quando la barra si riapre ognuna ritrova il colore
+che le spetta. E il carattere non dipende dall'essere accesa ma solo dall'essere aperta:
+una casella che si spegne non deve cambiare ingombro, o la fila si muoverebbe ogni volta
+che parte una chiamata.
 
 - La macro-struttura è un `TableLayoutPanel` (righe: barra superiore fissa, area
   centrale elastica, fascia inferiore **alta zero finché non serve**, v. sotto); dentro ogni banda, `Panel` a coordinate

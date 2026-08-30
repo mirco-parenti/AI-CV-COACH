@@ -1,4 +1,4 @@
-Imports System.Windows.Forms
+﻿Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro
 
@@ -72,6 +72,47 @@ Namespace Ui
             Next
 
             Assert.HasCount(fondi.Count, fondi.Distinct().ToList(), "nessun livello copia il fondo di un altro")
+        End Sub
+
+        <TestMethod>
+        Public Sub LaCasellaApertaSiDistingueSenzaCambiareFondo()
+            ' Sulla barra il fondo dice il ruolo (azzurro le destinazioni, verde il
+            ' ritorno) e non può dire anche quale pannello è aperto: a dirlo restano la
+            ' cornice, le lettere e il carattere — tre segnali insieme, come al livello 2.
+            Using riposo As New Button(), aperta As New Button()
+
+                StileApp.VestiBottoneBarra(riposo, RuoloBarra.Destinazione, attiva:=False)
+                StileApp.VestiBottoneBarra(aperta, RuoloBarra.Destinazione, attiva:=True)
+
+                Assert.AreEqual(riposo.BackColor, aperta.BackColor, "il fondo è lo stesso")
+                Assert.AreNotEqual(riposo.FlatAppearance.BorderColor, aperta.FlatAppearance.BorderColor,
+                                   "la cornice cambia colore")
+                Assert.AreNotEqual(riposo.FlatAppearance.BorderSize, aperta.FlatAppearance.BorderSize,
+                                   "e spessore")
+                Assert.AreNotEqual(riposo.ForeColor, aperta.ForeColor, "le lettere cambiano colore")
+
+            End Using
+        End Sub
+
+        <TestMethod>
+        Public Sub UnaCasellaSpentaSiSmorzaEPoiRitrovaIlSuoRuolo()
+            ' Mentre l'AI lavora la barra si spegne tutta (cap. 02.6): sette caselle
+            ' colorate che restano colorate direbbero che si può ancora andare via.
+            Using casella As New Button()
+
+                StileApp.VestiBottoneBarra(casella, RuoloBarra.RitornoAlMenu, attiva:=True)
+
+                casella.Enabled = False
+
+                Assert.AreEqual(StileApp.SfondoBase, casella.BackColor, "spenta: fondo smorzato")
+                Assert.AreEqual(StileApp.TestoSecondario, casella.ForeColor, "e testo smorzato")
+
+                casella.Enabled = True
+
+                Assert.AreEqual(StileApp.Successo, casella.BackColor, "riaccesa: torna il verde del ritorno")
+                Assert.AreEqual(2, casella.FlatAppearance.BorderSize, "e la cornice doppia di quella aperta")
+
+            End Using
         End Sub
 
     End Class

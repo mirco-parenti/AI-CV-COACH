@@ -99,106 +99,71 @@ Partial Class FormPrincipale
         '
         ' La via di ritorno al menu d'ingresso (P0). Senza, dal menu si esce e non si
         ' rientra: la barra porta ai sei pannelli ma non alla schermata che li elenca.
-        Me.btnMenu.BackColor = StileApp.SfondoContenuto
-        Me.btnMenu.FlatAppearance.BorderColor = StileApp.BordoLeggero
-        Me.btnMenu.FlatAppearance.BorderSize = 1
-        Me.btnMenu.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.btnMenu.ForeColor = StileApp.TestoPrimario
         Me.btnMenu.Location = New System.Drawing.Point(14, 7)
         Me.btnMenu.Name = "btnMenu"
         Me.btnMenu.Size = StileApp.BottoneBarraSuperiore
         Me.btnMenu.TabIndex = 0
         Me.btnMenu.Text = "🎮 Menu"
-        Me.btnMenu.UseVisualStyleBackColor = False
+        StileApp.VestiBottoneBarra(Me.btnMenu, RuoloBarra.RitornoAlMenu, attiva:=False)
         '
         'btnHome
         '
-        Me.btnHome.BackColor = StileApp.SfondoContenuto
-        Me.btnHome.FlatAppearance.BorderColor = StileApp.BordoLeggero
-        Me.btnHome.FlatAppearance.BorderSize = 1
-        Me.btnHome.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.btnHome.ForeColor = StileApp.TestoPrimario
         Me.btnHome.Location = New System.Drawing.Point(136, 7)
         Me.btnHome.Name = "btnHome"
         Me.btnHome.Size = StileApp.BottoneBarraSuperioreLargo
         Me.btnHome.TabIndex = 1
         Me.btnHome.Text = "🏠 Le mie candidature"
-        Me.btnHome.UseVisualStyleBackColor = False
+        StileApp.VestiBottoneBarra(Me.btnHome, RuoloBarra.Destinazione, attiva:=False)
         '
         'btnProfilo
         '
-        Me.btnProfilo.BackColor = StileApp.SfondoContenuto
-        Me.btnProfilo.FlatAppearance.BorderColor = StileApp.BordoLeggero
-        Me.btnProfilo.FlatAppearance.BorderSize = 1
-        Me.btnProfilo.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.btnProfilo.ForeColor = StileApp.TestoPrimario
         Me.btnProfilo.Location = New System.Drawing.Point(358, 7)
         Me.btnProfilo.Name = "btnProfilo"
         Me.btnProfilo.Size = StileApp.BottoneBarraSuperiore
         Me.btnProfilo.TabIndex = 2
         Me.btnProfilo.Text = "👤 Profilo"
-        Me.btnProfilo.UseVisualStyleBackColor = False
+        StileApp.VestiBottoneBarra(Me.btnProfilo, RuoloBarra.Destinazione, attiva:=False)
         '
         'btnRicerca
         '
-        Me.btnRicerca.BackColor = StileApp.SfondoContenuto
-        Me.btnRicerca.FlatAppearance.BorderColor = StileApp.BordoLeggero
-        Me.btnRicerca.FlatAppearance.BorderSize = 1
-        Me.btnRicerca.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.btnRicerca.ForeColor = StileApp.TestoPrimario
         Me.btnRicerca.Location = New System.Drawing.Point(480, 7)
         Me.btnRicerca.Name = "btnRicerca"
         Me.btnRicerca.Size = StileApp.BottoneBarraSuperiore
         Me.btnRicerca.TabIndex = 3
         Me.btnRicerca.Text = "🔍 Ricerca"
-        Me.btnRicerca.UseVisualStyleBackColor = False
+        StileApp.VestiBottoneBarra(Me.btnRicerca, RuoloBarra.Destinazione, attiva:=False)
         '
         'btnCandidatura
         '
         ' La porta di P4. Il cruscotto che raccoglierà le opportunità è di T5: fino ad
         ' allora questa è l'unica strada per arrivare a un annuncio (cap. 12.3).
-        Me.btnCandidatura.BackColor = StileApp.SfondoContenuto
-        Me.btnCandidatura.FlatAppearance.BorderColor = StileApp.BordoLeggero
-        Me.btnCandidatura.FlatAppearance.BorderSize = 1
-        Me.btnCandidatura.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.btnCandidatura.ForeColor = StileApp.TestoPrimario
         Me.btnCandidatura.Location = New System.Drawing.Point(602, 7)
         Me.btnCandidatura.Name = "btnCandidatura"
         Me.btnCandidatura.Size = StileApp.BottoneBarraSuperioreLargo
         Me.btnCandidatura.TabIndex = 4
         Me.btnCandidatura.Text = NomiUi.Confronto
-        Me.btnCandidatura.UseVisualStyleBackColor = False
+        StileApp.VestiBottoneBarra(Me.btnCandidatura, RuoloBarra.Destinazione, attiva:=False)
         '
         'btnDocumenti
         '
         ' La porta di P6 (T9d). Fino ad allora i documenti erano solo il passo successivo
         ' di un flusso — dalla candidatura o dal profilo — e per rileggere un CV scritto
         ' ieri bisognava ripassare dalla Home e riaprire la candidatura giusta.
-        Me.btnDocumenti.BackColor = StileApp.SfondoContenuto
-        Me.btnDocumenti.FlatAppearance.BorderColor = StileApp.BordoLeggero
-        Me.btnDocumenti.FlatAppearance.BorderSize = 1
-        Me.btnDocumenti.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.btnDocumenti.ForeColor = StileApp.TestoPrimario
         Me.btnDocumenti.Location = New System.Drawing.Point(824, 7)
         Me.btnDocumenti.Name = "btnDocumenti"
         Me.btnDocumenti.Size = StileApp.BottoneBarraSuperiore
         Me.btnDocumenti.TabIndex = 5
         Me.btnDocumenti.Text = "📄 Documenti"
-        Me.btnDocumenti.UseVisualStyleBackColor = False
+        StileApp.VestiBottoneBarra(Me.btnDocumenti, RuoloBarra.Destinazione, attiva:=False)
         '
         'btnImpostazioni
         '
-        Me.btnImpostazioni.BackColor = StileApp.SfondoContenuto
-        Me.btnImpostazioni.FlatAppearance.BorderColor = StileApp.BordoLeggero
-        Me.btnImpostazioni.FlatAppearance.BorderSize = 1
-        Me.btnImpostazioni.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.btnImpostazioni.ForeColor = StileApp.TestoPrimario
         Me.btnImpostazioni.Location = New System.Drawing.Point(946, 7)
         Me.btnImpostazioni.Name = "btnImpostazioni"
         Me.btnImpostazioni.Size = StileApp.BottoneBarraSuperiore
         Me.btnImpostazioni.TabIndex = 6
         Me.btnImpostazioni.Text = "⚙ Impostazioni"
-        Me.btnImpostazioni.UseVisualStyleBackColor = False
+        StileApp.VestiBottoneBarra(Me.btnImpostazioni, RuoloBarra.Destinazione, attiva:=False)
         '
         'pnlBordoBarraSuperiore
         '

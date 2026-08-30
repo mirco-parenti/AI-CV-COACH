@@ -24,6 +24,18 @@ Public Enum LivelloBottone
 End Enum
 
 ''' <summary>
+''' Che parte fa una casella della barra superiore (cap. 03.4). Non è un livello di
+''' conseguenza — la navigazione non ha conseguenze, e i livelli della tabella 03.3
+''' misurano proprio quelle: è il posto che una casella occupa in quella fila.
+''' </summary>
+Public Enum RuoloBarra
+    ''' <summary>Una delle sei porte dei pannelli: l'azzurro del menu d'ingresso.</summary>
+    Destinazione = 0
+    ''' <summary>La casella che riporta al menu d'ingresso: il verde.</summary>
+    RitornoAlMenu = 1
+End Enum
+
+''' <summary>
 ''' Token di design dell'applicazione (cap. 03.2): colori, font, spaziature.
 ''' Tutta l'interfaccia pesca da qui e solo da qui: nei form non compaiono mai
 ''' Color.FromArgb né New Font.
@@ -110,6 +122,17 @@ Public Module StileApp
 
     ''' <summary>Azioni sicure/positive, badge OK.</summary>
     Public ReadOnly Successo As Color = ColorTranslator.FromHtml("#28A745")
+
+    ''' <summary>Il contorno che va col fondo <see cref="Successo"/> (cap. 03.4).</summary>
+    ''' <remarks>
+    ''' Un verde scurissimo, non il nero e non il verde stesso: serve alla casella
+    ''' «🎮 Menu» della barra superiore, che è l'unica di quella fila a portare un fondo
+    ''' pieno e ha bisogno di un bordo per restare una forma sul bianco della barra.
+    ''' Contornarla del suo stesso verde la lascerebbe senza contorno; contornarla di nero
+    ''' la farebbe un corpo estraneo, perché il nero qui dentro è del solo marchio
+    ''' (<see cref="BordoMarchio"/>). Questo è il verde di famiglia, portato al buio.
+    ''' </remarks>
+    Public ReadOnly BordoSuccesso As Color = ColorTranslator.FromHtml("#0A2C11")
 
     ''' <summary>Azioni che modificano, badge attenzione.</summary>
     Public ReadOnly Avviso As Color = ColorTranslator.FromHtml("#FFC107")
@@ -311,4 +334,100 @@ Public Module StileApp
 
     End Sub
 
+    ' --- La barra superiore (cap. 03.4) ---
+
+    ''' <summary>
+    ''' Veste una casella della barra di navigazione: il verde del ritorno al menu, o
+    ''' l'azzurro delle sei destinazioni, con la cornice d'accento se è quella aperta.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Perché non uno dei livelli di 03.3.</b> Quelli dicono quanto pesa la
+    ''' conseguenza di un bottone, e una navigazione non pesa niente: fino al 2026-08-30
+    ''' la barra era infatti tutta di livello 0 — bianca — e l'unico segno del pannello
+    ''' aperto era un fondo lilla. La barra però non è una fila di comandi qualunque: è
+    ''' l'indice dell'applicazione, e le sue caselle sono le stesse sei voci del menu
+    ''' d'ingresso più la porta di casa. Prendono perciò i colori di quel menu — azzurro
+    ''' le sei voci, verde il ritorno — così chi passa dal menu alla barra ritrova le
+    ''' stesse cose, invece di trovarne sette bianche tutte uguali.</para>
+    ''' <para><b>Il pannello aperto si vede dalla cornice, non dal fondo.</b> Con il
+    ''' riposo azzurro il lilla di prima non si distinguerebbe più: adesso la casella
+    ''' aperta tiene il suo azzurro e prende cornice doppia, lettere e carattere del blu
+    ''' d'accento — gli stessi tre segnali insieme del livello 2 (03.3), che qui dentro
+    ''' vogliono già dire «questo è vivo».</para>
+    ''' <para><b>Lo spento si smorza.</b> Vale qui la ragione di
+    ''' <see cref="VestiBottone"/>: un bottone piatto con un colore suo resta acceso
+    ''' all'occhio anche da disabilitato, e mentre l'AI lavora la barra si spegne tutta
+    ''' (cap. 02.6). Il ruolo e lo stato restano scritti nel <c>Tag</c>, così quando la
+    ''' barra si riapre ogni casella ritrova il colore che le spetta.</para>
+    ''' </remarks>
+    Public Sub VestiBottoneBarra(bottone As Button, ruolo As RuoloBarra, attiva As Boolean)
+
+        If bottone Is Nothing Then Throw New ArgumentNullException(NameOf(bottone))
+
+        bottone.Tag = New VesteDiBarra(ruolo, attiva)
+
+        ' Rimuovere prima di aggiungere rende la vestizione ripetibile: MostraPannello la
+        ' rifà a ogni cambio di pannello, e i gestori si accumulerebbero.
+        RemoveHandler bottone.EnabledChanged, AddressOf CasellaAccesaOSpenta
+        AddHandler bottone.EnabledChanged, AddressOf CasellaAccesaOSpenta
+
+        DipingiLaCasella(bottone, ruolo, attiva)
+
+    End Sub
+
+    ''' <summary>Ruolo e stato di una casella della barra, tenuti nel suo <c>Tag</c>.</summary>
+    Private Structure VesteDiBarra
+
+        Public ReadOnly Ruolo As RuoloBarra
+        Public ReadOnly Attiva As Boolean
+
+        Public Sub New(ruolo As RuoloBarra, attiva As Boolean)
+            Me.Ruolo = ruolo
+            Me.Attiva = attiva
+        End Sub
+
+    End Structure
+
+    Private Sub CasellaAccesaOSpenta(mittente As Object, e As EventArgs)
+
+        Dim bottone As Button = TryCast(mittente, Button)
+        If bottone Is Nothing OrElse Not TypeOf bottone.Tag Is VesteDiBarra Then Return
+
+        Dim veste As VesteDiBarra = DirectCast(bottone.Tag, VesteDiBarra)
+        DipingiLaCasella(bottone, veste.Ruolo, veste.Attiva)
+
+    End Sub
+
+    ''' <summary>Dà alla casella l'aspetto del suo ruolo, o quello spento se è disabilitata.</summary>
+    Private Sub DipingiLaCasella(bottone As Button, ruolo As RuoloBarra, attiva As Boolean)
+
+        bottone.FlatStyle = FlatStyle.Flat
+        bottone.UseVisualStyleBackColor = False
+
+        ' Il carattere dipende dal ruolo e dall'essere aperta, mai dall'essere accesa: una
+        ' casella che si spegne non deve cambiare ingombro, o la fila si muoverebbe ogni
+        ' volta che l'AI parte.
+        bottone.Font = If(ruolo = RuoloBarra.RitornoAlMenu OrElse attiva, FontBottoneForte, FontTesto)
+        bottone.FlatAppearance.BorderSize = If(attiva, 2, 1)
+
+        If Not bottone.Enabled Then
+            bottone.BackColor = SfondoBase
+            bottone.ForeColor = TestoSecondario
+            bottone.FlatAppearance.BorderColor = BordoLeggero
+            Return
+        End If
+
+        If ruolo = RuoloBarra.RitornoAlMenu Then
+            bottone.BackColor = Successo
+            bottone.ForeColor = SfondoContenuto
+            bottone.FlatAppearance.BorderColor = BordoSuccesso
+        Else
+            bottone.BackColor = FondoAzione
+            bottone.ForeColor = If(attiva, Accento, TestoPrimario)
+            bottone.FlatAppearance.BorderColor = If(attiva, Accento, BordoForte)
+        End If
+
+    End Sub
+
 End Module
+

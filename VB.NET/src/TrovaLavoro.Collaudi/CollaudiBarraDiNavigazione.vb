@@ -1,5 +1,6 @@
-Imports System.IO
+﻿Imports System.IO
 Imports System.Linq
+Imports System.Reflection
 Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
@@ -235,9 +236,149 @@ Namespace Ui
 
         End Function
 
+
+        ''' <summary>
+        ''' La barra porta i colori del menu d'ingresso: verde la porta di casa, azzurre
+        ''' le sei destinazioni.
+        ''' </summary>
+        ''' <remarks>
+        ''' Nato il 2026-08-30, quando la barra ha smesso di essere una fila di sette
+        ''' bottoni bianchi. Il legame con il menu d'ingresso passa dai <b>token</b> — è
+        ''' <c>FondoAzione</c> il colore delle voci di P0 (v. <c>BottoneMenu</c>) e
+        ''' <c>Successo</c> il verde delle azioni sicure — e qui si guarda che la barra
+        ''' peschi di lì e non da un colore suo: sette caselle vestite a mano nel designer
+        ''' sono sette occasioni di divergere.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LaBarraPortaIColoriDelMenuDIngresso()
+
+            Using form As New FormPrincipale()
+
+                Dim caselle As Button() = Barra(form)
+                Dim menu As Button = caselle.Single(Function(b) b.Name = "btnMenu")
+
+                Assert.AreEqual(StileApp.Successo, menu.BackColor,
+                                "la casella che torna al menu è verde")
+                Assert.AreEqual(StileApp.SfondoContenuto, menu.ForeColor,
+                                "col testo bianco, che è l'unico leggibile su quel verde")
+                Assert.AreEqual(StileApp.BordoSuccesso, menu.FlatAppearance.BorderColor,
+                                "e il contorno scuro che la tiene una forma sul bianco della barra")
+
+                For Each casella As Button In caselle.Where(Function(b) b IsNot menu)
+
+                    Assert.AreEqual(StileApp.FondoAzione, casella.BackColor,
+                                    $"«{casella.Text}» ha l'azzurro delle voci del menu d'ingresso")
+                    Assert.AreEqual(StileApp.TestoPrimario, casella.ForeColor,
+                                    $"«{casella.Text}» scrive in scuro su quell'azzurro")
+
+                Next
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Quale pannello è aperto si vede dalla sua casella, e da una sola.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È la metà che il colore da solo non dà. Finché la barra era bianca, il
+        ''' pannello aperto si riconosceva dal fondo lilla; adesso che il riposo è azzurro
+        ''' quel lilla non si distinguerebbe più, e l'evidenza è passata alla cornice —
+        ''' doppia e d'accento, con le lettere dello stesso blu. Se qualcuno togliesse la
+        ''' vestizione da <c>MostraPannello</c>, la barra resterebbe bella e muta: sette
+        ''' caselle uguali, e nessun modo di sapere dove si è.</para>
+        ''' <para>Si apre il pannello dalla strada della finestra e non rivestendo la
+        ''' casella a mano: quel che si sorveglia è che <c>MostraPannello</c> continui a
+        ''' rifare la veste della barra, non che la veste sappia farsi.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub IlPannelloApertoSiVedeDallaSuaCasella()
+
+            Using form As New FormPrincipale()
+
+                Dim profilo As Button = Barra(form).Single(Function(b) b.Name = "btnProfilo")
+
+                ApriIlPannello(form, "pnlProfilo", profilo)
+
+                Assert.AreEqual(StileApp.Accento, profilo.FlatAppearance.BorderColor,
+                                "la casella aperta prende la cornice d'accento")
+                Assert.AreEqual(2, profilo.FlatAppearance.BorderSize,
+                                "e la prende doppia")
+                Assert.AreEqual(StileApp.Accento, profilo.ForeColor,
+                                "con le lettere dello stesso blu, che è il segnale che si legge per primo")
+                Assert.AreEqual(StileApp.FondoAzione, profilo.BackColor,
+                                "il fondo però non cambia: è la cornice a dire dove si è")
+
+                For Each altra As Button In Barra(form).Where(Function(b) b IsNot profilo)
+                    Assert.AreNotEqual(StileApp.Accento, altra.FlatAppearance.BorderColor,
+                                       $"«{altra.Text}» non è il pannello aperto e non deve sembrarlo")
+                Next
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Il nome ci sta anche nella casella aperta, che scrive in grassetto.
+        ''' </summary>
+        ''' <remarks>
+        ''' Gemello di <see cref="OgniNomeDellaBarraStaDentroIlSuoBottone"/>, e nato dallo
+        ''' stesso guasto silenzioso: quello misura il carattere che la casella ha
+        ''' <i>adesso</i>, e a riposo il carattere è quello normale. Ma la casella aperta
+        ''' passa al grassetto, che è più largo — e un bottone della barra non manda a capo
+        ''' e non mette i puntini: taglia. Il nome più lungo, tagliato, si vedrebbe solo
+        ''' aprendo quel pannello.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniNomeCiStaAncheQuandoLaCasellaSiAccende()
+
+            Using form As New FormPrincipale()
+
+                For Each casella As Button In Barra(form)
+
+                    Assert.IsLessThanOrEqualTo(
+                        casella.Width,
+                        TextRenderer.MeasureText(casella.Text, StileApp.FontBottoneForte).Width,
+                        $"«{casella.Text}» non ci sta nel suo bottone quando si accende")
+
+                Next
+
+            End Using
+
+        End Sub
+
         ' ==================================================================
         ' L'impalcatura
         ' ==================================================================
+
+        ''' <summary>
+        ''' Apre un pannello per la stessa strada che percorre la finestra quando si preme
+        ''' una casella della barra, ma senza mostrarla.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para><b>Perché non <c>PerformClick</c>.</b> Su una finestra mai mostrata quel
+        ''' metodo non fa niente e non lo dice: <c>CanSelect</c> risale la catena dei
+        ''' genitori fino al Form, che invisibile è, e il click non parte affatto. Provato
+        ''' il 2026-08-30, con un collaudo che restava rosso su un codice giusto — dentro i
+        ''' pannelli, che nei collaudi vivono senza finestra attorno, lo stesso
+        ''' <c>PerformClick</c> funziona benissimo, ed è per questo che l'inganno regge.</para>
+        ''' <para><b>E perché non mostrarla.</b> Il <c>Load</c> della finestra principale
+        ''' monta il motore, prende il lucchetto della cartella dati e può aprire finestre
+        ''' modali (l'informativa, la chiave): un banco che le apre non finisce più. Resta
+        ''' la chiamata al metodo che il click chiamerebbe — privato, quindi per riflesso:
+        ''' se un giorno cambia nome, questo collaudo lo dice subito invece di restare
+        ''' verde su una barra che non si aggiorna più.</para>
+        ''' </remarks>
+        Private Shared Sub ApriIlPannello(form As FormPrincipale, pannello As String, casella As Button)
+
+            Dim mostra As MethodInfo = GetType(FormPrincipale).GetMethod(
+                "MostraPannello", BindingFlags.Instance Or BindingFlags.NonPublic)
+
+            Assert.IsNotNull(mostra, "«MostraPannello» è la porta da cui si apre un pannello")
+
+            mostra.Invoke(form, {form.Controls.Find(pannello, searchAllChildren:=True).Single(), casella})
+
+        End Sub
 
         ''' <summary>I nomi dei bottoni della barra che in questo momento sono premibili.</summary>
         ''' <remarks>
