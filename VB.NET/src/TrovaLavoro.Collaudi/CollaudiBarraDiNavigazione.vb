@@ -115,13 +115,18 @@ Namespace Ui
         ''' Ogni nome sta dentro il suo bottone, e nessun bottone finisce sotto il vicino.
         ''' </summary>
         ''' <remarks>
-        ''' Nato il 2026-08-30, quando «🏠 Home» è diventato «🏠 Le mie candidature»: un
+        ''' <para>Nato il 2026-08-30, quando «🏠 Home» è diventato «🏠 Le mie candidature»: un
         ''' bottone della barra ha una larghezza scritta a mano e non manda a capo né mette
         ''' i puntini — taglia, e basta. Allungare un nome senza allargarne il bottone non
         ''' rompe niente che si possa vedere da un collaudo di comportamento: la finestra
         ''' funziona, i cammini reggono, e l'unico segno è mezza parola mancante a video.
         ''' E allargarlo senza spostare i cinque che vengono dopo li fa sovrapporre, che è
-        ''' lo stesso genere di guasto: silenzioso finché non lo si guarda. Qui si misura.
+        ''' lo stesso genere di guasto: silenzioso finché non lo si guarda. Qui si misura.</para>
+        ''' <para>Dalla sera dello stesso giorno la misura è più stretta senza che questo
+        ''' collaudo sia cambiato: la barra è passata tutta al <b>grassetto</b>, che è più
+        ''' largo del tondo, e il carattere che si misura è quello che la casella porta
+        ''' davvero. Un collaudo gemello che misurava apposta col grassetto è stato tolto
+        ''' quando è diventato la stessa domanda fatta due volte.</para>
         ''' </remarks>
         <TestMethod>
         Public Sub OgniNomeDellaBarraStaDentroIlSuoBottone()
@@ -238,8 +243,8 @@ Namespace Ui
 
 
         ''' <summary>
-        ''' La barra porta i colori del menu d'ingresso: verde la porta di casa, azzurre
-        ''' le sei destinazioni.
+        ''' La barra porta i colori e il carattere del menu d'ingresso: verde la porta di
+        ''' casa, azzurre le sei destinazioni, tutte e sette in grassetto.
         ''' </summary>
         ''' <remarks>
         ''' Nato il 2026-08-30, quando la barra ha smesso di essere una fila di sette
@@ -247,7 +252,9 @@ Namespace Ui
         ''' <c>FondoAzione</c> il colore delle voci di P0 (v. <c>BottoneMenu</c>) e
         ''' <c>Successo</c> il verde delle azioni sicure — e qui si guarda che la barra
         ''' peschi di lì e non da un colore suo: sette caselle vestite a mano nel designer
-        ''' sono sette occasioni di divergere.
+        ''' sono sette occasioni di divergere. Dalla sera dello stesso giorno la fila è
+        ''' anche tutta in <b>grassetto</b>, per la ragione per cui lo sono le voci del
+        ''' menu: sono nomi che si leggono di sfuggita, mentre si sta facendo altro.
         ''' </remarks>
         <TestMethod>
         Public Sub LaBarraPortaIColoriDelMenuDIngresso()
@@ -270,6 +277,13 @@ Namespace Ui
                                     $"«{casella.Text}» ha l'azzurro delle voci del menu d'ingresso")
                     Assert.AreEqual(StileApp.TestoPrimario, casella.ForeColor,
                                     $"«{casella.Text}» scrive in scuro su quell'azzurro")
+
+                Next
+
+                For Each casella As Button In caselle
+
+                    Assert.IsTrue(casella.Font.Bold,
+                                  $"«{casella.Text}» è in grassetto, come le voci del menu d'ingresso")
 
                 Next
 
@@ -312,35 +326,6 @@ Namespace Ui
                 For Each altra As Button In Barra(form).Where(Function(b) b IsNot profilo)
                     Assert.AreNotEqual(StileApp.Accento, altra.FlatAppearance.BorderColor,
                                        $"«{altra.Text}» non è il pannello aperto e non deve sembrarlo")
-                Next
-
-            End Using
-
-        End Sub
-
-        ''' <summary>
-        ''' Il nome ci sta anche nella casella aperta, che scrive in grassetto.
-        ''' </summary>
-        ''' <remarks>
-        ''' Gemello di <see cref="OgniNomeDellaBarraStaDentroIlSuoBottone"/>, e nato dallo
-        ''' stesso guasto silenzioso: quello misura il carattere che la casella ha
-        ''' <i>adesso</i>, e a riposo il carattere è quello normale. Ma la casella aperta
-        ''' passa al grassetto, che è più largo — e un bottone della barra non manda a capo
-        ''' e non mette i puntini: taglia. Il nome più lungo, tagliato, si vedrebbe solo
-        ''' aprendo quel pannello.
-        ''' </remarks>
-        <TestMethod>
-        Public Sub OgniNomeCiStaAncheQuandoLaCasellaSiAccende()
-
-            Using form As New FormPrincipale()
-
-                For Each casella As Button In Barra(form)
-
-                    Assert.IsLessThanOrEqualTo(
-                        casella.Width,
-                        TextRenderer.MeasureText(casella.Text, StileApp.FontBottoneForte).Width,
-                        $"«{casella.Text}» non ci sta nel suo bottone quando si accende")
-
                 Next
 
             End Using

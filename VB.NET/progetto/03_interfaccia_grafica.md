@@ -150,10 +150,17 @@ dalle sei che portano avanti **prima** di leggerne l'etichetta.
 Con il riposo azzurro, il pannello aperto **non si vede più dal fondo**: fino a qui era
 lilla (`AccentoTenue`) e le altre bianche, ma su una fila già azzurra quel lilla è quasi
 lo stesso colore. L'evidenza passa alla **cornice**: la casella aperta tiene il suo
-azzurro e prende contorno doppio, lettere e carattere del blu d'accento — gli stessi tre
-segnali insieme del livello 2 (3.3), che qui dentro vogliono già dire «questo è vivo». Il
-fondo dice **che cosa** è una casella, la cornice **dove si è**: due domande diverse, due
-segnali diversi.
+azzurro e prende contorno doppio e lettere del blu d'accento — due dei tre segnali del
+livello 2 (3.3), che qui dentro vogliono già dire «questo è vivo»; il terzo, il grassetto,
+non può distinguerla perché ce l'hanno tutte (v. sotto). Il fondo dice **che cosa** è una
+casella, la cornice **dove si è**: due domande diverse, due segnali diversi.
+
+E tutte e sette scrivono in **grassetto** (`FontBottoneForte`), come le voci del menu
+d'ingresso e per la stessa ragione: sono l'indice del programma, nomi che si leggono di
+sfuggita mentre si sta facendo altro, non comandi che si vanno a cercare. Il carattere non
+cambia mai — né aprendo un pannello né quando la barra si spegne — perché cambiarlo cambia
+l'ingombro, e una fila che si muove sotto gli occhi a ogni clic è peggio del segnale che si
+sarebbe guadagnato.
 
 Il resto vale come per ogni bottone colorato dell'applicazione: **spento si smorza**
 (3.3), perché mentre l'AI lavora la barra si spegne tutta (cap. 02.6) e sette caselle

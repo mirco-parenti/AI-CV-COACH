@@ -351,9 +351,10 @@ Public Module StileApp
     ''' stesse cose, invece di trovarne sette bianche tutte uguali.</para>
     ''' <para><b>Il pannello aperto si vede dalla cornice, non dal fondo.</b> Con il
     ''' riposo azzurro il lilla di prima non si distinguerebbe più: adesso la casella
-    ''' aperta tiene il suo azzurro e prende cornice doppia, lettere e carattere del blu
-    ''' d'accento — gli stessi tre segnali insieme del livello 2 (03.3), che qui dentro
-    ''' vogliono già dire «questo è vivo».</para>
+    ''' aperta tiene il suo azzurro e prende cornice doppia e lettere del blu d'accento —
+    ''' due dei tre segnali del livello 2 (03.3), che qui dentro vogliono già dire «questo
+    ''' è vivo». Il terzo, il grassetto, non può più distinguerla: da quando la barra è
+    ''' tutta in grassetto ce l'hanno già tutte.</para>
     ''' <para><b>Lo spento si smorza.</b> Vale qui la ragione di
     ''' <see cref="VestiBottone"/>: un bottone piatto con un colore suo resta acceso
     ''' all'occhio anche da disabilitato, e mentre l'AI lavora la barra si spegne tutta
@@ -404,10 +405,13 @@ Public Module StileApp
         bottone.FlatStyle = FlatStyle.Flat
         bottone.UseVisualStyleBackColor = False
 
-        ' Il carattere dipende dal ruolo e dall'essere aperta, mai dall'essere accesa: una
-        ' casella che si spegne non deve cambiare ingombro, o la fila si muoverebbe ogni
-        ' volta che l'AI parte.
-        bottone.Font = If(ruolo = RuoloBarra.RitornoAlMenu OrElse attiva, FontBottoneForte, FontTesto)
+        ' Il carattere è quello dei bottoni che pesano, e vale per tutte: la fila in cima è
+        ' l'indice del programma, e i suoi sette nomi si leggono di sfuggita mentre si sta
+        ' facendo altro — come le voci del menu d'ingresso, che sono in grassetto per la
+        ' stessa ragione. Non dipende né dal ruolo né dall'essere aperta o accesa: una
+        ' casella che cambia carattere cambia ingombro, e la fila si muoverebbe sotto gli
+        ' occhi a ogni clic e a ogni chiamata all'AI.
+        bottone.Font = FontBottoneForte
         bottone.FlatAppearance.BorderSize = If(attiva, 2, 1)
 
         If Not bottone.Enabled Then
