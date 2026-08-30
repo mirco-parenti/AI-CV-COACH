@@ -7,170 +7,311 @@ Imports TrovaLavoro
 Namespace Ui
 
     ''' <summary>
-    ''' Collaudi del menu d'ingresso (P0): che lo sfondo copra l'area senza deformarsi,
-    ''' che ognuna delle sei voci abbia il suo bottone, e che il menu si chiuda insieme
-    ''' alla barra quando l'AI lavora.
+    ''' Collaudi del menu d'ingresso (P0): che la fascia del nome lasci scoperta la cima,
+    ''' che il mega stemma nasca dalla misura dello scudo e non da quella della tela, che
+    ''' ognuna delle sei voci abbia il suo bottone, e che il menu si chiuda insieme alla
+    ''' barra quando l'AI lavora.
     ''' </summary>
     ''' <remarks>
     ''' Il pannello si costruisce e non si mostra, come gli altri collaudi di interfaccia:
     ''' quel che si guarda è la geometria e il filo fra bottone ed evento, e nessuno dei
-    ''' due ha bisogno di uno schermo. Il riempimento dello sfondo è addirittura
+    ''' due ha bisogno di uno schermo. La geometria dello sfondo è addirittura
     ''' <c>Shared</c> apposta: si interroga senza costruire niente.
     ''' </remarks>
     <TestClass>
     Public Class CollaudiMenu
 
         ' ==================================================================
-        ' Lo sfondo che riempie
+        ' La fascia del nome, e lo spazio che resta sotto
         ' ==================================================================
 
         <TestMethod>
-        Public Sub LoSfondoSiVedeIntero()
+        Public Sub SopraLaZonaRestaPostoPerNomeESottotitolo()
 
-            ' Il caso vero: il banner è quasi quadrato, l'area è panoramica.
-            Dim riquadro As Rectangle =
-                PannelloMenu.RiquadroDelloSfondo(New Size(1536, 1348), New Size(1134, 485))
+            ' Il difetto visto a video, due volte in un pomeriggio: la colonna dei bottoni
+            ' saliva fin sopra il sottotitolo del marchio. Sul banner nome e sottotitolo
+            ' finivano a 356 px su 1348, poco oltre un quarto dell'altezza; qui la fascia
+            ' deve tenerne almeno altrettanto, perché ci sta dentro anche il respiro che
+            ' stacca il sottotitolo dal primo bottone.
+            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 485), New Size(700, 1000)}
 
-            Assert.IsGreaterThanOrEqualTo(0, riquadro.X, "non sborda a sinistra")
-            Assert.IsGreaterThanOrEqualTo(0, riquadro.Y, "né in cima")
-            Assert.IsLessThanOrEqualTo(1134, riquadro.Right, "né a destra")
-            Assert.IsLessThanOrEqualTo(485, riquadro.Bottom, "né in fondo: si vede tutto il marchio")
+                Dim zona As Rectangle = PannelloMenu.ZonaSottoIlNome(area)
+                Dim scoperto As Double = zona.Top / CDbl(area.Height)
 
-        End Sub
+                Assert.IsGreaterThanOrEqualTo(0.26, scoperto,
+                                              $"su {area.Width}x{area.Height} sopra i bottoni resta scoperto più di un quarto")
 
-        <TestMethod>
-        Public Sub LoSfondoNonSiSchiaccia()
-
-            Dim immagine As New Size(1536, 1348)
-            Dim riquadro As Rectangle = PannelloMenu.RiquadroDelloSfondo(immagine, New Size(1134, 485))
-
-            Dim originale As Double = immagine.Width / CDbl(immagine.Height)
-            Dim disegnata As Double = riquadro.Width / CDbl(riquadro.Height)
-
-            Assert.AreEqual(originale, disegnata, 0.01,
-                            "le proporzioni non si toccano: il disegno non si allunga")
+            Next
 
         End Sub
 
         <TestMethod>
-        Public Sub LoSfondoRestaCentrato()
+        Public Sub LaZonaPrendeTuttoQuelCheLaFasciaLasciaSenzaBuchi()
 
-            Dim riquadro As Rectangle =
-                PannelloMenu.RiquadroDelloSfondo(New Size(1536, 1348), New Size(1134, 485))
+            Dim area As New Size(1134, 485)
 
-            Assert.AreEqual(riquadro.X, 1134 - riquadro.Right, 1,
-                            "in orizzontale l'aria che avanza si divide in parti uguali")
-            Assert.AreEqual(riquadro.Y, 485 - riquadro.Bottom, 1,
-                            "e in verticale pure")
+            Dim fascia As Integer = PannelloMenu.FasciaDelTesto(area)
+            Dim zona As Rectangle = PannelloMenu.ZonaSottoIlNome(area)
+
+            Assert.AreEqual(fascia, zona.Top, "la zona comincia dove la fascia finisce")
+            Assert.AreEqual(area.Height, zona.Bottom, "e arriva in fondo: fra le due non resta un buco")
+            Assert.AreEqual(area.Width, zona.Width, "in larghezza prende tutto")
+            Assert.AreEqual(0, zona.Left, "da bordo a bordo")
 
         End Sub
 
         <TestMethod>
-        Public Sub LoSfondoCrescePerQuantoPuo()
+        Public Sub LaZonaSegueLaFinestraQuandoCambia()
 
-            ' Starci dentro non basta: un'immagine grande la metà del necessario ci sta
-            ' anche lei, e sarebbe un francobollo in mezzo al blu. Il lato che le sta più
-            ' stretto va toccato.
-            Dim riquadro As Rectangle =
-                PannelloMenu.RiquadroDelloSfondo(New Size(1536, 1348), New Size(1134, 485))
+            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 485), New Size(700, 1000)}
 
-            Assert.IsGreaterThanOrEqualTo(484, riquadro.Height,
-                                          "l'altezza è il lato stretto: si arriva a filo")
+                Dim zona As Rectangle = PannelloMenu.ZonaSottoIlNome(area)
 
-            ' E su un'area alta e magra tocca invece la larghezza.
-            Dim magra As Rectangle =
-                PannelloMenu.RiquadroDelloSfondo(New Size(1536, 1348), New Size(400, 900))
+                Assert.IsGreaterThan(0, zona.Width, $"su {area.Width}x{area.Height} la zona non si annulla")
+                Assert.IsGreaterThan(0, zona.Height, "né in altezza")
+                Assert.IsLessThanOrEqualTo(area.Height, zona.Bottom, "e non sborda in fondo")
 
-            Assert.IsGreaterThanOrEqualTo(399, magra.Width, "qui il lato stretto è la larghezza")
-            Assert.IsLessThanOrEqualTo(900, magra.Bottom, "e in altezza ne avanza")
+            Next
+
+        End Sub
+
+        ' ==================================================================
+        ' Il mega stemma dietro i bottoni
+        ' ==================================================================
+
+        ''' <summary>
+        ''' Lo scudo viene alto quanto la zona: esce di poco sopra il primo bottone e
+        ''' sotto l'ultimo.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il riquadro che il pannello restituisce è quello della <b>tela</b>, che è più
+        ''' grande: qui si rifà il conto al contrario — dalla tela allo scudo — e si
+        ''' guarda che torni la zona. È il modo di accorgersi se un giorno qualcuno
+        ''' dimensionasse la tela invece dello scudo.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub IlMegaStemmaHaLoScudoAltoQuantoLaZona()
+
+            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 485), New Size(700, 1000)}
+
+                Dim zona As Rectangle = PannelloMenu.ZonaDelloStemma(area)
+                Dim tela As Rectangle = PannelloMenu.RiquadroDelloStemma(area)
+
+                Dim scudoAlto As Double =
+                    tela.Height * LogoAviolab.ScudoDentroLaTela.Height / CDbl(LogoAviolab.LatoDellaTela)
+
+                Assert.AreEqual(CDbl(zona.Height), scudoAlto, 2.0,
+                                $"su {area.Width}x{area.Height} lo scudo è alto quanto la zona")
+
+            Next
+
+        End Sub
+
+        ''' <summary>
+        ''' La tela è più grande dello scudo, e di quanto: è la guardia contro il conto
+        ''' fatto sulla misura sbagliata.
+        ''' </summary>
+        ''' <remarks>
+        ''' Attorno allo scudo il PNG ha dell'aria trasparente. Chi dimensionasse la
+        ''' <b>tela</b> sull'altezza della zona otterrebbe uno scudo più basso del 6% — a
+        ''' video un difetto piccolo abbastanza da non vedersi. Qui si dichiara che la
+        ''' tela deve venire più alta della zona, il che è vero solo se il conto parte
+        ''' dallo scudo.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LaTelaDelMegaStemmaEPiuGrandeDellaZona()
+
+            Dim area As New Size(1134, 485)
+
+            Dim zona As Rectangle = PannelloMenu.ZonaDelloStemma(area)
+            Dim tela As Rectangle = PannelloMenu.RiquadroDelloStemma(area)
+
+            Assert.IsGreaterThan(zona.Height, tela.Height,
+                                 "la tela è più alta della zona: dentro ci sta lo scudo più la sua aria")
+            Assert.AreEqual(tela.Width, tela.Height,
+                            "e resta quadrata: il PNG è quadrato, deformarlo storcerebbe lo stemma")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IlMegaStemmaECentratoSullaZona()
+
+            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 485), New Size(700, 1000)}
+
+                Dim zona As Rectangle = PannelloMenu.ZonaDelloStemma(area)
+                Dim tela As Rectangle = PannelloMenu.RiquadroDelloStemma(area)
+                Dim scudo As Rectangle = LogoAviolab.ScudoDentroLaTela
+
+                ' Dov'è finito, a video, il centro dello scudo dentro la tela.
+                Dim fattore As Double = tela.Width / CDbl(LogoAviolab.LatoDellaTela)
+                Dim centroX As Double = tela.Left + (scudo.Left + scudo.Right) / 2.0 * fattore
+                Dim centroY As Double = tela.Top + (scudo.Top + scudo.Bottom) / 2.0 * fattore
+
+                Assert.AreEqual(zona.Left + zona.Width / 2.0, centroX, 2.0,
+                                $"su {area.Width}x{area.Height} lo scudo è centrato sull'asse")
+                Assert.AreEqual(zona.Top + zona.Height / 2.0, centroY, 2.0,
+                                "e a metà della zona in altezza")
+
+            Next
+
+        End Sub
+
+        ''' <summary>
+        ''' Lo stemma risale nel respiro fin sotto il sottotitolo, senza toccarlo.
+        ''' </summary>
+        ''' <remarks>
+        ''' Due difetti opposti, e questo collaudo sta in mezzo. Se lo stemma si fermasse
+        ''' dove cominciano i bottoni resterebbe una striscia di avorio vuota sotto il
+        ''' nome — è com'era fino al 2026-08-30 (sera), e si vedeva. Se invece salisse
+        ''' troppo, il colmo dello scudo finirebbe addosso alle lettere del sottotitolo.
+        ''' Il posto giusto è fra i due, ed è l'unico che nessuna delle due misure da sola
+        ''' può garantire.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LoStemmaSaleFinSottoIlSottotitoloSenzaToccarlo()
+
+            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 485), New Size(700, 1000)}
+
+                Dim fineNome As Integer = PannelloMenu.FineDelNome(area)
+                Dim deiBottoni As Rectangle = PannelloMenu.ZonaSottoIlNome(area)
+                Dim delloStemma As Rectangle = PannelloMenu.ZonaDelloStemma(area)
+
+                Assert.IsGreaterThan(fineNome, delloStemma.Top,
+                                     $"su {area.Width}x{area.Height} lo stemma comincia sotto il sottotitolo")
+                Assert.IsLessThan(deiBottoni.Top, delloStemma.Top,
+                                  "e più in alto di dove cominciano i bottoni: il respiro se lo prende")
+                Assert.AreEqual(deiBottoni.Bottom, delloStemma.Bottom,
+                                "in fondo invece arrivano insieme")
+
+            Next
+
+        End Sub
+
+        ''' <summary>
+        ''' Lo scudo sta davvero dove <see cref="LogoAviolab.ScudoDentroLaTela"/> dice.
+        ''' </summary>
+        ''' <remarks>
+        ''' La geometria del mega stemma non guarda il PNG: si fida di quattro numeri
+        ''' misurati una volta. Questa è la guardia che li tiene onesti — se un domani il
+        ''' marchio cambiasse disegno e lo scudo si spostasse nella tela, lo stemma
+        ''' verrebbe scentrato e nessun altro collaudo se ne accorgerebbe. Si rilegge
+        ''' quindi il PNG e si guarda dove stanno i pixel che non sono trasparenti.
+        ''' <para>Con quattro dita di tolleranza, e non per pigrizia: attorno al disegno
+        ''' il PNG si porta un alone di alfa quasi nulla, e <c>Genera</c> lo ridisegna con
+        ''' l'interpolazione accesa. Contando solo i pixel davvero opachi il bordo cade a
+        ''' 30 invece che a 28 — due pixel che a video non esistono. Con una tolleranza di
+        ''' due il collaudo passerebbe esattamente al limite, cioè sarebbe rosso al primo
+        ''' pixel che GDI+ tratta un filo diversamente; con quattro resta capace di vedere
+        ''' uno spostamento vero (venti pixel lo fanno cadere) senza essere ballerino.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LoScudoStaDoveLaCostanteDice()
+
+            Const Tolleranza As Integer = 4
+
+            Using stemma As Bitmap = LogoAviolab.Genera(LogoAviolab.LatoDellaTela)
+
+                Dim sinistra As Integer = Integer.MaxValue
+                Dim destra As Integer = -1
+                Dim cima As Integer = Integer.MaxValue
+                Dim fondo As Integer = -1
+
+                For y As Integer = 0 To stemma.Height - 1
+                    For x As Integer = 0 To stemma.Width - 1
+                        If stemma.GetPixel(x, y).A > 8 Then
+                            If x < sinistra Then sinistra = x
+                            If x > destra Then destra = x
+                            If y < cima Then cima = y
+                            If y > fondo Then fondo = y
+                        End If
+                    Next
+                Next
+
+                Dim dichiarato As Rectangle = LogoAviolab.ScudoDentroLaTela
+
+                Assert.AreEqual(dichiarato.Left, sinistra, Tolleranza, "lo scudo comincia dove è scritto")
+                Assert.AreEqual(dichiarato.Right - 1, destra, Tolleranza, "e finisce dove è scritto")
+                Assert.AreEqual(dichiarato.Top, cima, Tolleranza, "in cima pure")
+                Assert.AreEqual(dichiarato.Bottom - 1, fondo, Tolleranza, "e in fondo")
+
+            End Using
 
         End Sub
 
         <TestMethod>
         Public Sub UnaMisuraImpossibileNonFaCadereNiente()
 
-            Assert.AreEqual(Rectangle.Empty,
-                            PannelloMenu.RiquadroDelloSfondo(New Size(1536, 1348), Size.Empty),
+            Assert.AreEqual(Rectangle.Empty, PannelloMenu.ZonaSottoIlNome(Size.Empty),
                             "un'area di misura zero non si riempie: non è un errore, non c'è spazio")
 
-            Dim senzaImmagine As Rectangle =
-                PannelloMenu.RiquadroDelloSfondo(Size.Empty, New Size(800, 600))
-            Assert.AreEqual(New Size(800, 600), senzaImmagine.Size,
-                            "senza immagine non si divide per zero")
+            Assert.AreEqual(Rectangle.Empty, PannelloMenu.ZonaDelloStemma(Size.Empty),
+                            "né una zona in cui metterci lo stemma")
+
+            Assert.AreEqual(Rectangle.Empty, PannelloMenu.RiquadroDelloStemma(Size.Empty),
+                            "e senza zona non c'è nemmeno lo stemma")
+
+            Assert.AreEqual(0, PannelloMenu.FasciaDelTesto(Size.Empty),
+                            "né una fascia del nome")
 
         End Sub
 
+        ''' <summary>
+        ''' Il banner è ancora dentro l'eseguibile, anche se il menu non lo usa più.
+        ''' </summary>
+        ''' <remarks>
+        ''' Dal 2026-08-30 (sera) lo sfondo del menu si dipinge, e questa risorsa non ha
+        ''' più nessun lettore nel prodotto: resta incorporata finché non si decide se
+        ''' toglierla del tutto (sono 825 KB dentro l'exe). Fino ad allora il collaudo
+        ''' dice almeno che è integra — un giorno che si decida di riusarla, non la si
+        ''' troverà rotta.
+        ''' </remarks>
         <TestMethod>
-        Public Sub LoSfondoEDentroLEseguibileEMisuraQuelCheIlCodiceCrede()
+        Public Sub IlBannerEAncoraIncorporato()
 
             Dim sfondo As Image = Marchio.SfondoDelMenu
 
-            Assert.IsNotNull(sfondo, "lo sfondo del menu è incorporato")
-
-            ' La geometria del menu non chiede la misura all'immagine — leggerla è una
-            ' chiamata a GDI+ su un oggetto condiviso, e in parallelo esplode — ma la
-            ' tiene in una costante. Questa è la guardia che tiene onesta la costante: se
-            ' il banner cambiasse misura senza che nessuno aggiorni MisuraDelMaster, i
-            ' bottoni si centrerebbero su un riquadro che non esiste più.
-            Assert.AreEqual(PannelloMenu.MisuraDelMaster, sfondo.Size,
-                            "e misura quel che PannelloMenu.MisuraDelMaster dichiara")
+            Assert.IsNotNull(sfondo, "il banner è incorporato")
+            Assert.AreEqual(New Size(1536, 1348), sfondo.Size, "e misura quel che ha sempre misurato")
 
         End Sub
 
-        ' ==================================================================
-        ' Lo spazio dentro la cornice, dove vanno i bottoni
-        ' ==================================================================
-
+        ''' <summary>
+        ''' La colonna sta sopra il centro della zona, di quanto il progetto ha deciso.
+        ''' </summary>
+        ''' <remarks>
+        ''' È una correzione dell'occhio, e per questo va sorvegliata: un numero deciso
+        ''' guardando non ha nessuno che lo difenda: se domani qualcuno rimette la colonna
+        ''' al centro geometrico — che è la cosa che verrebbe naturale scrivere — non
+        ''' sbaglia nessun conto, e a vederlo è appena un po' peggio di prima. Le due volte
+        ''' in cui questa geometria è stata sbagliata, nel pomeriggio in cui è nata, se n'è
+        ''' accorto solo l'occhio guardando una fotografia.
+        ''' </remarks>
         <TestMethod>
-        Public Sub LaZonaDeiBottoniStaDentroLoSfondo()
+        Public Sub LaColonnaStaSopraIlCentroDellaZona()
 
-            Dim immagine As New Size(1536, 1348)
-            Dim area As New Size(1936, 940)
+            Using menu As New PannelloMenu()
 
-            Dim sfondo As Rectangle = PannelloMenu.RiquadroDelloSfondo(immagine, area)
-            Dim zona As Rectangle = PannelloMenu.ZonaDentroLaCornice(immagine, area)
+                menu.Size = New Size(1134, 700)
 
-            Assert.IsTrue(sfondo.Contains(zona),
-                          "lo spazio dei bottoni è dentro l'immagine, non fuori")
+                Dim bottoni As BottoneMenu() =
+                    menu.Controls.OfType(Of BottoneMenu)().OrderBy(Function(b) b.Top).ToArray()
 
-        End Sub
+                Dim primo As BottoneMenu = bottoni.First()
+                Dim ultimo As BottoneMenu = bottoni.Last()
 
-        <TestMethod>
-        Public Sub SopraLaZonaRestaPostoPerNomeESottotitolo()
+                Dim zona As Rectangle = PannelloMenu.ZonaSottoIlNome(menu.ClientSize)
 
-            ' Il difetto visto a video, due volte in un pomeriggio: la colonna dei bottoni
-            ' saliva fin sopra il sottotitolo del marchio. Sopra il filetto giallo il
-            ' banner tiene nome e sottotitolo, e quella parte deve restare scoperta: nel
-            ' master finisce a 356 px su 1348, cioè poco oltre un quarto dell'altezza.
-            Dim immagine As New Size(1536, 1348)
-            Dim area As New Size(1936, 940)
+                Dim centroColonna As Double = (primo.Top + ultimo.Bottom) / 2.0
+                Dim centroZona As Double = zona.Top + zona.Height / 2.0
 
-            Dim sfondo As Rectangle = PannelloMenu.RiquadroDelloSfondo(immagine, area)
-            Dim zona As Rectangle = PannelloMenu.ZonaDentroLaCornice(immagine, area)
+                ' Dichiarato qui e non preso dalla costante del pannello: un metro
+                ' copiato dalla cosa da misurare non può dire che è sbagliata.
+                Const RialzoAtteso As Double = 1.75
 
-            Dim scopertoSopra As Double = (zona.Top - sfondo.Top) / CDbl(sfondo.Height)
+                Assert.AreEqual(primo.Height * RialzoAtteso, centroZona - centroColonna, 2.0,
+                                "la colonna sta un bottone e tre quarti più in alto del centro")
 
-            Assert.IsGreaterThanOrEqualTo(0.26, scopertoSopra,
-                                          "sopra i bottoni resta scoperto più di un quarto del banner")
-
-        End Sub
-
-        <TestMethod>
-        Public Sub LaZonaSegueLoSfondoQuandoLaFinestraCambia()
-
-            Dim immagine As New Size(1536, 1348)
-
-            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 485), New Size(700, 1000)}
-
-                Dim sfondo As Rectangle = PannelloMenu.RiquadroDelloSfondo(immagine, area)
-                Dim zona As Rectangle = PannelloMenu.ZonaDentroLaCornice(immagine, area)
-
-                Assert.IsTrue(sfondo.Contains(zona),
-                              $"su {area.Width}x{area.Height} la zona resta dentro l'immagine")
-                Assert.IsGreaterThan(0, zona.Width, "e non si annulla")
-                Assert.IsGreaterThan(0, zona.Height, "né in altezza")
-
-            Next
+            End Using
 
         End Sub
 

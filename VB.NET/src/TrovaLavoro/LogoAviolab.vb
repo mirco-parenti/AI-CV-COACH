@@ -3,11 +3,34 @@ Imports System.Drawing.Drawing2D
 Imports System.IO
 
 ''' <summary>
-''' Logo Aviolab AI del pannello in basso a sinistra (cap. 03.5): l'immagine vive
+''' Lo stemma Aviolab AI: il pannello in basso a sinistra (cap. 03.5) e il mega
+''' stemma di sfondo del menu (cap. 03.6). L'immagine vive
 ''' in forma binaria dentro questo sorgente (PNG 256x256 codificato Base64), cosi'
 ''' nel repository e accanto all'exe non esiste nessun file di risorse.
 ''' </summary>
-Friend Module LogoAviolab
+Public Module LogoAviolab
+
+    ''' <summary>Il lato della tela quadrata del PNG, in pixel.</summary>
+    Public Const LatoDellaTela As Integer = 256
+
+    ''' <summary>Dove sta lo <b>scudo vero</b> dentro la tela, in pixel del PNG.</summary>
+    ''' <remarks>
+    ''' <para>Attorno allo scudo la tela ha dell'aria trasparente: chi vuole uno scudo
+    ''' alto tanto deve chiedere una tela piu' grande, non della stessa misura. Serve al
+    ''' <b>mega stemma</b> del menu (cap. 03.6), che si dimensiona sullo scudo e non sulla
+    ''' tela — misurandolo sulla tela verrebbe piu' basso del 6%.</para>
+    ''' <para>Il <b>centro</b> invece coincide, e vale la pena saperlo: lo scudo sta
+    ''' esattamente in mezzo alla tela (128 e 128 su 256), quindi centrare l'uno o l'altra
+    ''' da' oggi lo stesso punto. Il menu parte lo stesso dal centro dello scudo, perche'
+    ''' se un domani il disegno si spostasse sarebbe ancora lo scudo a dover stare in
+    ''' mezzo; ma e' una prudenza che <b>nessun collaudo puo' sorvegliare</b> finche' i due
+    ''' centri coincidono — falsificarla, il 2026-08-30, non ha fatto diventare rosso
+    ''' niente.</para>
+    ''' <para>Sono numeri <b>misurati sul PNG</b>, non stimati: i pixel non trasparenti
+    ''' stanno fra x 28 e 228 e fra y 7 e 249. Che continuino a starci lo sorveglia il
+    ''' banco, che il PNG se lo rilegge.</para>
+    ''' </remarks>
+    Public ReadOnly ScudoDentroLaTela As New Rectangle(28, 7, 200, 242)
 
     ' PNG 256x256 del logo, codificato Base64.
     Private ReadOnly DatiPng As String() = {
@@ -245,7 +268,7 @@ Friend Module LogoAviolab
     }
 
     ''' <summary>Crea l'immagine del logo, quadrata, del lato richiesto in pixel.</summary>
-    Friend Function Genera(lato As Integer) As Bitmap
+    Public Function Genera(lato As Integer) As Bitmap
         Dim immagine As New Bitmap(lato, lato)
 
         Using flusso As New MemoryStream(Convert.FromBase64String(String.Concat(DatiPng)))

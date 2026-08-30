@@ -6,8 +6,11 @@ Partial Class PannelloMenu
     <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
-            If disposing AndAlso components IsNot Nothing Then
-                components.Dispose()
+            If disposing Then
+                ' Gli elementi di sfondo sono una Bitmap tenuta da parte fra un
+                ' ridisegno e l'altro: se ne va con il pannello.
+                _sfondo?.Dispose()
+                If components IsNot Nothing Then components.Dispose()
             End If
         Finally
             MyBase.Dispose(disposing)

@@ -45,6 +45,20 @@ Public Module StileApp
     ''' </summary>
     Public ReadOnly FondoMarchio As Color = ColorTranslator.FromHtml("#0B06B0")
 
+    ''' <summary>Il fondo del menu d'ingresso (cap. 03.6): un avorio caldo.</summary>
+    ''' <remarks>
+    ''' Non e' un bianco. <c>#FFFAF0</c> porta dentro un velo di giallo che scalda la
+    ''' schermata su cui l'applicazione si apre, e la stacca dal <see cref="SfondoBase"/>
+    ''' grigino delle finestre di lavoro: il menu non e' una finestra di lavoro, e' la
+    ''' soglia. Dal 2026-08-30 prende il posto del banner, che del menu era lo sfondo
+    ''' intero; il marchio ci resta come <b>mega stemma</b> dietro i bottoni, e il nome
+    ''' come scritta in cima (cap. 03.6).
+    ''' <para>Su questo fondo il velo bianco del menu non ha quasi presa — lo porterebbe
+    ''' a <c>#FFFDF8</c>, che a occhio e' lo stesso colore — e infatti li' il velo non
+    ''' serve a schiarire il fondo ma solo cio' che ci sta sopra.</para>
+    ''' </remarks>
+    Public ReadOnly FondoMenu As Color = ColorTranslator.FromHtml("#FFFAF0")
+
     ''' <summary>Il filo che contorna il pannello del logo (cap. 03.5).</summary>
     ''' <remarks>
     ''' Nero pieno, e non <see cref="BordoLeggero"/>: quel grigio serve a separare due

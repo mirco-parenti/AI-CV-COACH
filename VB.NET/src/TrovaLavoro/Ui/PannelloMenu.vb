@@ -1,5 +1,7 @@
 Imports System.Drawing
 Imports System.Drawing.Drawing2D
+Imports System.Drawing.Imaging
+Imports System.Drawing.Text
 Imports System.Windows.Forms
 
 ''' <summary>
@@ -49,8 +51,9 @@ Public Class VoceDelMenuEventArgs
 End Class
 
 ''' <summary>
-''' Pannello P0 — il menu d'ingresso: sei bottoni a pillola su un fondo che è il marchio
-''' schiarito. È la schermata su cui l'applicazione si apre.
+''' Pannello P0 — il menu d'ingresso: sei bottoni a pillola su un fondo avorio, col nome
+''' del prodotto in cima e il mega stemma Aviolab dietro. È la schermata su cui
+''' l'applicazione si apre.
 ''' </summary>
 ''' <remarks>
 ''' <para><b>Non sostituisce la barra, la precede.</b> La barra in alto resta dov'è e
@@ -62,15 +65,27 @@ End Class
 ''' <c>FormPrincipale</c>, che è l'unico posto in cui è già scritto come si passa da un
 ''' pannello all'altro — e uno dei sei (le Impostazioni) non è nemmeno un pannello, ma
 ''' una finestra che si apre sopra.</para>
-''' <para><b>Lo sfondo è il banner, e non è stato ritoccato.</b> L'immagine incorporata è
-''' identica al file dei definitivi; il velo che la schiarisce è un rettangolo bianco
-''' semitrasparente dipinto qui sopra, a ogni ridisegno. Così il marchio nel repository
-''' resta uno solo, e decidere quanto è chiaro il fondo non vuol dire rigenerare un PNG.
-''' Il banner <b>si vede intero</b>: sta tutto dentro l'area, centrato, senza tagli —
-''' nome e timbro compresi. Attorno resta il blu del marchio, che è anche il colore della
-''' cornice del banner: lo stacco non si vede. La prima versione lo faceva invece
-''' <i>riempire</i>, tagliando quel che avanzava, e in cima restava una striscia di
-''' lettere mozzate: un marchio tagliato è peggio di un marchio piccolo.</para>
+''' <para><b>Lo sfondo si dipinge, non si carica.</b> Dal 2026-08-30 (sera) il fondo non
+''' è più il banner del marchio ma tre cose disegnate a video: l'avorio di
+''' <see cref="StileApp.FondoMenu"/>, il <b>mega stemma</b> Aviolab dietro la colonna dei
+''' bottoni, e in cima <see cref="Titolo"/> e <see cref="Sottotitolo"/> — le stesse due
+''' righe del banner, centrate sull'asse e senza il timbro che sul banner sta a destra
+''' del nome. Il vantaggio non è estetico: un fondo dipinto <b>segue la finestra</b>,
+''' mentre un'immagine sola può solo starci dentro o essere tagliata, e su una finestra
+''' panoramica il banner quasi quadrato lasciava blu ai lati.</para>
+''' <para><b>Il velo bianco è rimasto, e li prende tutti e tre.</b> Sul banner
+''' schiariva l'immagine intera; qui non si stende sul fondo — <c>#FFFAF0</c> velato
+''' diventa <c>#FFFDF8</c>, che è lo stesso colore, e l'avorio va lasciato esatto —
+''' ma su <b>quel che ci sta sopra</b>: mega stemma, nome e sottotitolo insieme. Sono
+''' tutti e tre sfondo, e sfondo vuol dire stare dietro ai bottoni senza contendere.</para>
+''' <para><b>Come si stende un velo su tre cose e non sulla quarta.</b> Gli elementi si
+''' disegnano <b>a piena forza su una tela a parte</b>, e la tela si appoggia sull'avorio
+''' con l'opacità abbassata in una volta sola. La via corta — disegnare ciascuno con un
+''' colore già trasparente — qui non funziona: il nome è un contorno nero <i>e</i> un
+''' riempimento bianco sullo stesso percorso, e col bianco trasparente il nero di sotto
+''' riaffiorerebbe dentro le lettere, che verrebbero grigie ai bordi invece che bianche.
+''' L'altra via corta — un rettangolo bianco steso sopra tutto, com'era sul banner —
+''' schiarirebbe anche l'avorio.</para>
 ''' <para><b>Perché la disposizione è a mano e non un <c>TableLayoutPanel</c>.</b> I
 ''' bottoni devono restare centrati e proporzionati su finestre molto diverse — e stare
 ''' lontani dal pannello del logo, che è flottante sull'angolo in basso a sinistra
@@ -79,27 +94,102 @@ End Class
 Public Class PannelloMenu
     Implements IPannelloArea
 
-    ''' <summary>Quanto è coprente il velo bianco sopra l'immagine, da 0 a 255.</summary>
+    ''' <summary>Il nome del prodotto, com'è scritto sul banner del marchio.</summary>
+    Public Const Titolo As String = "TrovaLavoro"
+
+    ''' <summary>La riga sotto il nome, com'è scritta sul banner del marchio.</summary>
+    Public Const Sottotitolo As String =
+        "Crea il tuo miglior CV e rispondi subito all'annuncio di lavoro perfetto per te!"
+
+    ''' <summary>La famiglia con cui è scritto il nome, se la macchina ce l'ha.</summary>
     ''' <remarks>
-    ''' Scelto guardandolo a video: a 140 il marchio si legge tutto — nome, timbro,
-    ''' illustrazione — e sta dietro ai bottoni senza contendere. È la sola manopola
-    ''' dell'effetto: alzarlo lo sbianca, abbassarlo lo riporta avanti.
+    ''' Le due famiglie del banner. Portano il peso <b>nel nome</b> — «Black», «Semibold»
+    ''' — e non sono stili di «Segoe UI»: vanno chieste così, e in stile normale. Se su
+    ''' una macchina non ci fossero si ripiega su <see cref="StileApp.NomeFont"/> in
+    ''' grassetto, che è la stessa famiglia di tutta l'interfaccia.
+    ''' </remarks>
+    Private Const NomeFontTitolo As String = "Segoe UI Black"
+
+    ''' <summary><inheritdoc cref="NomeFontTitolo" path="/summary"/></summary>
+    Private Const NomeFontSottotitolo As String = "Segoe UI Semibold"
+
+    ''' <summary>Quanto è coprente il velo bianco sopra il mega stemma, da 0 a 255.</summary>
+    ''' <remarks>
+    ''' Scelto guardandolo a video quando il fondo era il banner, e rimasto lo stesso: a
+    ''' 140 lo stemma si riconosce e sta dietro ai bottoni senza contendere. È la sola
+    ''' manopola dell'effetto — alzarlo lo sbianca, abbassarlo lo riporta avanti.
     ''' </remarks>
     Private Const VeloBianco As Integer = 140
 
+    ''' <summary>Quanta parte dell'altezza si prende la fascia del nome, in cima.</summary>
+    ''' <remarks>
+    ''' Sul banner nome e sottotitolo occupavano i primi 356 px su 1348, poco oltre un
+    ''' quarto: qui la fascia è un filo più alta perché deve contenere anche il
+    ''' <see cref="FrazioneRespiro">respiro</see> che stacca il sottotitolo dal primo
+    ''' bottone. Sotto di lei comincia tutto il resto — il mega stemma e la colonna.
+    ''' </remarks>
+    Private Const FrazioneFasciaDelTesto As Double = 0.32
+
+    ''' <summary>Quanta parte della fascia resta vuota in fondo, per staccare il primo bottone.</summary>
+    ''' <remarks>
+    ''' È un respiro che serve ai <b>bottoni</b>, non allo stemma: v.
+    ''' <see cref="ZonaDelloStemma"/>.
+    ''' </remarks>
+    Private Const FrazioneRespiro As Double = 0.18
+
+    ''' <summary>Di quanto lo stemma resta sotto il sottotitolo, in frazione della fascia.</summary>
+    ''' <remarks>
+    ''' Poco: quel tanto che basta perché il colmo dello scudo non tocchi le lettere. Il
+    ''' respiro vero, quello grande, è più sotto e riguarda il primo bottone.
+    ''' </remarks>
+    Private Const FrazioneStaccoStemma As Double = 0.05
+
+    ''' <summary>Quanta parte della larghezza si prende il nome.</summary>
+    ''' <remarks>
+    ''' Il corpo del carattere non è un numero fisso: si ricava da quanto deve venire
+    ''' <b>largo</b> il testo, così il nome cresce con la finestra invece di restare un
+    ''' francobollo su uno schermo grande. Le due frazioni sono quelle del banner,
+    ''' misurate sul master: il nome ne copriva il 63% e il sottotitolo il 90%, ma il
+    ''' banner è quasi quadrato e qui l'area è panoramica — riportarle tali e quali
+    ''' avrebbe dato un nome alto quanto mezza fascia.
+    ''' </remarks>
+    Private Const FrazioneLarghezzaTitolo As Double = 0.4
+
+    ''' <summary><inheritdoc cref="FrazioneLarghezzaTitolo" path="/summary"/></summary>
+    Private Const FrazioneLarghezzaSottotitolo As Double = 0.74
+
+    ''' <summary>Quanto è spesso il contorno nero, in frazione del corpo.</summary>
+    ''' <remarks>
+    ''' Misurato sul banner: il nome bianco è alto 109 px e il suo contorno ne aggiunge
+    ''' una ventina per parte. A quello spessore il contorno salda fra loro le lettere e
+    ''' fa della scritta un blocco unico, che è il carattere del marchio — e su un fondo
+    ''' chiaro è anche la sola ragione per cui un testo bianco si legge.
+    ''' </remarks>
+    Private Const FrazioneContorno As Single = 0.2
+
     ''' <summary>Larghezza dei bottoni quando c'è tutto lo spazio che vogliono.</summary>
     ''' <remarks>
-    ''' Una volta e mezza la misura con cui erano nati (460×58): a quella, sullo sfondo
-    ''' del banner, sembravano piccoli. È il genere di cosa che si decide guardando, non
-    ''' calcolando.
+    ''' <para>Tre misure in due giorni, e ognuna aveva ragione sul suo sfondo: nati 460×58,
+    ''' cresciuti a 690×87 perché sul banner sembravano piccoli, e tornati a <b>420×53</b>
+    ''' il 2026-08-30 (sera), quando il fondo è diventato il mega stemma. A 690 la colonna
+    ''' lo copriva per intero, e di uno scudo alto quanto tutta la zona si vedevano tre
+    ''' strisce negli stacchi fra una pillola e l'altra — che a occhio non sembrava un
+    ''' marchio, sembrava un difetto. È il genere di cosa che si decide guardando, non
+    ''' calcolando.</para>
+    ''' <para>Il <b>rapporto</b> fra i due lati non si è mosso (7,9), e non è un vezzo: il
+    ''' corpo del testo segue l'altezza del bottone, quindi stringere la sola larghezza
+    ''' avrebbe lasciato lettere da bottone grande dentro un bottone corto.</para>
+    ''' <para>Sotto questa misura non si scende a cuor leggero: a misura piena il nome più
+    ''' lungo — «Confronta ANNUNCIO - CV / Match 1-5 ⭐» — vuole 379 px, e qui ne restano
+    ''' quaranta di margine. A sorvegliarlo c'è il banco, che a 260 diventa rosso.</para>
     ''' </remarks>
-    Private Const LarghezzaBottone As Integer = 690
+    Private Const LarghezzaBottone As Integer = 420
 
     ''' <summary>Sotto questa larghezza i bottoni non scendono, per stretta che sia la finestra.</summary>
     Private Const LarghezzaMinimaBottone As Integer = 240
 
     ''' <summary><inheritdoc cref="LarghezzaBottone" path="/summary"/></summary>
-    Private Const AltezzaBottone As Integer = 87
+    Private Const AltezzaBottone As Integer = 53
 
     ''' <summary>Sotto questa altezza un bottone non scende: il testo ci deve stare.</summary>
     Private Const AltezzaMinimaBottone As Integer = 34
@@ -107,40 +197,71 @@ Public Class PannelloMenu
     ''' <summary>Quanto spazio fra un bottone e il successivo, a misura piena.</summary>
     Private Const DistanzaBottoni As Integer = 16
 
+    ''' <summary>
+    ''' Di quanto la colonna sta più in alto del centro, in altezze di bottone.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Un bottone, deciso guardando. Il centro geometrico della zona non è il
+    ''' centro che l'occhio si aspetta: sotto la colonna non c'è niente fino al bordo,
+    ''' sopra c'è il nome, e una colonna esattamente centrata sembra scivolata in basso.
+    ''' È lo stesso genere di correzione con cui si compone una pagina — il blocco si alza
+    ''' un poco, perché il margine di sotto pesa meno di quello di sopra.</para>
+    ''' <para>La misura però non è arbitraria, e il metro è lo <b>stemma</b>: la colonna
+    ''' deve stare <b>dentro</b> il campo blu, e il primo tasto non sedersi sulle due
+    ''' stelle laterali, che hanno la cima a 64 px sulla tela di 256 — su una finestra
+    ''' massimizzata, a y 511. Ci si è arrivati per gradi, misurando ogni volta dove
+    ''' finiva il primo tasto: a <b>mezzo</b> bottone finiva a 540, cioè quasi trenta
+    ''' pixel <i>sotto</i> la cima delle stelle; a <b>uno</b> a 509, appena sopra; poi 496,
+    ''' 483, 469, 456. Il valore fermato è <b>uno e tre quarti</b>, col primo tasto a 469
+    ''' e quaranta pixel di aria sopra le stelle laterali — ci si è saliti fino a due e si
+    ''' è tornati di un quarto. Se un domani il marchio cambiasse e le stelle si
+    ''' spostassero, questo numero andrebbe riguardato: è legato a loro, anche se il
+    ''' codice non può saperlo.</para>
+    ''' <para>Perché ci si è fermati qui e non più su. Salendo, il primo tasto si allontana
+    ''' dalle due stelle laterali ma comincia a coprire la <b>stella grande</b> in mezzo,
+    ''' che sta più in alto (y 375-508 a video): a due bottoni ne restava visibile solo la
+    ''' punta. Da un certo punto in avanti alzare non è più un guadagno netto, è uno
+    ''' scambio fra le stelle di sotto e quella di sopra — e questo è il punto in
+    ''' cui lo scambio conviene ancora.</para>
+    ''' <para>Una cosa che il solo rialzo non può risolvere: le due stelle sono larghe
+    ''' quanto <b>sta dentro la colonna</b> (a video x 762-881 e 1050-1170, contro i
+    ''' 763-1173 dei bottoni), quindi in orizzontale restano dietro le pillole comunque, e
+    ''' si vedono solo negli stacchi fra un tasto e l'altro. Alzare la colonna le libera
+    ''' dal <i>primo</i> tasto, non da tutti.</para>
+    ''' <para><i>Due stime a occhio sono state smentite dal conto dei pixel, in mezz'ora:
+    ''' «a un bottone ne copre una dozzina» (ne copriva zero) e «a uno e mezzo le stelle
+    ''' restano libere sotto» (restano dietro il secondo tasto). Un numero che nasce
+    ''' guardando va poi misurato, o resta un'opinione scritta in un commento.</i></para>
+    ''' </remarks>
+    Private Const RialzoColonna As Double = 1.75
+
     ''' <summary>Quanto spazio resta libero ai lati della colonna dei bottoni.</summary>
     Private Const MargineLaterale As Integer = StileApp.MargineRiquadro * 2
 
-    ''' <summary>Quanto è grande il banner incorporato, in pixel.</summary>
-    ''' <remarks>
-    ''' Scritta qui invece di chiederla all'immagine, e non per pigrizia: leggere
-    ''' <c>Image.Size</c> è una chiamata a GDI+ sull'oggetto <b>condiviso</b> che
-    ''' <see cref="Marchio.SfondoDelMenu"/> restituisce sempre uguale, e GDI+ non tollera
-    ''' che due thread lo tocchino insieme — «Object is currently in use elsewhere». Nel
-    ''' programma il pannello è uno solo e non capita; nel banco, dove i collaudi girano in
-    ''' parallelo, due finestre lo hanno chiesto nello stesso istante e il secondo è
-    ''' esploso. La geometria non ha bisogno dell'immagine: le basta sapere quanto è
-    ''' grande, e quella è una costante. Che la risorsa vera misuri davvero così lo
-    ''' sorveglia il banco.
-    ''' </remarks>
-    Public Shared ReadOnly MisuraDelMaster As New Size(1536, 1348)
+    ''' <summary>Una riga del nome già dimensionata sulla finestra di adesso.</summary>
+    Private Structure RigaDelNome
 
-    ''' <summary>
-    ''' Il riquadro che la cornice gialla racchiude, in pixel del master.
-    ''' </summary>
-    ''' <remarks>
-    ''' <para>È lo spazio dentro cui i bottoni si centrano, e sono numeri <b>misurati sul
-    ''' PNG</b>, non stimati a occhio: cercando il giallo del filetto (<c>#E2E44E</c>) sul
-    ''' master, i due tratti orizzontali stanno a x 13-32 e 1503-1523, i due verticali a
-    ''' y 335-355 e 1320-1340. Dentro, quindi, resta da 33 a 1502 e da 356 a 1319.</para>
-    ''' <para>Serve a lasciare scoperti <b>nome e sottotitolo</b>, che stanno sopra la
-    ''' cornice: centrando la colonna sull'area, o anche solo sotto la fascia del testo, il
-    ''' primo bottone finiva addosso al sottotitolo. Se un giorno il marchio cambia
-    ''' impaginazione, questi quattro numeri si rimisurano allo stesso modo.</para>
-    ''' </remarks>
-    Private Shared ReadOnly RiquadroDentroLaCornice As New Rectangle(33, 356, 1470, 964)
+        ''' <summary>Il corpo del carattere, in pixel.</summary>
+        Public Corpo As Single
+
+        ''' <summary>Quanto è alta la riga a quel corpo, in pixel, contorno escluso.</summary>
+        Public Altezza As Single
+
+    End Structure
 
     ''' <summary>Quanto spazio si prende il logo flottante (cap. 03.5).</summary>
     Private _ingombroLogo As Size
+
+    ''' <summary>Gli elementi di sfondo già disegnati, a piena forza, senza il velo.</summary>
+    ''' <remarks>
+    ''' Tenuto da parte e non rifatto a ogni ridisegno: <see cref="LogoAviolab.Genera"/>
+    ''' decodifica il PNG e lo riscala, e il nome vuole due misurazioni di testo. Si rifà
+    ''' solo quando cambia la misura della finestra.
+    ''' </remarks>
+    Private _sfondo As Bitmap
+
+    ''' <summary>Per quale misura <see cref="_sfondo"/> è stato disegnato.</summary>
+    Private _misuraSfondo As Size
 
     ''' <summary>Alzato quando si sceglie una delle sei voci.</summary>
     Public Event VoceScelta As EventHandler(Of VoceDelMenuEventArgs)
@@ -155,7 +276,7 @@ Public Class PannelloMenu
                  ControlStyles.OptimizedDoubleBuffer Or
                  ControlStyles.ResizeRedraw, True)
 
-        Me.BackColor = StileApp.FondoMarchio
+        Me.BackColor = StileApp.FondoMenu
 
     End Sub
 
@@ -189,11 +310,13 @@ Public Class PannelloMenu
     ''' finestra piccola ne ha meno. Quando lo spazio non basta, bottoni e stacchi calano
     ''' insieme fino ai loro minimi — sotto i quali la colonna esce dal pannello ed è
     ''' meglio che esca in basso, dove non c'è niente, che sopra il logo.</para>
-    ''' <para>La colonna non è centrata sull'area ma sull'<b>illustrazione</b>, cioè sul
-    ''' banner meno la sua fascia del testo (v. <see cref="ZonaDelDisegno"/>): centrandola
-    ''' sull'area, il primo bottone finiva davanti al nome del marchio. E resta comunque
-    ''' <b>al netto del logo</b> flottante, che sull'angolo in basso a sinistra si prende
-    ''' il suo spazio.</para>
+    ''' <para>La colonna non è centrata sull'area ma sulla
+    ''' <see cref="ZonaSottoIlNome">zona sotto il nome</see>: centrandola sull'area, il
+    ''' primo bottone finiva davanti al nome del marchio. E resta comunque <b>al netto del
+    ''' logo</b> flottante, che sull'angolo in basso a sinistra si prende il suo
+    ''' spazio. Dentro la zona sta poi <see cref="RialzoColonna">un bottone e tre quarti
+    ''' più in alto</see> del centro, che è una correzione dell'occhio e non del
+    ''' conto.</para>
     ''' </remarks>
     Private Sub DisponiIBottoni()
 
@@ -219,10 +342,13 @@ Public Class PannelloMenu
         larghezza = Math.Max(LarghezzaMinimaBottone, larghezza)
 
         Dim totale As Integer = altezza * bottoni.Length + distanza * (bottoni.Length - 1)
-        Dim zona As Rectangle = ZonaDelDisegno()
+        Dim zona As Rectangle = ZonaSottoIlNome(Me.ClientSize)
 
         Dim sinistra As Integer = zona.Left + (zona.Width - larghezza) \ 2
-        Dim cima As Integer = zona.Top + (zona.Height - totale) \ 2
+
+        ' Centrata nella zona, e poi alzata: di quanto lo dice RialzoColonna.
+        Dim cima As Integer = zona.Top + (zona.Height - totale) \ 2 -
+                              CInt(Math.Round(altezza * RialzoColonna))
 
         ' Le due guardie: non sopra il bordo, e non addosso al logo flottante — ma il logo
         ' sta nell'angolo in <b>basso a sinistra</b>, e a schermo largo la colonna gli passa
@@ -285,49 +411,120 @@ Public Class PannelloMenu
     End Sub
 
     ''' <summary>
-    ''' Dove sta, a video, lo spazio dentro la cornice gialla del banner.
+    ''' Quanto è alta la fascia in cima in cui stanno nome e sottotitolo.
     ''' </summary>
     ''' <remarks>
-    ''' Si prende <see cref="RiquadroDentroLaCornice"/> — misurato sul master — e lo si
-    ''' scala come è stata scalata l'immagine. Se lo sfondo non c'è, la zona è tutta
-    ''' l'area e la colonna torna semplicemente al centro: senza immagine non c'è nessun
-    ''' titolo da lasciare scoperto.
+    ''' È una frazione dell'altezza e non la misura del testo, e la differenza conta: la
+    ''' geometria dei bottoni si decide a ogni ridimensionamento, dove un
+    ''' <c>Graphics</c> non c'è — e su un controllo mai mostrato non si può nemmeno
+    ''' chiedere. Il testo si adatta poi alla fascia, non viceversa.
     ''' </remarks>
-    Private Function ZonaDelDisegno() As Rectangle
+    Public Shared Function FasciaDelTesto(area As Size) As Integer
 
-        ' Si chiede solo *se* lo sfondo c'è: quanto è grande lo dice MisuraDelMaster, per
-        ' la ragione scritta là sopra.
-        If Marchio.SfondoDelMenu Is Nothing Then Return New Rectangle(Point.Empty, Me.ClientSize)
+        If area.Height <= 0 Then Return 0
 
-        Return ZonaDentroLaCornice(MisuraDelMaster, Me.ClientSize)
+        Return CInt(Math.Floor(area.Height * FrazioneFasciaDelTesto))
+
+    End Function
+
+    ''' <summary>Dove finisce il sottotitolo, dentro la fascia.</summary>
+    ''' <remarks>
+    ''' Sotto di lì la fascia è vuota: è il respiro che stacca il nome dal primo bottone.
+    ''' Sta qui, e non dentro il disegno del testo, perché due cose lo devono sapere — chi
+    ''' scrive il nome, per non sconfinare, e chi mette il mega stemma, che in quel vuoto
+    ''' ci risale. Se lo calcolassero ognuno per conto suo, prima o poi direbbero due cose
+    ''' diverse.
+    ''' </remarks>
+    Public Shared Function FineDelNome(area As Size) As Integer
+
+        Return CInt(Math.Floor(FasciaDelTesto(area) * (1.0 - FrazioneRespiro)))
 
     End Function
 
     ''' <summary>
-    ''' Lo spazio dentro la cornice gialla, in coordinate dell'area: dove i bottoni si
-    ''' centrano.
+    ''' Lo spazio sotto il nome, dove si centra la colonna dei bottoni.
     ''' </summary>
     ''' <remarks>
-    ''' Condivisa come <see cref="RiquadroDelloSfondo"/>, e per la stessa ragione: è
-    ''' geometria, e il banco la interroga senza costruire il pannello. Qui la ragione è
-    ''' più forte che altrove — questo conto è stato sbagliato <b>due volte</b> in un
-    ''' pomeriggio (prima centrando sull'area, poi lasciando che la guardia del logo
-    ''' spingesse in alto la colonna), e tutte e due le volte se n'è accorto solo l'occhio,
-    ''' guardando una fotografia. Adesso se ne accorge anche il banco.
+    ''' Pubblica e <c>Shared</c> perché il banco la interroga senza costruire il pannello
+    ''' e senza uno schermo. È l'erede della «zona dentro la cornice» del banner, e nasce
+    ''' dalla stessa esigenza: lasciare scoperto quel che sta scritto in cima. Quel conto
+    ''' fu sbagliato <b>due volte</b> in un pomeriggio, e tutte e due le volte se ne
+    ''' accorse solo l'occhio, guardando una fotografia.
     ''' </remarks>
-    Public Shared Function ZonaDentroLaCornice(immagine As Size, area As Size) As Rectangle
+    Public Shared Function ZonaSottoIlNome(area As Size) As Rectangle
 
-        Dim riquadro As Rectangle = RiquadroDelloSfondo(immagine, area)
-        If riquadro.Width <= 0 OrElse riquadro.Height <= 0 Then Return riquadro
+        If area.Width <= 0 OrElse area.Height <= 0 Then Return Rectangle.Empty
 
-        Dim orizzontale As Double = riquadro.Width / CDbl(MisuraDelMaster.Width)
-        Dim verticale As Double = riquadro.Height / CDbl(MisuraDelMaster.Height)
+        Dim cima As Integer = FasciaDelTesto(area)
+
+        Return New Rectangle(0, cima, area.Width, Math.Max(1, area.Height - cima))
+
+    End Function
+
+    ''' <summary>
+    ''' Lo spazio in cui vive il mega stemma: comincia più in alto di quello dei bottoni.
+    ''' </summary>
+    ''' <remarks>
+    ''' Il respiro sotto il nome serve ai <b>bottoni</b>, non allo stemma: fermare anche
+    ''' lui là sotto gli faceva cominciare il colmo un dito più in basso di dove il
+    ''' sottotitolo finiva, con una striscia di avorio vuota in mezzo che non era di
+    ''' nessuno. Lo stemma quel vuoto se lo prende, e si ferma
+    ''' <see cref="FrazioneStaccoStemma">poco sotto</see> il sottotitolo.
+    ''' </remarks>
+    Public Shared Function ZonaDelloStemma(area As Size) As Rectangle
+
+        Dim zona As Rectangle = ZonaSottoIlNome(area)
+        If zona.Width <= 0 OrElse zona.Height <= 0 Then Return zona
+
+        Dim cima As Integer =
+            FineDelNome(area) + CInt(Math.Floor(FasciaDelTesto(area) * FrazioneStaccoStemma))
+
+        ' Non si sale mai sopra il nome, per stretta che sia la finestra.
+        If cima >= zona.Top Then Return zona
+
+        Return New Rectangle(zona.Left, cima, zona.Width, zona.Bottom - cima)
+
+    End Function
+
+    ''' <summary>
+    ''' Dove va disegnato il mega stemma: la <b>tela</b> del PNG, non lo scudo.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Lo scudo viene alto quanto la <see cref="ZonaSottoIlNome">zona</see>, così
+    ''' esce di poco sopra il primo bottone e sotto l'ultimo. Ma il PNG ha dell'aria
+    ''' trasparente attorno (<see cref="LogoAviolab.ScudoDentroLaTela"/>): chiedere una
+    ''' tela alta quanto la zona darebbe uno scudo più basso del 6%, che è la sola cosa
+    ''' che la tela sbaglia. Perciò la tela si chiede <b>in proporzione</b>.</para>
+    ''' <para>Sul <b>centro</b>, invece, non c'è niente da correggere: nel PNG di oggi lo
+    ''' scudo sta esattamente in mezzo alla tela, e le due maniere di centrarlo danno lo
+    ''' stesso punto. Il conto parte lo stesso dal centro dello scudo — se il disegno un
+    ''' domani si spostasse, sarebbe ancora lo scudo a dover stare in mezzo — ma è una
+    ''' prudenza che oggi nessun collaudo può vedere.</para>
+    ''' <para>In larghezza lo scudo viene poco più di due terzi della sua altezza, e la
+    ''' colonna dei bottoni gli sta <b>dentro</b>: è per questo che il 2026-08-30 (sera) i
+    ''' bottoni sono passati da 690 a 420 di larghezza. Con la colonna larga come prima lo
+    ''' scudo spariva sotto, e se ne vedevano solo le strisce fra una pillola e
+    ''' l'altra.</para>
+    ''' </remarks>
+    Public Shared Function RiquadroDelloStemma(area As Size) As Rectangle
+
+        Dim zona As Rectangle = ZonaDelloStemma(area)
+        If zona.Width <= 0 OrElse zona.Height <= 0 Then Return Rectangle.Empty
+
+        Dim scudo As Rectangle = LogoAviolab.ScudoDentroLaTela
+        If scudo.Height <= 0 OrElse scudo.Width <= 0 Then Return Rectangle.Empty
+
+        Dim lato As Integer = Math.Max(1, CInt(Math.Round(
+            zona.Height * LogoAviolab.LatoDellaTela / CDbl(scudo.Height))))
+
+        ' Dov'è il centro dello scudo dentro la tela, in frazione del lato.
+        Dim centroX As Double = (scudo.Left + scudo.Right) / 2.0 / LogoAviolab.LatoDellaTela
+        Dim centroY As Double = (scudo.Top + scudo.Bottom) / 2.0 / LogoAviolab.LatoDellaTela
 
         Return New Rectangle(
-            riquadro.X + CInt(RiquadroDentroLaCornice.X * orizzontale),
-            riquadro.Y + CInt(RiquadroDentroLaCornice.Y * verticale),
-            Math.Max(1, CInt(RiquadroDentroLaCornice.Width * orizzontale)),
-            Math.Max(1, CInt(RiquadroDentroLaCornice.Height * verticale)))
+            CInt(Math.Round(zona.Left + zona.Width / 2.0 - lato * centroX)),
+            CInt(Math.Round(zona.Top + zona.Height / 2.0 - lato * centroY)),
+            lato, lato)
 
     End Function
 
@@ -339,63 +536,236 @@ Public Class PannelloMenu
     End Sub
 
     ''' <summary>
-    ''' Dipinge il fondo: l'immagine che riempie l'area, e sopra il velo che la schiarisce.
+    ''' Dipinge il fondo: l'avorio, e sopra gli elementi di sfondo passati sotto il velo.
     ''' </summary>
     ''' <remarks>
-    ''' Se la risorsa non c'è resta il blu del marchio, che è già il <c>BackColor</c> del
-    ''' pannello: un'immagine che manca non è una ragione per non mostrare il menu — la
-    ''' stessa promessa che <see cref="FinestraAvvio"/> fa per la schermata di avvio.
+    ''' L'avorio lo mette già <see cref="Control.BackColor"/>, che la base dipinge per
+    ''' prima, e resta del colore esatto che è: il velo tocca solo la tela che ci si
+    ''' appoggia sopra. Se quella tela non si potesse disegnare resterebbe l'avorio nudo,
+    ''' che è pur sempre un menu — la stessa promessa che <see cref="FinestraAvvio"/> fa
+    ''' per la schermata di avvio.
     ''' </remarks>
     Protected Overrides Sub OnPaintBackground(e As PaintEventArgs)
 
         MyBase.OnPaintBackground(e)
 
-        Dim sfondo As Image = Marchio.SfondoDelMenu
-        If sfondo Is Nothing OrElse Me.ClientSize.Width <= 0 OrElse Me.ClientSize.Height <= 0 Then Return
+        Dim strato As Bitmap = StratoDelloSfondo()
+        If strato Is Nothing Then Return
 
-        e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic
-        e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality
-        e.Graphics.DrawImage(sfondo, RiquadroDelloSfondo(sfondo.Size, Me.ClientSize))
+        Using attributi As New ImageAttributes()
 
-        Using velo As New SolidBrush(Color.FromArgb(VeloBianco, Color.White))
-            e.Graphics.FillRectangle(velo, Me.ClientRectangle)
+            Dim matrice As New ColorMatrix()
+            matrice.Matrix33 = (255.0F - VeloBianco) / 255.0F
+            attributi.SetColorMatrix(matrice)
+
+            e.Graphics.DrawImage(strato, New Rectangle(Point.Empty, strato.Size),
+                                 0, 0, strato.Width, strato.Height, GraphicsUnit.Pixel, attributi)
+
         End Using
 
     End Sub
 
     ''' <summary>
-    ''' Dove finisce l'immagine per <b>starci tutta</b> dentro l'area senza deformarsi: si
-    ''' ingrandisce o si riduce fino a toccare il lato che le sta più stretto, e resta
-    ''' centrata.
+    ''' La tela con gli elementi di sfondo a piena forza, rifatta solo se la finestra è
+    ''' cambiata.
     ''' </summary>
-    ''' <remarks>
-    ''' È la stessa regola della schermata di avvio, che pure deve starci dentro: si
-    ''' prende il fattore <b>più piccolo</b> dei due. Il fattore più grande — riempire
-    ''' tagliando — era la scelta di partenza, ed è durata il tempo di guardarla: un
-    ''' banner tagliato a metà del nome non è uno sfondo, è un marchio rotto. È pubblica e
-    ''' condivisa perché il banco la interroga senza costruire il pannello, e senza uno
-    ''' schermo.
-    ''' </remarks>
-    ''' <param name="immagine">Quanto è grande l'immagine.</param>
-    ''' <param name="area">Quanto è grande lo spazio in cui deve stare.</param>
-    Public Shared Function RiquadroDelloSfondo(immagine As Size, area As Size) As Rectangle
+    Private Function StratoDelloSfondo() As Bitmap
 
-        If immagine.Width <= 0 OrElse immagine.Height <= 0 Then Return New Rectangle(Point.Empty, area)
-        If area.Width <= 0 OrElse area.Height <= 0 Then Return Rectangle.Empty
+        If Me.ClientSize.Width <= 0 OrElse Me.ClientSize.Height <= 0 Then Return Nothing
+        If _sfondo IsNot Nothing AndAlso _misuraSfondo = Me.ClientSize Then Return _sfondo
 
-        Dim fattore As Double = Math.Min(area.Width / CDbl(immagine.Width),
-                                         area.Height / CDbl(immagine.Height))
+        _sfondo?.Dispose()
+        _sfondo = New Bitmap(Me.ClientSize.Width, Me.ClientSize.Height, PixelFormat.Format32bppArgb)
+        _misuraSfondo = Me.ClientSize
 
-        ' Si arrotonda per difetto: arrotondando per eccesso l'immagine sborderebbe di un
-        ' pixel, che è proprio la cosa che qui non deve succedere.
-        Dim larghezza As Integer = Math.Max(1, CInt(Math.Floor(immagine.Width * fattore)))
-        Dim altezza As Integer = Math.Max(1, CInt(Math.Floor(immagine.Height * fattore)))
+        Using g As Graphics = Graphics.FromImage(_sfondo)
+            DisegnaIlMegaStemma(g)
+            DisegnaIlNome(g)
+        End Using
 
-        Return New Rectangle((area.Width - larghezza) \ 2,
-                             (area.Height - altezza) \ 2,
-                             larghezza, altezza)
+        Return _sfondo
 
     End Function
+
+    ''' <summary>Il mega stemma dietro la colonna, a piena forza.</summary>
+    ''' <remarks>
+    ''' Il velo non si stende qui ma sulla tela intera (v.
+    ''' <see cref="OnPaintBackground"/>), insieme al nome: sono tutti e tre sfondo, e
+    ''' devono sbiadire della stessa quantità. Velarli uno per uno vorrebbe dire tre
+    ''' manopole da tenere d'accordo, e la prima volta che una si muove da sola lo si
+    ''' scopre guardando.
+    ''' </remarks>
+    Private Sub DisegnaIlMegaStemma(g As Graphics)
+
+        Dim riquadro As Rectangle = RiquadroDelloStemma(Me.ClientSize)
+        If riquadro.Width <= 0 OrElse riquadro.Height <= 0 Then Return
+
+        g.InterpolationMode = InterpolationMode.HighQualityBicubic
+        g.PixelOffsetMode = PixelOffsetMode.HighQuality
+
+        Using stemma As Bitmap = LogoAviolab.Genera(riquadro.Width)
+            g.DrawImage(stemma, riquadro)
+        End Using
+
+    End Sub
+
+    ''' <summary>Il nome e il sottotitolo, centrati sull'asse nella fascia in cima.</summary>
+    ''' <remarks>
+    ''' <para>Il blocco delle due righe si centra nella fascia <b>meno il respiro</b>, che
+    ''' è lo stacco dal primo bottone: senza, il sottotitolo finiva appoggiato alla prima
+    ''' pillola.</para>
+    ''' <para>Se il blocco non ci sta — finestra bassa, o una traduzione più lunga — le due
+    ''' righe calano <b>insieme</b> fino a starci, invece di sconfinare sui bottoni.</para>
+    ''' </remarks>
+    Private Sub DisegnaIlNome(g As Graphics)
+
+        Dim area As Size = Me.ClientSize
+        Dim fascia As Integer = FasciaDelTesto(area)
+        If fascia <= 0 OrElse area.Width <= 0 Then Return
+
+        Dim stileTitolo As FontStyle = FontStyle.Regular
+        Dim stileSotto As FontStyle = FontStyle.Regular
+
+        Using famigliaTitolo As FontFamily = FamigliaPerIlNome(NomeFontTitolo, stileTitolo),
+              famigliaSotto As FontFamily = FamigliaPerIlNome(NomeFontSottotitolo, stileSotto)
+
+            Dim rigaTitolo As RigaDelNome = RigaPerLarghezza(
+                g, Titolo, famigliaTitolo, stileTitolo, CSng(area.Width * FrazioneLarghezzaTitolo))
+            Dim rigaSotto As RigaDelNome = RigaPerLarghezza(
+                g, Sottotitolo, famigliaSotto, stileSotto, CSng(area.Width * FrazioneLarghezzaSottotitolo))
+
+            Dim contornoTitolo As Single = rigaTitolo.Corpo * FrazioneContorno
+            Dim contornoSotto As Single = rigaSotto.Corpo * FrazioneContorno
+            Dim stacco As Single = rigaSotto.Altezza * 0.35F
+
+            Dim blocco As Single =
+                rigaTitolo.Altezza + contornoTitolo + stacco + rigaSotto.Altezza + contornoSotto
+
+            ' Lo spazio in cui il blocco si centra: la fascia, meno il respiro in fondo.
+            Dim utile As Single = FineDelNome(area)
+
+            If blocco > utile AndAlso blocco > 0.0F Then
+                Dim fattore As Single = utile / blocco
+                rigaTitolo.Corpo *= fattore
+                rigaTitolo.Altezza *= fattore
+                rigaSotto.Corpo *= fattore
+                rigaSotto.Altezza *= fattore
+                contornoTitolo *= fattore
+                contornoSotto *= fattore
+                stacco *= fattore
+                blocco = utile
+            End If
+
+            Dim cima As Single = Math.Max(0.0F, (utile - blocco) / 2.0F)
+            Dim asse As Single = area.Width / 2.0F
+
+            g.SmoothingMode = SmoothingMode.AntiAlias
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit
+
+            ScriviContornato(g, Titolo, famigliaTitolo, stileTitolo, rigaTitolo.Corpo,
+                             contornoTitolo, asse, cima + contornoTitolo / 2.0F)
+
+            ScriviContornato(g, Sottotitolo, famigliaSotto, stileSotto, rigaSotto.Corpo,
+                             contornoSotto, asse,
+                             cima + rigaTitolo.Altezza + contornoTitolo + stacco + contornoSotto / 2.0F)
+
+        End Using
+
+    End Sub
+
+    ''' <summary>
+    ''' La famiglia chiesta se la macchina ce l'ha, altrimenti quella di casa in grassetto.
+    ''' </summary>
+    ''' <remarks>
+    ''' «Segoe UI Black» e «Segoe UI Semibold» sono famiglie a sé e il peso ce l'hanno
+    ''' già nel nome: chiedere loro anche il grassetto le ingrasserebbe una seconda volta,
+    ''' per finta. Il ripiego invece il grassetto lo vuole, perché «Segoe UI» normale su
+    ''' un titolo grande sembrerebbe sbiadito.
+    ''' </remarks>
+    Private Shared Function FamigliaPerIlNome(nome As String, ByRef stile As FontStyle) As FontFamily
+
+        Try
+            Dim famiglia As New FontFamily(nome)
+            If famiglia.IsStyleAvailable(FontStyle.Regular) Then
+                stile = FontStyle.Regular
+                Return famiglia
+            End If
+            famiglia.Dispose()
+        Catch ex As ArgumentException
+            ' Su questa macchina quella famiglia non c'è: si ripiega, non si muore.
+        End Try
+
+        stile = FontStyle.Bold
+        Return New FontFamily(StileApp.NomeFont)
+
+    End Function
+
+    ''' <summary>Il corpo che rende il testo largo quanto si vuole, e quanto viene alto.</summary>
+    ''' <remarks>
+    ''' Si misura una volta sola a un corpo di riferimento e si scala: le metriche di un
+    ''' carattere crescono in proporzione al corpo, quindi cercare la misura per tentativi
+    ''' darebbe lo stesso numero dopo molte più chiamate a GDI+. Si misura con
+    ''' <c>Graphics.MeasureString</c> perché a scrivere è <c>GraphicsPath.AddString</c>, e
+    ''' i due parlano la stessa lingua: misurare con l'attrezzo dell'altro darebbe un
+    ''' testo largo quanto non ci si aspetta.
+    ''' </remarks>
+    Private Shared Function RigaPerLarghezza(g As Graphics, testo As String, famiglia As FontFamily,
+                                             stile As FontStyle, voluta As Single) As RigaDelNome
+
+        Const Riferimento As Single = 100.0F
+
+        Dim riga As New RigaDelNome With {.Corpo = Riferimento, .Altezza = Riferimento}
+        If voluta <= 0.0F OrElse String.IsNullOrEmpty(testo) Then Return riga
+
+        Using prova As New Font(famiglia, Riferimento, stile, GraphicsUnit.Pixel),
+              formato As New StringFormat(StringFormat.GenericTypographic)
+
+            Dim misura As SizeF = g.MeasureString(testo, prova, Integer.MaxValue, formato)
+            If misura.Width <= 0.0F Then Return riga
+
+            riga.Corpo = Riferimento * voluta / misura.Width
+            riga.Altezza = misura.Height * riga.Corpo / Riferimento
+
+        End Using
+
+        Return riga
+
+    End Function
+
+    ''' <summary>Scrive una riga bianca contornata di nero, centrata sull'asse.</summary>
+    ''' <remarks>
+    ''' Il contorno si disegna <b>prima</b> del riempimento e sullo stesso percorso: una
+    ''' penna larga dipinge metà dentro e metà fuori, e riempiendo dopo si riprende la
+    ''' metà che aveva invaso le lettere. All'incontrario il nero mangerebbe il bianco.
+    ''' </remarks>
+    Private Shared Sub ScriviContornato(g As Graphics, testo As String, famiglia As FontFamily,
+                                        stile As FontStyle, corpo As Single, contorno As Single,
+                                        asse As Single, cima As Single)
+
+        If corpo <= 0.0F OrElse String.IsNullOrEmpty(testo) Then Return
+
+        Using percorso As New GraphicsPath()
+
+            Using formato As New StringFormat(StringFormat.GenericTypographic)
+                formato.Alignment = StringAlignment.Center
+                percorso.AddString(testo, famiglia, CInt(stile), corpo,
+                                   New PointF(asse, cima), formato)
+            End Using
+
+            If contorno >= 1.0F Then
+                Using penna As New Pen(Color.Black, contorno)
+                    ' Giunti tondi: a questo spessore un giunto a punta farebbe spuntare
+                    ' aghi neri dai vertici delle lettere.
+                    penna.LineJoin = LineJoin.Round
+                    g.DrawPath(penna, percorso)
+                End Using
+            End If
+
+            g.FillPath(Brushes.White, percorso)
+
+        End Using
+
+    End Sub
 
     Private Sub btnCandidature_Click(sender As Object, e As EventArgs) Handles btnVoceCandidature.Click
         RaiseEvent VoceScelta(Me, New VoceDelMenuEventArgs(VoceDelMenu.Candidature))
