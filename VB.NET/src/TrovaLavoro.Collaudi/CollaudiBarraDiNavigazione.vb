@@ -147,6 +147,35 @@ Namespace Ui
         End Sub
 
         ''' <summary>
+        ''' Il bottone del confronto porta il nome che i messaggi promettono all'utente.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È un capo dell'anello che <c>NomiUi.Confronto</c> chiude: di qui si
+        ''' guarda che il <b>bottone vero</b> porti quel nome, dall'altro capo
+        ''' (<c>CollaudiPannelloRicerca</c>) che i messaggi continuino a pescarlo di là
+        ''' invece di riscriverselo. Fino al 2026-08-30 il nome stava a mano in sei posti
+        ''' e a tenerli insieme c'era soltanto il banco; adesso il posto è uno, e resta un
+        ''' solo modo di romperlo — riscrivere un letterale nel designer, che è
+        ''' esattamente com'era arrivato fin lì.</para>
+        ''' <para>Non è una tautologia: il testo si legge dal controllo <b>costruito</b>,
+        ''' non dalla costante. Se il designer tornasse a un letterale e i due
+        ''' divergessero, la differenza si vedrebbe qui.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub IlBottoneDelConfrontoPortaIlNomeCheIMessaggiPromettono()
+
+            Using form As New FormPrincipale()
+
+                Dim bottone As Button = Barra(form).Single(Function(b) b.Name = "btnCandidatura")
+
+                Assert.AreEqual(NomiUi.Confronto, bottone.Text,
+                                "il bottone della barra e i messaggi devono dire lo stesso nome")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
         ''' La fascia di stato non c'è finché non ha qualcosa da dire, e quando ce l'ha
         ''' occupa spazio davvero.
         ''' </summary>

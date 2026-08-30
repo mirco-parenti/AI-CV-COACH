@@ -41,7 +41,7 @@ Tutti i colori e i font dell'applicazione vengono **da questa tabella e solo da 
 | Token | Hex | Uso |
 |---|---|---|
 | `TestoPrimario` | `#212529` | testo normale, valori, titoli di sezione |
-| `TestoSecondario` | `#6C757D` | didascalie, suggerimenti, stati |
+| `TestoSecondario` | `#6A737C` | didascalie, suggerimenti, stati *(era `#6C757D` fino al 2026-08-30: su `SfondoBase` faceva 4,45 : 1, un centesimo sotto la soglia WCAG di 4,5, ed è la coppia di **ogni** didascalia; ora 4,57)* |
 | `SfondoBase` | `#F8F9FA` | sfondo delle finestre |
 | `SfondoContenuto` | `#FFFFFF` | aree di lavoro (testi, anteprime, input) |
 | `BordoLeggero` | `#DEE2E6` | separatori e bordi da 1 px |

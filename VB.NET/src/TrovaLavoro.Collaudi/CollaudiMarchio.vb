@@ -93,9 +93,12 @@ Namespace Ui
 
                 ' La soglia non è il 4,5 di WCAG per decreto: è il contrasto che
                 ' l'applicazione **già** usa per ogni didascalia — TestoSecondario su
-                ' SfondoBase — e che vale 4,45 a 1, un centesimo sotto quella soglia. Le
-                ' scritte del marchio devono leggersi almeno quanto tutte le altre; se la
-                ' tavolozza va rivista, si rivede là e questo collaudo si adegua da sé.
+                ' SfondoBase. Le scritte del marchio devono leggersi almeno quanto tutte
+                ' le altre; se la tavolozza va rivista, si rivede là e questo collaudo si
+                ' adegua da sé. Fino al 2026-08-30 quella coppia valeva 4,45 a 1, un
+                ' centesimo sotto il 4,5, e il metro relativo serviva anche a non fingere
+                ' che passasse: adesso passa (4,57), e a sorvegliarlo c'è il collaudo qui
+                ' sotto.
                 Dim soglia As Double = Contrasto(StileApp.TestoSecondario, StileApp.SfondoBase)
 
                 For Each etichetta As Label In etichette
@@ -105,6 +108,39 @@ Namespace Ui
                 Next
 
             End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' La coppia con cui si scrive ogni didascalia sta sopra la soglia WCAG.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para><c>TestoSecondario</c> su <c>SfondoBase</c> non è una coppia fra le
+        ''' tante: è quella con cui l'applicazione scrive <b>ogni</b> didascalia, ogni
+        ''' suggerimento e ogni stato. Fino al 2026-08-30 valeva <b>4,45 a 1</b> — un
+        ''' centesimo sotto il 4,5 che WCAG 2 chiede a un testo piccolo — e nessuno se ne
+        ''' accorgeva, perché l'unico collaudo che misurasse un contrasto usava proprio
+        ''' quella coppia come metro: un metro non può dire di sé stesso che è corto. Il
+        ''' grigio è passato a <c>#6A737C</c>, tre punti più scuro, e adesso fa 4,57.</para>
+        ''' <para>Si guarda anche il fondo bianco delle aree di lavoro, dove quella coppia
+        ''' era già a posto (4,69, oggi 4,82). Una tavolozza si aggiusta guardando il fondo
+        ''' peggiore, ma si collauda su tutti e due: una cura può spostare il problema
+        ''' invece di toglierlo, e su due fondi diversi lo spostamento si vede.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniDidascaliaSiLeggeQuantoWcagChiede()
+
+            ' Qui la soglia è il 4,5 di WCAG e basta: è il collaudo che deve dire se la
+            ' tavolozza ci arriva, e un metro preso dalla tavolozza stessa non potrebbe.
+            Const soglia As Double = 4.5
+
+            Assert.IsGreaterThanOrEqualTo(
+                soglia, Contrasto(StileApp.TestoSecondario, StileApp.SfondoBase),
+                "le didascalie sul fondo delle finestre")
+
+            Assert.IsGreaterThanOrEqualTo(
+                soglia, Contrasto(StileApp.TestoSecondario, StileApp.SfondoContenuto),
+                "le didascalie sulle aree di lavoro")
 
         End Sub
 

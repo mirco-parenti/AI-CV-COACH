@@ -471,7 +471,7 @@ Public Class PannelloDocumenti
                "quello di allora è stato eliminato, e i giudizi e i documenti raccontano ancora lui." &
                vbLf &
                "Riscriverli sul profilo di oggi mescolerebbe due storie diverse. Per averne di " &
-               "nuovi, rifai la candidatura da «Confronta ⭐ ANNUNCIO - CV», incollando di nuovo l'annuncio."
+               $"nuovi, rifai la candidatura da «{NomiUi.Confronto}», incollando di nuovo l'annuncio."
 
     End Function
 

@@ -166,7 +166,7 @@ Partial Class FormPrincipale
         Me.btnCandidatura.Name = "btnCandidatura"
         Me.btnCandidatura.Size = StileApp.BottoneBarraSuperioreLargo
         Me.btnCandidatura.TabIndex = 4
-        Me.btnCandidatura.Text = "Confronta ⭐ ANNUNCIO - CV"
+        Me.btnCandidatura.Text = NomiUi.Confronto
         Me.btnCandidatura.UseVisualStyleBackColor = False
         '
         'btnDocumenti

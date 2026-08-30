@@ -59,7 +59,16 @@ Public Module StileApp
     Public ReadOnly TestoPrimario As Color = ColorTranslator.FromHtml("#212529")
 
     ''' <summary>Didascalie, suggerimenti, stati.</summary>
-    Public ReadOnly TestoSecondario As Color = ColorTranslator.FromHtml("#6C757D")
+    ''' <remarks>
+    ''' Dal 2026-08-30 è <c>#6A737C</c> e non più <c>#6C757D</c>, il grigio da cui viene:
+    ''' su <see cref="SfondoBase"/> quello faceva <b>4,45 a 1</b>, un centesimo sotto il
+    ''' 4,5 che WCAG 2 chiede a un testo piccolo — ed è la coppia con cui l'applicazione
+    ''' scrive <i>ogni</i> didascalia, non un caso di confine. Tre punti più scuro in
+    ''' tutto, che a occhio non si distinguono, portano il rapporto a <b>4,57</b>. Su
+    ''' <see cref="SfondoContenuto"/> passava già (4,69) e adesso fa 4,82: il difetto
+    ''' stava sul fondo delle finestre, che dei due è il più chiaro.
+    ''' </remarks>
+    Public ReadOnly TestoSecondario As Color = ColorTranslator.FromHtml("#6A737C")
 
     ''' <summary>Sfondo delle finestre.</summary>
     Public ReadOnly SfondoBase As Color = ColorTranslator.FromHtml("#F8F9FA")
@@ -155,13 +164,13 @@ Public Module StileApp
 
     ''' <summary>Bottone della barra superiore che porta un nome lungo.</summary>
     ''' <remarks>
-    ''' Ne esistono due — «Le mie candidature» e «Confronta ANNUNCIO - CV» — e a 110 pixel
-    ''' il nome ci finiva tagliato: un bottone della barra non manda a capo e non mette i
-    ''' puntini, taglia e basta. Allargarli non è un'eccezione allo stile, è la stessa
-    ''' misura con la larghezza che quei testi chiedono; l'altezza resta identica, perché
-    ''' la barra deve restare una riga sola. La larghezza la decide il <b>più lungo dei
-    ''' due</b> e vale per entrambi: due bottoni larghi uguale sono una barra, due larghi
-    ''' quasi uguale sono una svista.
+    ''' Ne esistono due — «Le mie candidature» e «Confronta ⭐ ANNUNCIO - CV» — e a 110
+    ''' pixel il nome ci finiva tagliato: un bottone della barra non manda a capo e non
+    ''' mette i puntini, taglia e basta. Allargarli non è un'eccezione allo stile, è la
+    ''' stessa misura con la larghezza che quei testi chiedono; l'altezza resta identica,
+    ''' perché la barra deve restare una riga sola. La larghezza la decide il <b>più
+    ''' lungo dei due</b> e vale per entrambi: due bottoni larghi uguale sono una barra,
+    ''' due larghi quasi uguale sono una svista.
     ''' </remarks>
     Public ReadOnly BottoneBarraSuperioreLargo As New Size(210, 34)
 

@@ -25,20 +25,18 @@ Namespace Ui
     <TestClass>
     Public Class CollaudiPannelloRicerca
 
-        ''' <summary>
-        ''' Il nome con cui l'utente vede, in barra, il pannello dove si incolla un
-        ''' annuncio a mano.
-        ''' </summary>
-        ''' <remarks>
-        ''' Il pannello P3 manda lì l'utente in quattro messaggi diversi — quando manca
-        ''' WebView2, quando il browser non parte, quando una pagina non si lascia
-        ''' leggere, quando l'annuncio era già stato catturato — e un nome sbagliato in
-        ''' un messaggio è un utente che cerca un bottone che non esiste. Il 2026-08-30
-        ''' quel bottone è passato da «📋 Candidatura» a questo nome, e sono stati questi
-        ''' due collaudi ad accorgersene: è il motivo per cui l'atteso sta scritto qui
-        ''' una volta sola invece che due.
-        ''' </remarks>
-        Private Const NomeDelConfronto As String = "Confronta ⭐ ANNUNCIO - CV"
+        ' Il nome del pannello dove si incolla un annuncio a mano vive in un posto solo,
+        ' NomiUi.Confronto (cap. 03.4), e di là pescano sia il bottone della barra sia i
+        ' messaggi che ce lo mandano. Quello che si guarda qui non è che la costante sia
+        ' sé stessa — sarebbe una tautologia — ma che i messaggi di P3 continuino a
+        ' pescarla invece di riscriversi il nome a mano: un letterale sbagliato in un
+        ' messaggio è un utente che cerca un bottone che non esiste. Che il bottone vero
+        ' porti davvero quel nome lo guarda CollaudiBarraDiNavigazione, dall'altro capo
+        ' dello stesso anello.
+        '
+        ' Fino al 2026-08-30 l'atteso era una copia scritta qui, e furono proprio questi
+        ' due collaudi a diventare rossi quando il bottone passò da «📋 Candidatura» al
+        ' nome di oggi: è la storia che ha fatto nascere NomiUi.
 
         ' ==================================================================
         ' I menù e lo stato d'ingresso
@@ -336,7 +334,7 @@ Namespace Ui
                     Assert.AreEqual(1, lettore.Letture, "ci ha provato")
 
                     ' Il ripiego onesto: il testo si può sempre incollare a mano in P4.
-                    Assert.Contains(NomeDelConfronto, Etichetta(pannello, "lblStatoRicerca").Text)
+                    Assert.Contains(NomiUi.Confronto, Etichetta(pannello, "lblStatoRicerca").Text)
 
                 End Function)
 
@@ -474,7 +472,7 @@ Namespace Ui
                     ' Ma si dice dov'è la prima, e come rifarla se è quello che si vuole.
                     Dim detto As String = Etichetta(pannello, "lblStatoRicerca").Text
                     Assert.Contains("già catturato", detto)
-                    Assert.Contains(NomeDelConfronto, detto)
+                    Assert.Contains(NomiUi.Confronto, detto)
 
                 End Function)
 

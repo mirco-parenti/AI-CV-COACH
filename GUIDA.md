@@ -59,16 +59,25 @@ funzionare.
    domande del programma, oppure dargli un **CV che hai già** (anche in PDF) e lasciare che
    lo legga. Poi controlli quel che ha capito e correggi.
 
-Da lì in avanti la barra a sinistra è tutto il programma:
+Da lì in avanti la barra in alto è tutto il programma:
 
 | | |
 |---|---|
+| 🎮 **Menu** | la pagina d'ingresso: le sei cose che il programma sa fare, una per bottone |
 | 🏠 **Le mie candidature** | a che punto sei, e cosa conviene fare adesso |
 | 👤 **Profilo** | chi sei: si aggiorna quando vuoi, e ogni versione resta nello storico |
 | 🔍 **Ricerca** | trova annunci sui portali, o incolla il testo di uno che hai già |
-| ⭐ **Confronta ANNUNCIO - CV** | il confronto, le stelle, e la decisione se candidarsi |
+| **Confronta ⭐ ANNUNCIO - CV** | il confronto, le stelle, e la decisione se candidarsi |
 | 📄 **Documenti** | CV, lettera ed email: si rileggono, si correggono a mano, si salvano |
 | ⚙ **Impostazioni** | la chiave, le preferenze, il backup, quanto hai speso |
+
+Il **Menu** e la barra portano nelle stesse stanze: la barra è sempre lì mentre lavori, il menu
+è la pagina da cui si parte quando non sai ancora dove andare.
+
+Dal **Profilo** esce anche un **CV base senza AI**: il tuo profilo messo nella forma di un
+curriculum, subito e **senza spendere niente**. Non prende il posto del CV che scrive l'AI, gli
+sta accanto — lì il sommario e le descrizioni delle esperienze sono scritti, qui restano le tue
+parole com'erano — e la differenza fra i due è esattamente quello che ci ha messo l'AI.
 
 ---
 

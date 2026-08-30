@@ -207,7 +207,7 @@ Public Class PannelloRicerca
         Catch ex As ErroreBrowser When ex.MotoreAssente
             FuoriUso("Per cercare gli annunci serve il componente WebView2 di Windows, che su " &
                      "questo computer non c'è. Puoi comunque incollare il testo di un annuncio " &
-                     "nel pannello «Confronta ⭐ ANNUNCIO - CV».")
+                     $"nel pannello «{NomiUi.Confronto}».")
             Return
 
         Catch ex As Exception
@@ -220,7 +220,7 @@ Public Class PannelloRicerca
             ' guasto. Restringerla qui non darebbe all'utente una parola in più: gli
             ' toglierebbe il ripiego, che è la sola cosa che gli serve.
             FuoriUso($"Il browser integrato non si è avviato ({ex.Message}). Puoi comunque " &
-                     "incollare il testo di un annuncio nel pannello «Confronta ⭐ ANNUNCIO - CV».")
+                     $"incollare il testo di un annuncio nel pannello «{NomiUi.Confronto}».")
             Return
 
         End Try
@@ -511,7 +511,7 @@ Public Class PannelloRicerca
         ' Una pagina che non si lascia leggere non è un crash: è un annuncio che si potrà
         ' sempre incollare a mano in Candidatura.
         Dim pagina As PaginaLetta = Await LeggiLaPaginaAsync(
-            "Puoi copiarne il testo e incollarlo nel pannello «Confronta ⭐ ANNUNCIO - CV».",
+            $"Puoi copiarne il testo e incollarlo nel pannello «{NomiUi.Confronto}».",
             scorrendo:=False).ConfigureAwait(True)
         If pagina Is Nothing Then Return
 
@@ -560,7 +560,7 @@ Public Class PannelloRicerca
         Dim gia As String = GiaCatturato(pagina.Indirizzo)
         If gia IsNot Nothing Then
             Racconta($"Questo annuncio l'avevi già catturato: è fra le tue opportunità, in «{gia}». " &
-                     "Per rileggerlo da capo, incolla il testo nel pannello «Confronta ⭐ ANNUNCIO - CV».")
+                     $"Per rileggerlo da capo, incolla il testo nel pannello «{NomiUi.Confronto}».")
             Return
         End If
 
@@ -911,10 +911,10 @@ Public Class PannelloRicerca
                "body{font-family:'Segoe UI',sans-serif;color:#212529;background:#FFFFFF;" &
                "margin:0;padding:48px 56px;line-height:1.55}" &
                "h1{color:#FA0825;font-size:20px;margin:0 0 6px}" &
-               "p.sotto{color:#6C757D;font-size:13px;margin:0 0 28px}" &
+               "p.sotto{color:#6A737C;font-size:13px;margin:0 0 28px}" &
                "ol{font-size:14px;padding-left:22px;margin:0 0 28px}" &
                "li{margin-bottom:10px}" &
-               "p.nota{color:#6C757D;font-size:12px;border-top:1px solid #DEE2E6;padding-top:14px;margin:0}" &
+               "p.nota{color:#6A737C;font-size:12px;border-top:1px solid #DEE2E6;padding-top:14px;margin:0}" &
                "</style></head><body>" &
                "<h1>Cerca gli annunci</h1>" &
                "<p class=""sotto"">Qui dentro navighi tu: il programma non raccoglie niente da solo.</p>" &
