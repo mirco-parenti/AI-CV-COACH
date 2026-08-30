@@ -9,7 +9,7 @@ usare mai — è in [`../VB.NET/progetto/prompt-logo.md`](../VB.NET/progetto/pro
 
 | File | Misura | A cosa serve |
 |---|---|---|
-| `MASTER-solo-disegno-1536x1024.png` | 1536×1024 | Il disegno nudo, senza nessuna scritta. È la **sorgente**: ogni altro formato nasce da qui, ritagliando e aggiungendo il lettering. Non si sovrascrive con un formato derivato — cambia **solo** quando cambia il marchio, e allora cambiano con lei tutti i formati (l'ultima volta il 2026-08-30, la girella a spicchi). |
+| `MASTER-solo-disegno-1536x1024.png` | 1536×1024 | Il disegno nudo, senza nessuna scritta. È la **sorgente**: ogni altro formato nasce da qui, ritagliando e aggiungendo il lettering. Non si sovrascrive con un formato derivato — cambia **solo** quando cambia il marchio, e allora cambiano con lei tutti i formati (l'ultima volta il 2026-08-30: la girella a spicchi, e poi il filetto giallo tre volte più spesso). |
 | `TrovaLavoro-readme-1200x972.png` | 1200×972 | La testata di questo `README.md`. |
 
 **Come sono fatti.** Fondo, cornice e fasce laterali sono un unico **blu Aviolab `#0B06B0`**
@@ -19,7 +19,10 @@ stemma e nessun altro. Nome in Segoe UI Black bianco, sottotitolo in Segoe UI se
 `#DDE5F7`. Nei formati panoramici i lati si riempiono prolungando le colonne di bordo del
 disegno, così il braccio si allunga invece di troncarsi. *(Dal 2026-08-30 lo sfondo interno
 non è più a spire concentriche ma a **spicchi**, con le diagonali dello scudetto Aviolab: il
-fondo del banner era `#000C38`, un blu che alla tavolozza non apparteneva.)*
+fondo del banner era `#000C38`, un blu che alla tavolozza non apparteneva. Dello stesso
+giorno è il filetto **tre volte più spesso** — una ventina di pixel sulla sorgente invece di
+sette —, cresciuto solo **verso l'interno**: il bordo esterno del disegno non si è mosso, e
+dove le maniche delle giacche tagliano la cornice il filetto resta interrotto com'era.)*
 
 **Lo stesso disegno vive anche dentro l'applicazione**: la schermata di avvio
 (`../VB.NET/src/TrovaLavoro/Risorse/schermata-avvio.png`, 800×648) nasce da questa sorgente

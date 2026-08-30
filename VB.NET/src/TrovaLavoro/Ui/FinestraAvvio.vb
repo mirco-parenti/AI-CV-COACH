@@ -11,7 +11,8 @@ Imports System.Windows.Forms
 ''' l'applicazione passa dal doppio clic alla finestra in <b>265-330 ms</b>: una
 ''' schermata legata al solo caricamento lampeggerebbe senza che nessuno la legga, che
 ''' è il difetto tipico degli splash fatti a naso. Resta perciò a video un minimo
-''' garantito, e il caricamento le corre sotto.</para>
+''' garantito — <b>cinque secondi</b>, il tempo di leggere il marchio e il sottotitolo —
+''' e il caricamento le corre sotto.</para>
 ''' <para><b>Ma il minimo vale per chi guarda, non per chi aspetta una risposta.</b>
 ''' Al primo avvio la chiave API si chiede prima di ogni altra cosa (cap. 11.3), e una
 ''' schermata <c>TopMost</c> davanti a quella domanda sarebbe un programma che sembra
@@ -27,7 +28,7 @@ Public Class FinestraAvvio
     Implements ISchermataDiAvvio
 
     ''' <summary>Quanto resta a video come minimo, se nessuno la manda via prima.</summary>
-    Public Shared ReadOnly MinimoAVideo As TimeSpan = TimeSpan.FromMilliseconds(1500)
+    Public Shared ReadOnly MinimoAVideo As TimeSpan = TimeSpan.FromSeconds(5)
 
     ''' <summary>
     ''' Quanta parte dello schermo può occupare al massimo. L'immagine è disegnata per

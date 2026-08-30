@@ -216,13 +216,14 @@ riporta dove si era (candidatura, profilo o Home).*
 - **Con T9e arrivano le due che non chiedono niente a nessuno** *(2026-08-22)*. La
   **schermata di avvio** (`FinestraAvvio`) copre il montaggio: senza bordi, centrata sullo
   schermo, sopra tutto, e con dentro il marchio disegnato per 800×648. Perché abbia senso
-  ha un **tempo minimo** a video, ed è una misura e non un gusto: dal doppio clic alla
-  finestra passano **265–330 ms**, e una schermata legata al solo caricamento lampeggerebbe
-  senza che nessuno la legga. Ma il minimo vale per chi guarda, non per chi deve rispondere:
-  chi sta per aprire una finestra che chiede qualcosa — al primo avvio la chiave API, che
-  nasce dentro il `Load` — la manda via **subito**, e provato dal vivo succede a 438 ms, un
-  secondo prima della sua scadenza. Su uno schermo piccolo, o scalato, si rimpicciolisce
-  per stare dentro il **70%** dell'area di lavoro senza deformarsi. Un clic la chiude.
+  ha un **tempo minimo** a video (**cinque secondi**, dal 2026-08-30), ed è una misura e non
+  un gusto: dal doppio clic alla finestra passano **265–330 ms**, e una schermata legata al
+  solo caricamento lampeggerebbe senza che nessuno la legga. Ma il minimo vale per chi
+  guarda, non per chi deve rispondere: chi sta per aprire una finestra che chiede qualcosa
+  — al primo avvio la chiave API, che nasce dentro il `Load` — la manda via **subito**, e
+  provato dal vivo succede a 438 ms, molto prima della sua scadenza. Su uno schermo
+  piccolo, o scalato, si rimpicciolisce per stare dentro il **70%** dell'area di lavoro
+  senza deformarsi. Un clic la chiude.
   Nasce in `Programma.Main`, **dopo** la biforcazione del server: in modalità `--mcp` non
   esiste, come nessun'altra finestra (cap. 09). La seconda è **«Informazioni su…»**
   (`FinestraInformazioni`), e non ripete le Impostazioni: il marchio, la riga di versione e
