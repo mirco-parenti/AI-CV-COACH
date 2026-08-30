@@ -29,9 +29,35 @@ Namespace Ui
             "{""tipo"": ""cv_base"", ""intestazione"": {""nome"": ""Luca Ferrari"", ""citta"": ""Modena""}," &
             """sommario"": ""Il ritratto del profilo."", ""competenze"": [""Uso del muletto""]}"
 
-        ''' <summary>I bottoni della barra superiore, quelli che la guardia deve spegnere.</summary>
-        Private Shared ReadOnly Barra As String() =
-            {"btnHome", "btnProfilo", "btnRicerca", "btnCandidatura", "btnImpostazioni"}
+        ''' <summary>
+        ''' I bottoni della barra superiore, quelli che la guardia deve spegnere: si
+        ''' <b>leggono dalla barra</b>, non si elencano.
+        ''' </summary>
+        ''' <remarks>
+        ''' Fino al 2026-08-30 erano cinque nomi scritti qui a mano, ed e' la terza volta
+        ''' che questa storia si ripete nello stesso punto: il codice della finestra
+        ''' racconta di un elenco gemello invecchiato in silenzio fra T9b e T9d, e
+        ''' l'elenco fu unificato la'. Questo, che e' il collaudo incaricato di
+        ''' accorgersene, aveva la sua copia e non conteneva «btnDocumenti», nato a T9d.
+        ''' Un collaudo con un elenco proprio non sorveglia la barra: sorveglia la sua
+        ''' idea della barra, e resta verde mentre il bottone nuovo resta acceso. Leggendo
+        ''' i figli del pannello si guarda la barra vera, e un bottone che nasce entra nel
+        ''' collaudo il giorno stesso.
+        ''' </remarks>
+        Private Shared Function Barra(form As Control) As Button()
+
+            Dim pannello As Control = form.Controls.Find("pnlBarraSuperiore", searchAllChildren:=True).Single()
+
+            Return pannello.Controls.OfType(Of Button)().
+                OrderBy(Function(b) b.Name, StringComparer.Ordinal).
+                ToArray()
+
+        End Function
+
+        ''' <summary>I nomi dei bottoni della barra.</summary>
+        Private Shared Function NomiDellaBarra(form As Control) As String()
+            Return Barra(form).Select(Function(b) b.Name).ToArray()
+        End Function
 
         <TestMethod>
         Public Async Function MentreLAiLavoraLaBarraSiSpegneTutta() As Task
@@ -52,7 +78,7 @@ Namespace Ui
                             If pannello.AiAlLavoro Then accesiDurante = Accesi(form)
                         End Sub
 
-                    Assert.HasCount(Barra.Length, Accesi(form),
+                    Assert.HasCount(Barra(form).Length, Accesi(form),
                                     "prima di cominciare la barra è tutta accesa")
 
                     Await pannello.MostraIlCvBaseAsync()
@@ -77,26 +103,68 @@ Namespace Ui
 
                     Await pannello.MostraIlCvBaseAsync()
 
-                    CollectionAssert.AreEquivalent(Barra, Accesi(form),
+                    CollectionAssert.AreEquivalent(NomiDellaBarra(form), Accesi(form),
                                                    "finito il giro si riapre tutto, Impostazioni compreso")
 
                 End Function)
 
         End Function
 
+        ''' <summary>
+        ''' Ogni nome sta dentro il suo bottone, e nessun bottone finisce sotto il vicino.
+        ''' </summary>
+        ''' <remarks>
+        ''' Nato il 2026-08-30, quando «🏠 Home» è diventato «🏠 Le mie candidature»: un
+        ''' bottone della barra ha una larghezza scritta a mano e non manda a capo né mette
+        ''' i puntini — taglia, e basta. Allungare un nome senza allargarne il bottone non
+        ''' rompe niente che si possa vedere da un collaudo di comportamento: la finestra
+        ''' funziona, i cammini reggono, e l'unico segno è mezza parola mancante a video.
+        ''' E allargarlo senza spostare i cinque che vengono dopo li fa sovrapporre, che è
+        ''' lo stesso genere di guasto: silenzioso finché non lo si guarda. Qui si misura.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniNomeDellaBarraStaDentroIlSuoBottone()
+
+            Using form As New FormPrincipale()
+
+                Dim bottoni As Button() = Barra(form).OrderBy(Function(b) b.Left).ToArray()
+
+                For Each bottone As Button In bottoni
+                    Assert.IsLessThanOrEqualTo(
+                        bottone.Width,
+                        TextRenderer.MeasureText(bottone.Text, bottone.Font).Width,
+                        $"«{bottone.Text}» non ci sta nel suo bottone")
+                Next
+
+                For i As Integer = 1 To bottoni.Length - 1
+                    Assert.IsLessThanOrEqualTo(
+                        bottoni(i).Left, bottoni(i - 1).Right,
+                        $"«{bottoni(i - 1).Text}» finisce sotto «{bottoni(i).Text}»")
+                Next
+
+            End Using
+
+        End Sub
+
         ' ==================================================================
         ' L'impalcatura
         ' ==================================================================
 
         ''' <summary>I nomi dei bottoni della barra che in questo momento sono premibili.</summary>
+        ''' <remarks>
+        ''' Si chiede lo stato ai bottoni <b>della barra</b>, invece di ricercarli per nome
+        ''' in tutta la finestra: cercando per nome si inciampa in
+        ''' <c>Sequence contains more than one element</c>, perché «btnDocumenti» esiste
+        ''' due volte — in barra da T9d, e da prima ancora dentro P7, dove è il bottone che
+        ''' torna ai documenti. Sono due controlli diversi in due contenitori diversi, e
+        ''' per Windows Forms va benissimo; è il <i>cercare per nome</i> a non poterli
+        ''' distinguere. Il difetto non si vedeva perché l'elenco a mano di questo
+        ''' collaudo «btnDocumenti» non lo conteneva: la cecità nascondeva l'ambiguità.
+        ''' </remarks>
         Private Shared Function Accesi(form As Control) As String()
 
-            Return Barra.Where(Function(nome) Bottone(form, nome).Enabled).ToArray()
+            Return Barra(form).Where(Function(b) b.Enabled).Select(Function(b) b.Name).ToArray()
 
-        End Function
-
-        Private Shared Function Bottone(form As Control, nome As String) As Button
-            Return DirectCast(form.Controls.Find(nome, searchAllChildren:=True).Single(), Button)
         End Function
 
         ''' <summary>

@@ -63,10 +63,10 @@ Da lì in avanti la barra a sinistra è tutto il programma:
 
 | | |
 |---|---|
-| 🏠 **Home** | a che punto sei, e cosa conviene fare adesso |
+| 🏠 **Le mie candidature** | a che punto sei, e cosa conviene fare adesso |
 | 👤 **Profilo** | chi sei: si aggiorna quando vuoi, e ogni versione resta nello storico |
 | 🔍 **Ricerca** | trova annunci sui portali, o incolla il testo di uno che hai già |
-| 📋 **Candidatura** | il confronto, le stelle, e la decisione se candidarsi |
+| ⭐ **Confronta ANNUNCIO - CV** | il confronto, le stelle, e la decisione se candidarsi |
 | 📄 **Documenti** | CV, lettera ed email: si rileggono, si correggono a mano, si salvano |
 | ⚙ **Impostazioni** | la chiave, le preferenze, il backup, quanto hai speso |
 

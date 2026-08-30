@@ -107,6 +107,33 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
+    ''' Il filo nero che contorna il pannello del logo (cap. 03.5).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Perché non <c>BorderStyle = FixedSingle</c>.</b> Quello non è nero: lo
+    ''' disegna Windows col colore di sistema — un grigio che cambia col tema — e sul
+    ''' fondo chiaro del pannello si vedrebbe appena. Il colore lo decide la tavolozza,
+    ''' come per ogni altra cosa colorata di questa finestra.</para>
+    ''' <para><b>Perché <c>-1</c>.</b> Un rettangolo disegnato sulle misure piene chiude
+    ''' il lato destro a <c>Width</c> e quello inferiore a <c>Height</c>, cioè sulla prima
+    ''' colonna e sulla prima riga <i>fuori</i> dall'area: si vedrebbero due lati su
+    ''' quattro, e sembrerebbe un difetto di disegno invece che un errore di un pixel.</para>
+    ''' <para><b>Le tre etichette sono rientrate di 1 px per lato</b> (qui sotto e nel
+    ''' designer) proprio per questo filo: sono larghe quanto il pannello, hanno il fondo
+    ''' opaco che ereditano da lui, e i figli si disegnano <i>dopo</i> il genitore — alla
+    ''' larghezza piena cancellerebbero il contorno sui due lati verticali, ma solo alle
+    ''' righe che occupano. Il risultato sarebbe un contorno interrotto tre volte: il
+    ''' genere di difetto che si vede solo guardando, e solo se si sa dove.</para>
+    ''' </remarks>
+    Private Sub DisegnaIlContornoDelLogo(mittente As Object, e As PaintEventArgs) Handles pnlLogo.Paint
+
+        Using penna As New Pen(StileApp.BordoMarchio)
+            e.Graphics.DrawRectangle(penna, 0, 0, pnlLogo.Width - 1, pnlLogo.Height - 1)
+        End Using
+
+    End Sub
+
+    ''' <summary>
     ''' Il foglietto da mettere negli appunti quando si chiede «Copia diagnostica»
     ''' (cap. 11.1). Si compone al momento del clic e non all'apertura della finestra:
     ''' fra le due cose può esserci passato di mezzo il guasto che si vuole raccontare.
@@ -202,10 +229,11 @@ Public Class FormPrincipale
         pnlLogo.BringToFront()
         AggiornaPannelloLogo()
 
-        ' La casa è il cruscotto (T5c): dice a che punto si è e da dove riprendere. Al
-        ' primo avvio, quando non c'è ancora niente, è lui a mandare al profilo — che
-        ' resta il primo passo del flusso A.
-        MostraPannello(pnlHome, btnHome)
+        ' La casa è il menu (P0): sei porte e nient'altro, che è quel che serve a chi
+        ' apre il programma e deve decidere cosa farci. Il cruscotto (T5c) — a che punto
+        ' si è e da dove riprendere — è la prima delle sei, e al primo avvio, quando non
+        ' c'è ancora niente, è ancora lui a mandare al profilo: il flusso A comincia di lì.
+        MostraPannello(pnlMenu, btnMenu)
     End Sub
 
     ''' <summary>
@@ -304,8 +332,55 @@ Public Class FormPrincipale
     End Sub
 
     Private Function BottoniDiNavigazione() As Button()
-        Return {btnHome, btnProfilo, btnRicerca, btnCandidatura, btnDocumenti, btnImpostazioni}
+        Return {btnMenu, btnHome, btnProfilo, btnRicerca, btnCandidatura, btnDocumenti, btnImpostazioni}
     End Function
+
+    ''' <summary>
+    ''' Quale bottone della barra sta dietro a una voce del menu d'ingresso (P0).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>È l'unico posto in cui il legame è scritto</b>, e da qui passano tutt'e
+    ''' due i mestieri che ne hanno bisogno: premere la voce, e sapere se è ancora
+    ''' premibile. La ragione sta due metodi più sotto, in
+    ''' <see cref="BarraDiNavigazione"/>: là un secondo elenco degli stessi bottoni è
+    ''' invecchiato in silenzio per una tappa intera. Sei voci e sei bottoni sono di
+    ''' nuovo la stessa cosa detta due volte — se il legame vive qui, però, la seconda
+    ''' volta non può divergere dalla prima.</para>
+    ''' <para><b>Perché preme il bottone invece di rifarne il mestiere.</b> Dietro
+    ''' «Ricerca annuncio» c'è l'accensione del browser, dietro «Impostazioni» una
+    ''' finestra che rimonta il motore: riscrivere quei giri qui vorrebbe dire due strade
+    ''' che fanno la stessa cosa e che un giorno smetteranno di farla allo stesso modo.
+    ''' Il menu <b>preme</b> il bottone della barra, e quel che ne segue è per costruzione
+    ''' identico a quel che accadeva prima che il menu esistesse.</para>
+    ''' </remarks>
+    Private Function BottoneDellaVoce(voce As VoceDelMenu) As Button
+
+        Select Case voce
+            Case VoceDelMenu.Candidature : Return btnHome
+            Case VoceDelMenu.ProfiloECvBase : Return btnProfilo
+            Case VoceDelMenu.RicercaOnline : Return btnRicerca
+            Case VoceDelMenu.IncollaOffline : Return btnCandidatura
+            Case VoceDelMenu.Documentazione : Return btnDocumenti
+            Case VoceDelMenu.Impostazioni : Return btnImpostazioni
+            Case Else : Return Nothing
+        End Select
+
+    End Function
+
+    Private Sub btnMenu_Click(sender As Object, e As EventArgs) Handles btnMenu.Click
+        MostraPannello(pnlMenu, btnMenu)
+    End Sub
+
+    ''' <summary>
+    ''' Una delle sei voci del menu: si preme il bottone della barra che le sta dietro.
+    ''' </summary>
+    Private Sub pnlMenu_VoceScelta(sender As Object, e As VoceDelMenuEventArgs) Handles pnlMenu.VoceScelta
+
+        ' PerformClick su un bottone spento non fa niente, ed è quel che deve succedere:
+        ' mentre l'AI lavora la barra è chiusa, e il menu si chiude con lei.
+        BottoneDellaVoce(e.Voce)?.PerformClick()
+
+    End Sub
 
     Private Sub btnHome_Click(sender As Object, e As EventArgs) Handles btnHome.Click
         MostraPannello(pnlHome, btnHome)
@@ -706,6 +781,13 @@ Public Class FormPrincipale
             navigazione.Enabled = libera
         Next
 
+        ' E con lei il menu d'ingresso, che porta alle stesse destinazioni: se restasse
+        ' acceso sarebbe la scorciatoia con cui uscire da una porta appena chiusa. Gli
+        ' stati non si riscrivono qui, si leggono dai bottoni: un elenco solo.
+        For Each voce As VoceDelMenu In [Enum].GetValues(GetType(VoceDelMenu))
+            pnlMenu.ImpostaStato(voce, BottoneDellaVoce(voce)?.Enabled)
+        Next
+
         ' La barra di stato è l'unico posto della finestra che parla per tutti i pannelli,
         ' e fino al 2026-08-27 diceva «Pronto» dall'avvio alla chiusura. Adesso, mentre
         ' l'AI lavora, lo dice — e si muove, perché è il muoversi a dire che il programma
@@ -1037,14 +1119,20 @@ Public Class FormPrincipale
         lblMarchio.Visible = Not compatta
         lblCopyright.Visible = Not compatta
 
+        ' Le etichette rientrano di un pixel per lato: alla larghezza piena il loro fondo
+        ' opaco coprirebbe il filo del contorno sui due lati verticali (v.
+        ' DisegnaIlContornoDelLogo). Il testo resta centrato: si toglie lo stesso pixel
+        ' da destra e da sinistra.
+        Dim rientro As Integer = larghezza - 2
+
         Dim riga As Integer = margine + lato + StileApp.InterlineaMinima
         If Not compatta Then
-            lblMarchio.SetBounds(0, riga, larghezza, AltezzaRigaNome)
+            lblMarchio.SetBounds(1, riga, rientro, AltezzaRigaNome)
             riga += AltezzaRigaNome + 2
         End If
-        lblVersione.SetBounds(0, riga, larghezza, AltezzaRigaDidascalia)
+        lblVersione.SetBounds(1, riga, rientro, AltezzaRigaDidascalia)
         If Not compatta Then
-            lblCopyright.SetBounds(0, riga + AltezzaRigaDidascalia + 2, larghezza, AltezzaRigaDidascalia)
+            lblCopyright.SetBounds(1, riga + AltezzaRigaDidascalia + 2, rientro, AltezzaRigaDidascalia)
         End If
 
         ' La barra di stato scrive a destra del pannello logo, che le sta sopra.

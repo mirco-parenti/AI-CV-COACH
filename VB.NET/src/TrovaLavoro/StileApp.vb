@@ -45,6 +45,16 @@ Public Module StileApp
     ''' </summary>
     Public ReadOnly FondoMarchio As Color = ColorTranslator.FromHtml("#0B06B0")
 
+    ''' <summary>Il filo che contorna il pannello del logo (cap. 03.5).</summary>
+    ''' <remarks>
+    ''' Nero pieno, e non <see cref="BordoLeggero"/>: quel grigio serve a separare due
+    ''' aree della stessa finestra, questo a dire che il marchio è una cosa a parte,
+    ''' appoggiata sopra. È l'unico nero della tavolozza — <see cref="TestoPrimario"/> è
+    ''' un grigio scurissimo, non nero — ed è nero perché un contorno più chiaro sul
+    ''' fondo chiaro del pannello si sarebbe visto appena.
+    ''' </remarks>
+    Public ReadOnly BordoMarchio As Color = ColorTranslator.FromHtml("#000000")
+
     ''' <summary>Testo normale, valori, titoli di sezione.</summary>
     Public ReadOnly TestoPrimario As Color = ColorTranslator.FromHtml("#212529")
 
@@ -142,6 +152,18 @@ Public Module StileApp
 
     ''' <summary>Bottone della barra superiore di navigazione.</summary>
     Public ReadOnly BottoneBarraSuperiore As New Size(110, 34)
+
+    ''' <summary>Bottone della barra superiore che porta un nome lungo.</summary>
+    ''' <remarks>
+    ''' Ne esistono due — «Le mie candidature» e «Confronta ANNUNCIO - CV» — e a 110 pixel
+    ''' il nome ci finiva tagliato: un bottone della barra non manda a capo e non mette i
+    ''' puntini, taglia e basta. Allargarli non è un'eccezione allo stile, è la stessa
+    ''' misura con la larghezza che quei testi chiedono; l'altezza resta identica, perché
+    ''' la barra deve restare una riga sola. La larghezza la decide il <b>più lungo dei
+    ''' due</b> e vale per entrambi: due bottoni larghi uguale sono una barra, due larghi
+    ''' quasi uguale sono una svista.
+    ''' </remarks>
+    Public ReadOnly BottoneBarraSuperioreLargo As New Size(210, 34)
 
     ' --- I livelli di conseguenza (cap. 03.3) ---
 

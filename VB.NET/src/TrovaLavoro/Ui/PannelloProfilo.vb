@@ -7,6 +7,7 @@ Imports System.Threading
 Imports System.Windows.Forms
 Imports TrovaLavoro.Ai
 Imports TrovaLavoro.Dati
+Imports TrovaLavoro.Documenti
 Imports TrovaLavoro.Motore
 
 ''' <summary>
@@ -299,6 +300,12 @@ Public Class PannelloProfilo
             End Sub)
 
         AggiornaComandi()
+
+        ' Un profilo appena mostrato — caricato, importato, ripristinato da un backup —
+        ' è un profilo diverso da quello di un attimo fa: l'anteprima lo segue. Passa di
+        ' qui e non da SegnaModificato, che qui non scatta apposta (mostrare non è
+        ' modificare).
+        AggiornaIlCvBase()
 
     End Sub
 
@@ -641,6 +648,163 @@ Public Class PannelloProfilo
 
         _modificato = True
         AggiornaComandi()
+        AggiornaIlCvBase()
+
+    End Sub
+
+    ' ==================================================================
+    ' La scheda «📄 CV base» (2026-08-30)
+    ' ==================================================================
+
+    ''' <summary>
+    ''' Riscrive l'anteprima del 📄 CV base sul profilo <b>di adesso</b>, quello a video.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Perché sta qui e non in P6.</b> In P6 il CV base è un documento: quello
+    ''' che l'AI ha scritto un certo giorno, che si esporta e si manda. Qui è un
+    ''' <i>riflesso</i> del profilo: non si salva, non si esporta, non esiste su disco —
+    ''' si rifà a ogni battuta di tasto da <see cref="CvDalProfilo"/>, e per questo non
+    ''' può essere in ritardo. Aggiungi un'esperienza e la vedi comparire mentre la scrivi.</para>
+    ''' <para><b>Costa poco, e comunque solo quando si guarda.</b> Ricomporre è un giro su
+    ''' liste di poche voci più l'impaginazione, ma <see cref="SegnaModificato"/> passa a
+    ''' ogni tasto premuto: se la scheda non è quella aperta non si fa niente, e la si
+    ''' ritrova aggiornata entrandoci.</para>
+    ''' <para><b>Impagina con lo stesso impaginatore del documento vero</b>
+    ''' (<see cref="Impaginazione.PaginaCv"/>): un'anteprima che si disegnasse da sé
+    ''' finirebbe per mostrare un CV diverso da quello che poi esce, ed è il genere di
+    ''' differenza che nessuno nota finché non ha spedito.</para>
+    ''' </remarks>
+    Private Sub AggiornaIlCvBase()
+
+        If tabSezioni.SelectedTab IsNot tabCvBase Then Return
+
+        txtCvBase.Text = ScrittoreTesto.Componi(
+            Impaginazione.PaginaCv(CvDalProfilo.Componi(_profilo), LinguaDelCvBase()))
+
+        lblStatoCvBase.Text = StatoDelCvBase()
+
+    End Sub
+
+    ''' <summary>
+    ''' In che lingua impaginare l'anteprima: quella del 📄 CV base già scritto, se c'è.
+    ''' </summary>
+    ''' <remarks>
+    ''' Sono le etichette delle sezioni, non i contenuti — quelli vengono dal profilo e
+    ''' restano nella lingua in cui l'utente li ha scritti. Prendere la lingua del CV
+    ''' salvato serve a che l'anteprima e il documento si somiglino: due colonne che
+    ''' dicono le stesse cose con intestazioni diverse si confrontano male.
+    ''' </remarks>
+    Private Function LinguaDelCvBase() As String
+
+        Dim salvato As Dati.CvBase = CvBaseSuDisco()
+        If salvato Is Nothing Then Return LinguaDocumenti.Italiano
+
+        Return LinguaDocumenti.PerDocumenti(salvato.Lingua)
+
+    End Function
+
+    ''' <summary>Il 📄 CV base su disco, o <c>Nothing</c> se non ce n'è uno.</summary>
+    ''' <remarks>
+    ''' Un CV illeggibile qui non è un guaio: la scheda mostra l'anteprima viva lo stesso,
+    ''' e la riga di stato dice che di scritto non c'è niente. Questa scheda non salva
+    ''' nulla, quindi non può rovinare quel che non riesce a leggere.
+    ''' </remarks>
+    Private Function CvBaseSuDisco() As Dati.CvBase
+
+        If _contesto Is Nothing Then Return Nothing
+
+        Try
+            Return _contesto.Archivio.CaricaCvBase()
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is JsonException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            Return Nothing
+        End Try
+
+    End Function
+
+    ''' <summary>
+    ''' La riga sotto il titolo della scheda: che cos'è questa anteprima, e come sta il
+    ''' 📄 CV-1 vero rispetto al profilo di adesso.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Dice sempre le due cose che distinguono l'anteprima dal documento — il
+    ''' sommario che manca e le descrizioni non riformulate — perché sono esattamente
+    ''' quel che ci mette l'AI, e chi guarda le due colonne deve sapere cosa sta
+    ''' guardando.</para>
+    ''' <para>Sul CV-1 non decide niente: <b>riferisce</b>. Che sia da rifare lo decide
+    ''' l'utente, e il bottone per farlo è lì sotto — è la stessa promessa che P6 fa da
+    ''' sempre, «lo dico invece di rigenerare di soppiatto», e vale anche qui.</para>
+    ''' </remarks>
+    Private Function StatoDelCvBase() As String
+
+        Const CheCosaE As String =
+            "Il tuo CV come risulta dal profilo di adesso: si rifà mentre scrivi, e non " &
+            "contiene una riga che tu non abbia scritto. Il sommario e le descrizioni " &
+            "riformulate li aggiunge l'AI con «Genera 📄 CV-1 base», qui sotto."
+
+        Dim salvato As Dati.CvBase = CvBaseSuDisco()
+        If salvato Is Nothing OrElse salvato.Cv Is Nothing Then
+            Return CheCosaE & vbLf & "Un 📄 CV-1 scritto dall'AI non c'è ancora."
+        End If
+
+        Dim quando As String = salvato.Generato.ToString("d MMMM yyyy", CultureInfo.CurrentCulture)
+
+        If ProfiloCambiatoDopoIlCvBase(salvato) Then
+            Return CheCosaE & vbLf &
+                   $"Il 📄 CV-1 scritto dall'AI è del {quando}, e da allora il profilo è cambiato: " &
+                   "quello lì sopra è più aggiornato di lui."
+        End If
+
+        Return CheCosaE & vbLf &
+               $"Il 📄 CV-1 scritto dall'AI è del {quando}, sulla stessa versione di profilo."
+
+    End Function
+
+    ''' <summary>
+    ''' Se il profilo è cambiato dopo che il 📄 CV base fu scritto.
+    ''' </summary>
+    ''' <remarks>
+    ''' Due strade, e la prima conta più della seconda: se c'è una correzione a video non
+    ''' ancora salvata, il profilo <b>è</b> già cambiato — nessuna versione su disco lo
+    ''' racconta ancora, ma è quello che l'utente sta guardando. Altrimenti si guarda se
+    ''' la versione da cui il CV nacque è ancora l'ultima, che è la stessa domanda che si
+    ''' fa P6.
+    ''' </remarks>
+    Private Function ProfiloCambiatoDopoIlCvBase(salvato As Dati.CvBase) As Boolean
+
+        If _modificato Then Return True
+        If _contesto Is Nothing OrElse String.IsNullOrEmpty(salvato.VersioneProfilo) Then Return False
+
+        Return Not String.Equals(salvato.VersioneProfilo,
+                                 _contesto.Archivio.Versioni().LastOrDefault(),
+                                 StringComparison.Ordinal)
+
+    End Function
+
+    ''' <summary>
+    ''' Entrando nella scheda del 📄 CV base la si trova aggiornata: fuori di lì non si
+    ''' ricompone niente, e senza questo aggancio resterebbe ferma all'ultima volta.
+    ''' </summary>
+    Private Sub tabSezioni_SelectedIndexChanged(sender As Object, e As EventArgs) _
+        Handles tabSezioni.SelectedIndexChanged
+
+        AggiornaIlCvBase()
+
+    End Sub
+
+    ''' <summary>
+    ''' Rientrando nel pannello, la scheda del 📄 CV base si rilegge.
+    ''' </summary>
+    ''' <remarks>
+    ''' Il 📄 CV-1 lo scrive P6, non questo pannello: chi lo genera esce di qui, e senza
+    ''' questo aggancio tornerebbe a trovare una riga di stato che dice ancora «non c'è
+    ''' ancora», sotto un CV che invece è appena stato scritto.
+    ''' </remarks>
+    Protected Overrides Sub OnVisibleChanged(e As EventArgs)
+
+        MyBase.OnVisibleChanged(e)
+        If Me.Visible Then AggiornaIlCvBase()
 
     End Sub
 

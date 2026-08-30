@@ -26,6 +26,7 @@ Partial Class FormPrincipale
         Me.ttSuggerimenti = New System.Windows.Forms.ToolTip(Me.components)
         Me.tlpStruttura = New System.Windows.Forms.TableLayoutPanel()
         Me.pnlBarraSuperiore = New System.Windows.Forms.Panel()
+        Me.btnMenu = New System.Windows.Forms.Button()
         Me.btnHome = New System.Windows.Forms.Button()
         Me.btnProfilo = New System.Windows.Forms.Button()
         Me.btnRicerca = New System.Windows.Forms.Button()
@@ -37,6 +38,7 @@ Partial Class FormPrincipale
         Me.pnlFasciaInferiore = New System.Windows.Forms.Panel()
         Me.lblStato = New System.Windows.Forms.Label()
         Me.pnlBordoFasciaInferiore = New System.Windows.Forms.Panel()
+        Me.pnlMenu = New PannelloMenu()
         Me.pnlHome = New PannelloHome()
         Me.pnlProfilo = New PannelloProfilo()
         Me.pnlDialogo = New PannelloDialogo()
@@ -78,6 +80,7 @@ Partial Class FormPrincipale
         'pnlBarraSuperiore
         '
         Me.pnlBarraSuperiore.BackColor = StileApp.SfondoContenuto
+        Me.pnlBarraSuperiore.Controls.Add(Me.btnMenu)
         Me.pnlBarraSuperiore.Controls.Add(Me.btnHome)
         Me.pnlBarraSuperiore.Controls.Add(Me.btnProfilo)
         Me.pnlBarraSuperiore.Controls.Add(Me.btnRicerca)
@@ -92,6 +95,22 @@ Partial Class FormPrincipale
         Me.pnlBarraSuperiore.Size = New System.Drawing.Size(1134, 48)
         Me.pnlBarraSuperiore.TabIndex = 0
         '
+        'btnMenu
+        '
+        ' La via di ritorno al menu d'ingresso (P0). Senza, dal menu si esce e non si
+        ' rientra: la barra porta ai sei pannelli ma non alla schermata che li elenca.
+        Me.btnMenu.BackColor = StileApp.SfondoContenuto
+        Me.btnMenu.FlatAppearance.BorderColor = StileApp.BordoLeggero
+        Me.btnMenu.FlatAppearance.BorderSize = 1
+        Me.btnMenu.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.btnMenu.ForeColor = StileApp.TestoPrimario
+        Me.btnMenu.Location = New System.Drawing.Point(14, 7)
+        Me.btnMenu.Name = "btnMenu"
+        Me.btnMenu.Size = StileApp.BottoneBarraSuperiore
+        Me.btnMenu.TabIndex = 0
+        Me.btnMenu.Text = "🎮 Menu"
+        Me.btnMenu.UseVisualStyleBackColor = False
+        '
         'btnHome
         '
         Me.btnHome.BackColor = StileApp.SfondoContenuto
@@ -99,11 +118,11 @@ Partial Class FormPrincipale
         Me.btnHome.FlatAppearance.BorderSize = 1
         Me.btnHome.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnHome.ForeColor = StileApp.TestoPrimario
-        Me.btnHome.Location = New System.Drawing.Point(14, 7)
+        Me.btnHome.Location = New System.Drawing.Point(136, 7)
         Me.btnHome.Name = "btnHome"
-        Me.btnHome.Size = StileApp.BottoneBarraSuperiore
-        Me.btnHome.TabIndex = 0
-        Me.btnHome.Text = "🏠 Home"
+        Me.btnHome.Size = StileApp.BottoneBarraSuperioreLargo
+        Me.btnHome.TabIndex = 1
+        Me.btnHome.Text = "🏠 Le mie candidature"
         Me.btnHome.UseVisualStyleBackColor = False
         '
         'btnProfilo
@@ -113,10 +132,10 @@ Partial Class FormPrincipale
         Me.btnProfilo.FlatAppearance.BorderSize = 1
         Me.btnProfilo.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnProfilo.ForeColor = StileApp.TestoPrimario
-        Me.btnProfilo.Location = New System.Drawing.Point(136, 7)
+        Me.btnProfilo.Location = New System.Drawing.Point(358, 7)
         Me.btnProfilo.Name = "btnProfilo"
         Me.btnProfilo.Size = StileApp.BottoneBarraSuperiore
-        Me.btnProfilo.TabIndex = 1
+        Me.btnProfilo.TabIndex = 2
         Me.btnProfilo.Text = "👤 Profilo"
         Me.btnProfilo.UseVisualStyleBackColor = False
         '
@@ -127,10 +146,10 @@ Partial Class FormPrincipale
         Me.btnRicerca.FlatAppearance.BorderSize = 1
         Me.btnRicerca.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnRicerca.ForeColor = StileApp.TestoPrimario
-        Me.btnRicerca.Location = New System.Drawing.Point(258, 7)
+        Me.btnRicerca.Location = New System.Drawing.Point(480, 7)
         Me.btnRicerca.Name = "btnRicerca"
         Me.btnRicerca.Size = StileApp.BottoneBarraSuperiore
-        Me.btnRicerca.TabIndex = 2
+        Me.btnRicerca.TabIndex = 3
         Me.btnRicerca.Text = "🔍 Ricerca"
         Me.btnRicerca.UseVisualStyleBackColor = False
         '
@@ -143,11 +162,11 @@ Partial Class FormPrincipale
         Me.btnCandidatura.FlatAppearance.BorderSize = 1
         Me.btnCandidatura.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnCandidatura.ForeColor = StileApp.TestoPrimario
-        Me.btnCandidatura.Location = New System.Drawing.Point(380, 7)
+        Me.btnCandidatura.Location = New System.Drawing.Point(602, 7)
         Me.btnCandidatura.Name = "btnCandidatura"
-        Me.btnCandidatura.Size = StileApp.BottoneBarraSuperiore
-        Me.btnCandidatura.TabIndex = 3
-        Me.btnCandidatura.Text = "📋 Candidatura"
+        Me.btnCandidatura.Size = StileApp.BottoneBarraSuperioreLargo
+        Me.btnCandidatura.TabIndex = 4
+        Me.btnCandidatura.Text = "Confronta ⭐ ANNUNCIO - CV"
         Me.btnCandidatura.UseVisualStyleBackColor = False
         '
         'btnDocumenti
@@ -160,10 +179,10 @@ Partial Class FormPrincipale
         Me.btnDocumenti.FlatAppearance.BorderSize = 1
         Me.btnDocumenti.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnDocumenti.ForeColor = StileApp.TestoPrimario
-        Me.btnDocumenti.Location = New System.Drawing.Point(502, 7)
+        Me.btnDocumenti.Location = New System.Drawing.Point(824, 7)
         Me.btnDocumenti.Name = "btnDocumenti"
         Me.btnDocumenti.Size = StileApp.BottoneBarraSuperiore
-        Me.btnDocumenti.TabIndex = 4
+        Me.btnDocumenti.TabIndex = 5
         Me.btnDocumenti.Text = "📄 Documenti"
         Me.btnDocumenti.UseVisualStyleBackColor = False
         '
@@ -174,10 +193,10 @@ Partial Class FormPrincipale
         Me.btnImpostazioni.FlatAppearance.BorderSize = 1
         Me.btnImpostazioni.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.btnImpostazioni.ForeColor = StileApp.TestoPrimario
-        Me.btnImpostazioni.Location = New System.Drawing.Point(624, 7)
+        Me.btnImpostazioni.Location = New System.Drawing.Point(946, 7)
         Me.btnImpostazioni.Name = "btnImpostazioni"
         Me.btnImpostazioni.Size = StileApp.BottoneBarraSuperiore
-        Me.btnImpostazioni.TabIndex = 5
+        Me.btnImpostazioni.TabIndex = 6
         Me.btnImpostazioni.Text = "⚙ Impostazioni"
         Me.btnImpostazioni.UseVisualStyleBackColor = False
         '
@@ -193,6 +212,7 @@ Partial Class FormPrincipale
         'pnlAreaCentrale
         '
         Me.pnlAreaCentrale.BackColor = StileApp.SfondoBase
+        Me.pnlAreaCentrale.Controls.Add(Me.pnlMenu)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlHome)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlProfilo)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlDialogo)
@@ -206,6 +226,15 @@ Partial Class FormPrincipale
         Me.pnlAreaCentrale.Name = "pnlAreaCentrale"
         Me.pnlAreaCentrale.Size = New System.Drawing.Size(1134, 485)
         Me.pnlAreaCentrale.TabIndex = 1
+        '
+        'pnlMenu
+        '
+        Me.pnlMenu.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.pnlMenu.Location = New System.Drawing.Point(0, 0)
+        Me.pnlMenu.Name = "pnlMenu"
+        Me.pnlMenu.Size = New System.Drawing.Size(1134, 485)
+        Me.pnlMenu.TabIndex = 7
+        Me.pnlMenu.Visible = False
         '
         'pnlHome
         '
@@ -329,9 +358,9 @@ Partial Class FormPrincipale
         '
         Me.lblMarchio.Font = StileApp.FontTitoloFinestra
         Me.lblMarchio.ForeColor = StileApp.TestoPrimario
-        Me.lblMarchio.Location = New System.Drawing.Point(0, 123)
+        Me.lblMarchio.Location = New System.Drawing.Point(1, 123)
         Me.lblMarchio.Name = "lblMarchio"
-        Me.lblMarchio.Size = New System.Drawing.Size(261, 30)
+        Me.lblMarchio.Size = New System.Drawing.Size(259, 30)
         Me.lblMarchio.TabIndex = 1
         Me.lblMarchio.Text = "AVIOLAB AI"
         Me.lblMarchio.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -340,9 +369,9 @@ Partial Class FormPrincipale
         '
         Me.lblVersione.Font = StileApp.FontDidascalia
         Me.lblVersione.ForeColor = StileApp.TestoSecondario
-        Me.lblVersione.Location = New System.Drawing.Point(0, 155)
+        Me.lblVersione.Location = New System.Drawing.Point(1, 155)
         Me.lblVersione.Name = "lblVersione"
-        Me.lblVersione.Size = New System.Drawing.Size(261, 15)
+        Me.lblVersione.Size = New System.Drawing.Size(259, 15)
         Me.lblVersione.TabIndex = 2
         Me.lblVersione.Text = "Ver. — · Pool —"
         Me.lblVersione.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -351,9 +380,9 @@ Partial Class FormPrincipale
         '
         Me.lblCopyright.Font = StileApp.FontDidascalia
         Me.lblCopyright.ForeColor = StileApp.TestoSecondario
-        Me.lblCopyright.Location = New System.Drawing.Point(0, 172)
+        Me.lblCopyright.Location = New System.Drawing.Point(1, 172)
         Me.lblCopyright.Name = "lblCopyright"
-        Me.lblCopyright.Size = New System.Drawing.Size(261, 15)
+        Me.lblCopyright.Size = New System.Drawing.Size(259, 15)
         Me.lblCopyright.TabIndex = 3
         Me.lblCopyright.Text = "©2026 Aviolab AI - Tutti i diritti riservati"
         Me.lblCopyright.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -384,6 +413,7 @@ Partial Class FormPrincipale
 
     Friend WithEvents tlpStruttura As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents pnlBarraSuperiore As System.Windows.Forms.Panel
+    Friend WithEvents btnMenu As System.Windows.Forms.Button
     Friend WithEvents btnHome As System.Windows.Forms.Button
     Friend WithEvents btnProfilo As System.Windows.Forms.Button
     Friend WithEvents btnRicerca As System.Windows.Forms.Button
@@ -392,6 +422,7 @@ Partial Class FormPrincipale
     Friend WithEvents btnImpostazioni As System.Windows.Forms.Button
     Friend WithEvents pnlBordoBarraSuperiore As System.Windows.Forms.Panel
     Friend WithEvents pnlAreaCentrale As System.Windows.Forms.Panel
+    Friend WithEvents pnlMenu As PannelloMenu
     Friend WithEvents pnlHome As PannelloHome
     Friend WithEvents pnlProfilo As PannelloProfilo
     Friend WithEvents pnlDialogo As PannelloDialogo

@@ -43,6 +43,8 @@ Public Module Marchio
     Private _iconaCaricata As Boolean
     Private _schermata As Image
     Private _schermataCaricata As Boolean
+    Private _sfondoMenu As Image
+    Private _sfondoMenuCaricato As Boolean
 
     ''' <summary>
     ''' L'icona dell'applicazione, o <c>Nothing</c> se la risorsa non c'è.
@@ -92,6 +94,39 @@ Public Module Marchio
                 End If
 
                 Return _schermata
+
+            End SyncLock
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Lo sfondo del menu (1536x1348), o <c>Nothing</c> se la risorsa non c'è.
+    ''' </summary>
+    ''' <remarks>
+    ''' È il banner intero, <b>identico</b> al file dei definitivi: il velo che lo
+    ''' schiarisce dietro ai bottoni lo dipinge <see cref="PannelloMenu"/> a video, e
+    ''' non è cotto dentro l'immagine. Così il marchio nel repository resta uno solo, e
+    ''' cambiare quanto è chiaro il fondo non vuol dire rigenerare un PNG.
+    ''' Come le altre, torna sempre la stessa immagine e non va liberata da chi la riceve.
+    ''' </remarks>
+    Public ReadOnly Property SfondoDelMenu As Image
+        Get
+            SyncLock _lucchetto
+
+                If Not _sfondoMenuCaricato Then
+                    Using flusso As Stream = Risorsa("sfondo-menu.png")
+                        ' Come sopra: Bitmap tiene aperto il flusso da cui nasce.
+                        If flusso IsNot Nothing Then
+                            Using originale As New Bitmap(flusso)
+                                _sfondoMenu = New Bitmap(originale)
+                            End Using
+                        End If
+                    End Using
+                    ' La bandiera si alza a lavoro finito, mai prima.
+                    _sfondoMenuCaricato = True
+                End If
+
+                Return _sfondoMenu
 
             End SyncLock
         End Get

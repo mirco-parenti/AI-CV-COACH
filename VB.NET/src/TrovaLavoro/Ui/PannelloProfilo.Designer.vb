@@ -82,6 +82,9 @@ Partial Class PannelloProfilo
         Me.lblAnno = New System.Windows.Forms.Label()
         Me.txtAnno = New System.Windows.Forms.TextBox()
         Me.tabTestoLetto = New System.Windows.Forms.TabPage()
+        Me.tabCvBase = New System.Windows.Forms.TabPage()
+        Me.lblStatoCvBase = New System.Windows.Forms.Label()
+        Me.txtCvBase = New System.Windows.Forms.TextBox()
         Me.lblTestoLetto = New System.Windows.Forms.Label()
         Me.txtTestoLetto = New System.Windows.Forms.TextBox()
         Me.pnlAzioni = New System.Windows.Forms.Panel()
@@ -308,6 +311,7 @@ Partial Class PannelloProfilo
         Me.tabSezioni.Controls.Add(Me.tabCompetenze)
         Me.tabSezioni.Controls.Add(Me.tabStudi)
         Me.tabSezioni.Controls.Add(Me.tabTestoLetto)
+        Me.tabSezioni.Controls.Add(Me.tabCvBase)
         Me.tabSezioni.Dock = System.Windows.Forms.DockStyle.Fill
         Me.tabSezioni.Font = StileApp.FontTesto
         Me.tabSezioni.Location = New System.Drawing.Point(14, 220)
@@ -820,6 +824,40 @@ Partial Class PannelloProfilo
         Me.txtTestoLetto.Size = New System.Drawing.Size(1070, 248)
         Me.txtTestoLetto.TabIndex = 1
         '
+        'tabCvBase
+        '
+        Me.tabCvBase.BackColor = StileApp.SfondoContenuto
+        Me.tabCvBase.Controls.Add(Me.txtCvBase)
+        Me.tabCvBase.Controls.Add(Me.lblStatoCvBase)
+        Me.tabCvBase.Location = New System.Drawing.Point(4, 24)
+        Me.tabCvBase.Name = "tabCvBase"
+        Me.tabCvBase.Padding = New System.Windows.Forms.Padding(14)
+        Me.tabCvBase.Size = New System.Drawing.Size(1098, 310)
+        Me.tabCvBase.TabIndex = 5
+        Me.tabCvBase.Text = "📄 CV base"
+        '
+        'lblStatoCvBase
+        '
+        Me.lblStatoCvBase.Dock = System.Windows.Forms.DockStyle.Top
+        Me.lblStatoCvBase.Font = StileApp.FontDidascalia
+        Me.lblStatoCvBase.ForeColor = StileApp.TestoSecondario
+        Me.lblStatoCvBase.Location = New System.Drawing.Point(14, 14)
+        Me.lblStatoCvBase.Name = "lblStatoCvBase"
+        Me.lblStatoCvBase.Size = New System.Drawing.Size(1070, 34)
+        Me.lblStatoCvBase.TabIndex = 0
+        Me.lblStatoCvBase.Text = ""
+        '
+        'txtCvBase
+        '
+        Me.txtCvBase.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.txtCvBase.Font = StileApp.FontTesto
+        Me.txtCvBase.Multiline = True
+        Me.txtCvBase.Name = "txtCvBase"
+        Me.txtCvBase.ReadOnly = True
+        Me.txtCvBase.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
+        Me.txtCvBase.Size = New System.Drawing.Size(1070, 248)
+        Me.txtCvBase.TabIndex = 1
+        '
         'pnlAzioni
         '
         Me.pnlAzioni.Controls.Add(Me.btnImporta)
@@ -1009,6 +1047,9 @@ Partial Class PannelloProfilo
     Friend WithEvents lblAnno As System.Windows.Forms.Label
     Friend WithEvents txtAnno As System.Windows.Forms.TextBox
     Friend WithEvents tabTestoLetto As System.Windows.Forms.TabPage
+    Friend WithEvents tabCvBase As System.Windows.Forms.TabPage
+    Friend WithEvents lblStatoCvBase As System.Windows.Forms.Label
+    Friend WithEvents txtCvBase As System.Windows.Forms.TextBox
     Friend WithEvents lblTestoLetto As System.Windows.Forms.Label
     Friend WithEvents txtTestoLetto As System.Windows.Forms.TextBox
     Friend WithEvents pnlAzioni As System.Windows.Forms.Panel

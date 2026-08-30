@@ -159,7 +159,7 @@
        WithCulture=false per la ragione dei prompt: senza, un punto nel nome verrebbe
        letto come codice di lingua e ne nascerebbe un assembly satellite. -->
   <ItemGroup>
-    <EmbeddedResource Include="Risorse\TrovaLavoro.ico;Risorse\schermata-avvio.png"
+    <EmbeddedResource Include="Risorse\TrovaLavoro.ico;Risorse\schermata-avvio.png;Risorse\sfondo-menu.png"
                       WithCulture="false">
       <LogicalName>marchio/%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>

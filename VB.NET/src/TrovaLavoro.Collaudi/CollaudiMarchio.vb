@@ -1,5 +1,7 @@
 Imports System.Drawing
 Imports System.IO
+Imports System.Linq
+Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro
 
@@ -63,6 +65,221 @@ Namespace Ui
             End Using
 
         End Sub
+
+        ''' <summary>
+        ''' Le tre scritte del pannello del logo si leggono sul fondo che il pannello ha.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il collaudo non guarda i colori uno per uno — quelli sono la tabella del
+        ''' cap. 03.2 — ma il legame fra due scelte che si fanno in due punti diversi del
+        ''' designer: il fondo del pannello e il colore delle sue scritte. Cambiare il
+        ''' primo e dimenticare il secondo non rompe niente e non spegne nessun collaudo:
+        ''' il testo resta lì, dello stesso colore di prima, e diventa semplicemente
+        ''' illeggibile. È successo il 2026-08-30, provando un fondo blu: su quel blu
+        ''' <c>TestoPrimario</c> faceva 1,2 a 1, dove la soglia è 4,5. Il fondo è poi
+        ''' tornato chiaro, ma la misura resta — vale per qualunque fondo si scelga.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LeScritteDelMarchioSiLeggonoSulLoroFondo()
+
+            Using form As New FormPrincipale()
+
+                Dim pannello As Control =
+                    form.Controls.Find("pnlLogo", searchAllChildren:=True).Single()
+
+                Dim etichette As Label() = pannello.Controls.OfType(Of Label)().ToArray()
+                Assert.IsGreaterThanOrEqualTo(3, etichette.Length,
+                                              "nome, versione e copyright: le tre scritte ci sono")
+
+                ' La soglia non è il 4,5 di WCAG per decreto: è il contrasto che
+                ' l'applicazione **già** usa per ogni didascalia — TestoSecondario su
+                ' SfondoBase — e che vale 4,45 a 1, un centesimo sotto quella soglia. Le
+                ' scritte del marchio devono leggersi almeno quanto tutte le altre; se la
+                ' tavolozza va rivista, si rivede là e questo collaudo si adegua da sé.
+                Dim soglia As Double = Contrasto(StileApp.TestoSecondario, StileApp.SfondoBase)
+
+                For Each etichetta As Label In etichette
+                    Assert.IsGreaterThanOrEqualTo(
+                        soglia, Contrasto(etichetta.ForeColor, pannello.BackColor),
+                        $"«{etichetta.Name}» si legge peggio di una didascalia qualunque")
+                Next
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Il pannello del logo ha il suo filo nero, e il filo gira tutt'intorno.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Si fotografa il pannello vero e si guardano i pixel del bordo, invece di
+        ''' rileggere il codice che li disegna: un contorno è una cosa che o si vede o non
+        ''' si vede, e le due maniere di sbagliarlo non lasciano altra traccia. La prima è
+        ''' disegnare il rettangolo sulle misure piene invece che a <c>-1</c>, e allora due
+        ''' lati su quattro cadono fuori dall'area. La seconda è più insidiosa: le tre
+        ''' etichette sono larghe quanto il pannello e hanno il fondo opaco, e i figli si
+        ''' disegnano dopo il genitore — alla larghezza piena mangiano il filo verticale
+        ''' <b>solo alle righe che occupano</b>. Il contorno resterebbe lì, interrotto tre
+        ''' volte, e a occhio sembrerebbe intero. Per questo fra i punti misurati ce n'è
+        ''' uno preso apposta all'altezza del nome.</para>
+        ''' <para>Il pannello va costruito (<c>CreateControl</c>) o non ha finestra da
+        ''' fotografare; costruire un figlio costruisce anche la finestra principale, ma
+        ''' <b>non</b> ne fa girare il <c>Load</c> — quello lo chiama solo chi la mostra.
+        ''' </para>
+        ''' <para><b>Quel che la fotografia NON può vedere, e perché il rientro si misura
+        ''' invece di guardarlo.</b> Su una finestra mai mostrata i figli sono
+        ''' <c>Visible = False</c> per eredità, quindi <c>CreateControl</c> non dà loro una
+        ''' finestra e <c>DrawToBitmap</c> non li stampa: nella foto ci sono solo il fondo
+        ''' e il filo, zero pixel d'altro. Detto altrimenti, questa foto **non può**
+        ''' accorgersi di un'etichetta che copre il contorno, e provandolo apposta —
+        ''' rimettendo le etichette a tutta larghezza — il collaudo restava verde. Il
+        ''' rischio è vero lo stesso: nel programma vero le etichette si vedono eccome. Per
+        ''' questo il rientro si verifica sui <b>bordi</b>, che sono veri anche senza una
+        ''' finestra, e non sui pixel. Le due misure guardano due cose diverse: la foto
+        ''' che il filo ci sia e sia chiuso a <c>-1</c>, la geometria che nessuno glielo
+        ''' vada sopra.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub IlPannelloDelMarchioHaIlSuoContorno()
+
+            Using form As New FormPrincipale()
+
+                Dim pannello As Control =
+                    form.Controls.Find("pnlLogo", searchAllChildren:=True).Single()
+
+                pannello.CreateControl()
+
+                Dim destra As Integer = pannello.Width - 1
+                Dim fondo As Integer = pannello.Height - 1
+
+                Using foto As New Bitmap(pannello.Width, pannello.Height)
+
+                    pannello.DrawToBitmap(foto, New Rectangle(0, 0, pannello.Width, pannello.Height))
+
+                    Dim atteso As Integer = StileApp.BordoMarchio.ToArgb()
+
+                    ' Si guarda il perimetro **tutto**, non qualche punto scelto: dove il
+                    ' filo si interrompe dipende da dove capitano le etichette, e quello
+                    ' cambia con la modalità (piena o compatta) e con il DPI della
+                    ' macchina. Un collaudo che sceglie i punti a mano sceglie anche, senza
+                    ' saperlo, di non guardare dove il difetto sarebbe.
+                    For x As Integer = 0 To destra
+                        Assert.AreEqual(atteso, foto.GetPixel(x, 0).ToArgb(),
+                                        $"il filo di sopra si interrompe in x={x}")
+                        Assert.AreEqual(atteso, foto.GetPixel(x, fondo).ToArgb(),
+                                        $"il filo di sotto si interrompe in x={x}")
+                    Next
+
+                    For y As Integer = 0 To fondo
+                        Assert.AreEqual(atteso, foto.GetPixel(0, y).ToArgb(),
+                                        $"il filo di sinistra si interrompe in y={y}")
+                        Assert.AreEqual(atteso, foto.GetPixel(destra, y).ToArgb(),
+                                        $"il filo di destra si interrompe in y={y}")
+                    Next
+
+                    ' E dentro no: un contorno che riempie non è un contorno.
+                    Assert.AreEqual(pannello.BackColor.ToArgb(),
+                                    foto.GetPixel(4, fondo - 4).ToArgb(),
+                                    "appena dentro il filo il fondo è quello del pannello")
+
+                End Using
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Nessuna scritta del pannello va a finire sopra il filo del contorno, in
+        ''' nessuna delle due modalità.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È la metà del collaudo che la fotografia non può fare (v.
+        ''' <see cref="IlPannelloDelMarchioHaIlSuoContorno"/>): i figli si misurano dai
+        ''' loro bordi, che esistono anche su una finestra mai mostrata, invece che dai
+        ''' pixel, che non esistono.</para>
+        ''' <para><b>Perché due modalità e non una.</b> Il pannello si dispone in due modi
+        ''' — pieno e compatto — e i due non riguardano gli stessi controlli: in compatto
+        ''' restano lo stemma rimpicciolito e la sola riga della versione, e nome e
+        ''' copyright si nascondono. Provare una modalità sola vuol dire non guardare le
+        ''' due etichette che l'altra dispone. La larghezza che sceglie la modalità si
+        ''' misura in unità di progetto, cioè scalata col DPI: 4000 pixel sono modalità
+        ''' piena fino al 280%, 900 sono compatta sempre. Un numero al limite avrebbe
+        ''' collaudato una cosa diversa sulla macchina del tutor.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub NessunaScrittaVaSopraIlContorno()
+
+            Using form As New FormPrincipale()
+
+                ' Piena: ci stanno tutte e tre le scritte.
+                ControllaIlRientro(form, 4000, {"lblMarchio", "lblVersione", "lblCopyright"})
+
+                ' Compatta: il pannello si stringe e dispone la sola riga della versione.
+                ControllaIlRientro(form, 900, {"lblVersione"})
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Porta la finestra alla larghezza chiesta e verifica che le scritte indicate
+        ''' stiano dentro il pannello del logo, lasciando libero il pixel del contorno.
+        ''' </summary>
+        Private Shared Sub ControllaIlRientro(form As Form, larghezza As Integer, scritte As String())
+
+            form.ClientSize = New Size(larghezza, 800)
+
+            Dim pannello As Control =
+                form.Controls.Find("pnlLogo", searchAllChildren:=True).Single()
+
+            For Each nome As String In scritte
+
+                Dim scritta As Control =
+                    pannello.Controls.Find(nome, searchAllChildren:=False).Single()
+
+                Assert.IsGreaterThanOrEqualTo(1, scritta.Left,
+                    $"a {larghezza} px «{nome}» arriva sul filo di sinistra")
+                Assert.IsLessThanOrEqualTo(pannello.Width - 1, scritta.Right,
+                    $"a {larghezza} px «{nome}» arriva sul filo di destra")
+                Assert.IsGreaterThanOrEqualTo(1, scritta.Top,
+                    $"a {larghezza} px «{nome}» arriva sul filo di sopra")
+                Assert.IsLessThanOrEqualTo(pannello.Height - 1, scritta.Bottom,
+                    $"a {larghezza} px «{nome}» arriva sul filo di sotto")
+
+            Next
+
+        End Sub
+
+        ''' <summary>
+        ''' Il rapporto di contrasto WCAG fra due colori: 1 se sono identici, 21 fra
+        ''' bianco e nero. Sotto 4,5 un testo piccolo non si legge.
+        ''' </summary>
+        Private Shared Function Contrasto(uno As Color, altro As Color) As Double
+
+            Dim a As Double = Luminanza(uno)
+            Dim b As Double = Luminanza(altro)
+
+            Return (Math.Max(a, b) + 0.05) / (Math.Min(a, b) + 0.05)
+
+        End Function
+
+        ''' <summary>La luminanza relativa di un colore, come la definisce WCAG 2.</summary>
+        Private Shared Function Luminanza(colore As Color) As Double
+
+            Return 0.2126 * Canale(colore.R) +
+                   0.7152 * Canale(colore.G) +
+                   0.0722 * Canale(colore.B)
+
+        End Function
+
+        ''' <summary>Un canale da 0-255 portato in luce lineare.</summary>
+        Private Shared Function Canale(valore As Byte) As Double
+
+            Dim c As Double = valore / 255.0
+
+            Return If(c <= 0.03928, c / 12.92, Math.Pow((c + 0.055) / 1.055, 2.4))
+
+        End Function
 
         <TestMethod>
         Public Sub LaSchermataDiAvvioEDentroLEseguibile()

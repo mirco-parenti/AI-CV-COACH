@@ -25,6 +25,21 @@ Namespace Ui
     <TestClass>
     Public Class CollaudiPannelloRicerca
 
+        ''' <summary>
+        ''' Il nome con cui l'utente vede, in barra, il pannello dove si incolla un
+        ''' annuncio a mano.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il pannello P3 manda lì l'utente in quattro messaggi diversi — quando manca
+        ''' WebView2, quando il browser non parte, quando una pagina non si lascia
+        ''' leggere, quando l'annuncio era già stato catturato — e un nome sbagliato in
+        ''' un messaggio è un utente che cerca un bottone che non esiste. Il 2026-08-30
+        ''' quel bottone è passato da «📋 Candidatura» a questo nome, e sono stati questi
+        ''' due collaudi ad accorgersene: è il motivo per cui l'atteso sta scritto qui
+        ''' una volta sola invece che due.
+        ''' </remarks>
+        Private Const NomeDelConfronto As String = "Confronta ⭐ ANNUNCIO - CV"
+
         ' ==================================================================
         ' I menù e lo stato d'ingresso
         ' ==================================================================
@@ -321,7 +336,7 @@ Namespace Ui
                     Assert.AreEqual(1, lettore.Letture, "ci ha provato")
 
                     ' Il ripiego onesto: il testo si può sempre incollare a mano in P4.
-                    Assert.Contains("Candidatura", Etichetta(pannello, "lblStatoRicerca").Text)
+                    Assert.Contains(NomeDelConfronto, Etichetta(pannello, "lblStatoRicerca").Text)
 
                 End Function)
 
@@ -381,6 +396,55 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function LaPaginaConLElencoLoDiceInUnaFinestra() As Task
+
+            ' Una pagina-risultati come la restituisce un portale: trenta annunci di fila,
+            ' righe corte, le parole-spia ripetute a ogni voce.
+            Dim righe As New List(Of String)
+            For i As Integer = 1 To 30
+                righe.AddRange({$"Magazziniere addetto al carico {i}",
+                                "Logistica Bianchi s.r.l. - Sestri Levante",
+                                $"{i} giorni fa",
+                                "Candidati"})
+            Next
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {
+                    .Titolo = "Offerte di lavoro magazziniere | Indeed",
+                    .Indirizzo = "https://it.indeed.com/jobs?q=magazziniere",
+                    .Testo = String.Join(vbLf, righe)}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Dim consegnato As Boolean = False
+                    AddHandler pannello.AnnuncioCatturato, Sub(mittente, argomenti) consegnato = True
+
+                    Dim finestre As New List(Of String)
+
+                    Await pannello.CatturaAsync(Sub(testo) finestre.Add(testo))
+
+                    Assert.IsFalse(consegnato, "un elenco non è un annuncio: non si consegna")
+
+                    ' Il punto del collaudo. Prima l'avviso viveva solo nella riga grigia in
+                    ' fondo, che è alta due righe e lo tagliava a metà: si vedeva il problema
+                    ' e non la via d'uscita. Ora esce in una finestra che si deve chiudere.
+                    Assert.HasCount(1, finestre, "una finestra, e una sola")
+                    Assert.Contains("nuova finestra", finestre(0),
+                                    "e dice come aprire il singolo annuncio")
+                    Assert.Contains("Cattura annuncio", finestre(0), "e cosa fare dopo averlo aperto")
+                    Assert.Contains("selezion", finestre(0), "più l'altra strada, quella della selezione")
+
+                    ' Nella riga grigia resta la traccia, corta abbastanza da entrarci.
+                    Dim riga As String = Etichetta(pannello, "lblStatoRicerca").Text
+                    Assert.Contains("elenco degli annunci", riga, "la riga grigia dice cos'è successo")
+                    Assert.IsLessThan(200, riga.Length, "ma corta: nelle due righe che ha ci deve stare")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Async Function UnAnnuncioGiaCatturatoNonSiRianalizza() As Task
 
             Dim lettore As New LettorePaginaFinto With {
@@ -410,7 +474,7 @@ Namespace Ui
                     ' Ma si dice dov'è la prima, e come rifarla se è quello che si vuole.
                     Dim detto As String = Etichetta(pannello, "lblStatoRicerca").Text
                     Assert.Contains("già catturato", detto)
-                    Assert.Contains("Candidatura", detto)
+                    Assert.Contains(NomeDelConfronto, detto)
 
                 End Function)
 

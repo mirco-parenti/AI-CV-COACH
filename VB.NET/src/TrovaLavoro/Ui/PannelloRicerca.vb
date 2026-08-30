@@ -207,7 +207,7 @@ Public Class PannelloRicerca
         Catch ex As ErroreBrowser When ex.MotoreAssente
             FuoriUso("Per cercare gli annunci serve il componente WebView2 di Windows, che su " &
                      "questo computer non c'è. Puoi comunque incollare il testo di un annuncio " &
-                     "nel pannello Candidatura.")
+                     "nel pannello «Confronta ⭐ ANNUNCIO - CV».")
             Return
 
         Catch ex As Exception
@@ -220,7 +220,7 @@ Public Class PannelloRicerca
             ' guasto. Restringerla qui non darebbe all'utente una parola in più: gli
             ' toglierebbe il ripiego, che è la sola cosa che gli serve.
             FuoriUso($"Il browser integrato non si è avviato ({ex.Message}). Puoi comunque " &
-                     "incollare il testo di un annuncio nel pannello Candidatura.")
+                     "incollare il testo di un annuncio nel pannello «Confronta ⭐ ANNUNCIO - CV».")
             Return
 
         End Try
@@ -498,12 +498,20 @@ Public Class PannelloRicerca
     ''' controlla è che una pagina da mandare ci sia — perché mandare il nulla costerebbe
     ''' un'attesa e una chiamata per sentirsi dire quel che si sapeva già.</para>
     ''' </remarks>
-    Public Async Function CatturaAsync() As Task
+    ''' <param name="avvisa">
+    ''' Come si dice all'utente una cosa che <b>non deve</b> potersi perdere. Se non si
+    ''' passa niente è una finestra a comparsa vera, che va chiusa; il banco ne passa una
+    ''' finta e legge quel che avrebbe detto. Esiste per la stessa ragione del
+    ''' <c>confermaSostituzione</c> di P6: dentro una finestra modale il banco non può
+    ''' entrare, e un <c>MessageBox</c> su una via che i collaudi percorrono li appende
+    ''' invece di farli fallire — cioè il modo peggiore di rompersi, perché non lo dice.
+    ''' </param>
+    Public Async Function CatturaAsync(Optional avvisa As Action(Of String) = Nothing) As Task
 
         ' Una pagina che non si lascia leggere non è un crash: è un annuncio che si potrà
         ' sempre incollare a mano in Candidatura.
         Dim pagina As PaginaLetta = Await LeggiLaPaginaAsync(
-            "Puoi copiarne il testo e incollarlo nel pannello Candidatura.",
+            "Puoi copiarne il testo e incollarlo nel pannello «Confronta ⭐ ANNUNCIO - CV».",
             scorrendo:=False).ConfigureAwait(True)
         If pagina Is Nothing Then Return
 
@@ -520,14 +528,30 @@ Public Class PannelloRicerca
         ' altri. Il guaio non era l'analisi sbagliata — era che nessuno lo diceva: usciva un
         ' punteggio in stelle su un'accozzaglia di decine di offerte, e sembrava funzionare.
         ' Chi ha selezionato il testo a mano è già stato esplicito, e non lo si contraddice.
+        '
+        ' Dal 2026-08-30 non basta più scriverlo nella riga grigia in fondo al pannello.
+        ' Quella riga è alta due righe scarse e questo avviso ne chiede sei: arrivava
+        ' tagliato, e la parte che si perdeva era proprio quella che dice come uscirne.
+        ' Un avviso che non entra dove lo si scrive è un avviso che non è stato dato.
+        ' Ora il testo intero sta in una finestra che si deve chiudere, e nella riga grigia
+        ' resta la versione corta, come traccia di quel che è appena successo.
         If Not pagina.DaSelezione AndAlso LettorePagina.SembraUnaPaginaDiRisultati(testo) Then
-            Racconta("Questa sembra la pagina con l'elenco degli annunci, non un annuncio " &
-                     "solo: leggendola tutta metterei insieme decine di offerte diverse, e il " &
-                     "punteggio in stelle non vorrebbe dire niente. Due modi per andare " &
-                     "avanti: apri l'annuncio che ti interessa e premi di nuovo, oppure " &
-                     "selezionane il testo qui con il mouse — se trovo una selezione, leggo " &
-                     "quella e basta.")
+
+            Racconta("Questa è la pagina con l'elenco degli annunci, non un annuncio solo: " &
+                     "apri il singolo annuncio e premi di nuovo.")
+
+            AvvisaLUtente(avvisa,
+                "Questa sembra la pagina con l'elenco degli annunci, non un annuncio solo: " &
+                "leggendola tutta metterei insieme decine di offerte diverse, e il punteggio " &
+                "in stelle non vorrebbe dire niente." & vbLf & vbLf &
+                "Apri l'annuncio che ti interessa: clic destro sul suo titolo, poi " &
+                "«Apri collegamento in una nuova finestra» — si apre qui dentro, da solo. " &
+                "Quando lo vedi, premi di nuovo «Cattura annuncio»." & vbLf & vbLf &
+                "Oppure selezionane il testo qui con il mouse: se trovo una selezione, leggo " &
+                "quella e basta.")
+
             Return
+
         End If
 
         ' Premere due volte sulla stessa pagina non deve produrre due candidature
@@ -536,7 +560,7 @@ Public Class PannelloRicerca
         Dim gia As String = GiaCatturato(pagina.Indirizzo)
         If gia IsNot Nothing Then
             Racconta($"Questo annuncio l'avevi già catturato: è fra le tue opportunità, in «{gia}». " &
-                     "Per rileggerlo da capo, incolla il testo nel pannello Candidatura.")
+                     "Per rileggerlo da capo, incolla il testo nel pannello «Confronta ⭐ ANNUNCIO - CV».")
             Return
         End If
 
@@ -847,6 +871,30 @@ Public Class PannelloRicerca
     ''' <summary>La riga di stato del pannello; <c>Nothing</c> la svuota.</summary>
     Private Sub Racconta(testo As String)
         lblStatoRicerca.Text = If(testo, String.Empty)
+    End Sub
+
+    ''' <summary>
+    ''' Dice all'utente una cosa che non deve potersi perdere: una finestra a comparsa
+    ''' vera, oppure quella che il chiamante ha portato al suo posto.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Il titolo è «Ricerca», lo stesso dell'altra finestra che nasce in questo
+    ''' pannello: due domande che vengono dallo stesso posto si presentano con lo stesso
+    ''' nome.</para>
+    ''' <para><b>Non sostituisce <see cref="Racconta"/>, lo accompagna</b>: la riga grigia
+    ''' è il registro di quel che il pannello ha fatto e resta lì da rileggere; la finestra
+    ''' è l'unico modo di essere certi che una cosa sia stata letta. Sono due mestieri
+    ''' diversi, e per questo il testo lungo va in una e quello corto nell'altra.</para>
+    ''' </remarks>
+    Private Shared Sub AvvisaLUtente(comeAvvisare As Action(Of String), testo As String)
+
+        If comeAvvisare IsNot Nothing Then
+            comeAvvisare(testo)
+            Return
+        End If
+
+        MessageBox.Show(testo, "Ricerca", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+
     End Sub
 
     ''' <summary>

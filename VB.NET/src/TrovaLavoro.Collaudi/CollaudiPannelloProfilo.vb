@@ -97,9 +97,16 @@ Namespace Ui
                 Dim schede As TabControl = DirectCast(
                     pannello.Controls.Find("tabSezioni", searchAllChildren:=True).Single(), TabControl)
 
-                Assert.HasCount(4, schede.TabPages, "le quattro sezioni del profilo")
+                Assert.HasCount(5, schede.TabPages,
+                                "le quattro sezioni del profilo, più il 📄 CV base che ne discende")
                 Assert.IsFalse(schede.TabPages.Cast(Of TabPage)().Any(Function(s) s.Name = "tabTestoLetto"),
                                "e non la scheda del testo letto")
+
+                ' La scheda del CV base c'è invece sempre, anche a profilo vuoto: non
+                ' promette un documento che non c'è, mostra il profilo nella forma di un
+                ' CV — e un profilo vuoto dà un CV vuoto, che è la risposta giusta.
+                Assert.IsTrue(schede.TabPages.Cast(Of TabPage)().Any(Function(s) s.Name = "tabCvBase"),
+                              "il 📄 CV base non aspetta un import per esserci")
             End Using
         End Sub
 
