@@ -124,6 +124,44 @@ pagina-lista e fermarsi, e di catturare la **selezione** quando c'è; la scelta 
 sottoalbero più «articolo» per densità di testo resta fuori dalla 1.0, perché cambierebbe
 la cattura su tutti i portali e andrebbe misurata su ciascuno.
 
+*E il rifiuto, a sua volta, era diventato un **vicolo cieco*** *(2026-08-30, segnalato da
+Mirco sull'uso vero)*. Il giudizio di R5 guarda la **forma** del testo — righe corte, nessun
+paragrafo lungo, parole di servizio ripetute — e su Indeed **anche un annuncio aperto da solo
+ha quella forma**: è fatto di elenchi puntati, e in coda porta «Candidati» e i lavori simili
+coi loro «giorni fa». Così chi seguiva il consiglio dell'avviso — clic destro, «Apri
+collegamento in una nuova finestra», ripremi «Cattura annuncio» — si vedeva tornare lo stesso
+avviso, parola per parola, all'infinito: il consiglio era giusto e il verdetto non cambiava.
+L'unica uscita rimasta era selezionare il testo col mouse, che l'avviso dice per ultima e che
+nessuno legge quando ha appena fatto quel che gli era stato chiesto.
+
+La cura è che **l'indirizzo parla prima del testo**. Se l'URL è quello della pagina di un
+singolo annuncio — `it.indeed.com/viewjob?jk=…`, `jooble.org/desc/…`, un `.htm` di Subito,
+`linkedin.com/jobs/view/…` — il giudizio sulla forma non si applica affatto: non perché sia
+sbagliato, ma perché sta rispondendo a una domanda a cui l'indirizzo ha già risposto meglio.
+Quel sapere non era nuovo: che `jobs?q=` cerchi e `viewjob?jk=` sia l'annuncio stava scritto
+in `Ricerche.FonteDi` da T5 — semplicemente la cattura non lo guardava.
+
+Due limiti dichiarati. È **conoscenza che invecchia**: un portale può cambiare i suoi
+indirizzi domani, e allora il segno smette di riconoscersi — ma non rompe niente, si torna
+esattamente al giudizio sul testo di prima. E vale per **quattro portali**, non per il mondo:
+fuori di lì decide il testo, con il rifiuto di R5 così com'è. *Deciso con Mirco lo stesso
+giorno, scartando l'alternativa — trasformare l'avviso in una domanda a due uscite («leggila
+lo stesso» / «annulla»), che avrebbe tolto il vicolo cieco ovunque ma riaperto la porta al
+difetto che R5 era nato per chiudere: stelle su un'accozzaglia di offerte, stavolta con il
+permesso dell'utente.*
+
+*E la cura ha avuto il suo difetto, trovato provandola dal vivo la sera stessa.* Il primo
+segno scritto per Indeed era `jk=` nudo. Ma la **pagina di ricerca** di Indeed, appena si
+clicca un risultato, diventa `jobs?q=…&`**`vjk`**`=…` — *viewed job key*, l'annuncio mostrato
+nel riquadro di destra — e `vjk=` contiene `jk=`: la lista passava per un annuncio, e la
+cattura ci prendeva dentro tutte e venticinque le offerte. Cioè **esattamente il difetto che
+R5 era nato per chiudere, riaperto dalla sua cura**, e su un portale solo — quello da cui
+tutta questa storia era partita. Il banco non poteva vederlo: i suoi indirizzi di prova erano
+`viewjob?jk=…` puliti, scritti da chi già sapeva come devono venire. L'ha visto la prova a
+video, in cinque minuti, guardando la casella dell'indirizzo. Adesso il segno buono è il
+**percorso** `/viewjob`, e il parametro vale solo dove un parametro comincia davvero — `?jk=`
+o `&jk=` — con l'indirizzo vero della prova finito nei collaudi.
+
 Due cose che il programma **non** fa, e sono decisioni:
 - **non indovina** se la pagina sia un elenco. A dirlo è l'analisi, con lo schema vuoto;
   l'unica cosa che si controlla prima è che una pagina da mandare ci sia — sotto un

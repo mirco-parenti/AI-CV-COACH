@@ -1,4 +1,4 @@
-Imports System.Drawing
+﻿Imports System.Drawing
 Imports System.Linq
 Imports System.Threading.Tasks
 Imports System.Windows.Forms
@@ -535,7 +535,16 @@ Public Class PannelloRicerca
         ' Un avviso che non entra dove lo si scrive è un avviso che non è stato dato.
         ' Ora il testo intero sta in una finestra che si deve chiudere, e nella riga grigia
         ' resta la versione corta, come traccia di quel che è appena successo.
-        If Not pagina.DaSelezione AndAlso LettorePagina.SembraUnaPaginaDiRisultati(testo) Then
+        '
+        ' Dal 2026-08-30 il giudizio sul testo non si applica quando l'INDIRIZZO dice già
+        ' che siamo sulla pagina di un annuncio solo. Il guasto che chiude: su Indeed un
+        ' annuncio aperto da solo ha la stessa forma di una lista — righe corte, «Candidati»
+        ' e i «giorni fa» dei lavori simili in coda — e veniva rifiutato con il consiglio di
+        ' fare quel che l'utente aveva appena fatto. Il messaggio tornava identico a ogni
+        ' tentativo: un vicolo cieco, con la sola uscita di selezionare il testo a mano.
+        If Not pagina.DaSelezione AndAlso
+           Not LettorePagina.SembraLaPaginaDiUnAnnuncio(pagina.Indirizzo) AndAlso
+           LettorePagina.SembraUnaPaginaDiRisultati(testo) Then
 
             Racconta("Questa è la pagina con l'elenco degli annunci, non un annuncio solo: " &
                      "apri il singolo annuncio e premi di nuovo.")

@@ -584,6 +584,41 @@ Namespace Ui
 
         End Sub
 
+
+        ''' <summary>
+        ''' Ogni comando del pannello dice per intero il proprio nome.
+        ''' </summary>
+        ''' <remarks>
+        ''' Nato il 2026-08-30, quando «Nuovo annuncio» è diventato «Incolla annuncio
+        ''' manualmente»: settantasei pixel di testo in più su un bottone largo 130. Un
+        ''' Button non manda a capo e non mette i puntini — taglia, e l'unico segno è mezza
+        ''' parola mancante a video. La fascia dei comandi manda a capo la fila se i bottoni
+        ''' non ci stanno in larghezza, quindi allargarne uno non rovina la disposizione: è
+        ''' il testo dentro il bottone a doverci stare, e qui si misura.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniComandoDiceIlProprioNomePerIntero()
+
+            Using pannello As New PannelloOpportunita()
+
+                Dim comandi As Button() = Riquadro(pannello, "pnlAzioni").
+                    Controls.OfType(Of Button)().ToArray()
+
+                Assert.IsGreaterThan(0, comandi.Length, "la fascia dei comandi non è vuota")
+
+                For Each comando As Button In comandi
+
+                    Assert.IsLessThanOrEqualTo(
+                        comando.Width,
+                        TextRenderer.MeasureText(comando.Text, comando.Font).Width,
+                        $"«{comando.Text}» non ci sta nel suo bottone")
+
+                Next
+
+            End Using
+
+        End Sub
+
         ' ==================================================================
         ' Il banco
         ' ==================================================================

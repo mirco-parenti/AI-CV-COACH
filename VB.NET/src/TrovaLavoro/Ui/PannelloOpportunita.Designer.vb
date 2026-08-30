@@ -1,4 +1,4 @@
-<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class PannelloOpportunita
     Inherits System.Windows.Forms.UserControl
 
@@ -351,9 +351,9 @@ Partial Class PannelloOpportunita
         '
         Me.btnNuovoAnnuncio.Location = New System.Drawing.Point(0, 18)
         Me.btnNuovoAnnuncio.Name = "btnNuovoAnnuncio"
-        Me.btnNuovoAnnuncio.Size = New System.Drawing.Size(130, 32)
+        Me.btnNuovoAnnuncio.Size = New System.Drawing.Size(200, 32)
         Me.btnNuovoAnnuncio.TabIndex = 0
-        Me.btnNuovoAnnuncio.Text = "Nuovo annuncio"
+        Me.btnNuovoAnnuncio.Text = "Incolla annuncio manualmente"
         '
         'btnBrainstorm
         '

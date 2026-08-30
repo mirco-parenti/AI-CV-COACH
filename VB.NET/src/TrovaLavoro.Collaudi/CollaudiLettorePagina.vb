@@ -1,4 +1,4 @@
-Imports System.Drawing
+﻿Imports System.Drawing
 Imports System.IO
 Imports System.Threading
 Imports System.Threading.Tasks
@@ -271,6 +271,62 @@ Namespace Web
                            "e il vuoto non è una lista")
             Assert.IsFalse(LettorePagina.SembraUnaPaginaDiRisultati(Nothing),
                            "né lo è il niente")
+
+        End Sub
+
+        ''' <summary>
+        ''' L'indirizzo di un annuncio si distingue da quello di una ricerca, sui portali
+        ''' che il programma conosce.
+        ''' </summary>
+        ''' <remarks>
+        ''' Nato il 2026-08-30 dal vicolo cieco della cattura: su Indeed un annuncio aperto
+        ''' da solo ha la forma di una lista, e il giudizio sul testo lo rifiutava
+        ''' consigliando di fare quel che l'utente aveva appena fatto. Questi sono i segni
+        ''' che gli danno ragione prima che quel giudizio parli.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub UnIndirizzoDiAnnuncioSiDistingueDaUnoDiRicerca()
+
+            Dim annunci As String() = {
+                "https://it.indeed.com/viewjob?jk=9f3a1c",
+                "https://it.indeed.com/m/viewjob?jk=9f3a1c&from=serp",
+                "https://it.jooble.org/desc/1234567890",
+                "https://www.subito.it/offerte-lavoro/magazziniere-genova-123456.htm",
+                "https://www.linkedin.com/jobs/view/4012345678/"}
+
+            For Each indirizzo As String In annunci
+                Assert.IsTrue(LettorePagina.SembraLaPaginaDiUnAnnuncio(indirizzo),
+                              $"«{indirizzo}» è la pagina di un annuncio solo")
+            Next
+
+            Dim ricerche As String() = {
+                "https://it.indeed.com/jobs?q=magazziniere&l=Genova",
+                "https://it.jooble.org/SearchResult?ukw=magazziniere",
+                "https://www.subito.it/annunci-italia/vendita/offerte-lavoro/?q=magazziniere",
+                "https://www.linkedin.com/jobs/search/?keywords=magazziniere"}
+
+            For Each indirizzo As String In ricerche
+                Assert.IsFalse(LettorePagina.SembraLaPaginaDiUnAnnuncio(indirizzo),
+                               $"«{indirizzo}» è una pagina di risultati")
+            Next
+
+            ' Il caso preso dal vivo il 2026-08-30, e il motivo per cui i segni sono
+            ' delimitati: cliccando un risultato, la pagina di RICERCA di Indeed si porta
+            ' dietro «vjk=» — l'annuncio mostrato nel riquadro di destra — e «vjk=»
+            ' contiene «jk=». Con il segno nudo la lista passava per un annuncio, e la
+            ' cattura si riprendeva dentro tutte le offerte della pagina.
+            Assert.IsFalse(
+                LettorePagina.SembraLaPaginaDiUnAnnuncio(
+                    "https://it.indeed.com/jobs?q=magazziniere&l=Genova&vjk=02e9c34d08f1f31d"),
+                "la ricerca con un annuncio in anteprima resta una ricerca")
+
+            ' Fuori dai portali conosciuti non si indovina: decide il testo, come prima.
+            Assert.IsFalse(LettorePagina.SembraLaPaginaDiUnAnnuncio("https://www.azienda.it/lavora-con-noi/magazziniere"),
+                           "un sito qualunque non si giudica dall'indirizzo")
+            Assert.IsFalse(LettorePagina.SembraLaPaginaDiUnAnnuncio("non è un indirizzo"),
+                           "e quel che non è un indirizzo non è un annuncio")
+            Assert.IsFalse(LettorePagina.SembraLaPaginaDiUnAnnuncio(Nothing),
+                           "nemmeno il nulla")
 
         End Sub
 

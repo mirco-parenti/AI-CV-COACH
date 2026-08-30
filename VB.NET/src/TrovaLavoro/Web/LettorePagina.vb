@@ -161,6 +161,86 @@ Namespace Web
 
         End Function
 
+        ''' <summary>
+        ''' Le forme con cui i portali che conosciamo scrivono l'indirizzo di <b>un</b>
+        ''' annuncio, distinte da quelle delle loro pagine di ricerca.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È conoscenza che invecchia — un portale può cambiare i suoi indirizzi
+        ''' domani — e per questo sta scritta in un posto solo e non decide mai da sola: se
+        ''' il segno non si riconosce più, si torna esattamente al comportamento di prima,
+        ''' cioè al giudizio sul testo. Un pattern che invecchia qui non rompe niente:
+        ''' smette di aiutare.</para>
+        ''' <para><b>I segni sono delimitati apposta.</b> Il primo che scrissi per Indeed
+        ''' era <c>jk=</c> nudo, e nella prova dal vivo dello stesso giorno si è visto cosa
+        ''' vuol dire: la <b>pagina di ricerca</b> di Indeed, quando si clicca un risultato,
+        ''' diventa <c>jobs?q=…&amp;<b>vjk</b>=…</c> — «viewed job key», l'annuncio mostrato
+        ''' nel riquadro di destra — e <c>vjk=</c> contiene <c>jk=</c>. La lista veniva
+        ''' scambiata per un annuncio, e la cattura ci prendeva dentro tutte e venticinque
+        ''' le offerte: cioè esattamente il difetto (R5) che l'avviso era nato per fermare,
+        ''' riaperto dalla cura. Il segno buono è il <b>percorso</b> <c>/viewjob</c>, che è
+        ''' la pagina dell'annuncio da solo; il parametro vale solo se comincia davvero lì
+        ''' dove un parametro comincia, <c>?jk=</c> o <c>&amp;jk=</c>.</para>
+        ''' </remarks>
+        Private Shared ReadOnly SegniDiUnAnnuncio As New Dictionary(Of String, String()) From {
+            {"indeed.", {"/viewjob", "?jk=", "&jk="}},
+            {"jooble.", {"/desc/", "/jdp/"}},
+            {"subito.it", {".htm"}},
+            {"linkedin.", {"/jobs/view/"}}
+        }
+
+        ''' <summary>
+        ''' Se l'<b>indirizzo</b> è quello della pagina di un singolo annuncio, e non di un
+        ''' elenco di offerte.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Nasce il 2026-08-30 da un guasto vero, e da un vicolo cieco. Il giudizio
+        ''' sul testo (<see cref="SembraUnaPaginaDiRisultati"/>) guarda la <i>forma</i> della
+        ''' pagina: righe corte, nessun paragrafo lungo, parole di servizio ripetute. Un
+        ''' annuncio di Indeed aperto <b>da solo</b> ha esattamente quella forma — è fatto di
+        ''' elenchi puntati, e in coda porta «Candidati» e i lavori simili col loro «giorni
+        ''' fa» — e finiva scambiato per la lista da cui l'utente era appena uscito. Il
+        ''' consiglio che gli si dava («apri il singolo annuncio e premi di nuovo») era
+        ''' quello che aveva già fatto: il messaggio tornava identico, e l'unica uscita
+        ''' rimasta era selezionare il testo col mouse.</para>
+        ''' <para><b>L'indirizzo è un segno più forte del testo</b>, e lo era già: che
+        ''' <c>it.indeed.com/jobs?q=…</c> cerchi e <c>it.indeed.com/viewjob?jk=…</c> sia
+        ''' l'annuncio stava scritto in <c>Ricerche.FonteDi</c> da T5, ma la cattura non lo
+        ''' guardava. Quando l'indirizzo dice «questo è un annuncio», il giudizio sul testo
+        ''' non si applica: non perché sia sbagliato, ma perché sta rispondendo a una
+        ''' domanda a cui qualcuno ha già risposto meglio.</para>
+        ''' <para>Non riconosce tutti i portali del mondo, e non ci prova: fuori da questi
+        ''' quattro resta il giudizio sul testo, com'era.</para>
+        ''' </remarks>
+        Public Shared Function SembraLaPaginaDiUnAnnuncio(indirizzo As String) As Boolean
+
+            Dim letto As Uri = Nothing
+            If String.IsNullOrWhiteSpace(indirizzo) OrElse
+               Not Uri.TryCreate(indirizzo.Trim(), UriKind.Absolute, letto) Then Return False
+
+            Dim sito As String = letto.Host.ToLowerInvariant()
+
+            ' Percorso e parametri insieme: «/viewjob» sta nel primo, «jk=» nei secondi, e
+            ' un portale può spostare un annuncio dall'uno agli altri senza avvisare.
+            Dim resto As String = (letto.AbsolutePath & letto.Query).ToLowerInvariant()
+
+            For Each portale As KeyValuePair(Of String, String()) In SegniDiUnAnnuncio
+
+                If Not sito.Contains(portale.Key) Then Continue For
+
+                For Each segno As String In portale.Value
+                    If resto.Contains(segno) Then Return True
+                Next
+
+                ' Sito conosciuto ma nessun segno: è una sua pagina che annuncio non è.
+                Return False
+
+            Next
+
+            Return False
+
+        End Function
+
         ''' <summary>Quante volte una parola compare in un testo già in minuscolo.</summary>
         Private Shared Function Ripetizioni(testo As String, parola As String) As Integer
 

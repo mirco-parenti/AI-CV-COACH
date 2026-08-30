@@ -1,4 +1,4 @@
-Imports System.IO
+﻿Imports System.IO
 Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports System.Threading.Tasks
@@ -398,19 +398,11 @@ Namespace Ui
 
             ' Una pagina-risultati come la restituisce un portale: trenta annunci di fila,
             ' righe corte, le parole-spia ripetute a ogni voce.
-            Dim righe As New List(Of String)
-            For i As Integer = 1 To 30
-                righe.AddRange({$"Magazziniere addetto al carico {i}",
-                                "Logistica Bianchi s.r.l. - Sestri Levante",
-                                $"{i} giorni fa",
-                                "Candidati"})
-            Next
-
             Dim lettore As New LettorePaginaFinto With {
                 .Pagina = New PaginaLetta With {
                     .Titolo = "Offerte di lavoro magazziniere | Indeed",
                     .Indirizzo = "https://it.indeed.com/jobs?q=magazziniere",
-                    .Testo = String.Join(vbLf, righe)}}
+                    .Testo = TestoDiUnaLista()}}
 
             Await ConPannelloAsync(lettore,
                 Async Function(pannello, contesto, cartella) As Task
@@ -437,6 +429,49 @@ Namespace Ui
                     Dim riga As String = Etichetta(pannello, "lblStatoRicerca").Text
                     Assert.Contains("elenco degli annunci", riga, "la riga grigia dice cos'è successo")
                     Assert.IsLessThan(200, riga.Length, "ma corta: nelle due righe che ha ci deve stare")
+
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Sulla pagina di un annuncio solo la cattura non si ferma, nemmeno se il testo
+        ''' ha la forma di una lista.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È il vicolo cieco del 2026-08-30, e il collaudo che lo tiene chiuso. Su
+        ''' Indeed un annuncio aperto <b>da solo</b> ha esattamente la forma che il giudizio
+        ''' sul testo chiama «lista»: righe corte di elenco puntato, e in coda «Candidati» e
+        ''' i lavori simili con i loro «giorni fa». La cattura lo rifiutava consigliando di
+        ''' aprire il singolo annuncio — che era quel che l'utente aveva appena fatto — e il
+        ''' messaggio tornava identico a ogni tentativo.</para>
+        ''' <para>Il testo qui è <b>lo stesso</b> del collaudo che vede la lista, riga per
+        ''' riga: cambia solo l'indirizzo. Se cambiasse anche il testo, i due collaudi non
+        ''' direbbero più che è l'indirizzo a decidere — direbbero che due testi diversi
+        ''' finiscono diversamente, che non è la stessa cosa.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function SullaPaginaDiUnAnnuncioLaCatturaNonSiFerma() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {
+                    .Titolo = "Magazziniere - Logistica Bianchi s.r.l. | Indeed",
+                    .Indirizzo = "https://it.indeed.com/viewjob?jk=9f3a1c",
+                    .Testo = TestoDiUnaLista()}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Dim consegnato As String = Nothing
+                    AddHandler pannello.AnnuncioCatturato,
+                        Sub(mittente, argomenti) consegnato = argomenti.Testo
+
+                    Dim finestre As New List(Of String)
+
+                    Await pannello.CatturaAsync(Sub(testo) finestre.Add(testo))
+
+                    Assert.IsEmpty(finestre, "l'indirizzo dice che è un annuncio: niente avviso")
+                    Assert.IsNotNull(consegnato, "e l'annuncio si consegna")
 
                 End Function)
 
@@ -817,6 +852,31 @@ Namespace Ui
         Private Shared Function Menu(pannello As Control, nome As String) As ComboBox
             Return DirectCast(pannello.Controls.Find(nome, searchAllChildren:=True).Single(), ComboBox)
         End Function
+
+        ''' <summary>
+        ''' Il testo di una pagina che <b>sembra</b> una lista: righe corte tutte uguali e
+        ''' le parole di servizio ripetute a ogni voce.
+        ''' </summary>
+        ''' <remarks>
+        ''' Sta qui, e non dentro un collaudo, perché lo condividono i due che si guardano
+        ''' in faccia: quello che sulla pagina-elenco vuole l'avviso, e quello che sulla
+        ''' pagina di un annuncio lo vieta. Con lo stesso testo in mano, l'unica differenza
+        ''' fra i due è l'indirizzo — che è precisamente ciò che si vuole dimostrare.
+        ''' </remarks>
+        Private Shared Function TestoDiUnaLista() As String
+
+            Dim righe As New List(Of String)
+            For i As Integer = 1 To 30
+                righe.AddRange({$"Magazziniere addetto al carico {i}",
+                                "Logistica Bianchi s.r.l. - Sestri Levante",
+                                $"{i} giorni fa",
+                                "Candidati"})
+            Next
+
+            Return String.Join(vbLf, righe)
+
+        End Function
+
 
     End Class
 
