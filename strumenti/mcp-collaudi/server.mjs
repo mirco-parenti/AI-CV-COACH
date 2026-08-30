@@ -398,15 +398,25 @@ const ATTREZZI = [
       "Sceglie una riga in una lista dell'applicazione — la coda delle candidature di P1 — cercandola " +
       "per un pezzo di quello che c'è scritto nelle sue celle, non solo nella prima. Ci clicca sopra " +
       "come farebbe una persona, e poi verifica che risulti davvero scelta. Senza «testo» non sceglie " +
-      "niente: elenca le righe che ci sono, con una freccia su quella di adesso. Con «doppio» fa il " +
-      "doppio clic, che nella coda apre la candidatura. Come «clic», non sceglie al buio: se " +
-      "l'applicazione non viene davanti, o il punto non è suo, dichiara che non ha scelto.",
+      "niente: elenca le righe di **tutte** le liste che vede, con una freccia su quella di adesso. " +
+      "Quando la finestra ne ha più d'una — «Modifica i testi» ha «Nel documento» e «Lasciate fuori» — " +
+      "si dice quale con «lista»; senza, cerca in tutte e agisce solo se il testo combacia in una " +
+      "sola. Con «doppio» fa il doppio clic, che nella coda apre la candidatura. Come «clic», non " +
+      "sceglie al buio: se l'applicazione non viene davanti, se il punto non è suo, o se non sa in " +
+      "quale delle liste premere, dichiara che non ha scelto.",
     inputSchema: {
       type: "object",
       properties: {
         testo: {
           type: "string",
           description: "Un pezzo del contenuto della riga: «Rossi S.p.A.», «magazziniere».",
+        },
+        lista: {
+          type: "string",
+          description:
+            "In quale lista, se la finestra ne ha più d'una: un pezzo del suo nome («Lasciate " +
+            "fuori») oppure il suo numero («2»), contate dall'alto e da sinistra. Con una lista " +
+            "sola non serve; «controlli» le mostra col loro numero.",
         },
         doppio: {
           type: "boolean",
@@ -415,8 +425,8 @@ const ATTREZZI = [
       },
       additionalProperties: false,
     },
-    async esegui({ testo: contenuto, doppio = false }) {
-      return testo(await interfaccia({ azione: "riga", testo: contenuto, doppio }));
+    async esegui({ testo: contenuto, lista, doppio = false }) {
+      return testo(await interfaccia({ azione: "riga", testo: contenuto, lista, doppio }));
     },
   },
 

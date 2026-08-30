@@ -214,15 +214,9 @@ decisa — si toglie e si rimette — e riordinare è un raffinamento in più, n
 
 *Tre dei quattro — il **segno ✎** che non sapeva del disco, la **selezione** che tornava in
 cima e l'**errore criptico** rigenerando la lettera — sono stati curati il 2026-08-24, primo
-lavoro del ramo delle rifiniture prima del giro D, e sono in «Chiuse». Resta il quarto, che è
-un debito dell'attrezzo di collaudo.*
-
-- **`scegli_riga` dello strumento di collaudo tocca solo il primo elenco della finestra.** I
-  due elenchi di «Modifica i testi» sono esposti all'accessibilità come **Table** e non come
-  List, e l'attrezzo prende sempre la prima che trova: la colonna «Lasciate fuori» non si può
-  guidare da lì, e R6 è stato provato a mano. È un debito dell'attrezzo, non del prodotto, ma
-  pesa sul prodotto — quella parte di finestra oggi nessun collaudo automatico la tocca.
-  *(`strumenti/mcp-collaudi/README.md`.)*
+lavoro del ramo delle rifiniture prima del giro D, e sono in «Chiuse». Il quarto — il debito
+dell'attrezzo di collaudo sul secondo elenco della finestra — è stato chiuso il 2026-08-30 ed
+è in «Chiuse» con loro: qui non resta più niente di aperto.*
 
 ## Da questa passata di rifiniture prima del giro D (2026-08-24)
 
@@ -344,6 +338,22 @@ il certificato per la firma) più quella.
   *(`strumenti/mcp-collaudi/interfaccia.ps1`; README dello strumento.)*
 
 ## Chiuse
+
+- ✅ **`scegli_riga` toccava solo il primo elenco della finestra** *(aperta il 2026-08-24 col
+  reperto R6, **chiusa il 2026-08-30**)*. L'attrezzo raccoglieva tutte le liste e poi ne
+  guidava una sola, la prima: in «Modifica i testi» la colonna «Lasciate fuori» era
+  irraggiungibile, e il giro del «Togli →/← Rimetti» era stato provato a mano. Adesso
+  `controlli` numera le liste e `scegli_riga` accetta `lista` — per nome («Lasciate fuori») o
+  per numero —; senza, cerca in tutte e **si ferma** se il testo combacia in più d'una, invece
+  di premere nella prima. Provata dal vivo sull'applicazione vera, su una cartella dati
+  usa-e-getta: il giro completo «Togli →/← Rimetti» guidato dall'attrezzo, andata e ritorno,
+  26 righe → 25 + 1 → 26. Per strada la prova ne ha stanati altri **due**, curati con lei: una
+  riga **oltre la piega** si cliccava dove UI Automation la dichiarava e non dove si vedeva
+  (adesso si porta in vista prima di premere), e un `Pane` comparso accanto alla finestra vera
+  con handle più alto rendeva **ciechi tutti** gli attrezzi (adesso fra le finestre di primo
+  livello si tengono solo le `Window`). Le prime due **falsificate**; la terza no, e sta
+  scritta: il `Pane` era transitorio e non si è saputo riprodurre. *(Tutte e tre nel README
+  dello strumento; diario Step 2.52.)*
 
 - ✅ **Il `clic` che diceva «Premuto» senza aver premuto** *(aperta il 2026-08-27, **chiusa il
   2026-08-29** insegnandogli a rifiutare)*. Adesso `clic`, `scrivi`, `scegli_voce` e

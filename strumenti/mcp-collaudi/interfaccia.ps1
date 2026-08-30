@@ -19,7 +19,9 @@
 #   { "azione": "scegli_file", "annulla": true }
 #   { "azione": "riga",        "testo": "Rossi S.p.A." }        # sceglie una riga di lista
 #   { "azione": "riga",        "testo": "Rossi", "doppio": true }
-#   { "azione": "riga" }                                        # senza «testo»: le elenca
+#   { "azione": "riga",        "testo": "Sommario", "lista": "Lasciate fuori" }   # se le liste sono due
+#   { "azione": "riga",        "lista": 2 }                     # le righe della seconda lista
+#   { "azione": "riga" }                                        # senza «testo»: le elenca tutte
 #   { "azione": "rispondi",    "bottone": "No" }                # finestra di messaggio
 #   { "azione": "rispondi" }                                    # senza: legge e elenca
 #   { "azione": "aspetta",     "nome": "Analizza", "stato": "acceso" }
@@ -209,8 +211,21 @@ $scrivania = [System.Windows.Automation.AutomationElement]::RootElement
 $condizioneProcesso = New-Object System.Windows.Automation.PropertyCondition(
     [System.Windows.Automation.AutomationElement]::ProcessIdProperty, $processo.Id)
 
-$radici = @($scrivania.FindAll($figli, $condizioneProcesso) |
+# Delle finestre del processo si tengono solo le **Window**: il 2026-08-30 accanto alla
+# finestra vera è comparso un `Pane` con un handle più alto, e siccome qui si prende la
+# prima, ogni attrezzo ha risposto «nessun controllo: l'applicazione è aperta?» mentre
+# l'applicazione era aperta e visibile. Un pannello di sistema non ha i comandi che
+# cerchiamo; se un giorno non ci fosse nessuna Window si ripiega su ciò che c'è, che è
+# meglio di un elenco vuoto.
+$diPrimoLivello = @($scrivania.FindAll($figli, $condizioneProcesso))
+
+$radici = @($diPrimoLivello |
+            Where-Object { $_.Current.ControlType.ProgrammaticName -eq "ControlType.Window" } |
             Sort-Object { $_.Current.NativeWindowHandle } -Descending)
+
+if ($radici.Count -eq 0) {
+    $radici = @($diPrimoLivello | Sort-Object { $_.Current.NativeWindowHandle } -Descending)
+}
 
 if ($radici.Count -eq 0) {
     $radici = @([System.Windows.Automation.AutomationElement]::FromHandle($processo.MainWindowHandle))
@@ -570,12 +585,136 @@ function VociDi($menu) {
     return @()
 }
 
+<#
+.SYNOPSIS
+Le liste che l'attrezzo sa guidare, in ordine di lettura: dall'alto, e a pari altezza da sinistra.
+.DESCRIPTION
+Una lista in vista dettagli arriva a UI Automation come **Table**, una semplice come **List**:
+si prendono tutte e due. Restano fuori quelle della pagina aperta dentro P3 (`FrameworkId`
+«Chrome»), che sono di un altro programma e non si guidano da qui.
+
+L'ordine conta, perché è quello con cui le liste si chiamano per numero: lasciarle come
+capita all'albero vorrebbe dire un numero che cambia senza che sia cambiato niente a schermo.
+L'altezza si arrotonda a scaglioni di 20 pixel, altrimenti due liste affiancate ma disallineate
+di un pixel risulterebbero una **sopra** l'altra invece che **a fianco**.
+#>
+function ListeGuidabili {
+
+    $condizioneListe = New-Object System.Windows.Automation.OrCondition(
+        (New-Object System.Windows.Automation.PropertyCondition(
+            [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
+            [System.Windows.Automation.ControlType]::Table)),
+        (New-Object System.Windows.Automation.PropertyCondition(
+            [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
+            [System.Windows.Automation.ControlType]::List)))
+
+    $trovate = @($radice.FindAll($tutti, $condizioneListe) |
+                 Where-Object { -not $_.Current.IsOffscreen -and $_.Current.FrameworkId -ne "Chrome" })
+
+    return @($trovate |
+             Sort-Object @{ Expression = { [math]::Round($_.Current.BoundingRectangle.Y / 20) } },
+                         @{ Expression = { $_.Current.BoundingRectangle.X } })
+}
+
+<#
+.SYNOPSIS
+Le righe di una lista.
+#>
+function RigheDi($lista) {
+
+    return @($lista.FindAll($figli, (New-Object System.Windows.Automation.PropertyCondition(
+        [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
+        [System.Windows.Automation.ControlType]::ListItem))))
+}
+
+<#
+.SYNOPSIS
+Il testo intero di una riga: tutte le sue celle, non solo la prima.
+.DESCRIPTION
+Il `Name` di una riga è la **sola prima colonna**, che nella coda di P1 sono le stelle:
+chiedere «Rossi S.p.A.» fra i nomi delle righe non troverebbe niente, perché in quel campo
+c'è scritto «★☆☆☆☆ 1,0». Le colonne nell'albero sono dei `Text` sotto la riga.
+#>
+function TestoDellaRiga($riga) {
+
+    $celle = @($riga.FindAll($tutti, (New-Object System.Windows.Automation.PropertyCondition(
+        [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
+        [System.Windows.Automation.ControlType]::Text))) | ForEach-Object { $_.Current.Name })
+
+    if ($celle.Count -eq 0) { return $riga.Current.Name }
+    return ($celle -join " · ")
+}
+
+<#
+.SYNOPSIS
+Come si chiama una lista, in una riga sola.
+.DESCRIPTION
+Il nome non c'è sempre — la coda di P1 è una `Table` che di suo non ne ha — e quando c'è
+può essere lunghissimo: in P1 UI Automation le presta il testo del promemoria che le sta
+sopra, tre righe di frase. Si accorcia, perché serve a riconoscerla, non a leggerla.
+#>
+function NomeDellaLista($lista) {
+
+    $suo = [string]$lista.Current.Name
+    if ([string]::IsNullOrWhiteSpace($suo)) { return "(senza nome)" }
+
+    $suo = ($suo -replace '\s+', ' ').Trim()
+    if ($suo.Length -gt 60) { $suo = $suo.Substring(0, 59) + "…" }
+    return $suo
+}
+
+<#
+.SYNOPSIS
+Le liste che ci sono, una per riga, col numero con cui si chiamano.
+#>
+function ElencaLeListe($liste) {
+
+    for ($i = 0; $i -lt $liste.Count; $i++) {
+        Write-Output "  lista $($i + 1): «$(NomeDellaLista $liste[$i])» — $((RigheDi $liste[$i]).Count) righe"
+    }
+}
+
+<#
+.SYNOPSIS
+Le righe di una lista, con una freccia su quella scelta adesso.
+#>
+function RaccontaLeRighe($lista, [int]$numero, [int]$quante) {
+
+    $righe = RigheDi $lista
+
+    if ($quante -gt 1) {
+        Write-Output "Lista ${numero}: «$(NomeDellaLista $lista)» — $($righe.Count) righe:"
+    } else {
+        Write-Output "La lista ha $($righe.Count) righe:"
+    }
+
+    if ($righe.Count -eq 0) {
+        Write-Output "  (vuota)"
+        return
+    }
+
+    foreach ($r in $righe) {
+
+        $suo = $null
+        $eScelta = $false
+        if ($r.TryGetCurrentPattern(
+                [System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$suo)) {
+            $eScelta = $suo.Current.IsSelected
+        }
+
+        $segno = if ($eScelta) { "→" } else { " " }
+        Write-Output "  $segno $(TestoDellaRiga $r)"
+    }
+}
+
 switch ($azione) {
 
     "elenca" {
 
         $condizione = New-Object System.Windows.Automation.PropertyCondition(
             [System.Windows.Automation.AutomationElement]::IsOffscreenProperty, $false)
+
+        $listeGuidabili = ListeGuidabili
 
         foreach ($elemento in $radice.FindAll($tutti, $condizione)) {
 
@@ -588,11 +727,29 @@ switch ($azione) {
             # Una lista in vista dettagli non ha nome — la coda di P1 si chiama «(senza
             # nome)» — e il suo nome non è quel che serve sapere: serve sapere quante righe
             # ha, e che si sceglie con «scegli_riga».
+            #
+            # Quando le liste sono più d'una serve anche il **numero** con cui dire quale,
+            # altrimenti si sa che ce ne sono due e non come chiamarle. La numerazione esce
+            # dalla stessa funzione che usa «scegli_riga», così le due non possono divergere.
             if ($tipo -in @("Table", "List")) {
-                $quante = @($elemento.FindAll($figli, (New-Object System.Windows.Automation.PropertyCondition(
-                    [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
-                    [System.Windows.Automation.ControlType]::ListItem)))).Count
-                $etichetta = "$etichetta — $quante righe (si scelgono con «scegli_riga»)"
+
+                $quante = (RigheDi $elemento).Count
+
+                $numeroDiLista = 0
+                if ($listeGuidabili.Count -gt 1) {
+                    for ($i = 0; $i -lt $listeGuidabili.Count; $i++) {
+                        if ([System.Windows.Automation.Automation]::Compare($listeGuidabili[$i], $elemento)) {
+                            $numeroDiLista = $i + 1
+                            break
+                        }
+                    }
+                }
+
+                if ($numeroDiLista -gt 0) {
+                    $etichetta = "$etichetta — $quante righe (per «scegli_riga» è la lista $numeroDiLista)"
+                } else {
+                    $etichetta = "$etichetta — $quante righe (si scelgono con «scegli_riga»)"
+                }
             }
 
             # Di un menù a tendina l'etichetta non basta: quella non cambia mai, e quel che
@@ -1005,85 +1162,158 @@ switch ($azione) {
     "riga" {
 
         # Una lista in vista dettagli — la coda delle candidature di P1 — UI Automation la
-        # espone come **Table senza nome**, con una ListItem per riga e dentro una Text per
-        # colonna. Il nome della riga è la sola prima colonna: cercare «Rossi S.p.A.» fra i
-        # nomi delle righe non troverebbe niente, perché lì c'è scritto «★☆☆☆☆ 1,0».
-        # Perciò la riga si cerca **nel testo delle sue celle**.
+        # espone come **Table**, con una ListItem per riga e dentro una Text per colonna. Il
+        # nome della riga è la sola prima colonna: cercare «Rossi S.p.A.» fra i nomi delle
+        # righe non troverebbe niente, perché lì c'è scritto «★☆☆☆☆ 1,0». Perciò la riga si
+        # cerca **nel testo delle sue celle** (v. TestoDellaRiga).
+        #
+        # Fino al 2026-08-30 la lista era «la prima che capita»: `$tabelle[0]`, e basta. Di
+        # due elenchi nella stessa finestra ne guidava dunque uno solo — «Modifica i testi»
+        # ne ha due affiancati, «Nel documento» e «Lasciate fuori» — e quello di destra non
+        # si raggiungeva: il giro del «Togli →/← Rimetti» andò provato a mano, e da allora
+        # quella metà di finestra nessun collaudo automatico la toccava. Adesso le liste si
+        # contano tutte, si dicono per nome e si sceglie quale con «lista»; e quando il testo
+        # cercato combacia in più d'una, l'attrezzo si ferma e chiede invece di indovinare —
+        # premere nella lista sbagliata sarebbe lo stesso peccato del clic che diceva
+        # «Premuto» senza aver premuto.
         $voluto = [string]$scelte.testo
+        $quale = [string]$scelte.lista
 
-        $tabelle = @($radice.FindAll($tutti, (New-Object System.Windows.Automation.OrCondition(
-            (New-Object System.Windows.Automation.PropertyCondition(
-                [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
-                [System.Windows.Automation.ControlType]::Table)),
-            (New-Object System.Windows.Automation.PropertyCondition(
-                [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
-                [System.Windows.Automation.ControlType]::List))))) |
-            Where-Object { -not $_.Current.IsOffscreen -and $_.Current.FrameworkId -ne "Chrome" })
+        $liste = ListeGuidabili
 
-        if ($tabelle.Count -eq 0) {
+        if ($liste.Count -eq 0) {
             Write-Output "Nel pannello che si vede adesso non c'è nessuna lista."
             exit 1
         }
 
-        $lista = $tabelle[0]
+        # Se «lista» c'è si risolve prima di tutto: per numero («2») o per un pezzo del suo
+        # nome («Lasciate fuori»). Il numero serve alle liste che un nome non ce l'hanno, e a
+        # quelle il cui nome non è loro: in P1 UI Automation presta alla coda il testo del
+        # promemoria che le sta sopra, che cambia con i giorni.
+        $indiceChiesto = -1
 
-        $condizioneRighe = New-Object System.Windows.Automation.PropertyCondition(
-            [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
-            [System.Windows.Automation.ControlType]::ListItem)
+        if (-not [string]::IsNullOrWhiteSpace($quale)) {
 
-        $righe = @($lista.FindAll($figli, $condizioneRighe))
+            if ($quale.Trim() -match '^\d+$') {
 
-        if ($righe.Count -eq 0) {
-            Write-Output "La lista è vuota: non c'è nessuna riga da scegliere."
-            exit 0
-        }
+                $numero = [int]$quale.Trim()
 
-        # Il testo intero di una riga: il suo nome più tutte le celle.
-        function TestoDellaRiga($riga) {
-            $celle = @($riga.FindAll($tutti, (New-Object System.Windows.Automation.PropertyCondition(
-                [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
-                [System.Windows.Automation.ControlType]::Text))) | ForEach-Object { $_.Current.Name })
+                if ($numero -lt 1 -or $numero -gt $liste.Count) {
+                    Write-Output "Non c'è nessuna lista numero $numero. Ci sono:"
+                    ElencaLeListe $liste
+                    exit 1
+                }
 
-            if ($celle.Count -eq 0) { return $riga.Current.Name }
-            return ($celle -join " · ")
+                $indiceChiesto = $numero - 1
+
+            } else {
+
+                $combacianti = @(0..($liste.Count - 1) |
+                    Where-Object { ([string]$liste[$_].Current.Name) -like "*$quale*" })
+
+                if ($combacianti.Count -eq 0) {
+                    Write-Output "Nessuna lista si chiama «$quale». Ci sono:"
+                    ElencaLeListe $liste
+                    exit 1
+                }
+
+                if ($combacianti.Count -gt 1) {
+                    Write-Output "«$quale» non basta a distinguerle: combacia con più di una lista. Dimmene una sola, o usa il numero. Ci sono:"
+                    ElencaLeListe $liste
+                    exit 1
+                }
+
+                $indiceChiesto = $combacianti[0]
+            }
         }
 
         # Senza «testo» non si sceglie niente: si racconta cosa c'è, con una freccia sulla
-        # riga di adesso. È il gemello di «scegli» sui menù.
+        # riga di adesso. È il gemello di «scegli» sui menù. E si raccontano **tutte** le
+        # liste, non solo la prima: raccontarne una tacendo che ce n'è un'altra è il difetto
+        # che qui si sta curando.
         if ([string]::IsNullOrEmpty($voluto)) {
 
-            Write-Output "La lista ha $($righe.Count) righe:"
-            foreach ($r in $righe) {
-                $suo = $null
-                $scelta = $false
-                if ($r.TryGetCurrentPattern(
-                        [System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$suo)) {
-                    $scelta = $suo.Current.IsSelected
+            if ($indiceChiesto -ge 0) {
+                RaccontaLeRighe $liste[$indiceChiesto] ($indiceChiesto + 1) $liste.Count
+            } else {
+                for ($i = 0; $i -lt $liste.Count; $i++) {
+                    if ($i -gt 0) { Write-Output "" }
+                    RaccontaLeRighe $liste[$i] ($i + 1) $liste.Count
                 }
-                $segno = if ($scelta) { "→" } else { " " }
-                Write-Output "  $segno $(TestoDellaRiga $r)"
             }
+
             exit 0
         }
 
-        $trovata = $righe | Where-Object { (TestoDellaRiga $_) -like "*$voluto*" } | Select-Object -First 1
+        # Con «testo» la riga si cerca in tutte le liste in gioco — una sola, se «lista» lo
+        # dice — e si agisce solo quando combacia in **una**: se combacia in due, quale
+        # premere non lo può decidere l'attrezzo.
+        $daCercare = if ($indiceChiesto -ge 0) { @($indiceChiesto) } else { @(0..($liste.Count - 1)) }
 
-        if (-not $trovata) {
+        $trovate = @()
+
+        foreach ($i in $daCercare) {
+            foreach ($r in (RigheDi $liste[$i])) {
+                if ((TestoDellaRiga $r) -like "*$voluto*") {
+                    $trovate += [pscustomobject]@{ Dove = $i; Riga = $r }
+                    break
+                }
+            }
+        }
+
+        if ($trovate.Count -eq 0) {
             Write-Output "Nessuna riga contiene «$voluto». Ci sono:"
-            foreach ($r in $righe) { Write-Output "  $(TestoDellaRiga $r)" }
+            foreach ($i in $daCercare) {
+                if ($i -ne $daCercare[0]) { Write-Output "" }
+                RaccontaLeRighe $liste[$i] ($i + 1) $liste.Count
+            }
             exit 1
         }
 
+        if ($trovate.Count -gt 1) {
+            Write-Output "NON ho scelto niente: «$voluto» combacia in $($trovate.Count) liste, e quale premere non posso deciderlo io. Dimmelo con «lista»:"
+            foreach ($t in $trovate) {
+                Write-Output "  lista $($t.Dove + 1): «$(NomeDellaLista $liste[$t.Dove])» → $(TestoDellaRiga $t.Riga)"
+            }
+            exit 1
+        }
+
+        $trovata = $trovate[0].Riga
         $suoTesto = TestoDellaRiga $trovata
+
+        # Dove sta la riga si dice solo quando le liste sono più d'una: con una sola sarebbe
+        # rumore, con due è la sola cosa che distingue le due risposte.
+        $dove = ""
+        if ($liste.Count -gt 1) { $dove = " nella lista «$(NomeDellaLista $liste[$trovate[0].Dove])»" }
+
+        # Una riga oltre la piega non si può premere dov'è dichiarata. UI Automation il
+        # rettangolo lo dà lo stesso — anche quando la riga sta sotto la parte visibile della
+        # lista — e il clic finisce dove capita: dentro la finestra, quindi «di chi è il
+        # pixel» risponde «tuo» e nessuno si accorge di niente. Provato dal vivo il
+        # 2026-08-30 sulla 25ª riga di 26: nessuna riga scelta, e «Togli →» rimasto spento.
+        # Prima si porta in vista, che è scorrere la lista e non sceglierla: nessun evento
+        # dell'applicazione scatta, e la scelta resta quella del mouse.
+        $scorrimento = $null
+        if ($trovata.TryGetCurrentPattern(
+                [System.Windows.Automation.ScrollItemPattern]::Pattern, [ref]$scorrimento)) {
+
+            try {
+                $scorrimento.ScrollIntoView()
+                Start-Sleep -Milliseconds 150
+            } catch {
+                Write-Output "(non sono riuscita a portare in vista la riga «$suoTesto»: $($_.Exception.Message))"
+            }
+        }
+
         $area = $trovata.Current.BoundingRectangle
 
         if (($area.Width -le 0) -or ($area.Height -le 0)) {
-            Write-Output "La riga «$suoTesto» non ha una posizione sullo schermo: non ci posso cliccare."
+            Write-Output "La riga «$suoTesto»$dove non ha una posizione sullo schermo: non ci posso cliccare."
             exit 1
         }
 
         if (-not (PortaDavanti)) {
-            Write-Output "NON ho scelto la riga «$suoTesto»: non riesco a portare TrovaLavoro in primo piano, e davanti c'è $(ChiStaDavanti)."
+            Write-Output "NON ho scelto la riga «$suoTesto»${dove}: non riesco a portare TrovaLavoro in primo piano, e davanti c'è $(ChiStaDavanti)."
             exit 1
         }
 
@@ -1095,7 +1325,7 @@ switch ($azione) {
 
         $ostacolo = OstacoloAlClic $x $y
         if ($ostacolo) {
-            Write-Output "NON ho scelto la riga «$suoTesto»: $ostacolo."
+            Write-Output "NON ho scelto la riga «$suoTesto»${dove}: $ostacolo."
             exit 1
         }
 
@@ -1108,7 +1338,7 @@ switch ($azione) {
             Start-Sleep -Milliseconds 80
             [Finestre]::Clic($x, $y)
             Start-Sleep -Milliseconds 900
-            Write-Output "Doppio clic sulla riga «$suoTesto»."
+            Write-Output "Doppio clic sulla riga «$suoTesto»$dove."
             exit 0
         }
 
@@ -1118,13 +1348,13 @@ switch ($azione) {
                 [System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$stato)) {
 
             if ($stato.Current.IsSelected) {
-                Write-Output "Scelta la riga «$suoTesto»."
+                Write-Output "Scelta la riga «$suoTesto»$dove."
             } else {
-                Write-Output "Ho cliccato la riga «$suoTesto», ma non risulta scelta: la scelta non ha attecchito."
+                Write-Output "Ho cliccato la riga «$suoTesto»$dove, ma non risulta scelta: la scelta non ha attecchito."
                 exit 1
             }
         } else {
-            Write-Output "Cliccata la riga «$suoTesto» (non racconta se è scelta: da qui non posso confermarlo)."
+            Write-Output "Cliccata la riga «$suoTesto»$dove (non racconta se è scelta: da qui non posso confermarlo)."
         }
     }
 

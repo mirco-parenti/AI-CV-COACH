@@ -67,7 +67,7 @@ comando **uccide sé stesso** prima di arrivare al server.
 | `controlli` | Elenca bottoni, caselle e schede dicendo per ciascuno se è **acceso o SPENTO**; dei menù a tendina dice anche **la voce che mostrano**, e marca `[pagina]` quel che è del sito aperto nel browser. |
 | `clic` · `scrivi` | Preme un controllo per etichetta; scrive in una casella. Se il controllo è spento — o la casella è di sola lettura — lo dichiara invece di fingere. **Prima di muovere il puntatore pretende due cose**: il primo piano *verificato*, e che il pixel da premere appartenga all'applicazione (non fuori schermo, non coperto). Se una manca, dice che **non** ha premuto e perché. |
 | `scegli_voce` | Sceglie una voce in un menù a tendina — il portale in «Cerca su» — aprendolo e cliccandoci dentro come farebbe una persona, e poi verificando che il menù la mostri davvero. Senza la voce, le **elenca**. Stesse due pretese di `clic` prima di ogni colpo di mouse. |
-| `scegli_riga` | Sceglie una riga di una lista — la coda delle candidature in P1 — cercandola per un pezzo di quel che c'è scritto **in una qualsiasi delle sue celle**, e verificando poi che risulti scelta. Senza il testo, le **elenca**; con `doppio`, fa il doppio clic (che nella coda apre la candidatura). Stesse due pretese di `clic` prima di ogni colpo di mouse. |
+| `scegli_riga` | Sceglie una riga di una lista — la coda delle candidature in P1 — cercandola per un pezzo di quel che c'è scritto **in una qualsiasi delle sue celle**, e verificando poi che risulti scelta. Se la finestra ha **più liste** si dice quale con `lista`: un pezzo del suo nome («Lasciate fuori») o il numero che dice `controlli`; senza, cerca in tutte e si ferma se il testo combacia in più d'una. Una riga **oltre la piega** la porta in vista prima di premerla. Senza il testo, le **elenca** — tutte, lista per lista; con `doppio`, fa il doppio clic (che nella coda apre la candidatura). Stesse due pretese di `clic` prima di ogni colpo di mouse. |
 | `rispondi_finestra` | Risponde a una finestra di messaggio premendo il bottone per nome («Sì», «No», «OK»). Senza il bottone **legge cosa chiede** e quali scelte dà, così si sa cosa si sta per confermare. |
 | `scegli_file` | Risponde alla finestra di scelta file che l'applicazione ha aperto: il file da prendere (anche in forma `/mnt/c/…`), oppure `annulla`. |
 | `cartella_dati` | Cosa l'applicazione ha scritto su disco: profilo, storico, opportunità, documenti. |
@@ -84,14 +84,6 @@ nella coda e riaprirla, e rispondere alle conferme — la prima cosa provata con
 collaudare un comando distruttivo su dati veri senza distruggere niente.
 
 ## Quel che ancora non sa fare
-
-- **Di due elenchi nella stessa finestra ne guida solo il primo.** *(2026-08-24, T9e/R6.)*
-  «Modifica i testi» ha adesso due liste affiancate — «Nel documento» e «Lasciate fuori» — e
-  `scegli_riga` prende sempre quella di sinistra: l'altra non si raggiunge, e il giro del
-  «Togli →/← Rimetti» è stato provato **a mano**. La causa è nell'accessibilità, non nel
-  nome: tutte e due si presentano come **Table**, e la ricerca si ferma alla prima che
-  incontra. Finché non gli si insegna a distinguerle — per posizione, o per il nome
-  accessibile del controllo — quella metà di finestra nessun collaudo automatico la tocca.
 
 - **Le voci di un menù contestuale non si premono.** *(2026-08-21, T9c.)* Il menù di
   «Com'è andata…» in P4 si apre benissimo con `clic` sul bottone, le sue voci compaiono
@@ -189,6 +181,47 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   attrezzi che muovono il puntatore non ci si fida.
 
 ## Le trappole già pagate
+
+- **Di due elenchi nella stessa finestra ne guidava uno solo.** *(Debito annotato il
+  2026-08-24 con R6; **curato il 2026-08-30**.)* `scegli_riga` raccoglieva tutte le liste
+  della finestra e poi prendeva `$tabelle[0]`: la prima e basta. In «Modifica i testi», che
+  ne ha due affiancate, la colonna «Lasciate fuori» non si raggiungeva — il giro del
+  «Togli →/← Rimetti» andò provato **a mano**, e da allora quella metà di finestra nessun
+  collaudo automatico la toccava. Il difetto non era nell'accessibilità, come si era
+  scritto: un nome le due liste ce l'hanno già, perché WinForms presta a un controllo il
+  testo dell'etichetta che lo precede. Mancava solo il modo di **dire quale**.
+
+  Adesso le liste si contano tutte, `controlli` le numera (*«per «scegli_riga» è la lista
+  2»*) e si sceglie con `lista`, per nome o per numero. Senza `lista` la riga si cerca in
+  tutte: se combacia in **una** si agisce, se combacia in **due** l'attrezzo si ferma e
+  dice dove — premere nella lista sbagliata sarebbe lo stesso peccato del «Premuto» che non
+  aveva premuto. Falsificata rimettendo `[0]`: la stessa chiamata risponde «Non c'è nessuna
+  lista numero 2», e senza `lista` «Nessuna riga contiene «Competenza 16»» — che è
+  esattamente com'era prima, con la riga a un palmo di distanza e invisibile.
+
+- **Una riga oltre la piega si cliccava dov'era scritta, non dov'era.** *(Trovata il
+  2026-08-30 provando la cura qui sopra, curata lo stesso giorno.)* UI Automation il
+  rettangolo di una riga lo dichiara **anche quando la riga sta fuori dalla parte visibile
+  della lista**: della 25ª di 26 diceva `y = 586` mentre la lista finiva a `610`, e della
+  prima `y = 130` mentre la lista cominciava a `370`. Il clic partiva lì, cadeva **dentro
+  la finestra** — quindi la guardia del pixel rispondeva «è tua» — e non sceglieva niente.
+  Adesso, prima di colpire, la riga si porta in vista con `ScrollItemPattern.ScrollIntoView()`:
+  è scorrere la lista, non sceglierla, quindi nessun evento dell'applicazione scatta e la
+  scelta resta quella del mouse.
+
+- **Una finestra che non è una finestra rende cieco tutto l'attrezzo.** *(2026-08-30.)* La
+  radice su cui ogni azione lavora è la finestra del processo con l'**handle più alto**.
+  Quel giorno, accanto alla finestra vera (handle 131420), è comparso per qualche minuto un
+  `Pane` senza controlli con handle **657034**: `controlli` ha risposto tre volte «nessun
+  controllo: l'applicazione è aperta?» con l'applicazione aperta e visibile, `schermata` ha
+  fotografato un rettangolo di 267 × 25 pixel e `ridimensiona` ha ridimensionato quello.
+  Adesso fra le finestre di primo livello si tengono solo le **Window**, e se non ce n'è
+  nessuna si ripiega su ciò che c'è. **Il sintomo è quello di un'applicazione chiusa**: se
+  gli attrezzi diventano ciechi tutti insieme, prima di riavviare guarda che cosa c'è
+  davvero sotto la scrivania —
+  `FindAll(Children, ProcessId)` e il `ControlType` di ciascuna. *(Il `Pane` era transitorio
+  e non si è saputo riprodurre: la cura è ragionata sul dump, e questa è la sola delle tre
+  che non si è potuta falsificare.)*
 
 - **Il «Premuto» che non aveva premuto.** *(Trappola del 2026-08-27, guardando a occhio le
   tre cose nuove; **curata il 2026-08-29**.)* Per tutta la sua vita `clic` aveva riferito un
