@@ -114,8 +114,8 @@ con icona** (FontAwesome.Sharp); i menu contestuali (tasto destro) usano voci co
 │    P5 Dialogo/Brainstorm · P6 Documenti · P7 Email)                │
 │                                                                    │
 ├──────────────┬─────────────────────────────────────────────────────┤
-│  ┌────────┐  │  BARRA DI STATO   «Pronto» · avanzamento chiamate   │
-│  │ LOGO   │  │                                                     │
+│  ┌────────┐  │  BARRA DI STATO   solo mentre l'AI lavora, o se     │
+│  │ LOGO   │  │                   all'avvio c'è un avviso           │
 │  │ AI-CV- │  │                                                     │
 │  │ COACH  │  │                                                     │
 │  └────────┘  │                                                     │
@@ -135,10 +135,22 @@ generazione è una spesa non chiesta — e in barra, quando si guardano i docume
 riporta dove si era (candidatura, profilo o Home).*
 
 - La macro-struttura è un `TableLayoutPanel` (righe: barra superiore fissa, area
-  centrale elastica, fascia inferiore fissa); dentro ogni banda, `Panel` a coordinate
+  centrale elastica, fascia inferiore **alta zero finché non serve**, v. sotto); dentro ogni banda, `Panel` a coordinate
   fisse. I pannelli P1–P7 sono **UserControl disegnati nel designer**, impilati
   nell'area centrale e mostrati uno alla volta: struttura statica, nessun controllo
   creato a runtime.
+- **La fascia di stato c'è solo quando parla** *(dal 2026-08-30)*. A riposo non dice più
+  «Pronto»: sparisce, e con lei si azzera la riga della tabella che la ospita — nasconderla
+  soltanto lascerebbe il buco, alto uguale e dello stesso colore chiaro, cioè la striscia
+  che si voleva togliere. Torna quando ha qualcosa da dire: mentre l'AI lavora
+  («L'AI sta lavorando…», in `Accento`, col conto dei secondi dopo i primi dieci) e
+  all'avvio quando c'è un avviso — una cartella dati diversa da quella di sempre, un
+  argomento della riga di comando non rispettato, o il lucchetto in mano a qualcun altro.
+  È lo stesso principio della riga dei solleciti in Home (cap. 07.3): un avviso che occupa
+  spazio anche da spento insegna a non guardarlo, e quando poi ha davvero qualcosa da dire
+  non lo si vede più. Conseguenza da tenere presente: **l'ingombro che il pannello del logo
+  dichiara ai pannelli cambia con lei** (cap. 03.5), perché sparita la fascia il logo
+  sfonda nell'area centrale di tutta la propria altezza.
 - **La barra ha cinque bottoni, non quattro** *(deciso in T4c, 2026-08-10)*: fra Ricerca
   e Impostazioni c'è il bottone che porta a P4 — **📋 Candidatura** quando è nato,
   **«Confronta ⭐ ANNUNCIO - CV»** dal 2026-08-30, che è la stessa porta chiamata col
@@ -428,8 +440,9 @@ Prefissi standard, nome semantico in PascalCase: `pnl` (Panel), `btn` (Button),
 - **Badge di stato** (pannellino 115×26 con etichetta bold centrata): verde OK, azzurro
   info, giallo attenzione, rosso errore — usati per lo stato delle opportunità e delle
   chiamate AI.
-- Operazioni AI in corso: indicatore nella barra di stato + testo in streaming dove
-  previsto (cap. 02); mai una finestra bloccata.
+- Operazioni AI in corso: indicatore nella barra di stato — che **compare per questo** e
+  se ne va appena finito — + testo in streaming dove previsto (cap. 02); mai una
+  finestra bloccata.
 - Errori: messaggio in italiano nel contesto in cui è avvenuto (non solo un popup),
   sempre con un'azione possibile («Riprova», «Salta»). *Dal 2026-08-09 c'è anche
   l'ultima rete: un gestore globale delle eccezioni in italiano (in `Programma`),

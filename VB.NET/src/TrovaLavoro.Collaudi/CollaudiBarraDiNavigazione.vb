@@ -146,6 +146,66 @@ Namespace Ui
 
         End Sub
 
+        ''' <summary>
+        ''' La fascia di stato non c'è finché non ha qualcosa da dire, e quando ce l'ha
+        ''' occupa spazio davvero.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Fino al 2026-08-30 la fascia stava lì sempre, e a riposo diceva
+        ''' «Pronto». Una striscia chiara che non cambia mai si smette di guardarla, e il
+        ''' giorno che ci compare «L'AI sta lavorando» non la si vede più: la fascia adesso
+        ''' compare e sparisce, così quando c'è vuol dire qualcosa.</para>
+        ''' <para><b>Si misura l'altezza della riga, non solo <c>Visible</c>.</b> La fascia
+        ''' vive nella terza riga di un <c>TableLayoutPanel</c>, e quella riga ha altezza
+        ''' <i>assoluta</i>: nascondere il pannello e fermarsi lì lascia il buco, alto
+        ''' uguale e dello stesso colore chiaro — cioè esattamente la striscia che si
+        ''' voleva togliere, senza più nemmeno la scritta. È il modo in cui questo lavoro
+        ''' poteva riuscire a metà senza che nessuno se ne accorgesse, ed è per questo che
+        ''' il collaudo guarda i pixel della riga e non la proprietà del pannello.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function LaFasciaDiStatoCEsoloQuandoParla() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase)
+
+            Await ConLaFinestraAsync(
+                generatore,
+                Async Function(form, pannello)
+
+                    Dim durante As String = Nothing
+                    Dim altezzaDurante As Single = -1
+
+                    AddHandler pannello.LavoroAiCambiato,
+                        Sub()
+                            If pannello.AiAlLavoro Then
+                                durante = Etichetta(form, "lblStato").Text
+                                altezzaDurante = AltezzaDellaFascia(form)
+                            End If
+                        End Sub
+
+                    Assert.AreEqual(0.0F, AltezzaDellaFascia(form),
+                                    "a riposo la fascia non si prende nemmeno un pixel")
+                    Assert.IsEmpty(Etichetta(form, "lblStato").Text,
+                                   "e non dice «Pronto», che non è una notizia")
+
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.IsNotNull(durante, "l'AI è stata chiamata davvero")
+                    Assert.Contains("sta lavorando", durante,
+                                    "mentre l'AI lavora la fascia lo dice")
+                    Assert.IsGreaterThan(0.0F, altezzaDurante,
+                                         "e per dirlo si prende lo spazio che le serve")
+
+                    Assert.AreEqual(0.0F, AltezzaDellaFascia(form),
+                                    "finito il lavoro se ne va di nuovo")
+                    Assert.IsEmpty(Etichetta(form, "lblStato").Text,
+                                   "e non resta un «sta lavorando» su un lavoro finito")
+
+                End Function)
+
+        End Function
+
         ' ==================================================================
         ' L'impalcatura
         ' ==================================================================
@@ -200,6 +260,28 @@ Namespace Ui
                 If Directory.Exists(radice) Then Directory.Delete(radice, recursive:=True)
             End Try
 
+        End Function
+
+        ''' <summary>Quanto è alta, adesso, la riga che ospita la fascia di stato.</summary>
+        ''' <remarks>
+        ''' Si guarda la riga e non <c>pnlFasciaInferiore.Visible</c>: quella proprietà, su
+        ''' una finestra mai mostrata, risponde False per tutti e non distinguerebbe una
+        ''' fascia sparita da una fascia che c'è. L'altezza della riga invece è vera in
+        ''' entrambi i casi, ed è anche il pixel che l'utente vede o non vede.
+        ''' </remarks>
+        Private Shared Function AltezzaDellaFascia(form As Control) As Single
+
+            Dim tabella As TableLayoutPanel =
+                DirectCast(form.Controls.Find("tlpStruttura", searchAllChildren:=True).Single(),
+                           TableLayoutPanel)
+
+            Return tabella.RowStyles(tabella.RowCount - 1).Height
+
+        End Function
+
+        ''' <summary>Un'etichetta della finestra, per nome.</summary>
+        Private Shared Function Etichetta(form As Control, nome As String) As Label
+            Return DirectCast(form.Controls.Find(nome, searchAllChildren:=True).Single(), Label)
         End Function
 
         Private Shared Function PoolInesistente() As String

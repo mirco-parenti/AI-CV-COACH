@@ -73,7 +73,7 @@ Partial Class FormPrincipale
         Me.tlpStruttura.RowCount = 3
         Me.tlpStruttura.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 48.0!))
         Me.tlpStruttura.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.tlpStruttura.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28.0!))
+        Me.tlpStruttura.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 0.0!))
         Me.tlpStruttura.Size = New System.Drawing.Size(1134, 561)
         Me.tlpStruttura.TabIndex = 0
         '
@@ -309,6 +309,7 @@ Partial Class FormPrincipale
         Me.pnlFasciaInferiore.Margin = New System.Windows.Forms.Padding(0)
         Me.pnlFasciaInferiore.Name = "pnlFasciaInferiore"
         Me.pnlFasciaInferiore.Size = New System.Drawing.Size(1134, 28)
+        Me.pnlFasciaInferiore.Visible = False
         Me.pnlFasciaInferiore.TabIndex = 2
         '
         'lblStato
@@ -320,7 +321,6 @@ Partial Class FormPrincipale
         Me.lblStato.Padding = New System.Windows.Forms.Padding(273, 0, 12, 0)
         Me.lblStato.Size = New System.Drawing.Size(1134, 27)
         Me.lblStato.TabIndex = 0
-        Me.lblStato.Text = "Pronto"
         Me.lblStato.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'pnlBordoFasciaInferiore

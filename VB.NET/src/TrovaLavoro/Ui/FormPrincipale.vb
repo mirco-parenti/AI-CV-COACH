@@ -25,6 +25,17 @@ Public Class FormPrincipale
     Private Const LarghezzaMinimaDiProgetto As Integer = 1150
     Private Const AltezzaMinimaDiProgetto As Integer = 600
 
+    ''' <summary>Quanto è alta la fascia di stato, quando ha qualcosa da dire.</summary>
+    ''' <remarks>
+    ''' La riga della tabella nasce alta <b>zero</b> nel Designer, perché la fascia nasce
+    ''' muta: questo è quindi l'unico posto in cui l'altezza è scritta, e la riga la
+    ''' prende da qui ogni volta che la fascia trova qualcosa da dire.
+    ''' </remarks>
+    Private Const AltezzaFasciaDiStato As Single = 28.0F
+
+    ''' <summary>La riga della tabella in cui vive la fascia di stato (0 barra, 1 area).</summary>
+    Private Const RigaDellaFascia As Integer = 2
+
     ' Geometria del pannello logo nelle due modalità.
     Private Const LogoLarghezza As Integer = 261
     Private Const LogoAltezza As Integer = 216
@@ -37,6 +48,21 @@ Public Class FormPrincipale
 
     ' Nothing finché la modalità non è stata decisa la prima volta.
     Private compattaAttiva As Boolean?
+
+    ''' <summary>Se la fascia di stato in questo momento ha qualcosa da dire.</summary>
+    ''' <remarks>
+    ''' Si tiene a parte invece di chiederlo a <c>pnlFasciaInferiore.Visible</c>, e non
+    ''' per gusto: <c>Visible</c> risponde con la visibilità <b>effettiva</b>, cioè False
+    ''' per ogni figlio di una finestra non ancora mostrata. Allo <c>Load</c> la fascia
+    ''' sarebbe quindi già «invisibile», la guardia troverebbe niente da cambiare e la
+    ''' riga della tabella resterebbe alta 28: la striscia ricomparirebbe appena la
+    ''' finestra si mostra, che è precisamente quel che si voleva togliere.
+    ''' <para>Parte da <b>False</b> perché il Designer la fa nascere muta: fascia
+    ''' invisibile, riga della tabella alta zero, etichetta vuota. Così non c'è nessun
+    ''' istante fra la costruzione e il primo messaggio in cui la striscia si veda —
+    ''' e l'unico 28 rimasto è la costante qui sopra.</para>
+    ''' </remarks>
+    Private fasciaCheParla As Boolean? = False
 
     ' L'ultimo ingombro comunicato ai pannelli: si ridichiara solo quando cambia davvero.
     Private ingombroDichiarato As Size = Size.Empty
@@ -803,6 +829,45 @@ Public Class FormPrincipale
     Private _battitoDellAttesa As System.Windows.Forms.Timer
 
     ''' <summary>
+    ''' Scrive nella fascia di stato, e la fa comparire o sparire di conseguenza.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>La fascia esiste solo quando parla</b> *(2026-08-30)*. A riposo non ha
+    ''' niente da dire — «Pronto» è un'informazione che nessuno cerca — e una striscia
+    ''' chiara sotto un pannello a tutta altezza è rumore: si impara a non guardarla, e
+    ''' quando poi ci compare «L'AI sta lavorando» non la si vede più. È la stessa scelta
+    ''' della riga dei solleciti in Home (T9c, cap. 07.3): un avviso che occupa spazio
+    ''' anche da spento insegna a non guardarlo.</para>
+    ''' <para><b>Nascondere il pannello non basta.</b> La sua riga nella tabella ha
+    ''' altezza <i>assoluta</i>: il pannello sparisce e resta il buco, alto uguale e dello
+    ''' stesso colore chiaro — cioè esattamente la striscia che si voleva togliere. Si
+    ''' azzera anche la riga, e la si rimette quando la fascia torna.</para>
+    ''' <para><b>Tutto passa di qui.</b> Testo, colore e presenza sono tre facce dello
+    ''' stesso fatto — «c'è qualcosa da dire» — e tenerle in tre punti diversi vuol dire
+    ''' che prima o poi una resta indietro: una fascia visibile e vuota, o una fascia
+    ''' sparita mentre l'AI lavora.</para>
+    ''' </remarks>
+    Private Sub ScriviNellaFascia(testo As String, colore As Color)
+
+        Dim parla As Boolean = Not String.IsNullOrWhiteSpace(testo)
+
+        lblStato.Text = If(testo, String.Empty)
+        lblStato.ForeColor = colore
+
+        If fasciaCheParla.HasValue AndAlso fasciaCheParla.Value = parla Then Return
+        fasciaCheParla = parla
+
+        pnlFasciaInferiore.Visible = parla
+        tlpStruttura.RowStyles(RigaDellaFascia).Height = If(parla, AltezzaFasciaDiStato, 0.0F)
+
+        ' L'ingombro del logo si misura sulla fascia: sparita lei, il pannello del logo
+        ' sfonda nell'area centrale di tutta la sua altezza, e i pannelli devono saperlo
+        ' (cap. 03.5) o ci scrivono sotto dei dati.
+        DichiaraLIngombroDelLogo()
+
+    End Sub
+
+    ''' <summary>
     ''' Accende o spegne il segnale d'attesa nella barra di stato. La logica di che cosa
     ''' scrivere sta in <see cref="SegnaleDiAttesa"/>, che si collauda senza finestre: qui
     ''' resta solo il battito e l'etichetta da riempire.
@@ -821,8 +886,7 @@ Public Class FormPrincipale
                 AddHandler _battitoDellAttesa.Tick, AddressOf UnBattitoDellAttesa
             End If
 
-            lblStato.ForeColor = StileApp.Accento
-            lblStato.Text = _segnaleDiAttesa.Avvia(Date.Now)
+            ScriviNellaFascia(_segnaleDiAttesa.Avvia(Date.Now), StileApp.Accento)
             _battitoDellAttesa.Start()
 
         Else
@@ -830,15 +894,14 @@ Public Class FormPrincipale
             If _segnaleDiAttesa Is Nothing OrElse Not _segnaleDiAttesa.InCorso Then Return
 
             _battitoDellAttesa?.Stop()
-            lblStato.Text = _segnaleDiAttesa.Ferma()
-            lblStato.ForeColor = StileApp.TestoSecondario
+            ScriviNellaFascia(_segnaleDiAttesa.Ferma(), StileApp.TestoSecondario)
 
         End If
 
     End Sub
 
     Private Sub UnBattitoDellAttesa(mittente As Object, e As EventArgs)
-        lblStato.Text = _segnaleDiAttesa.Battito(Date.Now)
+        ScriviNellaFascia(_segnaleDiAttesa.Battito(Date.Now), StileApp.Accento)
     End Sub
 
     ''' <summary>
@@ -1014,7 +1077,7 @@ Public Class FormPrincipale
     ''' </summary>
     Private Sub MostraLoStatoDellAvvio()
         lblVersione.Text = Versione.Riga(EtichettaDelPool())
-        lblStato.Text = If(AvvisoDellAvvio(), "Pronto")
+        ScriviNellaFascia(AvvisoDellAvvio(), StileApp.TestoSecondario)
     End Sub
 
     ''' <summary>
@@ -1154,7 +1217,12 @@ Public Class FormPrincipale
         ' Si misura il pannello invece di ripetere le costanti di geometria: quelle sono in
         ' unità di progetto, il pannello vero lo scala WinForms, e a 150% dichiarare 261×216
         ' dove il pannello ne occupa 373×360 sfondava nell'area viva (cap. 03.5).
-        Dim sfondamento As Integer = Math.Max(0, pnlLogo.Height - pnlFasciaInferiore.Height)
+        ' Una fascia nascosta conserva la sua altezza: quel che conta è lo spazio che
+        ' occupa davvero, e da sparita è zero.
+        Dim altezzaDellaFascia As Integer =
+            If(fasciaCheParla.GetValueOrDefault(True), pnlFasciaInferiore.Height, 0)
+
+        Dim sfondamento As Integer = Math.Max(0, pnlLogo.Height - altezzaDellaFascia)
         Dim ingombro As New Size(pnlLogo.Width, sfondamento)
 
         If ingombro = ingombroDichiarato Then Return
