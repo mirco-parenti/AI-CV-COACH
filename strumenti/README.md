@@ -7,7 +7,8 @@ mai: com'è fatta l'applicazione mentre gira, e come la si mette in mano a qualc
 | Attrezzo | A cosa serve |
 |---|---|
 | [`mcp-collaudi/`](mcp-collaudi/README.md) | Il server MCP con cui l'assistente prova l'applicazione vera: la compila, fa girare il banco, la avvia, la fotografa, le preme i bottoni e — dal 2026-08-18 — **aspetta** che una condizione si avveri invece di guardare a intervalli. **Il suo README si legge prima di usarlo**: sono ore risparmiate. |
-| `avvia-demo.bat` | Apre TrovaLavoro con un doppio clic, per mostrarla a qualcuno senza passare da Claude Code. |
+| `aggiorna-riferimento.bat` | Rifà l'**eseguibile di riferimento sul Desktop**: un file solo, autonomo, dall'ultimo codice di questo albero di lavoro. È quello che si apre col doppio clic *ed* è quello su cui l'assistente prova. |
+| `avvia-demo.bat` | Apre TrovaLavoro con un doppio clic **passandole la chiave API**, per mostrarla a qualcuno senza passare da Claude Code. |
 | `sigilla-pool/` | Il **rito del bump** da riga di comando (cap. 04.5): rigenera le impronte del pool dei prompt e riscrive il manifest. |
 | [`collauda-copioni/`](collauda-copioni/README.md) | Il banco dei **copioni JavaScript** di `LettorePagina` — l'unico codice del prodotto che il banco VB non raggiunge, perché gira dentro la WebView. Li estrae dal sorgente, li compila e li prova su pagine finte. |
 
@@ -44,6 +45,51 @@ compilazione emette un `MSB3277` su `WindowsBase` — due versioni, una dal runt
 da WebView2 — che riguarda solo questo attrezzo: l'eseguibile del prodotto compila senza
 avvisi. *(Nato il 2026-08-14, col bump a Pool 1.04 di T6.)*
 
+## Perché esiste `aggiorna-riferimento.bat`
+
+*Nato il **2026-08-30**, perché Mirco l'ha chiesto con una frase che è anche la sua
+specifica: «un eseguibile dell'app sul desktop che sarà sempre la versione più aggiornata,
+e userai sempre quella quando fai i test, così che quando siamo offline so che è quella di
+riferimento».*
+
+Il problema che risolve non è la comodità del doppio clic: è l'**ambiguità**. Prima c'erano
+due file che si chiamavano TrovaLavoro.exe — quello di `bin/Release`, che provava
+l'assistente, e qualunque cosa Mirco aprisse per conto suo — e niente diceva se fossero la
+stessa versione. Adesso ce n'è **uno**, sul Desktop, e lo usano tutti e due: lo strumento di
+collaudo ci punta, `avvia-demo.bat` pure.
+
+```
+strumenti\aggiorna-riferimento.bat        (doppio clic, oppure l'attrezzo «compila»)
+```
+
+Sono gli stessi parametri del rilascio (cap. 13.2) — un file solo, il runtime .NET dentro,
+niente DLL a fianco: **113 MiB in circa sei secondi**. Alla fine stampa il riquadro
+dell'identità (versione, commit, dimensione, SHA-256), che è il modo di sapere *quale* file
+si ha davanti quando il numero di versione non basta.
+
+Tre accorgimenti, ciascuno pagato:
+
+- **La compilazione intermedia va in `%TEMP%`, non in `bin\Release`.** Quel file lo tiene
+  bloccato il server MCP del prodotto, e senza questo il comando fallirebbe con `MSB3027`
+  per un motivo che col codice non c'entra niente.
+- **Si chiude solo l'applicazione che gira dal Desktop**, riconosciuta dal percorso: mai un
+  `taskkill /IM TrovaLavoro.exe`, che quel nome ce l'ha anche il server MCP.
+- **`git -C "%~dp0"` non funziona**, e non lo dice: `%~dp0` finisce con una barra rovescia,
+  e a git arriva un percorso con la virgoletta dentro. Il commit resta vuoto e l'eseguibile
+  esce dichiarandosi «compilazione di sviluppo» — cioè con l'identità sbagliata, in silenzio.
+  Si scrive **`git -C "%~dp0."`**, col punto. Lo stesso difetto stava in
+  `VB.NET/src/publish.bat` fin dal giorno in cui il timbro del commit è nato (2026-08-27):
+  **corretto il 2026-08-30**, e con lui si è rimessa in funzione anche la seconda guardia,
+  l'avviso «ci sono modifiche non committate», che era muta per la stessa ragione. Nessun
+  rilascio ne è uscito storpiato — l'unico eseguibile in `pubblicazione/` è del 24 agosto,
+  cioè di tre giorni prima che il timbro esistesse.
+
+*Una prova che vale la pena conoscere*: le due ricette producono un eseguibile **identico
+bit per bit**. Il 2026-08-30, dallo stesso albero di lavoro, `aggiorna-riferimento.bat` e
+`publish.bat` hanno dato lo stesso SHA-256 (`99d178e2…`). È il modo di sapere che il
+riferimento su cui si prova non è «quasi» il rilascio: è lo stesso file, in un'altra
+cartella.
+
 ## Perché esiste `avvia-demo.bat`
 
 Fino a T6 l'applicazione prendeva la chiave API **solo** dalla variabile d'ambiente
@@ -60,9 +106,9 @@ di continuo su cartelle dati usa-e-getta (`--dati`), dove nessuna chiave è mai 
 salvata.
 
 Il lanciatore legge la chiave dal `.env` del prototipo e la tiene in vita **solo per quell'avvio**:
-non la copia da nessuna parte e non la stampa mai a schermo. Avvia la build di
-`bin/Release` — quella di `dotnet build -c Release` — e se non la trova lo dice, invece
-di aprire il vuoto.
+non la copia da nessuna parte e non la stampa mai a schermo. Avvia l'**eseguibile di
+riferimento sul Desktop** *(dal 2026-08-30; prima era la build di `bin/Release`)*, e se non
+lo trova lo dice — rimandando ad `aggiorna-riferimento.bat` — invece di aprire il vuoto.
 
 *(Nato il 2026-08-12, il giorno in cui l'applicazione è stata mostrata per la prima volta
 a qualcuno di fuori dal progetto.)*

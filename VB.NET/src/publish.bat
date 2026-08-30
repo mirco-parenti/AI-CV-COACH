@@ -18,13 +18,18 @@ REM --- Da quale codice sorgente nasce questo eseguibile -----------------------
 REM Se git non c'e', o non siamo in un repository, il codice resta vuoto: allora
 REM l'attributo non entra nell'eseguibile e l'applicazione dichiara "non dichiarato
 REM (compilazione di sviluppo)". Meglio il silenzio dichiarato di un codice inventato.
+REM Il punto dopo %~dp0 non e' un vezzo: quella variabile finisce con una barra
+REM rovescia, e a git arriverebbe "C:\...\src\" con la virgoletta inglobata. Git
+REM fallisce in silenzio, il codice resta vuoto e l'eseguibile esce dichiarandosi
+REM "compilazione di sviluppo" -- cioe' con l'identita' sbagliata, senza che nessuno
+REM se ne accorga. Provato il 2026-08-30: senza punto [], col punto [a0507f2].
 set "CODICE="
-for /f "usebackq delims=" %%G in (`git -C "%~dp0" rev-parse --short HEAD 2^>nul`) do set "CODICE=%%G"
+for /f "usebackq delims=" %%G in (`git -C "%~dp0." rev-parse --short HEAD 2^>nul`) do set "CODICE=%%G"
 
 REM Un albero di lavoro sporco NON corrisponde a nessun commit: l'eseguibile lo dice
 REM di se stesso, invece di spacciarsi per il commit da cui e' quasi uscito.
 set "SPORCO="
-for /f "usebackq delims=" %%S in (`git -C "%~dp0" status --porcelain 2^>nul`) do set "SPORCO=1"
+for /f "usebackq delims=" %%S in (`git -C "%~dp0." status --porcelain 2^>nul`) do set "SPORCO=1"
 if defined SPORCO if defined CODICE set "CODICE=%CODICE%+modificato"
 
 if not defined CODICE (

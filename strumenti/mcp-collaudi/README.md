@@ -54,14 +54,31 @@ Cercarlo per nome (`pkill -f mcp-collaudi/server.mjs`) sembra più naturale e in
 trappola: il pattern compare anche nella riga di comando che lo sta cercando, così il
 comando **uccide sé stesso** prima di arrivare al server.
 
+## Su quale eseguibile si prova
+
+Dal **2026-08-30** uno solo: `TrovaLavoro.exe` **sul Desktop**. È un file unico e autonomo
+(il runtime .NET dentro, gli stessi parametri del rilascio, cap. 13.2) che `compila` rifà
+in una manciata di secondi chiamando [`../aggiorna-riferimento.bat`](../README.md).
+
+Perché la differenza conta: prima si provava la build di `bin/Release`, e Mirco — a
+sessione chiusa — apriva un'altra cosa. Due file omonimi, due versioni possibili, e niente
+che lo dicesse. Adesso **quel che si prova qui e quel che apre lui sono lo stesso file**, e
+l'eseguibile porta dentro di sé il commit da cui nasce (`+modificato` se l'albero di lavoro
+era sporco), che si legge in «Informazioni su…».
+
+Un effetto collaterale gradito: la compilazione intermedia va in `%TEMP%`, non in
+`bin\Release`. Quel file lì lo tiene bloccato il server MCP del **prodotto**, ed era il
+motivo per cui `compila` non si poteva chiamare senza sacrificare i tool della sessione.
+Adesso si può.
+
 ## Gli attrezzi
 
 | Attrezzo | Cosa fa |
 |---|---|
-| `compila` | Compila TrovaLavoro in Release. Chiude prima l'applicazione, che altrimenti tiene bloccato l'exe. |
+| `compila` | Rifà l'**eseguibile di riferimento sul Desktop** — un file solo, autonomo, dall'ultimo codice — e restituisce gli errori del compilatore. Chiude prima il riferimento, se è aperto (il server MCP del prodotto resta vivo). Se fallisce, sul Desktop resta quello di prima. |
 | `collaudi` | Fa girare il banco (`dotnet test`); con `filtro` ne esegue solo una parte. |
-| `avvia_app` | Avvia TrovaLavoro.exe con la chiave API presa dal `.env` del prototipo. Con `dati` lo fa partire su una **cartella usa-e-getta** (`--dati`), che è il modo di provare ciò che cancella senza toccare i dati veri. |
-| `stato_app` · `chiudi_app` | Se è viva; e la chiude. |
+| `avvia_app` | Avvia il **riferimento sul Desktop** con la chiave API presa dal `.env` del prototipo. Con `dati` lo fa partire su una **cartella usa-e-getta** (`--dati`), che è il modo di provare ciò che cancella senza toccare i dati veri. |
+| `stato_app` · `chiudi_app` | Se è viva; e la chiude — **solo le finestre**, mai il server MCP del prodotto, che ha lo stesso nome di processo. |
 | `schermata` | Riprende la finestra dell'applicazione (o tutto il desktop) e restituisce il PNG. Se non riesce a portarla davanti lo **dichiara**: la fotografia riprende quel rettangolo di schermo, e potrebbe ritrarre la finestra che le sta sopra. |
 | `ridimensiona` | Cambia la misura della finestra, o la rimette massimizzata. È il modo di guardare i difetti di impaginazione che si vedono **solo stretti**. |
 | `controlli` | Elenca bottoni, caselle e schede dicendo per ciascuno se è **acceso o SPENTO**; dei menù a tendina dice anche **la voce che mostrano**, e marca `[pagina]` quel che è del sito aperto nel browser. |
@@ -484,7 +501,13 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   vanificherebbe la prova. L'exe si lancia a mano, con la variabile d'ambiente che si vuole
   (ricordando `WSLENV`) e sempre con `--dati` su una cartella usa-e-getta.
 - **Chiudere per nome ammazza anche il server MCP del prodotto.** *(2026-08-21, dal collaudo
-  di tappa di T8.)* `compila`, `collaudi` e `chiudi_app` fanno `taskkill.exe /IM TrovaLavoro.exe /F`:
+  di tappa di T8. **Dal 2026-08-30 vale solo per `collaudi`**: `compila` e `chiudi_app` sono
+  guariti — passano da `chiudi-finestre.ps1`, che guarda la riga di comando e lascia vivere
+  chi ha `--mcp`. Provato con una finestra aperta davvero: chiusa lei, il server è rimasto.
+  `collaudi` no, e per una ragione: fa `dotnet test -c Release`, che ricompila l'applicazione
+  in `bin\Release` — proprio il file che il server tiene bloccato. Lì la scelta è fra
+  sacrificare i tool e far fallire il banco, e non è una scelta da fare di nascosto dentro un
+  attrezzo.)* I tre attrezzi facevano `taskkill.exe /IM TrovaLavoro.exe /F`:
   chiudono per **nome**, non per processo. Da quando esiste il server MCP del **prodotto**
   (cap. 09), un client che ce l'abbia registrato — Claude Code, per dirne uno — tiene in vita
   un secondo `TrovaLavoro.exe` senza finestra, e quei tre attrezzi lo spengono insieme

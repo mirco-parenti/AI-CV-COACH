@@ -14,7 +14,14 @@ REM Attrezzo di sviluppo: sta fuori dal prodotto, non entra nell'eseguibile.
 setlocal
 set "RADICE=%~dp0.."
 set "ENVFILE=%RADICE%\HTML+JS\.env"
-set "APP=%RADICE%\VB.NET\src\TrovaLavoro\bin\Release\net10.0-windows\TrovaLavoro.exe"
+
+REM L'applicazione e' quella di riferimento, sul Desktop: un file solo, l'ultima
+REM versione, la stessa che avvia l'assistente per le sue prove. La rifa'
+REM aggiorna-riferimento.bat, qui accanto.
+set "DESKTOP="
+for /f "usebackq delims=" %%D in (`powershell -NoProfile -Command "[Environment]::GetFolderPath('Desktop')" 2^>nul`) do set "DESKTOP=%%D"
+if not defined DESKTOP set "DESKTOP=%USERPROFILE%\Desktop"
+set "APP=%DESKTOP%\TrovaLavoro.exe"
 
 if not exist "%ENVFILE%" (
   echo.
@@ -39,11 +46,11 @@ if not defined ANTHROPIC_API_KEY (
 
 if not exist "%APP%" (
   echo.
-  echo Non trovo l'applicazione:
+  echo Non trovo l'applicazione di riferimento:
   echo   "%APP%"
   echo.
-  echo Compilala prima, dalla cartella VB.NET\src:
-  echo   dotnet build TrovaLavoro\TrovaLavoro.vbproj -c Release
+  echo Falla, con un doppio clic su:
+  echo   "%~dp0aggiorna-riferimento.bat"
   echo.
   pause
   exit /b 1

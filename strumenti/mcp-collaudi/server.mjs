@@ -14,7 +14,7 @@
 //           -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 
 import { createServer } from "node:http";
-import { spawn } from "node:child_process";
+import { spawn, execSync } from "node:child_process";
 import { readFile, writeFile, unlink, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -29,12 +29,44 @@ const PORTA = 3300;
 const VERSIONE_PROTOCOLLO = "2025-06-18";
 
 const DOTNET = "/mnt/c/Program Files/dotnet/dotnet.exe";
-const ESEGUIBILE = join(SRC, "TrovaLavoro", "bin", "Release", "net10.0-windows", "TrovaLavoro.exe");
 
-// I progetti si nominano **relativi** a VB.NET/src, e i comandi si eseguono da lì:
+// Lo script che rifa' l'eseguibile di riferimento: i parametri della pubblicazione
+// stanno **solo** li dentro, e questo attrezzo lo chiama invece di ricopiarseli.
+const RIFERIMENTO = join(REPO, "strumenti", "aggiorna-riferimento.bat");
+
+/**
+ * L'eseguibile su cui si prova: il file unico e autonomo che sta **sul Desktop**,
+ * rifatto da `strumenti/aggiorna-riferimento.bat` (attrezzo «compila»).
+ *
+ * È lo stesso che Mirco apre con un doppio clic a sessione chiusa. Prima stava in
+ * `bin/Release/`, e c'erano due file omonimi: quello che si provava qui e quello che
+ * vedeva lui, che potevano essere versioni diverse senza che niente lo dicesse.
+ *
+ * Il Desktop si chiede a Windows invece di comporlo con `%USERPROFILE%`: può essere
+ * spostato o finire su OneDrive, e sulla macchina del tutor l'utente è un altro.
+ */
+function eseguibileDiRiferimento() {
+  try {
+    const suWindows = execSync(
+      `powershell.exe -NoProfile -Command "[Environment]::GetFolderPath('Desktop')"`,
+      { encoding: "utf8" }
+    ).trim();
+    const desktop = execSync(`wslpath -u '${suWindows}'`, { encoding: "utf8" }).trim();
+    if (desktop) return join(desktop, "TrovaLavoro.exe");
+  } catch {
+    // Senza Windows sotto non c'è niente da provare comunque: si tiene il percorso
+    // di prima, così il server parte lo stesso e sarà «avvia_app» a dire che manca.
+  }
+  return join(SRC, "TrovaLavoro", "bin", "Release", "net10.0-windows", "TrovaLavoro.exe");
+}
+
+const ESEGUIBILE = eseguibileDiRiferimento();
+
+// Il banco si nomina **relativo** a VB.NET/src, e il comando si esegue da lì:
 // `dotnet.exe` è un eseguibile Windows, e un percorso alla maniera di WSL
 // (`/mnt/c/…`) MSBuild lo scambia per un'opzione — errore MSB1001, visto sul serio.
-const PROGETTO = "TrovaLavoro/TrovaLavoro.vbproj";
+// (Il progetto dell'applicazione non compare più: a compilarla è lo script del
+// riferimento, che sa anche dove metterla.)
 const COLLAUDI = "TrovaLavoro.Collaudi/TrovaLavoro.Collaudi.vbproj";
 const CHIAVE_DA = join(REPO, "HTML+JS", ".env");
 
@@ -90,6 +122,25 @@ async function chiaveApi() {
   return riga.slice(riga.indexOf("=") + 1).trim().replace(/^["']|["']$/g, "");
 }
 
+/**
+ * Chiude le **finestre** di TrovaLavoro, e solo quelle: il server MCP del prodotto
+ * porta lo stesso nome di processo, e un `taskkill /IM` se lo porterebbe via
+ * insieme — con tutti i tool della sessione. Torna quante ne ha chiuse.
+ */
+async function chiudiLeFinestre() {
+  const script = join(QUI, "chiudi-finestre.ps1");
+  const scriptWindows = (await esegui(`wslpath -w "${script}"`)).uscita.trim();
+
+  const esito = await esegui(
+    `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${scriptWindows}" 2>&1`,
+    { timeoutMs: 30_000 }
+  );
+
+  const ultima = esito.uscita.trim().split("\n").pop() || "0";
+  const quante = Number.parseInt(ultima.trim(), 10);
+  return Number.isNaN(quante) ? 0 : quante;
+}
+
 // ============================================================================
 // Gli attrezzi
 // ============================================================================
@@ -98,15 +149,17 @@ const ATTREZZI = [
   {
     name: "compila",
     description:
-      "Compila l'applicazione TrovaLavoro in Release e restituisce gli errori del compilatore. " +
-      "Se l'applicazione è aperta la chiude prima: un exe in esecuzione tiene il file bloccato e la " +
-      "compilazione fallirebbe per un motivo che non ha niente a che vedere col codice.",
+      "Rifà l'ESEGUIBILE DI RIFERIMENTO sul Desktop — un file solo, autonomo, dall'ultimo codice — e " +
+      "restituisce gli errori del compilatore. È lo stesso file che «avvia_app» lancia e che Mirco apre " +
+      "col doppio clic: dopo questo attrezzo le due cose coincidono di nuovo. Se il riferimento è aperto " +
+      "lo chiude prima (il server MCP del prodotto resta vivo). Se la pubblicazione fallisce, sul Desktop " +
+      "resta il riferimento di prima.",
     inputSchema: {
       type: "object",
       properties: {
         tieni_aperta: {
           type: "boolean",
-          description: "Vero per non chiudere l'applicazione (e accettare che la copia dell'exe fallisca).",
+          description: "Vero per non chiudere l'applicazione (e accettare che la scrittura del file fallisca).",
         },
       },
       additionalProperties: false,
@@ -115,26 +168,35 @@ const ATTREZZI = [
       let premessa = "";
 
       if (!tieni_aperta) {
-        const chiusa = await esegui(`taskkill.exe /IM TrovaLavoro.exe /F 2>&1 | grep -c RIUSCITA || true`);
-        if (chiusa.uscita.trim() !== "0") premessa = "Ho chiuso l'applicazione, che teneva l'exe bloccato.\n";
-        await attendi(700);
+        const quante = await chiudiLeFinestre();
+        if (quante > 0) {
+          premessa = `Ho chiuso ${quante === 1 ? "l'applicazione" : `${quante} finestre`}, che teneva bloccato il file.\n`;
+        }
       }
 
-      const esito = await esegui(
-        `cd "${SRC}" && "${DOTNET}" build "${PROGETTO}" -c Release --nologo`,
-        { timeoutMs: 300_000 }
-      );
+      // I parametri della pubblicazione stanno nello script, non qui: una ricetta
+      // sola, due chiamanti. `cmd.exe` vuole una cartella di lavoro che Windows sappia
+      // nominare, e il repo sta su /mnt/c: da REPO va bene.
+      const batWindows = (await esegui(`wslpath -w "${RIFERIMENTO}"`)).uscita.trim();
+      const esito = await esegui(`cd "${REPO}" && cmd.exe /c "${batWindows}" 2>&1`, {
+        timeoutMs: 600_000,
+      });
 
-      // Del log serve poco: le righe di errore, e quante ce n'erano.
+      // Del log serve poco: le righe di errore, o il riquadro dell'identità.
       const errori = esito.uscita
         .split("\n")
         .filter((r) => / error [A-Z]+\d+/.test(r))
         .slice(0, 12);
 
+      const identita = esito.uscita
+        .split("\n")
+        .filter((r) => /^\s*(file|versione|commit|dimensione|SHA-256)\s*:/.test(r))
+        .join("\n");
+
       return testo(
         esito.codice === 0
-          ? `${premessa}Compilazione riuscita.`
-          : `${premessa}Compilazione FALLITA (codice ${esito.codice}).\n${errori.join("\n") || coda(esito.uscita, 10)}`,
+          ? `${premessa}Riferimento aggiornato sul Desktop.\n${identita || coda(esito.uscita, 8)}`
+          : `${premessa}Pubblicazione FALLITA (codice ${esito.codice}).\n${errori.join("\n") || coda(esito.uscita, 12)}`,
         esito.codice !== 0
       );
     },
@@ -247,11 +309,17 @@ const ATTREZZI = [
 
   {
     name: "chiudi_app",
-    description: "Chiude TrovaLavoro.exe, se è aperta.",
+    description:
+      "Chiude le finestre di TrovaLavoro, se ce ne sono. Il server MCP del prodotto — che è un " +
+      "TrovaLavoro.exe anche lui, con «--mcp» nella riga di comando — resta vivo.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     async esegui() {
-      const esito = await esegui(`taskkill.exe /IM TrovaLavoro.exe /F 2>&1 || true`);
-      return testo(coda(esito.uscita, 4));
+      const quante = await chiudiLeFinestre();
+      return testo(
+        quante === 0
+          ? "Non c'era nessuna finestra da chiudere."
+          : `Chiuse ${quante === 1 ? "una finestra" : `${quante} finestre`}.`
+      );
     },
   },
 
