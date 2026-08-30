@@ -107,6 +107,31 @@ Public Class PannelloRicerca
     ''' </summary>
     Private Const MinimoTestoDellaPagina As Integer = 200
 
+    ''' <summary>
+    ''' Quel che si dice a chi ha premuto mentre la pagina è ancora coperta dal <b>banner
+    ''' del consenso ai cookie</b> <i>(2026-08-30, visto sull'uso vero)</i>.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Il banner è la prima cosa che un portale mostra su una macchina nuova, e
+    ''' finché non gli si risponde <b>è</b> la pagina: il suo testo era l'unico che ci fosse
+    ''' da leggere, e finiva catturato e mandato all'analisi come se fosse un annuncio.
+    ''' Adesso il lettore lo lascia fuori (cap. 06.4) e quel che resta è troppo poco — ma
+    ''' senza sapere <i>perché</i> è poco, l'unica cosa da dire sarebbe «aspetta che finisca
+    ''' di caricarsi», cioè un consiglio che non porta da nessuna parte: la pagina ha finito
+    ''' da un pezzo e sta aspettando <b>lui</b>.</para>
+    ''' <para>È lo stesso difetto del vicolo cieco di R5 — il rimedio giusto detto alla
+    ''' persona sbagliata — e per questo il nome del bottone da ripremere si prende dal
+    ''' bottone invece di riscriverlo qui: chi lo rinominasse non lascerebbe indietro il
+    ''' consiglio.</para>
+    ''' </remarks>
+    Private Shared Function AvvisoDelConsenso(bottone As String) As String
+
+        Return "Questa pagina ti sta ancora chiedendo il consenso ai cookie: rispondi al " &
+               "banner («Accetta» o «Rifiuta»), aspetta che compaia la pagina e premi di " &
+               $"nuovo «{bottone}»."
+
+    End Function
+
     Private ReadOnly _suggerimenti As New ToolTip()
 
     Private _contesto As ContestoApp
@@ -518,8 +543,10 @@ Public Class PannelloRicerca
         Dim testo As String = If(pagina.Testo, String.Empty).Trim()
 
         If testo.Length < MinimoTestoDellaPagina Then
-            Racconta("In questa pagina non c'è testo da leggere. Aspetta che finisca di " &
-                     "caricarsi, oppure apri la pagina di un singolo annuncio.")
+            Racconta(If(pagina.ConsensoAperto,
+                        AvvisoDelConsenso(btnCattura.Text),
+                        "In questa pagina non c'è testo da leggere. Aspetta che finisca di " &
+                        "caricarsi, oppure apri la pagina di un singolo annuncio."))
             Return
         End If
 
@@ -609,8 +636,10 @@ Public Class PannelloRicerca
         Dim testo As String = If(pagina.Testo, String.Empty).Trim()
 
         If testo.Length < MinimoTestoDellaPagina Then
-            Racconta("In questa pagina non c'è testo da leggere. Aspetta che finisca di " &
-                     "caricarsi, oppure apri la tua pagina profilo.")
+            Racconta(If(pagina.ConsensoAperto,
+                        AvvisoDelConsenso(btnImportaCv.Text),
+                        "In questa pagina non c'è testo da leggere. Aspetta che finisca di " &
+                        "caricarsi, oppure apri la tua pagina profilo."))
             Return
         End If
 

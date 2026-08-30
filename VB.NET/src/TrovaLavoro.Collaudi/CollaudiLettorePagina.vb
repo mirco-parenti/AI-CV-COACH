@@ -81,6 +81,169 @@ Namespace Web
 
         End Sub
 
+        ' --- L'avviso sui cookie (2026-08-30) -------------------------------------------
+
+        ''' <summary>
+        ''' Il banner del consenso non entra nel testo dell'annuncio, e che ci fosse si
+        ''' dichiara.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il difetto vero, visto al primo avvio su una macchina nuova: premendo «Cattura
+        ''' annuncio» prima di rispondere al banner, nella casella dell'annuncio finiva il
+        ''' testo del banner — e nessuna guardia scattava, perché è corto e l'indirizzo è
+        ''' quello della ricerca.
+        ''' </remarks>
+        <TestMethod, TestCategory("Reale")>
+        Public Sub IlBannerDeiCookieRestaFuoriDalTestoESiDichiara()
+
+            Dim letta As PaginaLetta = Nothing
+
+            ConVista(
+                Async Function(vista) As Task
+                    Await CaricaAsync(vista, PaginaCol(BannerDeiCookie("onetrust-consent-sdk") & AnnuncioInPagina()))
+                    letta = Await New LettorePagina(vista.CoreWebView2).LeggiAsync()
+                End Function)
+
+            Assert.DoesNotContain("Rispettiamo la tua privacy", letta.Testo,
+                                  "il banner non è l'annuncio")
+            Assert.DoesNotContain("Accetta tutti", letta.Testo, "e nemmeno i suoi bottoni")
+            Assert.Contains("Cerchiamo un magazziniere", letta.Testo,
+                            "mentre l'annuncio sotto si legge tutto")
+            Assert.IsTrue(letta.ConsensoAperto, "e che il banner ci fosse si dichiara")
+
+        End Sub
+
+        ''' <summary>
+        ''' Una pagina ancora tutta coperta dal banner non ha testo da leggere — che è la
+        ''' verità, e prima non lo sembrava affatto.
+        ''' </summary>
+        <TestMethod, TestCategory("Reale")>
+        Public Sub UnaPaginaCopertaSoloDalBannerNonHaTestoDaLeggere()
+
+            Dim letta As PaginaLetta = Nothing
+
+            ConVista(
+                Async Function(vista) As Task
+                    Await CaricaAsync(vista, PaginaCol(BannerDeiCookie("onetrust-banner-sdk")))
+                    letta = Await New LettorePagina(vista.CoreWebView2).LeggiAsync()
+                End Function)
+
+            Assert.IsEmpty(letta.Testo.Trim(),
+                           "sotto il banner non c'era niente, e niente si porta via")
+            Assert.IsTrue(letta.ConsensoAperto,
+                          "così a chi ha premuto si può dire che deve rispondere al banner")
+
+        End Sub
+
+        ''' <summary>
+        ''' Un banner a cui si è già risposto non si dichiara aperto, e il bottoncino delle
+        ''' preferenze che resta a video non è un banner.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>I due modi in cui questo criterio poteva mentire dopo il consenso: il
+        ''' gestore lascia il banner nel documento ma spento, e lascia a video un bottone
+        ''' «Impostazioni cookie» che di un avviso ha il nome e non la sostanza — per quello
+        ''' c'è <see cref="LettorePagina.MinimoDellAvvisoSuiCookie"/>.</para>
+        ''' <para><b>Lo spegnimento qui è quello scomodo, ed è voluto</b>: il banner non è
+        ''' spento da sé, è dentro un contenitore spento che di nome non dice niente. Chi
+        ''' cerca l'avviso ci arriva dritto — il banner porta il nome giusto — e a quel punto
+        ''' <c>display</c> risponde «block», perché è il valore suo e non quello che gli
+        ''' antenati gli impongono. L'unica cosa che si accorge della differenza è che a
+        ''' video non occupa spazio. Con il banner spento da sé (la prima versione di questo
+        ''' collaudo) restava verde anche togliendo quel controllo: verde per il motivo
+        ''' sbagliato.</para>
+        ''' </remarks>
+        <TestMethod, TestCategory("Reale")>
+        Public Sub UnBannerGiaChiusoNonSiDichiaraAperto()
+
+            Dim letta As PaginaLetta = Nothing
+
+            ConVista(
+                Async Function(vista) As Task
+                    Await CaricaAsync(vista,
+                        PaginaCol("<div class='sovrapposizioni' style='display: none'>" &
+                                  BannerDeiCookie("onetrust-consent-sdk") & "</div>" &
+                                  "<div class='ot-floating-cookie-button'>Impostazioni cookie</div>" &
+                                  AnnuncioInPagina()))
+                    letta = Await New LettorePagina(vista.CoreWebView2).LeggiAsync()
+                End Function)
+
+            Assert.IsFalse(letta.ConsensoAperto,
+                           "a un banner spento si è già risposto: non c'è niente da fare")
+            Assert.Contains("Cerchiamo un magazziniere", letta.Testo, "e l'annuncio si legge")
+            Assert.Contains("Impostazioni cookie", letta.Testo,
+                            "il bottoncino si vede a video, e quel che si vede si legge")
+
+        End Sub
+
+        ''' <summary>
+        ''' Un testo che <i>parla</i> di cookie non è un banner, e una pagina intera nemmeno.
+        ''' </summary>
+        ''' <remarks>
+        ''' Qui il danno di sbagliarsi non è lasciar passare del rumore: è cancellare
+        ''' l'annuncio. Perciò il nome non basta da solo — serve anche che il pezzo sia
+        ''' corto come un avviso — e i due casi che tengono aperta questa porta sono un
+        ''' annuncio che i cookie li nomina e un contenitore che di nome fa «cookie» e
+        ''' dentro ha mezzo sito.
+        ''' </remarks>
+        <TestMethod, TestCategory("Reale")>
+        Public Sub UnTestoCheParlaDiCookieNonSiScambiaPerUnBanner()
+
+            Dim letta As PaginaLetta = Nothing
+
+            Dim lungo As String = String.Concat(
+                Enumerable.Repeat("Informativa estesa sull'uso dei cookie in questo sito. ", 120))
+
+            ConVista(
+                Async Function(vista) As Task
+                    Await CaricaAsync(vista,
+                        PaginaCol("<div class='descrizione'><p>Cerchiamo un magazziniere che sappia " &
+                                  "usare il gestionale, i cookie del portale interno e il muletto.</p></div>" &
+                                  "<div id='cookie-policy'><p>" & lungo & "</p></div>"))
+                    letta = Await New LettorePagina(vista.CoreWebView2).LeggiAsync()
+                End Function)
+
+            Assert.Contains("Cerchiamo un magazziniere", letta.Testo,
+                            "l'annuncio resta, anche se nomina i cookie")
+            Assert.Contains("Informativa estesa", letta.Testo,
+                            "e una pagina intera non si cancella perché si chiama «cookie»")
+            Assert.IsFalse(letta.ConsensoAperto, "né si dichiara un consenso che nessuno chiede")
+
+        End Sub
+
+        ''' <summary>
+        ''' Con una selezione il banner si dichiara lo stesso, e questa è l'altra strada per
+        ''' cui lo si va a cercare.
+        ''' </summary>
+        ''' <remarks>
+        ''' Quando l'utente ha selezionato il testo col mouse, la pagina non si percorre
+        ''' affatto: si legge la selezione e basta (R5). Il banner non passerebbe mai per le
+        ''' mani di chi lo toglie, e senza una seconda strada resterebbe invisibile.
+        ''' </remarks>
+        <TestMethod, TestCategory("Reale")>
+        Public Sub ConUnaSelezioneIlBannerSiDichiaraLoStesso()
+
+            Dim letta As PaginaLetta = Nothing
+
+            ConVista(
+                Async Function(vista) As Task
+                    Await CaricaAsync(vista,
+                        PaginaCol(BannerDeiCookie("onetrust-consent-sdk") &
+                                  "<div id='descrizione'><p>" & UnParagrafoLungo() & "</p></div>" &
+                                  "<script>" &
+                                  "var r = document.createRange();" &
+                                  "r.selectNodeContents(document.getElementById('descrizione'));" &
+                                  "var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);" &
+                                  "</script>"))
+                    letta = Await New LettorePagina(vista.CoreWebView2).LeggiAsync()
+                End Function)
+
+            Assert.IsTrue(letta.DaSelezione, "la selezione ha la precedenza, com'era")
+            Assert.IsTrue(letta.ConsensoAperto,
+                          "e il banner si trova anche senza percorrere la pagina")
+
+        End Sub
+
         ' ==================================================================
         ' Attrezzi
         ' ==================================================================
@@ -95,6 +258,46 @@ Namespace Web
                    "<p>Cerchiamo un magazziniere con esperienza.</p>" &
                    "<p>Città: Genova. Perù escluso.</p>" &
                    "</body></html>"
+
+        End Function
+
+        ''' <summary>Una pagina qualunque, con dentro quel che le si mette.</summary>
+        Private Shared Function PaginaCol(corpo As String) As String
+
+            Return "<!doctype html><html lang='it'><head><meta charset='utf-8'>" &
+                   "<title>Magazziniere — Rossi S.p.A.</title></head><body>" &
+                   corpo & "</body></html>"
+
+        End Function
+
+        ''' <summary>
+        ''' Il banner del consenso ai cookie, com'è fatto sui portali veri: un contenitore
+        ''' il cui nome dice cos'è, un testo che nomina i cookie e i due bottoni.
+        ''' </summary>
+        Private Shared Function BannerDeiCookie(nome As String) As String
+
+            Return $"<div id='{nome}'>" &
+                   "<h2>Rispettiamo la tua privacy</h2>" &
+                   "<p>Noi e i nostri partner usiamo i cookie per personalizzare i contenuti " &
+                   "e misurare gli annunci. Puoi accettare tutto o gestire le preferenze.</p>" &
+                   "<button>Accetta tutti</button><button>Rifiuta tutti</button>" &
+                   "</div>"
+
+        End Function
+
+        ''' <summary>L'annuncio, dove un portale lo mette: dentro il contenuto principale.</summary>
+        Private Shared Function AnnuncioInPagina() As String
+
+            Return "<main><h1>Magazziniere</h1><p>" & UnParagrafoLungo() & "</p></main>"
+
+        End Function
+
+        Private Shared Function UnParagrafoLungo() As String
+
+            Return "Cerchiamo un magazziniere con esperienza nella preparazione degli ordini " &
+                   "e nella gestione delle scorte, disponibile a lavorare su turni anche nel " &
+                   "fine settimana, con buona capacità di organizzazione e attenzione alla " &
+                   "sicurezza sul lavoro."
 
         End Function
 

@@ -316,6 +316,83 @@ Namespace Ui
 
         End Function
 
+        ''' <summary>
+        ''' Con la pagina ancora coperta dal banner dei cookie non si dice «aspetta che
+        ''' finisca di caricarsi»: si dice di rispondere al banner <i>(2026-08-30)</i>.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il lettore adesso il banner lo lascia fuori, e quel che resta è troppo poco per
+        ''' essere mandato: fin qui il rimedio era giusto. Sbagliato era il consiglio —
+        ''' aspettare un caricamento che è finito da un pezzo, perché la pagina sta
+        ''' aspettando <b>lui</b>. Lo stesso difetto del vicolo cieco di R5: un consiglio
+        ''' corretto dato alla persona che ha un altro problema.
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function UnaPaginaCopertaDalConsensoDiceDiRispondereAlBanner() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {
+                    .Titolo = "Offerte di lavoro magazziniere | Indeed",
+                    .Indirizzo = "https://it.indeed.com/jobs?q=magazziniere",
+                    .Testo = "", .ConsensoAperto = True}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Dim consegnato As Boolean = False
+                    AddHandler pannello.AnnuncioCatturato, Sub(mittente, argomenti) consegnato = True
+
+                    Await pannello.CatturaAsync()
+
+                    Assert.IsFalse(consegnato, "sotto un banner non c'è nessun annuncio")
+
+                    Dim riga As String = Etichetta(pannello, "lblStatoRicerca").Text
+
+                    Assert.Contains("consenso ai cookie", riga, "si dice cosa sta succedendo")
+                    Assert.Contains("Cattura annuncio", riga, "e quale bottone ripremere dopo")
+                    Assert.DoesNotContain("finisca di caricarsi", riga,
+                                          "non il consiglio che non porta da nessuna parte")
+                    Assert.IsLessThan(200, riga.Length,
+                                      "e corta: nelle due righe della riga grigia ci deve stare")
+
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Lo stesso vale per l'import del CV, che legge la stessa pagina dall'altra porta:
+        ''' lì il bottone da ripremere è il suo.
+        ''' </summary>
+        <TestMethod>
+        Public Async Function AncheLImportDelCvDiceDiRispondereAlBanner() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Pagina = New PaginaLetta With {
+                    .Titolo = "LinkedIn",
+                    .Indirizzo = "https://www.linkedin.com/in/mario-rossi/",
+                    .Testo = "", .ConsensoAperto = True}}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Dim consegnato As Boolean = False
+                    AddHandler pannello.CvCatturato, Sub(mittente, argomenti) consegnato = True
+
+                    Await pannello.ImportaCvAsync()
+
+                    Assert.IsFalse(consegnato, "e nemmeno nessun CV")
+
+                    Dim riga As String = Etichetta(pannello, "lblStatoRicerca").Text
+
+                    Assert.Contains("consenso ai cookie", riga, "si dice cosa sta succedendo")
+                    Assert.Contains("Importa CV", riga, "e il bottone è l'altro")
+                    Assert.DoesNotContain("pagina profilo", riga,
+                                          "aprire la pagina profilo qui non serve a niente")
+
+                End Function)
+
+        End Function
+
         <TestMethod>
         Public Async Function UnaPaginaCheNonSiLasciaLeggereNonFaCadereIlPannello() As Task
 

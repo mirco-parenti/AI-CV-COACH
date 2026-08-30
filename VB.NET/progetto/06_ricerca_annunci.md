@@ -162,6 +162,35 @@ video, in cinque minuti, guardando la casella dell'indirizzo. Adesso il segno bu
 **percorso** `/viewjob`, e il parametro vale solo dove un parametro comincia davvero — `?jk=`
 o `&jk=` — con l'indirizzo vero della prova finito nei collaudi.
 
+*E prima ancora del vicolo cieco c'era il banner* *(2026-08-30, visto al primo avvio su una
+macchina nuova)*. Su un profilo appena creato la prima cosa che un portale mostra non è un
+annuncio: è la richiesta di consenso ai cookie, e finché non le si risponde quel banner **è**
+la pagina. Premendo «Cattura annuncio» prima di rispondergli, nella casella di P4 finiva il
+testo del banner — «Rispettiamo la tua privacy», i due bottoni — e **nessuna guardia
+scattava**: è corto, quindi non sembra una lista, e l'indirizzo è quello della ricerca. Il
+difetto è piccolo ma capita **al primo uso**, che è il momento peggiore per sembrare rotti.
+
+La cura ha due metà, ed è la stessa forma di sempre: *si toglie il rumore, e si dice che
+c'era*. Il lettore riconosce l'avviso del consenso e **non lo mette nel testo** — lo riconosce
+dal **nome** (l'id o la classe contengono `cookie`, `consent`, `onetrust` e gli altri gestori
+diffusi) più la **parola** «cookie» nel suo testo, e solo se è lungo come un avviso e non come
+una pagina. Ma non lo cancella in silenzio: alza un campo, `consenso`, e P3 lo usa per dare il
+consiglio giusto. Senza quel campo una pagina ancora coperta si presenta come una pagina senza
+testo, e l'unica cosa da dirle sarebbe «aspetta che finisca di caricarsi» — mentre ha finito da
+un pezzo e sta aspettando **lui**: di nuovo il vicolo cieco, il rimedio giusto detto alla
+persona sbagliata. Ora dice: «questa pagina ti sta ancora chiedendo il consenso ai cookie:
+rispondi al banner, poi premi di nuovo «Cattura annuncio»» — e il nome del bottone lo legge dal
+bottone, così chi lo rinominasse non lascerebbe indietro il consiglio.
+
+Le due soglie sono i due lati della stessa prudenza, perché qui **il danno di sbagliarsi non è
+lasciar passare del rumore: è cancellare l'annuncio**. Sotto i 40 caratteri non è un avviso ma
+il link «Cookie policy» del piè di pagina, o il bottoncino delle preferenze che resta a video
+dopo aver accettato: quelli si vedono, e quel che si vede si legge. Sopra i 4000 non è più un
+avviso ma una pagina intera che si chiama «cookie», e quella non si tocca. *E chi cerca il
+banner lo cerca due volte: percorrendo la pagina, dove lo si toglie; e con una scansione
+mirata, perché quando l'utente ha selezionato il testo col mouse la pagina non si percorre
+affatto (R5) e il banner non passerebbe mai per le mani di chi lo leva.*
+
 Due cose che il programma **non** fa, e sono decisioni:
 - **non indovina** se la pagina sia un elenco. A dirlo è l'analisi, con lo schema vuoto;
   l'unica cosa che si controlla prima è che una pagina da mandare ci sia — sotto un

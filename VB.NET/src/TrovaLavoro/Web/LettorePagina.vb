@@ -38,6 +38,21 @@ Namespace Web
         ''' </summary>
         Public Property DaSelezione As Boolean
 
+        ''' <summary>
+        ''' Se nella pagina c'è un <b>avviso di consenso ai cookie</b> ancora aperto — il
+        ''' banner che i portali mostrano al primo accesso, e che finché non riceve risposta
+        ''' copre tutto il resto.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il suo testo <b>non</b> entra in <see cref="Testo"/>: è rumore che non riguarda
+        ''' nessun annuncio. Ma che ci fosse va detto, perché cambia il consiglio da dare a
+        ''' chi ha premuto: senza questo campo una pagina ancora coperta dal banner si
+        ''' presenta come una pagina senza testo, e l'unica cosa che le si sa dire è
+        ''' «aspetta che finisca di caricarsi» — mentre ha finito da un pezzo, e sta
+        ''' aspettando lui.
+        ''' </remarks>
+        Public Property ConsensoAperto As Boolean
+
     End Class
 
     ''' <summary>
@@ -110,6 +125,22 @@ Namespace Web
         ''' Sotto, è più probabile un clic andato a vuoto che una scelta voluta.
         ''' </summary>
         Public Const MinimoDellaSelezione As Integer = 200
+
+        ''' <summary>
+        ''' Fra quanti caratteri sta il testo di un <b>avviso sui cookie</b>, perché lo si
+        ''' riconosca come tale.
+        ''' </summary>
+        ''' <remarks>
+        ''' Sono i due lati della stessa prudenza. Sotto il minimo c'è il link «Cookie
+        ''' policy» del piè di pagina o il bottoncino delle preferenze che resta a video
+        ''' dopo aver accettato: toglierli non servirebbe a niente e dichiarare per loro un
+        ''' consenso da dare sarebbe falso. Sopra il massimo non c'è più un avviso ma una
+        ''' pagina intera — una privacy policy, o un contenitore che si chiama «cookie» e
+        ''' dentro ha tutto il sito: quello non si tocca, perché il danno di sbagliarsi è
+        ''' cancellare l'annuncio invece di un banner.
+        ''' </remarks>
+        Public Const MinimoDellAvvisoSuiCookie As Integer = 40
+        Public Const MassimoDellAvvisoSuiCookie As Integer = 4000
 
         ' Le soglie con cui si riconosce una pagina-risultati. Sono volutamente SEVERE:
         ' sbagliare dicendo «sembra una lista» su un annuncio buono ferma chi aveva ragione,
@@ -428,10 +459,30 @@ Namespace Web
         ''' Si toglie solo per <i>decidere</i> — quel che resta dentro un pezzo che entra
         ''' non si tocca — e si scarta soltanto ciò che, tolte quelle, non ha più niente da
         ''' dire.</para>
+        ''' <para><b>L'avviso sui cookie si lascia fuori, e si dichiara</b>
+        ''' <i>(2026-08-30)</i>. Su una macchina nuova la prima cosa che un portale mostra è
+        ''' il banner del consenso, e finché non gli si risponde quel banner <b>è</b> la
+        ''' pagina: premendo «Cattura annuncio» finiva nella casella dell'annuncio il testo
+        ''' del banner, e nessuna guardia scattava — è corto, e l'indirizzo è quello della
+        ''' ricerca. Si riconosce dal <b>nome</b> (id o classe: <c>cookie</c>,
+        ''' <c>consent</c>, <c>onetrust</c>, i nomi dei gestori del consenso più diffusi)
+        ''' più la <b>parola</b> «cookie» nel suo testo — che è la stessa in tutte le lingue
+        ''' che ci riguardano — e vale solo dentro
+        ''' <see cref="MinimoDellAvvisoSuiCookie"/>…<see cref="MassimoDellAvvisoSuiCookie"/>
+        ''' caratteri. Chi lo trova non lo cancella e basta: alza <c>consenso</c>, perché a
+        ''' chi ha premuto si deve poter dire <i>perché</i> non c'era niente da leggere.</para>
+        ''' <para><b>Perché togliere un ramo obbliga a scendere.</b> Quando dentro un
+        ''' elemento non ci sono blocchi si prendeva il suo <c>innerText</c> in un colpo
+        ''' solo, ed è ancora così — ma solo se non si è tolto niente. <c>innerText</c>
+        ''' ignora già da sé quel che è nascosto e gli <c>script</c>, e quindi non li
+        ''' riporta indietro; il banner invece è visibile, e chiederlo al padre lo
+        ''' rimetterebbe dentro dalla porta di servizio, esattamente com'era prima.</para>
         ''' </remarks>
         Private Shared Function Copione() As String
 
             Dim massimo As String = MassimoCaratteri.ToString(CultureInfo.InvariantCulture)
+            Dim minimoAvviso As String = MinimoDellAvvisoSuiCookie.ToString(CultureInfo.InvariantCulture)
+            Dim massimoAvviso As String = MassimoDellAvvisoSuiCookie.ToString(CultureInfo.InvariantCulture)
 
             Return "(function () {" &
                    "  function visibile(e) {" &
@@ -455,14 +506,43 @@ Namespace Web
                    "    var g = e.tagName;" &
                    "    return g === 'SCRIPT' || g === 'STYLE' || g === 'NOSCRIPT' || g === 'TEMPLATE';" &
                    "  }" &
+                   "  function siVede(e) {" &
+                   "    if (!visibile(e)) return false;" &
+                   "    var r = e.getBoundingClientRect();" &
+                   "    return r.width > 0 && r.height > 0;" &
+                   "  }" &
+                   "  var segniDelConsenso = ['cookie', 'consent', 'consenso', 'gdpr', 'onetrust'," &
+                   "                          'didomi', 'usercentrics', 'osano', 'privacy-banner'];" &
+                   "  function eUnAvvisoSuiCookie(e) {" &
+                   "    var g = e.tagName;" &
+                   "    if (g === 'BODY' || g === 'MAIN' || g === 'ARTICLE') return false;" &
+                   "    var id = e.id || '';" &
+                   "    var classe = (typeof e.className === 'string') ? e.className : '';" &
+                   "    var nome = (id + ' ' + classe).toLowerCase(), segno = false;" &
+                   "    for (var i = 0; i < segniDelConsenso.length; i++) {" &
+                   "      if (nome.indexOf(segniDelConsenso[i]) >= 0) { segno = true; break; }" &
+                   "    }" &
+                   "    if (!segno) return false;" &
+                   "    if (e.querySelector('main, article, [role=main]')) return false;" &
+                   "    var t = e.innerText || '';" &
+                   $"    if (t.length < {minimoAvviso} || t.length > {massimoAvviso}) return false;" &
+                   "    return t.toLowerCase().indexOf('cookie') >= 0;" &
+                   "  }" &
+                   "  var trovatoUnAvviso = false;" &
+                   "  function daTogliere(e) {" &
+                   "    if (!eUnAvvisoSuiCookie(e)) return false;" &
+                   "    trovatoUnAvviso = true;" &
+                   "    return true;" &
+                   "  }" &
                    "  function raccogli(e, pezzi) {" &
-                   "    var figli = e.childNodes, dentroCiSonoBlocchi = false;" &
+                   "    var figli = e.childNodes, dentroCiSonoBlocchi = false, hoTolto = false;" &
                    "    for (var i = 0; i < figli.length; i++) {" &
                    "      var n = figli[i];" &
                    "      if (n.nodeType !== 1 || daSaltare(n) || !visibile(n)) continue;" &
+                   "      if (daTogliere(n)) { hoTolto = true; continue; }" &
                    "      if (bloccante(n)) { dentroCiSonoBlocchi = true; break; }" &
                    "    }" &
-                   "    if (!dentroCiSonoBlocchi) {" &
+                   "    if (!dentroCiSonoBlocchi && !hoTolto) {" &
                    "      var tutto = e.innerText;" &
                    "      metti(pezzi, tutto);" &
                    "      return;" &
@@ -475,6 +555,7 @@ Namespace Web
                    "        continue;" &
                    "      }" &
                    "      if (f.nodeType !== 1 || daSaltare(f) || !visibile(f)) continue;" &
+                   "      if (daTogliere(f)) continue;" &
                    "      raccogli(f, pezzi);" &
                    "    }" &
                    "  }" &
@@ -489,12 +570,25 @@ Namespace Web
                    "    if (document.body) raccogli(document.body, pezzi);" &
                    "    t = pezzi.join('\n').replace(/\n{3,}/g, '\n\n');" &
                    "  }" &
+                   "  if (!trovatoUnAvviso && document.body) {" &
+                   "    var forse = document.body.querySelectorAll(" &
+                   "      '[id*=cookie],[class*=cookie],[id*=consent],[class*=consent]," &
+                   "       [id*=onetrust],[class*=onetrust],[id*=didomi],[id*=usercentrics]," &
+                   "       [class*=osano],[id*=gdpr],[class*=gdpr]');" &
+                   "    for (var k = 0; k < forse.length && k < 40; k++) {" &
+                   "      if (siVede(forse[k]) && eUnAvvisoSuiCookie(forse[k])) {" &
+                   "        trovatoUnAvviso = true;" &
+                   "        break;" &
+                   "      }" &
+                   "    }" &
+                   "  }" &
                    "  return JSON.stringify({" &
                    "    titolo: document.title || ''," &
                    "    indirizzo: location.href || ''," &
                    $"    testo: t.slice(0, {massimo})," &
                    $"    troncato: t.length > {massimo}," &
-                   "    selezione: daSelezione" &
+                   "    selezione: daSelezione," &
+                   "    consenso: trovatoUnAvviso" &
                    "  });" &
                    "})()"
 
@@ -528,6 +622,7 @@ Namespace Web
                 letta.Testo = Testo(contenuto, "testo")
                 letta.Troncato = Vero(contenuto, "troncato")
                 letta.DaSelezione = Vero(contenuto, "selezione")
+                letta.ConsensoAperto = Vero(contenuto, "consenso")
 
             Catch ex As JsonException
                 ' Una risposta che non è JSON non è un guasto da propagare: è una pagina
