@@ -73,8 +73,50 @@ Namespace Dati
 
         ''' <summary>Scrive un guasto: dove è successo, che cos'era, che cosa diceva.</summary>
         Public Sub AnnotaGuasto(dove As String, eccezione As Exception)
-            Annota($"GUASTO in {If(dove, "un posto senza nome")} — {UltimaRete.MessaggioPerIlDiario(eccezione)}")
+            Annota($"GUASTO {NelPosto(dove)} — {UltimaRete.MessaggioPerIlDiario(eccezione)}")
         End Sub
+
+        ''' <summary>
+        ''' Gli articoli che «in» assorbe. L'ordine conta: quelli che portano lo spazio
+        ''' vanno provati prima di <c>l'</c>, che lo spazio non ce l'ha.
+        ''' </summary>
+        Private Shared ReadOnly Fusioni As (Articolo As String, Fuso As String)() = {
+            ("gli ", "negli "), ("lo ", "nello "), ("la ", "nella "), ("le ", "nelle "),
+            ("il ", "nel "), ("i ", "nei "), ("l'", "nell'"), ("l’", "nell’")
+        }
+
+        ''' <summary>
+        ''' «in» e l'articolo del posto, fusi come vuole l'italiano: <c>l'ultima rete</c>
+        ''' diventa <c>nell'ultima rete</c>, <c>il ciclo del server MCP</c> diventa
+        ''' <c>nel ciclo del server MCP</c>, e quel che non comincia per articolo resta
+        ''' <c>in …</c>.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Sta qui e non nei chiamanti perché chi chiama sa <b>dove</b> è successo —
+        ''' «la prova della chiave API» — e non deve sapere in che frase quel posto andrà a
+        ''' finire. Fino al 2026-08-30 la riga si componeva come <c>GUASTO in {dove}</c> e
+        ''' usciva «GUASTO in l'ultima rete»: i sette posti che il prodotto nomina
+        ''' cominciano <i>tutti</i> per articolo, quindi sbagliavano tutti e sette. Non era
+        ''' un caso di confine: era ogni riga di guasto che il diario abbia mai scritto.</para>
+        ''' <para>È vissuto a lungo perché il diario non si vede — non è interfaccia, è il
+        ''' file che esce col foglietto di diagnostica, cioè il solo pezzo di questa
+        ''' cartella fatto per essere <b>letto da altri</b>. Ed è proprio per questo che va
+        ''' scritto in italiano.</para>
+        ''' </remarks>
+        Private Shared Function NelPosto(dove As String) As String
+
+            Dim posto As String = If(dove, String.Empty).Trim()
+            If posto.Length = 0 Then Return "in un posto senza nome"
+
+            For Each fusione In Fusioni
+                If posto.StartsWith(fusione.Articolo, StringComparison.OrdinalIgnoreCase) Then
+                    Return fusione.Fuso & posto.Substring(fusione.Articolo.Length)
+                End If
+            Next
+
+            Return "in " & posto
+
+        End Function
 
         ''' <summary>
         ''' Le ultime righe del diario, dalla più vecchia alla più recente. Vuoto se il

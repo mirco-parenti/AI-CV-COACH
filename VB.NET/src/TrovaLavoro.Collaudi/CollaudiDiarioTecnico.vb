@@ -117,10 +117,50 @@ Namespace Dati
 
                     Dim riga As String = diario.UltimeRighe(1)(0)
 
-                    Assert.Contains("la stampa del PDF", riga, "dove è successo")
+                    Assert.Contains("nella stampa del PDF", riga, "dove è successo")
                     Assert.Contains("TimeoutException", riga, "che cos'era")
                     Assert.Contains("non è finita entro 60 secondi", riga, "che cosa diceva")
                 End Sub)
+        End Sub
+
+        ''' <summary>
+        ''' Il guasto dice dove è successo in italiano: «nell'ultima rete», non «in
+        ''' l'ultima rete».
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Si provano <b>tutti e sette</b> i posti che il prodotto nomina davvero,
+        ''' presi uno per uno dai chiamanti di <c>AnnotaGuasto</c>, più il caso senza nome.
+        ''' Cominciano tutti per articolo, e fino al 2026-08-30 uscivano tutti
+        ''' sgrammaticati: non era un caso di confine, era ogni riga di guasto che il
+        ''' diario abbia mai scritto.</para>
+        ''' <para>Il collaudo che c'era non poteva accorgersene, ed è istruttivo: chiedeva
+        ''' che la riga contenesse «la stampa del PDF», e «nella stampa del PDF» quella
+        ''' sottostringa ce l'ha già. Era verde, e cieco proprio a questo — per quello
+        ''' adesso il suo atteso porta la preposizione.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub IlGuastoDiceDoveEsuccessoInItaliano()
+
+            Dim attesi As (Posto As String, Frase As String)() = {
+                ("l'ultima rete", "GUASTO nell'ultima rete"),
+                ("il ciclo del server MCP", "GUASTO nel ciclo del server MCP"),
+                ("la prova della chiave API", "GUASTO nella prova della chiave API"),
+                ("l'elenco dei modelli disponibili", "GUASTO nell'elenco dei modelli disponibili"),
+                ("il controllo della versione", "GUASTO nel controllo della versione"),
+                ("il salvataggio dell'informativa vista", "GUASTO nel salvataggio dell'informativa vista"),
+                ("un compito che nessuno stava aspettando", "GUASTO in un compito che nessuno stava aspettando"),
+                (Nothing, "GUASTO in un posto senza nome")
+            }
+
+            ConDiarioTemporaneo(
+                Sub(diario, cartella)
+                    For Each atteso In attesi
+                        diario.AnnotaGuasto(atteso.Posto, New TimeoutException("scaduto"))
+                        Assert.Contains(atteso.Frase, diario.UltimeRighe(1)(0),
+                                        $"il posto «{atteso.Posto}»")
+                    Next
+                End Sub)
+
         End Sub
 
         <TestMethod>

@@ -76,7 +76,7 @@ Adesso si può.
 | Attrezzo | Cosa fa |
 |---|---|
 | `compila` | Rifà l'**eseguibile di riferimento sul Desktop** — un file solo, autonomo, dall'ultimo codice — e restituisce gli errori del compilatore. Chiude prima il riferimento, se è aperto (il server MCP del prodotto resta vivo). Se fallisce, sul Desktop resta quello di prima. |
-| `collaudi` | Fa girare il banco (`dotnet test`); con `filtro` ne esegue solo una parte. |
+| `collaudi` | Fa girare il banco (`dotnet test`, Release); con `filtro` ne esegue solo una parte. **Non chiude niente**: compila in `banco/` invece che in `bin/`, così convive con l'applicazione aperta e col server MCP del prodotto. |
 | `avvia_app` | Avvia il **riferimento sul Desktop** con la chiave API presa dal `.env` del prototipo. Con `dati` lo fa partire su una **cartella usa-e-getta** (`--dati`), che è il modo di provare ciò che cancella senza toccare i dati veri. |
 | `stato_app` · `chiudi_app` | Se è viva; e la chiude — **solo le finestre**, mai il server MCP del prodotto, che ha lo stesso nome di processo. |
 | `schermata` | Riprende la finestra dell'applicazione (o tutto il desktop) e restituisce il PNG. Se non riesce a portarla davanti lo **dichiara**: la fotografia riprende quel rettangolo di schermo, e potrebbe ritrarre la finestra che le sta sopra. |
@@ -501,13 +501,13 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   vanificherebbe la prova. L'exe si lancia a mano, con la variabile d'ambiente che si vuole
   (ricordando `WSLENV`) e sempre con `--dati` su una cartella usa-e-getta.
 - **Chiudere per nome ammazza anche il server MCP del prodotto.** *(2026-08-21, dal collaudo
-  di tappa di T8. **Dal 2026-08-30 vale solo per `collaudi`**: `compila` e `chiudi_app` sono
-  guariti — passano da `chiudi-finestre.ps1`, che guarda la riga di comando e lascia vivere
-  chi ha `--mcp`. Provato con una finestra aperta davvero: chiusa lei, il server è rimasto.
-  `collaudi` no, e per una ragione: fa `dotnet test -c Release`, che ricompila l'applicazione
-  in `bin\Release` — proprio il file che il server tiene bloccato. Lì la scelta è fra
-  sacrificare i tool e far fallire il banco, e non è una scelta da fare di nascosto dentro un
-  attrezzo.)* I tre attrezzi facevano `taskkill.exe /IM TrovaLavoro.exe /F`:
+  di tappa di T8. **Dal 2026-08-30 non lo fa più nessuno dei tre.** `compila` e `chiudi_app`
+  sono guariti la mattina — passano da `chiudi-finestre.ps1`, che guarda la riga di comando e
+  lascia vivere chi ha `--mcp`. Provato con una finestra aperta davvero: chiusa lei, il server
+  è rimasto. `collaudi` è guarito la sera, e in un altro modo: non chiude più niente affatto,
+  perché non compila più dove il server tiene bloccato — vedi il punto qui sotto. Quel che
+  segue resta scritto perché è la storia, e perché il modo di distinguere i due processi
+  serve ancora.)* I tre attrezzi facevano `taskkill.exe /IM TrovaLavoro.exe /F`:
   chiudono per **nome**, non per processo. Da quando esiste il server MCP del **prodotto**
   (cap. 09), un client che ce l'abbia registrato — Claude Code, per dirne uno — tiene in vita
   un secondo `TrovaLavoro.exe` senza finestra, e quei tre attrezzi lo spengono insieme
@@ -520,6 +520,22 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   `Get-Process TrovaLavoro | Select Id, StartTime, MainWindowTitle` — il server è quello
   **senza titolo di finestra**; per chiudere solo l'applicazione si usa `CloseMainWindow()`,
   che è la chiusura gentile, non `taskkill /F`.
+- **Il banco non ha bisogno di `bin/`, e chiedere una cartella qualunque non basta.**
+  *(2026-08-30, sera.)* La cura del punto qui sopra per `collaudi` è una riga:
+  `dotnet test -c Release -p:BaseOutputPath='banco\'`. Compilando altrove, l'exe di
+  `bin\Release` non viene toccato, il server MCP del prodotto se lo tiene bloccato quanto
+  vuole, e il banco gira **in Release** con l'applicazione aperta e i tool della sessione
+  vivi: 1289 verdi provati così, senza chiudere niente.
+  **La trappola sta nel percorso.** Il primo tentativo mandava l'output in
+  `C:\Temp\collaudi-trovalavoro\`, che è fuori dal repo e sembra la scelta più pulita: la
+  compilazione riesce — «Errori: 0» — e poi cadono **dieci** collaudi con
+  `DirectoryNotFoundException: Non trovo la cartella dei casi`. Il banco trova i suoi casi
+  **risalendo** da `AppContext.BaseDirectory` fino al `.vbproj` (`CasiDiCollaudo.Cartella`), e
+  da `C:\Temp` non risale a niente. Il percorso va **relativo** — `banco\`, senza radice —
+  così ogni progetto scrive dentro di sé e la risalita continua a funzionare. È una diagnosi
+  che costa cara perché il messaggio d'errore del `BaseOutputPath` non parla: dice che manca
+  una cartella, e sembra un guasto del banco. La cartella è ignorata da git
+  (`VB.NET/src/.gitignore`).
 - **Rimettere a posto un file falsificato con `mv` non fa ricompilare.** *(2026-08-24, dal
   quinto tempo di T9e.)* Falsificare vuol dire rompere apposta il codice e guardare se il
   collaudo diventa rosso (regola 14): si mette da parte l'originale, si guasta il file, si

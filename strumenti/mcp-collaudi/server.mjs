@@ -206,7 +206,8 @@ const ATTREZZI = [
     name: "collaudi",
     description:
       "Fa girare il banco di collaudo (dotnet test, Release). Con «filtro» ne esegue solo una parte, " +
-      "come farebbe --filter FullyQualifiedName~<filtro>. Restituisce il conteggio e i collaudi rossi.",
+      "come farebbe --filter FullyQualifiedName~<filtro>. Restituisce il conteggio e i collaudi rossi. " +
+      "Non chiude niente: né l'applicazione aperta né il server MCP del prodotto.",
     inputSchema: {
       type: "object",
       properties: {
@@ -218,13 +219,20 @@ const ATTREZZI = [
       additionalProperties: false,
     },
     async esegui({ filtro }) {
-      // Anche il banco ricompila l'applicazione: se è aperta, tiene bloccato l'exe.
-      await esegui(`taskkill.exe /IM TrovaLavoro.exe /F > /dev/null 2>&1 || true`);
-      await attendi(500);
-
+      // Il banco compila in `banco/` invece che in `bin/`, e per questo non chiude più
+      // niente. L'exe di `bin/Release` resta bloccato finché vive un server MCP del
+      // prodotto — che porta lo stesso nome di processo dell'applicazione — e fino al
+      // 2026-08-30 l'unico modo di arrivare in fondo era un `taskkill /IM` che li
+      // portava via tutti insieme, i tool della sessione compresi.
+      //
+      // Il percorso è **relativo** apposta, ed è la parte che costa di più da scoprire:
+      // così ogni progetto scrive dentro di sé, e il banco continua a trovare la sua
+      // cartella `casi/` risalendo dalla dll fino al .vbproj. Con un percorso assoluto
+      // (provato: C:\Temp\…) la compilazione riesce e poi cadono dieci collaudi, con un
+      // «Non trovo la cartella dei casi» che del BaseOutputPath non parla.
       const parte = filtro ? ` --filter "FullyQualifiedName~${filtro}"` : "";
       const esito = await esegui(
-        `cd "${SRC}" && "${DOTNET}" test "${COLLAUDI}" -c Release --nologo${parte}`
+        `cd "${SRC}" && "${DOTNET}" test "${COLLAUDI}" -c Release --nologo -p:BaseOutputPath='banco\\'${parte}`
       );
 
       const righe = esito.uscita

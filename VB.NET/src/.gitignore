@@ -3,6 +3,11 @@ bin/
 obj/
 pubblicazione/
 
+# Dove compila il banco quando lo lancia lo strumento di collaudo. Non e' una
+# seconda bin/ per capriccio: l'exe di bin/Release resta bloccato finche' vive un
+# server MCP del prodotto, e da qui il banco gira in Release senza chiudere niente.
+banco/
+
 # File locali di Visual Studio
 .vs/
 *.user
