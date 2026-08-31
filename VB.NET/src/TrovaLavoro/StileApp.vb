@@ -86,21 +86,53 @@ Public Module StileApp
 
     ''' <summary>Didascalie, suggerimenti, stati.</summary>
     ''' <remarks>
-    ''' Dal 2026-08-30 è <c>#6A737C</c> e non più <c>#6C757D</c>, il grigio da cui viene:
-    ''' su <see cref="SfondoBase"/> quello faceva <b>4,45 a 1</b>, un centesimo sotto il
+    ''' Dal 2026-08-30 non è più <c>#6C757D</c>, il grigio da cui viene: su
+    ''' <see cref="SfondoBase"/> quello faceva <b>4,45 a 1</b>, un centesimo sotto il
     ''' 4,5 che WCAG 2 chiede a un testo piccolo — ed è la coppia con cui l'applicazione
     ''' scrive <i>ogni</i> didascalia, non un caso di confine. Tre punti più scuro in
-    ''' tutto, che a occhio non si distinguono, portano il rapporto a <b>4,57</b>. Su
-    ''' <see cref="SfondoContenuto"/> passava già (4,69) e adesso fa 4,82: il difetto
-    ''' stava sul fondo delle finestre, che dei due è il più chiaro.
+    ''' tutto, che a occhio non si distinguono, lo portarono a <b>4,57</b>.
+    ''' <para>Dal 2026-08-31 ne scende altri due, a <c>#68717A</c>, e per la stessa
+    ''' ragione a un giro di distanza: le pagine hanno preso il fondo caldo
+    ''' (<see cref="FondoPagina"/>), che parte già sotto il bianco, e lì il grigio di ieri
+    ''' faceva <b>4,39</b>. Adesso fa <b>4,52</b> sul fondo delle pagine, 4,71 su
+    ''' <see cref="SfondoBase"/> e 4,77 su <see cref="FondoCasella"/>: il fondo si è
+    ''' scaldato, la didascalia si è scurita, e la coppia resta sopra la soglia su
+    ''' <b>tutti e quattro</b> i fondi su cui l'applicazione la scrive.</para>
     ''' </remarks>
-    Public ReadOnly TestoSecondario As Color = ColorTranslator.FromHtml("#6A737C")
+    Public ReadOnly TestoSecondario As Color = ColorTranslator.FromHtml("#68717A")
 
     ''' <summary>Sfondo delle finestre.</summary>
     Public ReadOnly SfondoBase As Color = ColorTranslator.FromHtml("#F8F9FA")
 
     ''' <summary>Aree di lavoro: testi, anteprime, input.</summary>
     Public ReadOnly SfondoContenuto As Color = ColorTranslator.FromHtml("#FFFFFF")
+
+    ''' <summary>Il fondo delle pagine che si aprono dal menu (cap. 03.6).</summary>
+    ''' <remarks>
+    ''' <see cref="SfondoBase"/> scaldato: è <see cref="FondoMenu"/> con sopra lo stesso
+    ''' velo che porta il fondo delle finestre sotto il bianco — sette punti di rosso, sei
+    ''' di verde, cinque di blu — e viene lo stesso identico stacco di prima (0,053 di
+    ''' luminanza contro 0,054). Dal 2026-08-31 le sei pagine non sono più isole grigie
+    ''' aperte da una soglia avorio: l'avorio entra con loro, e il velo resta a dire dove
+    ''' finisce la pagina e comincia l'area di lavoro.
+    ''' <para>Non sostituisce <see cref="SfondoBase"/>, gli sta accanto: quel grigino resta
+    ''' il fondo delle <b>finestre</b> — impostazioni, backup, conferme — e il fondo dei
+    ''' bottoni spenti, che di questo giro non erano.</para>
+    ''' </remarks>
+    Public ReadOnly FondoPagina As Color = ColorTranslator.FromHtml("#F8F4EB")
+
+    ''' <summary>Le aree di lavoro dentro quelle pagine: caselle, elenchi, schede.</summary>
+    ''' <remarks>
+    ''' È <see cref="FondoMenu"/> preso di peso — lo stesso avorio, lo stesso codice — e
+    ''' sta qui come costante propria per la ragione per cui <see cref="FondoMarchio"/> sta
+    ''' accanto ad <see cref="Accento"/>: sono due ruoli, e se un domani la soglia cambia
+    ''' colore non deve trascinarsi dietro ogni casella dell'applicazione.
+    ''' <para>Gemello caldo di <see cref="SfondoContenuto"/>, che resta il bianco delle
+    ''' finestre — con una sola eccezione, e dichiarata: le <b>Impostazioni</b>, che sono
+    ''' la settima porta del menu e si aprono in una finestra solo per come sono fatte,
+    ''' prendono questo fondo come le altre sei destinazioni.</para>
+    ''' </remarks>
+    Public ReadOnly FondoCasella As Color = ColorTranslator.FromHtml("#FFFAF0")
 
     ''' <summary>Separatori e bordi da 1 px.</summary>
     Public ReadOnly BordoLeggero As Color = ColorTranslator.FromHtml("#DEE2E6")
@@ -213,7 +245,7 @@ Public Module StileApp
 
     ''' <summary>Bottone della barra superiore che porta un nome lungo.</summary>
     ''' <remarks>
-    ''' Ne esistono due — «Le mie candidature» e «Confronta ⭐ ANNUNCIO - CV» — e a 110
+    ''' Ne esistono due — «Le mie candidature» e «Confronta ★ ANNUNCIO - CV» — e a 110
     ''' pixel il nome ci finiva tagliato: un bottone della barra non manda a capo e non
     ''' mette i puntini, taglia e basta. Allargarli non è un'eccezione allo stile, è la
     ''' stessa misura con la larghezza che quei testi chiedono; l'altezza resta identica,

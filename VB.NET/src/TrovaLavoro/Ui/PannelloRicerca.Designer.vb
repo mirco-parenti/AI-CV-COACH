@@ -1,4 +1,4 @@
-<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class PannelloRicerca
     Inherits System.Windows.Forms.UserControl
 
@@ -171,6 +171,7 @@ Partial Class PannelloRicerca
         '
         'txtCosa
         '
+        Me.txtCosa.BackColor = StileApp.FondoCasella
         Me.txtCosa.Location = New System.Drawing.Point(370, 36)
         Me.txtCosa.Name = "txtCosa"
         Me.txtCosa.PlaceholderText = "magazziniere, perito elettronico…"
@@ -189,6 +190,7 @@ Partial Class PannelloRicerca
         '
         'txtDove
         '
+        Me.txtDove.BackColor = StileApp.FondoCasella
         Me.txtDove.Location = New System.Drawing.Point(654, 36)
         Me.txtDove.Name = "txtDove"
         Me.txtDove.PlaceholderText = "Genova, Chiavari…"
@@ -238,6 +240,7 @@ Partial Class PannelloRicerca
         Me.txtIndirizzo.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.txtIndirizzo.AccessibleName = "Indirizzo"
+        Me.txtIndirizzo.BackColor = StileApp.FondoCasella
         Me.txtIndirizzo.Font = StileApp.FontDatiTecnici
         Me.txtIndirizzo.Location = New System.Drawing.Point(96, 76)
         Me.txtIndirizzo.Name = "txtIndirizzo"
@@ -258,7 +261,7 @@ Partial Class PannelloRicerca
         '
         ' Il riquadro del browser: un bordo da 1 px che separa la pagina del portale
         ' dall'applicazione, così è sempre chiaro dove finisce l'una e comincia l'altra.
-        Me.pnlCorpo.BackColor = StileApp.SfondoContenuto
+        Me.pnlCorpo.BackColor = StileApp.FondoCasella
         Me.pnlCorpo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.pnlCorpo.Controls.Add(Me.vista)
         Me.pnlCorpo.Dock = System.Windows.Forms.DockStyle.Fill
@@ -272,7 +275,7 @@ Partial Class PannelloRicerca
         '
         Me.vista.AllowExternalDrop = False
         Me.vista.CreationProperties = Nothing
-        Me.vista.DefaultBackgroundColor = System.Drawing.Color.White
+        Me.vista.DefaultBackgroundColor = StileApp.FondoCasella
         Me.vista.Dock = System.Windows.Forms.DockStyle.Fill
         Me.vista.Location = New System.Drawing.Point(1, 1)
         Me.vista.Name = "vista"
@@ -324,7 +327,7 @@ Partial Class PannelloRicerca
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.BackColor = StileApp.SfondoBase
+        Me.BackColor = StileApp.FondoPagina
         Me.Controls.Add(Me.pnlCorpo)
         Me.Controls.Add(Me.pnlComandi)
         Me.Controls.Add(Me.pnlIntestazione)

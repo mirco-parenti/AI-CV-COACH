@@ -214,7 +214,7 @@ Partial Class PannelloHome
         ' La coda delle opportunità (cap. 03.6): una lista di sistema come quella dei
         ' giudizi in P4 — a cambiare sono le righe, mai la struttura (cap. 03.1).
         ' L'intestazione si può cliccare per ordinare, e il doppio clic riapre.
-        Me.lvwCoda.BackColor = StileApp.SfondoContenuto
+        Me.lvwCoda.BackColor = StileApp.FondoCasella
         Me.lvwCoda.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lvwCoda.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colMatch, Me.colAzienda, Me.colRuolo, Me.colStato, Me.colFonte, Me.colQuando})
         Me.lvwCoda.Dock = System.Windows.Forms.DockStyle.Fill
@@ -323,7 +323,7 @@ Partial Class PannelloHome
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.BackColor = StileApp.SfondoBase
+        Me.BackColor = StileApp.FondoPagina
         Me.Controls.Add(Me.pnlCorpo)
         Me.Controls.Add(Me.pnlFiltro)
         Me.Controls.Add(Me.pnlProfiloInSintesi)

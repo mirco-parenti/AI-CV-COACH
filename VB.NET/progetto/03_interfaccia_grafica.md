@@ -41,9 +41,11 @@ Tutti i colori e i font dell'applicazione vengono **da questa tabella e solo da 
 | Token | Hex | Uso |
 |---|---|---|
 | `TestoPrimario` | `#212529` | testo normale, valori, titoli di sezione |
-| `TestoSecondario` | `#6A737C` | didascalie, suggerimenti, stati *(era `#6C757D` fino al 2026-08-30: su `SfondoBase` faceva 4,45 : 1, un centesimo sotto la soglia WCAG di 4,5, ed è la coppia di **ogni** didascalia; ora 4,57)* |
+| `TestoSecondario` | `#68717A` | didascalie, suggerimenti, stati *(era `#6C757D` fino al 2026-08-30: su `SfondoBase` faceva 4,45 : 1, un centesimo sotto la soglia WCAG di 4,5, ed è la coppia di **ogni** didascalia. Dal 2026-08-31 scende di altri due punti, perché il fondo delle pagine si è scaldato e col grigio di ieri faceva 4,39: ora fa **4,52** su `FondoPagina`, 4,71 su `SfondoBase`, 4,77 su `FondoCasella` e 4,88 su `SfondoContenuto`)* |
 | `SfondoBase` | `#F8F9FA` | sfondo delle finestre |
 | `SfondoContenuto` | `#FFFFFF` | aree di lavoro (testi, anteprime, input) |
+| `FondoPagina` | `#F8F4EB` | fondo delle **pagine** che si aprono dal menu *(dal 2026-08-31: è `FondoMenu` con sopra lo stesso velo che porta `SfondoBase` sotto il bianco — sette punti di rosso, sei di verde, cinque di blu — e lo stacco resta quello di prima, 0,053 di luminanza contro 0,054)* |
+| `FondoCasella` | `#FFFAF0` | le aree di lavoro **dentro** quelle pagine — caselle, elenchi, schede — e il fondo della finestra **Impostazioni** *(dal 2026-08-31: è `FondoMenu` preso di peso, e sta a parte per la ragione per cui `FondoMarchio` sta accanto ad `Accento` — sono due ruoli)* |
 | `BordoLeggero` | `#DEE2E6` | separatori e bordi da 1 px |
 | `BordoForte` | `#CED4DA` | bordo dei controlli interattivi |
 | `BordoMarchio` | `#000000` | contorno del pannello del logo (cap. 03.5) |
@@ -59,6 +61,21 @@ Tutti i colori e i font dell'applicazione vengono **da questa tabella e solo da 
 | `Avviso` | `#FFC107` | azioni che modificano, badge attenzione |
 | `Pericolo` | `#DC3545` | azioni distruttive, badge errore |
 | `Informazione` | `#17A2B8` | badge informativi |
+
+**Due famiglie di fondi, e non è un doppione** *(dal 2026-08-31)*. `SfondoBase`/`SfondoContenuto`
+— il grigino e il bianco — restano i fondi delle **finestre**: impostazioni, backup, conferme,
+la barra in cima, i bottoni spenti. `FondoPagina`/`FondoCasella` sono i loro gemelli caldi e
+valgono nelle **pagine**, cioè i pannelli che si aprono dal menu. La ragione è che l'avorio è
+la soglia: l'applicazione si apriva su un menu caldo e mandava, premendo un bottone, dentro
+sei stanze grigie. Adesso l'avorio entra con l'utente e resta finché lavora, mentre le finestre
+— che sono momenti, non stanze — conservano il fondo di sempre. L'eccezione, dichiarata,
+sono le **Impostazioni**: quella è la settima porta del menu, e si apre in una finestra
+solo per come è fatta dentro; sarebbe stata l'unica destinazione a restare bianca, e prende
+`FondoCasella` come fondo pieno (non ha la coppia, perché è tutta una superficie sola). Il velo fra i due fondi di
+ciascuna coppia è **lo stesso**, così la geografia di una schermata non cambia: si sposta la
+temperatura, non il disegno. Fanno eccezione, per scelta, la barra superiore, la fascia
+inferiore e il pannello del logo, che stanno **sopra** ogni pagina e sono le stesse in tutte,
+menu compreso.
 
 ### Font
 
@@ -108,7 +125,7 @@ con icona** (FontAwesome.Sharp); i menu contestuali (tasto destro) usano voci co
 ```
 ┌────────────────────────────────────────────────────────────────────┐
 │ BARRA SUPERIORE   [🎮 Menu] [🏠 Le mie candidature] [👤 Profilo]   │
-│      [🔍 Ricerca] [Confronta ⭐ ANNUNCIO - CV] [📄 Documenti]      │
+│      [🔍 Ricerca] [Confronta ★ ANNUNCIO - CV] [▤ Documenti]       │
 │      [⚙ Impostazioni]                            stato AI …        │
 ├────────────────────────────────────────────────────────────────────┤
 │                                                                    │
@@ -126,7 +143,7 @@ con icona** (FontAwesome.Sharp); i menu contestuali (tasto destro) usano voci co
 └──────────────┴─────────────────────────────────────────────────────┘
 ```
 
-*La voce **«📄 Documenti» è di T9d** (2026-08-22). Fino ad allora P6 non era una
+*La voce **«▤ Documenti» è di T9d** (2026-08-22). Fino ad allora P6 non era una
 destinazione ma il passo successivo di un flusso — ci si arrivava dalla candidatura o dal
 profilo — e per rileggere un CV scritto il giorno prima bisognava ripassare dalla Home e
 riaprire la candidatura giusta col doppio clic. Adesso la voce porta a P6 «da fermo» e
@@ -135,8 +152,24 @@ hanno davvero un documento scritto, così da lì si raggiunge qualunque testo se
 strada. Due conseguenze volute: **entrare nei documenti non chiama mai l'AI** — senza niente
 da mostrare il pannello resta vuoto e lo spiega, perché una navigazione che fa partire una
 generazione è una spesa non chiesta — e in barra, quando si guardano i documenti, si accende
-**sempre** «📄 Documenti», da qualunque strada si sia arrivati, mentre il «Torna indietro»
+**sempre** «▤ Documenti», da qualunque strada si sia arrivati, mentre il «Torna indietro»
 riporta dove si era (candidatura, profilo o Home).*
+
+**I due segni della barra** *(dal 2026-08-31)*. La stella del confronto è **★** (U+2605)
+e il foglio dei documenti **▤** (U+25A4): prima erano ⭐ e 📄, e a cambiarli è stato come
+Windows li disegna. I bottoni della barra passano da GDI, che le emoji a colori non le sa
+fare: ogni simbolo finisce al font di ripiego, dove i glifi non hanno la stessa statura né
+lo stesso peso. Misurati a 9 punti in grassetto, la casa fa 11 pixel d'altezza, la lente e
+l'ingranaggio 10, il busto 9 — quanto una maiuscola — e ⭐ ne faceva **6**, cioè l'altezza
+di una «x»: accanto ad «ANNUNCIO» tutto maiuscolo non sembrava un'icona, sembrava un
+refuso. ★ ne fa 8 ed è dentro Segoe UI, quindi prende anche il grassetto vero del bottone;
+in più è la stessa stella con cui la colonna «Match» scrive il punteggio, e quel bottone
+promette proprio quello. Il foglio invece era già alto (10 pixel): il suo difetto era il
+**tratto**, un contorno sottile in mezzo a glifi pieni, e ▤ è pieno. A sorvegliare la
+statura c'è un collaudo — nessun simbolo della barra può stare tutto dentro l'altezza di
+una «x» — mentre la pienezza resta cosa da guardare: a dieci pixel l'antialias riempie il
+contorno quanto il pieno, e misurarla direbbe il falso. *Nel menu (3.6) la stellina resta
+⭐: là il bottone è disegnato a mano, con un corpo molto più grande, e il difetto non c'è.*
 
 **I colori della barra** *(dal 2026-08-30 sera)*. La barra non è una fila di comandi
 qualunque: è l'**indice** dell'applicazione, e le sue caselle sono le stesse sei voci del
@@ -191,7 +224,7 @@ che parte una chiamata.
   sfonda nell'area centrale di tutta la propria altezza.
 - **La barra ha cinque bottoni, non quattro** *(deciso in T4c, 2026-08-10)*: fra Ricerca
   e Impostazioni c'è il bottone che porta a P4 — **📋 Candidatura** quando è nato,
-  **«Confronta ⭐ ANNUNCIO - CV»** dal 2026-08-30, che è la stessa porta chiamata col
+  **«Confronta ★ ANNUNCIO - CV»** dal 2026-08-30, che è la stessa porta chiamata col
   nome di quel che ne esce invece che con quello del pannello. Nel disegno originale a P4 si
   arrivava dalla coda delle opportunità in Home, ma la Home è di T5c e l'incolla-testo è
   già di T4: senza una porta propria, il pannello che questa tappa costruisce non

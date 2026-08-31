@@ -1,4 +1,4 @@
-<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class PannelloEmail
     Inherits System.Windows.Forms.UserControl
 
@@ -115,6 +115,7 @@ Partial Class PannelloEmail
         '
         Me.txtDestinatario.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtDestinatario.BackColor = StileApp.FondoCasella
         Me.txtDestinatario.Location = New System.Drawing.Point(96, 4)
         Me.txtDestinatario.Name = "txtDestinatario"
         Me.txtDestinatario.Size = New System.Drawing.Size(1010, 23)
@@ -132,6 +133,7 @@ Partial Class PannelloEmail
         '
         Me.txtOggetto.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtOggetto.BackColor = StileApp.FondoCasella
         Me.txtOggetto.Location = New System.Drawing.Point(96, 40)
         Me.txtOggetto.Name = "txtOggetto"
         Me.txtOggetto.Size = New System.Drawing.Size(1010, 23)
@@ -172,7 +174,7 @@ Partial Class PannelloEmail
         Me.txtCorpo.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.txtCorpo.BackColor = StileApp.SfondoContenuto
+        Me.txtCorpo.BackColor = StileApp.FondoCasella
         Me.txtCorpo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtCorpo.Location = New System.Drawing.Point(0, 22)
         Me.txtCorpo.Multiline = True
@@ -207,7 +209,7 @@ Partial Class PannelloEmail
         Me.lstAllegati.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.lstAllegati.BackColor = StileApp.SfondoContenuto
+        Me.lstAllegati.BackColor = StileApp.FondoCasella
         Me.lstAllegati.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lstAllegati.CheckOnClick = True
         Me.lstAllegati.IntegralHeight = False
@@ -285,7 +287,7 @@ Partial Class PannelloEmail
         '
         'PannelloEmail
         '
-        Me.BackColor = StileApp.SfondoBase
+        Me.BackColor = StileApp.FondoPagina
         Me.Controls.Add(Me.pnlCorpo)
         Me.Controls.Add(Me.pnlCampi)
         Me.Controls.Add(Me.pnlIntestazione)

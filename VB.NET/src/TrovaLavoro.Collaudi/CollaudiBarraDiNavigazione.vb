@@ -1,4 +1,7 @@
-﻿Imports System.IO
+﻿Imports System.Collections.Generic
+Imports System.Drawing
+Imports System.Globalization
+Imports System.IO
 Imports System.Linq
 Imports System.Reflection
 Imports System.Threading.Tasks
@@ -488,6 +491,107 @@ Namespace Ui
                            TableLayoutPanel)
 
             Return tabella.RowStyles(tabella.RowCount - 1).Height
+
+        End Function
+
+        ''' <summary>
+        ''' Nessuna icona della barra si legge come un segno di punteggiatura: ogni
+        ''' simbolo si alza <b>sopra</b> la «x» del testo che gli sta accanto.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>I bottoni della barra li disegna GDI, che le emoji a colori non le sa
+        ''' fare: ogni simbolo finisce al font di ripiego, e lì i glifi non sono alti
+        ''' uguali. La casa arriva a 11 pixel, il busto a 9 — quanto una maiuscola — mentre
+        ''' ⭐ (U+2B50), che fino al 2026-08-31 stava nel nome del confronto, ne faceva
+        ''' <b>6</b>: esattamente l'altezza di una «x», cioè quella di una virgola o di un
+        ''' asterisco. Accanto a «ANNUNCIO» tutto maiuscolo non sembrava un'icona, sembrava
+        ''' un refuso.</para>
+        ''' <para>La soglia non è un numero scelto a occhio ed è per questo che è la «x»:
+        ''' un simbolo che sta <i>tutto</i> dentro l'altezza della lettera più bassa del
+        ''' testo non si legge come figura, si legge come punteggiatura. Il metro viene dal
+        ''' <b>font del bottone stesso</b>, così regge a qualunque DPI e a qualunque
+        ''' cambio di corpo: se domani la barra scrivesse più grande, crescerebbero
+        ''' entrambi.</para>
+        ''' <para>Si guardano solo i <i>simboli</i> (categoria Unicode <c>OtherSymbol</c>):
+        ''' il trattino di «ANNUNCIO - CV» è punteggiatura, ed è alto due pixel per
+        ''' mestiere.</para>
+        ''' <para><b>Cosa questo collaudo non vede.</b> Rimettendo ⭐ diventa rosso — è
+        ''' stato provato — ma rimettendo il vecchio 📄 dei Documenti resta <b>verde</b>,
+        ''' e anche quello il 2026-08-31 è stato cambiato. Il foglio era alto 10 pixel: il
+        ''' suo difetto non era la statura ma il <b>tratto</b>, un contorno sottile in
+        ''' mezzo a glifi pieni, e la pienezza qui non si misura (a dieci pixel l'antialias
+        ''' riempie il contorno quanto il pieno: misurata, quella emoji risultava piena
+        ''' all'83%, che è quasi quanto una «M»). Della coppia di cure, questa metà resta
+        ''' cosa che si vede e non si misura.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniIconaDellaBarraSiAlzaSopraLaXDelTesto()
+
+            Using form As New FormPrincipale()
+
+                Dim guardati As Integer = 0
+
+                For Each bottone As Button In Barra(form)
+
+                    Dim xDelTesto As Integer = AltezzaDelGlifo("x", bottone.Font)
+
+                    For Each simbolo As String In SimboliDi(bottone.Text)
+                        guardati += 1
+                        Assert.IsGreaterThan(
+                            xDelTesto, AltezzaDelGlifo(simbolo, bottone.Font),
+                            $"in «{bottone.Text}» il simbolo «{simbolo}» sta tutto dentro l'altezza di una «x»")
+                    Next
+
+                Next
+
+                Assert.AreEqual(7, guardati, "le sette voci della barra hanno un simbolo per una")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>I simboli veri di un testo: non le lettere, non la punteggiatura.</summary>
+        Private Shared Iterator Function SimboliDi(testo As String) As IEnumerable(Of String)
+
+            ' Per elementi di testo e non per caratteri: un'emoji sta in due Char, e
+            ' misurare mezza coppia surrogata non disegna niente.
+            Dim elementi As TextElementEnumerator = StringInfo.GetTextElementEnumerator(testo)
+
+            While elementi.MoveNext()
+                Dim elemento As String = CStr(elementi.Current)
+                If CharUnicodeInfo.GetUnicodeCategory(elemento, 0) = UnicodeCategory.OtherSymbol Then
+                    Yield elemento
+                End If
+            End While
+
+        End Function
+
+        ''' <summary>Quanti pixel alto viene disegnato un glifo, con quel carattere.</summary>
+        Private Shared Function AltezzaDelGlifo(testo As String, carattere As Font) As Integer
+
+            Using foglio As New Bitmap(80, 60)
+
+                Using disegno As Graphics = Graphics.FromImage(foglio)
+                    disegno.Clear(Color.White)
+                    TextRenderer.DrawText(disegno, testo, carattere, New Point(20, 20), Color.Black)
+                End Using
+
+                Dim primaRiga As Integer = -1
+                Dim ultimaRiga As Integer = -1
+
+                For y As Integer = 0 To foglio.Height - 1
+                    For x As Integer = 0 To foglio.Width - 1
+                        If foglio.GetPixel(x, y).R < 140 Then
+                            If primaRiga < 0 Then primaRiga = y
+                            ultimaRiga = y
+                            Exit For
+                        End If
+                    Next
+                Next
+
+                Return If(primaRiga < 0, 0, ultimaRiga - primaRiga + 1)
+
+            End Using
 
         End Function
 

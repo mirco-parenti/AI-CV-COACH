@@ -1,4 +1,4 @@
-Imports System.Diagnostics
+﻿Imports System.Diagnostics
 Imports System.Drawing
 Imports System.IO
 Imports System.Text.Json
@@ -747,15 +747,23 @@ Public Class FinestraImpostazioni
     End Sub
 
     ''' <summary>I colori e i font della finestra, tutti da <see cref="StileApp"/> (cap. 03.2).</summary>
+    ''' <remarks>
+    ''' Il fondo è <see cref="StileApp.FondoCasella"/> e non il bianco delle altre
+    ''' finestre: dal 2026-08-31 l'avorio della soglia è entrato nelle pagine, e questa —
+    ''' che è la settima porta del menu, anche se si apre in una finestra invece che in un
+    ''' pannello — sarebbe stata l'unica destinazione a restare bianca. Le altre finestre
+    ''' non la seguono: quelle sono momenti (una conferma, un backup, una chiave da
+    ''' scrivere), non posti dove si sta.
+    ''' </remarks>
     Private Sub Vesti()
 
-        BackColor = StileApp.SfondoContenuto
+        BackColor = StileApp.FondoCasella
         Font = StileApp.FontTesto
 
         ' Un filo sopra la fascia: senza, il testo che le scorre sotto sembra tagliato a
         ' metà da niente, invece che passare dietro a qualcosa (2026-08-27).
-        pnlContenuto.BackColor = StileApp.SfondoContenuto
-        pnlFascia.BackColor = StileApp.SfondoContenuto
+        pnlContenuto.BackColor = StileApp.FondoCasella
+        pnlFascia.BackColor = StileApp.FondoCasella
         AddHandler pnlFascia.Paint,
             Sub(mittente As Object, disegno As PaintEventArgs)
                 Using filo As New Pen(StileApp.BordoLeggero)
@@ -785,7 +793,7 @@ Public Class FinestraImpostazioni
         Next
 
         chkRifinitura.ForeColor = StileApp.TestoPrimario
-        chkRifinitura.BackColor = StileApp.SfondoContenuto
+        chkRifinitura.BackColor = StileApp.FondoCasella
 
         For Each tendina As ComboBox In {cmbLingua, cmbModelloRagionamento, cmbModelloSemplice}
             tendina.BackColor = StileApp.SfondoContenuto

@@ -1516,7 +1516,7 @@ Public Class PannelloProfilo
         For Each casella As TextBox In CampiDelProfilo()
             Dim scrivibile As Boolean = Not occupato AndAlso ConVoceDoveScrivere(casella)
             casella.ReadOnly = Not scrivibile
-            casella.BackColor = If(scrivibile, StileApp.SfondoContenuto, StileApp.SfondoBase)
+            casella.BackColor = If(scrivibile, StileApp.FondoCasella, StileApp.FondoPagina)
         Next
 
         cmbPatente.Enabled = Not occupato

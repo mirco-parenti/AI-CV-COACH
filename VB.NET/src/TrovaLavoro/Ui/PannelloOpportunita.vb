@@ -1170,7 +1170,7 @@ Public Class PannelloOpportunita
         DiciPercheNonSiPuoAnalizzare(occupato, conAi, conProfilo, soloIlConfronto)
 
         txtAnnuncio.ReadOnly = occupato
-        txtAnnuncio.BackColor = If(occupato, StileApp.SfondoBase, StileApp.SfondoContenuto)
+        txtAnnuncio.BackColor = If(occupato, StileApp.FondoPagina, StileApp.FondoCasella)
 
         btnNuovoAnnuncio.Enabled = Not occupato AndAlso Not _fasciaAperta
 

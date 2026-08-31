@@ -940,19 +940,25 @@ Public Class PannelloRicerca
     ''' in tre righe come si usa e ricorda che il login si fa qui dentro — le due cose che
     ''' un utente non può indovinare da solo guardando un browser vuoto.
     ''' </summary>
+    ''' <remarks>
+    ''' I colori sono scritti a mano perché qui si compone un foglio di stile, non si veste
+    ''' un controllo: sono gli stessi di <c>StileApp</c> — fondo <c>FondoCasella</c>, testo
+    ''' <c>TestoPrimario</c>, titolo <c>RossoTitoli</c>, note <c>TestoSecondario</c> — e se
+    ''' la tavolozza si muove, questa pagina è uno dei posti che va guardato.
+    ''' </remarks>
     Private Function PaginaDiCasa() As String
 
         Dim portali As String = String.Join(", ", _ricerche.Portali.Select(Function(p) p.Nome))
 
         Return "<!doctype html><html lang=""it""><head><meta charset=""utf-8"">" &
                "<style>" &
-               "body{font-family:'Segoe UI',sans-serif;color:#212529;background:#FFFFFF;" &
+               "body{font-family:'Segoe UI',sans-serif;color:#212529;background:#FFFAF0;" &
                "margin:0;padding:48px 56px;line-height:1.55}" &
                "h1{color:#FA0825;font-size:20px;margin:0 0 6px}" &
-               "p.sotto{color:#6A737C;font-size:13px;margin:0 0 28px}" &
+               "p.sotto{color:#68717A;font-size:13px;margin:0 0 28px}" &
                "ol{font-size:14px;padding-left:22px;margin:0 0 28px}" &
                "li{margin-bottom:10px}" &
-               "p.nota{color:#6A737C;font-size:12px;border-top:1px solid #DEE2E6;padding-top:14px;margin:0}" &
+               "p.nota{color:#68717A;font-size:12px;border-top:1px solid #DEE2E6;padding-top:14px;margin:0}" &
                "</style></head><body>" &
                "<h1>Cerca gli annunci</h1>" &
                "<p class=""sotto"">Qui dentro navighi tu: il programma non raccoglie niente da solo.</p>" &

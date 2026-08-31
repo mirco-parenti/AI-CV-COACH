@@ -1,4 +1,4 @@
-<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class PannelloProfilo
     Inherits System.Windows.Forms.UserControl
 
@@ -191,6 +191,7 @@ Partial Class PannelloProfilo
         '
         'txtNome
         '
+        Me.txtNome.BackColor = StileApp.FondoCasella
         Me.txtNome.Location = New System.Drawing.Point(92, 30)
         Me.txtNome.Name = "txtNome"
         Me.txtNome.Size = New System.Drawing.Size(220, 23)
@@ -208,6 +209,7 @@ Partial Class PannelloProfilo
         '
         'txtEmail
         '
+        Me.txtEmail.BackColor = StileApp.FondoCasella
         Me.txtEmail.Location = New System.Drawing.Point(398, 30)
         Me.txtEmail.Name = "txtEmail"
         Me.txtEmail.Size = New System.Drawing.Size(260, 23)
@@ -225,6 +227,7 @@ Partial Class PannelloProfilo
         '
         'txtTelefono
         '
+        Me.txtTelefono.BackColor = StileApp.FondoCasella
         Me.txtTelefono.Location = New System.Drawing.Point(754, 30)
         Me.txtTelefono.Name = "txtTelefono"
         Me.txtTelefono.Size = New System.Drawing.Size(200, 23)
@@ -242,6 +245,7 @@ Partial Class PannelloProfilo
         '
         'txtDomicilio
         '
+        Me.txtDomicilio.BackColor = StileApp.FondoCasella
         Me.txtDomicilio.Location = New System.Drawing.Point(92, 64)
         Me.txtDomicilio.Name = "txtDomicilio"
         Me.txtDomicilio.Size = New System.Drawing.Size(220, 23)
@@ -261,6 +265,7 @@ Partial Class PannelloProfilo
         '
         Me.txtLink.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtLink.BackColor = StileApp.FondoCasella
         Me.txtLink.Location = New System.Drawing.Point(398, 64)
         Me.txtLink.Name = "txtLink"
         Me.txtLink.Size = New System.Drawing.Size(556, 23)
@@ -299,6 +304,7 @@ Partial Class PannelloProfilo
         '
         'txtCategorie
         '
+        Me.txtCategorie.BackColor = StileApp.FondoCasella
         Me.txtCategorie.Location = New System.Drawing.Point(326, 98)
         Me.txtCategorie.Name = "txtCategorie"
         Me.txtCategorie.Size = New System.Drawing.Size(200, 23)
@@ -322,7 +328,7 @@ Partial Class PannelloProfilo
         '
         'tabLavoro
         '
-        Me.tabLavoro.BackColor = StileApp.SfondoContenuto
+        Me.tabLavoro.BackColor = StileApp.FondoCasella
         Me.tabLavoro.Controls.Add(Me.lstLavoro)
         Me.tabLavoro.Controls.Add(Me.btnAggiungiLavoro)
         Me.tabLavoro.Controls.Add(Me.btnEliminaLavoro)
@@ -337,6 +343,7 @@ Partial Class PannelloProfilo
         '
         Me.lstLavoro.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left)), System.Windows.Forms.AnchorStyles)
+        Me.lstLavoro.BackColor = StileApp.FondoCasella
         Me.lstLavoro.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lstLavoro.Font = StileApp.FontTesto
         Me.lstLavoro.FormattingEnabled = True
@@ -399,6 +406,7 @@ Partial Class PannelloProfilo
         '
         Me.txtRuolo.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtRuolo.BackColor = StileApp.FondoCasella
         Me.txtRuolo.Location = New System.Drawing.Point(106, 0)
         Me.txtRuolo.Name = "txtRuolo"
         Me.txtRuolo.Size = New System.Drawing.Size(650, 23)
@@ -418,6 +426,7 @@ Partial Class PannelloProfilo
         '
         Me.txtAzienda.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtAzienda.BackColor = StileApp.FondoCasella
         Me.txtAzienda.Location = New System.Drawing.Point(106, 34)
         Me.txtAzienda.Name = "txtAzienda"
         Me.txtAzienda.Size = New System.Drawing.Size(650, 23)
@@ -435,6 +444,7 @@ Partial Class PannelloProfilo
         '
         'txtDurata
         '
+        Me.txtDurata.BackColor = StileApp.FondoCasella
         Me.txtDurata.Location = New System.Drawing.Point(106, 68)
         Me.txtDurata.Name = "txtDurata"
         Me.txtDurata.Size = New System.Drawing.Size(260, 23)
@@ -452,6 +462,7 @@ Partial Class PannelloProfilo
         '
         'txtTipo
         '
+        Me.txtTipo.BackColor = StileApp.FondoCasella
         Me.txtTipo.Location = New System.Drawing.Point(492, 68)
         Me.txtTipo.Name = "txtTipo"
         Me.txtTipo.Size = New System.Drawing.Size(200, 23)
@@ -472,6 +483,7 @@ Partial Class PannelloProfilo
         Me.txtCosaFacevoLavoro.Anchor = CType(((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right)), System.Windows.Forms.AnchorStyles)
+        Me.txtCosaFacevoLavoro.BackColor = StileApp.FondoCasella
         Me.txtCosaFacevoLavoro.Location = New System.Drawing.Point(106, 102)
         Me.txtCosaFacevoLavoro.Multiline = True
         Me.txtCosaFacevoLavoro.Name = "txtCosaFacevoLavoro"
@@ -481,7 +493,7 @@ Partial Class PannelloProfilo
         '
         'tabInformali
         '
-        Me.tabInformali.BackColor = StileApp.SfondoContenuto
+        Me.tabInformali.BackColor = StileApp.FondoCasella
         Me.tabInformali.Controls.Add(Me.lstInformali)
         Me.tabInformali.Controls.Add(Me.btnAggiungiInformale)
         Me.tabInformali.Controls.Add(Me.btnEliminaInformale)
@@ -496,6 +508,7 @@ Partial Class PannelloProfilo
         '
         Me.lstInformali.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left)), System.Windows.Forms.AnchorStyles)
+        Me.lstInformali.BackColor = StileApp.FondoCasella
         Me.lstInformali.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lstInformali.Font = StileApp.FontTesto
         Me.lstInformali.FormattingEnabled = True
@@ -552,6 +565,7 @@ Partial Class PannelloProfilo
         '
         'txtQuando
         '
+        Me.txtQuando.BackColor = StileApp.FondoCasella
         Me.txtQuando.Location = New System.Drawing.Point(106, 0)
         Me.txtQuando.Name = "txtQuando"
         Me.txtQuando.Size = New System.Drawing.Size(260, 23)
@@ -571,6 +585,7 @@ Partial Class PannelloProfilo
         '
         Me.txtConChi.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtConChi.BackColor = StileApp.FondoCasella
         Me.txtConChi.Location = New System.Drawing.Point(106, 34)
         Me.txtConChi.Name = "txtConChi"
         Me.txtConChi.Size = New System.Drawing.Size(650, 23)
@@ -591,6 +606,7 @@ Partial Class PannelloProfilo
         Me.txtCosaFacevoInformale.Anchor = CType(((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right)), System.Windows.Forms.AnchorStyles)
+        Me.txtCosaFacevoInformale.BackColor = StileApp.FondoCasella
         Me.txtCosaFacevoInformale.Location = New System.Drawing.Point(106, 68)
         Me.txtCosaFacevoInformale.Multiline = True
         Me.txtCosaFacevoInformale.Name = "txtCosaFacevoInformale"
@@ -600,7 +616,7 @@ Partial Class PannelloProfilo
         '
         'tabCompetenze
         '
-        Me.tabCompetenze.BackColor = StileApp.SfondoContenuto
+        Me.tabCompetenze.BackColor = StileApp.FondoCasella
         Me.tabCompetenze.Controls.Add(Me.lstCompetenze)
         Me.tabCompetenze.Controls.Add(Me.btnAggiungiCompetenza)
         Me.tabCompetenze.Controls.Add(Me.btnEliminaCompetenza)
@@ -615,6 +631,7 @@ Partial Class PannelloProfilo
         '
         Me.lstCompetenze.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left)), System.Windows.Forms.AnchorStyles)
+        Me.lstCompetenze.BackColor = StileApp.FondoCasella
         Me.lstCompetenze.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lstCompetenze.Font = StileApp.FontTesto
         Me.lstCompetenze.FormattingEnabled = True
@@ -669,6 +686,7 @@ Partial Class PannelloProfilo
         '
         Me.txtCompetenza.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtCompetenza.BackColor = StileApp.FondoCasella
         Me.txtCompetenza.Location = New System.Drawing.Point(106, 0)
         Me.txtCompetenza.Name = "txtCompetenza"
         Me.txtCompetenza.Size = New System.Drawing.Size(650, 23)
@@ -676,7 +694,7 @@ Partial Class PannelloProfilo
         '
         'tabStudi
         '
-        Me.tabStudi.BackColor = StileApp.SfondoContenuto
+        Me.tabStudi.BackColor = StileApp.FondoCasella
         Me.tabStudi.Controls.Add(Me.lstStudi)
         Me.tabStudi.Controls.Add(Me.btnAggiungiStudio)
         Me.tabStudi.Controls.Add(Me.btnEliminaStudio)
@@ -691,6 +709,7 @@ Partial Class PannelloProfilo
         '
         Me.lstStudi.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left)), System.Windows.Forms.AnchorStyles)
+        Me.lstStudi.BackColor = StileApp.FondoCasella
         Me.lstStudi.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lstStudi.Font = StileApp.FontTesto
         Me.lstStudi.FormattingEnabled = True
@@ -749,6 +768,7 @@ Partial Class PannelloProfilo
         '
         Me.txtTitoloStudio.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtTitoloStudio.BackColor = StileApp.FondoCasella
         Me.txtTitoloStudio.Location = New System.Drawing.Point(106, 0)
         Me.txtTitoloStudio.Name = "txtTitoloStudio"
         Me.txtTitoloStudio.Size = New System.Drawing.Size(650, 23)
@@ -768,6 +788,7 @@ Partial Class PannelloProfilo
         '
         Me.txtIstituto.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtIstituto.BackColor = StileApp.FondoCasella
         Me.txtIstituto.Location = New System.Drawing.Point(106, 34)
         Me.txtIstituto.Name = "txtIstituto"
         Me.txtIstituto.Size = New System.Drawing.Size(650, 23)
@@ -785,6 +806,7 @@ Partial Class PannelloProfilo
         '
         'txtAnno
         '
+        Me.txtAnno.BackColor = StileApp.FondoCasella
         Me.txtAnno.Location = New System.Drawing.Point(106, 68)
         Me.txtAnno.Name = "txtAnno"
         Me.txtAnno.Size = New System.Drawing.Size(200, 23)
@@ -792,7 +814,7 @@ Partial Class PannelloProfilo
         '
         'tabTestoLetto
         '
-        Me.tabTestoLetto.BackColor = StileApp.SfondoContenuto
+        Me.tabTestoLetto.BackColor = StileApp.FondoCasella
         Me.tabTestoLetto.Controls.Add(Me.txtTestoLetto)
         Me.tabTestoLetto.Controls.Add(Me.lblTestoLetto)
         Me.tabTestoLetto.Location = New System.Drawing.Point(4, 24)
@@ -815,6 +837,7 @@ Partial Class PannelloProfilo
         '
         'txtTestoLetto
         '
+        Me.txtTestoLetto.BackColor = StileApp.FondoCasella
         Me.txtTestoLetto.Dock = System.Windows.Forms.DockStyle.Fill
         Me.txtTestoLetto.Font = StileApp.FontTesto
         Me.txtTestoLetto.Multiline = True
@@ -826,7 +849,7 @@ Partial Class PannelloProfilo
         '
         'tabCvBase
         '
-        Me.tabCvBase.BackColor = StileApp.SfondoContenuto
+        Me.tabCvBase.BackColor = StileApp.FondoCasella
         Me.tabCvBase.Controls.Add(Me.txtCvBase)
         Me.tabCvBase.Controls.Add(Me.lblStatoCvBase)
         Me.tabCvBase.Location = New System.Drawing.Point(4, 24)
@@ -849,6 +872,7 @@ Partial Class PannelloProfilo
         '
         'txtCvBase
         '
+        Me.txtCvBase.BackColor = StileApp.FondoCasella
         Me.txtCvBase.Dock = System.Windows.Forms.DockStyle.Fill
         Me.txtCvBase.Font = StileApp.FontTesto
         Me.txtCvBase.Multiline = True
@@ -950,7 +974,7 @@ Partial Class PannelloProfilo
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.BackColor = StileApp.SfondoBase
+        Me.BackColor = StileApp.FondoPagina
         Me.Controls.Add(Me.tabSezioni)
         Me.Controls.Add(Me.grpDatiPersonali)
         Me.Controls.Add(Me.pnlIntestazione)

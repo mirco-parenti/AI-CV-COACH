@@ -1058,7 +1058,7 @@ Public Class PannelloDialogo
     Private Sub AggiungiBollaAssistente(testo As String)
 
         AggiungiBolla({RigaDiTesto(testo, StileApp.FontTesto, StileApp.TestoPrimario)},
-                      StileApp.SfondoContenuto, StileApp.BordoForte, aDestra:=False, nome:="bollaAssistente")
+                      StileApp.FondoCasella, StileApp.BordoForte, aDestra:=False, nome:="bollaAssistente")
 
     End Sub
 
@@ -1089,7 +1089,7 @@ Public Class PannelloDialogo
 
         ' Fondo come le bolle dell'assistente, ma bordo dell'accento: è lui a dire che
         ' questa non è una frase, è la cosa su cui l'utente deve pronunciarsi.
-        AggiungiBolla(righe.ToArray(), StileApp.SfondoContenuto, StileApp.Accento,
+        AggiungiBolla(righe.ToArray(), StileApp.FondoCasella, StileApp.Accento,
                       aDestra:=False, nome:="scheda")
 
     End Sub
@@ -1371,7 +1371,7 @@ Public Class PannelloDialogo
         pnlRisposta.Visible = conDialogo AndAlso _mossa IsNot Nothing AndAlso
                               _mossa.Tipo <> TipoMossa.Fine
         txtRisposta.ReadOnly = _occupato
-        txtRisposta.BackColor = If(_occupato, StileApp.SfondoBase, StileApp.SfondoContenuto)
+        txtRisposta.BackColor = If(_occupato, StileApp.FondoPagina, StileApp.FondoCasella)
         btnInvia.Enabled = Not _occupato
 
         For Each bottone As Button In BottoniDelleScelte()
@@ -1402,7 +1402,7 @@ Public Class PannelloDialogo
         btnInvia.Visible = conConversazione
 
         txtRisposta.ReadOnly = _occupato
-        txtRisposta.BackColor = If(_occupato, StileApp.SfondoBase, StileApp.SfondoContenuto)
+        txtRisposta.BackColor = If(_occupato, StileApp.FondoPagina, StileApp.FondoCasella)
 
         ' Mentre l'AI scrive il bottone non si spegne: diventa il modo di fermarla. È la
         ' differenza che lo streaming si porta dietro — c'è qualcosa da interrompere,

@@ -131,6 +131,7 @@ Partial Class PannelloOpportunita
         Me.txtAnnuncio.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtAnnuncio.BackColor = StileApp.FondoCasella
         Me.txtAnnuncio.Location = New System.Drawing.Point(0, 22)
         Me.txtAnnuncio.Multiline = True
         Me.txtAnnuncio.Name = "txtAnnuncio"
@@ -186,7 +187,7 @@ Partial Class PannelloOpportunita
         '
         ' L'elenco dei giudizi è una lista di sistema, non dei controlli creati a runtime
         ' (cap. 03.1, punto 6): a cambiare sono le righe, mai la struttura.
-        Me.lvwGiudizi.BackColor = StileApp.SfondoContenuto
+        Me.lvwGiudizi.BackColor = StileApp.FondoCasella
         Me.lvwGiudizi.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lvwGiudizi.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colSegno, Me.colRequisito, Me.colPeso, Me.colEsito})
         Me.lvwGiudizi.Dock = System.Windows.Forms.DockStyle.Fill
@@ -290,7 +291,7 @@ Partial Class PannelloOpportunita
         '
         'txtSpiegazione
         '
-        Me.txtSpiegazione.BackColor = StileApp.SfondoContenuto
+        Me.txtSpiegazione.BackColor = StileApp.FondoCasella
         Me.txtSpiegazione.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtSpiegazione.Dock = System.Windows.Forms.DockStyle.Fill
         Me.txtSpiegazione.Multiline = True
@@ -324,7 +325,7 @@ Partial Class PannelloOpportunita
         '
         'txtAnnuncioLetto
         '
-        Me.txtAnnuncioLetto.BackColor = StileApp.SfondoContenuto
+        Me.txtAnnuncioLetto.BackColor = StileApp.FondoCasella
         Me.txtAnnuncioLetto.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtAnnuncioLetto.Dock = System.Windows.Forms.DockStyle.Fill
         Me.txtAnnuncioLetto.Multiline = True
@@ -392,7 +393,7 @@ Partial Class PannelloOpportunita
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.BackColor = StileApp.SfondoBase
+        Me.BackColor = StileApp.FondoPagina
         Me.Controls.Add(Me.pnlCorpo)
         Me.Controls.Add(Me.pnlIngresso)
         Me.Controls.Add(Me.pnlIntestazione)

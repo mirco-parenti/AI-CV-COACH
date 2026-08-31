@@ -153,7 +153,7 @@ Partial Class FormPrincipale
         Me.btnDocumenti.Name = "btnDocumenti"
         Me.btnDocumenti.Size = StileApp.BottoneBarraSuperiore
         Me.btnDocumenti.TabIndex = 5
-        Me.btnDocumenti.Text = "📄 Documenti"
+        Me.btnDocumenti.Text = "▤ Documenti"
         StileApp.VestiBottoneBarra(Me.btnDocumenti, RuoloBarra.Destinazione, attiva:=False)
         '
         'btnImpostazioni
@@ -176,7 +176,7 @@ Partial Class FormPrincipale
         '
         'pnlAreaCentrale
         '
-        Me.pnlAreaCentrale.BackColor = StileApp.SfondoBase
+        Me.pnlAreaCentrale.BackColor = StileApp.FondoPagina
         Me.pnlAreaCentrale.Controls.Add(Me.pnlMenu)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlHome)
         Me.pnlAreaCentrale.Controls.Add(Me.pnlProfilo)

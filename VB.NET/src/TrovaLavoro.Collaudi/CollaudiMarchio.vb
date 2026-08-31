@@ -1,4 +1,4 @@
-Imports System.Drawing
+﻿Imports System.Drawing
 Imports System.IO
 Imports System.Linq
 Imports System.Windows.Forms
@@ -126,6 +126,12 @@ Namespace Ui
         ''' era già a posto (4,69, oggi 4,82). Una tavolozza si aggiusta guardando il fondo
         ''' peggiore, ma si collauda su tutti e due: una cura può spostare il problema
         ''' invece di toglierlo, e su due fondi diversi lo spostamento si vede.</para>
+        ''' <para>Dal 2026-08-31 i fondi sono <b>quattro</b>: le pagine hanno preso
+        ''' l'avorio della soglia — <c>FondoPagina</c> e <c>FondoCasella</c> — e il primo
+        ''' dei due è il più scuro di tutti, quindi il peggiore. Guardare solo i due di
+        ''' prima sarebbe stato peggio che non guardare: il collaudo sarebbe restato verde
+        ''' misurando un fondo che le didascalie non hanno più sotto. È servito: col grigio
+        ''' di ieri quel fondo faceva 4,39, e la tavolozza si è mossa per questo.</para>
         ''' </remarks>
         <TestMethod>
         Public Sub OgniDidascaliaSiLeggeQuantoWcagChiede()
@@ -141,6 +147,14 @@ Namespace Ui
             Assert.IsGreaterThanOrEqualTo(
                 soglia, Contrasto(StileApp.TestoSecondario, StileApp.SfondoContenuto),
                 "le didascalie sulle aree di lavoro")
+
+            Assert.IsGreaterThanOrEqualTo(
+                soglia, Contrasto(StileApp.TestoSecondario, StileApp.FondoPagina),
+                "le didascalie sul fondo delle pagine")
+
+            Assert.IsGreaterThanOrEqualTo(
+                soglia, Contrasto(StileApp.TestoSecondario, StileApp.FondoCasella),
+                "le didascalie dentro le caselle delle pagine")
 
         End Sub
 

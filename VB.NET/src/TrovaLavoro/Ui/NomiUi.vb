@@ -25,12 +25,20 @@ Public Module NomiUi
     ''' Il bottone della barra che porta al confronto fra annuncio e CV (P4).
     ''' </summary>
     ''' <remarks>
-    ''' La stella sta <b>dentro</b> il nome e non davanti: è il punteggio che quel
+    ''' <para>La stella sta <b>dentro</b> il nome e non davanti: è il punteggio che quel
     ''' pannello produce, non un'icona che lo decora — le altre voci della barra l'icona
     ''' ce l'hanno in testa. Il menu (P0) dice lo stesso mestiere più disteso,
     ''' «Confronta ANNUNCIO - CV / Match 1-5 ⭐», e non passa da qui: lì c'è una riga
-    ''' intera a disposizione, e nessun messaggio cita quel testo.
+    ''' intera a disposizione, e nessun messaggio cita quel testo.</para>
+    ''' <para>Dal 2026-08-31 è <b>★</b> (U+2605) e non più ⭐ (U+2B50), e la ragione sta
+    ''' in come Windows disegna le due. I bottoni della barra sono disegnati da GDI, che
+    ''' le emoji a colori non le sa fare: ogni simbolo finisce al font di ripiego, dove
+    ''' la casa e il busto hanno un glifo pieno alto quanto le maiuscole e ⭐ ne ha uno
+    ''' minuscolo e sottile — a video sembrava un asterisco stinto in mezzo a icone nere.
+    ''' ★ sta invece dentro Segoe UI, quindi prende il <b>grassetto vero</b> del bottone
+    ''' ed è piena. Ed è la stessa stella con cui la colonna «Match» scrive il punteggio:
+    ''' il bottone promette quel che l'elenco poi mostra, ora anche nel segno.</para>
     ''' </remarks>
-    Public Const Confronto As String = "Confronta ⭐ ANNUNCIO - CV"
+    Public Const Confronto As String = "Confronta ★ ANNUNCIO - CV"
 
 End Module

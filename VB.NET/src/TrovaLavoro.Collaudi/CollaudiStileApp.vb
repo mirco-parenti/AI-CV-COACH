@@ -1,4 +1,7 @@
-﻿Imports System.Windows.Forms
+﻿Imports System.Collections.Generic
+Imports System.Drawing
+Imports System.Linq
+Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro
 
@@ -114,6 +117,77 @@ Namespace Ui
 
             End Using
         End Sub
+
+        ''' <summary>
+        ''' Le pagine che si aprono dal menu portano il fondo caldo, e dentro non resta
+        ''' niente di bianco.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Dal 2026-08-31 l'avorio della soglia entra anche nelle pagine
+        ''' (cap. 03.6): il fondo è <c>FondoPagina</c>, i rettangoli che tengono testo
+        ''' <c>FondoCasella</c>. Un colore che manca non rompe niente — la pagina si apre
+        ''' lo stesso — e per questo lo deve dire il banco: una casella dimenticata resta
+        ''' bianca in mezzo all'avorio e la si scopre guardando, se qualcuno guarda proprio
+        ''' quella scheda.</para>
+        ''' <para>Non si chiede <i>quale</i> colore abbia ogni rettangolo, ma che non sia
+        ''' rimasto <b>bianco</b>: il bianco è il fondo che Windows dà da sé a una casella
+        ''' di cui nessuno ha detto niente, ed è l'unico modo in cui il difetto si presenta.
+        ''' Chiedere il colore esatto significherebbe riscrivere qui il designer, e
+        ''' bocciare domani una casella spenta solo perché si smorza come deve.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniPaginaPortaIlFondoCaldoEDentroNonRestaBianco()
+
+            Using form As New FormPrincipale()
+
+                Dim centrale As Control =
+                    form.Controls.Find("pnlAreaCentrale", searchAllChildren:=True).Single()
+
+                ' Il menu resta fuori: è la soglia, e l'avorio ce l'ha già per conto suo.
+                Dim pagine As Control() =
+                    centrale.Controls.OfType(Of Control)().
+                             Where(Function(c) Not (TypeOf c Is PannelloMenu)).ToArray()
+
+                Assert.AreEqual(7, pagine.Length, "le pagine ospitate dall'area centrale")
+
+                For Each pagina As Control In pagine
+
+                    Assert.AreEqual(StileApp.FondoPagina, pagina.BackColor,
+                                    $"«{pagina.Name}» non ha il fondo delle pagine")
+
+                    For Each rettangolo As Control In RettangoliDi(pagina)
+                        Assert.AreNotEqual(Color.White.ToArgb(), rettangolo.BackColor.ToArgb(),
+                                           $"«{rettangolo.Name}» è rimasto bianco")
+                    Next
+
+                Next
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' I rettangoli che tengono testo dentro una pagina, a qualunque profondità.
+        ''' </summary>
+        ''' <remarks>
+        ''' Le tendine non ci sono: sono comandi, e come i bottoni di questo giro non erano.
+        ''' </remarks>
+        Private Shared Iterator Function RettangoliDi(radice As Control) As IEnumerable(Of Control)
+
+            For Each figlio As Control In radice.Controls
+
+                If TypeOf figlio Is TextBoxBase OrElse TypeOf figlio Is ListBox OrElse
+                   TypeOf figlio Is ListView OrElse TypeOf figlio Is TabPage Then
+                    Yield figlio
+                End If
+
+                For Each dentro As Control In RettangoliDi(figlio)
+                    Yield dentro
+                Next
+
+            Next
+
+        End Function
 
     End Class
 

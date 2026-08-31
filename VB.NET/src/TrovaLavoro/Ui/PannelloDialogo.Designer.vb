@@ -1,4 +1,4 @@
-<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class PannelloDialogo
     Inherits System.Windows.Forms.UserControl
 
@@ -105,7 +105,7 @@ Partial Class PannelloDialogo
         ' Il fondo è quello neutro delle finestre, non il bianco delle aree di lavoro:
         ' le bolle sono bianche, e su bianco non si vedrebbero.
         Me.pnlScorrimento.AutoScroll = True
-        Me.pnlScorrimento.BackColor = StileApp.SfondoBase
+        Me.pnlScorrimento.BackColor = StileApp.FondoPagina
         Me.pnlScorrimento.Controls.Add(Me.flpConversazione)
         Me.pnlScorrimento.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlScorrimento.Location = New System.Drawing.Point(1, 1)
@@ -121,7 +121,7 @@ Partial Class PannelloDialogo
         ' compare la barra.
         Me.flpConversazione.AutoSize = True
         Me.flpConversazione.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.flpConversazione.BackColor = StileApp.SfondoBase
+        Me.flpConversazione.BackColor = StileApp.FondoPagina
         Me.flpConversazione.Dock = System.Windows.Forms.DockStyle.Top
         Me.flpConversazione.FlowDirection = System.Windows.Forms.FlowDirection.TopDown
         Me.flpConversazione.Location = New System.Drawing.Point(12, 12)
@@ -148,6 +148,7 @@ Partial Class PannelloDialogo
         Me.txtRisposta.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtRisposta.BackColor = StileApp.FondoCasella
         Me.txtRisposta.Location = New System.Drawing.Point(0, 14)
         Me.txtRisposta.Multiline = True
         Me.txtRisposta.Name = "txtRisposta"
@@ -241,7 +242,7 @@ Partial Class PannelloDialogo
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.BackColor = StileApp.SfondoBase
+        Me.BackColor = StileApp.FondoPagina
         Me.Controls.Add(Me.pnlConversazione)
         Me.Controls.Add(Me.pnlIntestazione)
         Me.Controls.Add(Me.pnlRisposta)

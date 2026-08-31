@@ -240,7 +240,7 @@ Partial Class PannelloDocumenti
         '
         'txtCv
         '
-        Me.txtCv.BackColor = StileApp.SfondoContenuto
+        Me.txtCv.BackColor = StileApp.FondoCasella
         Me.txtCv.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtCv.Dock = System.Windows.Forms.DockStyle.Fill
         Me.txtCv.Multiline = True
@@ -274,7 +274,7 @@ Partial Class PannelloDocumenti
         '
         'txtAnnuncio
         '
-        Me.txtAnnuncio.BackColor = StileApp.SfondoContenuto
+        Me.txtAnnuncio.BackColor = StileApp.FondoCasella
         Me.txtAnnuncio.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtAnnuncio.Dock = System.Windows.Forms.DockStyle.Fill
         Me.txtAnnuncio.Multiline = True
@@ -307,7 +307,7 @@ Partial Class PannelloDocumenti
         '
         'txtLettera
         '
-        Me.txtLettera.BackColor = StileApp.SfondoContenuto
+        Me.txtLettera.BackColor = StileApp.FondoCasella
         Me.txtLettera.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.txtLettera.Dock = System.Windows.Forms.DockStyle.Fill
         Me.txtLettera.Multiline = True
@@ -398,7 +398,7 @@ Partial Class PannelloDocumenti
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.BackColor = StileApp.SfondoBase
+        Me.BackColor = StileApp.FondoPagina
         Me.Controls.Add(Me.pnlCorpo)
         Me.Controls.Add(Me.pnlOpzioni)
         Me.Controls.Add(Me.pnlIntestazione)

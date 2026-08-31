@@ -1,4 +1,4 @@
-Imports System.IO
+﻿Imports System.IO
 Imports System.Linq
 Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
@@ -24,6 +24,40 @@ Namespace Ui
     Public Class CollaudiFinestraImpostazioni
 
         Private Const ChiaveFinta As String = "sk-ant-finta-0000-CODA"
+
+        ''' <summary>
+        ''' Il fondo è l'avorio delle destinazioni, non il bianco delle finestre.
+        ''' </summary>
+        ''' <remarks>
+        ''' Le Impostazioni sono la settima porta del menu e si aprono in una finestra solo
+        ''' per come sono fatte dentro (cap. 03.2): dal 2026-08-31, quando l'avorio è
+        ''' entrato nelle sei pagine, restare bianche voleva dire essere l'unica
+        ''' destinazione fredda. È un colore, e un colore sbagliato non rompe niente: se
+        ''' non lo guarda il banco, se ne accorge solo chi apre proprio questa finestra.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub IlFondoEQuelloDelleDestinazioni()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        Assert.AreEqual(StileApp.FondoCasella, finestra.BackColor,
+                                        "la finestra")
+
+                        For Each nome As String In {"pnlContenuto", "pnlFascia", "chkRifinitura"}
+                            Assert.AreEqual(
+                                StileApp.FondoCasella,
+                                finestra.Controls.Find(nome, searchAllChildren:=True).Single().BackColor,
+                                $"«{nome}» è rimasto bianco")
+                        Next
+
+                    End Using
+
+                End Sub)
+
+        End Sub
 
         <TestMethod>
         Public Sub AprirlaNonScriveNiente()
