@@ -58,6 +58,11 @@ Tutti i colori e i font dell'applicazione vengono **da questa tabella e solo da 
 | `BordoSuccesso` | `#0A2C11` | contorno della casella verde della barra (cap. 03.4) *(dal 2026-08-30 sera)* |
 | `ArgentoDiAttesa` | `#E2E8F0` | i pallini che girano sullo scudo di caricamento (cap. 03.8) *(dal 2026-08-30)* |
 | `OmbraDiAttesa` | `#4A5568` | il contorno di quei pallini, che li stacca dalle parti chiare dello scudo *(dal 2026-08-30)* |
+| `VerdeDiAttesa` | `#0D7C0D` | il corpo della barra che si riempie sotto lo scudo (cap. 03.8) *(dal 2026-08-31)* |
+| `VerdeSulFondo` | `#378B35` | il fondo di quella barra, dove la sfumatura verticale schiarisce *(dal 2026-08-31)* |
+| `VerdeInTesta` | `#34A936` | la punta accesa del riempimento, che è la parte che si vede muoversi *(dal 2026-08-31)* |
+| `FondoDiAttesa` | `#E4E6E6` | il grigio della barra ancora da riempire *(dal 2026-08-31)* |
+| `BordoDiAttesa` | `#CACBCC` | il filetto attorno alla barra, che la stacca dal desktop *(dal 2026-08-31)* |
 | `Avviso` | `#FFC107` | azioni che modificano, badge attenzione |
 | `Pericolo` | `#DC3545` | azioni distruttive, badge errore |
 | `Informazione` | `#17A2B8` | badge informativi |
@@ -540,7 +545,7 @@ Prefissi standard, nome semantico in PascalCase: `pnl` (Panel), `btn` (Button),
     (200 × 242, più alto che largo) e stirarlo per riempire esattamente un rettangolo che
     non è il suo vorrebbe dire deformare il marchio — la sola cosa che il marchio non
     tollera. Si prende perciò il più grande scudo **non deformato** che ci sta dentro
-    tutti e due: su 1920 × 1080 fanno 297 × 360 invece di 384 × 360.
+    tutti e due: su 1920 × 1080 fanno 298 × 360 invece di 384 × 360.
   - **È lo scudo dello sfondo**, lo stesso PNG del mega stemma del menu (cap. 03.6) e con
     lo stesso conto — la tela si chiede in proporzione, perché attorno allo scudo c'è
     dell'aria trasparente e chiederla della misura dello scudo lo farebbe più basso del
@@ -552,11 +557,48 @@ Prefissi standard, nome semantico in PascalCase: `pnl` (Panel), `btn` (Button),
     lascerebbe attorno al disegno l'alone del colore reso invisibile.
   - **Sta sopra lo schermo di chi guarda**, non «sul primo»: con due monitor il centro
     dello schermo è il centro di quello dove sta la finestra principale.
-  - **Venti pixel più in alto del centro** *(chiesto da Mirco il 2026-08-31, guardandolo a
-    video)*. Non è una correzione di un conto sbagliato — il centro geometrico era esatto —
+  - **Trenta pixel più in alto del centro** *(chiesti da Mirco il 2026-08-31, guardandolo
+    a video: prima venti, poi altri dieci quando sotto lo scudo è arrivata la barra — un
+    complesso più alto pesa più in basso, e per restare dov'era all'occhio deve salire)*. Non è una correzione di un conto sbagliato — il centro geometrico era esatto —
     ma di come lo legge l'occhio: una figura appesa esattamente a metà di un rettangolo
-    sembra cadere verso il basso. L'alzata vale per il **complesso**: si sposta la
-    finestra, non il disegno dentro di lei, o la ruota si scollerebbe dallo scudo.
+    sembra cadere verso il basso. L'alzata vale per il **complesso** — scudo, ruota e,
+    dal 31 agosto, barra: si sposta la finestra, non il disegno dentro di lei, o la ruota
+    si scollerebbe dallo scudo. *Da quando sotto c'è la barra il complesso è alto 397
+    pixel, cioè un numero dispari, e «la metà» sono due pixel diversi: l'aria che avanza
+    si divide arrotondando per eccesso, o il centro cadrebbe a ventun pixel dal centro
+    dello schermo invece che a venti.*
+  - **La barra che si riempie** *(dal 2026-08-31, chiesta da Mirco)*. Sotto lo scudo,
+    **larga esattamente quanto lui**, spessa il 7,4% di quella larghezza — ventidue pixel
+    su uno schermo comune — e staccata dal suo piede del 7%: misure in frazione e non in
+    pixel, o su un monitor 4K sarebbero un filo di capello. *(Lo spessore è passato dal
+    5,5% al 6,5% al 7,4% nella stessa sera del 31 agosto, guardando la barra a video:
+    quanto dev'essere spessa perché si veda da lontano non lo dice nessun conto. Che
+    resti un pixel sopra lo stacco va bene — quel che serve è che dell'aria ci sia, non
+    che vinca il confronto.)* I colori sono quelli della barra di avanzamento di sistema,
+    campionati pixel per pixel dall'immagine che Mirco ha portato: corpo `#0D7C0D`, punta
+    `#34A936` sull'ultimo ottavo (quel che nella barra vera sembra un effetto
+    fluorescente, ed è invece la parte che si vede muoversi), fondo `#E4E6E6` col suo
+    filetto. È un prestito consapevole da fuori tavolozza: una barra che si riempie è un
+    segno che si legge **senza impararlo**, e dipingerla del blu Aviolab l'avrebbe resa
+    una striscia da interpretare.
+  - **Perché è dipinta e non è un `ProgressBar`**: questa finestra non ha controlli, è
+    un'unica immagine col suo alfa consegnata a Windows in un colpo solo, e un figlio
+    dentro non finirebbe mai in quell'immagine.
+  - **Avanza col tempo, e non arriva mai in fondo da sola.** Quanto durerà una chiamata
+    all'AI non lo sa nessuno — venticinque secondi un'analisi, trentacinque un confronto,
+    cinquantasette un CV con la lettera, il doppio su una rete lenta — e nemmeno lo
+    streaming lo saprebbe: il numero di parole che verranno non è noto a chi le sta
+    scrivendo. La barra dice perciò l'unica cosa che può dire senza mentire: **più tempo
+    passa, meno ne resta in proporzione**. Cresce in fretta all'inizio e rallenta, e si
+    ferma al **95%** (un terzo a cinque secondi, due terzi a quindici, l'84% a
+    trentacinque, il 92% a un minuto — i numeri che Mirco ha scelto vedendoli scritti).
+    L'ultimo 5% lo riempie il **fatto**: l'AI ha risposto. Allora la barra scatta a uno,
+    **resta piena tre battiti** — un quarto di secondo scarso, o quel compimento non lo
+    vedrebbe nessuno — e sparisce con lo scudo.
+  - **Un'attesa già in corso non fa ricominciare la barra.** Chi accende lo scudo è la
+    stessa riga che spegne la barra di navigazione, e quella passa di lì più volte nella
+    stessa attesa: con la sola ruota non si vedeva — un pallino vale l'altro — mentre una
+    barra che torna a zero a metà strada non verrebbe più creduta.
   - Il filo che lo accende è **uno solo** — lo stesso che spegne la barra di navigazione
     (cap. 02.6) e fa parlare la fascia di stato — così i tre segnali non possono
     smentirsi a vicenda.

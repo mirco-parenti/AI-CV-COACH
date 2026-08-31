@@ -4,8 +4,8 @@ Imports System.Runtime.InteropServices
 Imports System.Windows.Forms
 
 ''' <summary>
-''' La finestra che porta lo <see cref="ScudoDiCaricamento">scudo</see> in mezzo allo
-''' schermo mentre l'AI lavora (cap. 03.8).
+''' La finestra che porta lo <see cref="ScudoDiCaricamento">scudo</see>, la sua ruota e
+''' la barra che si riempie in mezzo allo schermo mentre l'AI lavora (cap. 03.8).
 ''' </summary>
 ''' <remarks>
 ''' <para><b>Perché è una finestra a strati (<i>layered</i>) e non un controllo.</b> Lo
@@ -38,10 +38,28 @@ Friend NotInheritable Class FinestraDiCaricamento
     Private Const MiscelaConAlfa As Byte = 1
     Private Const DallaSorgente As Integer = 2
 
+    ''' <summary>Quanti scatti resta piena la barra prima che lo scudo se ne vada.</summary>
+    ''' <remarks>
+    ''' Tre scatti da ottanta millisecondi: un quarto di secondo scarso, quanto basta
+    ''' perché l'occhio veda la barra arrivare in fondo. Di più sarebbe un ritardo fra il
+    ''' lavoro finito e la finestra libera, e chi aspetta da un minuto non merita altra
+    ''' attesa per un'animazione.
+    ''' </remarks>
+    Private Const ScattiDelCompimento As Integer = 3
+
     Private ReadOnly _battito As New Timer() With {
         .Interval = ScudoDiCaricamento.IntervalloInMillisecondi}
 
     Private _passo As Integer
+
+    ''' <summary>Quando è cominciata l'attesa: è da qui che la barra sa dove arrivare.</summary>
+    Private _iniziata As Date
+
+    ''' <summary>Se l'AI ha già risposto e si sta mostrando la barra piena.</summary>
+    Private _inCompimento As Boolean
+
+    ''' <summary>Quanti scatti mancano alla sparizione, durante il compimento.</summary>
+    Private _scattiRimasti As Integer
 
     Public Sub New()
 
@@ -91,7 +109,17 @@ Friend NotInheritable Class FinestraDiCaricamento
             Screen.FromControl(finestraPrincipale).Bounds)
         If dove.IsEmpty Then Return
 
-        _passo = 0
+        ' Un'attesa già in corso non ricomincia da capo. Non è prudenza teorica: chi
+        ' accende lo scudo è la stessa riga che spegne la barra di navigazione, e quella
+        ' passa di qui più volte nella stessa attesa. Con la sola ruota non si vedeva —
+        ' un pallino vale l'altro — mentre la barra si vedrebbe benissimo tornare a zero
+        ' a metà strada, che è il modo più rapido di non essere creduta mai più.
+        If Not Visible OrElse _inCompimento Then
+            _passo = 0
+            _iniziata = Date.Now
+        End If
+
+        _inCompimento = False
         SetBounds(dove.Left, dove.Top, dove.Width, dove.Height)
 
         If Not Visible Then Show(finestraPrincipale)
@@ -101,20 +129,67 @@ Friend NotInheritable Class FinestraDiCaricamento
 
     End Sub
 
-    ''' <summary>Toglie lo scudo. Non si distrugge: la prossima attesa è vicina.</summary>
+    ''' <summary>
+    ''' L'AI ha risposto: la barra scatta in fondo, si vede piena un istante, poi lo scudo
+    ''' se ne va. Non si distrugge niente: la prossima attesa è vicina.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Quell'istante è ciò che rende vera la barra.</b> Per tutta l'attesa il
+    ''' riempimento è una stima — onesta, ma una stima — e si ferma al 95%
+    ''' (<see cref="ScudoDiCaricamento.RiempimentoMassimo"/>): l'ultimo pezzo lo riempie
+    ''' il fatto, cioè la risposta arrivata. Se lo scudo sparisse nello stesso
+    ''' millisecondo, quel pezzo non lo vedrebbe nessuno, e agli occhi di chi guarda la
+    ''' barra resterebbe una cosa che in fondo non ci arriva mai.</para>
+    ''' <para>A contare l'istante è il battito che già c'è, non un secondo timer. La ruota
+    ''' intanto continua a girare, ed è voluto: un fermo immagine, anche di un quarto di
+    ''' secondo, si legge come un blocco.</para>
+    ''' </remarks>
     Public Sub Spegni()
 
-        _battito.Stop()
-        If Visible Then Hide()
+        If Not Visible Then
+            _battito.Stop()
+            Return
+        End If
+
+        If _inCompimento Then Return
+
+        _inCompimento = True
+        _scattiRimasti = ScattiDelCompimento
+
+        Ridisegna()
+        _battito.Start()
 
     End Sub
 
     Private Sub UnoScatto(mittente As Object, e As EventArgs)
 
         _passo = (_passo + 1) Mod ScudoDiCaricamento.Pallini
+
+        If _inCompimento Then
+
+            _scattiRimasti -= 1
+
+            If _scattiRimasti <= 0 Then
+                _battito.Stop()
+                _inCompimento = False
+                If Visible Then Hide()
+                Return
+            End If
+
+        End If
+
         Ridisegna()
 
     End Sub
+
+    ''' <summary>Quanta barra è piena adesso: la curva del tempo, o tutta se è finita.</summary>
+    Private Function QuotaPiena() As Double
+
+        If _inCompimento Then Return 1.0
+
+        Return ScudoDiCaricamento.Riempimento(Date.Now - _iniziata)
+
+    End Function
 
     Private Sub Ridisegna()
 
@@ -124,7 +199,7 @@ Friend NotInheritable Class FinestraDiCaricamento
 
             Using disegno As Graphics = Graphics.FromImage(tela)
                 disegno.Clear(Color.Transparent)
-                ScudoDiCaricamento.Disegna(disegno, tela.Size, _passo)
+                ScudoDiCaricamento.Disegna(disegno, tela.Size, _passo, QuotaPiena())
             End Using
 
             PosaLaTela(tela)

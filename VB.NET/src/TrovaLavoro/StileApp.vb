@@ -178,6 +178,44 @@ Public Module StileApp
     ''' <summary>Il contorno dei pallini dell'attesa: un grigio di piombo (cap. 03.8).</summary>
     Public ReadOnly OmbraDiAttesa As Color = ColorTranslator.FromHtml("#4A5568")
 
+    ''' <summary>Il verde della barra che si riempie mentre l'AI lavora (cap. 03.8).</summary>
+    ''' <remarks>
+    ''' <para>È un colore <b>preso in prestito da fuori</b>, e apposta: non appartiene alla
+    ''' tavolozza del marchio — il verde di famiglia è <see cref="Successo"/> — ma è quello
+    ''' della barra di avanzamento di Windows, campionato pixel per pixel dall'immagine che
+    ''' Mirco ha portato il 2026-08-31. La ragione è che una barra che si riempie non è
+    ''' decorazione ma un <b>segno che si legge senza impararlo</b>: chi la vede in mezzo
+    ''' allo schermo sa già cosa vuol dire, perché l'ha vista mille volte di quel verde lì.
+    ''' Dipingerla del blu Aviolab l'avrebbe resa una striscia da interpretare.</para>
+    ''' <para>Sta comunque qui, come tutti gli altri: un colore scritto a mano dentro un
+    ''' disegno è un colore che nessuno ritrova più.</para>
+    ''' </remarks>
+    Public ReadOnly VerdeDiAttesa As Color = ColorTranslator.FromHtml("#0D7C0D")
+
+    ''' <summary>
+    ''' Il verde chiaro sulla testa del riempimento: è lui a farlo sembrare acceso.
+    ''' </summary>
+    ''' <remarks>
+    ''' Nell'immagine di Mirco sembra un effetto fluorescente diffuso; misurandola, è una
+    ''' sfumatura che comincia un ottavo prima della punta e arriva fin qui. Non è un
+    ''' vezzo: è la parte che si muove, e schiarirla è come si vede che si muove.
+    ''' </remarks>
+    Public ReadOnly VerdeInTesta As Color = ColorTranslator.FromHtml("#34A936")
+
+    ''' <summary>Il verde in basso: la barra non è di un verde solo.</summary>
+    ''' <remarks>
+    ''' Anche in verticale c'è una sfumatura, appena percettibile: scura sopra, un filo
+    ''' più chiara sull'ultimo terzo. È quel che dà spessore alla striscia invece di
+    ''' lasciarla piatta, ed è misurata sull'immagine come le altre.
+    ''' </remarks>
+    Public ReadOnly VerdeSulFondo As Color = ColorTranslator.FromHtml("#378B35")
+
+    ''' <summary>Il fondo grigio della barra: la parte che deve ancora riempirsi.</summary>
+    Public ReadOnly FondoDiAttesa As Color = ColorTranslator.FromHtml("#E4E6E6")
+
+    ''' <summary>Il filetto attorno alla barra, che le dà un contorno sullo schermo.</summary>
+    Public ReadOnly BordoDiAttesa As Color = ColorTranslator.FromHtml("#CACBCC")
+
     ''' <summary>Azioni che modificano, badge attenzione.</summary>
     Public ReadOnly Avviso As Color = ColorTranslator.FromHtml("#FFC107")
 

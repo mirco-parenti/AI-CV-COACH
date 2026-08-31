@@ -6,7 +6,7 @@ Namespace Ui
 
     ''' <summary>
     ''' Collaudi dello scudo che compare mentre l'AI lavora (cap. 03.8): la misura sullo
-    ''' schermo e il disegno che gira.
+    ''' schermo, il disegno che gira e la barra che si riempie sotto di lui.
     ''' </summary>
     ''' <remarks>
     ''' Non aprono nessuna finestra e non vogliono la macchina: si disegna su un
@@ -91,10 +91,11 @@ Namespace Ui
         ''' <para>Il secondo monitor non è un capriccio: con due schermi il centro è quello
         ''' dove l'utente sta guardando, e un conto fatto sulle sole misure ci metterebbe lo
         ''' scudo sullo schermo di sinistra.</para>
-        ''' <para>In verticale il centro non è 540 ma <b>520</b>: il complesso sta
-        ''' <see cref="ScudoDiCaricamento.AlzataInPixel">venti pixel</see> più in alto del
+        ''' <para>In verticale il centro non è 540 ma <b>510</b>: il complesso sta
+        ''' <see cref="ScudoDiCaricamento.AlzataInPixel">trenta pixel</see> più in alto del
         ''' centro, perché a video una figura appesa esattamente a metà sembra cadere in
-        ''' basso <i>(chiesto da Mirco il 2026-08-31, guardandolo)</i>.</para>
+        ''' basso <i>(chiesto da Mirco il 2026-08-31, guardandolo: venti, e altri dieci
+        ''' quando il complesso si è allungato con la barra)</i>.</para>
         ''' </remarks>
         <TestMethod>
         Public Sub LoScudoStaInMezzoAlloSchermoCheGliSiDa()
@@ -127,7 +128,7 @@ Namespace Ui
 
             Assert.IsLessThan(centroDelloSchermo, centroDelloScudo, "sta più in alto del centro")
             Assert.AreEqual(ScudoDiCaricamento.AlzataInPixel, centroDelloSchermo - centroDelloScudo,
-                            "e di esattamente venti pixel")
+                            "e di esattamente l'alzata chiesta")
 
         End Sub
 
@@ -175,21 +176,322 @@ Namespace Ui
         End Sub
 
         ' ==================================================================
+        ' La barra che si riempie
+        ' ==================================================================
+
+        ''' <summary>
+        ''' La barra si aggiunge sotto lo scudo, e non gliela toglie da sopra.
+        ''' </summary>
+        ''' <remarks>
+        ''' È il difetto che questo pezzo poteva fare più facilmente: dare alla barra il
+        ''' posto che era dello scudo invece di chiedere una tela più alta. Sarebbe passato
+        ''' inosservato — lo scudo si sarebbe visto lo stesso, appena più basso e con la
+        ''' ruota scentrata di qualche pixel — e nessun altro collaudo se ne accorgerebbe.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LaBarraSiAggiungeSottoLoScudoESenzaRubargliNiente()
+
+            For Each schermo As Size In {Pieno, New Size(1366, 768), New Size(1000, 2000)}
+
+                Dim scudo As Size = ScudoDiCaricamento.MisuraSulloSchermo(schermo)
+                Dim complesso As Size = ScudoDiCaricamento.MisuraDelComplesso(schermo)
+
+                Assert.AreEqual(scudo.Width, complesso.Width,
+                                "il complesso è largo quanto lo scudo")
+                Assert.IsGreaterThan(scudo.Height, complesso.Height,
+                                     "ed è più alto, perché sotto c'è la barra")
+                Assert.AreEqual(scudo.Height, ScudoDiCaricamento.AltezzaDelloScudo(complesso),
+                                "e lo scudo dentro di lui è rimasto alto uguale")
+
+                ' Che fra i due ci sia dell'aria non lo diceva nessuno, e azzerando lo
+                ' stacco il banco restava verde: la barra si sarebbe incollata al piede
+                ' dello scudo — cioè sarebbe diventata parte del marchio — senza che
+                ' niente se ne accorgesse. Trovato falsificando, il 2026-08-31; e la
+                ' prima asserzione scritta per chiuderlo restò verde a sua volta, perché
+                ' il pavimento di due pixel dello stacco bastava a contentarla.
+                '
+                ' La soglia è i tre quarti dello spessore, e il quarto che manca ha una
+                ' storia: la prima versione chiedeva l'intero — «tanta aria quanto la
+                ' barra è spessa» — e il giorno stesso Mirco ha voluto la barra di 22
+                ' pixel contro i 21 dello stacco. Il collaudo diceva rosso, ma la cosa
+                ' sbagliata era lui: la proprietà da difendere è che l'aria non
+                ' scompaia, non che vinca il confronto per un pixel. Una soglia scritta
+                ' più stretta di quel che difende boccia il lavoro buono, e chi la
+                ' incontra impara ad allargarla invece di ascoltarla.
+                Assert.IsGreaterThanOrEqualTo(
+                    ScudoDiCaricamento.SpessoreDellaBarra(scudo.Width) * 3 \ 4,
+                    ScudoDiCaricamento.DistaccoDellaBarra(scudo.Width),
+                    "fra lo scudo e la barra non c'è più aria a sufficienza")
+
+            Next
+
+        End Sub
+
+        ''' <summary>La barra è larga quanto lo scudo: né più corta né più lunga.</summary>
+        ''' <remarks>
+        ''' Chiesto così da Mirco il 2026-08-31 — «uguale identica alla larghezza dello
+        ''' scudo, sicuramente non di meno» — ed è anche la ragione per cui la finestra è
+        ''' larga quanto lo scudo e basta: la barra ci si appoggia dentro per intero.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LaBarraELargaQuantoLoScudo()
+
+            Using tela As Bitmap = DipintaSu(Grande, 0, 1.0)
+
+                Dim riga As Color() = RigaDellaBarra(tela)
+                Dim primo As Integer = -1
+                Dim ultimo As Integer = -1
+
+                For x As Integer = 0 To riga.Length - 1
+                    If riga(x).A > 0 Then
+                        If primo < 0 Then primo = x
+                        ultimo = x
+                    End If
+                Next
+
+                Assert.AreEqual(0, primo, "la barra comincia al bordo sinistro dello scudo")
+                Assert.AreEqual(riga.Length - 1, ultimo, "e finisce a quello destro")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>Prima che l'attesa cominci non c'è niente da mostrare.</summary>
+        <TestMethod>
+        Public Sub PrimaDiCominciareLaBarraEVuota()
+
+            Assert.AreEqual(0.0, ScudoDiCaricamento.Riempimento(TimeSpan.Zero))
+            Assert.AreEqual(0.0, ScudoDiCaricamento.Riempimento(TimeSpan.FromSeconds(-3)),
+                            "e un tempo all'indietro non la riempie di certo")
+
+        End Sub
+
+        ''' <summary>
+        ''' La barra cresce sempre, e non torna mai indietro.
+        ''' </summary>
+        ''' <remarks>
+        ''' Una barra che indietreggia è peggio di nessuna barra: dice che il lavoro fatto
+        ''' è stato disfatto, che qui non succede mai.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LaBarraCresceESoloInAvanti()
+
+            Dim prima As Double = 0.0
+
+            For secondi As Integer = 1 To 300
+
+                Dim adesso As Double = ScudoDiCaricamento.Riempimento(TimeSpan.FromSeconds(secondi))
+
+                Assert.IsGreaterThan(prima, adesso,
+                                     $"al secondo {secondi} la barra non è andata avanti")
+                prima = adesso
+
+            Next
+
+        End Sub
+
+        ''' <summary>
+        ''' Da sola non arriva mai in fondo: l'ultimo pezzo lo riempie la risposta dell'AI.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il collaudo guarda anche il caso assurdo — un'attesa di un'ora — perché è lì
+        ''' che una curva sbagliata si tradirebbe: il 95% dev'essere un tetto, non un
+        ''' traguardo che prima o poi si taglia.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LaBarraNonArrivaMaiInFondoDaSola()
+
+            For Each secondi As Double In {1.0, 30.0, 120.0, 600.0, 3600.0}
+
+                Assert.IsLessThan(1.0, ScudoDiCaricamento.Riempimento(TimeSpan.FromSeconds(secondi)),
+                                  $"dopo {secondi} secondi la barra si è già dichiarata finita")
+                Assert.IsLessThanOrEqualTo(ScudoDiCaricamento.RiempimentoMassimo,
+                                           ScudoDiCaricamento.Riempimento(TimeSpan.FromSeconds(secondi)),
+                                           $"dopo {secondi} secondi ha passato il suo tetto")
+
+            Next
+
+        End Sub
+
+        ''' <summary>
+        ''' La curva è quella che Mirco ha scelto guardandola scritta in numeri.
+        ''' </summary>
+        ''' <remarks>
+        ''' Sono i quattro punti che gli sono stati messi davanti il 2026-08-31, con le
+        ''' attese vere dell'applicazione accanto: cinque secondi (un'analisi appena
+        ''' cominciata), quindici, trentacinque (un confronto) e sessanta (un CV con la
+        ''' lettera). Se un domani si tocca la forma della curva, questo collaudo dice
+        ''' subito se si è toccato anche quel che era stato deciso.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub IlRiempimentoSegueLaCurvaSceltaDaMirco()
+
+            Dim attesi As New Dictionary(Of Integer, Double) From {
+                {5, 0.32}, {15, 0.62}, {35, 0.84}, {60, 0.92}}
+
+            For Each punto As KeyValuePair(Of Integer, Double) In attesi
+
+                Dim venuto As Double = ScudoDiCaricamento.Riempimento(
+                    TimeSpan.FromSeconds(punto.Key))
+
+                Assert.IsLessThan(0.02, Math.Abs(venuto - punto.Value),
+                                  $"a {punto.Key} secondi la barra è al {venuto:P0} " &
+                                  $"invece che al {punto.Value:P0}")
+
+            Next
+
+        End Sub
+
+        ''' <summary>Quel che è dipinto è lungo quanto la quota dice.</summary>
+        ''' <remarks>
+        ''' Qui si contano i pixel verdi di una riga vera, non si rifà il conto: fra la
+        ''' quota e quel che si vede a video ci sono due arrotondamenti e un filetto di
+        ''' bordo, ed è proprio lì che un pezzo di barra si perde.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LaBarraDipintaELungaQuantoLaQuotaDice()
+
+            For Each quota As Double In {0.0, 0.25, 0.5, 0.95, 1.0}
+
+                Using tela As Bitmap = DipintaSu(Grande, 0, quota)
+
+                    Dim riga As Color() = RigaDellaBarra(tela)
+                    Dim verdi As Integer = QuantiVerdi(riga)
+                    Dim atteso As Double = (riga.Length - 2) * quota
+
+                    Assert.IsLessThanOrEqualTo(2.0, Math.Abs(verdi - atteso),
+                                               $"a quota {quota:P0} sono verdi {verdi} pixel " &
+                                               $"su {riga.Length - 2}, non {atteso:F0}")
+
+                End Using
+
+            Next
+
+        End Sub
+
+        ''' <summary>
+        ''' Il verde è quello campionato sulla barra vera, e la punta è più chiara.
+        ''' </summary>
+        ''' <remarks>
+        ''' Sono le due cose che Mirco ha chiesto guardando l'immagine: il colore
+        ''' «identico», e quello schiarirsi verso la punta che sembra un effetto
+        ''' fluorescente. Il corpo si guarda lontano dalla testa, dove la sfumatura non
+        ''' arriva ancora.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub IlVerdeEQuelloCampionatoELaPuntaEPiuChiara()
+
+            Using tela As Bitmap = DipintaSu(Grande, 0, 0.9)
+
+                Dim riga As Color() = RigaDellaBarra(tela)
+                Dim ultimoVerde As Integer = 0
+
+                For x As Integer = 0 To riga.Length - 1
+                    If EVerde(riga(x)) Then ultimoVerde = x
+                Next
+
+                Dim corpo As Color = riga(2)
+                Dim punta As Color = riga(ultimoVerde)
+
+                Assert.AreEqual(StileApp.VerdeDiAttesa.ToArgb(), corpo.ToArgb(),
+                                "il corpo della barra non è il verde campionato")
+                Assert.IsGreaterThan(corpo.GetBrightness(), punta.GetBrightness(),
+                                     "la punta non è più chiara del corpo")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' A barra vuota il posto della barra c'è lo stesso, e non ci arriva lo scudo.
+        ''' </summary>
+        ''' <remarks>
+        ''' Due cose in una. Che la barra vuota si veda comunque — altrimenti nei primi
+        ''' istanti d'attesa comparirebbe dal nulla — e che il disegno dello scudo si
+        ''' fermi dove deve: se sfondasse in basso, in quella riga ci sarebbero pixel del
+        ''' marchio invece del grigio.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub ABarraVuotaRestaIlSuoPostoGrigio()
+
+            Using tela As Bitmap = DipintaSu(Grande, 0, 0.0)
+
+                Dim riga As Color() = RigaDellaBarra(tela)
+
+                ' Dal secondo al penultimo: il primo e l'ultimo sono il filetto laterale,
+                ' che è grigio anche lui ma di un altro grigio.
+                For x As Integer = 1 To riga.Length - 2
+                    Assert.AreEqual(StileApp.FondoDiAttesa.ToArgb(), riga(x).ToArgb(),
+                                    $"a barra vuota il pixel {x} non è del suo grigio")
+                Next
+
+            End Using
+
+        End Sub
+
+        ' ==================================================================
         ' Attrezzi
         ' ==================================================================
 
+        ''' <summary>Uno schermo su cui la barra è alta abbastanza da contarne i pixel.</summary>
+        Private Shared ReadOnly Grande As New Size(1200, 900)
+
         ''' <summary>La tela dipinta a un certo passo. Piccola: qui si contano i pixel.</summary>
         Private Shared Function Dipinta(passo As Integer) As Bitmap
+            Return DipintaSu(New Size(600, 450), passo, 0.0)
+        End Function
 
-            Dim misura As Size = ScudoDiCaricamento.MisuraSulloSchermo(New Size(600, 450))
+        ''' <summary>La tela del complesso — scudo, ruota e barra — su un certo schermo.</summary>
+        Private Shared Function DipintaSu(schermo As Size, passo As Integer,
+                                          quotaPiena As Double) As Bitmap
+
+            Dim misura As Size = ScudoDiCaricamento.MisuraDelComplesso(schermo)
             Dim tela As New Bitmap(misura.Width, misura.Height)
 
             Using disegno As Graphics = Graphics.FromImage(tela)
                 disegno.Clear(Color.Transparent)
-                ScudoDiCaricamento.Disegna(disegno, misura, passo)
+                ScudoDiCaricamento.Disegna(disegno, misura, passo, quotaPiena)
             End Using
 
             Return tela
+
+        End Function
+
+        ''' <summary>
+        ''' La riga di pixel a metà altezza della barra, dal primo all'ultimo.
+        ''' </summary>
+        ''' <remarks>
+        ''' A metà altezza e non altrove perché la barra ha un filetto di bordo sopra e
+        ''' sotto: una riga presa sul bordo direbbe grigio anche a barra piena.
+        ''' </remarks>
+        Private Shared Function RigaDellaBarra(tela As Bitmap) As Color()
+
+            Dim spessore As Integer = ScudoDiCaricamento.SpessoreDellaBarra(tela.Width)
+            Dim y As Integer = tela.Height - spessore + spessore \ 2
+            Dim riga(tela.Width - 1) As Color
+
+            For x As Integer = 0 To tela.Width - 1
+                riga(x) = tela.GetPixel(x, y)
+            Next
+
+            Return riga
+
+        End Function
+
+        ''' <summary>Se un pixel è del verde della barra, comunque sfumato.</summary>
+        Private Shared Function EVerde(colore As Color) As Boolean
+            Return colore.G > colore.R AndAlso colore.G > colore.B AndAlso colore.G > 60
+        End Function
+
+        Private Shared Function QuantiVerdi(riga As Color()) As Integer
+
+            Dim quanti As Integer = 0
+
+            For Each colore As Color In riga
+                If EVerde(colore) Then quanti += 1
+            Next
+
+            Return quanti
 
         End Function
 
