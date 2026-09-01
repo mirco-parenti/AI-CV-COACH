@@ -58,7 +58,7 @@ prompt-pool/
 │   ├── formazione.md
 │   ├── importa_cv.md           strutturazione di un CV trascritto
 │   ├── trascrizione_pdf.md     lettura fedele del PDF (output testo)
-│   ├── aggiornamento.md        ✚ sessione differenziale di aggiornamento
+│   ├── aggiornamento.md        ✚ sessione differenziale di aggiornamento (mai scritto: v. nota)
 │   └── classifica_documenti.md ✚ riconoscere i documenti utili in una cartella
 ├── annuncio/
 │   └── analisi_annuncio.md     estrazione requisiti + contesto (+ campo lingua ✚)
@@ -85,6 +85,16 @@ prompt-pool/
     ├── umanizzazione_prosa.it.md     ✚ corpo di lettera ed email (italiano)
     └── umanizzazione_prosa.en.md     ✚ corpo di lettera ed email (inglese)
 ```
+
+*Due note di lettura sull'albero e sui numeri di versione che compaiono in questo capitolo.
+La prima: **`profilo/aggiornamento.md` non è mai stato scritto**, e dal 2026-09-01 non è più
+in attesa — il flusso D che l'avrebbe usato è **fuori dalla 1.0** (cap. 12.4). Resta
+nell'albero perché l'albero è il disegno: il giorno che quella sessione si faccia, il prompt
+nasce lì. La seconda: i **`Pool 1.03`** che si leggono qui sotto — nella regola 4, nel
+riquadro del logo, nell'esempio di manifest — sono la versione **del giorno in cui il
+capitolo è stato scritto**, non quella corrente. La versione vera è quella del manifest e la
+dichiara l'applicazione; qui i numeri servono a mostrare la forma, non lo stato (regola 4 di
+progetto: lo stato non si duplica).*
 
 *La cartella `rifinitura/` è nata col **Pool 1.08** (T7b, 2026-08-18) e porta **tre**
 prompt invece dell'unico `umanizzazione.md` previsto qui: sono tre forme di prosa

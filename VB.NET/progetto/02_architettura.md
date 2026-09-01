@@ -46,7 +46,7 @@ artefatti JSON ben definiti. Quelli ereditati:
 
 | Artefatto | Prodotto da | Consumato da |
 |---|---|---|
-| **Profilo JSON** | dialogo guidato, import CV (da file o dalla pagina aperta nel browser), aggiornamento periodico | tutto il resto (unica *fonte di fatti*) |
+| **Profilo JSON** | dialogo guidato, import CV (da file o dalla pagina aperta nel browser), editing campo per campo, aggiornamento periodico *(quest'ultimo fuori dalla 1.0 dal 2026-09-01, cap. 12.4: non produce niente perché non c'è)* | tutto il resto (unica *fonte di fatti*) |
 | **Annuncio JSON** | analisi annuncio (da cattura WebView2, link o testo incollato) | confronto, generazione (come *segnale di mira*) |
 | **Giudizi + punteggio** | confronto (AI) + CalcoloMatch (codice) | scheda match, mitigazione, generazione |
 | **Mitigazioni JSON** | mitigazione (può essere lista vuota) | la ✉️ lettera e — da T7c — il **brainstorming**, che senza vedere i ponti non potrebbe farne scegliere uno |

@@ -356,6 +356,25 @@ e che restano qui come lavoro futuro, con il motivo per cui non è di oggi.
   (decisione 15.7). È un raffinamento, non un difetto: si valuta quando le sezioni saranno
   troppe perché lo scorrimento le tenga.
   *(2026-09-01 — deroga B10 della stessa revisione; cap. 03.4, cap. 11.6.)*
+- **Rispettare la preferenza di sistema per il movimento ridotto.** Windows ha un
+  interruttore («Effetti di animazione») con cui chi soffre di cinetosi, o semplicemente non
+  li sopporta, spegne le animazioni: lo scudo d'attesa non lo legge, e la sua comparsa è
+  l'unica animazione del programma. Il rilievo U20 lo chiedeva insieme alla soglia
+  anti-flash; **la soglia si è fatta, questo no**, ed è una scelta dichiarata: l'attesa vera
+  è la ruota che gira, che non si può togliere senza togliere l'informazione, e spegnere la
+  sola comparsa cambierebbe pochissimo a fronte di una preferenza che nessuno ha mai chiesto
+  qui. Resta un raffinamento di accessibilità vero, e il giorno che si faccia costa una
+  lettura di `SystemInformation` e un ramo.
+  *(2026-09-01 — metà non approvata del rilievo U20 della revisione UI; cap. 03.8.)*
+- **Un token `AvvisoTesto`, gemello di `InformazioneTesto`.** Il giro degli errori (U4) ha
+  dato al testo *informativo* un colore leggibile a 9 pt — `InformazioneTesto`, perché
+  `Informazione` come inchiostro faceva ≈2,8:1 — e ha lasciato l'ambra `Avviso` ai soli
+  badge, dove sta su un fondo e non è testo. Se un giorno servirà **scrivere** un avviso (non
+  un errore: qualcosa di intermedio, «attento a questo») quel colore oggi non c'è, e la
+  tentazione sarà riusare l'ambra da fondo come inchiostro — che è precisamente il difetto
+  curato in `PannelloProfilo.vb`. Il token costa tre righe e una misura di contrasto; si fa
+  quando ci sarà la prima riga che lo vuole, non prima.
+  *(2026-09-01 — proposta dell'implementatore del blocco F2-3, non fatta; cap. 03.2.)*
 
 ## Collaudi e non-regressione (Fase VB.NET)
 

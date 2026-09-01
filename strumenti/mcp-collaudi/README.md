@@ -270,7 +270,14 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   davvero sotto la scrivania —
   `FindAll(Children, ProcessId)` e il `ControlType` di ciascuna. *(Il `Pane` era transitorio
   e non si è saputo riprodurre: la cura è ragionata sul dump, e questa è la sola delle tre
-  che non si è potuta falsificare.)*
+  che non si è potuta falsificare.)* *E il **2026-09-01** la stessa cosa si è vista di
+  nuovo, con la cura dentro: durante il giro dei fix finali `ridimensiona` ha preso una
+  finestra di **160 × 28**, probabilmente un tooltip. Non è stata investigata — era in corso
+  una sessione dal vivo col tutor, e fermarla sarebbe costato più del difetto — quindi non
+  si sa se il filtro sulle `Window` sia stato aggirato o se quella cosa si dichiari `Window`
+  davvero. Sta come voce aperta in `in_sospeso.md`; fino ad allora, se `ridimensiona`
+  risponde con una misura assurda, la risposta è la stessa di sopra: guarda che cosa c'è
+  sotto la scrivania prima di dare la colpa all'attrezzo.*
 
 - **Il «Premuto» che non aveva premuto.** *(Trappola del 2026-08-27, guardando a occhio le
   tre cose nuove; **curata il 2026-08-29**.)* Per tutta la sua vita `clic` aveva riferito un

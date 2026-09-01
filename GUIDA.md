@@ -46,13 +46,15 @@ installarlo, e tutto quello che non lo usa continua a funzionare.
 2. **Al primo doppio clic Windows può avvisarti** che «il PC è protetto» e che
    l'applicazione non è riconosciuta. Succede a ogni programma non firmato con un
    certificato commerciale. Per procedere: *Ulteriori informazioni* → *Esegui comunque*.
-3. **Compare la schermata di avvio** — il marchio del programma — e resta qualche secondo,
-   il tempo di leggerla, mentre TrovaLavoro si prepara. Non c'è niente da fare: se c'è
-   qualcosa da chiederti se ne va da sola, senza farti aspettare.
+3. **Compare la schermata di avvio** — il marchio del programma — e resta una decina di
+   secondi, il tempo di leggerla, mentre TrovaLavoro si prepara. Se hai fretta la mandi via
+   subito con **un clic o premendo Invio**; e se c'è qualcosa da chiederti se ne va da sola,
+   senza farti aspettare. Poi la finestra si apre **a una misura comoda e centrata** — non a
+   tutto schermo: ingrandiscila o ridimensionala come preferisci.
 4. **Si apre l'informativa**: che cosa esce dal tuo PC, che cosa no, dove restano i dati,
    che spesa comporta. Compare **una volta sola**, ed è il momento giusto per leggerla:
-   subito dopo il programma ti chiede la chiave. La ritrovi quando vuoi da *Informazioni* o
-   dalle *Impostazioni*.
+   subito dopo il programma ti chiede la chiave. La ritrovi quando vuoi con il bottone
+   **«?»** in fondo alla barra in alto, o da *Impostazioni → Come funziona…*.
 5. **Incolli la chiave API** e premi «Prova la chiave»: in due secondi sai se funziona,
    senza consumare niente. Se non ce l'hai ancora, il paragrafo dopo dice come si prende.
 6. **Racconti il tuo profilo.** Due strade, e la seconda è più veloce: rispondere alle
@@ -69,7 +71,8 @@ Da lì in avanti la barra in alto è tutto il programma:
 | 🔍 **Ricerca** | trova annunci sui portali, o incolla il link di uno che hai già |
 | **Confronta ★ ANNUNCIO - CV** | il confronto, le stelle, e la decisione se candidarsi — qui si incolla anche il testo di un annuncio che hai già |
 | ▤ **Documenti** | CV, lettera ed email: si rileggono, si correggono a mano, si salvano |
-| ⚙ **Impostazioni** | la chiave, le preferenze, il backup, quanto hai speso |
+| ⚙ **Impostazioni** | la chiave, le preferenze, il backup, quanto hai speso — sezione per sezione, con i comandi nella colonna di destra |
+| **?** | riapre «Come funziona»: l'informativa del primo avvio, e i credits del programma |
 
 Il **Menu** e la barra portano nelle stesse stanze: la barra è sempre lì mentre lavori, il menu
 è la pagina da cui si parte quando non sai ancora dove andare.
@@ -185,9 +188,10 @@ di mostrarti un codice d'errore. I casi più comuni:
 | «Il modello … non è più disponibile» | quel modello è stato ritirato dal listino | *Impostazioni → Sotto il cofano*, scegline un altro dalla tendina |
 | «Troppe richieste in poco tempo» | hai superato il limite di frequenza | aspetta un minuto e riprova |
 
-Se invece capita qualcosa di strano che vuoi segnalare, in *Informazioni* c'è **«Copia
-diagnostica»**: mette negli appunti un foglietto tecnico — versione, cartella dati, ultimi
-guasti — **senza la tua chiave e senza i tuoi testi**, che puoi incollare in un messaggio.
+Se invece capita qualcosa di strano che vuoi segnalare, in *Impostazioni → Informazioni su…*
+c'è **«Copia diagnostica»**: mette negli appunti un foglietto tecnico — versione, cartella
+dati, ultimi guasti — **senza la tua chiave e senza i tuoi testi**, che puoi incollare in un
+messaggio.
 
 ---
 
@@ -196,7 +200,7 @@ guasti — **senza la tua chiave e senza i tuoi testi**, che puoi incollare in u
 Non si aggiorna da solo, ed è una scelta: un programma che si riscrive da sé chiede più
 fiducia di quanta ne serva qui.
 
-In *Informazioni* c'è **«Cerca aggiornamenti»**: premuto, chiede a GitHub qual è l'ultima
+In *Impostazioni → Informazioni su…* c'è **«Cerca aggiornamenti»**: premuto, chiede a GitHub qual è l'ultima
 versione pubblicata e te lo dice. Se ce n'è una nuova, si scarica il nuovo `.exe` e si
 **sostituisce il vecchio**: i tuoi dati non si toccano e il programma riparte da dov'era. Se
 ti risponde che *non risulta pubblicata nessuna versione*, non è un guasto: vuol dire che
