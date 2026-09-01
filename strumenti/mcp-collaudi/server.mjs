@@ -14,7 +14,7 @@
 //           -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 
 import { createServer } from "node:http";
-import { spawn, execSync } from "node:child_process";
+import { spawn, execFileSync } from "node:child_process";
 import { readFile, writeFile, unlink, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -47,11 +47,12 @@ const RIFERIMENTO = join(REPO, "strumenti", "aggiorna-riferimento.bat");
  */
 function eseguibileDiRiferimento() {
   try {
-    const suWindows = execSync(
-      `powershell.exe -NoProfile -Command "[Environment]::GetFolderPath('Desktop')"`,
+    const suWindows = execFileSync(
+      "powershell.exe",
+      ["-NoProfile", "-Command", "[Environment]::GetFolderPath('Desktop')"],
       { encoding: "utf8" }
     ).trim();
-    const desktop = execSync(`wslpath -u '${suWindows}'`, { encoding: "utf8" }).trim();
+    const desktop = execFileSync("wslpath", ["-u", suWindows], { encoding: "utf8" }).trim();
     if (desktop) return join(desktop, "TrovaLavoro.exe");
   } catch {
     // Senza Windows sotto non c'è niente da provare comunque: si tiene il percorso
@@ -74,11 +75,26 @@ const CHIAVE_DA = join(REPO, "HTML+JS", ".env");
 // Mestieri di base: eseguire un comando, e non aspettarlo per sempre
 // ============================================================================
 
-/** Esegue un comando in bash e restituisce uscita, errori e codice. */
-function esegui(comando, { timeoutMs = 600_000, ambiente = {} } = {}) {
+/**
+ * Esegue un programma con i suoi argomenti **separati**, e restituisce uscita, errori
+ * e codice.
+ *
+ * Nessuna shell di mezzo: niente `bash -lc "…"`. Fino al 2026-09-01 il comando era una
+ * *stringa* che i chiamanti componevano interpolando anche gli argomenti degli attrezzi
+ * — il filtro dei collaudi, la cartella dati, il file da scegliere — e una stringa data
+ * a bash è codice: un `;` o un backtick dentro quel valore usciva dalle virgolette ed
+ * eseguiva altro. Passando un array, gli argomenti restano **dati** comunque siano
+ * fatti, e nessuno deve più ricordarsi di proteggerli.
+ *
+ * Le tre cose che prima faceva la shell hanno ciascuna la sua opzione: la cartella di
+ * lavoro (`cartella`, era `cd … &&`), l'unione di stderr nell'uscita (`unisciErrori`,
+ * era `2>&1`) e il silenzio sugli errori (niente: `errori` sta in un campo suo, e chi
+ * non lo guarda l'ha buttato via come faceva `2>/dev/null`).
+ */
+function esegui(programma, argomenti = [], { timeoutMs = 600_000, ambiente = {}, cartella = REPO, unisciErrori = false } = {}) {
   return new Promise((risolvi) => {
-    const figlio = spawn("bash", ["-lc", comando], {
-      cwd: REPO,
+    const figlio = spawn(programma, argomenti, {
+      cwd: cartella,
       env: { ...process.env, ...ambiente },
     });
 
@@ -92,13 +108,30 @@ function esegui(comando, { timeoutMs = 600_000, ambiente = {} } = {}) {
     }, timeoutMs);
 
     figlio.stdout.on("data", (pezzo) => (uscita += pezzo));
-    figlio.stderr.on("data", (pezzo) => (errori += pezzo));
+    figlio.stderr.on("data", (pezzo) => (unisciErrori ? (uscita += pezzo) : (errori += pezzo)));
+
+    // Senza shell, un programma che non c'è non è più un «codice 127» sull'uscita: è un
+    // evento «error» che, se nessuno lo ascolta, fa cadere il server intero.
+    figlio.on("error", (guasto) => {
+      clearTimeout(allarme);
+      risolvi({ codice: -1, uscita, errori: errori + guasto.message, scaduto });
+    });
 
     figlio.on("close", (codice) => {
       clearTimeout(allarme);
       risolvi({ codice, uscita, errori, scaduto });
     });
   });
+}
+
+/** Il percorso alla maniera di Windows (`C:\…`), da uno alla maniera di WSL. */
+async function versoWindows(percorso) {
+  return (await esegui("wslpath", ["-w", percorso])).uscita.trim();
+}
+
+/** Il percorso alla maniera di WSL (`/mnt/c/…`), da uno alla maniera di Windows. */
+async function versoWsl(percorso) {
+  return (await esegui("wslpath", ["-u", percorso])).uscita.trim();
 }
 
 /** Le ultime righe di un testo: i log lunghi non servono interi. */
@@ -128,12 +161,12 @@ async function chiaveApi() {
  * insieme — con tutti i tool della sessione. Torna quante ne ha chiuse.
  */
 async function chiudiLeFinestre() {
-  const script = join(QUI, "chiudi-finestre.ps1");
-  const scriptWindows = (await esegui(`wslpath -w "${script}"`)).uscita.trim();
+  const scriptWindows = await versoWindows(join(QUI, "chiudi-finestre.ps1"));
 
   const esito = await esegui(
-    `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${scriptWindows}" 2>&1`,
-    { timeoutMs: 30_000 }
+    "powershell.exe",
+    ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptWindows],
+    { timeoutMs: 30_000, unisciErrori: true }
   );
 
   const ultima = esito.uscita.trim().split("\n").pop() || "0";
@@ -177,9 +210,10 @@ const ATTREZZI = [
       // I parametri della pubblicazione stanno nello script, non qui: una ricetta
       // sola, due chiamanti. `cmd.exe` vuole una cartella di lavoro che Windows sappia
       // nominare, e il repo sta su /mnt/c: da REPO va bene.
-      const batWindows = (await esegui(`wslpath -w "${RIFERIMENTO}"`)).uscita.trim();
-      const esito = await esegui(`cd "${REPO}" && cmd.exe /c "${batWindows}" 2>&1`, {
+      const batWindows = await versoWindows(RIFERIMENTO);
+      const esito = await esegui("cmd.exe", ["/c", batWindows], {
         timeoutMs: 600_000,
+        unisciErrori: true,
       });
 
       // Del log serve poco: le righe di errore, o il riquadro dell'identità.
@@ -230,10 +264,13 @@ const ATTREZZI = [
       // cartella `casi/` risalendo dalla dll fino al .vbproj. Con un percorso assoluto
       // (provato: C:\Temp\…) la compilazione riesce e poi cadono dieci collaudi, con un
       // «Non trovo la cartella dei casi» che del BaseOutputPath non parla.
-      const parte = filtro ? ` --filter "FullyQualifiedName~${filtro}"` : "";
-      const esito = await esegui(
-        `cd "${SRC}" && "${DOTNET}" test "${COLLAUDI}" -c Release --nologo -p:BaseOutputPath='banco\\'${parte}`
-      );
+      //
+      // Il filtro arriva da chi chiama l'attrezzo e viaggia come **argomento a sé**: in
+      // una riga da dare a bash sarebbe stato codice (v. `esegui`).
+      const argomenti = ["test", COLLAUDI, "-c", "Release", "--nologo", "-p:BaseOutputPath=banco\\"];
+      if (filtro) argomenti.push("--filter", `FullyQualifiedName~${filtro}`);
+
+      const esito = await esegui(DOTNET, argomenti, { cartella: SRC });
 
       const righe = esito.uscita
         .split("\n")
@@ -275,7 +312,7 @@ const ATTREZZI = [
       // capirebbe, e finirebbe per creare una cartella dal nome assurdo accanto a sé.
       let radice = null;
       if (dati) {
-        radice = dati.startsWith("/") ? (await esegui(`wslpath -w "${dati}"`)).uscita.trim() : dati;
+        radice = dati.startsWith("/") ? await versoWindows(dati) : dati;
         if (!radice) return testo(`Non ho saputo tradurre il percorso «${dati}».`, true);
       }
 
@@ -295,7 +332,7 @@ const ATTREZZI = [
       figlio.unref();
 
       await attendi(1500);
-      const viva = await esegui(`tasklist.exe /FI "IMAGENAME eq TrovaLavoro.exe" 2>/dev/null`);
+      const viva = await esegui("tasklist.exe", ["/FI", "IMAGENAME eq TrovaLavoro.exe"]);
 
       return testo(
         `Avviata (pid del lanciatore ${figlio.pid}).\n${coda(viva.uscita, 5)}` +
@@ -310,7 +347,7 @@ const ATTREZZI = [
     description: "Dice se TrovaLavoro.exe è in esecuzione, e con quanta memoria.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     async esegui() {
-      const esito = await esegui(`tasklist.exe /FI "IMAGENAME eq TrovaLavoro.exe" 2>/dev/null`);
+      const esito = await esegui("tasklist.exe", ["/FI", "IMAGENAME eq TrovaLavoro.exe"]);
       return testo(coda(esito.uscita, 6));
     },
   },
@@ -553,9 +590,7 @@ const ATTREZZI = [
 
       // Il dialogo è una finestra di Windows: vuole C:\… Se il percorso arriva alla
       // maniera di WSL lo si traduce qui, invece di far sbagliare chi chiama.
-      const percorsoWindows = percorso.startsWith("/")
-        ? (await esegui(`wslpath -w "${percorso}"`)).uscita.trim()
-        : percorso;
+      const percorsoWindows = percorso.startsWith("/") ? await versoWindows(percorso) : percorso;
 
       if (!percorsoWindows) return testo(`Non ho saputo tradurre il percorso «${percorso}».`, true);
 
@@ -664,11 +699,17 @@ const ATTREZZI = [
       additionalProperties: false,
     },
     async esegui({ percorso }) {
-      const radice = percorso || `${process.env.HOME ? "" : ""}/mnt/c/Users/${await utenteWindows()}/AppData/Roaming/TrovaLavoro`;
-      const esito = await esegui(
-        `if [ -d "${radice}" ]; then find "${radice}" -maxdepth 3 | head -60; else echo "La cartella dati non esiste ancora: ${radice}"; fi`
-      );
-      return testo(esito.uscita.trimEnd() || "(vuota)");
+      const radice = percorso || `/mnt/c/Users/${await utenteWindows()}/AppData/Roaming/TrovaLavoro`;
+
+      // La cartella la chiede chi chiama, e prima finiva dentro una riga di shell con
+      // tanto di `if`, di `find` e di `head`: tre occasioni di uscire dalle virgolette.
+      // Adesso l'esistenza la guarda Node, `find` riceve il percorso come argomento, e
+      // il taglio a sessanta righe si fa qui.
+      if (!existsSync(radice)) return testo(`La cartella dati non esiste ancora: ${radice}`);
+
+      const esito = await esegui("find", [radice, "-maxdepth", "3"]);
+      const righe = esito.uscita.trimEnd().split("\n").slice(0, 60).join("\n");
+      return testo(righe || "(vuota)");
     },
   },
 ];
@@ -678,28 +719,31 @@ const ATTREZZI = [
  * un'azione sola: elencare, premere, scrivere, rispondere a una finestra di scelta file.
  *
  * Le scelte viaggiano in un file JSON, non sulla riga di comando. Il motivo è stato
- * pagato: qui si compone una riga per bash che poi diventa una riga per PowerShell, e
- * nel doppio passaggio gli apostrofi sparivano — «Incolla qui il testo dell'annuncio»
- * arrivava allo script come un'etichetta vuota, e la casella «non si trovava». Un file
- * regge apostrofi, accenti e testi con gli a capo senza che nessuno debba proteggerli.
+ * pagato: qui si componeva una riga per bash che poi diventava una riga per PowerShell,
+ * e nel doppio passaggio gli apostrofi sparivano — «Incolla qui il testo dell'annuncio»
+ * arrivava allo script come un'etichetta vuota, e la casella «non si trovava». Bash non
+ * c'è più (v. `esegui`), ma il file resta la strada giusta: regge apostrofi, accenti e
+ * testi con gli a capo, e nessuno deve fidarsi di come PowerShell rilegge i suoi
+ * argomenti.
  */
 async function interfaccia(scelte, { timeoutMs = 60_000 } = {}) {
-  const script = join(QUI, "interfaccia.ps1");
-  const scriptWindows = (await esegui(`wslpath -w "${script}"`)).uscita.trim();
+  const scriptWindows = await versoWindows(join(QUI, "interfaccia.ps1"));
 
   const scelteQui = join(tmpdir(), `interfaccia-${Date.now()}.json`);
   await writeFile(scelteQui, JSON.stringify(scelte), "utf8");
-  const scelteWindows = (await esegui(`wslpath -w "${scelteQui}"`)).uscita.trim();
+  const scelteWindows = await versoWindows(scelteQui);
 
   try {
-    // Il percorso del file va fra apici **singoli**: il file sta in /tmp, che per Windows
-    // è `\\wsl.localhost\…`, e fra doppi apici bash mangia una delle due barre iniziali —
-    // PowerShell si ritrova a cercare `C:\wsl.localhost\…`, che non esiste.
+    // Il percorso del file arriva a PowerShell come argomento suo, e nessuno lo rilegge
+    // per strada: il file sta in /tmp, che per Windows è `\\wsl.localhost\…`, e finché
+    // di mezzo c'era bash le due barre iniziali andavano protette con gli apici singoli
+    // — fra doppi ne restava una sola, e PowerShell cercava `C:\wsl.localhost\…`.
     // -STA: gli appunti di Windows si toccano solo da un thread «a stanza singola», e
     // senza questo Set-Clipboard non riempie niente senza nemmeno lamentarsi.
     const esito = await esegui(
-      `powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File "${scriptWindows}" -Argomenti '${scelteWindows}' 2>&1`,
-      { timeoutMs }
+      "powershell.exe",
+      ["-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-File", scriptWindows, "-Argomenti", scelteWindows],
+      { timeoutMs, unisciErrori: true }
     );
 
     return (esito.uscita + esito.errori).trimEnd();
@@ -720,9 +764,7 @@ async function interfaccia(scelte, { timeoutMs = 60_000 } = {}) {
  * aspettare che il lavoro finisca»).
  */
 async function aspettaFile({ file, contiene, timeoutMs, intervalloMs }) {
-  const percorso = file.startsWith("/")
-    ? file
-    : (await esegui(`wslpath -u "${file}"`)).uscita.trim() || file;
+  const percorso = file.startsWith("/") ? file : (await versoWsl(file)) || file;
 
   const partenza = Date.now();
   const iniziale = existsSync(percorso) ? await leggiSicuro(percorso) : null;
@@ -775,8 +817,10 @@ function secondiTrascorsi(partenza) {
 
 /** Il nome utente Windows, per trovare %APPDATA% da WSL. */
 async function utenteWindows() {
-  const esito = await esegui(`cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d "\\r"`);
-  return esito.uscita.trim();
+  // Il `tr -d "\r"` che c'era qui lo fa adesso la sostituzione: cmd chiude le righe alla
+  // maniera di Windows, e il ritorno a capo si porterebbe dentro il nome della cartella.
+  const esito = await esegui("cmd.exe", ["/c", "echo %USERNAME%"]);
+  return esito.uscita.replace(/\r/g, "").trim();
 }
 
 function attendi(ms) {
@@ -795,24 +839,17 @@ function testo(contenuto, errore = false) {
 async function catturaSchermata({ schermo_intero, porta_in_primo_piano }) {
   const png = join(tmpdir(), `schermata-${Date.now()}.png`);
 
-  const versoWindows = await esegui(`wslpath -w "${png}"`);
-  const destinazione = versoWindows.uscita.trim();
+  const destinazione = await versoWindows(png);
+  const scriptWindows = await versoWindows(join(QUI, "schermata.ps1"));
 
-  const script = join(QUI, "schermata.ps1");
-  const scriptWindows = (await esegui(`wslpath -w "${script}"`)).uscita.trim();
+  const argomenti = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptWindows, "-Percorso", destinazione];
+  if (schermo_intero) argomenti.push("-SchermoIntero");
+  if (porta_in_primo_piano) argomenti.push("-InPrimoPiano");
 
-  const argomenti = [
-    `-Percorso '${destinazione}'`,
-    schermo_intero ? "-SchermoIntero" : "",
-    porta_in_primo_piano ? "-InPrimoPiano" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  const esito = await esegui(
-    `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${scriptWindows}" ${argomenti} 2>&1`,
-    { timeoutMs: 60_000 }
-  );
+  const esito = await esegui("powershell.exe", argomenti, {
+    timeoutMs: 60_000,
+    unisciErrori: true,
+  });
 
   if (!existsSync(png)) {
     return testo(

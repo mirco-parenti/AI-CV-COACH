@@ -400,6 +400,17 @@ il certificato per la firma) più quella.
   sul bottone serve dove il gesto cancella qualcosa — ma è una scelta da rendere esplicita:
   o le altre conferme di livello 5 passano di lì, o il cap. 03.3 dice perché no.
 
+## Dalla fase di fix della revisione di sicurezza (2026-09-01)
+
+- **Il collaudo dal vivo dello strumento di collaudo senza shell.** Il fix di R4 ha tolto
+  `bash -lc` da tutte le chiamate di `strumenti/mcp-collaudi/server.mjs`: ogni sito è stato
+  provato a pezzi (compresa la falsificazione che con la forma vecchia piazzava davvero un
+  file), ma un giro intero — server acceso, tool chiamati da un client vero, compilazione,
+  avvio dell'app, screenshot — non si è potuto fare perché il server era in uso da un'altra
+  sessione sulla porta 3300. È il collaudo che chiude R4: da fare al primo giro di collaudi
+  UI che accende comunque lo strumento, guardando che i tool rispondano come prima.
+  *(`revisione-sicurezza.md`, blocco S3; la trappola è annotata nel README dello strumento.)*
+
 ## Chiuse
 
 - ✅ **`scegli_riga` toccava solo il primo elenco della finestra** *(aperta il 2026-08-24 col

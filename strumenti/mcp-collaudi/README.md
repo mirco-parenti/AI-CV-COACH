@@ -199,6 +199,38 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
 
 ## Le trappole già pagate
 
+- **Un argomento che passa da `bash -lc` non è un argomento: è codice.** *(Trovata dalla
+  revisione di sicurezza della finalizzazione — rilievo R4 — e curata il 2026-09-01.)*
+  Ogni comando di questo server si eseguiva così: si **componeva una stringa** e la si dava
+  a `spawn("bash", ["-lc", …])`. Dentro quella stringa i chiamanti interpolavano anche gli
+  argomenti degli attrezzi — il `filtro` di `collaudi`, la cartella `dati` di `avvia_app`, il
+  `percorso` di `scegli_file` e di `cartella_dati`, il `file` di `aspetta_che` — protetti da
+  virgolette doppie e nient'altro. Ma le virgolette non sono una difesa: basta che il valore
+  ne contenga una per uscirne, e da lì il resto è una riga di shell come tutte. Falsificato
+  proprio così, sul sito di `cartella_dati`: chiedendo la cartella
+  `/tmp"; touch /tmp/PROVA-INIEZIONE-R4; echo "` la forma vecchia **crea il file**, e non lo
+  dice a nessuno; la nuova risponde «La cartella dati non esiste ancora» e lascia l'argomento
+  dov'era. È un server di sviluppo, in ascolto solo su `127.0.0.1` e senza autenticazione:
+  il rischio vero è basso, ma il modo di scrivere queste chiamate era sbagliato lo stesso, e
+  chi copia il codice di un attrezzo per farne uno nuovo si porta dietro il difetto.
+
+  **Adesso di bash non ce n'è più nemmeno uno**: `esegui` vuole il programma e i suoi
+  argomenti in un **array**, e li dà a `spawn` così come sono — un `;` o un backtick dentro
+  un valore resta un carattere qualunque. Le tre cose che la shell faceva davvero hanno
+  ciascuna la sua strada: la cartella di lavoro è l'opzione `cartella` (era `cd … &&`),
+  l'unione di stderr nell'uscita è `unisciErrori` (era `2>&1`), e il `2>/dev/null` non serve
+  perché gli errori stanno in un campo loro che chi non li vuole non guarda. I `wslpath`
+  sparsi ovunque sono diventati due funzioni, `versoWindows` e `versoWsl`. Due dettagli che
+  vale la pena sapere prima di toccare questo codice: senza shell, un programma **che non
+  esiste** non è più un codice 127 sull'uscita ma un evento `error` che, se nessuno lo
+  ascolta, fa cadere il server intero (`esegui` lo ascolta e risponde `codice: -1`); e gli
+  eseguibili si cercano nel `PATH` che il processo Node ha ereditato, non più in quello di
+  una shell di login — in WSL è lo stesso, perché i percorsi di Windows ce li mette
+  l'interoperabilità, ma un server avviato da un ambiente spoglio non troverebbe più
+  `powershell.exe`. Quel che il figlio riceve, invece, **non è cambiato di una virgola**:
+  l'array di argomenti è identico a quello che bash gli passava, e i percorsi
+  `\\wsl.localhost\…` arrivano a PowerShell interi come prima — provato.
+
 - **Di due elenchi nella stessa finestra ne guidava uno solo.** *(Debito annotato il
   2026-08-24 con R6; **curato il 2026-08-30**.)* `scegli_riga` raccoglieva tutte le liste
   della finestra e poi prendeva `$tabelle[0]`: la prima e basta. In «Modifica i testi», che
