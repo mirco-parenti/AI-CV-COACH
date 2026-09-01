@@ -583,6 +583,17 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   «AutoInstall» — ed è una manopola del **processo**, non del thread. Il codice di
   produzione resta con `ConfigureAwait(True)`, che lì è la cosa giusta: nell'applicazione
   vera la pompa gira, e la riga di stato va scritta dal thread che possiede la finestra.
+- **Davanti alla sola informativa del primo avvio gli attrezzi dicono «non ha una
+  finestra aperta».** *(2026-09-01, il giro delle rifiniture del tutor.)* Al primo avvio
+  su una cartella dati vergine l'informativa modale si apre dal `Load`, prima che la
+  finestra principale esista: il processo ha **una sola** finestra di primo livello —
+  l'informativa, `ControlType.Window`, coi suoi bottoni — eppure `controlli` e `clic`
+  hanno risposto «TrovaLavoro non ha una finestra aperta», tre volte su tre, mentre una
+  UIA scritta a mano la vedeva benissimo: un `FindAll` sui figli della radice con
+  `ProcessIdProperty` l'ha elencata e un `InvokePattern` ha premuto «Ho capito» al primo
+  colpo. Quale filtro dello script la scarti non si è ancora capito — non è il `Pane`
+  della trappola qui sopra: il tipo è `Window` — e finché non lo si trova, il ripiego è
+  quello: PowerShell diretto, finestre del processo per `ProcessId`, bottone per nome.
 - **Rimettere a posto un file falsificato con `mv` non fa ricompilare.** *(2026-08-24, dal
   quinto tempo di T9e.)* Falsificare vuol dire rompere apposta il codice e guardare se il
   collaudo diventa rosso (regola 14): si mette da parte l'originale, si guasta il file, si
