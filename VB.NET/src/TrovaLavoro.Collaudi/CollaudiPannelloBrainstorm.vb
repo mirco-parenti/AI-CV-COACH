@@ -522,6 +522,24 @@ Namespace Ui
 
         End Sub
 
+        <TestMethod>
+        Public Sub QuandoNonCiStaSiScorreInveceDiTagliare()
+            ' A 150% i testi crescono e la finestra cresce con loro, ma non oltre lo
+            ' spazio che c'è: il tetto e lo scorrimento vanno insieme, o quel che resta
+            ' fuori cade fuori dalla finestra e nessuno spostamento lo recupera
+            ' (decisione 15.7).
+            Using finestra As New FinestraAppunti(Proposti())
+
+                finestra.DisponiIn(200)
+
+                Assert.IsTrue(finestra.AutoScroll, "con questo spazio si scorre")
+                Assert.IsLessThanOrEqualTo(200, finestra.ClientSize.Height,
+                                           "e la finestra sta nello spazio che c'è")
+
+            End Using
+
+        End Sub
+
     End Class
 
 End Namespace

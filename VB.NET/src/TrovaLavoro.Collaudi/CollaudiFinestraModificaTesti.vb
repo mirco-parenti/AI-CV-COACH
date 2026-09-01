@@ -534,6 +534,42 @@ Namespace Ui
 
         End Sub
 
+        <TestMethod>
+        Public Sub QuandoNonCiStaSiScorreInveceDiTagliare()
+
+            ' A 150% i testi crescono e la finestra cresce con loro, ma non oltre lo
+            ' spazio che c'è: il tetto e lo scorrimento vanno insieme, o quel che resta
+            ' fuori cade fuori dalla finestra e nessuno spostamento lo recupera
+            ' (decisione 15.7).
+            Using finestra As New FinestraModificaTesti(Aperti(Cv(), Lettera()))
+
+                finestra.DisponiIn(200)
+
+                Assert.IsTrue(finestra.AutoScroll, "con questo spazio si scorre")
+                Assert.IsLessThanOrEqualTo(200, finestra.ClientSize.Height,
+                                           "e la finestra sta nello spazio che c'è")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LElencoDiDestraArrivaFinoAlMargine()
+
+            ' I due elenchi si spartiscono la larghezza della finestra invece di stare su
+            ' due costanti: è quel che a DPI alti mandava quello di destra oltre il bordo.
+            Using finestra As New FinestraModificaTesti(Aperti(Cv(), Lettera()))
+
+                finestra.DisponiIn(4000)
+
+                Assert.IsFalse(finestra.AutoScroll, "con tutto questo spazio non si scorre")
+                Assert.AreEqual(finestra.ClientSize.Width - StileApp.MargineRiquadro,
+                                Fuori(finestra).Bounds.Right, "e l'elenco di destra finisce al margine")
+
+            End Using
+
+        End Sub
+
     End Class
 
 End Namespace
