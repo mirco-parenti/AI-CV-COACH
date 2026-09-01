@@ -336,7 +336,7 @@ Partial Class PannelloDocumenti
         '
         Me.btnTornaIndietro.Location = New System.Drawing.Point(0, 18)
         Me.btnTornaIndietro.Name = "btnTornaIndietro"
-        Me.btnTornaIndietro.Size = New System.Drawing.Size(170, 32)
+        Me.btnTornaIndietro.Size = StileApp.BottoneLargo
         Me.btnTornaIndietro.TabIndex = 0
         Me.btnTornaIndietro.Text = "◀ Torna all'opportunità"
         '
@@ -344,7 +344,7 @@ Partial Class PannelloDocumenti
         '
         Me.btnRigenera.Location = New System.Drawing.Point(182, 18)
         Me.btnRigenera.Name = "btnRigenera"
-        Me.btnRigenera.Size = New System.Drawing.Size(130, 32)
+        Me.btnRigenera.Size = StileApp.BottoneMedio
         Me.btnRigenera.TabIndex = 1
         Me.btnRigenera.Text = "Rigenera"
         '
@@ -352,7 +352,7 @@ Partial Class PannelloDocumenti
         '
         Me.btnModificaTesti.Location = New System.Drawing.Point(324, 18)
         Me.btnModificaTesti.Name = "btnModificaTesti"
-        Me.btnModificaTesti.Size = New System.Drawing.Size(170, 32)
+        Me.btnModificaTesti.Size = StileApp.BottoneLargo
         Me.btnModificaTesti.TabIndex = 2
         Me.btnModificaTesti.Text = "Modifica i testi"
         '
@@ -362,7 +362,7 @@ Partial Class PannelloDocumenti
         ' riscritto a mano (R7). La posizione la decide la fascia, come per tutti gli altri.
         Me.btnRigeneraLettera.Location = New System.Drawing.Point(506, 18)
         Me.btnRigeneraLettera.Name = "btnRigeneraLettera"
-        Me.btnRigeneraLettera.Size = New System.Drawing.Size(210, 32)
+        Me.btnRigeneraLettera.Size = StileApp.BottoneMoltoLargo
         Me.btnRigeneraLettera.TabIndex = 3
         Me.btnRigeneraLettera.Text = "⚠ Rigenera la lettera"
         Me.btnRigeneraLettera.Visible = False
@@ -372,7 +372,7 @@ Partial Class PannelloDocumenti
         Me.btnEsportaDocx.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnEsportaDocx.Location = New System.Drawing.Point(646, 18)
         Me.btnEsportaDocx.Name = "btnEsportaDocx"
-        Me.btnEsportaDocx.Size = New System.Drawing.Size(130, 32)
+        Me.btnEsportaDocx.Size = StileApp.BottoneMedio
         Me.btnEsportaDocx.TabIndex = 4
         Me.btnEsportaDocx.Text = "Esporta DOCX"
         '
@@ -381,7 +381,7 @@ Partial Class PannelloDocumenti
         Me.btnEsportaPdf.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnEsportaPdf.Location = New System.Drawing.Point(788, 18)
         Me.btnEsportaPdf.Name = "btnEsportaPdf"
-        Me.btnEsportaPdf.Size = New System.Drawing.Size(130, 32)
+        Me.btnEsportaPdf.Size = StileApp.BottoneMedio
         Me.btnEsportaPdf.TabIndex = 5
         Me.btnEsportaPdf.Text = "Esporta PDF"
         '
@@ -390,7 +390,7 @@ Partial Class PannelloDocumenti
         Me.btnPreparaEmail.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnPreparaEmail.Location = New System.Drawing.Point(930, 18)
         Me.btnPreparaEmail.Name = "btnPreparaEmail"
-        Me.btnPreparaEmail.Size = New System.Drawing.Size(176, 32)
+        Me.btnPreparaEmail.Size = StileApp.BottoneLargo
         Me.btnPreparaEmail.TabIndex = 6
         Me.btnPreparaEmail.Text = "Prepara email"
         '

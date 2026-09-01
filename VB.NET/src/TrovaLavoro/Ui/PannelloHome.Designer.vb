@@ -118,9 +118,9 @@ Partial Class PannelloHome
         'btnApriProfilo
         '
         Me.btnApriProfilo.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnApriProfilo.Location = New System.Drawing.Point(936, 16)
+        Me.btnApriProfilo.Location = New System.Drawing.Point(916, 16)
         Me.btnApriProfilo.Name = "btnApriProfilo"
-        Me.btnApriProfilo.Size = New System.Drawing.Size(170, 32)
+        Me.btnApriProfilo.Size = StileApp.BottoneLargo
         Me.btnApriProfilo.TabIndex = 2
         Me.btnApriProfilo.Text = "Apri il profilo"
         '
@@ -286,7 +286,7 @@ Partial Class PannelloHome
         '
         Me.btnApriCandidatura.Location = New System.Drawing.Point(0, 12)
         Me.btnApriCandidatura.Name = "btnApriCandidatura"
-        Me.btnApriCandidatura.Size = New System.Drawing.Size(190, 32)
+        Me.btnApriCandidatura.Size = StileApp.BottoneLargo
         Me.btnApriCandidatura.TabIndex = 0
         Me.btnApriCandidatura.Text = "Apri la candidatura"
         '
@@ -294,7 +294,7 @@ Partial Class PannelloHome
         '
         Me.btnNuovaRicerca.Location = New System.Drawing.Point(944, 12)
         Me.btnNuovaRicerca.Name = "btnNuovaRicerca"
-        Me.btnNuovaRicerca.Size = New System.Drawing.Size(150, 32)
+        Me.btnNuovaRicerca.Size = StileApp.BottoneLargo
         Me.btnNuovaRicerca.TabIndex = 3
         Me.btnNuovaRicerca.Text = "Nuova ricerca"
         '
@@ -302,7 +302,7 @@ Partial Class PannelloHome
         '
         Me.btnEsportaRegistro.Location = New System.Drawing.Point(202, 12)
         Me.btnEsportaRegistro.Name = "btnEsportaRegistro"
-        Me.btnEsportaRegistro.Size = New System.Drawing.Size(170, 32)
+        Me.btnEsportaRegistro.Size = StileApp.BottoneLargo
         Me.btnEsportaRegistro.TabIndex = 1
         Me.btnEsportaRegistro.Text = "Esporta l'elenco…"
         '
@@ -312,7 +312,7 @@ Partial Class PannelloHome
         ' che accende «Apri la candidatura», e i due non devono stare sotto lo stesso dito.
         Me.btnEliminaCandidatura.Location = New System.Drawing.Point(384, 12)
         Me.btnEliminaCandidatura.Name = "btnEliminaCandidatura"
-        Me.btnEliminaCandidatura.Size = New System.Drawing.Size(190, 32)
+        Me.btnEliminaCandidatura.Size = StileApp.BottoneLargo
         Me.btnEliminaCandidatura.TabIndex = 2
         Me.btnEliminaCandidatura.Text = "Elimina candidatura"
         '

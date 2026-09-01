@@ -178,7 +178,7 @@ Partial Class PannelloDialogo
         Me.btnInvia.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnInvia.Location = New System.Drawing.Point(996, 40)
         Me.btnInvia.Name = "btnInvia"
-        Me.btnInvia.Size = New System.Drawing.Size(110, 32)
+        Me.btnInvia.Size = StileApp.BottoneStandard
         Me.btnInvia.TabIndex = 2
         Me.btnInvia.Text = "Invia"
         '
@@ -192,7 +192,7 @@ Partial Class PannelloDialogo
         Me.btnScelta1.Location = New System.Drawing.Point(0, 40)
         Me.btnScelta1.MinimumSize = New System.Drawing.Size(130, 32)
         Me.btnScelta1.Name = "btnScelta1"
-        Me.btnScelta1.Size = New System.Drawing.Size(130, 32)
+        Me.btnScelta1.Size = StileApp.BottoneMedio
         Me.btnScelta1.TabIndex = 3
         Me.btnScelta1.Visible = False
         '
@@ -203,7 +203,7 @@ Partial Class PannelloDialogo
         Me.btnScelta2.Location = New System.Drawing.Point(142, 40)
         Me.btnScelta2.MinimumSize = New System.Drawing.Size(130, 32)
         Me.btnScelta2.Name = "btnScelta2"
-        Me.btnScelta2.Size = New System.Drawing.Size(130, 32)
+        Me.btnScelta2.Size = StileApp.BottoneMedio
         Me.btnScelta2.TabIndex = 4
         Me.btnScelta2.Visible = False
         '
@@ -214,7 +214,7 @@ Partial Class PannelloDialogo
         Me.btnScelta3.Location = New System.Drawing.Point(284, 40)
         Me.btnScelta3.MinimumSize = New System.Drawing.Size(130, 32)
         Me.btnScelta3.Name = "btnScelta3"
-        Me.btnScelta3.Size = New System.Drawing.Size(130, 32)
+        Me.btnScelta3.Size = StileApp.BottoneMedio
         Me.btnScelta3.TabIndex = 5
         Me.btnScelta3.Visible = False
         '
@@ -233,7 +233,7 @@ Partial Class PannelloDialogo
         '
         Me.btnTornaAlProfilo.Location = New System.Drawing.Point(0, 18)
         Me.btnTornaAlProfilo.Name = "btnTornaAlProfilo"
-        Me.btnTornaAlProfilo.Size = New System.Drawing.Size(130, 32)
+        Me.btnTornaAlProfilo.Size = StileApp.BottoneLargo
         Me.btnTornaAlProfilo.TabIndex = 0
         Me.btnTornaAlProfilo.Text = "◀ Torna al profilo"
         '
@@ -241,7 +241,7 @@ Partial Class PannelloDialogo
         '
         Me.btnRicomincia.Location = New System.Drawing.Point(142, 18)
         Me.btnRicomincia.Name = "btnRicomincia"
-        Me.btnRicomincia.Size = New System.Drawing.Size(130, 32)
+        Me.btnRicomincia.Size = StileApp.BottoneMedio
         Me.btnRicomincia.TabIndex = 1
         Me.btnRicomincia.Text = "Ricomincia"
         '
@@ -250,7 +250,7 @@ Partial Class PannelloDialogo
         Me.btnPortaNelProfilo.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnPortaNelProfilo.Location = New System.Drawing.Point(946, 18)
         Me.btnPortaNelProfilo.Name = "btnPortaNelProfilo"
-        Me.btnPortaNelProfilo.Size = New System.Drawing.Size(160, 32)
+        Me.btnPortaNelProfilo.Size = StileApp.BottoneLargo
         Me.btnPortaNelProfilo.TabIndex = 2
         Me.btnPortaNelProfilo.Text = "Porta nel profilo"
         '

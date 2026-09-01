@@ -247,7 +247,7 @@ Partial Class PannelloEmail
         '
         Me.btnTornaAiDocumenti.Location = New System.Drawing.Point(0, 12)
         Me.btnTornaAiDocumenti.Name = "btnTornaAiDocumenti"
-        Me.btnTornaAiDocumenti.Size = New System.Drawing.Size(190, 32)
+        Me.btnTornaAiDocumenti.Size = StileApp.BottoneLargo
         Me.btnTornaAiDocumenti.TabIndex = 0
         Me.btnTornaAiDocumenti.Text = "◀ Torna ai documenti"
         '
@@ -255,7 +255,7 @@ Partial Class PannelloEmail
         '
         Me.btnRiscrivi.Location = New System.Drawing.Point(202, 12)
         Me.btnRiscrivi.Name = "btnRiscrivi"
-        Me.btnRiscrivi.Size = New System.Drawing.Size(190, 32)
+        Me.btnRiscrivi.Size = StileApp.BottoneLargo
         Me.btnRiscrivi.TabIndex = 1
         Me.btnRiscrivi.Text = "Fallo riscrivere"
         '
@@ -263,7 +263,7 @@ Partial Class PannelloEmail
         '
         Me.btnDocumenti.Location = New System.Drawing.Point(404, 12)
         Me.btnDocumenti.Name = "btnDocumenti"
-        Me.btnDocumenti.Size = New System.Drawing.Size(240, 32)
+        Me.btnDocumenti.Size = StileApp.BottoneMoltoLargo
         Me.btnDocumenti.TabIndex = 2
         Me.btnDocumenti.Text = "Documenti da allegare…"
         '
@@ -277,7 +277,7 @@ Partial Class PannelloEmail
         Me.btnHoSpedito.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnHoSpedito.Location = New System.Drawing.Point(724, 12)
         Me.btnHoSpedito.Name = "btnHoSpedito"
-        Me.btnHoSpedito.Size = New System.Drawing.Size(190, 32)
+        Me.btnHoSpedito.Size = StileApp.BottoneLargo
         Me.btnHoSpedito.TabIndex = 3
         Me.btnHoSpedito.Text = "L'ho spedita"
         '
@@ -286,7 +286,7 @@ Partial Class PannelloEmail
         Me.btnPreparaEmail.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnPreparaEmail.Location = New System.Drawing.Point(926, 12)
         Me.btnPreparaEmail.Name = "btnPreparaEmail"
-        Me.btnPreparaEmail.Size = New System.Drawing.Size(180, 32)
+        Me.btnPreparaEmail.Size = StileApp.BottoneLargo
         Me.btnPreparaEmail.TabIndex = 4
         Me.btnPreparaEmail.Text = "Prepara l'email"
         '

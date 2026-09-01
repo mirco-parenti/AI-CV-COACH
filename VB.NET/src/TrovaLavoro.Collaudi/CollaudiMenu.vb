@@ -25,23 +25,92 @@ Namespace Ui
         ' La fascia del nome, e lo spazio che resta sotto
         ' ==================================================================
 
+        ''' <summary>
+        ''' Sopra la colonna resta scoperta una fascia per il nome, su qualunque misura.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Nato dal difetto visto a video due volte in un pomeriggio: la colonna dei
+        ''' bottoni saliva fin sopra il sottotitolo del marchio. Fino al 2026-09-01 la
+        ''' misura era «più di un quarto dell'altezza», perché la fascia <b>era</b> una
+        ''' frazione dell'altezza e nient'altro.</para>
+        ''' <para>Dal 2026-09-01, su indicazione del tutor, la fascia segue la
+        ''' <b>scritta</b>, e la scritta segue la larghezza (v.
+        ''' <c>PannelloMenu.FasciaDelTesto</c>): su una finestra alta e stretta la fascia
+        ''' non si prende più un terzo dell'altezza, e un quarto non è più il metro giusto.
+        ''' Quel che va sorvegliato resta lo stesso — che una fascia ci sia, e che sia larga
+        ''' abbastanza da tenerci un nome leggibile — e si misura adesso in pixel: sotto i
+        ''' cento un nome sarebbe un francobollo, e i bottoni gli sarebbero addosso.</para>
+        ''' </remarks>
         <TestMethod>
         Public Sub SopraLaZonaRestaPostoPerNomeESottotitolo()
 
-            ' Il difetto visto a video, due volte in un pomeriggio: la colonna dei bottoni
-            ' saliva fin sopra il sottotitolo del marchio. Sul banner nome e sottotitolo
-            ' finivano a 356 px su 1348, poco oltre un quarto dell'altezza; qui la fascia
-            ' deve tenerne almeno altrettanto, perché ci sta dentro anche il respiro che
-            ' stacca il sottotitolo dal primo bottone.
-            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 485), New Size(700, 1000)}
+            Const MinimoLeggibile As Integer = 100
+
+            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 485),
+                                                 New Size(700, 1000), New Size(3840, 2000)}
 
                 Dim zona As Rectangle = PannelloMenu.ZonaSottoIlNome(area)
-                Dim scoperto As Double = zona.Top / CDbl(area.Height)
 
-                Assert.IsGreaterThanOrEqualTo(0.26, scoperto,
-                                              $"su {area.Width}x{area.Height} sopra i bottoni resta scoperto più di un quarto")
+                Assert.IsGreaterThanOrEqualTo(MinimoLeggibile, zona.Top,
+                    $"su {area.Width}x{area.Height} sopra i bottoni non resta scoperto abbastanza")
+
+                Assert.IsLessThanOrEqualTo(CInt(area.Height / 3.0), zona.Top,
+                    $"su {area.Width}x{area.Height} la fascia si prende più di un terzo dell'area")
 
             Next
+
+        End Sub
+
+        ''' <summary>
+        ''' La scritta smette di crescere su uno schermo grande e di rimpicciolire su uno
+        ''' piccolo.
+        ''' </summary>
+        ''' <remarks>
+        ''' È la rifinitura del 2026-09-01: «proporzione sulla larghezza, con un minimo e un
+        ''' massimo sensati perché non degeneri né a francobollo né a manifesto». In mezzo
+        ''' ai due fermi la proporzione resta quella di sempre, e questo il collaudo lo
+        ''' guarda: un fermo che valesse ovunque sarebbe una misura fissa, non una scala.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LaScrittaSmetteDiCrescereEDiRimpicciolire()
+
+            Dim aSchermoPieno As Integer = PannelloMenu.LarghezzaDiRiferimento(New Size(1936, 940))
+            Dim suUnMuro As Integer = PannelloMenu.LarghezzaDiRiferimento(New Size(3840, 2000))
+
+            Assert.AreEqual(aSchermoPieno, suUnMuro,
+                            "oltre il tetto la scritta non cresce più: il doppio dello schermo non la raddoppia")
+
+            Dim stretta As Integer = PannelloMenu.LarghezzaDiRiferimento(New Size(700, 1000))
+            Dim strettissima As Integer = PannelloMenu.LarghezzaDiRiferimento(New Size(300, 1000))
+
+            Assert.AreEqual(stretta, strettissima,
+                            "e sotto il minimo non rimpicciolisce più")
+
+            Dim inMezzo As Integer = PannelloMenu.LarghezzaDiRiferimento(New Size(1134, 485))
+
+            Assert.IsGreaterThan(stretta, inMezzo, "fra i due fermi la scritta segue la larghezza")
+            Assert.IsLessThan(aSchermoPieno, inMezzo, "e la segue davvero, non a scatti")
+
+        End Sub
+
+        ''' <summary>
+        ''' La fascia del nome segue la scritta, non l'altezza della finestra.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il difetto che il tutor ha indicato il 2026-09-01: legata alla sola altezza, la
+        ''' fascia si allargava a ogni pixel di finestra in più e il nome ci cresceva dentro
+        ''' fino a riempirla — un manifesto sopra sei bottoni che di crescere si erano già
+        ''' fermati. Qui la stessa larghezza si prova a due altezze molto diverse: se la
+        ''' fascia tornasse a dipendere dall'altezza, i due numeri divergerebbero.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LaFasciaDelNomeSegueLaScrittaENonLAltezza()
+
+            Dim bassa As Integer = PannelloMenu.FasciaDelTesto(New Size(1400, 1600))
+            Dim alta As Integer = PannelloMenu.FasciaDelTesto(New Size(1400, 2400))
+
+            Assert.AreEqual(bassa, alta,
+                            "a parità di larghezza la fascia è la stessa, per alta che sia la finestra")
 
         End Sub
 
@@ -169,22 +238,103 @@ Namespace Ui
         End Sub
 
         ''' <summary>
+        ''' A nessuna misura la colonna dei bottoni pesta il nome del prodotto.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Difetto vero, visto dal tutor su una finestra di 1136×593 il 2026-09-01:
+        ''' «TrovaLavoro» spuntava da dietro le prime due voci e il sottotitolo tagliava in
+        ''' mezzo ai bottoni. Il centraggio era giusto; era sbagliata la <b>guardia</b> che
+        ''' tratteneva la colonna, che guardava il bordo del pannello invece della fascia
+        ''' del nome, e il rialzo dell'occhio la faceva salire fin lì.</para>
+        ''' <para>Si misura la proprietà e non il conto: <b>la cima del primo bottone non
+        ''' sale sopra la fine della fascia</b>, a qualunque misura, compresa una in cui la
+        ''' colonna non ci sta nemmeno stringendosi ai minimi. Il difetto è di quelli che si
+        ''' vedono solo guardando, e solo su una misura di finestra che nessuno prova per
+        ''' caso: l'applicazione si apriva massimizzata.</para>
+        ''' <para>L'ingombro del logo si dichiara come lo dichiarerebbe la finestra vera,
+        ''' perché è uno dei due termini da cui dipende quanto spazio ha la colonna.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub ANessunaMisuraLaColonnaPestaIlNome()
+
+            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 700),
+                                                 New Size(1134, 513), New Size(1120, 506),
+                                                 New Size(1000, 300)}
+
+                Using menu As New PannelloMenu()
+
+                    menu.Size = area
+                    menu.ImpostaIngombroLogo(New Size(130, 96))
+
+                    Dim bottoni As BottoneMenu() =
+                        menu.Controls.OfType(Of BottoneMenu)().OrderBy(Function(b) b.Top).ToArray()
+
+                    Dim fascia As Integer = PannelloMenu.FasciaDelTesto(menu.ClientSize)
+
+                    Assert.IsGreaterThanOrEqualTo(fascia, bottoni.First().Top,
+                        $"su {area.Width}x{area.Height} il primo bottone entra nella fascia del nome")
+
+                End Using
+
+            Next
+
+        End Sub
+
+        ''' <summary>
+        ''' Dalla misura minima della finestra in su, l'ultima voce non esce dal bordo.
+        ''' </summary>
+        ''' <remarks>
+        ''' L'altra metà della stessa fotografia del tutor: in fondo alla finestra restava
+        ''' una striscia di pixel tagliati. Sotto la misura minima — che la finestra vera non
+        ''' raggiunge, perché il suo <c>MinimumSize</c> è 1150×600 — la colonna esce
+        ''' comunque in basso, ed è una scelta: fra uscire dove non c'è niente e salire sul
+        ''' nome, esce in basso.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub DallaMisuraMinimaInSuLUltimaVoceRestaDentro()
+
+            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 700),
+                                                 New Size(1134, 513), New Size(1120, 506)}
+
+                Using menu As New PannelloMenu()
+
+                    menu.Size = area
+                    menu.ImpostaIngombroLogo(New Size(130, 96))
+
+                    Dim bottoni As BottoneMenu() =
+                        menu.Controls.OfType(Of BottoneMenu)().OrderBy(Function(b) b.Top).ToArray()
+
+                    Assert.IsLessThanOrEqualTo(menu.ClientSize.Height, bottoni.Last().Bottom,
+                        $"su {area.Width}x{area.Height} l'ultima voce esce dal bordo di sotto")
+
+                End Using
+
+            Next
+
+        End Sub
+
+        ''' <summary>
         ''' La colonna sta sopra il centro della zona, di quanto il progetto ha deciso.
         ''' </summary>
         ''' <remarks>
-        ''' È una correzione dell'occhio, e per questo va sorvegliata: un numero deciso
+        ''' <para>È una correzione dell'occhio, e per questo va sorvegliata: un numero deciso
         ''' guardando non ha nessuno che lo difenda: se domani qualcuno rimette la colonna
         ''' al centro geometrico — che è la cosa che verrebbe naturale scrivere — non
         ''' sbaglia nessun conto, e a vederlo è appena un po' peggio di prima. Le due volte
         ''' in cui questa geometria è stata sbagliata, nel pomeriggio in cui è nata, se n'è
-        ''' accorto solo l'occhio guardando una fotografia.
+        ''' accorto solo l'occhio guardando una fotografia.</para>
+        ''' <para>Si misura a schermo pieno e non più su 1134×700, e la ragione è la
+        ''' rifinitura del 2026-09-01: il rialzo <b>cede il passo</b> alla regola «la colonna
+        ''' non entra nella fascia del nome», quindi dove lo spazio è poco non si vede più.
+        ''' Sorvegliarlo su una finestra stretta vorrebbe dire pretendere indietro proprio
+        ''' quello che si è tolto.</para>
         ''' </remarks>
         <TestMethod>
         Public Sub LaColonnaStaSopraIlCentroDellaZona()
 
             Using menu As New PannelloMenu()
 
-                menu.Size = New Size(1134, 700)
+                menu.Size = New Size(1936, 940)
 
                 Dim bottoni As BottoneMenu() =
                     menu.Controls.OfType(Of BottoneMenu)().OrderBy(Function(b) b.Top).ToArray()

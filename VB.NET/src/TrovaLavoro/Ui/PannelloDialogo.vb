@@ -126,13 +126,6 @@ Public Class PannelloDialogo
     ''' </summary>
     Private _grezzoDellaBollaViva As String
 
-    ''' <summary>
-    ''' Quanto erano larghi nel disegno i due bottoni che cambiano nome col mestiere del
-    ''' pannello: è il minimo sotto cui non si scende quando il testo è più corto.
-    ''' </summary>
-    Private _larghezzaUscita As Integer
-    Private _larghezzaConclusione As Integer
-
     ''' <summary>Chiede alla finestra di riportare in vista la scheda del profilo.</summary>
     Public Event TornaAlProfilo As EventHandler
 
@@ -164,9 +157,6 @@ Public Class PannelloDialogo
     Public Sub New()
 
         InitializeComponent()
-
-        _larghezzaUscita = btnTornaAlProfilo.Width
-        _larghezzaConclusione = btnPortaNelProfilo.Width
 
         VestiIBottoni()
         AggiornaComandi()
@@ -670,6 +660,20 @@ Public Class PannelloDialogo
     ''' Passa il pannello da un mestiere all'altro: cambiano i titoli, i nomi dei bottoni
     ''' e dove portano. Quello che non è di questo modo si spegne e si dimentica.
     ''' </summary>
+    ''' <remarks>
+    ''' <para><b>I due bottoni che cambiano nome non cambiano misura.</b> Fino al
+    ''' 2026-09-01 la prendevano dal testo (<c>PreferredSize</c>), e quel meccanismo era
+    ''' nato da un difetto vero, trovato guardando l'applicazione in faccia nel collaudo di
+    ''' T7c: «◀ Torna alla candidatura» non stava dove stava «◀ Torna al profilo», e a
+    ''' video si leggeva «Torna alla». Da quel giorno la larghezza di un bottone viene
+    ''' dalla scala di <c>StileApp</c>, e questi due prendono nel disegno il gradino che
+    ''' contiene il <b>più lungo</b> dei loro due nomi: il difetto di T7c resta impossibile,
+    ''' e a sorvegliarlo c'è lo stesso collaudo di allora, che misura quanto testo ci entra
+    ''' senza sapere come sia stato deciso il numero.</para>
+    ''' <para>La fascia si rifà lo stesso a ogni passaggio: i nomi nuovi non cambiano le
+    ''' larghezze, ma <see cref="DisponiLeAzioni"/> è anche quella che decide se i comandi
+    ''' stanno su una riga o due.</para>
+    ''' </remarks>
     Private Sub PassaAlModo(modo As ModoDialogo)
 
         _modo = modo
@@ -687,7 +691,7 @@ Public Class PannelloDialogo
             txtRisposta.PlaceholderText = "Scrivi quello che pensi…"
 
             NascondiLeScelte()
-            AdattaAlTesto()
+            DisponiLeAzioni()
 
         Else
 
@@ -701,31 +705,11 @@ Public Class PannelloDialogo
             lblRisposta.Text = "La tua risposta"
             txtRisposta.PlaceholderText = "La tua risposta…"
 
-            AdattaAlTesto()
+            DisponiLeAzioni()
 
         End If
 
         AggiornaComandi()
-
-    End Sub
-
-    ''' <summary>
-    ''' Dà ai due bottoni che cambiano nome la larghezza che il loro testo chiede, senza
-    ''' scendere sotto quella del disegno.
-    ''' </summary>
-    ''' <remarks>
-    ''' Trovato guardando l'applicazione in faccia nel collaudo di T7c: «Torna alla
-    ''' candidatura» non sta dove stava «Torna al profilo», e a video si leggeva «Torna
-    ''' alla». Un bottone tagliato a metà non è un dettaglio estetico — è un comando che
-    ''' non dice più dove porta, e nessun collaudo del banco poteva accorgersene, perché
-    ''' il banco vede il testo del bottone, non quanto ne entra.
-    ''' </remarks>
-    Private Sub AdattaAlTesto()
-
-        btnTornaAlProfilo.Width = Math.Max(_larghezzaUscita, btnTornaAlProfilo.PreferredSize.Width)
-        btnPortaNelProfilo.Width = Math.Max(_larghezzaConclusione, btnPortaNelProfilo.PreferredSize.Width)
-
-        DisponiLeAzioni()
 
     End Sub
 
@@ -955,8 +939,10 @@ Public Class PannelloDialogo
             bottone.Location = New Point(sinistra, txtRisposta.Top)
             bottone.Visible = True
 
-            sinistra += Math.Max(bottone.MinimumSize.Width, bottone.PreferredSize.Width) +
-                        StileApp.DistanzaControlli
+            ' Il passo è la misura del bottone, non quella che il suo testo chiederebbe:
+            ' dal 2026-09-01 un bottone è largo quanto dice la scala di StileApp, e una
+            ' fila spaziata sul testo lascerebbe buchi diversi a ogni mossa dell'AI.
+            sinistra += bottone.Width + StileApp.DistanzaControlli
 
         Next
 

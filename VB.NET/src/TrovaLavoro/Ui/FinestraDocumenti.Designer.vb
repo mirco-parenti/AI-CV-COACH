@@ -116,23 +116,23 @@ Partial Class FinestraDocumenti
         '
         Me.btnRileggi.Location = New System.Drawing.Point(14, 477)
         Me.btnRileggi.Name = "btnRileggi"
-        Me.btnRileggi.Size = New System.Drawing.Size(220, 32)
+        Me.btnRileggi.Size = StileApp.BottoneMoltoLargo
         Me.btnRileggi.TabIndex = 6
         Me.btnRileggi.Text = "Fai rileggere la cartella"
         '
         'btnCambiaCartella
         '
-        Me.btnCambiaCartella.Location = New System.Drawing.Point(246, 477)
+        Me.btnCambiaCartella.Location = New System.Drawing.Point(266, 477)
         Me.btnCambiaCartella.Name = "btnCambiaCartella"
-        Me.btnCambiaCartella.Size = New System.Drawing.Size(180, 32)
+        Me.btnCambiaCartella.Size = StileApp.BottoneLargo
         Me.btnCambiaCartella.TabIndex = 7
         Me.btnCambiaCartella.Text = "Cambia cartella…"
         '
         'btnConferma
         '
-        Me.btnConferma.Location = New System.Drawing.Point(556, 477)
+        Me.btnConferma.Location = New System.Drawing.Point(546, 477)
         Me.btnConferma.Name = "btnConferma"
-        Me.btnConferma.Size = New System.Drawing.Size(120, 32)
+        Me.btnConferma.Size = StileApp.BottoneMedio
         Me.btnConferma.TabIndex = 8
         Me.btnConferma.Text = "Conferma"
         '
@@ -140,7 +140,7 @@ Partial Class FinestraDocumenti
         '
         Me.btnAnnulla.Location = New System.Drawing.Point(688, 477)
         Me.btnAnnulla.Name = "btnAnnulla"
-        Me.btnAnnulla.Size = New System.Drawing.Size(110, 32)
+        Me.btnAnnulla.Size = StileApp.BottoneStandard
         Me.btnAnnulla.TabIndex = 9
         Me.btnAnnulla.Text = "Annulla"
         '

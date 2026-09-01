@@ -88,7 +88,7 @@ Partial Class FinestraBackup
         'btnEsporta
         '
         Me.btnEsporta.Name = "btnEsporta"
-        Me.btnEsporta.Size = New System.Drawing.Size(150, 32)
+        Me.btnEsporta.Size = StileApp.BottoneLargo
         Me.btnEsporta.TabIndex = 6
         Me.btnEsporta.Text = "Esporta…"
         '
@@ -109,7 +109,7 @@ Partial Class FinestraBackup
         'btnScegli
         '
         Me.btnScegli.Name = "btnScegli"
-        Me.btnScegli.Size = New System.Drawing.Size(210, 32)
+        Me.btnScegli.Size = StileApp.BottoneMoltoLargo
         Me.btnScegli.TabIndex = 9
         Me.btnScegli.Text = "Scegli un file di backup…"
         '
@@ -126,7 +126,7 @@ Partial Class FinestraBackup
         '
         Me.btnRipristina.Enabled = False
         Me.btnRipristina.Name = "btnRipristina"
-        Me.btnRipristina.Size = New System.Drawing.Size(150, 32)
+        Me.btnRipristina.Size = StileApp.BottoneLargo
         Me.btnRipristina.TabIndex = 11
         Me.btnRipristina.Text = "Ripristina"
         '
@@ -140,7 +140,7 @@ Partial Class FinestraBackup
         'btnChiudi
         '
         Me.btnChiudi.Name = "btnChiudi"
-        Me.btnChiudi.Size = New System.Drawing.Size(110, 32)
+        Me.btnChiudi.Size = StileApp.BottoneStandard
         Me.btnChiudi.TabIndex = 13
         Me.btnChiudi.Text = "Chiudi"
         '

@@ -48,13 +48,75 @@ Namespace Ui
         ''' i figli del pannello si guarda la barra vera, e un bottone che nasce entra nel
         ''' collaudo il giorno stesso.
         ''' </remarks>
+        ''' <summary>Le sette caselle della barra: l'indice dei pannelli, e nient'altro.</summary>
+        ''' <remarks>
+        ''' Dal 2026-09-01 lassù non abitano solo loro: in coda c'è il «?» dell'aiuto, che
+        ''' della barra condivide il posto ma non il mestiere — non porta a un pannello, non
+        ''' è vestito col colore delle destinazioni e non si spegne mentre l'AI lavora
+        ''' (cap. 03.4). Escluderlo per nome è brutto ma è la verità: è l'unica eccezione, e
+        ''' scriverla qui è meglio che lasciare che i collaudi delle caselle gli chiedano
+        ''' cose che non lo riguardano.
+        ''' </remarks>
         Private Shared Function Barra(form As Control) As Button()
 
             Dim pannello As Control = form.Controls.Find("pnlBarraSuperiore", searchAllChildren:=True).Single()
 
             Return pannello.Controls.OfType(Of Button)().
+                Where(Function(b) b.Name <> "btnAiuto").
                 OrderBy(Function(b) b.Name, StringComparer.Ordinal).
                 ToArray()
+
+        End Function
+
+        ''' <summary>
+        ''' In coda alla barra c'è il «?» che riapre l'informativa, e non è un'ottava casella.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Nasce il 2026-09-01 su indicazione del tutor, per un buco che il capitolo
+        ''' non dichiarava: «Come funziona, e cosa esce dal tuo PC» compariva una volta sola,
+        ''' al primo avvio, e da lì in poi si ritrovava soltanto in fondo alle Impostazioni.
+        ''' Chi si domanda cosa esce dal proprio computer se lo domanda mentre lavora.</para>
+        ''' <para>Quel che il banco può dire è che il bottone c'è, sta lassù, è stretto e
+        ''' vestito da neutro — cioè <b>non</b> è una destinazione travestita, che era il
+        ''' rischio della scelta: sette caselle più una che sembra la ottava. Che il clic
+        ''' apra la finestra non si collauda di qui, come per ogni altra finestra modale
+        ''' dell'applicazione: il legame è la clausola <c>Handles</c>, che il compilatore
+        ''' verifica, e il contenuto ha i suoi collaudi in <c>CollaudiInformativa</c>.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LAiutoStaInBarraMaNonEUnaCasella()
+
+            Using form As New FormPrincipale()
+
+                ' La variabile non può chiamarsi «aiuto»: in VB le maiuscole non
+                ' distinguono, e coprirebbe la funzione «Aiuto» qui sotto. È la trappola di
+                ' casa, già pagata in questo banco.
+                Dim comando As Button = Aiuto(form)
+
+                Assert.AreEqual("?", comando.Text, "si cerca un punto interrogativo, non un nome")
+                Assert.AreEqual(StileApp.BottoneBarraSuperioreIcona, comando.Size,
+                                "stretto quanto il suo segno, alto quanto la fila")
+
+                Assert.AreEqual(StileApp.SfondoContenuto, comando.BackColor,
+                                "vestito da neutro: non è una delle sei destinazioni")
+
+                For Each casella As Button In Barra(form)
+                    Assert.AreNotEqual(casella.Name, comando.Name,
+                                       "e non entra nel conto delle caselle")
+                Next
+
+                Dim ultima As Button = Barra(form).OrderBy(Function(b) b.Left).Last()
+                Assert.IsGreaterThanOrEqualTo(ultima.Right, comando.Left,
+                                              "sta in coda, dopo l'ultima casella")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>Il «?» dell'aiuto, che sta in barra senza essere una casella.</summary>
+        Private Shared Function Aiuto(form As Control) As Button
+
+            Return DirectCast(form.Controls.Find("btnAiuto", searchAllChildren:=True).Single(), Button)
 
         End Function
 
@@ -74,12 +136,16 @@ Namespace Ui
                 Async Function(form, pannello)
 
                     Dim accesiDurante As String() = Nothing
+                    Dim aiutoDurante As Boolean? = Nothing
 
                     ' L'handler della finestra è agganciato per primo (WithEvents, alla
                     ' costruzione): quando questo gira, la barra ha già deciso.
                     AddHandler pannello.LavoroAiCambiato,
                         Sub()
-                            If pannello.AiAlLavoro Then accesiDurante = Accesi(form)
+                            If pannello.AiAlLavoro Then
+                                accesiDurante = Accesi(form)
+                                aiutoDurante = Aiuto(form).Enabled
+                            End If
                         End Sub
 
                     Assert.HasCount(Barra(form).Length, Accesi(form),
@@ -90,6 +156,11 @@ Namespace Ui
                     Assert.IsNotNull(accesiDurante, "l'AI è stata chiamata davvero")
                     Assert.IsEmpty(accesiDurante,
                                    "mentre l'AI scrive non resta acceso nessun bottone della barra")
+
+                    ' Tranne l'aiuto, che della barra non è una casella: non porta da
+                    ' nessuna parte, e il momento in cui ci si chiede cosa stia succedendo
+                    ' è proprio quello in cui qualcosa sta succedendo (cap. 03.4).
+                    Assert.IsTrue(aiutoDurante, "il «?» dell'aiuto resta acceso anche allora")
 
                 End Function)
 
@@ -358,8 +429,6 @@ Namespace Ui
                                 "la casella che torna al menu è verde")
                 Assert.AreEqual(StileApp.SfondoContenuto, menu.ForeColor,
                                 "col testo bianco, che è l'unico leggibile su quel verde")
-                Assert.AreEqual(StileApp.BordoSuccesso, menu.FlatAppearance.BorderColor,
-                                "e il contorno scuro che la tiene una forma sul bianco della barra")
 
                 For Each casella As Button In caselle.Where(Function(b) b IsNot menu)
 
@@ -386,11 +455,13 @@ Namespace Ui
         ''' </summary>
         ''' <remarks>
         ''' <para>È la metà che il colore da solo non dà. Finché la barra era bianca, il
-        ''' pannello aperto si riconosceva dal fondo lilla; adesso che il riposo è azzurro
-        ''' quel lilla non si distinguerebbe più, e l'evidenza è passata alla cornice —
-        ''' doppia e d'accento, con le lettere dello stesso blu. Se qualcuno togliesse la
-        ''' vestizione da <c>MostraPannello</c>, la barra resterebbe bella e muta: sette
-        ''' caselle uguali, e nessun modo di sapere dove si è.</para>
+        ''' pannello aperto si riconosceva dal fondo lilla; passato il riposo all'azzurro
+        ''' l'evidenza andò alla cornice — doppia e d'accento — e dal 2026-09-01, col
+        ''' passaggio a <c>FlatStyle.Standard</c> che le cornici scelte a mano non le
+        ''' disegna più, è tornata al <b>fondo</b>: la casella aperta è l'unica piena del
+        ''' blu d'accento. Se qualcuno togliesse la vestizione da <c>MostraPannello</c>, la
+        ''' barra resterebbe bella e muta: sette caselle uguali, e nessun modo di sapere
+        ''' dove si è.</para>
         ''' <para>Si apre il pannello dalla strada della finestra e non rivestendo la
         ''' casella a mano: quel che si sorveglia è che <c>MostraPannello</c> continui a
         ''' rifare la veste della barra, non che la veste sappia farsi.</para>
@@ -404,17 +475,13 @@ Namespace Ui
 
                 ApriIlPannello(form, "pnlProfilo", profilo)
 
-                Assert.AreEqual(StileApp.Accento, profilo.FlatAppearance.BorderColor,
-                                "la casella aperta prende la cornice d'accento")
-                Assert.AreEqual(2, profilo.FlatAppearance.BorderSize,
-                                "e la prende doppia")
-                Assert.AreEqual(StileApp.Accento, profilo.ForeColor,
-                                "con le lettere dello stesso blu, che è il segnale che si legge per primo")
-                Assert.AreEqual(StileApp.FondoAzione, profilo.BackColor,
-                                "il fondo però non cambia: è la cornice a dire dove si è")
+                Assert.AreEqual(StileApp.Accento, profilo.BackColor,
+                                "la casella aperta è l'unica piena del blu d'accento")
+                Assert.AreEqual(StileApp.SfondoContenuto, profilo.ForeColor,
+                                "con le lettere bianche, le sole leggibili su quel blu")
 
                 For Each altra As Button In Barra(form).Where(Function(b) b IsNot profilo)
-                    Assert.AreNotEqual(StileApp.Accento, altra.FlatAppearance.BorderColor,
+                    Assert.AreNotEqual(StileApp.Accento, altra.BackColor,
                                        $"«{altra.Text}» non è il pannello aperto e non deve sembrarlo")
                 Next
 

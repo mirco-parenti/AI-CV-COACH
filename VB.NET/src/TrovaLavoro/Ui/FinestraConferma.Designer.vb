@@ -49,9 +49,9 @@ Partial Class FinestraConferma
         '
         'btnAzione
         '
-        Me.btnAzione.Location = New System.Drawing.Point(320, 140)
+        Me.btnAzione.Location = New System.Drawing.Point(290, 140)
         Me.btnAzione.Name = "btnAzione"
-        Me.btnAzione.Size = New System.Drawing.Size(160, 32)
+        Me.btnAzione.Size = StileApp.BottoneLargo
         Me.btnAzione.TabIndex = 3
         Me.btnAzione.Text = "Confermo"
         '
@@ -59,7 +59,7 @@ Partial Class FinestraConferma
         '
         Me.btnAnnulla.Location = New System.Drawing.Point(492, 140)
         Me.btnAnnulla.Name = "btnAnnulla"
-        Me.btnAnnulla.Size = New System.Drawing.Size(110, 32)
+        Me.btnAnnulla.Size = StileApp.BottoneStandard
         Me.btnAnnulla.TabIndex = 2
         Me.btnAnnulla.Text = "Annulla"
         '

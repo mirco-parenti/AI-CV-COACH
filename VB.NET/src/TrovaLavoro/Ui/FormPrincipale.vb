@@ -109,6 +109,30 @@ Public Class FormPrincipale
             ttSuggerimenti.SetToolTip(parte, "Informazioni su TrovaLavoro")
         Next
 
+        ttSuggerimenti.SetToolTip(btnAiuto, "Come funziona")
+
+    End Sub
+
+    ''' <summary>
+    ''' Riapre l'informativa del primo avvio (cap. 11.2).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Nasce il 2026-09-01, su indicazione del tutor, per un buco che il capitolo
+    ''' non dichiarava: «Come funziona, e cosa esce dal tuo PC» compariva una volta sola, al
+    ''' primo avvio, e da lì in poi si poteva ritrovare <b>soltanto</b> aprendo le
+    ''' Impostazioni e cercandola in fondo a una finestra che scorre. Chi si domanda cosa
+    ''' esce dal proprio computer se lo domanda mentre lavora, non mentre configura.</para>
+    ''' <para>Il «?» sta in coda alla barra ma <b>non è l'ottava casella</b>: la barra è
+    ''' l'indice dei pannelli e quello non porta a un pannello. Per questo è vestito neutro
+    ''' e non del colore delle destinazioni, ed è l'unico bottone lassù che <b>resta acceso
+    ''' mentre l'AI lavora</b>: l'informativa non fa uscire da nessuna parte, e il momento in
+    ''' cui ci si chiede cosa stia succedendo è proprio quello in cui qualcosa sta
+    ''' succedendo.</para>
+    ''' </remarks>
+    Private Sub btnAiuto_Click(sender As Object, e As EventArgs) Handles btnAiuto.Click
+
+        FinestraInformativa.Mostra(Me)
+
     End Sub
 
     ''' <summary>
@@ -129,33 +153,6 @@ Public Class FormPrincipale
         Handles pnlLogo.Click, picLogo.Click, lblMarchio.Click, lblVersione.Click, lblCopyright.Click
 
         FinestraInformazioni.Mostra(Me, EtichettaDelPool(), AddressOf ComponiLaDiagnostica)
-
-    End Sub
-
-    ''' <summary>
-    ''' Il filo nero che contorna il pannello del logo (cap. 03.5).
-    ''' </summary>
-    ''' <remarks>
-    ''' <para><b>Perché non <c>BorderStyle = FixedSingle</c>.</b> Quello non è nero: lo
-    ''' disegna Windows col colore di sistema — un grigio che cambia col tema — e sul
-    ''' fondo chiaro del pannello si vedrebbe appena. Il colore lo decide la tavolozza,
-    ''' come per ogni altra cosa colorata di questa finestra.</para>
-    ''' <para><b>Perché <c>-1</c>.</b> Un rettangolo disegnato sulle misure piene chiude
-    ''' il lato destro a <c>Width</c> e quello inferiore a <c>Height</c>, cioè sulla prima
-    ''' colonna e sulla prima riga <i>fuori</i> dall'area: si vedrebbero due lati su
-    ''' quattro, e sembrerebbe un difetto di disegno invece che un errore di un pixel.</para>
-    ''' <para><b>Le tre etichette sono rientrate di 1 px per lato</b> (qui sotto e nel
-    ''' designer) proprio per questo filo: sono larghe quanto il pannello, hanno il fondo
-    ''' opaco che ereditano da lui, e i figli si disegnano <i>dopo</i> il genitore — alla
-    ''' larghezza piena cancellerebbero il contorno sui due lati verticali, ma solo alle
-    ''' righe che occupano. Il risultato sarebbe un contorno interrotto tre volte: il
-    ''' genere di difetto che si vede solo guardando, e solo se si sa dove.</para>
-    ''' </remarks>
-    Private Sub DisegnaIlContornoDelLogo(mittente As Object, e As PaintEventArgs) Handles pnlLogo.Paint
-
-        Using penna As New Pen(StileApp.BordoMarchio)
-            e.Graphics.DrawRectangle(penna, 0, 0, pnlLogo.Width - 1, pnlLogo.Height - 1)
-        End Using
 
     End Sub
 
@@ -264,6 +261,43 @@ Public Class FormPrincipale
     Private Sub FormPrincipale_Shown(sender As Object, e As EventArgs) Handles MyBase.Shown
         _schermataDiAvvio?.ChiudiQuandoPuoi()
         RiapplicaIlMinimoDellaFinestra()
+        ApriALaSuaMisura()
+    End Sub
+
+    ''' <summary>
+    ''' Dà alla finestra la misura con cui si apre, e la mette in mezzo allo schermo
+    ''' (cap. 03.4).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Dal 2026-09-01, su indicazione del tutor, l'applicazione <b>non si apre più
+    ''' massimizzata</b>: parte in stato normale, grande al massimo quanto dice
+    ''' <see cref="ScalaSchermo.TettoDiApertura"/>, e su uno schermo che non lo contiene
+    ''' prende quel che c'è. Massimizzare resta un gesto dell'utente — cambia lo stato
+    ''' d'apertura, non quello che si può fare dopo.</para>
+    ''' <para>Si fa nello <c>Shown</c> e dopo il minimo, per la ragione di
+    ''' <see cref="RiapplicaIlMinimoDellaFinestra"/>: la scalatura automatica deve avere
+    ''' già detto la sua, e il minimo deve essere quello vero prima che qualcuno gli
+    ''' confronti una misura. Se la finestra fosse stata massimizzata a mano nel frattempo
+    ''' non si tocca niente: la regola è dell'<b>apertura</b>.</para>
+    ''' <para>Il centraggio è a mano e non <c>CenterScreen</c>: quello vale al momento in
+    ''' cui la finestra si mostra, cioè con la misura di prima, e cambiandogliela dopo la
+    ''' lascerebbe fuori centro di mezza differenza.</para>
+    ''' </remarks>
+    Private Sub ApriALaSuaMisura()
+
+        If Me.WindowState <> FormWindowState.Normal Then Return
+
+        Dim schermo As Screen = Screen.FromControl(Me)
+        Dim areaDiLavoro As Rectangle = If(schermo Is Nothing, Rectangle.Empty, schermo.WorkingArea)
+
+        Me.Size = ScalaSchermo.MisuraDiApertura(areaDiLavoro.Size, Me.MinimumSize, Me.DeviceDpi)
+
+        If areaDiLavoro.Width <= 0 OrElse areaDiLavoro.Height <= 0 Then Return
+
+        Me.Location = New Point(
+            areaDiLavoro.X + Math.Max(0, (areaDiLavoro.Width - Me.Width) \ 2),
+            areaDiLavoro.Y + Math.Max(0, (areaDiLavoro.Height - Me.Height) \ 2))
+
     End Sub
 
     ''' <summary>
@@ -326,6 +360,15 @@ Public Class FormPrincipale
                                        RuoloDellaCasella(navigazione),
                                        attiva:=navigazione Is bottone)
         Next
+
+        ' Il pannello del logo prende il fondo di quel che gli sta sotto (cap. 03.5): dal
+        ' 2026-09-01, su indicazione del tutor, non è più un riquadro appoggiato sopra
+        ' l'area — niente filo nero attorno, niente fondo suo — ma il marchio posato
+        ' sull'angolo. E il fondo sotto non è uno solo: avorio nel menu d'ingresso
+        ' (FondoMenu), caldo nelle sei pagine (FondoPagina). Un colore fisso si fonderebbe
+        ' con uno dei due e lascerebbe un rettangolo visibile sull'altro, che è
+        ' esattamente il riquadro che si è tolto.
+        pnlLogo.BackColor = pannello.BackColor
 
         pnlLogo.BringToFront()
 
@@ -1349,20 +1392,18 @@ Public Class FormPrincipale
         lblMarchio.Visible = Not compatta
         lblCopyright.Visible = Not compatta
 
-        ' Le etichette rientrano di un pixel per lato: alla larghezza piena il loro fondo
-        ' opaco coprirebbe il filo del contorno sui due lati verticali (v.
-        ' DisegnaIlContornoDelLogo). Il testo resta centrato: si toglie lo stesso pixel
-        ' da destra e da sinistra.
-        Dim rientro As Integer = larghezza - 2
-
+        ' Le etichette prendono tutta la larghezza. Fino al 2026-09-01 rientravano di un
+        ' pixel per lato, e non per estetica: il pannello aveva un filo nero attorno, il
+        ' loro fondo opaco lo avrebbe coperto sui due lati verticali, e il contorno sarebbe
+        ' rimasto interrotto tre volte. Tolto il filo, è caduto il motivo del rientro.
         Dim riga As Integer = margine + lato + StileApp.InterlineaMinima
         If Not compatta Then
-            lblMarchio.SetBounds(1, riga, rientro, AltezzaRigaNome)
+            lblMarchio.SetBounds(0, riga, larghezza, AltezzaRigaNome)
             riga += AltezzaRigaNome + 2
         End If
-        lblVersione.SetBounds(1, riga, rientro, AltezzaRigaDidascalia)
+        lblVersione.SetBounds(0, riga, larghezza, AltezzaRigaDidascalia)
         If Not compatta Then
-            lblCopyright.SetBounds(1, riga + AltezzaRigaDidascalia + 2, rientro, AltezzaRigaDidascalia)
+            lblCopyright.SetBounds(0, riga + AltezzaRigaDidascalia + 2, larghezza, AltezzaRigaDidascalia)
         End If
 
         ' La barra di stato scrive a destra del pannello logo, che le sta sopra.

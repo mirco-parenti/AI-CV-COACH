@@ -22,6 +22,7 @@ Partial Class FinestraInformativa
     Private Sub InitializeComponent()
         Me.lblTitolo = New System.Windows.Forms.Label()
         Me.btnChiudi = New System.Windows.Forms.Button()
+        Me.btnCredits = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'lblTitolo
@@ -34,15 +35,23 @@ Partial Class FinestraInformativa
         'btnChiudi
         '
         Me.btnChiudi.Name = "btnChiudi"
-        Me.btnChiudi.Size = New System.Drawing.Size(110, 32)
+        Me.btnChiudi.Size = StileApp.BottoneStandard
         Me.btnChiudi.TabIndex = 1
         Me.btnChiudi.Text = "Ho capito"
+        '
+        'btnCredits
+        '
+        Me.btnCredits.Name = "btnCredits"
+        Me.btnCredits.Size = StileApp.BottoneStandard
+        Me.btnCredits.TabIndex = 2
+        Me.btnCredits.Text = "Credits"
         '
         'FinestraInformativa
         '
         Me.ClientSize = New System.Drawing.Size(660, 520)
         Me.Controls.Add(Me.lblTitolo)
         Me.Controls.Add(Me.btnChiudi)
+        Me.Controls.Add(Me.btnCredits)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.MaximizeBox = False
         Me.MinimizeBox = False
@@ -56,5 +65,6 @@ Partial Class FinestraInformativa
 
     Friend WithEvents lblTitolo As System.Windows.Forms.Label
     Friend WithEvents btnChiudi As System.Windows.Forms.Button
+    Friend WithEvents btnCredits As System.Windows.Forms.Button
 
 End Class

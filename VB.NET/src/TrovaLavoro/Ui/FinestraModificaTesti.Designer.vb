@@ -134,7 +134,7 @@ Partial Class FinestraModificaTesti
         Me.btnTogli.Enabled = False
         Me.btnTogli.Location = New System.Drawing.Point(566, 200)
         Me.btnTogli.Name = "btnTogli"
-        Me.btnTogli.Size = New System.Drawing.Size(110, 32)
+        Me.btnTogli.Size = StileApp.BottoneStandard
         Me.btnTogli.TabIndex = 3
         Me.btnTogli.Text = "Togli →"
         '
@@ -143,7 +143,7 @@ Partial Class FinestraModificaTesti
         Me.btnRimetti.Enabled = False
         Me.btnRimetti.Location = New System.Drawing.Point(566, 244)
         Me.btnRimetti.Name = "btnRimetti"
-        Me.btnRimetti.Size = New System.Drawing.Size(110, 32)
+        Me.btnRimetti.Size = StileApp.BottoneStandard
         Me.btnRimetti.TabIndex = 4
         Me.btnRimetti.Text = "← Rimetti"
         '
@@ -168,9 +168,9 @@ Partial Class FinestraModificaTesti
         '
         'btnSalva
         '
-        Me.btnSalva.Location = New System.Drawing.Point(724, 546)
+        Me.btnSalva.Location = New System.Drawing.Point(674, 546)
         Me.btnSalva.Name = "btnSalva"
-        Me.btnSalva.Size = New System.Drawing.Size(140, 32)
+        Me.btnSalva.Size = StileApp.BottoneLargo
         Me.btnSalva.TabIndex = 9
         Me.btnSalva.Text = "Salva"
         '
@@ -178,7 +178,7 @@ Partial Class FinestraModificaTesti
         '
         Me.btnAnnulla.Location = New System.Drawing.Point(876, 546)
         Me.btnAnnulla.Name = "btnAnnulla"
-        Me.btnAnnulla.Size = New System.Drawing.Size(110, 32)
+        Me.btnAnnulla.Size = StileApp.BottoneStandard
         Me.btnAnnulla.TabIndex = 10
         Me.btnAnnulla.Text = "Annulla"
         '

@@ -1,4 +1,5 @@
-﻿Imports Microsoft.VisualStudio.TestTools.UnitTesting
+﻿Imports System.Drawing
+Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro
 
 Namespace Ui
@@ -136,6 +137,83 @@ Namespace Ui
 
             Assert.AreEqual(660, ScalaSchermo.LarghezzaSenzaLaBarra(660, siScorre:=False, larghezzaBarra:=17),
                             "una barra che non c'è non toglie niente")
+
+        End Sub
+
+        ''' <summary>
+        ''' Su uno schermo grande la finestra si apre al suo tetto, non a tutto schermo.
+        ''' </summary>
+        ''' <remarks>
+        ''' La regola d'apertura del 2026-09-01, dettata dal tutor: l'applicazione non parte
+        ''' più massimizzata. Su un 4K a scala 100% il tetto è meno di metà schermo, e si
+        ''' vede a colpo d'occhio che la finestra è una finestra.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub SuUnoSchermoGrandeLaFinestraSiApreAlSuoTetto()
+
+            Dim misura As Size = ScalaSchermo.MisuraDiApertura(
+                New Size(3840, 2120), New Size(1150, 600), dpi:=96)
+
+            Assert.AreEqual(ScalaSchermo.TettoDiApertura, misura,
+                            "su un 4K si apre al tetto e non a tutto schermo")
+
+        End Sub
+
+        ''' <summary>Su uno schermo che il tetto non lo contiene, prende quel che c'è.</summary>
+        <TestMethod>
+        Public Sub SuUnoSchermoPiccoloLaFinestraPrendeLAreaDiLavoro()
+
+            Dim misura As Size = ScalaSchermo.MisuraDiApertura(
+                New Size(1366, 728), New Size(1150, 600), dpi:=96)
+
+            Assert.AreEqual(New Size(1366, 728), misura,
+                            "si adatta invece di sbordare")
+
+        End Sub
+
+        ''' <summary>E sotto il minimo della finestra non scende comunque.</summary>
+        ''' <remarks>
+        ''' Uno schermo più piccolo del minimo esiste (un netbook, una macchina virtuale
+        ''' stretta), e lì la finestra sborda: è già la scelta del <c>MinimumSize</c>, e
+        ''' farla decidere due volte vorrebbe dire due risposte diverse alla stessa domanda.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub SottoIlMinimoLaFinestraNonScende()
+
+            Dim misura As Size = ScalaSchermo.MisuraDiApertura(
+                New Size(1024, 500), New Size(1150, 600), dpi:=96)
+
+            Assert.AreEqual(New Size(1150, 600), misura, "vince il minimo dichiarato")
+
+        End Sub
+
+        ''' <summary>
+        ''' A 150% il tetto vale una volta e mezza, perché è una misura di progetto.
+        ''' </summary>
+        ''' <remarks>
+        ''' È l'interpretazione dichiarata: 1920×1024 sono unità di progetto come il minimo
+        ''' 1150×600, non pixel veri. Trattarli da pixel veri aprirebbe, su uno schermo
+        ''' grande a scala alta, una finestra che a video mostra 1280 unità di progetto —
+        ''' poco più del minimo, e proprio sulle macchine con lo schermo più grande.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub A144DpiIlTettoDiAperturaValeUnaVoltaEMezza()
+
+            Dim misura As Size = ScalaSchermo.MisuraDiApertura(
+                New Size(5120, 2800), New Size(1725, 900), dpi:=144)
+
+            Assert.AreEqual(New Size(2880, 1536), misura,
+                            "il tetto convertito, non i 1920x1024 di schermo")
+
+        End Sub
+
+        ''' <summary>Senza uno schermo noto passa il tetto, non una misura nulla.</summary>
+        <TestMethod>
+        Public Sub SenzaUnoSchermoLaFinestraSiApreAlTetto()
+
+            Assert.AreEqual(ScalaSchermo.TettoDiApertura,
+                            ScalaSchermo.MisuraDiApertura(Size.Empty, New Size(1150, 600), dpi:=96),
+                            "una finestra di misura zero non è un ripiego, è un guasto")
 
         End Sub
 

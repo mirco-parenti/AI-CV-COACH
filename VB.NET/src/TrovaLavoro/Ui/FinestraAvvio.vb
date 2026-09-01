@@ -11,8 +11,9 @@ Imports System.Windows.Forms
 ''' l'applicazione passa dal doppio clic alla finestra in <b>265-330 ms</b>: una
 ''' schermata legata al solo caricamento lampeggerebbe senza che nessuno la legga, che
 ''' è il difetto tipico degli splash fatti a naso. Resta perciò a video un minimo
-''' garantito — <b>cinque secondi</b>, il tempo di leggere il marchio e il sottotitolo —
-''' e il caricamento le corre sotto.</para>
+''' garantito — <b>dieci secondi</b> dal 2026-09-01, su indicazione del tutor; erano
+''' cinque, il tempo di leggere il marchio e il sottotitolo — e il caricamento le corre
+''' sotto.</para>
 ''' <para><b>Ma il minimo vale per chi guarda, non per chi aspetta una risposta.</b>
 ''' Al primo avvio la chiave API si chiede prima di ogni altra cosa (cap. 11.3), e una
 ''' schermata <c>TopMost</c> davanti a quella domanda sarebbe un programma che sembra
@@ -22,13 +23,25 @@ Imports System.Windows.Forms
 ''' biforcazione di <c>Programma.Main</c> sta prima di ogni preparativo grafico, e
 ''' questa finestra nasce dopo. Un server che apre una finestra sulla macchina di chi lo
 ''' ha avviato sarebbe un difetto grave, non un vezzo.</para>
-''' <para>Un clic la manda via: chi conosce già il programma non deve aspettare.</para>
+''' <para>Un clic la manda via, e dal 2026-09-01 anche <b>Invio</b>: chi conosce già il
+''' programma non deve aspettare, e dieci secondi sono lunghi da aspettare col mouse in
+''' mano. Perché Invio abbia bisogno di un filtro dei messaggi e non basti un
+''' <c>KeyDown</c>, v. <see cref="PreFilterMessage"/>.</para>
 ''' </remarks>
 Public Class FinestraAvvio
     Implements ISchermataDiAvvio
+    Implements IMessageFilter
 
     ''' <summary>Quanto resta a video come minimo, se nessuno la manda via prima.</summary>
-    Public Shared ReadOnly MinimoAVideo As TimeSpan = TimeSpan.FromSeconds(5)
+    ''' <remarks>
+    ''' Dieci secondi dal 2026-09-01, su indicazione del tutor: erano cinque. È il minimo
+    ''' <b>garantito</b>, non un'attesa imposta — un clic o un Invio la chiudono in
+    ''' qualunque momento.
+    ''' </remarks>
+    Public Shared ReadOnly MinimoAVideo As TimeSpan = TimeSpan.FromSeconds(10)
+
+    ''' <summary>Il messaggio di Windows «un tasto è stato premuto».</summary>
+    Private Const WmKeyDown As Integer = &H100
 
     ''' <summary>
     ''' Quanta parte dello schermo può occupare al massimo. L'immagine è disegnata per
@@ -117,6 +130,56 @@ Public Class FinestraAvvio
 
         Return New Size(Math.Max(1, CInt(Math.Round(originale.Width * fattore))),
                         Math.Max(1, CInt(Math.Round(originale.Height * fattore))))
+
+    End Function
+
+    ''' <summary>
+    ''' Appena è a video si mette in ascolto della tastiera di tutta l'applicazione.
+    ''' </summary>
+    Protected Overrides Sub OnShown(e As EventArgs)
+
+        MyBase.OnShown(e)
+        Application.AddMessageFilter(Me)
+
+    End Sub
+
+    ''' <summary>E smette appena se n'è andata, comunque se ne sia andata.</summary>
+    ''' <remarks>
+    ''' Qui e non dentro <see cref="ChiudiSubito"/>: un filtro dimenticato resta appeso al
+    ''' ciclo dei messaggi per tutta la vita del programma, e questo si mangerebbe ogni
+    ''' Invio dell'applicazione. Toglierlo dove la finestra è <b>chiusa davvero</b> copre
+    ''' anche le strade che non passano di lì. Toglierne uno mai aggiunto non fa niente,
+    ''' ed è il caso del banco, che la costruisce senza mostrarla.
+    ''' </remarks>
+    Protected Overrides Sub OnFormClosed(e As FormClosedEventArgs)
+
+        Application.RemoveMessageFilter(Me)
+        MyBase.OnFormClosed(e)
+
+    End Sub
+
+    ''' <summary>Invio la manda via, da qualunque finestra lo si prema.</summary>
+    ''' <remarks>
+    ''' <para><b>Perché un filtro dei messaggi e non un <c>KeyDown</c> di questa
+    ''' finestra.</b> La schermata è <c>TopMost</c> e resta davanti, ma il <b>fuoco della
+    ''' tastiera</b> non ce l'ha quasi mai: <c>Programma.Main</c> la mostra e subito dopo
+    ''' apre la finestra principale, che si attiva e si prende il fuoco mentre lo splash è
+    ''' ancora lì. Un <c>KeyDown</c> — o <c>KeyPreview</c>, o <c>ProcessCmdKey</c> — su
+    ''' questa finestra non scatterebbe mai, e il tasto sembrerebbe non funzionare a caso.
+    ''' Il filtro vede invece i tasti di <b>tutto</b> il ciclo dei messaggi, cioè anche
+    ''' quelli diretti alla finestra principale.</para>
+    ''' <para>Il tasto si <b>consuma</b> (<c>True</c>): l'Invio che manda via la schermata
+    ''' non deve arrivare anche al bottone che ha il fuoco dietro di lei.</para>
+    ''' </remarks>
+    Public Function PreFilterMessage(ByRef messaggio As Message) As Boolean _
+        Implements IMessageFilter.PreFilterMessage
+
+        If _chiusa OrElse messaggio.Msg <> WmKeyDown Then Return False
+        If messaggio.WParam.ToInt32() <> CInt(Keys.Enter) Then Return False
+
+        ChiudiSubito()
+
+        Return True
 
     End Function
 

@@ -83,9 +83,9 @@ Partial Class FinestraImpostazioni
         'btnComeFunziona
         '
         Me.btnComeFunziona.Name = "btnComeFunziona"
-        Me.btnComeFunziona.Size = New System.Drawing.Size(300, 32)
+        Me.btnComeFunziona.Size = StileApp.BottoneMedio
         Me.btnComeFunziona.TabIndex = 2
-        Me.btnComeFunziona.Text = "Come funziona, e cosa esce dal tuo PC"
+        Me.btnComeFunziona.Text = "Come funziona…"
         '
         'lblSezioneChiave
         '
@@ -104,7 +104,7 @@ Partial Class FinestraImpostazioni
         'btnCambiaChiave
         '
         Me.btnCambiaChiave.Name = "btnCambiaChiave"
-        Me.btnCambiaChiave.Size = New System.Drawing.Size(190, 32)
+        Me.btnCambiaChiave.Size = StileApp.BottoneLargo
         Me.btnCambiaChiave.TabIndex = 4
         Me.btnCambiaChiave.Text = "Cambia la chiave…"
         '
@@ -199,7 +199,7 @@ Partial Class FinestraImpostazioni
         'btnApriCartellaDati
         '
         Me.btnApriCartellaDati.Name = "btnApriCartellaDati"
-        Me.btnApriCartellaDati.Size = New System.Drawing.Size(190, 32)
+        Me.btnApriCartellaDati.Size = StileApp.BottoneLargo
         Me.btnApriCartellaDati.TabIndex = 12
         Me.btnApriCartellaDati.Text = "Apri la cartella dati"
         '
@@ -213,7 +213,7 @@ Partial Class FinestraImpostazioni
         'btnGestisciDocumenti
         '
         Me.btnGestisciDocumenti.Name = "btnGestisciDocumenti"
-        Me.btnGestisciDocumenti.Size = New System.Drawing.Size(230, 32)
+        Me.btnGestisciDocumenti.Size = StileApp.BottoneMoltoLargo
         Me.btnGestisciDocumenti.TabIndex = 14
         Me.btnGestisciDocumenti.Text = "Gestisci i documenti…"
         '
@@ -271,7 +271,7 @@ Partial Class FinestraImpostazioni
         'btnApriModelli
         '
         Me.btnApriModelli.Name = "btnApriModelli"
-        Me.btnApriModelli.Size = New System.Drawing.Size(230, 32)
+        Me.btnApriModelli.Size = StileApp.BottoneMoltoLargo
         Me.btnApriModelli.TabIndex = 18
         Me.btnApriModelli.Text = "Apri modelli.json"
         '
@@ -292,7 +292,7 @@ Partial Class FinestraImpostazioni
         'btnApriChiamate
         '
         Me.btnApriChiamate.Name = "btnApriChiamate"
-        Me.btnApriChiamate.Size = New System.Drawing.Size(230, 32)
+        Me.btnApriChiamate.Size = StileApp.BottoneMoltoLargo
         Me.btnApriChiamate.TabIndex = 22
         Me.btnApriChiamate.Text = "Apri il conto delle chiamate"
         '
@@ -306,21 +306,21 @@ Partial Class FinestraImpostazioni
         'btnBackup
         '
         Me.btnBackup.Name = "btnBackup"
-        Me.btnBackup.Size = New System.Drawing.Size(190, 32)
+        Me.btnBackup.Size = StileApp.BottoneLargo
         Me.btnBackup.TabIndex = 20
         Me.btnBackup.Text = "Backup…"
         '
         'btnSvuotaNavigazione
         '
         Me.btnSvuotaNavigazione.Name = "btnSvuotaNavigazione"
-        Me.btnSvuotaNavigazione.Size = New System.Drawing.Size(280, 32)
+        Me.btnSvuotaNavigazione.Size = StileApp.BottoneMassimo
         Me.btnSvuotaNavigazione.TabIndex = 21
         Me.btnSvuotaNavigazione.Text = "Svuota i dati di navigazione"
         '
         'btnEliminaTutto
         '
         Me.btnEliminaTutto.Name = "btnEliminaTutto"
-        Me.btnEliminaTutto.Size = New System.Drawing.Size(280, 32)
+        Me.btnEliminaTutto.Size = StileApp.BottoneMassimo
         Me.btnEliminaTutto.TabIndex = 22
         Me.btnEliminaTutto.Text = "ELIMINA TUTTI I DATI"
         '
@@ -334,7 +334,7 @@ Partial Class FinestraImpostazioni
         'btnChiudi
         '
         Me.btnChiudi.Name = "btnChiudi"
-        Me.btnChiudi.Size = New System.Drawing.Size(110, 32)
+        Me.btnChiudi.Size = StileApp.BottoneStandard
         Me.btnChiudi.TabIndex = 24
         Me.btnChiudi.Text = "Chiudi"
         Me.ClientSize = New System.Drawing.Size(660, 760)

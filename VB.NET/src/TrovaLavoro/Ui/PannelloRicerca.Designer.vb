@@ -137,15 +137,15 @@ Partial Class PannelloRicerca
         '
         Me.btnApri.Location = New System.Drawing.Point(558, 0)
         Me.btnApri.Name = "btnApri"
-        Me.btnApri.Size = New System.Drawing.Size(90, StileApp.BottoneStandard.Height)
+        Me.btnApri.Size = StileApp.BottoneStandard
         Me.btnApri.TabIndex = 2
         Me.btnApri.Text = "Apri"
         '
         'btnDimentica
         '
-        Me.btnDimentica.Location = New System.Drawing.Point(656, 0)
+        Me.btnDimentica.Location = New System.Drawing.Point(680, 0)
         Me.btnDimentica.Name = "btnDimentica"
-        Me.btnDimentica.Size = New System.Drawing.Size(110, StileApp.BottoneStandard.Height)
+        Me.btnDimentica.Size = StileApp.BottoneStandard
         Me.btnDimentica.TabIndex = 3
         Me.btnDimentica.Text = "Dimentica"
         '
@@ -203,22 +203,22 @@ Partial Class PannelloRicerca
         Me.txtDove.Location = New System.Drawing.Point(654, 44)
         Me.txtDove.Name = "txtDove"
         Me.txtDove.PlaceholderText = "Genova, Chiavari…"
-        Me.txtDove.Size = New System.Drawing.Size(170, 23)
+        Me.txtDove.Size = New System.Drawing.Size(128, 23)
         Me.txtDove.TabIndex = 9
         '
         'btnCerca
         '
-        Me.btnCerca.Location = New System.Drawing.Point(836, 40)
+        Me.btnCerca.Location = New System.Drawing.Point(794, 40)
         Me.btnCerca.Name = "btnCerca"
-        Me.btnCerca.Size = New System.Drawing.Size(100, StileApp.BottoneStandard.Height)
+        Me.btnCerca.Size = StileApp.BottoneStandard
         Me.btnCerca.TabIndex = 10
         Me.btnCerca.Text = "Cerca"
         '
         'btnSalvaRicerca
         '
-        Me.btnSalvaRicerca.Location = New System.Drawing.Point(944, 40)
+        Me.btnSalvaRicerca.Location = New System.Drawing.Point(916, 40)
         Me.btnSalvaRicerca.Name = "btnSalvaRicerca"
-        Me.btnSalvaRicerca.Size = New System.Drawing.Size(162, StileApp.BottoneStandard.Height)
+        Me.btnSalvaRicerca.Size = StileApp.BottoneLargo
         Me.btnSalvaRicerca.TabIndex = 11
         Me.btnSalvaRicerca.Text = "Salva questa ricerca"
         '
@@ -231,7 +231,7 @@ Partial Class PannelloRicerca
         Me.btnIndietro.AccessibleName = "Indietro"
         Me.btnIndietro.Location = New System.Drawing.Point(0, 80)
         Me.btnIndietro.Name = "btnIndietro"
-        Me.btnIndietro.Size = New System.Drawing.Size(40, StileApp.BottoneStandard.Height)
+        Me.btnIndietro.Size = StileApp.BottoneIcona
         Me.btnIndietro.TabIndex = 12
         Me.btnIndietro.Text = "◀"
         '
@@ -240,7 +240,7 @@ Partial Class PannelloRicerca
         Me.btnRicarica.AccessibleName = "Ricarica"
         Me.btnRicarica.Location = New System.Drawing.Point(46, 80)
         Me.btnRicarica.Name = "btnRicarica"
-        Me.btnRicarica.Size = New System.Drawing.Size(40, StileApp.BottoneStandard.Height)
+        Me.btnRicarica.Size = StileApp.BottoneIcona
         Me.btnRicarica.TabIndex = 13
         Me.btnRicarica.Text = "⟳"
         '
@@ -268,15 +268,15 @@ Partial Class PannelloRicerca
         Me.txtIndirizzo.Location = New System.Drawing.Point(160, 84)
         Me.txtIndirizzo.Name = "txtIndirizzo"
         Me.txtIndirizzo.PlaceholderText = "…oppure incolla qui il link di un annuncio"
-        Me.txtIndirizzo.Size = New System.Drawing.Size(856, 23)
+        Me.txtIndirizzo.Size = New System.Drawing.Size(826, 23)
         Me.txtIndirizzo.TabIndex = 15
         '
         'btnVai
         '
         Me.btnVai.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnVai.Location = New System.Drawing.Point(1026, 80)
+        Me.btnVai.Location = New System.Drawing.Point(996, 80)
         Me.btnVai.Name = "btnVai"
-        Me.btnVai.Size = New System.Drawing.Size(80, StileApp.BottoneStandard.Height)
+        Me.btnVai.Size = StileApp.BottoneStandard
         Me.btnVai.TabIndex = 16
         Me.btnVai.Text = "Vai"
         '
@@ -322,16 +322,16 @@ Partial Class PannelloRicerca
         Me.btnCattura.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnCattura.Location = New System.Drawing.Point(0, 12)
         Me.btnCattura.Name = "btnCattura"
-        Me.btnCattura.Size = New System.Drawing.Size(180, 32)
+        Me.btnCattura.Size = StileApp.BottoneLargo
         Me.btnCattura.TabIndex = 0
         Me.btnCattura.Text = "Cattura annuncio"
         '
         'btnImportaCv
         '
         Me.btnImportaCv.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.btnImportaCv.Location = New System.Drawing.Point(192, 12)
+        Me.btnImportaCv.Location = New System.Drawing.Point(202, 12)
         Me.btnImportaCv.Name = "btnImportaCv"
-        Me.btnImportaCv.Size = New System.Drawing.Size(210, 32)
+        Me.btnImportaCv.Size = StileApp.BottoneMoltoLargo
         Me.btnImportaCv.TabIndex = 1
         Me.btnImportaCv.Text = "Importa CV da questa pagina"
         '

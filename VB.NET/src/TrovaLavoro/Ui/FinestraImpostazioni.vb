@@ -962,65 +962,130 @@ Public Class FinestraImpostazioni
         End Get
     End Property
 
+    ''' <summary>I comandi di sezione: quelli che vivono nella colonna di destra.</summary>
+    ''' <remarks>
+    ''' In un posto solo perché di cose che valgono per tutti ce ne sono due — la larghezza
+    ''' unica e la colonna — e due elenchi separati finirebbero per non dire più la stessa
+    ''' cosa. «Chiudi» non c'è: vive nella fascia in fondo, che non scorre.
+    ''' </remarks>
+    Private Function ComandiDiSezione() As Button()
+
+        Return New Button() {btnComeFunziona, btnCambiaChiave, btnApriCartellaDati,
+                             btnGestisciDocumenti, btnApriModelli, btnApriChiamate,
+                             btnBackup, btnSvuotaNavigazione, btnEliminaTutto}
+
+    End Function
+
     ''' <summary>
-    ''' Mette i controlli in colonna dentro questa larghezza, e dice fin dove arrivano. Il
-    ''' conto lo fa il codice e non il designer, perché i testi qui dentro cambiano
+    ''' Mette i controlli in due colonne dentro questa larghezza, e dice fin dove arrivano.
+    ''' Il conto lo fa il codice e non il designer, perché i testi qui dentro cambiano
     ''' lunghezza con quel che c'è nella cartella dati.
     ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Due terzi ai testi, un terzo ai comandi</b> *(2026-09-01, su indicazione
+    ''' del tutor)*. Fino a quel giorno era una colonna sola: titolo di sezione, il
+    ''' paragrafo che spiega, e <b>sotto</b> il bottone — ognuno largo quanto la propria
+    ''' scritta. Ne veniva una colonna sfrangiata, con otto bottoni di otto larghezze
+    ''' diverse, e la sezione «I tuoi dati» era la peggiore: due bottoni disuguali a
+    ''' sinistra e l'eliminazione di tutto che galleggiava a destra in mezzo al vuoto.
+    ''' Adesso i comandi stanno in colonna a destra, <b>tutti della stessa larghezza</b> —
+    ''' quella della colonna (<see cref="StileApp.FrazioneColonnaDeiComandi"/>) — e ciascuno
+    ''' all'altezza della sua sezione: il bottone si legge accanto a quel che spiega a cosa
+    ''' serve, invece che dopo.</para>
+    ''' <para><b>Che cosa resta nel flusso del testo</b>, e perché: la tendina della lingua,
+    ''' il numerico dei giorni e le due tendine dei modelli. Non sono comandi ma
+    ''' <b>valori</b> — si leggono insieme alla frase che li introduce, e «italiano» accanto
+    ''' a «Lingua dei documenti» è una riga sola che si capisce; spostarli a destra
+    ''' spezzerebbe la frase per farne una colonna.</para>
+    ''' <para><b>Il critico ha la sua riga nella colonna</b>. Il vuoto attorno resta la
+    ''' difesa (cap. 11.5), ma è tutto <b>verticale</b>: stessa larghezza degli altri, sulla
+    ''' sua riga, con lo stacco doppio sopra e sotto. Fino a stamattina stava al margine
+    ''' opposto, e in una fascia orizzontale larga quel salto si legge come una scelta —
+    ''' in una colonna stretta si legge come un avanzo.</para>
+    ''' </remarks>
     Private Function MettiInFila(larghezza As Integer) As Integer
 
         Dim sinistra As Integer = StileApp.MargineRiquadro
         Dim larghezzaUtile As Integer = larghezza - 2 * StileApp.MargineRiquadro
 
+        ' Le due colonne: un terzo ai comandi, il resto ai testi meno lo stacco fra loro.
+        Dim colonnaComandi As Integer =
+            CInt(Math.Floor(larghezzaUtile * StileApp.FrazioneColonnaDeiComandi))
+        Dim colonnaTesto As Integer = larghezzaUtile - StileApp.DistanzaControlli - colonnaComandi
+        Dim destra As Integer = sinistra + larghezzaUtile - colonnaComandi
+
         For Each testo As Label In {lblSpiegazione, lblStatoChiave, lblRifinituraNota,
                                     lblFollowUpNota, lblCartellaDati, lblCartellaDocumenti,
                                     lblModelloRagionamento, lblModelloSemplice,
-                                    lblModelli, lblPool, lblConsumo, lblStato}
-            testo.MaximumSize = New Size(larghezzaUtile, 0)
+                                    lblModelli, lblPool, lblConsumo}
+            testo.MaximumSize = New Size(colonnaTesto, 0)
         Next
 
-        ' Le tendine dei modelli si prendono tutta la larghezza: un identificativo con
+        ' Lo stato finale sta in fondo e sotto di lui non c'è nessun comando: si prende
+        ' tutta la larghezza, come si prenderebbe una riga di piè di pagina.
+        lblStato.MaximumSize = New Size(larghezzaUtile, 0)
+
+        ' Le tendine dei modelli si prendono la colonna del testo: un identificativo con
         ' accanto il nome leggibile non sta in una casella da 180 pixel, e una tendina che
         ' tronca proprio l'id è una tendina che nasconde la cosa che conta.
         For Each tendina As ComboBox In {cmbModelloRagionamento, cmbModelloSemplice}
-            tendina.Width = larghezzaUtile
+            tendina.Width = colonnaTesto
+        Next
+
+        ' Una larghezza sola per tutti, ed è quella della colonna: è la regola del tutor
+        ' («i bottoni non sono grossi quanto la scritta che c'è dentro») applicata alla
+        ' finestra che ne aveva più bisogno.
+        For Each comando As Button In ComandiDiSezione()
+            comando.Width = colonnaComandi
         Next
 
         lblTitolo.Location = New Point(sinistra, StileApp.MargineRiquadro)
         lblSpiegazione.Location = New Point(sinistra, lblTitolo.Bottom + StileApp.DistanzaControlli)
+        btnComeFunziona.Location = New Point(destra, lblSpiegazione.Top)
 
-        btnComeFunziona.Location = New Point(sinistra, lblSpiegazione.Bottom + StileApp.DistanzaControlli)
+        Dim sotto As Integer = Math.Max(lblSpiegazione.Bottom, btnComeFunziona.Bottom)
 
-        lblSezioneChiave.Location = New Point(sinistra, btnComeFunziona.Bottom + StileApp.MargineRiquadro)
+        ' --- La chiave ---
+        lblSezioneChiave.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
         lblStatoChiave.Location = New Point(sinistra, lblSezioneChiave.Bottom + StileApp.InterlineaMinima)
-        btnCambiaChiave.Location = New Point(sinistra, lblStatoChiave.Bottom + StileApp.InterlineaMinima)
+        btnCambiaChiave.Location = New Point(destra, lblSezioneChiave.Top)
+        sotto = Math.Max(lblStatoChiave.Bottom, btnCambiaChiave.Bottom)
 
-        lblSezioneDocumenti.Location = New Point(sinistra, btnCambiaChiave.Bottom + StileApp.MargineRiquadro)
+        ' --- I documenti: niente comandi, solo valori che stanno nella frase ---
+        lblSezioneDocumenti.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
         lblLingua.Location = New Point(sinistra, lblSezioneDocumenti.Bottom + StileApp.InterlineaMinima + 4)
         cmbLingua.Location = New Point(lblLingua.Right + StileApp.InterlineaMinima,
                                        lblSezioneDocumenti.Bottom + StileApp.InterlineaMinima)
         chkRifinitura.Location = New Point(sinistra, cmbLingua.Bottom + StileApp.DistanzaControlli)
         lblRifinituraNota.Location = New Point(sinistra, chkRifinitura.Bottom + StileApp.InterlineaMinima)
+        sotto = lblRifinituraNota.Bottom
 
-        lblSezioneCandidature.Location = New Point(sinistra, lblRifinituraNota.Bottom + StileApp.MargineRiquadro)
+        ' --- Le candidature: idem, il numerico sta nella frase ---
+        lblSezioneCandidature.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
         lblFollowUp.Location = New Point(sinistra, lblSezioneCandidature.Bottom + StileApp.InterlineaMinima + 4)
         numFollowUp.Location = New Point(lblFollowUp.Right + StileApp.InterlineaMinima,
                                          lblSezioneCandidature.Bottom + StileApp.InterlineaMinima)
         lblGiorni.Location = New Point(numFollowUp.Right + StileApp.InterlineaMinima,
                                        lblFollowUp.Top)
         lblFollowUpNota.Location = New Point(sinistra, numFollowUp.Bottom + StileApp.InterlineaMinima)
+        sotto = lblFollowUpNota.Bottom
 
-        lblSezioneCartelle.Location = New Point(sinistra, lblFollowUpNota.Bottom + StileApp.MargineRiquadro)
+        ' --- Le cartelle: due comandi, e ognuno all'altezza del testo che lo spiega ---
+        lblSezioneCartelle.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
         lblCartellaDati.Location = New Point(sinistra, lblSezioneCartelle.Bottom + StileApp.InterlineaMinima)
-        btnApriCartellaDati.Location = New Point(sinistra, lblCartellaDati.Bottom + StileApp.InterlineaMinima)
-        lblCartellaDocumenti.Location = New Point(sinistra, btnApriCartellaDati.Bottom + StileApp.DistanzaControlli)
-        btnGestisciDocumenti.Location = New Point(sinistra, lblCartellaDocumenti.Bottom + StileApp.InterlineaMinima)
+        btnApriCartellaDati.Location = New Point(destra, lblCartellaDati.Top)
 
-        lblSezioneMotore.Location = New Point(sinistra, btnGestisciDocumenti.Bottom + StileApp.MargineRiquadro)
+        sotto = Math.Max(lblCartellaDati.Bottom, btnApriCartellaDati.Bottom)
+        lblCartellaDocumenti.Location = New Point(sinistra, sotto + StileApp.DistanzaControlli)
+        btnGestisciDocumenti.Location = New Point(destra, lblCartellaDocumenti.Top)
+        sotto = Math.Max(lblCartellaDocumenti.Bottom, btnGestisciDocumenti.Bottom)
+
+        ' --- Il motore ---
+        lblSezioneMotore.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
 
         ' Etichetta sopra e tendina sotto, e non affiancate come la lingua: qui
         ' l'etichetta è una frase e il valore un identificativo lungo, e in fila
-        ' finirebbero fuori dalla larghezza di progetto proprio a DPI alti.
+        ' finirebbero fuori dalla colonna proprio a DPI alti.
         lblModelloRagionamento.Location = New Point(sinistra, lblSezioneMotore.Bottom + StileApp.InterlineaMinima)
         cmbModelloRagionamento.Location = New Point(sinistra, lblModelloRagionamento.Bottom + StileApp.InterlineaMinima)
         lblModelloSemplice.Location = New Point(sinistra, cmbModelloRagionamento.Bottom + StileApp.DistanzaControlli)
@@ -1028,26 +1093,28 @@ Public Class FinestraImpostazioni
 
         lblModelli.Location = New Point(sinistra, cmbModelloSemplice.Bottom + StileApp.InterlineaMinima)
         lblPool.Location = New Point(sinistra, lblModelli.Bottom + StileApp.InterlineaMinima)
-        btnApriModelli.Location = New Point(sinistra, lblPool.Bottom + StileApp.InterlineaMinima)
+        btnApriModelli.Location = New Point(destra, lblSezioneMotore.Top)
+        sotto = Math.Max(lblPool.Bottom, btnApriModelli.Bottom)
 
-        lblSezioneConsumo.Location = New Point(sinistra, btnApriModelli.Bottom + StileApp.MargineRiquadro)
+        ' --- Quanto è costato ---
+        lblSezioneConsumo.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
         lblConsumo.Location = New Point(sinistra, lblSezioneConsumo.Bottom + StileApp.InterlineaMinima)
-        btnApriChiamate.Location = New Point(sinistra, lblConsumo.Bottom + StileApp.InterlineaMinima)
+        btnApriChiamate.Location = New Point(destra, lblSezioneConsumo.Top)
+        sotto = Math.Max(lblConsumo.Bottom, btnApriChiamate.Bottom)
 
-        lblSezioneDati.Location = New Point(sinistra, btnApriChiamate.Bottom + StileApp.MargineRiquadro)
-        btnBackup.Location = New Point(sinistra, lblSezioneDati.Bottom + StileApp.InterlineaMinima)
-        btnSvuotaNavigazione.Location = New Point(sinistra, btnBackup.Bottom + StileApp.DistanzaControlli)
+        ' --- I tuoi dati ---
+        lblSezioneDati.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
+        btnBackup.Location = New Point(destra, lblSezioneDati.Top)
+        btnSvuotaNavigazione.Location = New Point(destra, btnBackup.Bottom + StileApp.DistanzaControlli)
 
         ' L'azione che non si disfa sta lontana dalle altre: è una difesa, non una
-        ' spaziatura (cap. 11.5, la stessa regola della fascia dei comandi). Lì un comando
-        ' critico prende una riga tutta sua, staccata dal resto e allineata dall'altra
-        ' parte, «così non finisce mai sotto il dito di chi sta premendo il comando
-        ' accanto»; qui, fino al 2026-09-01, di quella regola c'era solo il vuoto sopra — e
-        ' il vuoto sopra non basta quando il bottone sta nella stessa colonna, alla stessa
-        ' larghezza e appena sotto un altro bottone rosso. Adesso ha il vuoto da tutti e due
-        ' i lati e sta al margine opposto: un clic scivolato sotto «Svuota i dati di
-        ' navigazione» trova il fondo della finestra, non l'eliminazione di tutto.
-        btnEliminaTutto.Location = New Point(larghezza - StileApp.MargineRiquadro - btnEliminaTutto.Width,
+        ' spaziatura (cap. 11.5, la stessa regola della fascia dei comandi). Qui la difesa è
+        ' tutta verticale — riga sua, stacco doppio sopra e sotto — e la larghezza è quella
+        ' di tutti: dal 2026-09-01 i comandi stanno in colonna, e un bottone spostato al
+        ' margine opposto, che in una fascia orizzontale si legge come una scelta, in una
+        ' colonna si legge come un avanzo. Un clic scivolato sotto «Svuota i dati di
+        ' navigazione» trova il vuoto, non l'eliminazione di tutto.
+        btnEliminaTutto.Location = New Point(destra,
                                              btnSvuotaNavigazione.Bottom + FasciaDeiComandi.StaccoDelCritico)
 
         lblStato.Location = New Point(sinistra, btnEliminaTutto.Bottom + FasciaDeiComandi.StaccoDelCritico)

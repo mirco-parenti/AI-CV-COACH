@@ -69,9 +69,9 @@ Partial Class FinestraConfermaCritica
         'btnAzione
         '
         Me.btnAzione.Enabled = False
-        Me.btnAzione.Location = New System.Drawing.Point(320, 190)
+        Me.btnAzione.Location = New System.Drawing.Point(290, 190)
         Me.btnAzione.Name = "btnAzione"
-        Me.btnAzione.Size = New System.Drawing.Size(160, 32)
+        Me.btnAzione.Size = StileApp.BottoneLargo
         Me.btnAzione.TabIndex = 4
         Me.btnAzione.Text = "Elimina"
         '
@@ -79,7 +79,7 @@ Partial Class FinestraConfermaCritica
         '
         Me.btnAnnulla.Location = New System.Drawing.Point(492, 190)
         Me.btnAnnulla.Name = "btnAnnulla"
-        Me.btnAnnulla.Size = New System.Drawing.Size(110, 32)
+        Me.btnAnnulla.Size = StileApp.BottoneStandard
         Me.btnAnnulla.TabIndex = 5
         Me.btnAnnulla.Text = "Annulla"
         '

@@ -93,8 +93,12 @@ Public Class BottoneMenu
                  ControlStyles.SupportsTransparentBackColor, True)
 
         Me.BackColor = Color.Transparent
-        Me.FlatStyle = FlatStyle.Flat
-        Me.FlatAppearance.BorderSize = 0
+        ' Standard come tutti gli altri bottoni dal 2026-09-01, ed è indifferente: con
+        ' UserPaint acceso e OnPaint riscritto qui sotto, del disegno di Windows non passa
+        ' niente. Restava Flat con FlatAppearance.BorderSize a zero — due righe che non
+        ' avevano più nessun effetto e facevano credere che questo fosse l'ultimo bottone
+        ' piatto rimasto.
+        Me.FlatStyle = FlatStyle.Standard
         Me.ForeColor = StileApp.TestoPrimario
         Me.Font = New Font(StileApp.NomeFont, 15.0F, FontStyle.Bold)
         Me.Cursor = Cursors.Hand

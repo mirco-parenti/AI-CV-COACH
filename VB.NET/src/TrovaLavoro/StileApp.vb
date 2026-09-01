@@ -71,16 +71,6 @@ Public Module StileApp
     ''' </remarks>
     Public ReadOnly FondoMenu As Color = ColorTranslator.FromHtml("#FFFAF0")
 
-    ''' <summary>Il filo che contorna il pannello del logo (cap. 03.5).</summary>
-    ''' <remarks>
-    ''' Nero pieno, e non <see cref="BordoLeggero"/>: quel grigio serve a separare due
-    ''' aree della stessa finestra, questo a dire che il marchio è una cosa a parte,
-    ''' appoggiata sopra. È l'unico nero della tavolozza — <see cref="TestoPrimario"/> è
-    ''' un grigio scurissimo, non nero — ed è nero perché un contorno più chiaro sul
-    ''' fondo chiaro del pannello si sarebbe visto appena.
-    ''' </remarks>
-    Public ReadOnly BordoMarchio As Color = ColorTranslator.FromHtml("#000000")
-
     ''' <summary>Testo normale, valori, titoli di sezione.</summary>
     Public ReadOnly TestoPrimario As Color = ColorTranslator.FromHtml("#212529")
 
@@ -172,17 +162,6 @@ Public Module StileApp
     ''' due versi, e sdoppiarlo avrebbe messo due verdi di famiglia nella stessa schermata.
     ''' </remarks>
     Public ReadOnly Successo As Color = ColorTranslator.FromHtml("#1E7E34")
-
-    ''' <summary>Il contorno che va col fondo <see cref="Successo"/> (cap. 03.4).</summary>
-    ''' <remarks>
-    ''' Un verde scurissimo, non il nero e non il verde stesso: serve alla casella
-    ''' «🎮 Menu» della barra superiore, che è l'unica di quella fila a portare un fondo
-    ''' pieno e ha bisogno di un bordo per restare una forma sul bianco della barra.
-    ''' Contornarla del suo stesso verde la lascerebbe senza contorno; contornarla di nero
-    ''' la farebbe un corpo estraneo, perché il nero qui dentro è del solo marchio
-    ''' (<see cref="BordoMarchio"/>). Questo è il verde di famiglia, portato al buio.
-    ''' </remarks>
-    Public ReadOnly BordoSuccesso As Color = ColorTranslator.FromHtml("#0A2C11")
 
     ''' <summary>I pallini che girano sullo scudo mentre l'AI lavora (cap. 03.8).</summary>
     ''' <remarks>
@@ -334,10 +313,48 @@ Public Module StileApp
     Public Const InterlineaMinima As Integer = 8
 
     ''' <summary>Bottone standard, testo breve.</summary>
+    ''' <remarks>
+    ''' <para>È il primo gradino della <b>scala delle misure</b> dei bottoni: dal
+    ''' 2026-09-01, su indicazione del tutor, un bottone non prende più la larghezza che
+    ''' la sua scritta chiede — la prende da questa scala, e la scritta ci sta dentro.
+    ''' Prima c'erano ventiquattro larghezze diverse scritte a mano nei designer (40, 80,
+    ''' 90, 100, 110, 120, 130, 134, 140, 150, 160, 162, 170, 176, 180, 190, 200, 210,
+    ''' 220, 230, 240, 260, 280, 300): ognuna nata misurando il proprio testo, e nessuna
+    ''' che dicesse niente a chi ne aggiungeva una nuova.</para>
+    ''' <para>I gradini sono cinque più quello dell'icona, e ognuno è una <b>misura che
+    ''' esisteva già</b> fra quelle ventiquattro — non un numero nuovo deciso adesso: si
+    ''' sale al primo gradino che contiene la scritta, mai si scende, così nessuna
+    ''' etichetta si accorcia passando alla scala.</para>
+    ''' </remarks>
     Public ReadOnly BottoneStandard As New Size(110, 32)
 
-    ''' <summary>Bottone standard, testo medio.</summary>
+    ''' <summary>Bottone standard, testo medio (secondo gradino).</summary>
     Public ReadOnly BottoneMedio As New Size(130, 32)
+
+    ''' <summary>Terzo gradino: una frase breve — «Fallo riscrivere», «Salva la chiave».</summary>
+    ''' <remarks>
+    ''' È la larghezza già più diffusa nei designer prima della scala (dodici bottoni su
+    ''' cinquanta la portavano), ed è per questo che il gradino cade qui e non altrove.
+    ''' </remarks>
+    Public ReadOnly BottoneLargo As New Size(190, 32)
+
+    ''' <summary>Quarto gradino: una frase — «Documenti da allegare…».</summary>
+    Public ReadOnly BottoneMoltoLargo As New Size(240, 32)
+
+    ''' <summary>Ultimo gradino: una riga intera — «Come funziona, e cosa esce dal tuo PC».</summary>
+    ''' <remarks>
+    ''' Oltre questo non si sale: una scritta che non ci stesse dentro non vuole un
+    ''' gradino nuovo, vuole essere più corta.
+    ''' </remarks>
+    Public ReadOnly BottoneMassimo As New Size(300, 32)
+
+    ''' <summary>Il bottone che porta un segno solo e non una parola: «◀», «⟳».</summary>
+    ''' <remarks>
+    ''' Sta fuori dalla scala perché non è una scritta corta, è un'icona: metterlo al
+    ''' primo gradino farebbe due quadrati da 110 nella barra del browser, dove accanto
+    ''' c'è l'indirizzo e lo spazio è di quello.
+    ''' </remarks>
+    Public ReadOnly BottoneIcona As New Size(40, 32)
 
     ''' <summary>Bottone della barra superiore di navigazione.</summary>
     Public ReadOnly BottoneBarraSuperiore As New Size(110, 34)
@@ -354,6 +371,32 @@ Public Module StileApp
     ''' </remarks>
     Public ReadOnly BottoneBarraSuperioreLargo As New Size(210, 34)
 
+    ''' <summary>
+    ''' Quanta parte della larghezza si prende la colonna dei comandi in una finestra
+    ''' divisa in due (cap. 03.4): un terzo ai bottoni, due terzi ai testi.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Nasce il 2026-09-01, su indicazione del tutor, per le <b>Impostazioni</b>:
+    ''' lì i bottoni stavano <i>sotto</i> il paragrafo che spiega a cosa servono, ognuno
+    ''' largo quanto la propria scritta, e la colonna veniva sfrangiata — «button
+    ''' disordinati e grossi quanto la scritta che c'è dentro». Adesso la finestra è divisa
+    ''' in due: a sinistra i titoli e i testi, a destra i comandi, ciascuno all'altezza
+    ''' della sua sezione.</para>
+    ''' <para>È una <b>frazione</b> e non una misura in pixel apposta: la colonna dei
+    ''' comandi è la larghezza unica di quei bottoni, e una frazione della finestra scala
+    ''' col DPI insieme a lei — un numero fisso no, e a 150% darebbe una colonna stretta
+    ''' dentro una finestra cresciuta.</para>
+    ''' </remarks>
+    Public Const FrazioneColonnaDeiComandi As Double = 1.0 / 3.0
+
+    ''' <summary>Il bottone della barra che porta un segno solo: il «?» dell'aiuto.</summary>
+    ''' <remarks>
+    ''' Nasce il 2026-09-01 col bottone d'aiuto (cap. 03.4). È il gemello alto di
+    ''' <see cref="BottoneIcona"/>: stessa larghezza, l'altezza della barra — che è una
+    ''' riga sola e non ammette un bottone di misura diversa dagli altri.
+    ''' </remarks>
+    Public ReadOnly BottoneBarraSuperioreIcona As New Size(40, 34)
+
     ''' <summary>Quanto sono smussati gli angoli dei bottoni disegnati a mano, in pixel.</summary>
     ''' <remarks>
     ''' Appena smussati, non tondi: la pillola del menu di prima aveva raggio pari a metà
@@ -366,15 +409,16 @@ Public Module StileApp
     ''' </remarks>
     Public Const RaggioAngolo As Single = 8.0F
 
-    ' --- Come reagisce al mouse quel che ha un fondo pieno (cap. 03.3) ---
+    ' --- Come reagisce al mouse quel che si dipinge da sé (cap. 03.3) ---
 
     ''' <summary>Di quanto si scurisce un fondo quando il mouse ci passa sopra.</summary>
     ''' <remarks>
     ''' <b>Sul chiaro ci si accende scurendo</b>, non schiarendo: è la manopola che
-    ''' <c>BottoneMenu</c> gira dal 2026-08-30, e dal 2026-09-01 la girano tutti i bottoni
-    ''' vestiti da qui. Prima nessuno la girava affatto: senza <c>MouseOverBackColor</c> un
-    ''' bottone piatto col suo colore resta identico sotto il puntatore, e un fondo saturo
-    ''' che non reagisce si legge come un'immagine, non come un comando.
+    ''' <c>BottoneMenu</c> gira dal 2026-08-30, e resta sua soltanto. Per un giorno —
+    ''' il 2026-09-01, mattina — l'hanno girata anche i bottoni vestiti da qui, tramite
+    ''' <c>FlatAppearance</c>; il passaggio a <see cref="FlatStyle.Standard"/> dello stesso
+    ''' giorno (su indicazione del tutor) ha tolto <c>FlatAppearance</c> di mezzo, e sotto
+    ''' il puntatore quei bottoni fanno adesso quel che fa un bottone di Windows.
     ''' </remarks>
     Public Const ScurimentoSopra As Integer = 18
 
@@ -404,10 +448,18 @@ Public Module StileApp
     ''' «identici» sarebbe durato fino al terzo pannello.
     ''' </summary>
     ''' <remarks>
-    ''' <para><c>FlatStyle.Flat</c> e <c>UseVisualStyleBackColor = False</c> valgono per
+    ''' <para><c>FlatStyle.Standard</c> e <c>UseVisualStyleBackColor = False</c> valgono per
     ''' tutti i livelli: senza il secondo, Windows ridipinge il fondo di suo e il colore
     ''' scelto qui non si vede.</para>
-    ''' <para>Proprio per questo il bottone si ridipinge anche quando viene <b>spento</b>:
+    ''' <para><b>Standard e non più Flat</b>, dal 2026-09-01 e su indicazione del tutor: il
+    ''' bottone torna a essere un bottone di Windows, con il rilievo che lo dichiara
+    ''' premibile prima di qualunque colore. Quel che i livelli dicono resta — il
+    ''' <b>fondo</b>, l'<b>inchiostro</b> e il <b>carattere</b> — mentre sparisce tutto ciò
+    ''' che passava da <c>FlatAppearance</c>, che <c>Standard</c> non guarda affatto: i
+    ''' contorni disegnati (l'accento del livello 2) e il fondo che si scuriva sotto il
+    ''' puntatore. Restano scritte qui le due manopole dello scurimento perché
+    ''' <c>BottoneMenu</c>, che si dipinge da sé, continua a girarle.</para>
+    ''' <para>Il bottone si ridipinge anche quando viene <b>spento</b>:
     ''' un bottone piatto con un colore suo resta acceso all'occhio anche da disabilitato,
     ''' e sembrerebbe premibile quando non lo è. Il livello resta scritto nel
     ''' <c>Tag</c>, così quando torna abilitato ritrova il colore che gli spetta.</para>
@@ -439,12 +491,10 @@ Public Module StileApp
     ''' <summary>Dà al bottone l'aspetto del suo livello, o quello spento se è disabilitato.</summary>
     Private Sub Dipingi(bottone As Button, livello As LivelloBottone)
 
-        bottone.FlatStyle = FlatStyle.Flat
+        bottone.FlatStyle = FlatStyle.Standard
         bottone.UseVisualStyleBackColor = False
         bottone.Font = FontTesto
         bottone.ForeColor = TestoPrimario
-        bottone.FlatAppearance.BorderSize = 1
-        bottone.FlatAppearance.BorderColor = BordoLeggero
 
         ' Il font del livello si applica comunque: spento o acceso, un bottone che pesa
         ' resta scritto in grassetto e non cambia ingombro quando si riaccende.
@@ -471,43 +521,33 @@ Public Module StileApp
             Case LivelloBottone.SicuroPositivo
                 bottone.BackColor = Successo
                 bottone.ForeColor = SfondoContenuto
-                bottone.FlatAppearance.BorderColor = Successo
 
             Case LivelloBottone.Esplorativo
                 bottone.BackColor = AccentoTenue
-                ' Il bordo è dell'accento e non grigio: il fondo tenue di questo livello,
-                ' su una finestra già chiara, si legge quasi come quello di un bottone
-                ' spento — ed è successo davvero, con «Esporta PDF» e «Esporta DOCX»
-                ' creduti morti mentre funzionavano (T9d, 2026-08-22). Il colore del bordo
-                ' è la differenza più piccola che si vede a colpo d'occhio, e lo avvicina
-                ' al livello sopra — che d'accento ha il bordo e in più il fondo azzurro e
-                ' il carattere grande: la parentela è voluta, l'esplorativo resta il fratello
-                ' quieto dell'azione principale.
-                '
-                ' Il bordo però non è bastato: alla **seconda** prova dal vivo dello stesso
-                ' giorno «Esporta PDF» e «Esporta DOCX» erano ancora letti come spenti. La
-                ' ragione è che l'occhio giudica un bottone dal **testo** prima che dal
-                ' contorno, e nero-su-azzurrino è esattamente ciò che nell'app significa
-                ' spento (grigio su grigio): il fondo tenue non basta a smentirlo. Adesso le
-                ' lettere sono d'accento, il contorno è doppio e il carattere è quello dei
-                ' bottoni che pesano — tre segnali invece di uno, e nessuno tolto allo
+                ' Il fondo tenue di questo livello, su una finestra già chiara, si legge
+                ' quasi come quello di un bottone spento — ed è successo davvero, con
+                ' «Esporta PDF» e «Esporta DOCX» creduti morti mentre funzionavano (T9d,
+                ' 2026-08-22). La ragione è che l'occhio giudica un bottone dal **testo**
+                ' prima che dal contorno, e nero-su-azzurrino è esattamente ciò che
+                ' nell'app significa spento (grigio su grigio): il fondo tenue non basta a
+                ' smentirlo. Le lettere d'accento e il carattere dei bottoni che pesano
+                ' sono i due segnali che glielo smentiscono, e nessuno dei due è tolto allo
                 ' spento, che resta grigio in tutto.
+                '
+                ' Il terzo segnale era il contorno doppio d'accento, e dal 2026-09-01 non
+                ' c'è più: FlatStyle.Standard il contorno se lo disegna da sé e
+                ' FlatAppearance non lo guarda. Ne restano due su tre.
                 bottone.ForeColor = Accento
-                bottone.FlatAppearance.BorderSize = 2
-                bottone.FlatAppearance.BorderColor = Accento
 
             Case LivelloBottone.AzionePrincipale
                 bottone.BackColor = FondoAzione
-                bottone.FlatAppearance.BorderColor = Accento
 
             Case LivelloBottone.Attenzione
                 bottone.BackColor = Avviso
-                bottone.FlatAppearance.BorderColor = Avviso
 
             Case LivelloBottone.Distruttivo
                 bottone.BackColor = Pericolo
                 bottone.ForeColor = SfondoContenuto
-                bottone.FlatAppearance.BorderColor = Pericolo
 
             Case Else ' Critico
                 ' Il fondo è il rosso grave e non quello del marchio: la saturazione
@@ -517,17 +557,8 @@ Public Module StileApp
                 ' del marchio resta dov'è di casa: i titoli.
                 bottone.BackColor = RossoCritico
                 bottone.ForeColor = SfondoContenuto
-                bottone.FlatAppearance.BorderColor = RossoCritico
 
         End Select
-
-        ' Come reagisce al mouse: senza queste due righe un bottone piatto col suo colore
-        ' resta identico sotto il puntatore e mentre lo si preme — un fondo saturo che non
-        ' si muove si legge come un'immagine, non come un comando. Si scuriscono, perché
-        ' qui dentro ci si accende scurendo (v. ScurimentoSopra). Vale la pena farlo solo
-        ' da acceso: su un bottone spento Windows non dipinge nemmeno il passaggio.
-        bottone.FlatAppearance.MouseOverBackColor = Scurito(bottone.BackColor, ScurimentoSopra)
-        bottone.FlatAppearance.MouseDownBackColor = Scurito(bottone.BackColor, ScurimentoPremuto)
 
     End Sub
 
@@ -546,12 +577,17 @@ Public Module StileApp
     ''' d'ingresso più la porta di casa. Prendono perciò i colori di quel menu — azzurro
     ''' le sei voci, verde il ritorno — così chi passa dal menu alla barra ritrova le
     ''' stesse cose, invece di trovarne sette bianche tutte uguali.</para>
-    ''' <para><b>Il pannello aperto si vede dalla cornice, non dal fondo.</b> Con il
-    ''' riposo azzurro il lilla di prima non si distinguerebbe più: adesso la casella
-    ''' aperta tiene il suo azzurro e prende cornice doppia e lettere del blu d'accento —
-    ''' due dei tre segnali del livello 2 (03.3), che qui dentro vogliono già dire «questo
-    ''' è vivo». Il terzo, il grassetto, non può più distinguerla: da quando la barra è
-    ''' tutta in grassetto ce l'hanno già tutte.</para>
+    ''' <para><b>Il pannello aperto si vede dal fondo pieno.</b> Fra il 2026-08-30 e il
+    ''' 2026-09-01 lo diceva la <b>cornice</b> — doppia e d'accento, con le lettere dello
+    ''' stesso blu — e la cornice era disegnata da <c>FlatAppearance</c>. Col passaggio a
+    ''' <see cref="FlatStyle.Standard"/> (su indicazione del tutor) quella cornice non
+    ''' esiste più: <c>Standard</c> il contorno se lo disegna da sé e non lo lascia
+    ''' scegliere. Restavano le sole lettere d'accento su fondo azzurro, che è la
+    ''' differenza più debole della barra; il segnale è passato perciò al <b>fondo</b>, che
+    ''' <c>Standard</c> rispetta: la casella aperta è l'unica <b>piena del blu d'accento,
+    ''' con le lettere bianche</b>. Vale per tutte e sette, verde compreso — quando si sta
+    ''' guardando il menu d'ingresso è la casella «🎮 Menu» a vestirsi così, e il verde
+    ''' torna appena si va altrove: dove si è pesa più del ruolo.</para>
     ''' <para><b>Lo spento si smorza.</b> Vale qui la ragione di
     ''' <see cref="VestiBottone"/>: un bottone piatto con un colore suo resta acceso
     ''' all'occhio anche da disabilitato, e mentre l'AI lavora la barra si spegne tutta
@@ -599,7 +635,7 @@ Public Module StileApp
     ''' <summary>Dà alla casella l'aspetto del suo ruolo, o quello spento se è disabilitata.</summary>
     Private Sub DipingiLaCasella(bottone As Button, ruolo As RuoloBarra, attiva As Boolean)
 
-        bottone.FlatStyle = FlatStyle.Flat
+        bottone.FlatStyle = FlatStyle.Standard
         bottone.UseVisualStyleBackColor = False
 
         ' Il carattere è quello dei bottoni che pesano, e vale per tutte: la fila in cima è
@@ -609,30 +645,28 @@ Public Module StileApp
         ' casella che cambia carattere cambia ingombro, e la fila si muoverebbe sotto gli
         ' occhi a ogni clic e a ogni chiamata all'AI.
         bottone.Font = FontBottoneForte
-        bottone.FlatAppearance.BorderSize = If(attiva, 2, 1)
 
         If Not bottone.Enabled Then
             bottone.BackColor = SfondoBase
             bottone.ForeColor = TestoSecondario
-            bottone.FlatAppearance.BorderColor = BordoLeggero
+            Return
+        End If
+
+        ' Dove si è, prima di che parte fa: la casella aperta è l'unica piena del blu
+        ' d'accento, e le lettere bianche sono le sole leggibili su quel blu.
+        If attiva Then
+            bottone.BackColor = Accento
+            bottone.ForeColor = SfondoContenuto
             Return
         End If
 
         If ruolo = RuoloBarra.RitornoAlMenu Then
             bottone.BackColor = Successo
             bottone.ForeColor = SfondoContenuto
-            bottone.FlatAppearance.BorderColor = BordoSuccesso
         Else
             bottone.BackColor = FondoAzione
-            bottone.ForeColor = If(attiva, Accento, TestoPrimario)
-            bottone.FlatAppearance.BorderColor = If(attiva, Accento, BordoForte)
+            bottone.ForeColor = TestoPrimario
         End If
-
-        ' E anche qui il fondo reagisce al mouse, per la ragione detta in Dipingi: la barra
-        ' è l'unica fila dell'applicazione che si attraversa col puntatore cercando dove
-        ' andare, e sette caselle colorate che non si muovono sono un disegno.
-        bottone.FlatAppearance.MouseOverBackColor = Scurito(bottone.BackColor, ScurimentoSopra)
-        bottone.FlatAppearance.MouseDownBackColor = Scurito(bottone.BackColor, ScurimentoPremuto)
 
     End Sub
 

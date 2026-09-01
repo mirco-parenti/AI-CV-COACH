@@ -474,15 +474,142 @@ Namespace Ui
 
         End Sub
 
+        ''' <summary>
+        ''' I comandi delle Impostazioni stanno in colonna, tutti della stessa larghezza.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Il difetto che il tutor ha fotografato il 2026-09-01: otto bottoni di otto
+        ''' larghezze diverse, ognuna cucita sulla propria scritta, e la colonna che ne
+        ''' veniva era sfrangiata. È un difetto che non rompe niente e che nessun collaudo
+        ''' di comportamento può vedere — la finestra funziona, semplicemente non sembra
+        ''' disegnata — e per questo lo deve dire il banco.</para>
+        ''' <para>Si guardano le due cose che fanno la colonna: la stessa larghezza e lo
+        ''' stesso margine sinistro. Non si guarda <i>quale</i> larghezza: quella è un terzo
+        ''' della finestra (cap. 03.2) e cambia col DPI.</para>
+        ''' </remarks>
         <TestMethod>
-        Public Sub LEliminazioneDiTuttoHaUnaFasciaTuttaSua()
+        Public Sub IComandiDelleImpostazioniStannoInUnaColonnaSola()
 
-            ' Cap. 11.5: il vuoto intorno è la prima difesa di un'azione critica, e in
-            ' fascia dei comandi quella regola vale già — riga tutta sua, staccata,
-            ' allineata dall'altra parte. Qui, fino al 2026-09-01, ce n'era solo metà: il
-            ' bottone rosso scuro stava nella stessa colonna del rosso di sopra, alla
-            ' stessa larghezza e a un dito di distanza, cioè proprio dove finisce un clic
-            ' scivolato. Adesso ha il vuoto sopra e sotto, e non condivide la colonna.
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        finestra.DisponiIn(4000)
+
+                        Dim comandi As Button() = ComandiDiSezione(finestra)
+
+                        Dim primo As Button = comandi.First()
+
+                        For Each comando As Button In comandi
+                            Assert.AreEqual(primo.Width, comando.Width,
+                                            $"«{comando.Text}» ha una larghezza sua")
+                            Assert.AreEqual(primo.Left, comando.Left,
+                                            $"«{comando.Text}» non sta nella colonna")
+                        Next
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        ''' <summary>E dentro quella larghezza ogni scritta ci sta per intero.</summary>
+        ''' <remarks>
+        ''' È la metà che rende sopportabile la colonna unica: un bottone non manda a capo e
+        ''' non mette i puntini, taglia. Prima della colonna il rischio non c'era per
+        ''' costruzione — ogni bottone era largo quanto il suo testo — e adesso che la
+        ''' misura viene da fuori qualcuno deve dire che ci sta.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniComandoDelleImpostazioniDiceIlProprioNomePerIntero()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        finestra.DisponiIn(4000)
+
+                        For Each comando As Button In ComandiDiSezione(finestra)
+                            Assert.IsLessThanOrEqualTo(
+                                comando.Width,
+                                TextRenderer.MeasureText(comando.Text, comando.Font).Width,
+                                $"«{comando.Text}» non ci sta nella colonna")
+                        Next
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        ''' <summary>
+        ''' Ogni comando sta all'altezza della sezione che lo spiega, non sotto il paragrafo.
+        ''' </summary>
+        ''' <remarks>
+        ''' È l'altra metà della forma nuova: i due terzi di sinistra tengono i testi, il
+        ''' terzo di destra i comandi, e il legame fra le due colonne è che il bottone si
+        ''' legge <b>accanto</b> a quel che dice a cosa serve. Si misura sui due che il
+        ''' difetto lo mostravano meglio: «Cambia la chiave», che stava sotto due righe di
+        ''' stato, e «Backup», che apriva la sezione dei dati.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniComandoStaAllAltezzaDellaSuaSezione()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        finestra.DisponiIn(4000)
+
+                        For Each coppia As String() In New String()() {
+                            New String() {"lblSezioneChiave", "btnCambiaChiave"},
+                            New String() {"lblCartellaDati", "btnApriCartellaDati"},
+                            New String() {"lblSezioneMotore", "btnApriModelli"},
+                            New String() {"lblSezioneConsumo", "btnApriChiamate"},
+                            New String() {"lblSezioneDati", "btnBackup"}}
+
+                            Dim titolo As Control =
+                                finestra.Controls.Find(coppia(0), searchAllChildren:=True).Single()
+                            ' La variabile non può chiamarsi «comando»: coprirebbe la
+                            ' funzione «Comando» qui sotto (trappola di casa, in VB le
+                            ' maiuscole non distinguono).
+                            Dim bottone As Button = Comando(finestra, coppia(1))
+
+                            Assert.AreEqual(titolo.Top, bottone.Top,
+                                            $"«{bottone.Text}» non è all'altezza di «{titolo.Text}»")
+                            Assert.IsGreaterThanOrEqualTo(titolo.Right, bottone.Left,
+                                                          "e sta nell'altra colonna, non sopra il testo")
+
+                        Next
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        ''' <summary>
+        ''' L'eliminazione di tutto ha la sua riga nella colonna, col vuoto sopra e sotto.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Cap. 11.5: il vuoto intorno è la prima difesa di un'azione critica. Fino
+        ''' al mattino del 2026-09-01 ce n'era solo metà — il vuoto sopra, mentre il bottone
+        ''' stava nella stessa colonna del rosso di sopra e a un dito di distanza — e la cura
+        ''' di quel giorno l'aveva spostato al <b>margine opposto</b>. In una fascia
+        ''' orizzontale larga quel salto si legge come una scelta; nella colonna stretta
+        ''' delle Impostazioni si leggeva come un avanzo, ed è quel che il tutor ha visto
+        ''' nella fotografia della sezione «I tuoi dati».</para>
+        ''' <para>La forma di adesso: <b>stessa larghezza, stessa colonna, riga sua</b>, e
+        ''' la difesa è tutta verticale — lo stacco doppio sopra e sotto. Quel che si
+        ''' sorveglia è il vuoto, che è la difesa, e non più il salto orizzontale, che era
+        ''' solo il modo di ottenerlo.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LEliminazioneDiTuttoHaUnaRigaTuttaSua()
+
             ConMotore(
                 Sub(contesto)
 
@@ -501,14 +628,25 @@ Namespace Ui
                         Assert.IsGreaterThanOrEqualTo(critico.Bottom + FasciaDeiComandi.StaccoDelCritico,
                                                       stato.Top, "e il vuoto sotto")
 
-                        Assert.IsGreaterThanOrEqualTo(distruttivo.Right, critico.Left,
-                                                      "e non sta nella colonna del bottone rosso di sopra")
+                        Assert.AreEqual(distruttivo.Left, critico.Left,
+                                        "e sta nella colonna come gli altri: la difesa è il vuoto, non il salto")
+                        Assert.AreEqual(distruttivo.Width, critico.Width, "con la larghezza di tutti")
 
                     End Using
 
                 End Sub)
 
         End Sub
+
+        ''' <summary>I comandi di sezione della finestra, per i collaudi della colonna.</summary>
+        Private Shared Function ComandiDiSezione(finestra As Control) As Button()
+
+            Return {"btnComeFunziona", "btnCambiaChiave", "btnApriCartellaDati",
+                    "btnGestisciDocumenti", "btnApriModelli", "btnApriChiamate",
+                    "btnBackup", "btnSvuotaNavigazione", "btnEliminaTutto"}.
+                Select(Function(nome) Comando(finestra, nome)).ToArray()
+
+        End Function
 
         ' ==================================================================
         ' Quanto è costato (2026-08-27)

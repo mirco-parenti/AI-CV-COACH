@@ -128,19 +128,57 @@ Public Class PannelloMenu
     ''' </remarks>
     Private Const VeloBianco As Integer = 140
 
-    ''' <summary>Quanta parte dell'altezza si prende la fascia del nome, in cima.</summary>
+    ''' <summary>Quanta parte dell'altezza può prendersi al massimo la fascia del nome.</summary>
     ''' <remarks>
     ''' Sul banner nome e sottotitolo occupavano i primi 356 px su 1348, poco oltre un
     ''' quarto: qui la fascia è un filo più alta perché deve contenere anche il
     ''' <see cref="FrazioneRespiro">respiro</see> che stacca il sottotitolo dal primo
     ''' bottone. Sotto di lei comincia la colonna.
+    ''' <para>Dal 2026-09-01, su indicazione del tutor, questa frazione non decide più da
+    ''' sola quanto è alta la fascia: è diventata il suo <b>tetto</b>. Chi la decide è la
+    ''' <see cref="LarghezzaDiRiferimento">larghezza di riferimento</see> — v.
+    ''' <see cref="FasciaDelTesto"/> — e la ragione sta in cosa si vedeva prima: legata
+    ''' alla sola altezza, su una finestra alta e stretta la fascia si prendeva un terzo
+    ''' di quell'altezza e il nome ci cresceva dentro fino a riempirla. Su una finestra
+    ''' non massimizzata — 1200×800, per dire — erano 256 px di scritta sopra sei bottoni
+    ''' alti 53: un manifesto sopra un menu.</para>
     ''' </remarks>
     Private Const FrazioneFasciaDelTesto As Double = 0.32
+
+    ''' <summary>Quanta parte della larghezza di riferimento si prende la fascia del nome.</summary>
+    ''' <remarks>
+    ''' È la misura che governa: la scritta scala con la <b>larghezza</b> del pannello, e
+    ''' la fascia le va dietro invece di essere un terzo dell'altezza qualunque cosa il
+    ''' nome faccia. Il numero viene da com'era il menu a schermo pieno, dove la fascia
+    ''' teneva il blocco delle due righe senza avanzo: un po' meno di un ottavo della
+    ''' larghezza.
+    ''' </remarks>
+    Private Const FrazioneFasciaSullaLarghezza As Double = 0.13
+
+    ''' <summary>Sotto questa larghezza di pannello la scritta non rimpicciolisce più.</summary>
+    ''' <remarks>
+    ''' Il minimo e il massimo che il tutor ha chiesto il 2026-09-01, «perché non degeneri
+    ''' né a francobollo né a manifesto». Il minimo oggi <b>non morde</b>: la finestra non
+    ''' scende sotto i 1150 px (v. <c>FormPrincipale</c>), e l'area centrale nemmeno. Sta
+    ''' qui perché il giorno che quel minimo cambiasse — o che qualcuno costruisse questo
+    ''' pannello per conto suo, come fa il banco — il nome non si riduca a un francobollo
+    ''' sopra sei bottoni a grandezza naturale.
+    ''' </remarks>
+    Private Const LarghezzaDiRiferimentoMinima As Integer = 950
+
+    ''' <summary>Oltre questa larghezza di pannello la scritta non cresce più.</summary>
+    ''' <remarks>
+    ''' Questo invece morde eccome, ed è il verso in cui il difetto si vedeva di più: su
+    ''' uno schermo panoramico il nome seguiva la larghezza senza fermarsi mai, e i sei
+    ''' bottoni no — quelli si fermano a <see cref="LarghezzaBottone"/>. Più era grande lo
+    ''' schermo, più la scritta sovrastava il menu che doveva soltanto presentare.
+    ''' </remarks>
+    Private Const LarghezzaDiRiferimentoMassima As Integer = 1500
 
     ''' <summary>Quanta parte della fascia resta vuota in fondo, per staccare il primo bottone.</summary>
     Private Const FrazioneRespiro As Double = 0.18
 
-    ''' <summary>Quanta parte della larghezza si prende il nome.</summary>
+    ''' <summary>Quanta parte della larghezza di riferimento si prende il nome.</summary>
     ''' <remarks>
     ''' Il corpo del carattere non è un numero fisso: si ricava da quanto deve venire
     ''' <b>largo</b> il testo, così il nome cresce con la finestra invece di restare un
@@ -148,6 +186,10 @@ Public Class PannelloMenu
     ''' misurate sul master: il nome ne copriva il 63% e il sottotitolo il 90%, ma il
     ''' banner è quasi quadrato e qui l'area è panoramica — riportarle tali e quali
     ''' avrebbe dato un nome alto quanto mezza fascia.
+    ''' <para>Dal 2026-09-01 non si applicano più alla larghezza del pannello ma alla
+    ''' <see cref="LarghezzaDiRiferimento">larghezza di riferimento</see>, che è la stessa
+    ''' fino a un certo punto e poi si ferma. Le due righe restano fra loro in proporzione,
+    ''' perché il fermo è uno solo e vale per tutte e due.</para>
     ''' </remarks>
     Private Const FrazioneLarghezzaTitolo As Double = 0.4
 
@@ -291,26 +333,55 @@ Public Class PannelloMenu
     ''' Mette i sei bottoni in colonna al centro, restringendoli se la finestra non basta.
     ''' </summary>
     ''' <remarks>
+    ''' <para><b>La colonna non entra mai nella fascia del nome</b> *(2026-09-01, secondo
+    ''' giro, su indicazione del tutor)*. Prima ci entrava, e a finestra piccola si vedeva:
+    ''' su 1136×593 «TrovaLavoro» spuntava da dietro le prime due voci e il sottotitolo
+    ''' tagliava in mezzo ai bottoni. La colpa non era del centraggio ma della <b>guardia</b>
+    ''' che lo tratteneva: era <c>MargineRiquadro</c>, cioè il bordo del pannello, quando
+    ''' invece il pavimento della colonna è la <see cref="ZonaSottoIlNome">zona sotto il
+    ''' nome</see>. Quando lo spazio si stringeva, il <see cref="RialzoColonna">rialzo</see>
+    ''' spingeva la colonna verso l'alto e quella guardia la lasciava salire fino a
+    ''' quattordici pixel dal bordo — dentro la fascia. Adesso la guardia è
+    ''' <c>zona.Top</c>: l'ordine verticale — nome, sottotitolo, colonna — è garantito da un
+    ''' confronto, non da un centraggio che di solito viene bene.</para>
+    ''' <para>Ne segue che il rialzo è una correzione che <b>cede il passo</b>: dove lo
+    ''' spazio non basta la colonna si appoggia alla fascia e il rialzo non si vede. È
+    ''' giusto così — è una gentilezza dell'occhio, e nessuna gentilezza vale una
+    ''' sovrapposizione.</para>
     ''' <para>L'altezza si calcola prima della larghezza, perché è lei a mancare per prima:
-    ''' sei bottoni alti 58 con 16 di stacco vogliono 428 px, e l'area centrale su una
+    ''' sei bottoni alti 53 con 16 di stacco vogliono 398 px, e la zona sotto il nome su una
     ''' finestra piccola ne ha meno. Quando lo spazio non basta, bottoni e stacchi calano
     ''' insieme fino ai loro minimi — sotto i quali la colonna esce dal pannello ed è
-    ''' meglio che esca in basso, dove non c'è niente, che sopra il logo.</para>
-    ''' <para>La colonna non è centrata sull'area ma sulla
-    ''' <see cref="ZonaSottoIlNome">zona sotto il nome</see>: centrandola sull'area, il
-    ''' primo bottone finiva davanti al nome del marchio. E resta comunque <b>al netto del
-    ''' logo</b> flottante, che sull'angolo in basso a sinistra si prende il suo
-    ''' spazio. Dentro la zona sta poi <see cref="RialzoColonna">un bottone e tre quarti
-    ''' più in alto</see> del centro, che è una correzione dell'occhio e non del
-    ''' conto.</para>
+    ''' meglio che esca in basso, dove non c'è niente, che sopra il nome.</para>
+    ''' <para>Lo spazio si conta <b>dalla fascia al pavimento</b>, e il pavimento è il bordo
+    ''' di sotto oppure la cima del logo flottante, se la colonna gli passa sopra — il logo
+    ''' sta nell'angolo in basso a sinistra, e a schermo largo la colonna gli passa lontano.
+    ''' Tenerne conto sempre, com'era la prima versione, spingeva i bottoni in cima.</para>
     ''' </remarks>
     Private Sub DisponiIBottoni()
 
         Dim bottoni As BottoneMenu() = IBottoni()
         If bottoni.Length = 0 OrElse Me.ClientSize.Width <= 0 Then Return
 
-        ' Lo spazio verticale utile: tolto quel che il logo sfonda nell'area centrale.
-        Dim altezzaUtile As Integer = Me.ClientSize.Height - _ingombroLogo.Height - StileApp.MargineRiquadro * 2
+        Dim zona As Rectangle = ZonaSottoIlNome(Me.ClientSize)
+        If zona.Height <= 0 Then Return
+
+        ' La larghezza per prima, contro l'ordine di prima: serve a sapere se la colonna
+        ' passa sopra l'angolo del logo, e da lì dipende quanto spazio ha in altezza.
+        Dim larghezza As Integer = Math.Min(LarghezzaBottone, Me.ClientSize.Width - MargineLaterale * 2)
+        larghezza = Math.Max(LarghezzaMinimaBottone, larghezza)
+
+        Dim sinistra As Integer = zona.Left + (zona.Width - larghezza) \ 2
+
+        ' Il pavimento: il bordo di sotto, o la cima del logo se la colonna gli capita sopra.
+        Dim pavimento As Integer = Me.ClientSize.Height - StileApp.MargineRiquadro
+        If sinistra < _ingombroLogo.Width Then
+            pavimento = Math.Min(pavimento, Me.ClientSize.Height - _ingombroLogo.Height)
+        End If
+
+        ' Lo spazio verticale utile è quello **fra la fascia e il pavimento**, e non l'area
+        ' intera: è la differenza da cui dipende che la colonna non salga sul nome.
+        Dim altezzaUtile As Integer = pavimento - zona.Top
         If altezzaUtile < AltezzaMinimaBottone Then altezzaUtile = AltezzaMinimaBottone
 
         Dim altezza As Integer = AltezzaBottone
@@ -324,30 +395,16 @@ Public Class PannelloMenu
             distanza = Math.Max(StileApp.InterlineaMinima, CInt(Math.Floor(distanza * fattore)))
         End If
 
-        Dim larghezza As Integer = Math.Min(LarghezzaBottone, Me.ClientSize.Width - MargineLaterale * 2)
-        larghezza = Math.Max(LarghezzaMinimaBottone, larghezza)
-
         Dim totale As Integer = altezza * bottoni.Length + distanza * (bottoni.Length - 1)
-        Dim zona As Rectangle = ZonaSottoIlNome(Me.ClientSize)
-
-        Dim sinistra As Integer = zona.Left + (zona.Width - larghezza) \ 2
 
         ' Centrata nella zona, e poi alzata: di quanto lo dice RialzoColonna.
         Dim cima As Integer = zona.Top + (zona.Height - totale) \ 2 -
                               CInt(Math.Round(altezza * RialzoColonna))
 
-        ' Le due guardie: non sopra il bordo, e non addosso al logo flottante — ma il logo
-        ' sta nell'angolo in <b>basso a sinistra</b>, e a schermo largo la colonna gli passa
-        ' lontano. Tenerne conto sempre, com'era la prima versione, spingeva i bottoni in
-        ' cima e il primo finiva sopra il sottotitolo del marchio: la guardia sbagliata
-        ' rovinava proprio la cosa che il centraggio era andato a salvare.
-        Dim ultimaCimaUtile As Integer = Me.ClientSize.Height - StileApp.MargineRiquadro - totale
-        If sinistra < _ingombroLogo.Width Then
-            ultimaCimaUtile = Math.Min(ultimaCimaUtile,
-                                       Me.ClientSize.Height - _ingombroLogo.Height - totale)
-        End If
-
-        cima = Math.Max(StileApp.MargineRiquadro, Math.Min(cima, ultimaCimaUtile))
+        ' Le due guardie. Il tetto è il pavimento meno l'ingombro della colonna, così
+        ' l'ultima voce non finisce tagliata dal bordo; il pavimento vero e proprio è
+        ' **zona.Top**, e quella è la riga che tiene separati il nome e i bottoni.
+        cima = Math.Max(zona.Top, Math.Min(cima, pavimento - totale))
 
         For Each bottone As BottoneMenu In bottoni
             bottone.SetBounds(sinistra, cima, larghezza, altezza)
@@ -397,19 +454,41 @@ Public Class PannelloMenu
     End Sub
 
     ''' <summary>
+    ''' La larghezza su cui si dimensiona la scritta: quella del pannello, ferma però al
+    ''' minimo e al massimo che il progetto le concede.
+    ''' </summary>
+    ''' <remarks>
+    ''' Pubblica e <c>Shared</c> come le altre misure di questa geometria: si chiede senza
+    ''' costruire il pannello e senza uno schermo. Da lei discendono sia il corpo delle due
+    ''' righe sia l'altezza della <see cref="FasciaDelTesto">fascia</see>, che è quel che
+    ''' tiene le due cose insieme — una scritta che smette di crescere dentro una fascia
+    ''' che continua lascerebbe un vuoto sopra i bottoni al posto di un difetto.
+    ''' </remarks>
+    Public Shared Function LarghezzaDiRiferimento(area As Size) As Integer
+
+        Return Math.Clamp(area.Width, LarghezzaDiRiferimentoMinima, LarghezzaDiRiferimentoMassima)
+
+    End Function
+
+    ''' <summary>
     ''' Quanto è alta la fascia in cima in cui stanno nome e sottotitolo.
     ''' </summary>
     ''' <remarks>
-    ''' È una frazione dell'altezza e non la misura del testo, e la differenza conta: la
+    ''' <para>È una frazione e non la misura del testo, e la differenza conta: la
     ''' geometria dei bottoni si decide a ogni ridimensionamento, dove un
     ''' <c>Graphics</c> non c'è — e su un controllo mai mostrato non si può nemmeno
-    ''' chiedere. Il testo si adatta poi alla fascia, non viceversa.
+    ''' chiedere. Il testo si adatta poi alla fascia, non viceversa.</para>
+    ''' <para>Frazione <b>della larghezza di riferimento</b>, dal 2026-09-01, con la
+    ''' vecchia frazione dell'altezza rimasta a fare da tetto: la fascia segue la scritta,
+    ''' e la scritta segue la larghezza. Delle due misure vince la più piccola, così su una
+    ''' finestra bassa la fascia non si prende comunque più di un terzo dell'altezza.</para>
     ''' </remarks>
     Public Shared Function FasciaDelTesto(area As Size) As Integer
 
-        If area.Height <= 0 Then Return 0
+        If area.Height <= 0 OrElse area.Width <= 0 Then Return 0
 
-        Return CInt(Math.Floor(area.Height * FrazioneFasciaDelTesto))
+        Return CInt(Math.Floor(Math.Min(area.Height * FrazioneFasciaDelTesto,
+                                        LarghezzaDiRiferimento(area) * FrazioneFasciaSullaLarghezza)))
 
     End Function
 
@@ -521,13 +600,17 @@ Public Class PannelloMenu
         Dim stileTitolo As FontStyle = FontStyle.Regular
         Dim stileSotto As FontStyle = FontStyle.Regular
 
+        ' Non la larghezza del pannello ma quella di riferimento: è lì che la scritta
+        ' smette di crescere e di rimpicciolire (v. LarghezzaDiRiferimento).
+        Dim riferimento As Integer = LarghezzaDiRiferimento(area)
+
         Using famigliaTitolo As FontFamily = FamigliaPerIlNome(NomeFontTitolo, stileTitolo),
               famigliaSotto As FontFamily = FamigliaPerIlNome(NomeFontSottotitolo, stileSotto)
 
             Dim rigaTitolo As RigaDelNome = RigaPerLarghezza(
-                g, Titolo, famigliaTitolo, stileTitolo, CSng(area.Width * FrazioneLarghezzaTitolo))
+                g, Titolo, famigliaTitolo, stileTitolo, CSng(riferimento * FrazioneLarghezzaTitolo))
             Dim rigaSotto As RigaDelNome = RigaPerLarghezza(
-                g, Sottotitolo, famigliaSotto, stileSotto, CSng(area.Width * FrazioneLarghezzaSottotitolo))
+                g, Sottotitolo, famigliaSotto, stileSotto, CSng(riferimento * FrazioneLarghezzaSottotitolo))
 
             Dim contornoTitolo As Single = rigaTitolo.Corpo * FrazioneContorno
             Dim contornoSotto As Single = rigaSotto.Corpo * FrazioneContorno

@@ -117,16 +117,16 @@ Partial Class FinestraChiaveApi
         '
         Me.btnProva.Location = New System.Drawing.Point(150, 324)
         Me.btnProva.Name = "btnProva"
-        Me.btnProva.Size = New System.Drawing.Size(160, 32)
+        Me.btnProva.Size = StileApp.BottoneLargo
         Me.btnProva.TabIndex = 8
         Me.btnProva.Text = "Prova la chiave"
         '
         'btnSalva
         '
         Me.btnSalva.Enabled = False
-        Me.btnSalva.Location = New System.Drawing.Point(320, 300)
+        Me.btnSalva.Location = New System.Drawing.Point(290, 300)
         Me.btnSalva.Name = "btnSalva"
-        Me.btnSalva.Size = New System.Drawing.Size(160, 32)
+        Me.btnSalva.Size = StileApp.BottoneLargo
         Me.btnSalva.TabIndex = 9
         Me.btnSalva.Text = "Salva la chiave"
         '
@@ -134,7 +134,7 @@ Partial Class FinestraChiaveApi
         '
         Me.btnNonAdesso.Location = New System.Drawing.Point(492, 300)
         Me.btnNonAdesso.Name = "btnNonAdesso"
-        Me.btnNonAdesso.Size = New System.Drawing.Size(110, 32)
+        Me.btnNonAdesso.Size = StileApp.BottoneStandard
         Me.btnNonAdesso.TabIndex = 10
         Me.btnNonAdesso.Text = "Non adesso"
         '

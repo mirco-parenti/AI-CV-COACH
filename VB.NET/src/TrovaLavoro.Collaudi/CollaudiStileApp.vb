@@ -78,76 +78,159 @@ Namespace Ui
         End Sub
 
         ''' <summary>
-        ''' Un bottone si scurisce sotto il puntatore, e di più mentre lo si preme.
+        ''' Ogni bottone dell'applicazione porta una delle misure della scala, e nessuna
+        ''' misura sua.
         ''' </summary>
         ''' <remarks>
-        ''' Fino al 2026-09-01 nessun livello dichiarava <c>MouseOverBackColor</c>, e un
-        ''' bottone piatto con un colore suo resta <b>identico</b> sotto il puntatore: il
-        ''' colore diceva la conseguenza, ma niente diceva «questo si preme». È il difetto
-        ''' che non rompe niente — l'applicazione funziona, semplicemente non risponde — e
-        ''' per questo lo deve dire il banco. Si guarda la <b>luce</b> e non il colore
-        ''' esatto: quale sia il fondo di ciascun livello lo dice la tabella, quel che qui si
-        ''' sorveglia è che i tre momenti siano tre e nell'ordine giusto.
+        ''' <para>È la guardia della regola dettata dal tutor il 2026-09-01: un bottone non
+        ''' prende più la larghezza che la sua scritta chiede, la prende dalla scala di
+        ''' <c>StileApp</c>. Prima di quel giorno le larghezze scritte a mano nei designer
+        ''' erano <b>ventiquattro</b>, e ognuna sembrava giusta perché era stata misurata
+        ''' sul proprio testo: è un difetto che non si vede da nessun collaudo di
+        ''' comportamento e che ricompare al primo bottone aggiunto di fretta.</para>
+        ''' <para>Restano fuori i sei bottoni del menu d'ingresso (<c>BottoneMenu</c>), che
+        ''' non hanno una misura di disegno affatto: la loro la calcola il pannello sulla
+        ''' finestra di adesso (cap. 03.6).</para>
+        ''' <para>Le misure si confrontano <b>esatte</b>, com'è già altrove nel banco: la
+        ''' macchina dei collaudi gira a 96 DPI e i numeri del designer non vengono scalati.
+        ''' </para>
         ''' </remarks>
         <TestMethod>
-        Public Sub OgniBottoneSiScurisceSottoIlPuntatore()
+        Public Sub OgniBottoneHaUnaMisuraDellaScala()
+
+            Dim scala As Size() = {StileApp.BottoneIcona, StileApp.BottoneStandard,
+                                   StileApp.BottoneMedio, StileApp.BottoneLargo,
+                                   StileApp.BottoneMoltoLargo, StileApp.BottoneMassimo,
+                                   StileApp.BottoneBarraSuperiore, StileApp.BottoneBarraSuperioreLargo,
+                                   StileApp.BottoneBarraSuperioreIcona}
+
+            Using form As New FormPrincipale()
+
+                Dim bottoni As Button() = TuttiIBottoni(form).
+                    Where(Function(b) Not (TypeOf b Is BottoneMenu)).ToArray()
+
+                Assert.IsGreaterThan(40, bottoni.Length, "i bottoni della finestra e dei suoi pannelli")
+
+                For Each bottone As Button In bottoni
+                    Assert.Contains(bottone.Size, scala,
+                                    $"«{bottone.Name}» porta una misura sua ({bottone.Width}×{bottone.Height})")
+                Next
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' E dentro quella misura la scritta ci sta per intero.
+        ''' </summary>
+        ''' <remarks>
+        ''' È la metà che rende sopportabile la scala: un `Button` non manda a capo e non
+        ''' mette i puntini, <b>taglia</b>, e l'unico segno è mezza parola mancante a video.
+        ''' Finché ogni bottone si misurava sul proprio testo il rischio non c'era per
+        ''' costruzione; adesso che la misura viene da fuori, qualcuno deve dire che il
+        ''' gradino scelto è abbastanza alto — e lo deve dire il banco, perché a occhio un
+        ''' bottone tagliato in un pannello che non si apre spesso non lo vede nessuno.
+        ''' <para>Restano fuori i sei bottoni del menu d'ingresso: quelli il testo lo
+        ''' tagliano con i puntini e hanno il loro collaudo (<c>CollaudiMenu</c>).</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniBottoneDiceIlProprioNomePerIntero()
+
+            Using form As New FormPrincipale()
+
+                For Each bottone As Button In TuttiIBottoni(form)
+
+                    If TypeOf bottone Is BottoneMenu OrElse String.IsNullOrEmpty(bottone.Text) Then Continue For
+
+                    Assert.IsLessThanOrEqualTo(
+                        bottone.Width,
+                        TextRenderer.MeasureText(bottone.Text, bottone.Font).Width,
+                        $"«{bottone.Text}» non ci sta nel suo bottone ({bottone.Name})")
+
+                Next
+
+            End Using
+
+        End Sub
+
+        ''' <summary>Tutti i bottoni dentro un controllo, a qualunque profondità.</summary>
+        Private Shared Iterator Function TuttiIBottoni(radice As Control) As IEnumerable(Of Button)
+
+            For Each figlio As Control In radice.Controls
+
+                Dim bottone As Button = TryCast(figlio, Button)
+                If bottone IsNot Nothing Then Yield bottone
+
+                For Each dentro As Button In TuttiIBottoni(figlio)
+                    Yield dentro
+                Next
+
+            Next
+
+        End Function
+
+        ''' <summary>
+        ''' Nessun bottone vestito da qui è più <c>Flat</c>: sono tutti bottoni di Windows.
+        ''' </summary>
+        ''' <remarks>
+        ''' Dal 2026-09-01, su indicazione del tutor. Non è un dettaglio di stile: da
+        ''' <c>Standard</c> tutto ciò che passa da <c>FlatAppearance</c> — i contorni
+        ''' disegnati, il fondo che si scuriva sotto il puntatore — smette di avere
+        ''' effetto <b>senza dare errore</b>. Rimettere una di quelle righe non romperebbe
+        ''' niente e non si vedrebbe: si vedrebbe solo il segnale che non arriva più. Per
+        ''' questo il banco guarda lo stile, che è la causa, e non i sintomi.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub NessunBottoneVestitoDaQuiRestaPiatto()
 
             For Each livello As LivelloBottone In [Enum].GetValues(GetType(LivelloBottone))
                 Using bottone As New Button()
-
                     StileApp.VestiBottone(bottone, livello)
-
-                    Dim riposo As Single = bottone.BackColor.GetBrightness()
-                    Dim sopra As Single = bottone.FlatAppearance.MouseOverBackColor.GetBrightness()
-                    Dim premuto As Single = bottone.FlatAppearance.MouseDownBackColor.GetBrightness()
-
-                    Assert.IsLessThan(riposo, sopra, $"il livello {livello} si scurisce al passaggio")
-                    Assert.IsLessThan(sopra, premuto, $"e il livello {livello} di più da premuto")
-
+                    Assert.AreEqual(FlatStyle.Standard, bottone.FlatStyle,
+                                    $"il livello {livello} è un bottone di Windows")
                 End Using
             Next
-
-        End Sub
-
-        ''' <summary>E lo fanno anche le caselle della barra, che sono la fila che si attraversa.</summary>
-        <TestMethod>
-        Public Sub AncheLeCaselleDellaBarraSiScurisconoSottoIlPuntatore()
 
             For Each ruolo As RuoloBarra In [Enum].GetValues(GetType(RuoloBarra))
-                Using casella As New Button()
-
-                    StileApp.VestiBottoneBarra(casella, ruolo, attiva:=False)
-
-                    Dim riposo As Single = casella.BackColor.GetBrightness()
-                    Dim sopra As Single = casella.FlatAppearance.MouseOverBackColor.GetBrightness()
-                    Dim premuto As Single = casella.FlatAppearance.MouseDownBackColor.GetBrightness()
-
-                    Assert.IsLessThan(riposo, sopra, $"la casella {ruolo} si scurisce al passaggio")
-                    Assert.IsLessThan(sopra, premuto, $"e la casella {ruolo} di più da premuta")
-
-                End Using
+                For Each attiva As Boolean In {False, True}
+                    Using casella As New Button()
+                        StileApp.VestiBottoneBarra(casella, ruolo, attiva)
+                        Assert.AreEqual(FlatStyle.Standard, casella.FlatStyle,
+                                        $"la casella {ruolo} (aperta: {attiva}) pure")
+                    End Using
+                Next
             Next
 
         End Sub
 
+        ''' <summary>La casella aperta si distingue dal fondo, che è l'unico mezzo rimasto.</summary>
+        ''' <remarks>
+        ''' Fino al 2026-09-01 il fondo diceva il <b>ruolo</b> e a dire quale pannello
+        ''' fosse aperto c'era la cornice, disegnata da <c>FlatAppearance</c>. Con
+        ''' <c>FlatStyle.Standard</c> quella cornice non esiste più e restavano le sole
+        ''' lettere d'accento su fondo azzurro: la differenza più debole della barra, e
+        ''' l'unica cosa che avrebbe detto «sei qui». Adesso lo dice il fondo — blu pieno,
+        ''' lettere bianche — e vale per tutte e sette, verde compreso.
+        ''' </remarks>
         <TestMethod>
-        Public Sub LaCasellaApertaSiDistingueSenzaCambiareFondo()
-            ' Sulla barra il fondo dice il ruolo (azzurro le destinazioni, verde il
-            ' ritorno) e non può dire anche quale pannello è aperto: a dirlo restano la
-            ' cornice, le lettere e il carattere — tre segnali insieme, come al livello 2.
-            Using riposo As New Button(), aperta As New Button()
+        Public Sub LaCasellaApertaSiDistinguePerIlFondo()
 
-                StileApp.VestiBottoneBarra(riposo, RuoloBarra.Destinazione, attiva:=False)
-                StileApp.VestiBottoneBarra(aperta, RuoloBarra.Destinazione, attiva:=True)
+            For Each ruolo As RuoloBarra In [Enum].GetValues(GetType(RuoloBarra))
+                Using riposo As New Button(), aperta As New Button()
 
-                Assert.AreEqual(riposo.BackColor, aperta.BackColor, "il fondo è lo stesso")
-                Assert.AreNotEqual(riposo.FlatAppearance.BorderColor, aperta.FlatAppearance.BorderColor,
-                                   "la cornice cambia colore")
-                Assert.AreNotEqual(riposo.FlatAppearance.BorderSize, aperta.FlatAppearance.BorderSize,
-                                   "e spessore")
-                Assert.AreNotEqual(riposo.ForeColor, aperta.ForeColor, "le lettere cambiano colore")
+                    StileApp.VestiBottoneBarra(riposo, ruolo, attiva:=False)
+                    StileApp.VestiBottoneBarra(aperta, ruolo, attiva:=True)
 
-            End Using
+                    Assert.AreNotEqual(riposo.BackColor, aperta.BackColor,
+                                       $"la casella {ruolo} aperta cambia fondo")
+                    Assert.AreEqual(StileApp.Accento, aperta.BackColor,
+                                    $"e il fondo è il blu d'accento, per la {ruolo} come per le altre")
+                    Assert.AreEqual(StileApp.SfondoContenuto, aperta.ForeColor,
+                                    "con le lettere bianche, le sole leggibili su quel blu")
+
+                End Using
+            Next
+
         End Sub
 
         <TestMethod>
@@ -156,7 +239,7 @@ Namespace Ui
             ' colorate che restano colorate direbbero che si può ancora andare via.
             Using casella As New Button()
 
-                StileApp.VestiBottoneBarra(casella, RuoloBarra.RitornoAlMenu, attiva:=True)
+                StileApp.VestiBottoneBarra(casella, RuoloBarra.RitornoAlMenu, attiva:=False)
 
                 casella.Enabled = False
 
@@ -166,7 +249,28 @@ Namespace Ui
                 casella.Enabled = True
 
                 Assert.AreEqual(StileApp.Successo, casella.BackColor, "riaccesa: torna il verde del ritorno")
-                Assert.AreEqual(2, casella.FlatAppearance.BorderSize, "e la cornice doppia di quella aperta")
+
+            End Using
+        End Sub
+
+        ''' <summary>E una casella aperta che si spegne si risveglia ancora aperta.</summary>
+        ''' <remarks>
+        ''' È la metà che il collaudo qui sopra non guarda: lo stato «aperta» viaggia nel
+        ''' <c>Tag</c> insieme al ruolo, e da quando a dirlo è il <b>fondo</b> — lo stesso
+        ''' posto in cui lo spento scrive il suo grigio — perderlo vorrebbe dire che il
+        ''' pannello aperto smette di sembrarlo ogni volta che l'AI lavora.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub UnaCasellaApertaSiRisvegliaAncoraAperta()
+
+            Using casella As New Button()
+
+                StileApp.VestiBottoneBarra(casella, RuoloBarra.Destinazione, attiva:=True)
+
+                casella.Enabled = False
+                casella.Enabled = True
+
+                Assert.AreEqual(StileApp.Accento, casella.BackColor, "riaccesa: è ancora quella aperta")
 
             End Using
         End Sub
