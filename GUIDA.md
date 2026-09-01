@@ -136,7 +136,9 @@ in una cartella tua, restano dove sono.
 
 Il principio è che tu resti padrone dei tuoi dati **anche senza questo programma**: se un
 giorno lo cancelli, i tuoi CV e le tue lettere restano lì, in DOCX e PDF, apribili da
-chiunque.
+chiunque. Il rovescio è che quei file non sono protetti da niente — nessuna password,
+nessuna cifratura, la sola chiave API a parte: restano sul tuo computer, e chi si siede a
+quel computer può aprirli. Se lo dividi con qualcuno, tienine conto.
 
 Se preferisci tenere i dati altrove — per esempio su un altro disco, o in una cartella di
 prova — puoi avviare il programma così:
