@@ -54,6 +54,32 @@ informativa modale del primo avvio** (nessuna finestra principale ancora)
 `controlli`/`clic` rispondono «non ha una finestra aperta» mentre UIA la vede — aggirata
 con lo script PowerShell di ripiego; da scrivere nel README dello strumento.
 
+## Fix finali e messa in sicurezza (2026-09-01, sera — approvazione di Mirco)
+
+Due fix dettati dal tutor e la messa in sicurezza (commit `3690fbb` + servizio
+`fa6513d`, banco **1394/0**, **push su origin/feature/finalizzazione** autorizzato:
+«Tutto approvato, Mirco approva»):
+
+1. **Scala della scritta del menu dopo resize→massimizza**: il meccanismo sospettato
+   (memoria della misura) non esiste — misurato su geometria e inchiostro dipinto —
+   ma nello stesso percorso c'era un difetto vero: i fermi del clamp in unità di
+   progetto confrontati coi pixel dello schermo; a 150% la scritta smetteva del tutto
+   di seguire la finestra. Curato con DPI passato alle funzioni pure (il banco le
+   interroga a 144 punti); a 96 DPI non cambia un pixel.
+2. **Stemma senza clic**: eliminato il tree (handler, manina, tooltip);
+   «Informazioni su…» vive nelle Impostazioni sotto «Come funziona…», con diagnostica
+   e modelli traslocati e il punto unico `InformazioniSuTrovaLavoro()`;
+   `EtichettaDelPool` sale in `ContestoApp` (tre lettori, una frase);
+   `FinestraInformazioni.Mostra` rimossa (era la strada senza foglietto).
+   Verifiche pre-push (chieste dalla sessione sicurezza, fatte subito dopo il push):
+   nessuna attribuzione ad assistenti nei messaggi della giornata, nessuna chiave nei
+   diff. Fuori perimetro annotati: (a) GUIDA.md nomina «Informazioni» tre volte senza
+   dire dov'è — ora che la porta è una sola andrebbe scritto (voce per la revisione);
+   (b) la geometria del menu P0 (420×53, distanze, corpo testo) non scala col DPI —
+   specie delle «~83 somme» di `in_sospeso.md`. Trappola strumento vista in corsa: il
+   `ridimensiona` ha preso una finestra sbagliata (160×28, probabile tooltip) — non
+   investigata, sessione dal vivo del tutor in corso.
+
 ## Rilettura del piano voce per voce (spirito della regola 16, 2026-09-01)
 
 Riletto il «Piano dei fix» di `revisione-finalizzazione.md` impegno per impegno:
