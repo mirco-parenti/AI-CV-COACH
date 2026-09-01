@@ -474,6 +474,42 @@ Namespace Ui
 
         End Sub
 
+        <TestMethod>
+        Public Sub LEliminazioneDiTuttoHaUnaFasciaTuttaSua()
+
+            ' Cap. 11.5: il vuoto intorno è la prima difesa di un'azione critica, e in
+            ' fascia dei comandi quella regola vale già — riga tutta sua, staccata,
+            ' allineata dall'altra parte. Qui, fino al 2026-09-01, ce n'era solo metà: il
+            ' bottone rosso scuro stava nella stessa colonna del rosso di sopra, alla
+            ' stessa larghezza e a un dito di distanza, cioè proprio dove finisce un clic
+            ' scivolato. Adesso ha il vuoto sopra e sotto, e non condivide la colonna.
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        finestra.DisponiIn(4000)
+
+                        Dim critico As Button = Comando(finestra, "btnEliminaTutto")
+                        Dim distruttivo As Button = Comando(finestra, "btnSvuotaNavigazione")
+                        Dim stato As Control = finestra.Controls.Find("lblStato", searchAllChildren:=True).Single()
+
+                        Assert.AreEqual(LivelloBottone.Critico, critico.Tag, "è il livello 6")
+
+                        Assert.IsGreaterThanOrEqualTo(distruttivo.Bottom + FasciaDeiComandi.StaccoDelCritico,
+                                                      critico.Top, "il vuoto sopra")
+                        Assert.IsGreaterThanOrEqualTo(critico.Bottom + FasciaDeiComandi.StaccoDelCritico,
+                                                      stato.Top, "e il vuoto sotto")
+
+                        Assert.IsGreaterThanOrEqualTo(distruttivo.Right, critico.Left,
+                                                      "e non sta nella colonna del bottone rosso di sopra")
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
         ' ==================================================================
         ' Quanto è costato (2026-08-27)
         ' ==================================================================

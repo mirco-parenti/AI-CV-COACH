@@ -407,14 +407,11 @@ Public Class PannelloRicerca
         Dim salvata As RicercaSalvata = SalvataScelta()
         If salvata Is Nothing Then Return
 
-        ' Cancellare è di livello 5: si chiede prima (cap. 03.3, cap. 12.7).
-        Dim risposta As DialogResult = MessageBox.Show(
-            $"Dimentico la ricerca «{salvata.Nome}»?" & vbLf &
-            "Le ricerche salvate si possono rifare in qualunque momento.",
-            "Ricerca", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-            MessageBoxDefaultButton.Button2)
-
-        If risposta <> DialogResult.Yes Then Return
+        ' Cancellare è di livello 5: si chiede prima (cap. 03.3, cap. 12.7), e lo si chiede
+        ' con la finestra nata per quel livello — dove il bottone che esegue porta il verbo
+        ' dell'azione invece di un «Sì» che risponde soltanto alla domanda.
+        If Not FinestraConferma.Chiedi(Me, "Dimentica la ricerca",
+                                       SpiegazioneDelDimenticare(salvata.Nome), "Confermo") Then Return
 
         _ricerche.Dimentica(salvata.Nome)
 
@@ -425,6 +422,22 @@ Public Class PannelloRicerca
         Racconta($"Ricerca dimenticata: «{salvata.Nome}».")
 
     End Sub
+
+    ''' <summary>
+    ''' Il testo della conferma: quale ricerca sparisce, e quanto costa riaverla.
+    ''' </summary>
+    ''' <remarks>
+    ''' È pubblica perché la legge il banco, come <c>PannelloHome.SpiegazioneDellEliminazione</c>:
+    ''' premere il bottone aprirebbe una finestra modale, e di quella un collaudo non può
+    ''' aspettare la chiusura.
+    ''' </remarks>
+    Public Shared Function SpiegazioneDelDimenticare(nome As String) As String
+
+        Return $"«{nome}»" & vbLf & vbLf &
+               "Sparisce dalle ricerche salvate. Non tocco né gli annunci né le candidature: " &
+               "una ricerca si rifà in qualunque momento, scrivendo di nuovo cosa e dove. Confermi?"
+
+    End Function
 
     ''' <summary>
     ''' Il nome che si propone per una ricerca nuova: portale, cosa e dove. È prevedibile
@@ -1042,10 +1055,18 @@ Public Class PannelloRicerca
 
         StileApp.VestiBottone(btnCerca, LivelloBottone.AzionePrincipale)
         StileApp.VestiBottone(btnSalvaRicerca, LivelloBottone.SicuroPositivo)
-        StileApp.VestiBottone(btnCattura, LivelloBottone.SicuroPositivo)
 
-        ' Come la cattura: costa una chiamata all'AI e propone qualcosa, ma non scrive
-        ' niente su disco — il profilo si salva solo dal suo pannello.
+        ' La cattura è l'azione principale del pannello: è il motivo per cui P3 esiste — si
+        ' naviga per arrivare a premere lei — e dal 2026-09-01 lo dice il livello 3 invece
+        ' del verde delle conferme senza rischio. Fino ad allora stava accanto all'import
+        ' del CV vestita <b>identica</b>, e due verdi pieni gemelli affiancati disfano
+        ' proprio la regola che li vestiva: il colore non diceva più la conseguenza, diceva
+        ' «bottone». Adesso i due si distinguono a colpo d'occhio, e resta distinto anche
+        ' quello che fanno.
+        StileApp.VestiBottone(btnCattura, LivelloBottone.AzionePrincipale)
+
+        ' L'import del CV resta di livello 1: costa una chiamata all'AI e propone qualcosa,
+        ' ma non scrive niente su disco — il profilo si salva solo dal suo pannello.
         StileApp.VestiBottone(btnImportaCv, LivelloBottone.SicuroPositivo)
         StileApp.VestiBottone(btnApri, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnVai, LivelloBottone.Esplorativo)

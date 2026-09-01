@@ -128,7 +128,13 @@ Public Class FinestraDocumenti
 
         lvwDocumenti.BackColor = StileApp.SfondoContenuto
 
-        StileApp.VestiBottone(btnRileggi, LivelloBottone.AzionePrincipale)
+        ' Rileggere è di livello 2 e non 3: l'azione principale di questa finestra è
+        ' <b>confermare</b> quel che si è riconosciuto — è il passo 4 del cap. 05.2, e il
+        ' motivo per cui la finestra si apre. Far rileggere la cartella è il suo vicino di
+        ' riga, come «cambia cartella»: si torna indietro di un passo, non si va avanti.
+        ' Fino al 2026-09-01 erano due i bottoni che dicevano «vai avanti», e nessuno dei
+        ' due era quello che chiude il lavoro.
+        StileApp.VestiBottone(btnRileggi, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnCambiaCartella, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnConferma, LivelloBottone.SicuroPositivo)
         StileApp.VestiBottone(btnAnnulla, LivelloBottone.Neutro)

@@ -31,6 +31,9 @@ Public Class PannelloEmail
     ''' <summary>Sotto questa altezza la fascia delle azioni non scende: i bottoni ci devono stare.</summary>
     Private Const AltezzaMinimaAzioni As Integer = 60
 
+    ''' <summary>Il nome che porta in testa una domanda fatta dal programma, come negli altri pannelli.</summary>
+    Private Const NomeProdotto As String = "TrovaLavoro"
+
     ''' <summary>Quanto spazio si prende il logo flottante (cap. 03.5).</summary>
     Private _ingombroLogo As Size
 
@@ -69,6 +72,35 @@ Public Class PannelloEmail
 
     ''' <summary>La bozza mostrata adesso: cambia mentre si scrive, e si salva a ogni passo che conta.</summary>
     Private _bozza As New BozzaEmail
+
+    ''' <summary>
+    ''' Se l'oggetto e il corpo in casella portano correzioni fatte a mano: è quel che
+    ''' «Fallo riscrivere» butterebbe via, e la ragione per cui prima chiede.
+    ''' </summary>
+    ''' <remarks>
+    ''' Si accendono in <see cref="txtOggetto_TextChanged"/> e
+    ''' <see cref="txtCorpo_TextChanged"/>, che scattano solo quando a scrivere è l'utente
+    ''' (v. <see cref="Riempiendo"/>), e si spengono quando è l'AI a riempire i campi: un
+    ''' testo appena arrivato dal compositore si rifà premendo di nuovo, e per quello non
+    ''' vale la pena di fermare nessuno.
+    ''' </remarks>
+    Private _oggettoAMano As Boolean
+
+    ''' <inheritdoc cref="_oggettoAMano"/>
+    Private _corpoAMano As Boolean
+
+    ''' <summary>
+    ''' Se la bozza in mostra viene da <c>email.json</c> e non da questa sessione: allora
+    ''' <b>non si sa</b> se ci sia dentro del lavoro a mano, e non saperlo è già un motivo
+    ''' per chiedere (cap. 03.3: nel dubbio fra due livelli si sceglie il più alto).
+    ''' </summary>
+    ''' <remarks>
+    ''' È lo stesso difetto che R7 ha chiuso in P6 dall'altra parte: là le riscritture si
+    ''' scrivono nel file e sopravvivono alla sessione, qui no — <c>email.json</c> tiene i
+    ''' testi, non la loro storia — e finché è così l'unica alternativa a questa domanda
+    ''' sarebbe dimenticarsi in silenzio del messaggio corretto ieri.
+    ''' </remarks>
+    Private _bozzaRipresa As Boolean
 
     ''' <summary>Come in P2: un contatore, perché i riempimenti si annidano.</summary>
     Private _riempimenti As Integer
@@ -174,6 +206,10 @@ Public Class PannelloEmail
         ' primo salvataggio. Gli allegati non servono qui: RiempiGliAllegati li rifà.
         _bozza = New BozzaEmail()
 
+        ' E con lei quel che si sapeva di chi l'aveva scritta: il lavoro a mano sul
+        ' messaggio di prima non è lavoro a mano su questo.
+        DimenticaIlLavoroAMano()
+
         Riempiendo(
             Sub()
                 txtDestinatario.Text = ""
@@ -230,6 +266,7 @@ Public Class PannelloEmail
         _candidatura = Nothing
         _destinatarioVieneDallAnnuncio = False
         _bozza = New BozzaEmail()
+        DimenticaIlLavoroAMano()
 
         _suggerimenti.SetToolTip(txtDestinatario, Nothing)
 
@@ -350,6 +387,12 @@ Public Class PannelloEmail
             _bozza.Oggetto = scritta.Oggetto
             _bozza.Corpo = scritta.Corpo
 
+            ' Quel che c'era di scritto a mano è appena stato sostituito — con il permesso
+            ' di chi l'aveva scritto, che è quello che la conferma è andata a prendere: da
+            ' qui in poi in casella c'è solo roba dell'AI, e la prossima riscrittura non ha
+            ' più niente da difendere.
+            DimenticaIlLavoroAMano()
+
             ' La lingua si annota adesso, insieme al testo che l'ha usata: è quella che
             ' domani dirà se questa bozza vale ancora per i documenti che ci sono.
             _bozza.Lingua = lingua
@@ -423,6 +466,11 @@ Public Class PannelloEmail
         _bozza.Oggetto = salvata.Oggetto
         _bozza.Corpo = salvata.Corpo
         _bozza.Lingua = salvata.Lingua
+
+        ' Da qui in poi il pannello mostra un testo di cui non conosce la storia: può
+        ' essere uscito dall'AI e non essere mai stato toccato, oppure essere il messaggio
+        ' che l'utente ha limato ieri sera. È la ragione per cui «Fallo riscrivere» chiede.
+        _bozzaRipresa = True
 
         For Each allegato As AllegatoScelto In _bozza.Allegati
             Dim scelto As AllegatoScelto = salvata.Allegati.FirstOrDefault(
@@ -593,6 +641,7 @@ Public Class PannelloEmail
 
         If _riempimenti > 0 Then Return
         _bozza.Oggetto = txtOggetto.Text
+        _oggettoAMano = True
         AggiornaComandi()
 
     End Sub
@@ -601,7 +650,17 @@ Public Class PannelloEmail
 
         If _riempimenti > 0 Then Return
         _bozza.Corpo = txtCorpo.Text
+        _corpoAMano = True
         AggiornaComandi()
+
+    End Sub
+
+    ''' <summary>Da adesso in casella non c'è più niente di scritto a mano.</summary>
+    Private Sub DimenticaIlLavoroAMano()
+
+        _oggettoAMano = False
+        _corpoAMano = False
+        _bozzaRipresa = False
 
     End Sub
 
@@ -624,15 +683,65 @@ Public Class PannelloEmail
     Private Async Sub btnRiscrivi_Click(sender As Object, e As EventArgs) Handles btnRiscrivi.Click
 
         ' Mentre l'AI scrive, questo bottone è l'annulla dell'attesa: è il pattern di
-        ' «Analizza» in P4 e dell'import in P2.
+        ' «Analizza» in P4 e dell'import in P2. Sta prima della conferma, come in P6: qui
+        ' non si sta buttando via niente, si sta rinunciando a scrivere.
         If AiAlLavoro Then
             AnnullaIlLavoro()
             Return
         End If
 
+        ' Riscrivere sostituisce oggetto e corpo che ci sono adesso, e quelli possono
+        ' essere passati per le mani dell'utente: allora si chiede prima, come «Rigenera»
+        ' in P6 (cap. 03.3, livello 4). Quando in casella c'è solo roba dell'AI la domanda
+        ' non si fa: il costo di un sì sarebbe un'attesa, non del lavoro perso.
+        Dim aMano As String = AncheQuelloCheHaiScrittoAMano()
+
+        If aMano.Length > 0 AndAlso MessageBox.Show(
+            "Vuoi che riscriva il messaggio da capo?" & vbLf &
+            "L'oggetto e il testo che vedi adesso vengono sostituiti." & aMano,
+            NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then Return
+
         Await ScriviLaBozzaAsync()
 
     End Sub
+
+    ''' <summary>
+    ''' La riga da aggiungere alla conferma quando fra i testi che spariscono c'è anche
+    ''' lavoro dell'utente; <b>vuota</b> quando non ce n'è, e allora non si chiede affatto.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>È la gemella di <c>PannelloDocumenti.AncheQuelliRiscrittiAMano</c>, e dice le
+    ''' stesse cose per la stessa ragione: di un testo scritto dall'AI si sa che si rifà
+    ''' premendo di nuovo, di uno scritto a mano no.</para>
+    ''' <para>Con una bozza ripresa dal disco il pannello non può <b>elencare</b> niente —
+    ''' <c>email.json</c> tiene i testi e non la loro storia — e lo dice invece di tacere o
+    ''' di inventare un elenco: chi legge sa se ci aveva messo mano, ed è l'unico che
+    ''' possa saperlo.</para>
+    ''' <para>È pubblica perché la legge il banco: una <c>MessageBox</c> in un collaudo
+    ''' resta lì ad aspettare per sempre, e questa riga è la sola parte di quella domanda
+    ''' che possa sbagliare.</para>
+    ''' </remarks>
+    Public Function AncheQuelloCheHaiScrittoAMano() As String
+
+        Dim campi As New List(Of String)
+
+        If _oggettoAMano Then campi.Add("l'oggetto")
+        If _corpoAMano Then campi.Add("il testo del messaggio")
+
+        If campi.Count > 0 Then
+            Return vbLf & "Compreso quello che hai scritto a mano: " &
+                   String.Join(", ", campi) & "."
+        End If
+
+        If _bozzaRipresa Then
+            Return vbLf & "Questa bozza viene da prima: se ci avevi messo mano, quelle " &
+                   "correzioni spariscono."
+        End If
+
+        Return String.Empty
+
+    End Function
 
     ''' <summary>
     ''' Scrive il file <c>.eml</c> nella cartella della candidatura e lo apre nel programma
@@ -1117,7 +1226,12 @@ Public Class PannelloEmail
         StileApp.VestiBottone(btnPreparaEmail, LivelloBottone.AzionePrincipale)
         StileApp.VestiBottone(btnHoSpedito, LivelloBottone.SicuroPositivo)
         StileApp.VestiBottone(btnTornaAiDocumenti, LivelloBottone.Esplorativo)
-        StileApp.VestiBottone(btnRiscrivi, LivelloBottone.Esplorativo)
+
+        ' Riscrivere sostituisce testi già scritti — e possibilmente corretti a mano: è la
+        ' stessa cosa che fa «Rigenera» in P6, e dal 2026-09-01 porta lo stesso livello 4
+        ' (cap. 03.3). Da esplorativo prometteva un'anteprima e invece cancellava.
+        StileApp.VestiBottone(btnRiscrivi, LivelloBottone.Attenzione)
+
         StileApp.VestiBottone(btnDocumenti, LivelloBottone.Esplorativo)
 
     End Sub

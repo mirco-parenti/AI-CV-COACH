@@ -906,16 +906,20 @@ Public Class PannelloProfilo
     ''' Toglie la voce selezionata, dopo averlo chiesto: è un'azione distruttiva
     ''' (livello 5, cap. 03.3) e quello che si cancella è il racconto dell'utente.
     ''' </summary>
+    ''' <remarks>
+    ''' Dal 2026-09-01 lo chiede la <see cref="FinestraConferma"/>, come l'eliminazione di
+    ''' una candidatura in P1: un'azione di livello 5 si conferma premendo il verbo di
+    ''' quel che si sta facendo, e due conferme dello stesso peso non possono avere due
+    ''' forme diverse a seconda del pannello in cui capitano.
+    ''' </remarks>
     Private Sub EliminaVoce(Of T)(elenco As ListBox, voci As List(Of T), come As String)
 
         Dim indice As Integer = elenco.SelectedIndex
         If indice < 0 OrElse indice >= voci.Count Then Return
 
-        Dim risposta As DialogResult = MessageBox.Show(
-            $"Vuoi togliere {come} dal profilo?" & vbLf & vbLf & elenco.Items(indice).ToString(),
-            NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2)
-
-        If risposta <> DialogResult.Yes Then Return
+        If Not FinestraConferma.Chiedi(Me, $"Togli {come} dal profilo",
+                                       SpiegazioneDellaVoceTolta(elenco.Items(indice).ToString()),
+                                       "Confermo") Then Return
 
         voci.RemoveAt(indice)
         elenco.Items.RemoveAt(indice)
@@ -930,6 +934,25 @@ Public Class PannelloProfilo
         SegnaModificato()
 
     End Sub
+
+    ''' <summary>
+    ''' Il testo della conferma: la voce che sparisce, e quando la sua sparizione arriva
+    ''' sul disco. La seconda riga non è un dettaglio tecnico — è la sola via d'uscita che
+    ''' resta a chi si accorge dopo di aver tolto quella sbagliata: uscire senza salvare.
+    ''' </summary>
+    ''' <remarks>
+    ''' È pubblica perché la legge il banco, come <c>PannelloHome.SpiegazioneDellEliminazione</c>:
+    ''' premere il bottone aprirebbe una finestra modale, e di quella un collaudo non può
+    ''' aspettare la chiusura.
+    ''' </remarks>
+    Public Shared Function SpiegazioneDellaVoceTolta(etichetta As String) As String
+
+        Return etichetta & vbLf & vbLf &
+               "Sparisce dalla scheda che stai compilando. Sul disco il profilo cambia " &
+               "quando premi «Salva profilo»: finché non lo fai, la versione salvata resta " &
+               "com'era. Confermi?"
+
+    End Function
 
     ' ==================================================================
     ' Salvare

@@ -1039,11 +1039,18 @@ Public Class FinestraImpostazioni
         btnSvuotaNavigazione.Location = New Point(sinistra, btnBackup.Bottom + StileApp.DistanzaControlli)
 
         ' L'azione che non si disfa sta lontana dalle altre: è una difesa, non una
-        ' spaziatura (cap. 11.5, la stessa regola della fascia dei comandi).
-        btnEliminaTutto.Location = New Point(sinistra,
+        ' spaziatura (cap. 11.5, la stessa regola della fascia dei comandi). Lì un comando
+        ' critico prende una riga tutta sua, staccata dal resto e allineata dall'altra
+        ' parte, «così non finisce mai sotto il dito di chi sta premendo il comando
+        ' accanto»; qui, fino al 2026-09-01, di quella regola c'era solo il vuoto sopra — e
+        ' il vuoto sopra non basta quando il bottone sta nella stessa colonna, alla stessa
+        ' larghezza e appena sotto un altro bottone rosso. Adesso ha il vuoto da tutti e due
+        ' i lati e sta al margine opposto: un clic scivolato sotto «Svuota i dati di
+        ' navigazione» trova il fondo della finestra, non l'eliminazione di tutto.
+        btnEliminaTutto.Location = New Point(larghezza - StileApp.MargineRiquadro - btnEliminaTutto.Width,
                                              btnSvuotaNavigazione.Bottom + FasciaDeiComandi.StaccoDelCritico)
 
-        lblStato.Location = New Point(sinistra, btnEliminaTutto.Bottom + StileApp.MargineRiquadro)
+        lblStato.Location = New Point(sinistra, btnEliminaTutto.Bottom + FasciaDeiComandi.StaccoDelCritico)
 
         ' «Chiudi» non sta più in coda al contenuto: vive nella fascia, che non scorre.
         Return lblStato.Bottom + StileApp.MargineRiquadro

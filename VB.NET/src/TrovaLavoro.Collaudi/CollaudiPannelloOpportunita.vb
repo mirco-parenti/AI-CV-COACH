@@ -435,6 +435,21 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Sub LoScartoDiceCheCosaNonSuccede()
+
+            ' Il testo della conferma di livello 5, che il banco legge da qui perché di
+            ' una finestra modale non può aspettare la chiusura (come in P1). «Scarta» è
+            ' una parola che fa temere una cancellazione: la prima cosa da dire è che qui
+            ' non sparisce niente, la seconda che dallo scarto non si torna indietro.
+            Dim domanda As String = PannelloOpportunita.SpiegazioneDelloScarto()
+
+            Assert.Contains("Non cancello niente", domanda, "quel che non succede, per primo")
+            Assert.Contains("Home", domanda, "e dove la si ritrova")
+            Assert.Contains("non si torna indietro", domanda, "ma anche che è un capolinea")
+
+        End Sub
+
+        <TestMethod>
         Public Async Function UnaCandidaturaAnalizzataEntraSubitoNellIndice() As Task
 
             ' Il registro è un indice rigenerabile, ma tenerlo in riga strada facendo è

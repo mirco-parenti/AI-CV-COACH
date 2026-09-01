@@ -372,6 +372,123 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function AppenaScrittoDallAiRiscrivereNonChiedeNiente() As Task
+
+            ' Il costo di un sì, qui, è un'attesa e nient'altro: un testo appena arrivato
+            ' dal compositore si rifà premendo di nuovo. Una domanda che si fa comunque è
+            ' una domanda a cui si risponde senza leggerla.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.IsEmpty(pannello.AncheQuelloCheHaiScrittoAMano(),
+                                   "in casella c'è solo roba dell'AI: niente da difendere")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function RiscrivereDiceQualiTestiCorrettiAManoSpariscono() As Task
+
+            ' Cap. 03.3, livello 4: «Fallo riscrivere» sostituisce oggetto e corpo, e da
+            ' quando l'utente ci mette mano quello che sparisce non è più un'attesa, è
+            ' lavoro suo. La riga li nomina uno per uno, come fa «Rigenera» in P6.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Casella(pannello, "txtCorpo").Text = "Il testo come lo voglio io."
+
+                    Dim detto As String = pannello.AncheQuelloCheHaiScrittoAMano()
+
+                    Assert.Contains("il testo del messaggio", detto, "il corpo è stato riscritto a mano")
+                    Assert.DoesNotContain("l'oggetto", detto, "l'oggetto invece no, ed è ancora dell'AI")
+
+                    Casella(pannello, "txtOggetto").Text = "Candidatura magazziniere"
+
+                    Assert.Contains("l'oggetto", pannello.AncheQuelloCheHaiScrittoAMano(),
+                                    "adesso sono tutti e due")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function DiUnaBozzaRipresaDalDiscoNonSiSaESiDice() As Task
+
+            ' email.json tiene i testi, non la loro storia: un messaggio limato ieri sera
+            ' e uno mai toccato tornano identici. Nel dubbio fra due livelli si sceglie il
+            ' più alto (cap. 03.3), e si chiede — dicendo però la cosa vera, cioè che a
+            ' saperlo è solo chi legge.
+            Dim compositore As New CompositoreFinto
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    candidatura.Email = JsonNode.Parse(
+                        "{""destinatario"": ""lavoro@rossi.it"", ""oggetto"": ""Il mio oggetto""," &
+                        """corpo"": ""Il testo che ho corretto a mano."", ""allegati"": []}")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim detto As String = pannello.AncheQuelloCheHaiScrittoAMano()
+
+                    Assert.IsNotEmpty(detto, "una bozza ripresa non si riscrive senza chiedere")
+                    Assert.Contains("se ci avevi messo mano", detto,
+                                    "e non si finge di sapere quel che non si sa")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function UnaCandidaturaNuovaNonEreditaISospettiDiQuellaDiPrima() As Task
+
+            ' Il pannello si riusa da una candidatura all'altra: il lavoro a mano sul
+            ' messaggio di prima non è lavoro a mano su questo, e portarselo dietro
+            ' vorrebbe dire una domanda che nessuno sa più a cosa si riferisca.
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Casella(pannello, "txtCorpo").Text = "Il testo come lo voglio io."
+                    Assert.IsNotEmpty(pannello.AncheQuelloCheHaiScrittoAMano(), "su questa sì")
+
+                    Dim laSeconda As New Opportunita With {
+                        .Annuncio = JsonNode.Parse(AnnuncioLetto),
+                        .Lettera = JsonNode.Parse(Lettera),
+                        .Creata = New Date(2026, 8, 11)}
+                    laSeconda.Avanza(StatoOpportunita.Interessante, laSeconda.Creata)
+                    laSeconda.Avanza(StatoOpportunita.Generata, laSeconda.Creata)
+                    contesto.Opportunita.Salva(laSeconda)
+
+                    Await pannello.MostraLaCandidaturaAsync(laSeconda)
+
+                    Assert.IsEmpty(pannello.AncheQuelloCheHaiScrittoAMano(),
+                                   "sull'altra no: il suo messaggio l'ha appena scritto l'AI")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Sub RiscrivereEUnAzioneDiLivelloQuattro()
+
+            ' Sostituisce testi già scritti, esattamente come «Rigenera» in P6: da
+            ' esplorativo prometteva un'anteprima e invece cancellava (cap. 03.3).
+            Using pannello As New PannelloEmail()
+                Assert.AreEqual(LivelloBottone.Attenzione, Bottone(pannello, "btnRiscrivi").Tag)
+            End Using
+
+        End Sub
+
+        <TestMethod>
         Public Async Function UnaBozzaInUnAltraLinguaLoDiceInveceDiTacere() As Task
 
             ' Chi cambia la tendina di P6 dopo aver già preparato l'email si ritrova

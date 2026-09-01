@@ -234,6 +234,117 @@ Namespace Ui
         End Sub
 
         ' ==================================================================
+        ' Le misure e i livelli della fascia dei comandi (cap. 03.2, 03.3)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Sub IComandiDellaRicercaSonoAltiComeGliAltriDellApplicazione()
+
+            ' Fino al 2026-09-01 erano alti 26 pixel: gli unici sette bottoni fuori dal
+            ' token in tutta l'applicazione, in mezzo a una fascia di caselle alte 23 e
+            ' sotto due bottoni alti 32. L'atteso si prende da un bottone del pannello
+            ' stesso e non dal numero 32, perché con AutoScaleMode.Font le misure crescono
+            ' col carattere: quel che deve valere è che crescano <b>insieme</b>.
+            Using pannello As New PannelloRicerca()
+
+                Dim atteso As Integer = Bottone(pannello, "btnCattura").Height
+
+                Assert.IsGreaterThanOrEqualTo(StileApp.BottoneStandard.Height, atteso,
+                                              "il metro è il bottone standard del progetto")
+
+                For Each nome As String In {"btnApri", "btnDimentica", "btnCerca", "btnSalvaRicerca",
+                                            "btnIndietro", "btnRicarica", "btnVai"}
+                    Assert.AreEqual(atteso, Bottone(pannello, nome).Height,
+                                    $"«{nome}» è alto quanto gli altri comandi del pannello")
+                Next
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LeTreRigheDellaFasciaNonSiPestanoIPiedi()
+
+            ' La proprietà che i sei pixel in più a bottone mettevano a rischio: fra una
+            ' riga e l'altra ci deve restare almeno l'interlinea minima (cap. 03.2), e
+            ' tutto deve stare dentro la fascia. Le righe si dichiarano qui perché è la
+            ' sola cosa che il designer sa e il collaudo no.
+            Dim righe As String()() = {
+                New String() {"lblSalvate", "cboSalvate", "btnApri", "btnDimentica"},
+                New String() {"lblPortale", "cboPortali", "lblCosa", "txtCosa",
+                              "lblDove", "txtDove", "btnCerca", "btnSalvaRicerca"},
+                New String() {"btnIndietro", "btnRicarica", "txtIndirizzo", "btnVai"}}
+
+            Using pannello As New PannelloRicerca()
+
+                Dim fascia As Panel = DirectCast(
+                    pannello.Controls.Find("pnlComandi", searchAllChildren:=True).Single(), Panel)
+
+                Dim cime As New List(Of Integer)
+                Dim fondi As New List(Of Integer)
+
+                For Each riga As String() In righe
+                    Dim controlli As Control() = riga.Select(
+                        Function(nome) fascia.Controls.Find(nome, searchAllChildren:=True).Single()).ToArray()
+
+                    cime.Add(controlli.Min(Function(c) c.Top))
+                    fondi.Add(controlli.Max(Function(c) c.Bottom))
+                Next
+
+                Assert.IsGreaterThanOrEqualTo(0, cime.First(), "la prima riga non esce dalla fascia in alto")
+
+                For riga As Integer = 0 To righe.Length - 2
+                    Assert.IsGreaterThanOrEqualTo(fondi(riga) + StileApp.InterlineaMinima, cime(riga + 1),
+                                                  $"fra la riga {riga + 1} e la {riga + 2} manca l'interlinea")
+                Next
+
+                Assert.IsGreaterThanOrEqualTo(fondi.Last(), fascia.Height,
+                                              "e l'ultima riga sta dentro la fascia")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LaCatturaNonEPiuLaGemellaDellImportDelCv()
+
+            ' Due bottoni pieni dello stesso colore, affiancati, per due azioni diverse:
+            ' dentro un sistema in cui il colore dice la conseguenza, quella era la coppia
+            ' che lo smentiva. La cattura è l'azione principale del pannello (livello 3),
+            ' l'import del CV una conferma senza rischio (livello 1).
+            Using pannello As New PannelloRicerca()
+
+                Assert.AreEqual(LivelloBottone.AzionePrincipale, Bottone(pannello, "btnCattura").Tag)
+                Assert.AreEqual(LivelloBottone.SicuroPositivo, Bottone(pannello, "btnImportaCv").Tag)
+
+                ' Senza una pagina aperta i due comandi sono spenti, e da spenti sono
+                ' grigi tutti e due com'è giusto: il colore che li distingue è quello che
+                ' si vede quando si possono premere.
+                Bottone(pannello, "btnCattura").Enabled = True
+                Bottone(pannello, "btnImportaCv").Enabled = True
+
+                Assert.AreNotEqual(Bottone(pannello, "btnCattura").BackColor,
+                                   Bottone(pannello, "btnImportaCv").BackColor,
+                                   "e a occhio nudo non si somigliano più")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub DimenticareUnaRicercaDiceCheCosaSparisceEChePuoTornare()
+
+            ' Il testo della conferma di livello 5: il banco lo legge da qui, perché di una
+            ' finestra modale non può aspettare la chiusura (come in P1).
+            Dim domanda As String = PannelloRicerca.SpiegazioneDelDimenticare("Muletto a Chiavari")
+
+            Assert.Contains("Muletto a Chiavari", domanda, "quale ricerca sparisce")
+            Assert.Contains("candidature", domanda, "e che cosa non si tocca")
+            Assert.Contains("si rifà", domanda, "e che una ricerca si può rifare")
+
+        End Sub
+
+        ' ==================================================================
         ' L'indirizzo che arriverebbe al browser
         ' ==================================================================
 

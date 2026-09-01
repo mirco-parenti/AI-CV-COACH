@@ -223,6 +223,26 @@ Namespace Ui
 
         End Function
 
+        <TestMethod>
+        Public Sub RipristinareModificaMaNonDistrugge()
+
+            ' Cap. 03.3: il livello 5 è di chi elimina, il 4 di chi «modifica dati
+            ' esistenti» — e un ripristino è il secondo, come il commento della vestizione
+            ' diceva già mentre il bottone portava il rosso del primo. Un rosso che grida
+            ' più forte del gesto insegna a non credere ai rossi.
+            ConMotore(
+                Sub(contesto)
+                    Using finestra As New FinestraBackup(contesto)
+
+                        Assert.AreEqual(LivelloBottone.Attenzione, Comando(finestra, "btnRipristina").Tag)
+                        Assert.AreEqual(LivelloBottone.AzionePrincipale, Comando(finestra, "btnEsporta").Tag,
+                                        "portare via i propri dati resta l'azione principale della finestra")
+
+                    End Using
+                End Sub)
+
+        End Sub
+
         ' ==================================================================
         ' Il banco
         ' ==================================================================

@@ -527,11 +527,14 @@ Public Class FinestraBackup
         StileApp.VestiBottone(btnEsporta, LivelloBottone.AzionePrincipale)
         StileApp.VestiBottone(btnScegli, LivelloBottone.Esplorativo)
 
-        ' Livello 5 e non 6: sovrascrive dati esistenti, ma il profilo di prima finisce
-        ' nello storico e le candidature non nominate restano — non è una cancellazione
-        ' definitiva, e chiedere di ridigitare una parola qui sarebbe un allarme che grida
-        ' più forte di quanto il gesto meriti (cap. 03.3).
-        StileApp.VestiBottone(btnRipristina, LivelloBottone.Distruttivo)
+        ' Livello 4 e non 5: un ripristino <b>modifica dati esistenti</b>, che è la riga
+        ' esatta della tabella 03.3 — non cancella niente. Il profilo di prima finisce nello
+        ' storico, le candidature che il backup non nomina restano dove sono, e quel che si
+        ' sovrascrive è scritto nell'anteprima qui sopra prima che si prema. Fino al
+        ' 2026-09-01 portava il rosso del livello 5 mentre il suo stesso commento diceva che
+        ' distruttivo non è: un rosso che grida più forte del gesto insegna a non credere ai
+        ' rossi, e il primo a rimetterci è quello che il gesto lo merita davvero.
+        StileApp.VestiBottone(btnRipristina, LivelloBottone.Attenzione)
         StileApp.VestiBottone(btnChiudi, LivelloBottone.Neutro)
 
     End Sub

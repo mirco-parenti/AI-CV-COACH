@@ -155,6 +155,21 @@ Namespace Ui
             End Using
         End Sub
 
+        <TestMethod>
+        Public Sub LAzionePrincipaleDiQuestaFinestraEConfermare()
+            ' Il passo 4 del cap. 05.2 è la conferma umana: è per quella che la finestra si
+            ' apre. Far rileggere la cartella è il vicino di riga di «cambia cartella» — si
+            ' torna indietro di un passo — e dal 2026-09-01 porta il suo livello 2: due
+            ' bottoni che dicono «vai avanti» ne lasciano zero che dicano «hai finito».
+            Using finestra As New FinestraDocumenti(ConTreDocumenti())
+
+                Assert.AreEqual(LivelloBottone.SicuroPositivo, Bottone(finestra, "btnConferma").Tag)
+                Assert.AreEqual(LivelloBottone.Esplorativo, Bottone(finestra, "btnRileggi").Tag)
+                Assert.AreEqual(LivelloBottone.Esplorativo, Bottone(finestra, "btnCambiaCartella").Tag)
+
+            End Using
+        End Sub
+
         Private Shared Function Lista(finestra As Control) As ListView
             Return DirectCast(finestra.Controls.Find("lvwDocumenti", searchAllChildren:=True).Single(), ListView)
         End Function

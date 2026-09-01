@@ -801,18 +801,18 @@ Public Class PannelloOpportunita
     ''' niente. Si chiede conferma prima — è una decisione che non si disfa, e la regola
     ''' del cap. 12.7 è che nessuno scriva senza un passaggio esplicito.
     ''' </summary>
+    ''' <remarks>
+    ''' Dal 2026-09-01 lo chiede la <see cref="FinestraConferma"/> e non più una
+    ''' <c>MessageBox</c> con Sì e No: lo scarto pesa quanto l'eliminazione di una
+    ''' candidatura in P1 — è una strada che non si ripercorre — e due conferme dello
+    ''' stesso livello non possono avere due forme diverse (cap. 03.3).
+    ''' </remarks>
     Private Sub btnScarta_Click(sender As Object, e As EventArgs) Handles btnScarta.Click
 
         If _opportunita Is Nothing OrElse AiAlLavoro Then Return
 
-        Dim risposta As DialogResult = MessageBox.Show(
-            "Vuoi scartare questa candidatura?" & vbLf &
-            "Non cancello niente: resta nella sua cartella e la ritrovi nella Home. " &
-            "Ma la do per chiusa, e da uno scarto non si torna indietro.",
-            "Scarta l'opportunità", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
-            MessageBoxDefaultButton.Button2)
-
-        If risposta <> DialogResult.Yes Then Return
+        If Not FinestraConferma.Chiedi(Me, "Scarta la candidatura",
+                                       SpiegazioneDelloScarto(), "Confermo") Then Return
 
         _opportunita.Avanza(StatoOpportunita.Scartata)
 
@@ -823,6 +823,24 @@ Public Class PannelloOpportunita
         AggiornaComandi()
 
     End Sub
+
+    ''' <summary>
+    ''' Il testo della conferma: che cosa succede scartando, e soprattutto che cosa
+    ''' <b>non</b> succede — qui non sparisce niente, e chi legge «scarta» può temere il
+    ''' contrario.
+    ''' </summary>
+    ''' <remarks>
+    ''' È pubblica perché la legge il banco, come <c>PannelloHome.SpiegazioneDellEliminazione</c>:
+    ''' premere il bottone aprirebbe una finestra modale, e di quella un collaudo non può
+    ''' aspettare la chiusura.
+    ''' </remarks>
+    Public Shared Function SpiegazioneDelloScarto() As String
+
+        Return "Non cancello niente: la candidatura resta nella sua cartella e la ritrovi " &
+               "nella Home, con i documenti che le hai fatto scrivere." & vbLf & vbLf &
+               "Ma la do per chiusa, e da uno scarto non si torna indietro. Confermi?"
+
+    End Function
 
     ''' <summary>
     ''' Di che colore si scrive a che punto è. Il rosso resta allo scarto — è l'unica
