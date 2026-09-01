@@ -63,6 +63,22 @@ Namespace Motore
         ''' <summary>Il pool dei prompt; <c>Nothing</c> se non si è lasciato aprire.</summary>
         Public ReadOnly Property Libreria As LibreriaPrompt
 
+        ''' <summary>
+        ''' Come si chiama la libreria in vigore: la dichiara lei stessa — sorgente e stato,
+        ''' asterisco compreso (cap. 04.5) — e il «Pool —» resta per l'anomalia totale,
+        ''' quando non si è aperta affatto.
+        ''' </summary>
+        ''' <remarks>
+        ''' Sta qui perché la leggono in tre — il pannello del logo, le Impostazioni e
+        ''' «Informazioni su…», che dalle Impostazioni si apre dal 2026-09-01 — e la stessa
+        ''' frase scritta in tre posti è la copia che un giorno diverge.
+        ''' </remarks>
+        Public ReadOnly Property EtichettaDelPool As String
+            Get
+                Return If(Libreria IsNot Nothing, Libreria.Etichetta, "Pool —")
+            End Get
+        End Property
+
         ''' <summary>I numeri del calcolo delle stelle (cap. 11.6).</summary>
         Public ReadOnly Property Taratura As Motore.Taratura
 

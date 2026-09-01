@@ -92,22 +92,25 @@ Public Class FormPrincipale
         Marchio.Vesti(Me)
         _argomenti = If(argomenti, ArgomentiAvvio.Leggi(Nothing))
         _schermataDiAvvio = schermataDiAvvio
-        DichiaraLaPortaDelleInformazioni()
+        DichiaraISuggerimenti()
 
     End Sub
 
     ''' <summary>
-    ''' Il pannello del logo è cliccabile e deve sembrarlo: mano sul puntatore e
-    ''' suggerimento, su tutte le sue parti. Senza, sarebbe una porta senza maniglia —
-    ''' la lezione di T9d, «quel che è acceso deve sembrarlo», applicata a un pannello
-    ''' che per undici tappe è stato solo un'insegna.
+    ''' I suggerimenti dei comandi della finestra.
     ''' </summary>
-    Private Sub DichiaraLaPortaDelleInformazioni()
-
-        For Each parte As Control In PartiDelPannelloLogo()
-            parte.Cursor = Cursors.Hand
-            ttSuggerimenti.SetToolTip(parte, "Informazioni su TrovaLavoro")
-        Next
+    ''' <remarks>
+    ''' <para>Fino al 2026-09-01 qui si vestiva anche il <b>pannello del logo</b>: mano sul
+    ''' puntatore e «Informazioni su TrovaLavoro» su tutte le sue parti, perché il clic
+    ''' sullo stemma apriva quella finestra. Su indicazione del tutor quel gesto non c'è
+    ''' più — il pannello è tornato a essere quello che era per undici tappe, un'insegna —
+    ''' e con lui se ne sono andati il puntatore a mano, il suggerimento e l'elenco delle
+    ''' parti da vestire: un invito al clic sopra qualcosa che non risponde è peggio di
+    ''' nessun invito.</para>
+    ''' <para>«Informazioni su…» non si è persa per strada: vive nelle Impostazioni
+    ''' (cap. 03.4), che è il posto da cui si arriva anche a «Come funziona…».</para>
+    ''' </remarks>
+    Private Sub DichiaraISuggerimenti()
 
         ttSuggerimenti.SetToolTip(btnAiuto, "Come funziona")
 
@@ -134,54 +137,6 @@ Public Class FormPrincipale
         FinestraInformativa.Mostra(Me)
 
     End Sub
-
-    ''' <summary>
-    ''' Le parti del pannello del logo, in un posto solo: le vestono il puntatore, il
-    ''' suggerimento e il clic che apre «Informazioni su…», e tre elenchi separati
-    ''' finirebbero per non dire più la stessa cosa.
-    ''' </summary>
-    Private Function PartiDelPannelloLogo() As Control()
-        Return New Control() {pnlLogo, picLogo, lblMarchio, lblVersione, lblCopyright}
-    End Function
-
-    ''' <summary>
-    ''' Apre «Informazioni su…» (cap. 03.4). La porta è il pannello del logo, che è dove
-    ''' versione e pool si vanno già a leggere (cap. 03.5): nessun bottone nuovo in
-    ''' barra, e il gesto è quello che si prova per primo.
-    ''' </summary>
-    Private Sub ApriLeInformazioni(mittente As Object, e As EventArgs) _
-        Handles pnlLogo.Click, picLogo.Click, lblMarchio.Click, lblVersione.Click, lblCopyright.Click
-
-        FinestraInformazioni.Mostra(Me, EtichettaDelPool(), AddressOf ComponiLaDiagnostica)
-
-    End Sub
-
-    ''' <summary>
-    ''' Il foglietto da mettere negli appunti quando si chiede «Copia diagnostica»
-    ''' (cap. 11.1). Si compone al momento del clic e non all'apertura della finestra:
-    ''' fra le due cose può esserci passato di mezzo il guasto che si vuole raccontare.
-    ''' </summary>
-    Private Function ComponiLaDiagnostica() As String
-
-        Return Diagnostica.Componi(
-            Date.Now,
-            Versione.Riga(EtichettaDelPool()),
-            Versione.RigaDelSorgente(),
-            _contesto?.Cartella?.Radice,
-            ModelliInVigore(),
-            _contesto?.Diario?.UltimeRighe(Diagnostica.RigheDiDiario))
-
-    End Function
-
-    ''' <summary>I due modelli in vigore, scritti come si leggono; <c>Nothing</c> se non ci sono.</summary>
-    Private Function ModelliInVigore() As String
-
-        Dim modelli As Ai.Modelli = _contesto?.Modelli
-        If modelli Is Nothing Then Return Nothing
-
-        Return $"{modelli.ModelloSemplice?.Id} (estrazione) · {modelli.ModelloRagionamento?.Id} (ragionamento)"
-
-    End Function
 
     ''' <summary>La schermata di avvio da togliere, se l'avvio ne ha aperta una.</summary>
     Private ReadOnly _schermataDiAvvio As ISchermataDiAvvio
@@ -1291,13 +1246,12 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
-    ''' Come si chiama la libreria in vigore: la dichiara lei stessa — sorgente e stato,
-    ''' asterisco compreso (cap. 04.5) — e il «Pool —» resta per l'anomalia totale,
-    ''' quando non si è aperta affatto. Sta in un metodo perché la leggono in due: il
-    ''' pannello del logo e «Informazioni su…».
+    ''' Come si chiama la libreria in vigore. La frase la compone il contesto
+    ''' (<see cref="ContestoApp.EtichettaDelPool"/>), che è chi ha la libreria in mano; qui
+    ''' resta il caso in cui il contesto non c'è ancora, che è solo di questa finestra.
     ''' </summary>
     Private Function EtichettaDelPool() As String
-        Return If(_contesto?.Libreria IsNot Nothing, _contesto.Libreria.Etichetta, "Pool —")
+        Return If(_contesto?.EtichettaDelPool, "Pool —")
     End Function
 
     ''' <summary>

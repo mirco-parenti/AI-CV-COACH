@@ -379,6 +379,69 @@ Namespace Ui
         End Sub
 
         ''' <summary>
+        ''' Lo stemma non invita più a un clic, perché non risponde più a nessuno.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Fino al 2026-09-01 il pannello del logo era la <b>porta</b> di
+        ''' «Informazioni su…»: cliccandolo — su una qualunque delle sue cinque parti — si
+        ''' apriva quella finestra, e per dirlo portava il puntatore a mano e il
+        ''' suggerimento «Informazioni su TrovaLavoro». Su indicazione del tutor la porta è
+        ''' stata tolta: lo stemma è un'insegna, e «Informazioni su…» si raggiunge dalle
+        ''' Impostazioni (v. <c>CollaudiFinestraImpostazioni</c>).</para>
+        ''' <para>Qui si difende l'<b>assenza</b>, e si difende quel che l'utente vede: la
+        ''' mano e il suggerimento sono l'invito, e un invito sopra qualcosa che non
+        ''' risponde è peggio di nessun invito — è la lezione di T9d («quel che è acceso
+        ''' deve sembrarlo») letta al contrario. Il gestore del clic non lascia traccia che
+        ''' si possa interrogare da fuori; l'invito sì, e rimetterne anche solo metà fa
+        ''' cadere questo collaudo.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LoStemmaNonInvitaPiuAUnClic()
+
+            Using form As New FormPrincipale()
+
+                Dim pannello As Control =
+                    form.Controls.Find("pnlLogo", searchAllChildren:=True).Single()
+
+                Dim suggerimenti As ToolTip = SuggerimentiDellaFinestra(form)
+
+                Dim parti As New List(Of Control) From {pannello}
+                parti.AddRange(pannello.Controls.Cast(Of Control)())
+
+                Assert.IsGreaterThanOrEqualTo(4, parti.Count,
+                    "il pannello e le sue parti: se fossero meno, il collaudo guarderebbe quasi niente")
+
+                For Each parte As Control In parti
+
+                    Assert.AreNotEqual(Cursors.Hand, parte.Cursor,
+                                       $"«{parte.Name}» promette ancora un clic col puntatore a mano")
+
+                    Assert.IsEmpty(suggerimenti.GetToolTip(parte),
+                                   $"«{parte.Name}» promette ancora un clic col suggerimento")
+
+                Next
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Il fornitore di suggerimenti della finestra principale. Non è un controllo e non
+        ''' si trova con <c>Controls.Find</c>: è un componente, e da fuori si arriva solo al
+        ''' campo che lo tiene — come già si fa qui sotto per <c>MostraPannello</c>.
+        ''' </summary>
+        Private Shared Function SuggerimentiDellaFinestra(form As Form) As ToolTip
+
+            Dim campo As FieldInfo = form.GetType().GetField(
+                "_ttSuggerimenti", BindingFlags.Instance Or BindingFlags.NonPublic)
+
+            Assert.IsNotNull(campo, "la finestra ha ancora il suo fornitore di suggerimenti")
+
+            Return DirectCast(campo.GetValue(form), ToolTip)
+
+        End Function
+
+        ''' <summary>
         ''' Chiama <c>MostraPannello</c> per la strada che percorre la finestra quando si
         ''' preme una casella della barra.
         ''' </summary>

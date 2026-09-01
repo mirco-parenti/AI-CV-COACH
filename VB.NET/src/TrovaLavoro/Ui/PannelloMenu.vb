@@ -163,6 +163,8 @@ Public Class PannelloMenu
     ''' qui perché il giorno che quel minimo cambiasse — o che qualcuno costruisse questo
     ''' pannello per conto suo, come fa il banco — il nome non si riduca a un francobollo
     ''' sopra sei bottoni a grandezza naturale.
+    ''' <para>Sono <b>unità di progetto</b>, come ogni soglia decisa guardando a video
+    ''' (<see cref="ScalaSchermo"/>): il confronto con la larghezza vera passa da lì.</para>
     ''' </remarks>
     Private Const LarghezzaDiRiferimentoMinima As Integer = 950
 
@@ -363,7 +365,7 @@ Public Class PannelloMenu
         Dim bottoni As BottoneMenu() = IBottoni()
         If bottoni.Length = 0 OrElse Me.ClientSize.Width <= 0 Then Return
 
-        Dim zona As Rectangle = ZonaSottoIlNome(Me.ClientSize)
+        Dim zona As Rectangle = ZonaSottoIlNome(Me.ClientSize, Me.DeviceDpi)
         If zona.Height <= 0 Then Return
 
         ' La larghezza per prima, contro l'ordine di prima: serve a sapere se la colonna
@@ -458,15 +460,34 @@ Public Class PannelloMenu
     ''' minimo e al massimo che il progetto le concede.
     ''' </summary>
     ''' <remarks>
-    ''' Pubblica e <c>Shared</c> come le altre misure di questa geometria: si chiede senza
-    ''' costruire il pannello e senza uno schermo. Da lei discendono sia il corpo delle due
-    ''' righe sia l'altezza della <see cref="FasciaDelTesto">fascia</see>, che è quel che
-    ''' tiene le due cose insieme — una scritta che smette di crescere dentro una fascia
-    ''' che continua lascerebbe un vuoto sopra i bottoni al posto di un difetto.
+    ''' <para>Pubblica e <c>Shared</c> come le altre misure di questa geometria: si chiede
+    ''' senza costruire il pannello e senza uno schermo. Da lei discendono sia il corpo
+    ''' delle due righe sia l'altezza della <see cref="FasciaDelTesto">fascia</see>, che è
+    ''' quel che tiene le due cose insieme — una scritta che smette di crescere dentro una
+    ''' fascia che continua lascerebbe un vuoto sopra i bottoni al posto di un
+    ''' difetto.</para>
+    ''' <para><b>I due fermi si confrontano in unità di progetto</b> *(2026-09-01, terzo
+    ''' giro)*. È la trappola del cap. 03.4 (decisione 15.7), ripresentata identica il
+    ''' giorno stesso in cui i fermi sono nati: 950 e 1500 sono soglie decise guardando a
+    ''' video a 96 DPI, <c>area.Width</c> sono pixel dello schermo, e a 150% di scala i due
+    ''' numeri non parlano più la stessa lingua. La finestra <b>minima</b> — 1150 unità di
+    ''' progetto — su quello schermo è larga 1725 pixel: già oltre il tetto. Da lì in su
+    ''' ogni misura, massimizzata compresa, ricadeva sullo stesso valore, e la scritta
+    ''' <b>smetteva di seguire la finestra del tutto</b>: si ridimensiona, si massimizza, e
+    ''' il nome resta quello di prima. Si converte quindi in unità di progetto, si ferma, e
+    ''' si torna in pixel dello schermo — perché chi la riceve ci disegna sopra.</para>
+    ''' <para>Il DPI si <b>passa</b> e non si legge, come in <see cref="ScalaSchermo"/>:
+    ''' queste restano funzioni pure, e il banco può chiedere loro cosa succederebbe a 144
+    ''' DPI pur girando a 96 (regola di progetto 14). Il valore predefinito è il DPI di
+    ''' progetto, dove la conversione non fa niente.</para>
     ''' </remarks>
-    Public Shared Function LarghezzaDiRiferimento(area As Size) As Integer
+    Public Shared Function LarghezzaDiRiferimento(
+        area As Size, Optional dpi As Integer = ScalaSchermo.DpiDiProgetto) As Integer
 
-        Return Math.Clamp(area.Width, LarghezzaDiRiferimentoMinima, LarghezzaDiRiferimentoMassima)
+        Dim inProgetto As Integer = ScalaSchermo.InUnitaDiProgetto(area.Width, dpi)
+
+        Return ScalaSchermo.InPixelDelloSchermo(
+            Math.Clamp(inProgetto, LarghezzaDiRiferimentoMinima, LarghezzaDiRiferimentoMassima), dpi)
 
     End Function
 
@@ -483,12 +504,13 @@ Public Class PannelloMenu
     ''' e la scritta segue la larghezza. Delle due misure vince la più piccola, così su una
     ''' finestra bassa la fascia non si prende comunque più di un terzo dell'altezza.</para>
     ''' </remarks>
-    Public Shared Function FasciaDelTesto(area As Size) As Integer
+    Public Shared Function FasciaDelTesto(
+        area As Size, Optional dpi As Integer = ScalaSchermo.DpiDiProgetto) As Integer
 
         If area.Height <= 0 OrElse area.Width <= 0 Then Return 0
 
         Return CInt(Math.Floor(Math.Min(area.Height * FrazioneFasciaDelTesto,
-                                        LarghezzaDiRiferimento(area) * FrazioneFasciaSullaLarghezza)))
+                                        LarghezzaDiRiferimento(area, dpi) * FrazioneFasciaSullaLarghezza)))
 
     End Function
 
@@ -500,9 +522,10 @@ Public Class PannelloMenu
     ''' della <b>geometria</b> del pannello: si può chiedere senza uno schermo, come la
     ''' fascia da cui discende.
     ''' </remarks>
-    Public Shared Function FineDelNome(area As Size) As Integer
+    Public Shared Function FineDelNome(
+        area As Size, Optional dpi As Integer = ScalaSchermo.DpiDiProgetto) As Integer
 
-        Return CInt(Math.Floor(FasciaDelTesto(area) * (1.0 - FrazioneRespiro)))
+        Return CInt(Math.Floor(FasciaDelTesto(area, dpi) * (1.0 - FrazioneRespiro)))
 
     End Function
 
@@ -516,11 +539,12 @@ Public Class PannelloMenu
     ''' fu sbagliato <b>due volte</b> in un pomeriggio, e tutte e due le volte se ne
     ''' accorse solo l'occhio, guardando una fotografia.
     ''' </remarks>
-    Public Shared Function ZonaSottoIlNome(area As Size) As Rectangle
+    Public Shared Function ZonaSottoIlNome(
+        area As Size, Optional dpi As Integer = ScalaSchermo.DpiDiProgetto) As Rectangle
 
         If area.Width <= 0 OrElse area.Height <= 0 Then Return Rectangle.Empty
 
-        Dim cima As Integer = FasciaDelTesto(area)
+        Dim cima As Integer = FasciaDelTesto(area, dpi)
 
         Return New Rectangle(0, cima, area.Width, Math.Max(1, area.Height - cima))
 
@@ -594,7 +618,7 @@ Public Class PannelloMenu
     Private Sub DisegnaIlNome(g As Graphics)
 
         Dim area As Size = Me.ClientSize
-        Dim fascia As Integer = FasciaDelTesto(area)
+        Dim fascia As Integer = FasciaDelTesto(area, Me.DeviceDpi)
         If fascia <= 0 OrElse area.Width <= 0 Then Return
 
         Dim stileTitolo As FontStyle = FontStyle.Regular
@@ -602,7 +626,7 @@ Public Class PannelloMenu
 
         ' Non la larghezza del pannello ma quella di riferimento: è lì che la scritta
         ' smette di crescere e di rimpicciolire (v. LarghezzaDiRiferimento).
-        Dim riferimento As Integer = LarghezzaDiRiferimento(area)
+        Dim riferimento As Integer = LarghezzaDiRiferimento(area, Me.DeviceDpi)
 
         Using famigliaTitolo As FontFamily = FamigliaPerIlNome(NomeFontTitolo, stileTitolo),
               famigliaSotto As FontFamily = FamigliaPerIlNome(NomeFontSottotitolo, stileSotto)
@@ -620,7 +644,7 @@ Public Class PannelloMenu
                 rigaTitolo.Altezza + contornoTitolo + stacco + rigaSotto.Altezza + contornoSotto
 
             ' Lo spazio in cui il blocco si centra: la fascia, meno il respiro in fondo.
-            Dim utile As Single = FineDelNome(area)
+            Dim utile As Single = FineDelNome(area, Me.DeviceDpi)
 
             If blocco > utile AndAlso blocco > 0.0F Then
                 Dim fattore As Single = utile / blocco

@@ -103,6 +103,177 @@ Namespace Ui
         ''' fermati. Qui la stessa larghezza si prova a due altezze molto diverse: se la
         ''' fascia tornasse a dipendere dall'altezza, i due numeri divergerebbero.
         ''' </remarks>
+        ''' <summary>
+        ''' La scritta segue la finestra anche quando lo schermo è ingrandito.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Il difetto vero trovato indagando la segnalazione «ridimensiono e poi
+        ''' massimizzo, e il font non torna» *(2026-09-01, terzo giro)*. I due fermi della
+        ''' <c>LarghezzaDiRiferimento</c> — 950 e 1500 — sono soglie decise guardando a
+        ''' video, cioè <b>unità di progetto</b>; <c>area.Width</c> sono pixel dello
+        ''' schermo. A 96 DPI i due numeri coincidono e non si vede niente. A 150% no: la
+        ''' finestra <b>minima</b> (1150 unità di progetto) è larga 1725 pixel, che è già
+        ''' oltre il tetto — e da lì in su ogni misura, massimizzata compresa, ricadeva
+        ''' sullo stesso valore. Su quello schermo la scritta non seguiva più la finestra
+        ''' <b>affatto</b>: è la trappola del cap. 03.4 (decisione 15.7), ripresentata il
+        ''' giorno stesso in cui i fermi sono nati.</para>
+        ''' <para>Si chiede al pannello cosa farebbe a 144 DPI pur girando a 96, che è
+        ''' esattamente perché queste sono funzioni pure a cui il DPI si passa. Le due
+        ''' misure sono quelle vere di quello schermo: la finestra al suo minimo e la stessa
+        ''' finestra massimizzata su un monitor da 1920 pixel.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LaScrittaSegueLaFinestraAncheSulloSchermoIngrandito()
+
+            Const Dpi150 As Integer = 144
+
+            Dim alMinimo As Integer = PannelloMenu.LarghezzaDiRiferimento(New Size(1725, 880), Dpi150)
+            Dim massimizzata As Integer = PannelloMenu.LarghezzaDiRiferimento(New Size(1920, 1000), Dpi150)
+
+            Assert.IsGreaterThan(alMinimo, massimizzata,
+                                 "a 150% la scritta non distingue più la finestra minima dalla massimizzata")
+
+            ' E il tetto continua a mordere dove deve: due schermi molto larghi danno la
+            ' stessa scritta, che è quel che i fermi servono a fare.
+            Assert.AreEqual(PannelloMenu.LarghezzaDiRiferimento(New Size(2880, 1400), Dpi150),
+                            PannelloMenu.LarghezzaDiRiferimento(New Size(3840, 1800), Dpi150),
+                            "oltre il tetto non cresce più, nemmeno a DPI alto")
+
+            ' A 96 DPI la conversione non fa niente: la scala validata a video resta quella.
+            Assert.AreEqual(1134, PannelloMenu.LarghezzaDiRiferimento(New Size(1134, 485)),
+                            "sul DPI di progetto il conto è quello di sempre")
+
+        End Sub
+
+        ''' <summary>
+        ''' Dopo un ingrandimento la scala è quella della misura nuova, non un ricordo di
+        ''' quella vecchia.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>La proprietà che la segnalazione del tutor metteva in dubbio: «ridimensiono
+        ''' la finestra piccola, poi la massimizzo, e non mantiene le dimensioni del font».
+        ''' Detta senza schermo è questa — <b>la disposizione del menu non ha memoria</b>:
+        ''' arrivare a una misura passando da un'altra deve dare lo stesso identico
+        ''' risultato che arrivarci di colpo.</para>
+        ''' <para>Non è una proprietà gratuita. Il pannello <b>tiene da parte</b> la tela su
+        ''' cui il nome è dipinto (v. <c>StratoDelloSfondo</c>) e rifà il font dei bottoni
+        ''' solo quando il corpo cambia: due meccanismi che ricordano, e a cui basterebbe una
+        ''' chiave sbagliata per restare fermi alla misura di prima. Per questo si guarda
+        ''' anche l'<b>inchiostro</b> — dove finisce davvero la scritta dipinta — e non solo
+        ''' la geometria che si potrebbe ricalcolare: una tela vecchia riproposta tale e
+        ''' quale non sposta nessun bottone.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub DopoUnIngrandimentoLaScalaEQuellaDellaMisuraNuova()
+
+            ' La misura piccola è più piccola anche di quella con cui il pannello nasce
+            ' (1134×513, dal designer): se non lo fosse, una disposizione che si ricordasse
+            ' della misura più stretta mai vista si ricorderebbe comunque di quella di
+            ' nascita, e i due percorsi finirebbero uguali per il motivo sbagliato.
+            Dim piccola As New Size(1000, 420)
+            Dim grande As New Size(1936, 940)
+
+            Dim dirittura As String
+            Dim inchiostroDiritto As Rectangle
+
+            Using menu As New PannelloMenu()
+                menu.Size = grande
+                menu.ImpostaIngombroLogo(New Size(261, 216))
+                dirittura = ComeStaIlMenu(menu)
+                inchiostroDiritto = InchiostroDelNome(menu)
+            End Using
+
+            Using menu As New PannelloMenu()
+
+                ' Prima piccola, come chi rimpicciolisce la finestra a mano. La scritta si
+                ' dipinge **davvero** a questa misura, e non è un dettaglio del collaudo: è
+                ' quel che mette la tela in cache. Senza questo passaggio il menu arriverebbe
+                ' grande con la prima tela della sua vita, e la memoria che si vuole
+                ' sorvegliare non esisterebbe ancora — la prova sarebbe verde comunque.
+                menu.Size = piccola
+                menu.ImpostaIngombroLogo(New Size(130, 96))
+
+                Assert.AreNotEqual(dirittura, ComeStaIlMenu(menu),
+                                   "da piccola il menu deve pur essere diverso, o la prova non prova niente")
+                Assert.AreNotEqual(inchiostroDiritto, InchiostroDelNome(menu),
+                                   "e la scritta pure")
+
+                ' …e poi il quadratino in alto a destra.
+                menu.Size = grande
+                menu.ImpostaIngombroLogo(New Size(261, 216))
+
+                Assert.AreEqual(dirittura, ComeStaIlMenu(menu),
+                                "il menu si ricorda della misura piccola")
+
+                Assert.AreEqual(inchiostroDiritto, InchiostroDelNome(menu),
+                                "la scritta dipinta si ricorda della misura piccola")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>Come sta il menu adesso: la fascia, e i sei bottoni col loro corpo.</summary>
+        Private Shared Function ComeStaIlMenu(menu As PannelloMenu) As String
+
+            Dim righe As New List(Of String) From {
+                $"fascia {PannelloMenu.FasciaDelTesto(menu.ClientSize)}"}
+
+            For Each bottone As BottoneMenu In
+                menu.Controls.OfType(Of BottoneMenu)().OrderBy(Function(b) b.Top)
+
+                righe.Add($"{bottone.Name} {bottone.Bounds} corpo {bottone.Font.Size:F3}")
+
+            Next
+
+            Return String.Join(" · ", righe)
+
+        End Function
+
+        ''' <summary>
+        ''' Il riquadro dell'inchiostro nella fascia del nome: dove la scritta dipinta
+        ''' comincia e dove finisce.
+        ''' </summary>
+        ''' <remarks>
+        ''' Si dipinge il pannello su una tela e si guardano i pixel che non sono l'avorio
+        ''' del fondo. È l'unico modo di vedere la tela tenuta da parte: quella non ha
+        ''' nessuna misura da interrogare, e un ridisegno mancato non lascia altra traccia
+        ''' che sullo schermo. La soglia è larga perché il testo è antialiasato e i bordi
+        ''' sfumano nell'avorio.
+        ''' </remarks>
+        Private Shared Function InchiostroDelNome(menu As PannelloMenu) As Rectangle
+
+            Using tela As New Bitmap(menu.Width, menu.Height)
+
+                menu.DrawToBitmap(tela, New Rectangle(0, 0, menu.Width, menu.Height))
+
+                Dim fascia As Integer = Math.Min(PannelloMenu.FasciaDelTesto(menu.ClientSize), tela.Height)
+                Dim fondo As Color = StileApp.FondoMenu
+
+                Dim sinistra As Integer = Integer.MaxValue, destra As Integer = -1
+                Dim cima As Integer = Integer.MaxValue, fine As Integer = -1
+
+                For y As Integer = 0 To fascia - 1
+                    For x As Integer = 0 To tela.Width - 1
+
+                        Dim punto As Color = tela.GetPixel(x, y)
+                        If Math.Abs(CInt(punto.R) - fondo.R) + Math.Abs(CInt(punto.G) - fondo.G) +
+                           Math.Abs(CInt(punto.B) - fondo.B) <= 12 Then Continue For
+
+                        If x < sinistra Then sinistra = x
+                        If x > destra Then destra = x
+                        If y < cima Then cima = y
+                        If y > fine Then fine = y
+
+                    Next
+                Next
+
+                If destra < 0 Then Return Rectangle.Empty
+                Return Rectangle.FromLTRB(sinistra, cima, destra + 1, fine + 1)
+
+            End Using
+
+        End Function
+
         <TestMethod>
         Public Sub LaFasciaDelNomeSegueLaScrittaENonLAltezza()
 

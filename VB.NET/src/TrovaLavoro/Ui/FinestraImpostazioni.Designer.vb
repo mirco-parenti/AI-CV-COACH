@@ -25,6 +25,7 @@ Partial Class FinestraImpostazioni
         Me.lblTitolo = New System.Windows.Forms.Label()
         Me.lblSpiegazione = New System.Windows.Forms.Label()
         Me.btnComeFunziona = New System.Windows.Forms.Button()
+        Me.btnInformazioni = New System.Windows.Forms.Button()
         Me.lblSezioneChiave = New System.Windows.Forms.Label()
         Me.lblStatoChiave = New System.Windows.Forms.Label()
         Me.btnCambiaChiave = New System.Windows.Forms.Button()
@@ -86,6 +87,13 @@ Partial Class FinestraImpostazioni
         Me.btnComeFunziona.Size = StileApp.BottoneMedio
         Me.btnComeFunziona.TabIndex = 2
         Me.btnComeFunziona.Text = "Come funziona…"
+        '
+        'btnInformazioni
+        '
+        Me.btnInformazioni.Name = "btnInformazioni"
+        Me.btnInformazioni.Size = StileApp.BottoneMedio
+        Me.btnInformazioni.TabIndex = 3
+        Me.btnInformazioni.Text = "Informazioni su…"
         '
         'lblSezioneChiave
         '
@@ -362,6 +370,7 @@ Partial Class FinestraImpostazioni
         Me.pnlContenuto.Controls.Add(Me.lblTitolo)
         Me.pnlContenuto.Controls.Add(Me.lblSpiegazione)
         Me.pnlContenuto.Controls.Add(Me.btnComeFunziona)
+        Me.pnlContenuto.Controls.Add(Me.btnInformazioni)
         Me.pnlContenuto.Controls.Add(Me.lblSezioneChiave)
         Me.pnlContenuto.Controls.Add(Me.lblStatoChiave)
         Me.pnlContenuto.Controls.Add(Me.btnCambiaChiave)
@@ -414,6 +423,7 @@ Partial Class FinestraImpostazioni
     Friend WithEvents lblTitolo As System.Windows.Forms.Label
     Friend WithEvents lblSpiegazione As System.Windows.Forms.Label
     Friend WithEvents btnComeFunziona As System.Windows.Forms.Button
+    Friend WithEvents btnInformazioni As System.Windows.Forms.Button
     Friend WithEvents lblSezioneChiave As System.Windows.Forms.Label
     Friend WithEvents lblStatoChiave As System.Windows.Forms.Label
     Friend WithEvents btnCambiaChiave As System.Windows.Forms.Button

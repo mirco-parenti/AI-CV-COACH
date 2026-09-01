@@ -638,12 +638,78 @@ Namespace Ui
 
         End Sub
 
+        ' ==================================================================
+        ' «Informazioni su…», che dal 2026-09-01 si apre di qui
+        ' ==================================================================
+
+        ''' <summary>
+        ''' Dalle Impostazioni si arriva a «Informazioni su…», e ci si arriva con tutto.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Fino al 2026-09-01 quella finestra si apriva <b>cliccando il pannello del
+        ''' logo</b>. Su indicazione del tutor il clic sullo stemma è stato tolto
+        ''' (v. <c>CollaudiMarchio</c>), e la finestra è venuta qui: perché dentro ci vivono
+        ''' «Cerca aggiornamenti» e «Copia diagnostica», cioè le due cose che si cercano
+        ''' quando qualcosa non torna, e toglier loro la porta senza dargliene un'altra
+        ''' sarebbe stato perderle in silenzio.</para>
+        ''' <para>Non basta quindi che il bottone ci sia: si guarda che le Impostazioni
+        ''' sappiano consegnare a quella finestra le <b>due cose che prima le dava la
+        ''' finestra principale</b> — l'etichetta del pool e il foglietto di diagnostica —
+        ''' e lo si guarda costruendo davvero «Informazioni su…» con quel che passerebbe il
+        ''' bottone. Un bottone che apre una finestra vuota è un bottone che non ha spostato
+        ''' niente.</para>
+        ''' <para>Il clic non si può premere: «Informazioni su…» è modale, e di una finestra
+        ''' modale il banco non può aspettare la chiusura (cap. 14). Si prova quindi la
+        ''' consegna, che è la parte che può rompersi.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub DalleImpostazioniSiArrivaAInformazioniSu()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        finestra.DisponiIn(4000)
+
+                        Dim bottone As Button = Comando(finestra, "btnInformazioni")
+
+                        Assert.IsTrue(bottone.Enabled, "il bottone è acceso: la porta è aperta sempre")
+                        Assert.AreEqual(Comando(finestra, "btnComeFunziona").Left, bottone.Left,
+                                        "e sta nella colonna dei comandi, come tutti gli altri")
+
+                        ' La finestra vera che il bottone aprirebbe, chiesta a chi la
+                        ' rifornisce: ricostruirla qui vorrebbe dire collaudare il collaudo.
+                        Using informazioni As FinestraInformazioni = finestra.InformazioniSuTrovaLavoro()
+
+                            StringAssert.Contains(informazioni.RigaDiVersione, contesto.EtichettaDelPool,
+                                                  "la riga di versione dice con quale pool si sta lavorando")
+
+                            Assert.IsTrue(informazioni.PuoCopiareLaDiagnostica,
+                                          "e «Copia diagnostica» c'è: senza il foglietto il bottone sparirebbe")
+
+                        End Using
+
+                        ' Il foglietto è pieno davvero, non una scatola con dentro i ripieghi.
+                        Dim foglietto As String = finestra.ComponiLaDiagnostica()
+
+                        StringAssert.Contains(foglietto, contesto.Cartella.Radice,
+                                              "dice dove sta la cartella dati")
+                        StringAssert.Contains(foglietto, contesto.Modelli.ModelloRagionamento.Id,
+                                              "e con quali modelli si sta lavorando")
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
         ''' <summary>I comandi di sezione della finestra, per i collaudi della colonna.</summary>
         Private Shared Function ComandiDiSezione(finestra As Control) As Button()
 
-            Return {"btnComeFunziona", "btnCambiaChiave", "btnApriCartellaDati",
-                    "btnGestisciDocumenti", "btnApriModelli", "btnApriChiamate",
-                    "btnBackup", "btnSvuotaNavigazione", "btnEliminaTutto"}.
+            Return {"btnComeFunziona", "btnInformazioni", "btnCambiaChiave",
+                    "btnApriCartellaDati", "btnGestisciDocumenti", "btnApriModelli",
+                    "btnApriChiamate", "btnBackup", "btnSvuotaNavigazione", "btnEliminaTutto"}.
                 Select(Function(nome) Comando(finestra, nome)).ToArray()
 
         End Function

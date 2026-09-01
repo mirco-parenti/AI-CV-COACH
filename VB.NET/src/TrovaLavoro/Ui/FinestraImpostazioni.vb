@@ -22,9 +22,11 @@ Imports TrovaLavoro.Motore
 ''' <para><b>Richiama invece di rifare.</b> La chiave passa dalla
 ''' <see cref="FinestraChiaveApi"/> del primo avvio, il backup dalla
 ''' <see cref="FinestraBackup"/> nata a T9a, l'eliminazione totale dalla
-''' <see cref="FinestraConfermaCritica"/> che chiede la parola. Tre finestre che esistono
-''' già e che qui non hanno un sosia: se un giorno cambia il modo di chiedere una chiave,
-''' cambia in un posto solo.</para>
+''' <see cref="FinestraConfermaCritica"/> che chiede la parola, e dal 2026-09-01 la carta
+''' d'identità del programma dalla <see cref="FinestraInformazioni"/>, che prima si apriva
+''' cliccando il pannello del logo. Quattro finestre che esistono già e che qui non hanno
+''' un sosia: se un giorno cambia il modo di chiedere una chiave, cambia in un posto
+''' solo.</para>
 ''' <para><b>Quel che non si tocca da qui.</b> La <i>cartella dati</i> si mostra e si apre
 ''' ma non si sposta: il lucchetto è preso all'avvio e per tutta la sessione (cap. 09.4),
 ''' e cambiarla a metà partita vorrebbe dire spostare file sotto i piedi di chi ci sta
@@ -170,6 +172,87 @@ Public Class FinestraImpostazioni
     Private Sub btnComeFunziona_Click(sender As Object, e As EventArgs) Handles btnComeFunziona.Click
         FinestraInformativa.Mostra(Me)
     End Sub
+
+    ' ==================================================================
+    ' «Informazioni su…» (2026-09-01, su indicazione del tutor)
+    ' ==================================================================
+
+    ''' <summary>
+    ''' Apre «Informazioni su…» (cap. 03.4): chi è questo programma, che versione è, e da
+    ''' lì «Cerca aggiornamenti» e «Copia diagnostica».
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Fino al 2026-09-01 quella finestra si apriva <b>cliccando il pannello del
+    ''' logo</b> in basso a sinistra. Su indicazione del tutor il gesto è stato tolto — lo
+    ''' stemma è un'insegna, non una porta — e la finestra è venuta qui, accanto a «Come
+    ''' funziona…»: sono le due voci che parlano <b>del programma</b> invece che delle
+    ''' scelte che lo governano, e stanno insieme in cima, prima che le impostazioni vere e
+    ''' proprie comincino.</para>
+    ''' <para>Non è un dettaglio di comodo: dentro «Informazioni su…» vivono il controllo
+    ''' degli aggiornamenti e la copia della diagnostica, cioè le due cose che si vanno a
+    ''' cercare quando qualcosa non torna. Toglierle la porta senza dargliene un'altra
+    ''' sarebbe stato perderle in silenzio.</para>
+    ''' </remarks>
+    Private Sub btnInformazioni_Click(sender As Object, e As EventArgs) Handles btnInformazioni.Click
+
+        Using finestra As FinestraInformazioni = InformazioniSuTrovaLavoro()
+            finestra.ShowDialog(Me)
+        End Using
+
+    End Sub
+
+    ''' <summary>
+    ''' «Informazioni su…» già rifornita di quel che sa questa finestra: l'etichetta del
+    ''' pool e il foglietto di diagnostica.
+    ''' </summary>
+    ''' <remarks>
+    ''' Sta in un metodo suo, e non dentro il gestore del bottone, perché è la <b>consegna</b>
+    ''' la cosa che può rompersi: una finestra aperta senza il foglietto perde «Copia
+    ''' diagnostica» senza dirlo a nessuno. Di una finestra modale il banco non può aspettare
+    ''' la chiusura, ma di questa può chiedere la <i>stessa</i> che il bottone aprirebbe —
+    ''' che è l'unico modo di collaudare la consegna invece di ricostruirla nel collaudo, e
+    ''' di ricostruirla giusta per sbaglio.
+    ''' </remarks>
+    Public Function InformazioniSuTrovaLavoro() As FinestraInformazioni
+
+        Return New FinestraInformazioni(_contesto.EtichettaDelPool, AddressOf ComponiLaDiagnostica)
+
+    End Function
+
+    ''' <summary>
+    ''' Il foglietto da mettere negli appunti quando si chiede «Copia diagnostica»
+    ''' (cap. 11.1). Si compone al momento del clic e non all'apertura della finestra:
+    ''' fra le due cose può esserci passato di mezzo il guasto che si vuole raccontare.
+    ''' </summary>
+    ''' <remarks>
+    ''' Pubblica per il banco, come gli altri mestieri di questa finestra: «Informazioni
+    ''' su…» è modale e di una finestra modale non si può aspettare la chiusura, quindi
+    ''' quel che vale la pena controllare — che il foglietto sia davvero pieno — si legge
+    ''' da qui. Viveva in <c>FormPrincipale</c> finché la porta era il pannello del logo;
+    ''' è venuta con la porta, e sta bene qui: tutto quel che le serve è nel contesto, che
+    ''' questa finestra ha già in mano.
+    ''' </remarks>
+    Public Function ComponiLaDiagnostica() As String
+
+        Return Diagnostica.Componi(
+            Date.Now,
+            Versione.Riga(_contesto.EtichettaDelPool),
+            Versione.RigaDelSorgente(),
+            _contesto.Cartella?.Radice,
+            ModelliInVigore(),
+            _contesto.Diario?.UltimeRighe(Diagnostica.RigheDiDiario))
+
+    End Function
+
+    ''' <summary>I due modelli in vigore, scritti come si leggono; <c>Nothing</c> se non ci sono.</summary>
+    Private Function ModelliInVigore() As String
+
+        Dim modelli As Ai.Modelli = _contesto.Modelli
+        If modelli Is Nothing Then Return Nothing
+
+        Return $"{modelli.ModelloSemplice?.Id} (estrazione) · {modelli.ModelloRagionamento?.Id} (ragionamento)"
+
+    End Function
 
     Private Sub btnCambiaChiave_Click(sender As Object, e As EventArgs) Handles btnCambiaChiave.Click
 
@@ -879,6 +962,7 @@ Public Class FinestraImpostazioni
         numFollowUp.ForeColor = StileApp.TestoPrimario
 
         StileApp.VestiBottone(btnComeFunziona, LivelloBottone.Esplorativo)
+        StileApp.VestiBottone(btnInformazioni, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnCambiaChiave, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnApriCartellaDati, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnGestisciDocumenti, LivelloBottone.Esplorativo)
@@ -970,9 +1054,9 @@ Public Class FinestraImpostazioni
     ''' </remarks>
     Private Function ComandiDiSezione() As Button()
 
-        Return New Button() {btnComeFunziona, btnCambiaChiave, btnApriCartellaDati,
-                             btnGestisciDocumenti, btnApriModelli, btnApriChiamate,
-                             btnBackup, btnSvuotaNavigazione, btnEliminaTutto}
+        Return New Button() {btnComeFunziona, btnInformazioni, btnCambiaChiave,
+                             btnApriCartellaDati, btnGestisciDocumenti, btnApriModelli,
+                             btnApriChiamate, btnBackup, btnSvuotaNavigazione, btnEliminaTutto}
 
     End Function
 
@@ -1041,9 +1125,15 @@ Public Class FinestraImpostazioni
 
         lblTitolo.Location = New Point(sinistra, StileApp.MargineRiquadro)
         lblSpiegazione.Location = New Point(sinistra, lblTitolo.Bottom + StileApp.DistanzaControlli)
-        btnComeFunziona.Location = New Point(destra, lblSpiegazione.Top)
 
-        Dim sotto As Integer = Math.Max(lblSpiegazione.Bottom, btnComeFunziona.Bottom)
+        ' Le due voci che parlano del programma, in cima e una sotto l'altra: «Come
+        ' funziona…» è l'informativa del cap. 11.2, «Informazioni su…» è la carta
+        ' d'identità dell'eseguibile e la strada per gli aggiornamenti e la diagnostica.
+        ' Nessuna delle due è una scelta da fare, e per questo stanno prima delle sezioni.
+        btnComeFunziona.Location = New Point(destra, lblSpiegazione.Top)
+        btnInformazioni.Location = New Point(destra, btnComeFunziona.Bottom + StileApp.DistanzaControlli)
+
+        Dim sotto As Integer = Math.Max(lblSpiegazione.Bottom, btnInformazioni.Bottom)
 
         ' --- La chiave ---
         lblSezioneChiave.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
