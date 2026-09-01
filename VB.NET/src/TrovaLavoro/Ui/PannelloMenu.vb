@@ -52,8 +52,8 @@ End Class
 
 ''' <summary>
 ''' Pannello P0 — il menu d'ingresso: sei bottoni a pillola su un fondo avorio, col nome
-''' del prodotto in cima e il mega stemma Aviolab dietro. È la schermata su cui
-''' l'applicazione si apre.
+''' del prodotto e il suo sottotitolo in cima. È la schermata su cui l'applicazione si
+''' apre.
 ''' </summary>
 ''' <remarks>
 ''' <para><b>Non sostituisce la barra, la precede.</b> La barra in alto resta dov'è e
@@ -65,27 +65,34 @@ End Class
 ''' <c>FormPrincipale</c>, che è l'unico posto in cui è già scritto come si passa da un
 ''' pannello all'altro — e uno dei sei (le Impostazioni) non è nemmeno un pannello, ma
 ''' una finestra che si apre sopra.</para>
+''' <para><b>Il marchio qui dietro non c'è.</b> Fra il 2026-08-30 e il 2026-09-01 questo
+''' fondo ha portato un <b>mega stemma</b> Aviolab dietro la colonna dei bottoni: è stato
+''' tolto, e lo stemma è tornato a vivere in un posto solo, il pannello del logo
+''' flottante in basso a sinistra (cap. 03.5). Un marchio che compare in tre punti della
+''' stessa schermata non si legge tre volte, si legge come rumore; e uno stemma grande
+''' quanto l'area, per quanto sbiadito, è uno sfondo con cui i bottoni devono comunque
+''' contendere. Restano il nome e l'avorio, che sono già il marchio.</para>
 ''' <para><b>Lo sfondo si dipinge, non si carica.</b> Dal 2026-08-30 (sera) il fondo non
-''' è più il banner del marchio ma tre cose disegnate a video: l'avorio di
-''' <see cref="StileApp.FondoMenu"/>, il <b>mega stemma</b> Aviolab dietro la colonna dei
-''' bottoni, e in cima <see cref="Titolo"/> e <see cref="Sottotitolo"/> — le stesse due
-''' righe del banner, centrate sull'asse e senza il timbro che sul banner sta a destra
-''' del nome. Il vantaggio non è estetico: un fondo dipinto <b>segue la finestra</b>,
-''' mentre un'immagine sola può solo starci dentro o essere tagliata, e su una finestra
-''' panoramica il banner quasi quadrato lasciava blu ai lati.</para>
-''' <para><b>Il velo bianco è rimasto, e li prende tutti e tre.</b> Sul banner
-''' schiariva l'immagine intera; qui non si stende sul fondo — <c>#FFFAF0</c> velato
-''' diventa <c>#FFFDF8</c>, che è lo stesso colore, e l'avorio va lasciato esatto —
-''' ma su <b>quel che ci sta sopra</b>: mega stemma, nome e sottotitolo insieme. Sono
-''' tutti e tre sfondo, e sfondo vuol dire stare dietro ai bottoni senza contendere.</para>
-''' <para><b>Come si stende un velo su tre cose e non sulla quarta.</b> Gli elementi si
+''' è più il banner del marchio ma due cose disegnate a video: l'avorio di
+''' <see cref="StileApp.FondoMenu"/>, e in cima <see cref="Titolo"/> e
+''' <see cref="Sottotitolo"/> — le stesse due righe del banner, centrate sull'asse e senza
+''' il timbro che sul banner sta a destra del nome. Il vantaggio non è estetico: un fondo
+''' dipinto <b>segue la finestra</b>, mentre un'immagine sola può solo starci dentro o
+''' essere tagliata, e su una finestra panoramica il banner quasi quadrato lasciava blu ai
+''' lati.</para>
+''' <para><b>Il velo bianco è rimasto, e prende le due righe.</b> Sul banner schiariva
+''' l'immagine intera; qui non si stende sul fondo — <c>#FFFAF0</c> velato diventa
+''' <c>#FFFDF8</c>, che è lo stesso colore, e l'avorio va lasciato esatto — ma su
+''' <b>quel che ci sta sopra</b>: nome e sottotitolo. Sono sfondo tutti e due, e sfondo
+''' vuol dire stare dietro ai bottoni senza contendere.</para>
+''' <para><b>Come si stende un velo sul nome e non sull'avorio.</b> Le due righe si
 ''' disegnano <b>a piena forza su una tela a parte</b>, e la tela si appoggia sull'avorio
-''' con l'opacità abbassata in una volta sola. La via corta — disegnare ciascuno con un
-''' colore già trasparente — qui non funziona: il nome è un contorno nero <i>e</i> un
-''' riempimento bianco sullo stesso percorso, e col bianco trasparente il nero di sotto
-''' riaffiorerebbe dentro le lettere, che verrebbero grigie ai bordi invece che bianche.
-''' L'altra via corta — un rettangolo bianco steso sopra tutto, com'era sul banner —
-''' schiarirebbe anche l'avorio.</para>
+''' con l'opacità abbassata in una volta sola. La via corta — scrivere già con un colore
+''' trasparente — qui non funziona: il nome è un contorno nero <i>e</i> un riempimento
+''' bianco sullo stesso percorso, e col bianco trasparente il nero di sotto riaffiorerebbe
+''' dentro le lettere, che verrebbero grigie ai bordi invece che bianche. L'altra via
+''' corta — un rettangolo bianco steso sopra tutto, com'era sul banner — schiarirebbe
+''' anche l'avorio.</para>
 ''' <para><b>Perché la disposizione è a mano e non un <c>TableLayoutPanel</c>.</b> I
 ''' bottoni devono restare centrati e proporzionati su finestre molto diverse — e stare
 ''' lontani dal pannello del logo, che è flottante sull'angolo in basso a sinistra
@@ -113,11 +120,11 @@ Public Class PannelloMenu
     ''' <summary><inheritdoc cref="NomeFontTitolo" path="/summary"/></summary>
     Private Const NomeFontSottotitolo As String = "Segoe UI Semibold"
 
-    ''' <summary>Quanto è coprente il velo bianco sopra il mega stemma, da 0 a 255.</summary>
+    ''' <summary>Quanto è coprente il velo bianco sopra il nome, da 0 a 255.</summary>
     ''' <remarks>
-    ''' Scelto guardandolo a video quando il fondo era il banner, e rimasto lo stesso: a
-    ''' 140 lo stemma si riconosce e sta dietro ai bottoni senza contendere. È la sola
-    ''' manopola dell'effetto — alzarlo lo sbianca, abbassarlo lo riporta avanti.
+    ''' Scelto guardandolo a video quando il fondo era il banner, e rimasto lo stesso da
+    ''' allora: a 140 le due righe si leggono e stanno dietro ai bottoni senza contendere.
+    ''' È la sola manopola dell'effetto — alzarlo le sbianca, abbassarlo le riporta avanti.
     ''' </remarks>
     Private Const VeloBianco As Integer = 140
 
@@ -126,23 +133,12 @@ Public Class PannelloMenu
     ''' Sul banner nome e sottotitolo occupavano i primi 356 px su 1348, poco oltre un
     ''' quarto: qui la fascia è un filo più alta perché deve contenere anche il
     ''' <see cref="FrazioneRespiro">respiro</see> che stacca il sottotitolo dal primo
-    ''' bottone. Sotto di lei comincia tutto il resto — il mega stemma e la colonna.
+    ''' bottone. Sotto di lei comincia la colonna.
     ''' </remarks>
     Private Const FrazioneFasciaDelTesto As Double = 0.32
 
     ''' <summary>Quanta parte della fascia resta vuota in fondo, per staccare il primo bottone.</summary>
-    ''' <remarks>
-    ''' È un respiro che serve ai <b>bottoni</b>, non allo stemma: v.
-    ''' <see cref="ZonaDelloStemma"/>.
-    ''' </remarks>
     Private Const FrazioneRespiro As Double = 0.18
-
-    ''' <summary>Di quanto lo stemma resta sotto il sottotitolo, in frazione della fascia.</summary>
-    ''' <remarks>
-    ''' Poco: quel tanto che basta perché il colmo dello scudo non tocchi le lettere. Il
-    ''' respiro vero, quello grande, è più sotto e riguarda il primo bottone.
-    ''' </remarks>
-    Private Const FrazioneStaccoStemma As Double = 0.05
 
     ''' <summary>Quanta parte della larghezza si prende il nome.</summary>
     ''' <remarks>
@@ -174,8 +170,12 @@ Public Class PannelloMenu
     ''' il 2026-08-30 (sera), quando il fondo è diventato il mega stemma. A 690 la colonna
     ''' lo copriva per intero, e di uno scudo alto quanto tutta la zona si vedevano tre
     ''' strisce negli stacchi fra una pillola e l'altra — che a occhio non sembrava un
-    ''' marchio, sembrava un difetto. È il genere di cosa che si decide guardando, non
-    ''' calcolando.</para>
+    ''' marchio, sembrava un difetto.</para>
+    ''' <para>Lo stemma dietro non c'è più dal 2026-09-01, e con lui se n'è andata la
+    ''' ragione per cui questo numero era sceso a 420. Il numero è rimasto: allargare la
+    ''' colonna adesso sarebbe una terza misura decisa <b>calcolando</b>, e queste si
+    ''' decidono guardando. Chi la riguarderà a video parta da qui sapendo che 420 non
+    ''' difende più niente.</para>
     ''' <para>Il <b>rapporto</b> fra i due lati non si è mosso (7,9), e non è un vezzo: il
     ''' corpo del testo segue l'altezza del bottone, quindi stringere la sola larghezza
     ''' avrebbe lasciato lettere da bottone grande dentro un bottone corto.</para>
@@ -201,37 +201,23 @@ Public Class PannelloMenu
     ''' Di quanto la colonna sta più in alto del centro, in altezze di bottone.
     ''' </summary>
     ''' <remarks>
-    ''' <para>Un bottone, deciso guardando. Il centro geometrico della zona non è il
-    ''' centro che l'occhio si aspetta: sotto la colonna non c'è niente fino al bordo,
-    ''' sopra c'è il nome, e una colonna esattamente centrata sembra scivolata in basso.
-    ''' È lo stesso genere di correzione con cui si compone una pagina — il blocco si alza
-    ''' un poco, perché il margine di sotto pesa meno di quello di sopra.</para>
-    ''' <para>La misura però non è arbitraria, e il metro è lo <b>stemma</b>: la colonna
-    ''' deve stare <b>dentro</b> il campo blu, e il primo tasto non sedersi sulle due
-    ''' stelle laterali, che hanno la cima a 64 px sulla tela di 256 — su una finestra
-    ''' massimizzata, a y 511. Ci si è arrivati per gradi, misurando ogni volta dove
-    ''' finiva il primo tasto: a <b>mezzo</b> bottone finiva a 540, cioè quasi trenta
-    ''' pixel <i>sotto</i> la cima delle stelle; a <b>uno</b> a 509, appena sopra; poi 496,
-    ''' 483, 469, 456. Il valore fermato è <b>uno e tre quarti</b>, col primo tasto a 469
-    ''' e quaranta pixel di aria sopra le stelle laterali — ci si è saliti fino a due e si
-    ''' è tornati di un quarto. Se un domani il marchio cambiasse e le stelle si
-    ''' spostassero, questo numero andrebbe riguardato: è legato a loro, anche se il
-    ''' codice non può saperlo.</para>
-    ''' <para>Perché ci si è fermati qui e non più su. Salendo, il primo tasto si allontana
-    ''' dalle due stelle laterali ma comincia a coprire la <b>stella grande</b> in mezzo,
-    ''' che sta più in alto (y 375-508 a video): a due bottoni ne restava visibile solo la
-    ''' punta. Da un certo punto in avanti alzare non è più un guadagno netto, è uno
-    ''' scambio fra le stelle di sotto e quella di sopra — e questo è il punto in
-    ''' cui lo scambio conviene ancora.</para>
-    ''' <para>Una cosa che il solo rialzo non può risolvere: le due stelle sono larghe
-    ''' quanto <b>sta dentro la colonna</b> (a video x 762-881 e 1050-1170, contro i
-    ''' 763-1173 dei bottoni), quindi in orizzontale restano dietro le pillole comunque, e
-    ''' si vedono solo negli stacchi fra un tasto e l'altro. Alzare la colonna le libera
-    ''' dal <i>primo</i> tasto, non da tutti.</para>
-    ''' <para><i>Due stime a occhio sono state smentite dal conto dei pixel, in mezz'ora:
-    ''' «a un bottone ne copre una dozzina» (ne copriva zero) e «a uno e mezzo le stelle
-    ''' restano libere sotto» (restano dietro il secondo tasto). Un numero che nasce
-    ''' guardando va poi misurato, o resta un'opinione scritta in un commento.</i></para>
+    ''' <para>Un bottone e tre quarti, deciso guardando. Il centro geometrico della zona
+    ''' non è il centro che l'occhio si aspetta: sotto la colonna non c'è niente fino al
+    ''' bordo, sopra c'è il nome, e una colonna esattamente centrata sembra scivolata in
+    ''' basso. È lo stesso genere di correzione con cui si compone una pagina — il blocco
+    ''' si alza un poco, perché il margine di sotto pesa meno di quello di sopra.</para>
+    ''' <para>Questa ragione regge da sola, ma non è quella che ha fissato il
+    ''' <b>quanto</b>: il metro fu lo <b>stemma</b> di sfondo, e in particolare le sue due
+    ''' stelle laterali, che il primo tasto non doveva coprire. Ci si arrivò per gradi —
+    ''' mezzo bottone, uno, poi 496, 483, 469, 456 — fermandosi a uno e tre quarti, col
+    ''' primo tasto a 469 e quaranta pixel di aria sopra le stelle. Dal 2026-09-01 lo
+    ''' stemma dietro non c'è più, e quel metro è sparito con lui: il numero resta come
+    ''' correzione dell'occhio, non più come misura di qualcosa. Se lo si vuole rifare, si
+    ''' rifà guardando la colonna sull'avorio nudo, che è un'altra cosa da guardare.</para>
+    ''' <para><i>Due stime a occhio furono smentite dal conto dei pixel, in mezz'ora: «a un
+    ''' bottone ne copre una dozzina» (ne copriva zero) e «a uno e mezzo le stelle restano
+    ''' libere sotto» (restavano dietro il secondo tasto). Un numero che nasce guardando va
+    ''' poi misurato, o resta un'opinione scritta in un commento.</i></para>
     ''' </remarks>
     Private Const RialzoColonna As Double = 1.75
 
@@ -252,11 +238,11 @@ Public Class PannelloMenu
     ''' <summary>Quanto spazio si prende il logo flottante (cap. 03.5).</summary>
     Private _ingombroLogo As Size
 
-    ''' <summary>Gli elementi di sfondo già disegnati, a piena forza, senza il velo.</summary>
+    ''' <summary>Il nome già disegnato, a piena forza, senza il velo.</summary>
     ''' <remarks>
-    ''' Tenuto da parte e non rifatto a ogni ridisegno: <see cref="LogoAviolab.Genera"/>
-    ''' decodifica il PNG e lo riscala, e il nome vuole due misurazioni di testo. Si rifà
-    ''' solo quando cambia la misura della finestra.
+    ''' Tenuto da parte e non rifatto a ogni ridisegno: le due righe vogliono due
+    ''' misurazioni di testo e due percorsi contornati, che a ogni pennellata del fondo
+    ''' sarebbero uno spreco. Si rifà solo quando cambia la misura della finestra.
     ''' </remarks>
     Private _sfondo As Bitmap
 
@@ -430,10 +416,10 @@ Public Class PannelloMenu
     ''' <summary>Dove finisce il sottotitolo, dentro la fascia.</summary>
     ''' <remarks>
     ''' Sotto di lì la fascia è vuota: è il respiro che stacca il nome dal primo bottone.
-    ''' Sta qui, e non dentro il disegno del testo, perché due cose lo devono sapere — chi
-    ''' scrive il nome, per non sconfinare, e chi mette il mega stemma, che in quel vuoto
-    ''' ci risale. Se lo calcolassero ognuno per conto suo, prima o poi direbbero due cose
-    ''' diverse.
+    ''' È il limite entro cui il blocco delle due righe si centra e oltre il quale non
+    ''' sconfina, e sta qui invece che dentro il disegno del testo perché è una misura
+    ''' della <b>geometria</b> del pannello: si può chiedere senza uno schermo, come la
+    ''' fascia da cui discende.
     ''' </remarks>
     Public Shared Function FineDelNome(area As Size) As Integer
 
@@ -461,73 +447,6 @@ Public Class PannelloMenu
 
     End Function
 
-    ''' <summary>
-    ''' Lo spazio in cui vive il mega stemma: comincia più in alto di quello dei bottoni.
-    ''' </summary>
-    ''' <remarks>
-    ''' Il respiro sotto il nome serve ai <b>bottoni</b>, non allo stemma: fermare anche
-    ''' lui là sotto gli faceva cominciare il colmo un dito più in basso di dove il
-    ''' sottotitolo finiva, con una striscia di avorio vuota in mezzo che non era di
-    ''' nessuno. Lo stemma quel vuoto se lo prende, e si ferma
-    ''' <see cref="FrazioneStaccoStemma">poco sotto</see> il sottotitolo.
-    ''' </remarks>
-    Public Shared Function ZonaDelloStemma(area As Size) As Rectangle
-
-        Dim zona As Rectangle = ZonaSottoIlNome(area)
-        If zona.Width <= 0 OrElse zona.Height <= 0 Then Return zona
-
-        Dim cima As Integer =
-            FineDelNome(area) + CInt(Math.Floor(FasciaDelTesto(area) * FrazioneStaccoStemma))
-
-        ' Non si sale mai sopra il nome, per stretta che sia la finestra.
-        If cima >= zona.Top Then Return zona
-
-        Return New Rectangle(zona.Left, cima, zona.Width, zona.Bottom - cima)
-
-    End Function
-
-    ''' <summary>
-    ''' Dove va disegnato il mega stemma: la <b>tela</b> del PNG, non lo scudo.
-    ''' </summary>
-    ''' <remarks>
-    ''' <para>Lo scudo viene alto quanto la <see cref="ZonaSottoIlNome">zona</see>, così
-    ''' esce di poco sopra il primo bottone e sotto l'ultimo. Ma il PNG ha dell'aria
-    ''' trasparente attorno (<see cref="LogoAviolab.ScudoDentroLaTela"/>): chiedere una
-    ''' tela alta quanto la zona darebbe uno scudo più basso del 6%, che è la sola cosa
-    ''' che la tela sbaglia. Perciò la tela si chiede <b>in proporzione</b>.</para>
-    ''' <para>Sul <b>centro</b>, invece, non c'è niente da correggere: nel PNG di oggi lo
-    ''' scudo sta esattamente in mezzo alla tela, e le due maniere di centrarlo danno lo
-    ''' stesso punto. Il conto parte lo stesso dal centro dello scudo — se il disegno un
-    ''' domani si spostasse, sarebbe ancora lo scudo a dover stare in mezzo — ma è una
-    ''' prudenza che oggi nessun collaudo può vedere.</para>
-    ''' <para>In larghezza lo scudo viene poco più di due terzi della sua altezza, e la
-    ''' colonna dei bottoni gli sta <b>dentro</b>: è per questo che il 2026-08-30 (sera) i
-    ''' bottoni sono passati da 690 a 420 di larghezza. Con la colonna larga come prima lo
-    ''' scudo spariva sotto, e se ne vedevano solo le strisce fra una pillola e
-    ''' l'altra.</para>
-    ''' </remarks>
-    Public Shared Function RiquadroDelloStemma(area As Size) As Rectangle
-
-        Dim zona As Rectangle = ZonaDelloStemma(area)
-        If zona.Width <= 0 OrElse zona.Height <= 0 Then Return Rectangle.Empty
-
-        Dim scudo As Rectangle = LogoAviolab.ScudoDentroLaTela
-        If scudo.Height <= 0 OrElse scudo.Width <= 0 Then Return Rectangle.Empty
-
-        Dim lato As Integer = Math.Max(1, CInt(Math.Round(
-            zona.Height * LogoAviolab.LatoDellaTela / CDbl(scudo.Height))))
-
-        ' Dov'è il centro dello scudo dentro la tela, in frazione del lato.
-        Dim centroX As Double = (scudo.Left + scudo.Right) / 2.0 / LogoAviolab.LatoDellaTela
-        Dim centroY As Double = (scudo.Top + scudo.Bottom) / 2.0 / LogoAviolab.LatoDellaTela
-
-        Return New Rectangle(
-            CInt(Math.Round(zona.Left + zona.Width / 2.0 - lato * centroX)),
-            CInt(Math.Round(zona.Top + zona.Height / 2.0 - lato * centroY)),
-            lato, lato)
-
-    End Function
-
     Protected Overrides Sub OnResize(e As EventArgs)
 
         MyBase.OnResize(e)
@@ -536,7 +455,7 @@ Public Class PannelloMenu
     End Sub
 
     ''' <summary>
-    ''' Dipinge il fondo: l'avorio, e sopra gli elementi di sfondo passati sotto il velo.
+    ''' Dipinge il fondo: l'avorio, e sopra il nome passato sotto il velo.
     ''' </summary>
     ''' <remarks>
     ''' L'avorio lo mette già <see cref="Control.BackColor"/>, che la base dipinge per
@@ -566,8 +485,7 @@ Public Class PannelloMenu
     End Sub
 
     ''' <summary>
-    ''' La tela con gli elementi di sfondo a piena forza, rifatta solo se la finestra è
-    ''' cambiata.
+    ''' La tela col nome a piena forza, rifatta solo se la finestra è cambiata.
     ''' </summary>
     Private Function StratoDelloSfondo() As Bitmap
 
@@ -579,35 +497,12 @@ Public Class PannelloMenu
         _misuraSfondo = Me.ClientSize
 
         Using g As Graphics = Graphics.FromImage(_sfondo)
-            DisegnaIlMegaStemma(g)
             DisegnaIlNome(g)
         End Using
 
         Return _sfondo
 
     End Function
-
-    ''' <summary>Il mega stemma dietro la colonna, a piena forza.</summary>
-    ''' <remarks>
-    ''' Il velo non si stende qui ma sulla tela intera (v.
-    ''' <see cref="OnPaintBackground"/>), insieme al nome: sono tutti e tre sfondo, e
-    ''' devono sbiadire della stessa quantità. Velarli uno per uno vorrebbe dire tre
-    ''' manopole da tenere d'accordo, e la prima volta che una si muove da sola lo si
-    ''' scopre guardando.
-    ''' </remarks>
-    Private Sub DisegnaIlMegaStemma(g As Graphics)
-
-        Dim riquadro As Rectangle = RiquadroDelloStemma(Me.ClientSize)
-        If riquadro.Width <= 0 OrElse riquadro.Height <= 0 Then Return
-
-        g.InterpolationMode = InterpolationMode.HighQualityBicubic
-        g.PixelOffsetMode = PixelOffsetMode.HighQuality
-
-        Using stemma As Bitmap = LogoAviolab.Genera(riquadro.Width)
-            g.DrawImage(stemma, riquadro)
-        End Using
-
-    End Sub
 
     ''' <summary>Il nome e il sottotitolo, centrati sull'asse nella fascia in cima.</summary>
     ''' <remarks>

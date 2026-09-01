@@ -4,13 +4,13 @@ Imports System.Runtime.InteropServices
 Imports System.Windows.Forms
 
 ''' <summary>
-''' La finestra che porta lo <see cref="ScudoDiCaricamento">scudo</see>, la sua ruota e
-''' la barra che si riempie in mezzo allo schermo mentre l'AI lavora (cap. 03.8).
+''' La finestra che porta la <see cref="ScudoDiCaricamento">ruota di pallini</see> e la
+''' barra che si riempie in mezzo allo schermo mentre l'AI lavora (cap. 03.8).
 ''' </summary>
 ''' <remarks>
-''' <para><b>Perché è una finestra a strati (<i>layered</i>) e non un controllo.</b> Lo
-''' scudo ha i bordi morbidi e il fondo trasparente: appoggiarlo su una finestra normale
-''' vorrebbe dire scegliere un colore da rendere invisibile
+''' <para><b>Perché è una finestra a strati (<i>layered</i>) e non un controllo.</b> I
+''' pallini hanno i bordi morbidi, e chi non è di testa è per metà trasparente: appoggiarli
+''' su una finestra normale vorrebbe dire scegliere un colore da rendere invisibile
 ''' (<c>TransparencyKey</c>), e attorno al disegno resterebbe l'alone di quel colore —
 ''' il difetto che il marchio ha già pagato una volta. Una finestra a strati riceve
 ''' invece l'immagine <b>con il suo canale alfa</b>: il disegno si posa sullo schermo
@@ -38,7 +38,7 @@ Friend NotInheritable Class FinestraDiCaricamento
     Private Const MiscelaConAlfa As Byte = 1
     Private Const DallaSorgente As Integer = 2
 
-    ''' <summary>Quanti scatti resta piena la barra prima che lo scudo se ne vada.</summary>
+    ''' <summary>Quanti scatti resta piena la barra prima che la finestra se ne vada.</summary>
     ''' <remarks>
     ''' Tre scatti da ottanta millisecondi: un quarto di secondo scarso, quanto basta
     ''' perché l'occhio veda la barra arrivare in fondo. Di più sarebbe un ritardo fra il
@@ -92,14 +92,14 @@ Friend NotInheritable Class FinestraDiCaricamento
     End Property
 
     ''' <summary>
-    ''' Mette lo scudo in mezzo allo schermo di quella finestra e lo fa girare.
+    ''' Mette l'indicatore in mezzo allo schermo di quella finestra e lo fa girare.
     ''' </summary>
     ''' <remarks>
     ''' Lo schermo è quello dove sta la finestra principale, non «il primo»: con due
     ''' monitor, il centro dello schermo è il centro di quello che l'utente sta
     ''' guardando. Si prende l'area <b>intera</b> e non quella di lavoro, perché il
     ''' centro dello schermo è il centro dello schermo — la barra delle applicazioni
-    ''' sposterebbe lo scudo in su di mezza sua altezza.
+    ''' sposterebbe l'indicatore in su di mezza sua altezza.
     ''' </remarks>
     Public Sub Accendi(finestraPrincipale As Form)
 
@@ -110,7 +110,7 @@ Friend NotInheritable Class FinestraDiCaricamento
         If dove.IsEmpty Then Return
 
         ' Un'attesa già in corso non ricomincia da capo. Non è prudenza teorica: chi
-        ' accende lo scudo è la stessa riga che spegne la barra di navigazione, e quella
+        ' accende l'indicatore è la stessa riga che spegne la barra di navigazione, e quella
         ' passa di qui più volte nella stessa attesa. Con la sola ruota non si vedeva —
         ' un pallino vale l'altro — mentre la barra si vedrebbe benissimo tornare a zero
         ' a metà strada, che è il modo più rapido di non essere creduta mai più.
@@ -130,14 +130,14 @@ Friend NotInheritable Class FinestraDiCaricamento
     End Sub
 
     ''' <summary>
-    ''' L'AI ha risposto: la barra scatta in fondo, si vede piena un istante, poi lo scudo
-    ''' se ne va. Non si distrugge niente: la prossima attesa è vicina.
+    ''' L'AI ha risposto: la barra scatta in fondo, si vede piena un istante, poi la
+    ''' finestra se ne va. Non si distrugge niente: la prossima attesa è vicina.
     ''' </summary>
     ''' <remarks>
     ''' <para><b>Quell'istante è ciò che rende vera la barra.</b> Per tutta l'attesa il
     ''' riempimento è una stima — onesta, ma una stima — e si ferma al 95%
     ''' (<see cref="ScudoDiCaricamento.RiempimentoMassimo"/>): l'ultimo pezzo lo riempie
-    ''' il fatto, cioè la risposta arrivata. Se lo scudo sparisse nello stesso
+    ''' il fatto, cioè la risposta arrivata. Se la finestra sparisse nello stesso
     ''' millisecondo, quel pezzo non lo vedrebbe nessuno, e agli occhi di chi guarda la
     ''' barra resterebbe una cosa che in fondo non ci arriva mai.</para>
     ''' <para>A contare l'istante è il battito che già c'è, non un secondo timer. La ruota

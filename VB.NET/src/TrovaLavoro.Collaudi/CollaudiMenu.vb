@@ -8,9 +8,9 @@ Namespace Ui
 
     ''' <summary>
     ''' Collaudi del menu d'ingresso (P0): che la fascia del nome lasci scoperta la cima,
-    ''' che il mega stemma nasca dalla misura dello scudo e non da quella della tela, che
-    ''' ognuna delle sei voci abbia il suo bottone, e che il menu si chiuda insieme alla
-    ''' barra quando l'AI lavora.
+    ''' che la colonna dei bottoni stia dove il progetto l'ha messa, che ognuna delle sei
+    ''' voci abbia il suo bottone, e che il menu si chiuda insieme alla barra quando l'AI
+    ''' lavora.
     ''' </summary>
     ''' <remarks>
     ''' Il pannello si costruisce e non si mostra, come gli altri collaudi di interfaccia:
@@ -76,126 +76,22 @@ Namespace Ui
         End Sub
 
         ' ==================================================================
-        ' Il mega stemma dietro i bottoni
+        ' Il marchio, che qui dietro non c'è più
         ' ==================================================================
-
-        ''' <summary>
-        ''' Lo scudo viene alto quanto la zona: esce di poco sopra il primo bottone e
-        ''' sotto l'ultimo.
-        ''' </summary>
-        ''' <remarks>
-        ''' Il riquadro che il pannello restituisce è quello della <b>tela</b>, che è più
-        ''' grande: qui si rifà il conto al contrario — dalla tela allo scudo — e si
-        ''' guarda che torni la zona. È il modo di accorgersi se un giorno qualcuno
-        ''' dimensionasse la tela invece dello scudo.
-        ''' </remarks>
-        <TestMethod>
-        Public Sub IlMegaStemmaHaLoScudoAltoQuantoLaZona()
-
-            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 485), New Size(700, 1000)}
-
-                Dim zona As Rectangle = PannelloMenu.ZonaDelloStemma(area)
-                Dim tela As Rectangle = PannelloMenu.RiquadroDelloStemma(area)
-
-                Dim scudoAlto As Double =
-                    tela.Height * LogoAviolab.ScudoDentroLaTela.Height / CDbl(LogoAviolab.LatoDellaTela)
-
-                Assert.AreEqual(CDbl(zona.Height), scudoAlto, 2.0,
-                                $"su {area.Width}x{area.Height} lo scudo è alto quanto la zona")
-
-            Next
-
-        End Sub
-
-        ''' <summary>
-        ''' La tela è più grande dello scudo, e di quanto: è la guardia contro il conto
-        ''' fatto sulla misura sbagliata.
-        ''' </summary>
-        ''' <remarks>
-        ''' Attorno allo scudo il PNG ha dell'aria trasparente. Chi dimensionasse la
-        ''' <b>tela</b> sull'altezza della zona otterrebbe uno scudo più basso del 6% — a
-        ''' video un difetto piccolo abbastanza da non vedersi. Qui si dichiara che la
-        ''' tela deve venire più alta della zona, il che è vero solo se il conto parte
-        ''' dallo scudo.
-        ''' </remarks>
-        <TestMethod>
-        Public Sub LaTelaDelMegaStemmaEPiuGrandeDellaZona()
-
-            Dim area As New Size(1134, 485)
-
-            Dim zona As Rectangle = PannelloMenu.ZonaDelloStemma(area)
-            Dim tela As Rectangle = PannelloMenu.RiquadroDelloStemma(area)
-
-            Assert.IsGreaterThan(zona.Height, tela.Height,
-                                 "la tela è più alta della zona: dentro ci sta lo scudo più la sua aria")
-            Assert.AreEqual(tela.Width, tela.Height,
-                            "e resta quadrata: il PNG è quadrato, deformarlo storcerebbe lo stemma")
-
-        End Sub
-
-        <TestMethod>
-        Public Sub IlMegaStemmaECentratoSullaZona()
-
-            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 485), New Size(700, 1000)}
-
-                Dim zona As Rectangle = PannelloMenu.ZonaDelloStemma(area)
-                Dim tela As Rectangle = PannelloMenu.RiquadroDelloStemma(area)
-                Dim scudo As Rectangle = LogoAviolab.ScudoDentroLaTela
-
-                ' Dov'è finito, a video, il centro dello scudo dentro la tela.
-                Dim fattore As Double = tela.Width / CDbl(LogoAviolab.LatoDellaTela)
-                Dim centroX As Double = tela.Left + (scudo.Left + scudo.Right) / 2.0 * fattore
-                Dim centroY As Double = tela.Top + (scudo.Top + scudo.Bottom) / 2.0 * fattore
-
-                Assert.AreEqual(zona.Left + zona.Width / 2.0, centroX, 2.0,
-                                $"su {area.Width}x{area.Height} lo scudo è centrato sull'asse")
-                Assert.AreEqual(zona.Top + zona.Height / 2.0, centroY, 2.0,
-                                "e a metà della zona in altezza")
-
-            Next
-
-        End Sub
-
-        ''' <summary>
-        ''' Lo stemma risale nel respiro fin sotto il sottotitolo, senza toccarlo.
-        ''' </summary>
-        ''' <remarks>
-        ''' Due difetti opposti, e questo collaudo sta in mezzo. Se lo stemma si fermasse
-        ''' dove cominciano i bottoni resterebbe una striscia di avorio vuota sotto il
-        ''' nome — è com'era fino al 2026-08-30 (sera), e si vedeva. Se invece salisse
-        ''' troppo, il colmo dello scudo finirebbe addosso alle lettere del sottotitolo.
-        ''' Il posto giusto è fra i due, ed è l'unico che nessuna delle due misure da sola
-        ''' può garantire.
-        ''' </remarks>
-        <TestMethod>
-        Public Sub LoStemmaSaleFinSottoIlSottotitoloSenzaToccarlo()
-
-            For Each area As Size In New Size() {New Size(1936, 940), New Size(1134, 485), New Size(700, 1000)}
-
-                Dim fineNome As Integer = PannelloMenu.FineDelNome(area)
-                Dim deiBottoni As Rectangle = PannelloMenu.ZonaSottoIlNome(area)
-                Dim delloStemma As Rectangle = PannelloMenu.ZonaDelloStemma(area)
-
-                Assert.IsGreaterThan(fineNome, delloStemma.Top,
-                                     $"su {area.Width}x{area.Height} lo stemma comincia sotto il sottotitolo")
-                Assert.IsLessThan(deiBottoni.Top, delloStemma.Top,
-                                  "e più in alto di dove cominciano i bottoni: il respiro se lo prende")
-                Assert.AreEqual(deiBottoni.Bottom, delloStemma.Bottom,
-                                "in fondo invece arrivano insieme")
-
-            Next
-
-        End Sub
 
         ''' <summary>
         ''' Lo scudo sta davvero dove <see cref="LogoAviolab.ScudoDentroLaTela"/> dice.
         ''' </summary>
         ''' <remarks>
-        ''' La geometria del mega stemma non guarda il PNG: si fida di quattro numeri
-        ''' misurati una volta. Questa è la guardia che li tiene onesti — se un domani il
-        ''' marchio cambiasse disegno e lo scudo si spostasse nella tela, lo stemma
-        ''' verrebbe scentrato e nessun altro collaudo se ne accorgerebbe. Si rilegge
-        ''' quindi il PNG e si guarda dove stanno i pixel che non sono trasparenti.
+        ''' Quei quattro numeri dicono dove sta lo scudo dentro la tela del PNG, e sono
+        ''' misurati una volta sola: questa è la guardia che li tiene onesti, perché se un
+        ''' domani il marchio cambiasse disegno e lo scudo si spostasse, nessun conto fatto
+        ''' su di loro tornerebbe più. Si rilegge quindi il PNG e si guarda dove stanno i
+        ''' pixel che non sono trasparenti.
+        ''' <para>Dal 2026-09-01 li legge <b>solo questo collaudo</b>: il mega stemma di
+        ''' sfondo è stato tolto e con lui l'unico posto che se ne serviva. La guardia resta
+        ''' com'è rimasto il banner (v. <see cref="IlBannerEAncoraIncorporato"/>): finché
+        ''' quei numeri stanno in <c>LogoAviolab</c>, tanto vale che siano veri.</para>
         ''' <para>Con quattro dita di tolleranza, e non per pigrizia: attorno al disegno
         ''' il PNG si porta un alone di alfa quasi nulla, e <c>Genera</c> lo ridisegna con
         ''' l'interpolazione accesa. Contando solo i pixel davvero opachi il bordo cade a
@@ -244,14 +140,11 @@ Namespace Ui
             Assert.AreEqual(Rectangle.Empty, PannelloMenu.ZonaSottoIlNome(Size.Empty),
                             "un'area di misura zero non si riempie: non è un errore, non c'è spazio")
 
-            Assert.AreEqual(Rectangle.Empty, PannelloMenu.ZonaDelloStemma(Size.Empty),
-                            "né una zona in cui metterci lo stemma")
-
-            Assert.AreEqual(Rectangle.Empty, PannelloMenu.RiquadroDelloStemma(Size.Empty),
-                            "e senza zona non c'è nemmeno lo stemma")
-
             Assert.AreEqual(0, PannelloMenu.FasciaDelTesto(Size.Empty),
                             "né una fascia del nome")
+
+            Assert.AreEqual(0, PannelloMenu.FineDelNome(Size.Empty),
+                            "e dentro una fascia che non c'è, il nome non finisce da nessuna parte")
 
         End Sub
 

@@ -5,13 +5,13 @@ Imports TrovaLavoro
 Namespace Ui
 
     ''' <summary>
-    ''' Collaudi dello scudo che compare mentre l'AI lavora (cap. 03.8): la misura sullo
-    ''' schermo, il disegno che gira e la barra che si riempie sotto di lui.
+    ''' Collaudi dell'indicatore che compare mentre l'AI lavora (cap. 03.8): la misura
+    ''' sullo schermo, la ruota che gira e la barra che si riempie sotto di lei.
     ''' </summary>
     ''' <remarks>
     ''' Non aprono nessuna finestra e non vogliono la macchina: si disegna su un
-    ''' <c>Bitmap</c>, che è tutto quello che serve per chiedersi se lo scudo ci sta, se è
-    ''' storto e se la ruota gira. La finestra a strati che porta questo disegno sullo
+    ''' <c>Bitmap</c>, che è tutto quello che serve per chiedersi se l'indicatore ci sta,
+    ''' dove sta e se la ruota gira. La finestra a strati che porta questo disegno sullo
     ''' schermo si guarda invece con gli occhi — è codice di Windows, non di logica.
     ''' </remarks>
     <TestClass>
@@ -19,45 +19,31 @@ Namespace Ui
 
         Private Shared ReadOnly Pieno As New Size(1920, 1080)
 
-        <TestMethod>
-        Public Sub LoScudoStaDentroIDueLimitiChiestiDaMirco()
-
-            Dim misura As Size = ScudoDiCaricamento.MisuraSulloSchermo(Pieno)
-
-            Assert.IsLessThanOrEqualTo(CInt(1920 * ScudoDiCaricamento.QuotaOrizzontale), misura.Width,
-                                       "in orizzontale non passa i due decimi dello schermo")
-            Assert.IsLessThanOrEqualTo(CInt(1080 * ScudoDiCaricamento.QuotaVerticale), misura.Height,
-                                       "in verticale non passa i due sesti")
-
-        End Sub
-
         ''' <summary>
-        ''' Lo scudo non si stira per riempire il rettangolo: il marchio non si deforma.
+        ''' Adesso i due limiti valgono per <b>tutto</b> quel che si vede, barra compresa.
         ''' </summary>
         ''' <remarks>
-        ''' È la ragione per cui le due quote sono limiti e non misure. Su 1920 × 1080 il
-        ''' rettangolo chiesto sarebbe 384 × 360 — più largo che alto — mentre lo scudo è
-        ''' più alto che largo: riempirlo vorrebbe dire schiacciarlo di un quarto.
+        ''' Finché sotto la ruota c'era lo stemma, i limiti misuravano lui e il complesso
+        ''' li sforava: la barra si aggiungeva dopo, e su uno schermo comune il disegno
+        ''' veniva alto 397 px contro i 360 dichiarati. Nessun collaudo se ne accorgeva,
+        ''' perché tutti guardavano la misura dello stemma. Qui si guarda il complesso, che
+        ''' è la cosa che occupa lo schermo.
         ''' </remarks>
         <TestMethod>
-        Public Sub LoScudoNonSiDeformaMai()
-
-            Dim suo As Rectangle = LogoAviolab.ScudoDentroLaTela
-            Dim giusto As Double = suo.Width / CDbl(suo.Height)
+        Public Sub LIndicatoreStaDentroIDueLimitiChiestiDaMirco()
 
             For Each schermo As Size In {Pieno, New Size(1366, 768), New Size(3840, 1080),
                                          New Size(1000, 2000), New Size(1280, 1024)}
 
-                Dim misura As Size = ScudoDiCaricamento.MisuraSulloSchermo(schermo)
-                Dim venuto As Double = misura.Width / CDbl(misura.Height)
-
-                Assert.IsLessThan(0.01, Math.Abs(venuto - giusto) / giusto,
-                                  $"su {schermo.Width}×{schermo.Height} lo scudo è storto")
+                Dim misura As Size = ScudoDiCaricamento.MisuraDelComplesso(schermo)
 
                 Assert.IsLessThanOrEqualTo(CInt(schermo.Width * ScudoDiCaricamento.QuotaOrizzontale),
-                                           misura.Width, "e non sfora in larghezza")
+                                           misura.Width,
+                                           $"su {schermo.Width}×{schermo.Height} passa i due decimi in larghezza")
                 Assert.IsLessThanOrEqualTo(CInt(schermo.Height * ScudoDiCaricamento.QuotaVerticale),
-                                           misura.Height, "né in altezza")
+                                           misura.Height,
+                                           $"su {schermo.Width}×{schermo.Height} passa il quarto in altezza")
+
             Next
 
         End Sub
@@ -65,40 +51,41 @@ Namespace Ui
         <TestMethod>
         Public Sub SuUnoSchermoStrettoEAltoComandaLaLarghezza()
 
-            ' Due decimi di 1000 sono 200; due sesti di 2000 sarebbero 666, e non ci
-            ' stanno: lo scudo si ferma a quel che permette la larghezza.
-            Dim misura As Size = ScudoDiCaricamento.MisuraSulloSchermo(New Size(1000, 2000))
+            ' Due decimi di 1000 sono 200; un quarto di 2000 lascerebbe passare un
+            ' indicatore largo il triplo: si ferma a quel che permette la larghezza.
+            Dim misura As Size = ScudoDiCaricamento.MisuraDelComplesso(New Size(1000, 2000))
 
             Assert.AreEqual(200, misura.Width, "la larghezza è quella chiesta, tutta")
-            Assert.IsLessThan(666, misura.Height, "e l'altezza è quella che ne consegue")
+            Assert.IsLessThan(500, misura.Height, "e l'altezza resta molto sotto il suo limite")
 
         End Sub
 
         <TestMethod>
         Public Sub SuUnoSchermoLargoEBassoComandaLAltezza()
 
-            ' Due sesti di 1080 sono 360, e sono meno di quel che la larghezza
+            ' Un quarto di 1080 sono 270, e sono meno di quel che la larghezza
             ' concederebbe (768): è l'altezza a decidere.
-            Dim misura As Size = ScudoDiCaricamento.MisuraSulloSchermo(New Size(3840, 1080))
+            Dim misura As Size = ScudoDiCaricamento.MisuraDelComplesso(New Size(3840, 1080))
 
-            Assert.AreEqual(360, misura.Height, "l'altezza è quella chiesta, tutta")
+            Assert.IsLessThanOrEqualTo(270, misura.Height, "l'altezza chiesta non si sfora")
+            Assert.IsGreaterThan(265, misura.Height, "ma ci si arriva vicino: è lei a comandare")
             Assert.IsLessThan(768, misura.Width, "e la larghezza resta indietro")
 
         End Sub
 
-        ''' <summary>Lo scudo sta in mezzo — un filo più su — e allo schermo giusto.</summary>
+        ''' <summary>L'indicatore sta in mezzo — un filo più su — e allo schermo giusto.</summary>
         ''' <remarks>
         ''' <para>Il secondo monitor non è un capriccio: con due schermi il centro è quello
-        ''' dove l'utente sta guardando, e un conto fatto sulle sole misure ci metterebbe lo
-        ''' scudo sullo schermo di sinistra.</para>
-        ''' <para>In verticale il centro non è 540 ma <b>510</b>: il complesso sta
-        ''' <see cref="ScudoDiCaricamento.AlzataInPixel">trenta pixel</see> più in alto del
+        ''' dove l'utente sta guardando, e un conto fatto sulle sole misure ci metterebbe
+        ''' l'indicatore sullo schermo di sinistra.</para>
+        ''' <para>In verticale il centro non è 540 ma <b>520</b>: il complesso sta
+        ''' <see cref="ScudoDiCaricamento.AlzataInPixel">venti pixel</see> più in alto del
         ''' centro, perché a video una figura appesa esattamente a metà sembra cadere in
-        ''' basso <i>(chiesto da Mirco il 2026-08-31, guardandolo: venti, e altri dieci
-        ''' quando il complesso si è allungato con la barra)</i>.</para>
+        ''' basso. Erano trenta finché il complesso portava anche lo stemma ed era alto 397;
+        ''' tolto quello è alto 269, e la stessa frazione della sua altezza fa venti.</para>
         ''' </remarks>
         <TestMethod>
-        Public Sub LoScudoStaInMezzoAlloSchermoCheGliSiDa()
+        Public Sub LIndicatoreStaInMezzoAlloSchermoCheGliSiDa()
 
             Dim secondo As New Rectangle(1920, 0, 1920, 1080)
             Dim dove As Rectangle = ScudoDiCaricamento.RiquadroSulloSchermo(secondo)
@@ -112,9 +99,9 @@ Namespace Ui
 
         ''' <summary>L'alzata è un'alzata: verso l'alto, e della misura giusta.</summary>
         ''' <remarks>
-        ''' Da sola l'asserzione qui sopra passerebbe anche con lo scudo abbassato di venti
-        ''' pixel, se il numero fosse scritto con lo stesso segno sbagliato in tutti e due i
-        ''' posti. Qui il confronto è con il centro vero dello schermo, e il verso si
+        ''' Da sola l'asserzione qui sopra passerebbe anche con l'indicatore abbassato di
+        ''' venti pixel, se il numero fosse scritto con lo stesso segno sbagliato in tutti e
+        ''' due i posti. Qui il confronto è con il centro vero dello schermo, e il verso si
         ''' guarda per quello che è.
         ''' </remarks>
         <TestMethod>
@@ -124,10 +111,10 @@ Namespace Ui
             Dim dove As Rectangle = ScudoDiCaricamento.RiquadroSulloSchermo(schermo)
 
             Dim centroDelloSchermo As Integer = 1080 \ 2
-            Dim centroDelloScudo As Integer = dove.Top + dove.Height \ 2
+            Dim centroDellIndicatore As Integer = dove.Top + dove.Height \ 2
 
-            Assert.IsLessThan(centroDelloSchermo, centroDelloScudo, "sta più in alto del centro")
-            Assert.AreEqual(ScudoDiCaricamento.AlzataInPixel, centroDelloSchermo - centroDelloScudo,
+            Assert.IsLessThan(centroDelloSchermo, centroDellIndicatore, "sta più in alto del centro")
+            Assert.AreEqual(ScudoDiCaricamento.AlzataInPixel, centroDelloSchermo - centroDellIndicatore,
                             "e di esattamente l'alzata chiesta")
 
         End Sub
@@ -135,18 +122,89 @@ Namespace Ui
         <TestMethod>
         Public Sub SenzaSchermoNonSiDisegnaNiente()
 
-            Assert.AreEqual(Size.Empty, ScudoDiCaricamento.MisuraSulloSchermo(New Size(0, 0)))
+            Assert.AreEqual(0, ScudoDiCaricamento.LarghezzaSulloSchermo(New Size(0, 0)))
+            Assert.AreEqual(Size.Empty, ScudoDiCaricamento.MisuraDelComplesso(New Size(0, 0)))
             Assert.AreEqual(Rectangle.Empty, ScudoDiCaricamento.RiquadroSulloSchermo(Rectangle.Empty))
 
         End Sub
 
+        ''' <summary>
+        ''' La ruota si vede, e riempie la fetta di tela che le è stata data.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È il collaudo che difende il conto rifatto il 2026-09-01. Finché sotto la
+        ''' ruota c'era lo stemma, la sua fetta era alta quanto <b>lui</b> e la ruota ci
+        ''' nuotava dentro: è larga poco più di due terzi, quindi restava un dito di vuoto
+        ''' sopra e sotto che lo stemma riempiva. Tolto lo stemma quel vuoto sarebbe rimasto
+        ''' vuoto, e la barra sarebbe sembrata scivolata via da sola.</para>
+        ''' <para>Si guarda tutto quel che sta <b>sopra la barra</b> e non la sola fetta:
+        ''' cercare la ruota dove ci si aspetta che sia direbbe soltanto che lì c'è
+        ''' qualcosa. Rimettendo la fetta alta com'era, la ruota comincia sessanta pixel
+        ''' più in basso e questo collaudo diventa rosso — provato.</para>
+        ''' </remarks>
         <TestMethod>
-        Public Sub LoScudoSiVedeDavvero()
+        Public Sub LaRuotaRiempieLaSuaFettaDiTela()
 
-            Using tela As Bitmap = Dipinta(0)
+            ' Dichiarata qui e non presa dalla classe: un metro copiato dalla cosa da
+            ' misurare non può dire che è sbagliata. La ruota è larga il suo raggio più il
+            ' pallino, per due — e siccome è tonda, è alta altrettanto.
+            Const QuotaAttesa As Double = (0.3 + 0.055) * 2.0
 
-                Assert.IsGreaterThan(tela.Width * tela.Height \ 4, PixelDipinti(tela),
-                                     "più di un quarto della tela è disegnato: lo scudo c'è")
+            Using tela As Bitmap = DipintaSu(Grande, 0, 0.0)
+
+                Dim alta As Integer = CInt(Math.Round(tela.Width * QuotaAttesa))
+                Dim sopraLaBarra As Integer =
+                    tela.Height - ScudoDiCaricamento.SpessoreDellaBarra(tela.Width) - 1
+
+                Dim cima As Integer = Integer.MaxValue
+                Dim fondo As Integer = -1
+
+                For y As Integer = 0 To sopraLaBarra
+                    For x As Integer = 0 To tela.Width - 1
+                        If tela.GetPixel(x, y).A > 0 Then
+                            If y < cima Then cima = y
+                            fondo = y
+                        End If
+                    Next
+                Next
+
+                Assert.IsGreaterThan(-1, fondo, "sopra la barra la ruota si vede")
+                Assert.IsLessThanOrEqualTo(1, cima,
+                                           $"la ruota comincia a {cima} invece che in cima alla tela")
+                Assert.IsGreaterThanOrEqualTo(alta * 9 \ 10, fondo,
+                                              $"e finisce a {fondo}, ben prima dei {alta} della sua fetta")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Dietro la ruota non c'è più il marchio: la sua fetta è quasi tutta vuota.
+        ''' </summary>
+        ''' <remarks>
+        ''' È il rovescio di un collaudo che c'era: fino al 2026-09-01 diceva che più di un
+        ''' quarto della tela era dipinto, ed era il modo di sapere che lo stemma c'era.
+        ''' Adesso difende il contrario, ed è la stessa proprietà guardata dall'altra parte:
+        ''' dodici pallini su una tela grande lasciano scoperto quasi tutto, un marchio alto
+        ''' quanto la fetta la riempirebbe per metà. Rimettendolo, questo diventa rosso.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub DietroLaRuotaNonCePiuIlMarchio()
+
+            Using tela As Bitmap = DipintaSu(Grande, 0, 0.0)
+
+                Dim alta As Integer = ScudoDiCaricamento.AltezzaDellaRuota(tela.Width)
+                Dim dipinti As Integer = 0
+
+                For y As Integer = 0 To alta - 1
+                    For x As Integer = 0 To tela.Width - 1
+                        If tela.GetPixel(x, y).A > 0 Then dipinti += 1
+                    Next
+                Next
+
+                Assert.IsGreaterThan(0, dipinti, "i pallini ci sono")
+                Assert.IsLessThan(tela.Width * alta \ 4, dipinti,
+                                  "dietro la ruota c'è qualcosa di grande: il marchio è tornato")
 
             End Using
 
@@ -180,28 +238,31 @@ Namespace Ui
         ' ==================================================================
 
         ''' <summary>
-        ''' La barra si aggiunge sotto lo scudo, e non gliela toglie da sopra.
+        ''' La barra si aggiunge sotto la ruota, e non le toglie niente da sopra.
         ''' </summary>
         ''' <remarks>
         ''' È il difetto che questo pezzo poteva fare più facilmente: dare alla barra il
-        ''' posto che era dello scudo invece di chiedere una tela più alta. Sarebbe passato
-        ''' inosservato — lo scudo si sarebbe visto lo stesso, appena più basso e con la
-        ''' ruota scentrata di qualche pixel — e nessun altro collaudo se ne accorgerebbe.
+        ''' posto che era della ruota invece di chiedere una tela più alta. Sarebbe passato
+        ''' inosservato — la ruota si vedrebbe lo stesso, appena scentrata — e nessun altro
+        ''' collaudo se ne accorgerebbe.
         ''' </remarks>
         <TestMethod>
-        Public Sub LaBarraSiAggiungeSottoLoScudoESenzaRubargliNiente()
+        Public Sub LaBarraSiAggiungeSottoLaRuotaESenzaRubargliNiente()
+
+            ' Dichiarata qui e non presa dalla classe: il raggio più il pallino, per due.
+            Const QuotaDellaRuotaAttesa As Double = (0.3 + 0.055) * 2.0
 
             For Each schermo As Size In {Pieno, New Size(1366, 768), New Size(1000, 2000)}
 
-                Dim scudo As Size = ScudoDiCaricamento.MisuraSulloSchermo(schermo)
                 Dim complesso As Size = ScudoDiCaricamento.MisuraDelComplesso(schermo)
+                Dim ruota As Integer = ScudoDiCaricamento.AltezzaDellaRuota(complesso.Width)
+                Dim spessore As Integer = ScudoDiCaricamento.SpessoreDellaBarra(complesso.Width)
+                Dim distacco As Integer = ScudoDiCaricamento.DistaccoDellaBarra(complesso.Width)
 
-                Assert.AreEqual(scudo.Width, complesso.Width,
-                                "il complesso è largo quanto lo scudo")
-                Assert.IsGreaterThan(scudo.Height, complesso.Height,
-                                     "ed è più alto, perché sotto c'è la barra")
-                Assert.AreEqual(scudo.Height, ScudoDiCaricamento.AltezzaDelloScudo(complesso),
-                                "e lo scudo dentro di lui è rimasto alto uguale")
+                Assert.AreEqual(CInt(Math.Round(complesso.Width * QuotaDellaRuotaAttesa)), ruota,
+                                $"su {schermo.Width}×{schermo.Height} la ruota non è alta quanto è larga")
+                Assert.AreEqual(complesso.Height, ruota + distacco + spessore,
+                                "il complesso è la ruota più l'aria più la barra: niente avanza e niente si sovrappone")
 
                 ' Che fra i due ci sia dell'aria non lo diceva nessuno, e azzerando lo
                 ' stacco il banco restava verde: la barra si sarebbe incollata al piede
@@ -218,23 +279,57 @@ Namespace Ui
                 ' scompaia, non che vinca il confronto per un pixel. Una soglia scritta
                 ' più stretta di quel che difende boccia il lavoro buono, e chi la
                 ' incontra impara ad allargarla invece di ascoltarla.
-                Assert.IsGreaterThanOrEqualTo(
-                    ScudoDiCaricamento.SpessoreDellaBarra(scudo.Width) * 3 \ 4,
-                    ScudoDiCaricamento.DistaccoDellaBarra(scudo.Width),
-                    "fra lo scudo e la barra non c'è più aria a sufficienza")
+                Assert.IsGreaterThanOrEqualTo(spessore * 3 \ 4, distacco,
+                                              "fra la ruota e la barra non c'è più aria a sufficienza")
 
             Next
 
         End Sub
 
-        ''' <summary>La barra è larga quanto lo scudo: né più corta né più lunga.</summary>
+        ''' <summary>
+        ''' Fra il piede della ruota e la barra l'aria si vede davvero.
+        ''' </summary>
+        ''' <remarks>
+        ''' L'asserzione qui sopra confronta due numeri, e due numeri d'accordo fra loro non
+        ''' dicono che a video ci sia dello spazio: lo direbbero anche se la ruota fosse
+        ''' disegnata più in basso della sua fetta. Qui si risale dalla barra finché si
+        ''' incontra il primo pixel dipinto — il piede della ruota — e si misura il vuoto
+        ''' che resta in mezzo.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub FraLaRuotaELaBarraLAriaSiVede()
+
+            Using tela As Bitmap = DipintaSu(Grande, 0, 1.0)
+
+                Dim spessore As Integer = ScudoDiCaricamento.SpessoreDellaBarra(tela.Width)
+                Dim cimaDellaBarra As Integer = tela.Height - spessore
+
+                Dim piede As Integer = -1
+
+                For y As Integer = cimaDellaBarra - 1 To 0 Step -1
+                    If RigaDipinta(tela, y) Then
+                        piede = y
+                        Exit For
+                    End If
+                Next
+
+                Assert.IsGreaterThan(-1, piede, "sopra la barra la ruota c'è")
+                Assert.IsGreaterThanOrEqualTo(spessore * 3 \ 4, cimaDellaBarra - piede - 1,
+                                              "fra il piede della ruota e la barra l'aria è sparita")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>La barra è larga quanto tutto l'indicatore: né più corta né più lunga.</summary>
         ''' <remarks>
         ''' Chiesto così da Mirco il 2026-08-31 — «uguale identica alla larghezza dello
         ''' scudo, sicuramente non di meno» — ed è anche la ragione per cui la finestra è
-        ''' larga quanto lo scudo e basta: la barra ci si appoggia dentro per intero.
+        ''' larga quanto la barra e basta: lei ci si appoggia dentro per intero, e la ruota,
+        ''' che è più stretta, ci sta comoda al centro.
         ''' </remarks>
         <TestMethod>
-        Public Sub LaBarraELargaQuantoLoScudo()
+        Public Sub LaBarraELargaQuantoTuttoLIndicatore()
 
             Using tela As Bitmap = DipintaSu(Grande, 0, 1.0)
 
@@ -249,7 +344,7 @@ Namespace Ui
                     End If
                 Next
 
-                Assert.AreEqual(0, primo, "la barra comincia al bordo sinistro dello scudo")
+                Assert.AreEqual(0, primo, "la barra comincia al bordo sinistro della tela")
                 Assert.AreEqual(riga.Length - 1, ultimo, "e finisce a quello destro")
 
             End Using
@@ -441,7 +536,7 @@ Namespace Ui
             Return DipintaSu(New Size(600, 450), passo, 0.0)
         End Function
 
-        ''' <summary>La tela del complesso — scudo, ruota e barra — su un certo schermo.</summary>
+        ''' <summary>La tela del complesso — la ruota e la barra — su un certo schermo.</summary>
         Private Shared Function DipintaSu(schermo As Size, passo As Integer,
                                           quotaPiena As Double) As Bitmap
 
@@ -495,17 +590,14 @@ Namespace Ui
 
         End Function
 
-        Private Shared Function PixelDipinti(tela As Bitmap) As Integer
+        ''' <summary>Se in quella riga della tela c'è almeno un pixel dipinto.</summary>
+        Private Shared Function RigaDipinta(tela As Bitmap, y As Integer) As Boolean
 
-            Dim quanti As Integer = 0
-
-            For y As Integer = 0 To tela.Height - 1
-                For x As Integer = 0 To tela.Width - 1
-                    If tela.GetPixel(x, y).A > 0 Then quanti += 1
-                Next
+            For x As Integer = 0 To tela.Width - 1
+                If tela.GetPixel(x, y).A > 0 Then Return True
             Next
 
-            Return quanti
+            Return False
 
         End Function
 
