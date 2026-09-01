@@ -402,16 +402,23 @@ il certificato per la firma) più quella.
 
 ## Dalla fase di fix della revisione di sicurezza (2026-09-01)
 
-- **Il collaudo dal vivo dello strumento di collaudo senza shell.** Il fix di R4 ha tolto
-  `bash -lc` da tutte le chiamate di `strumenti/mcp-collaudi/server.mjs`: ogni sito è stato
-  provato a pezzi (compresa la falsificazione che con la forma vecchia piazzava davvero un
-  file), ma un giro intero — server acceso, tool chiamati da un client vero, compilazione,
-  avvio dell'app, screenshot — non si è potuto fare perché il server era in uso da un'altra
-  sessione sulla porta 3300. È il collaudo che chiude R4: da fare al primo giro di collaudi
-  UI che accende comunque lo strumento, guardando che i tool rispondano come prima.
-  *(`revisione-sicurezza.md`, blocco S3; la trappola è annotata nel README dello strumento.)*
+*L'unica voce — il giro dal vivo dello strumento di collaudo senza shell — è stata **chiusa
+il giorno stesso**, dal primo giro di collaudi UI che ha riacceso il server: è in «Chiuse».*
 
 ## Chiuse
+
+- ✅ **Il collaudo dal vivo dello strumento di collaudo senza shell** *(aperta e **chiusa il
+  2026-09-01**, dentro la fase di fix della revisione di sicurezza)*. Il fix di R4
+  (`227fde8`) aveva tolto `bash -lc` da tutte le chiamate di
+  `strumenti/mcp-collaudi/server.mjs`, provate a pezzi ma mai in un giro intero, perché il
+  server era in uso da un'altra sessione sulla porta 3300. L'ha chiusa proprio quella
+  sessione: riavviato il server col codice nuovo (16 attrezzi), il giro a vista dei fix UI
+  F2-1+F2-2 è passato tutto da lì — `compila`, `avvia` manuale, `stato_app`, `clic` (otto,
+  su due giri), `rispondi_finestra` in lettura e con risposta «Yes», sei `schermata`,
+  `chiudi_app` — e ogni attrezzo ha risposto come prima, accenti e apostrofi compresi nelle
+  finestre lette. Sono esattamente i siti che passavano dalla shell, compreso quello
+  dell'interpolazione degli argomenti di `rispondi_finestra`. *(`revisione-sicurezza.md`,
+  blocco S3; la trappola resta annotata nel README dello strumento.)*
 
 - ✅ **`scegli_riga` toccava solo il primo elenco della finestra** *(aperta il 2026-08-24 col
   reperto R6, **chiusa il 2026-08-30**)*. L'attrezzo raccoglieva tutte le liste e poi ne
