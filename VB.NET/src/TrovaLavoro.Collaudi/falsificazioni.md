@@ -75,6 +75,11 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
 | Un inchiostro colorato si legge sul fondo su cui è scritto | `TrovaLavoro/StileApp.vb` | `Successo` torna a `#28A745` (o `InformazioneTesto` a `#17A2B8`, o `RossoCritico` a `#FA0825`) | `OgniInchiostroColoratoSiLeggeSuiFondiDellApplicazione` — e col solo verde anche `OgniBottoneColoratoPortaUnTestoCheSiLegge`, che è il bianco sul fondo del livello 1 |
 | Un fondo pieno reagisce al mouse | `TrovaLavoro/StileApp.vb` | si tolgono le due righe `MouseOverBackColor`/`MouseDownBackColor` in fondo a `Dipingi` **e** a `DipingiLaCasella` | `OgniBottoneSiScurisceSottoIlPuntatore`, `AncheLeCaselleDellaBarraSiScurisconoSottoIlPuntatore` |
 
+| Il diario stderr del server MCP non porta fuori la chiave (R1) | `TrovaLavoro/Mcp/ServerMcp.vb` | in `Annota` torna `_diario.WriteLine(riga)` senza `SenzaSegreti` | `UnaChiaveDentroUnaRigaDelDiarioNonEsceDiQui` |
+| E nemmeno la risposta d'errore che torna al client (R1-residuo) | `TrovaLavoro/Mcp/ServerMcp.vb` | si toglie `SenzaSegreti` da `ex.Message` nell'ultima rete di `RispondiAsync` | `UnaChiaveDentroUnEccezioneNonTornaAlClient` |
+| Un nome allegato tutto ASCII non salta la ripulitura dell'a capo | `TrovaLavoro/Documenti/ScrittoreEml.vb` | `PerIntestazione` torna `Codificata(…Replace(""""""…))` senza `SenzaACapo` | `UnACapoNelNomeDellAllegatoNonApreUnaRigaNuova` |
+| Un titolo abnorme non sfonda il nome della cartella | `TrovaLavoro/Dati/ArchivioOpportunita.vb` | si toglie `If costruito.Length >= Massimo Then Exit For` dallo slug | `UnTitoloAbnormeNonSfondaIlNomeDellaCartella` — rotto, cade prima l'`IOException` del sistema operativo dell'asserzione: è esattamente il danno che il tetto previene |
+
 ## Tre cose imparate falsificando, che valgono più della tabella
 
 - **Un collaudo può restare verde per il motivo sbagliato.** Il primo collaudo dell'a capo

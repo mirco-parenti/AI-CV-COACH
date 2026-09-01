@@ -296,6 +296,35 @@ Namespace Documenti
 
         End Sub
 
+        ''' <summary>
+        ''' La terza porta, ed era rimasta aperta: il nome di un allegato, che l'AI
+        ''' propone insieme al resto. Un nome <b>tutto ASCII</b> non passa dalla codifica
+        ''' dell'RFC 2047 — è il regalo a chi apre il file con un editor — e finiva
+        ''' nell'intestazione com'era, a capo compresi; un nome accentato invece il difetto
+        ''' lo nascondeva, perché il base64 se lo portava dentro.
+        ''' <i>(Revisione di sicurezza, 2026-09-01.)</i>
+        ''' </summary>
+        <TestMethod>
+        Public Sub UnACapoNelNomeDellAllegatoNonApreUnaRigaNuova()
+
+            ConFileDiProva(
+                Sub(percorso)
+                    Dim eml As String = ScrittoreEml.Componi(
+                        "io@example.it", "loro@example.it", "Oggetto", "Corpo",
+                        {New AllegatoEmail(percorso, "cv.pdf" & vbCrLf & "Bcc: nascosto@example.it")})
+
+                    For Each riga As String In eml.Split(New String() {vbCrLf, vbCr, vbLf},
+                                                         StringSplitOptions.None)
+                        Assert.IsFalse(riga.StartsWith("Bcc:", StringComparison.Ordinal),
+                                       "un nome tutto ASCII non salta la ripulitura")
+                    Next
+
+                    Assert.Contains("filename=""cv.pdf Bcc: nascosto@example.it""", eml,
+                                    "e il nome non si perde: resta dentro il valore")
+                End Sub)
+
+        End Sub
+
     End Class
 
 End Namespace

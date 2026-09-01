@@ -217,8 +217,13 @@ Namespace Mcp
 
             Catch ex As Exception
                 Annota($"Errore imprevisto servendo «{richiesta.Metodo}»: {ex}")
+
+                ' Anche il messaggio dell'eccezione esce di qui, e va ripulito come il
+                ' diario (v. Annota): un guasto della rete può ristampare l'intestazione
+                ' che porta la chiave dell'utente.
                 Consegna(ProtocolloMcp.Compatto(
-                    ProtocolloMcp.Errore(richiesta.Id, ProtocolloMcp.ErroreInterno, ex.Message)))
+                    ProtocolloMcp.Errore(richiesta.Id, ProtocolloMcp.ErroreInterno,
+                                         DiarioTecnico.SenzaSegreti(ex.Message))))
 
             Finally
                 Dim tolto As CancellationTokenSource = Nothing
@@ -374,9 +379,11 @@ Namespace Mcp
             Catch ex As Exception
                 ' L'ultima rete, gemella di quella della finestra principale: un guasto
                 ' che nessuno aveva previsto diventa una risposta, non la morte del
-                ' processo. Il dettaglio va nel diario, che il client raccoglie in un file.
+                ' processo. Il dettaglio va nel diario, che il client raccoglie in un file,
+                ' e il messaggio che torna esce ripulito come lui.
                 Annota($"Errore imprevisto su «{richiesta.Metodo}»: {ex}")
-                Return Scrivi(ProtocolloMcp.Errore(richiesta.Id, ProtocolloMcp.ErroreInterno, ex.Message))
+                Return Scrivi(ProtocolloMcp.Errore(richiesta.Id, ProtocolloMcp.ErroreInterno,
+                                                   DiarioTecnico.SenzaSegreti(ex.Message)))
             End Try
 
         End Function
@@ -519,7 +526,11 @@ Namespace Mcp
 
             Try
                 SyncLock _diario
-                    _diario.WriteLine(riga)
+                    ' La stessa rete del diario su file (cap. 11.3): questo diario esce di
+                    ' qui — il client MCP lo raccoglie nei suoi log — e un'eccezione può
+                    ' portarsi dietro una chiave (un'intestazione HTTP ristampata, per
+                    ' dire). Ripulirla prima di scriverla è la condizione perché possa uscire.
+                    _diario.WriteLine(DiarioTecnico.SenzaSegreti(riga))
                 End SyncLock
             Catch ex As IOException
             Catch ex As ObjectDisposedException

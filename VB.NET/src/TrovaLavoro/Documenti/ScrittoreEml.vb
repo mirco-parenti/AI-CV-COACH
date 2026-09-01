@@ -263,9 +263,14 @@ Namespace Documenti
 
         End Function
 
-        ''' <summary>Il nome di un file dentro un'intestazione: codificato se serve, e senza virgolette.</summary>
+        ''' <summary>
+        ''' Il nome di un file dentro un'intestazione: senza a capo — come già l'oggetto e
+        ''' gli indirizzi (v. <see cref="Indirizzo"/>), perché un CR/LF qui aprirebbe
+        ''' un'intestazione che nessuno ha chiesto, e i nomi tutti-ASCII saltavano la
+        ''' ripulitura — senza virgolette, e codificato se serve.
+        ''' </summary>
         Private Function PerIntestazione(nome As String) As String
-            Return Codificata(If(nome, "").Replace("""", ""))
+            Return Codificata(SenzaACapo(If(nome, "").Replace("""", "")))
         End Function
 
         ''' <summary>

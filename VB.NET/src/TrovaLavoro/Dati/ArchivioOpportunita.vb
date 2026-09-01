@@ -449,6 +449,13 @@ Namespace Dati
 
             If String.IsNullOrWhiteSpace(testo) Then Return String.Empty
 
+            ' Il tetto dei 40 caratteri che il riepilogo qui sopra promette: azienda e
+            ' titolo arrivano dall'annuncio (quindi dal modello, quindi da testo che
+            ' l'utente non ha scritto), e senza un limite un titolo abnorme sfonderebbe la
+            ' lunghezza massima del percorso. Il gemello «Pezzo» dei nomi documento taglia
+            ' allo stesso modo.
+            Const Massimo As Integer = 40
+
             Dim sciolto As String = testo.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD)
 
             Dim costruito As New StringBuilder()
@@ -465,6 +472,8 @@ Namespace Dati
                 ElseIf costruito.Length > 0 AndAlso costruito(costruito.Length - 1) <> "-"c Then
                     costruito.Append("-"c)
                 End If
+
+                If costruito.Length >= Massimo Then Exit For
 
             Next
 
