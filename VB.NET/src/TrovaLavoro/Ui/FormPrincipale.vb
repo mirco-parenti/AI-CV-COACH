@@ -788,6 +788,22 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
+    ''' Come per gli altri pannelli: mentre l'AI legge un CV la barra non porta via.
+    ''' </summary>
+    ''' <remarks>
+    ''' È l'attesa più lunga di P2 ed era la sola che qui non passava: la scheda spegneva i
+    ''' propri comandi, ma dalla barra si usciva lo stesso e da un altro pannello partiva
+    ''' una seconda chiamata mentre la prima era in volo. Il filo del lavoro dell'AI è uno
+    ''' solo (cap. 03.8), e adesso ci passa anche l'import.
+    ''' </remarks>
+    Private Sub pnlProfilo_LavoroAiCambiato(sender As Object, e As EventArgs) _
+        Handles pnlProfilo.LavoroAiCambiato
+
+        BarraDiNavigazione(libera:=Not pnlProfilo.HaUnaLetturaInCorso)
+
+    End Sub
+
+    ''' <summary>
     ''' Il profilo costruito parlando arriva nella scheda, dove l'utente lo controlla e
     ''' lo salva. Se preferisce tenersi le correzioni che aveva in sospeso, la scheda
     ''' rifiuta la proposta e si resta nel dialogo, che è ancora tutto lì.
@@ -943,7 +959,24 @@ Public Class FormPrincipale
     Private _scudoDiCaricamento As FinestraDiCaricamento
 
     ''' <summary>
-    ''' Se lo scudo dell'attesa <b>deve</b> vedersi adesso (cap. 03.8).
+    ''' Quanto deve durare un'attesa perché lo scudo si faccia vedere.
+    ''' </summary>
+    ''' <remarks>
+    ''' Non tutte le chiamate all'AI durano mezzo minuto: qualcuna si chiude in un
+    ''' battito, e uno scudo grande quanto un terzo dello schermo che compare e sparisce
+    ''' in duecento millisecondi non si legge come «sto lavorando» — si legge come un
+    ''' lampo, cioè come un difetto. Trecento millisecondi sono la misura sotto la quale
+    ''' un'attesa non è ancora un'attesa: chi guarda non ha fatto in tempo a chiedersi se
+    ''' il programma abbia sentito il clic. Sopra, lo scudo arriva e resta finché serve.
+    ''' </remarks>
+    Private Const SogliaDelloScudoInMillisecondi As Integer = 300
+
+    ''' <summary>Il conto alla rovescia che apre lo scudo, se l'attesa dura abbastanza.</summary>
+    Private _sogliaDelloScudo As System.Windows.Forms.Timer
+
+    ''' <summary>
+    ''' Se lo scudo dell'attesa <b>è dovuto</b> adesso (cap. 03.8) — cioè se una chiamata
+    ''' all'AI è in volo. <b>Quando</b> si veda lo decide la soglia qui sopra.
     ''' </summary>
     ''' <remarks>
     ''' È la <i>decisione</i>, non lo stato della finestra, e la differenza qui non è un
@@ -960,10 +993,11 @@ Public Class FormPrincipale
     ''' Accende o spegne lo scudo grande al centro dello schermo.
     ''' </summary>
     ''' <remarks>
-    ''' <para>La finestra si tiene da parte invece di rifarla ogni volta: fra la fine di
-    ''' un'attesa e l'inizio della successiva passano spesso pochi secondi — si analizza,
-    ''' si confronta, si genera — e ricostruire una finestra a strati a ogni giro
-    ''' significa rifare l'handle, il timer e le risorse grafiche per niente.</para>
+    ''' <para><b>Accendere non vuol dire subito.</b> Lo scudo si apre solo se il lavoro è
+    ''' ancora in corso dopo la <see cref="SogliaDelloScudoInMillisecondi">soglia</see>:
+    ''' un'attesa che si chiude prima non lo fa comparire affatto, e chi guarda non vede
+    ''' nessun lampo. Spegnere invece è immediato — la soglia si ferma e, se lo scudo era
+    ''' arrivato, se ne va col suo compimento.</para>
     ''' <para><b>Se la finestra principale non è a video non si apre niente</b>, e non è
     ''' una prudenza teorica: senza questa riga il banco farebbe comparire uno scudo
     ''' Aviolab in mezzo allo schermo di chi sta lanciando i collaudi, una volta per ogni
@@ -976,16 +1010,64 @@ Public Class FormPrincipale
         If Not IsHandleCreated OrElse Not Visible Then Return
 
         If acceso Then
-
-            If _scudoDiCaricamento Is Nothing OrElse _scudoDiCaricamento.IsDisposed Then
-                _scudoDiCaricamento = New FinestraDiCaricamento()
-            End If
-
-            _scudoDiCaricamento.Accendi(Me)
-
+            AspettaLaSogliaDelloScudo()
         Else
+            _sogliaDelloScudo?.Stop()
             _scudoDiCaricamento?.Spegni()
         End If
+
+    End Sub
+
+    ''' <summary>
+    ''' Mette in conto lo scudo, che si aprirà se fra un attimo il lavoro sarà ancora lì.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Uno scudo <b>già a video</b> la soglia l'ha passata: la sua attesa continua e
+    ''' si riaccende subito — rimetterlo in coda vorrebbe dire farlo sparire e tornare in
+    ''' mezzo allo stesso lavoro. Ed è <see cref="FinestraDiCaricamento.Accendi"/> a sapere
+    ''' che una barra in corsa non ricomincia da zero.</para>
+    ''' <para>Una soglia <b>già in corsa</b> non si riavvia, per la stessa ragione per cui
+    ''' la barra non ricomincia: chi accende lo scudo è la riga che spegne la barra di
+    ''' navigazione, e quella passa di qui più volte nella stessa attesa — riavviarla
+    ''' rimanderebbe lo scudo di altri trecento millisecondi ogni volta.</para>
+    ''' </remarks>
+    Private Sub AspettaLaSogliaDelloScudo()
+
+        If _scudoDiCaricamento IsNot Nothing AndAlso _scudoDiCaricamento.Visible Then
+            _scudoDiCaricamento.Accendi(Me)
+            Return
+        End If
+
+        If _sogliaDelloScudo Is Nothing Then
+            _sogliaDelloScudo = New System.Windows.Forms.Timer() With {
+                .Interval = SogliaDelloScudoInMillisecondi}
+            AddHandler _sogliaDelloScudo.Tick, AddressOf LaSogliaEScaduta
+        End If
+
+        If Not _sogliaDelloScudo.Enabled Then _sogliaDelloScudo.Start()
+
+    End Sub
+
+    ''' <summary>
+    ''' La soglia è scaduta: se il lavoro è ancora in volo, adesso lo scudo si vede.
+    ''' </summary>
+    ''' <remarks>
+    ''' La finestra si tiene da parte invece di rifarla ogni volta: fra la fine di
+    ''' un'attesa e l'inizio della successiva passano spesso pochi secondi — si analizza,
+    ''' si confronta, si genera — e ricostruire una finestra a strati a ogni giro
+    ''' significa rifare l'handle, il timer e le risorse grafiche per niente.
+    ''' </remarks>
+    Private Sub LaSogliaEScaduta(mittente As Object, e As EventArgs)
+
+        _sogliaDelloScudo.Stop()
+
+        If Not LoScudoDeveVedersi Then Return
+
+        If _scudoDiCaricamento Is Nothing OrElse _scudoDiCaricamento.IsDisposed Then
+            _scudoDiCaricamento = New FinestraDiCaricamento()
+        End If
+
+        _scudoDiCaricamento.Accendi(Me)
 
     End Sub
 

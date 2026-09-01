@@ -135,6 +135,53 @@ Namespace Ui
 
         End Function
 
+        ''' <summary>
+        ''' Anche l'import di un CV è una chiamata all'AI: mentre legge, dalla barra non
+        ''' si va da nessuna parte (cap. 03.8, il filo è uno solo).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Era l'unica attesa dell'applicazione che questo filo non lo alzava, ed è
+        ''' la più lunga di P2: la scheda spegneva i propri comandi — «IMPORTA CV DA UN
+        ''' FILE» diventa «Annulla lettura» e il resto si chiude — ma la barra restava
+        ''' tutta accesa. Bastava cambiare pannello mentre il CV era in volo per far
+        ''' partire una seconda chiamata da un'altra parte.</para>
+        ''' <para>Si guarda la <b>barra</b> e non l'evento: l'evento è il mezzo, i bottoni
+        ''' spenti sono la cosa che l'utente trova. Come per P6 qui sopra, il pannello è
+        ''' quello vero dentro la finestra vera, perché è la finestra a dover reagire.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function MentreLeggeIlCvLaBarraSiSpegneTutta() As Task
+
+            Dim aiFinta As New StrutturatoreFinto()
+            aiFinta.Dara(CasiDiCollaudo.Profilo().ToJsonString())
+
+            Await ConLaSchedaDelProfiloAsync(
+                aiFinta,
+                Async Function(form, pannello)
+
+                    Dim accesiDurante As String() = Nothing
+
+                    AddHandler pannello.LavoroAiCambiato,
+                        Sub()
+                            If pannello.HaUnaLetturaInCorso Then accesiDurante = Accesi(form)
+                        End Sub
+
+                    Assert.HasCount(Barra(form).Length, Accesi(form),
+                                    "prima di cominciare la barra è tutta accesa")
+
+                    Await pannello.ImportaDaTestoAsync(TestoDiUnCv(), "da linkedin.com")
+
+                    Assert.IsNotNull(accesiDurante, "l'AI è stata chiamata davvero")
+                    Assert.IsEmpty(accesiDurante,
+                                   "mentre l'AI legge il CV non resta acceso nessun bottone della barra")
+
+                    CollectionAssert.AreEquivalent(NomiDellaBarra(form), Accesi(form),
+                                                   "e finita la lettura la barra si riapre tutta")
+
+                End Function)
+
+        End Function
+
         <TestMethod>
         Public Async Function FinitoIlLavoroLaBarraTornaTuttaAccesa() As Task
 
@@ -457,6 +504,47 @@ Namespace Ui
             Finally
                 If Directory.Exists(radice) Then Directory.Delete(radice, recursive:=True)
             End Try
+
+        End Function
+
+        ''' <summary>
+        ''' La stessa finestra, con la scheda del profilo (P2) collegata a un lettore di
+        ''' CV <b>finto</b>: nessuna rete, nessuna chiave, e l'import intero gira lo stesso.
+        ''' </summary>
+        Private Shared Async Function ConLaSchedaDelProfiloAsync(
+                aiFinta As StrutturatoreFinto,
+                prova As Func(Of FormPrincipale, TrovaLavoro.PannelloProfilo, Task)) As Task
+
+            Dim radice As String = Path.Combine(
+                Path.GetTempPath(), "barra-navigazione-" & Guid.NewGuid().ToString("N"))
+
+            Try
+                Using contesto As ContestoApp = ContestoApp.Monta(radice, "", PoolInesistente()),
+                      form As New FormPrincipale()
+
+                    Dim pannello As TrovaLavoro.PannelloProfilo =
+                        DirectCast(form.Controls.Find("pnlProfilo", searchAllChildren:=True).Single(),
+                                   TrovaLavoro.PannelloProfilo)
+
+                    pannello.CreateControl()
+                    pannello.Collega(contesto, New ImportProfilo(aiFinta))
+
+                    Await prova(form, pannello)
+                End Using
+
+            Finally
+                If Directory.Exists(radice) Then Directory.Delete(radice, recursive:=True)
+            End Try
+
+        End Function
+
+        ''' <summary>Un CV come lo legge il browser da una pagina profilo.</summary>
+        Private Shared Function TestoDiUnCv() As String
+
+            Return "Luca Ferrari" & vbLf &
+                   "Magazziniere — Modena" & vbLf &
+                   "Esperienza" & vbLf &
+                   "Magazziniere presso Rossi S.p.A. — 2023-2024."
 
         End Function
 

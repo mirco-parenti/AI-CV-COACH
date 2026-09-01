@@ -76,6 +76,18 @@ Public Class PannelloEmail
     ''' <summary>Il filo per annullare la scrittura in corso; <c>Nothing</c> se non ce n'è una.</summary>
     Private _annulla As CancellationTokenSource
 
+    ''' <summary>
+    ''' Il comando che ha avviato l'attesa in corso: durante il lavoro è <b>lui</b> a fare
+    ''' da «Annulla». <c>Nothing</c> quando non c'è nessuna attesa.
+    ''' </summary>
+    ''' <remarks>
+    ''' Qui le attese sono due e non si somigliano — l'AI che scrive il messaggio, l'AI che
+    ''' riconosce i documenti della cartella — e ognuna ha il suo comando. Chi ha premuto
+    ''' «Documenti da allegare…» deve ritrovare l'annullo lì, non su un bottone che parla
+    ''' d'altro.
+    ''' </remarks>
+    Private _comandoDellAttesa As Button
+
     ''' <summary>Si torna ai documenti della candidatura (P6).</summary>
     Public Event TornaAiDocumenti As EventHandler
 
@@ -308,6 +320,7 @@ Public Class PannelloEmail
         End If
 
         _annulla = New CancellationTokenSource()
+        _comandoDellAttesa = btnRiscrivi
         RaiseEvent LavoroAiCambiato(Me, EventArgs.Empty)
         AggiornaComandi()
         Racconta("Sto scrivendo il messaggio…", StileApp.TestoSecondario)
@@ -364,6 +377,7 @@ Public Class PannelloEmail
         Finally
             _annulla?.Dispose()
             _annulla = Nothing
+            _comandoDellAttesa = Nothing
             RaiseEvent LavoroAiCambiato(Me, EventArgs.Empty)
             AggiornaComandi()
         End Try
@@ -611,7 +625,16 @@ Public Class PannelloEmail
     ' ==================================================================
 
     Private Async Sub btnRiscrivi_Click(sender As Object, e As EventArgs) Handles btnRiscrivi.Click
+
+        ' Mentre l'AI scrive, questo bottone è l'annulla dell'attesa: è il pattern di
+        ' «Analizza» in P4 e dell'import in P2.
+        If AiAlLavoro Then
+            AnnullaIlLavoro()
+            Return
+        End If
+
         Await ScriviLaBozzaAsync()
+
     End Sub
 
     ''' <summary>
@@ -741,7 +764,15 @@ Public Class PannelloEmail
     ' ==================================================================
 
     Private Async Sub btnDocumenti_Click(sender As Object, e As EventArgs) Handles btnDocumenti.Click
+
+        ' Come «Fallo riscrivere»: mentre l'AI guarda la cartella, di qui si rinuncia.
+        If AiAlLavoro Then
+            AnnullaIlLavoro()
+            Return
+        End If
+
         Await GestisciIDocumentiAsync()
+
     End Sub
 
     ''' <summary>
@@ -868,6 +899,7 @@ Public Class PannelloEmail
         End If
 
         _annulla = New CancellationTokenSource()
+        _comandoDellAttesa = btnDocumenti
         RaiseEvent LavoroAiCambiato(Me, EventArgs.Empty)
         AggiornaComandi()
         Racconta($"Sto guardando i {trovati.Count} documenti della cartella…", StileApp.TestoSecondario)
@@ -888,6 +920,7 @@ Public Class PannelloEmail
         Finally
             _annulla?.Dispose()
             _annulla = Nothing
+            _comandoDellAttesa = Nothing
             RaiseEvent LavoroAiCambiato(Me, EventArgs.Empty)
             AggiornaComandi()
         End Try
@@ -1106,8 +1139,17 @@ Public Class PannelloEmail
         Dim occupato As Boolean = AiAlLavoro
         Dim conCandidatura As Boolean = _candidatura IsNot Nothing
 
-        btnRiscrivi.Enabled = conCandidatura AndAlso Not occupato AndAlso
-                              _compositore IsNot Nothing
+        ' A lavoro in corso il comando che l'ha chiesto cambia mestiere: è l'annulla
+        ' dell'attesa, come «Analizza» in P4 e l'import in P2 (cap. 12.7 — le operazioni
+        ' lunghe sono annullabili). Fino al 2026-09-01 da qui non si poteva fermare
+        ' niente: `AnnullaIlLavoro` esisteva e la chiamava soltanto la chiusura della
+        ' finestra, cioè si annullava solo chiudendo il programma.
+        Dim annullaLaScrittura As Boolean = occupato AndAlso _comandoDellAttesa Is btnRiscrivi
+
+        btnRiscrivi.Text = If(annullaLaScrittura, "Annulla", "Fallo riscrivere")
+        btnRiscrivi.Enabled = annullaLaScrittura OrElse
+                              (conCandidatura AndAlso Not occupato AndAlso
+                               _compositore IsNot Nothing)
 
         btnPreparaEmail.Enabled = conCandidatura AndAlso Not occupato AndAlso
                                   Not String.IsNullOrWhiteSpace(_bozza.Corpo)
@@ -1116,9 +1158,16 @@ Public Class PannelloEmail
 
         btnTornaAiDocumenti.Enabled = Not occupato
 
+        ' L'altra attesa di questo pannello, e il suo annullo: chi ha chiesto di guardare
+        ' la cartella lo ferma dallo stesso bottone da cui l'ha chiesto.
+        Dim annullaLaLettura As Boolean = occupato AndAlso _comandoDellAttesa Is btnDocumenti
+
+        btnDocumenti.Text = If(annullaLaLettura, "Annulla", "Documenti da allegare…")
+
         ' La cartella documenti non dipende dalla candidatura: si può sistemare anche
         ' prima di avere un'email da mandare, ed è quel che conviene fare una volta sola.
-        btnDocumenti.Enabled = Not occupato AndAlso _contesto IsNot Nothing
+        btnDocumenti.Enabled = annullaLaLettura OrElse
+                               (Not occupato AndAlso _contesto IsNot Nothing)
 
         If Not btnPreparaEmail.Enabled AndAlso conCandidatura AndAlso Not occupato Then
             _suggerimenti.SetToolTip(btnPreparaEmail, "Prima serve un messaggio: fallo scrivere o scrivilo tu.")

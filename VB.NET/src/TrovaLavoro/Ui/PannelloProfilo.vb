@@ -122,6 +122,19 @@ Public Class PannelloProfilo
     ''' </summary>
     Public Event ProfiloEliminato As EventHandler
 
+    ''' <summary>
+    ''' L'AI ha cominciato o finito di leggere un CV: «mentre l'AI lavora non si esce»
+    ''' vale anche per la barra di navigazione, che questo pannello non può spegnere da sé
+    ''' (cap. 02.6).
+    ''' </summary>
+    ''' <remarks>
+    ''' È l'unico filo che qui mancava, ed era proprio quello dell'attesa più lunga di P2:
+    ''' la guardia interna spegneva i comandi del pannello, ma dalla barra si usciva lo
+    ''' stesso — e da un altro pannello partiva una seconda chiamata mentre la prima era in
+    ''' volo, contro il filo unico del cap. 03.8.
+    ''' </remarks>
+    Public Event LavoroAiCambiato As EventHandler
+
     Public Sub New()
 
         InitializeComponent()
@@ -1296,12 +1309,18 @@ Public Class PannelloProfilo
     End Sub
 
     ''' <summary>Il pannello mentre l'AI lavora: niente si tocca, e si può rinunciare.</summary>
+    ''' <remarks>
+    ''' L'ultima riga è quella che manda il fatto <b>fuori</b> di qui: i comandi del
+    ''' pannello li spegne <see cref="AggiornaComandi"/>, la barra di navigazione no —
+    ''' quella la governa la finestra, ed è lei che deve saperlo (cap. 02.6).
+    ''' </remarks>
     Private Sub LetturaInCorso(inCorso As Boolean)
 
         btnImporta.Text = If(inCorso, "Annulla lettura", "IMPORTA CV DA UN FILE")
         Cursor = If(inCorso, Cursors.AppStarting, Cursors.Default)
 
         AggiornaComandi()
+        RaiseEvent LavoroAiCambiato(Me, EventArgs.Empty)
 
     End Sub
 

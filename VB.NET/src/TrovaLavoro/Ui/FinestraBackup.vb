@@ -3,6 +3,7 @@ Imports System.Globalization
 Imports System.IO
 Imports System.Linq
 Imports System.Text.Json
+Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Motore
@@ -33,6 +34,12 @@ Public Class FinestraBackup
 
     ''' <summary>Il backup scelto per il ripristino; <c>Nothing</c> finché non se ne apre uno.</summary>
     Private _letto As Dati.Backup
+
+    ''' <summary>
+    ''' Se il backup aperto è già stato rimesso a posto: da lì in poi «Ripristina» resta
+    ''' spento, e per rifarlo si riapre il file — che è un gesto voluto.
+    ''' </summary>
+    Private _giaRipristinato As Boolean
 
     ''' <summary>
     ''' Se il profilo su disco è cambiato per mano di questa finestra: chi l'ha aperta
@@ -86,29 +93,63 @@ Public Class FinestraBackup
     ''' Scrive il backup nel file indicato e lo racconta. È la porta che usa il bottone
     ''' dopo il dialogo di salvataggio, ed è anche quella da cui passa il banco.
     ''' </summary>
+    ''' <remarks>
+    ''' <b>Comporre e scrivere vanno su un altro filo.</b> Comporre vuol dire leggere
+    ''' tutta la cartella dati — profilo, storico, e i file di ogni candidatura — e
+    ''' scrivere vuol dire posarli in un JSON solo, che su una chiavetta o su un disco di
+    ''' rete sono secondi. Sul thread dell'interfaccia sarebbero secondi di finestra
+    ''' morta, con Windows che le sbianca sopra il suo «non risponde»; qui restano i
+    ''' comandi chiusi e la riga che racconta, come in ogni attesa di questo programma
+    ''' (cap. 03.8).
+    ''' </remarks>
     ''' <returns><c>False</c> se il file non si è potuto scrivere; il motivo è nella riga di stato.</returns>
-    Public Function EsportaVerso(percorso As String) As Boolean
+    Public Async Function EsportaVersoAsync(percorso As String) As Task(Of Boolean)
+
+        ' Che cosa esce lo dicono due bottoncini, e i controlli si leggono di qua: dentro
+        ' il filo che lavora non ci va niente che appartenga alla finestra.
+        Dim cosa As ContenutoBackup = Scelta
+
+        AggiornaIComandi(inPausa:=True)
+        RaccontaLoStato($"Sto scrivendo «{percorso}»…", StileApp.TestoSecondario)
+
+        Dim fatto As Dati.Backup = Nothing
+        Dim guasto As Exception = Nothing
 
         Try
-            Dim fatto As Dati.Backup = _contesto.Backup.Componi(Scelta)
-            _contesto.Backup.Scrivi(fatto, percorso)
-
-            RaccontaLoStato($"Backup scritto: «{percorso}» — {String.Join(", ", CosaCEDentro(fatto))}.",
-                            StileApp.TestoSecondario)
-            Return True
+            fatto = Await Task.Run(
+                Function()
+                    Dim composto As Dati.Backup = _contesto.Backup.Componi(cosa)
+                    _contesto.Backup.Scrivi(composto, percorso)
+                    Return composto
+                End Function).ConfigureAwait(True)
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException OrElse
                                    TypeOf ex Is NotSupportedException
-
-            RaccontaLoStato($"Non sono riuscita a scrivere «{percorso}»: {ex.Message}", StileApp.Pericolo)
-            Return False
+            guasto = ex
 
         End Try
 
+        ' Nel frattempo la finestra può essere stata chiusa: toccare i controlli di una
+        ' finestra smaltita solleverebbe, e per giunta in un punto che nessuno guarda.
+        If IsDisposed Then Return guasto Is Nothing
+
+        AggiornaIComandi()
+
+        If guasto IsNot Nothing Then
+            RaccontaLoStato($"Non sono riuscita a scrivere «{percorso}»: {guasto.Message}", StileApp.Pericolo)
+            Return False
+        End If
+
+        RaccontaLoStato($"Backup scritto: «{percorso}» — {String.Join(", ", CosaCEDentro(fatto))}.",
+                        StileApp.TestoSecondario)
+        Return True
+
     End Function
 
-    Private Sub btnEsporta_Click(sender As Object, e As EventArgs) Handles btnEsporta.Click
+    Private Async Sub btnEsporta_Click(sender As Object, e As EventArgs) Handles btnEsporta.Click
+
+        Dim percorso As String
 
         Using scelta As New SaveFileDialog()
 
@@ -130,9 +171,13 @@ Public Class FinestraBackup
 
             If scelta.ShowDialog(Me) <> DialogResult.OK Then Return
 
-            EsportaVerso(scelta.FileName)
+            percorso = scelta.FileName
 
         End Using
+
+        ' Fuori dal dialogo: la scrittura dura, e tenerlo aperto per tutto quel tempo
+        ' vorrebbe dire farla aspettare a una finestra che ha già finito il suo mestiere.
+        Await EsportaVersoAsync(percorso)
 
     End Sub
 
@@ -180,7 +225,9 @@ Public Class FinestraBackup
             Concat({"", "Che cosa cambia sul disco:"}).
             Concat(detto.CosaSovrascrive().Select(Function(r) "  • " & r)))
 
-        btnRipristina.Enabled = True
+        _giaRipristinato = False
+        AggiornaIComandi()
+
         RaccontaLoStato($"Letto «{Path.GetFileName(percorso)}». " &
                         "Guarda cosa contiene, poi decidi.", StileApp.TestoSecondario)
 
@@ -192,33 +239,62 @@ Public Class FinestraBackup
     ''' Rimette al loro posto i dati del backup aperto. Ci si arriva dopo la conferma:
     ''' chi chiama questo metodo ha già chiesto all'utente.
     ''' </summary>
-    Public Function Ripristina() As EsitoRipristino
+    ''' <remarks>
+    ''' Scrive sul disco quanto ne contiene il backup — il profilo, il suo storico, le
+    ''' cartelle di ogni candidatura — e per la stessa ragione dell'export lo fa su un
+    ''' altro filo: qui la finestra resta viva, coi comandi chiusi e la riga che dice
+    ''' cos'è in corso.
+    ''' </remarks>
+    Public Async Function RipristinaAsync() As Task(Of EsitoRipristino)
 
         If _letto Is Nothing Then
             Throw New InvalidOperationException("Non c'è nessun backup aperto da ripristinare.")
         End If
 
+        AggiornaIComandi(inPausa:=True)
+        RaccontaLoStato("Sto rimettendo i dati al loro posto…", StileApp.TestoSecondario)
+
+        Dim esito As EsitoRipristino = Nothing
+        Dim guasto As Exception = Nothing
+
         Try
-            Dim esito As EsitoRipristino = _contesto.Backup.Ripristina(_letto)
-
-            If esito.ProfiloRipristinato Then _ProfiloRipristinato = True
-
-            RaccontaLoStato(ComEAndata(esito),
-                            If(esito.Rifiutati.Count > 0, StileApp.Pericolo, StileApp.TestoSecondario))
-
-            ' Un backup già ripristinato non si ripristina due volte di fila per un click
-            ' distratto: per rifarlo si riapre il file, che è un gesto voluto.
-            btnRipristina.Enabled = False
-
-            Return esito
+            esito = Await Task.Run(Function() _contesto.Backup.Ripristina(_letto)).ConfigureAwait(True)
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException
-
-            RaccontaLoStato($"Il ripristino si è fermato: {ex.Message}", StileApp.Pericolo)
-            Return Nothing
+            guasto = ex
 
         End Try
+
+        ' Quel che è successo sul disco si annota comunque, prima di guardare se la
+        ' finestra c'è ancora: chi l'ha aperta legge «ProfiloRipristinato» per sapere se
+        ' deve rileggere il profilo, e un ripristino avvenuto davvero non può andare perso
+        ' perché nel frattempo qualcuno ha chiuso.
+        If guasto Is Nothing Then
+
+            If esito.ProfiloRipristinato Then _ProfiloRipristinato = True
+
+            ' Un backup già ripristinato non si ripristina due volte di fila per un click
+            ' distratto: per rifarlo si riapre il file, che è un gesto voluto.
+            _giaRipristinato = True
+
+        End If
+
+        ' Nel frattempo la finestra può essere stata chiusa: toccare i controlli di una
+        ' finestra smaltita solleverebbe, e per giunta in un punto che nessuno guarda.
+        If IsDisposed Then Return esito
+
+        AggiornaIComandi()
+
+        If guasto IsNot Nothing Then
+            RaccontaLoStato($"Il ripristino si è fermato: {guasto.Message}", StileApp.Pericolo)
+            Return Nothing
+        End If
+
+        RaccontaLoStato(ComEAndata(esito),
+                        If(esito.Rifiutati.Count > 0, StileApp.Pericolo, StileApp.TestoSecondario))
+
+        Return esito
 
     End Function
 
@@ -242,7 +318,7 @@ Public Class FinestraBackup
 
     End Sub
 
-    Private Sub btnRipristina_Click(sender As Object, e As EventArgs) Handles btnRipristina.Click
+    Private Async Sub btnRipristina_Click(sender As Object, e As EventArgs) Handles btnRipristina.Click
 
         If _letto Is Nothing Then Return
 
@@ -262,7 +338,7 @@ Public Class FinestraBackup
             Return
         End If
 
-        Ripristina()
+        Await RipristinaAsync()
 
     End Sub
 
@@ -357,12 +433,37 @@ Public Class FinestraBackup
 
         _letto = Nothing
         txtAnteprima.Text = ""
-        btnRipristina.Enabled = False
+        AggiornaIComandi()
         RaccontaLoStato(perche, StileApp.Pericolo)
 
         Return False
 
     End Function
+
+    ''' <summary>
+    ''' Che cosa si può premere adesso.
+    ''' </summary>
+    ''' <param name="inPausa">
+    ''' Vero mentre il disco lavora: allora non si tocca niente, perché ogni comando di
+    ''' questa finestra legge o scrive gli stessi file di quello in corso.
+    ''' </param>
+    ''' <remarks>
+    ''' La regola di «Ripristina» sta <b>qui</b> e in nessun altro posto: vuole un backup
+    ''' aperto (l'anteprima è il passo 2 del cap. 11.4) e non ancora rimesso a posto. Prima
+    ''' era scritta in tre punti — chi apriva, chi falliva l'apertura, chi ripristinava — e
+    ''' con la pausa sarebbe diventata di quattro: alla riapertura dei comandi nessuno di
+    ''' quei tre saprebbe dire se il bottone va riacceso o no.
+    ''' </remarks>
+    Private Sub AggiornaIComandi(Optional inPausa As Boolean = False)
+
+        btnEsporta.Enabled = Not inPausa
+        btnScegli.Enabled = Not inPausa
+        rdoSoloProfilo.Enabled = Not inPausa
+        rdoTutto.Enabled = Not inPausa
+
+        btnRipristina.Enabled = Not inPausa AndAlso _letto IsNot Nothing AndAlso Not _giaRipristinato
+
+    End Sub
 
     ''' <summary>La riga di stato in fondo: una cosa alla volta, l'ultima che è successa.</summary>
     Private Sub RaccontaLoStato(testo As String, colore As Color)

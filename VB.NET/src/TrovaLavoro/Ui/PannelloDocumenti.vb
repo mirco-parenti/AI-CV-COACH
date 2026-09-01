@@ -160,6 +160,19 @@ Public Class PannelloDocumenti
     Private _annulla As CancellationTokenSource
 
     ''' <summary>
+    ''' Il comando che ha avviato l'attesa in corso: durante il lavoro è <b>lui</b> a fare
+    ''' da «Annulla». <c>Nothing</c> quando non c'è nessuna attesa.
+    ''' </summary>
+    ''' <remarks>
+    ''' Le attese di questo pannello sono tre — il 📄 CV base, i documenti della
+    ''' candidatura, il riallineo della ✉️ lettera — e due comandi diversi le
+    ''' rappresentano. Ricordarsi <i>quale</i> è la differenza fra un bottone che annulla
+    ''' quel che si è chiesto e un bottone che annulla qualcos'altro: chi ha premuto
+    ''' «Rigenera la lettera» deve ritrovare l'annullo lì, sotto lo stesso dito.
+    ''' </remarks>
+    Private _comandoDellAttesa As Button
+
+    ''' <summary>
     ''' L'ultima cartella in cui si è esportato, per non ripartire dal Desktop a ogni giro.
     ''' È <b>condivisa</b> perché il pannello è uno per area ma la scelta è dell'utente, non
     ''' del documento che sta guardando, e vale finché l'applicazione resta aperta.
@@ -534,7 +547,7 @@ Public Class PannelloDocumenti
         Using filo As New CancellationTokenSource()
 
             _annulla = filo
-            LavoroInCorso(True)
+            LavoroInCorso(True, btnRigenera)
 
             Try
                 RaccontaLoStato($"Scrivo il tuo 📄 CV base{InQuestaLingua()}…", StileApp.TestoSecondario)
@@ -607,7 +620,7 @@ Public Class PannelloDocumenti
         Using filo As New CancellationTokenSource()
 
             _annulla = filo
-            LavoroInCorso(True)
+            LavoroInCorso(True, btnRigenera)
 
             Try
                 Dim avanzamento As New Progress(Of AvanzamentoPipeline)(
@@ -1226,7 +1239,7 @@ Public Class PannelloDocumenti
         Using filo As New CancellationTokenSource()
 
             _annulla = filo
-            LavoroInCorso(True)
+            LavoroInCorso(True, btnRigeneraLettera)
 
             Try
                 Dim avanzamento As New Progress(Of AvanzamentoPipeline)(
@@ -1555,6 +1568,14 @@ Public Class PannelloDocumenti
     End Sub
 
     Private Async Sub btnRigenera_Click(sender As Object, e As EventArgs) Handles btnRigenera.Click
+
+        ' Ad attesa in corso lo stesso bottone serve ad annullarla, come «Analizza» in P4
+        ' e l'import in P2. Sta prima della conferma: qui non si sta buttando via niente,
+        ' si sta rinunciando a scrivere.
+        If AiAlLavoro Then
+            AnnullaIlLavoro()
+            Return
+        End If
 
         ' Rigenerare butta via testi che l'utente potrebbe aver già letto e approvato, e
         ' costa un'altra attesa: si chiede prima (cap. 03.3, livello 4).
@@ -2023,7 +2044,15 @@ Public Class PannelloDocumenti
     End Sub
 
     Private Async Sub btnRigeneraLettera_Click(sender As Object, e As EventArgs) Handles btnRigeneraLettera.Click
+
+        ' Come «Rigenera» qui accanto: mentre riscrive, questo bottone è l'annulla.
+        If AiAlLavoro Then
+            AnnullaIlLavoro()
+            Return
+        End If
+
         Await RiallineaLaLetteraAsync()
+
     End Sub
 
     Private Sub btnPreparaEmail_Click(sender As Object, e As EventArgs) Handles btnPreparaEmail.Click
@@ -2094,7 +2123,14 @@ Public Class PannelloDocumenti
 
     End Function
 
-    Private Sub LavoroInCorso(inCorso As Boolean)
+    ''' <param name="comando">
+    ''' Il comando che ha chiesto questa attesa: durante il lavoro diventa il suo
+    ''' «Annulla». Si passa solo cominciando; finendo, non c'è più nessuna attesa da
+    ''' rappresentare.
+    ''' </param>
+    Private Sub LavoroInCorso(inCorso As Boolean, Optional comando As Button = Nothing)
+
+        _comandoDellAttesa = If(inCorso, comando, Nothing)
 
         Cursor = If(inCorso, Cursors.AppStarting, Cursors.Default)
 
@@ -2116,11 +2152,21 @@ Public Class PannelloDocumenti
         btnEsportaDocx.Enabled = conDocumento AndAlso Not occupato
         btnEsportaPdf.Enabled = conDocumento AndAlso Not occupato
 
+        ' A lavoro in corso il comando che l'ha chiesto cambia mestiere: è l'annulla
+        ' dell'attesa, come «Analizza» in P4 e l'import in P2 (cap. 12.7 — le operazioni
+        ' lunghe sono annullabili). Fino al 2026-09-01 qui non c'era nessuna via per
+        ' fermare una generazione: `AnnullaIlLavoro` esisteva e la chiamava solo la
+        ' chiusura della finestra, cioè si annullava soltanto chiudendo il programma.
+        Dim annullaLaGenerazione As Boolean = occupato AndAlso _comandoDellAttesa Is btnRigenera
+
+        btnRigenera.Text = If(annullaLaGenerazione, "Annulla", "Rigenera")
+
         ' Anche dopo una generazione andata storta: è da qui che si riprova, e un
         ' «Rigenera» spento lascerebbe come unica via il ritorno al profilo.
-        btnRigenera.Enabled = Not occupato AndAlso
-                              (_sulCvBase OrElse _candidatura IsNot Nothing) AndAlso
-                              (_pipeline IsNot Nothing OrElse _generatore IsNot Nothing)
+        btnRigenera.Enabled = annullaLaGenerazione OrElse
+                              (Not occupato AndAlso
+                               (_sulCvBase OrElse _candidatura IsNot Nothing) AndAlso
+                               (_pipeline IsNot Nothing OrElse _generatore IsNot Nothing))
 
         btnTornaIndietro.Enabled = Not occupato
 
@@ -2133,12 +2179,19 @@ Public Class PannelloDocumenti
                                        _candidatura IsNot Nothing AndAlso
                                        _candidatura.LetteraDaRiallineare
 
-        If btnRigeneraLettera.Visible <> daRiallineare Then
-            btnRigeneraLettera.Visible = daRiallineare
+        ' Anche questa attesa si annulla, e dal comando che l'ha chiesta: sparire mentre
+        ' il lavoro che si è appena chiesto è in volo lascerebbe l'attesa senza uscita.
+        Dim annullaIlRiallineo As Boolean = occupato AndAlso _comandoDellAttesa Is btnRigeneraLettera
+        Dim inFascia As Boolean = daRiallineare OrElse annullaIlRiallineo
+
+        If btnRigeneraLettera.Visible <> inFascia Then
+            btnRigeneraLettera.Visible = inFascia
             DisponiLeAzioni()
         End If
 
-        btnRigeneraLettera.Enabled = daRiallineare AndAlso Not occupato AndAlso _pipeline IsNot Nothing
+        btnRigeneraLettera.Text = If(annullaIlRiallineo, "Annulla", "⚠ Rigenera la lettera")
+        btnRigeneraLettera.Enabled = annullaIlRiallineo OrElse
+                                     (daRiallineare AndAlso Not occupato AndAlso _pipeline IsNot Nothing)
 
         If daRiallineare Then
             _suggerimenti.SetToolTip(btnRigeneraLettera,

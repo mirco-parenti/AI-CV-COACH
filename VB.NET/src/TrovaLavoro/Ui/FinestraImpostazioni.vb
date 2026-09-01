@@ -2,6 +2,7 @@
 Imports System.Drawing
 Imports System.IO
 Imports System.Text.Json
+Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Motore
@@ -642,8 +643,27 @@ Public Class FinestraImpostazioni
 
     Private Sub RaccontaCosaSiPuoPulire()
 
+        btnBackup.Enabled = True
         btnSvuotaNavigazione.Enabled = Directory.Exists(_contesto.Cartella.CartellaWebView2)
         btnEliminaTutto.Enabled = _pulizia.CEQualcosa
+
+    End Sub
+
+    ''' <summary>
+    ''' Chiude i tre comandi della sezione «I tuoi dati» mentre una pulizia è in corso.
+    ''' </summary>
+    ''' <remarks>
+    ''' Riaprirli non tocca a questo metodo ma a <see cref="RaccontaCosaSiPuoPulire"/>, che
+    ''' li riaccende <b>secondo quel che è rimasto</b>: dopo un'eliminazione riuscita non
+    ''' c'è più niente da eliminare, e riaccendere alla cieca il bottone rosso direbbe il
+    ''' contrario. Sono tre e non due perché lavorano sugli stessi file: un backup avviato
+    ''' in mezzo a un'eliminazione leggerebbe una cartella che sta sparendo.
+    ''' </remarks>
+    Private Sub ChiudiIComandiDeiDati()
+
+        btnBackup.Enabled = False
+        btnSvuotaNavigazione.Enabled = False
+        btnEliminaTutto.Enabled = False
 
     End Sub
 
@@ -658,7 +678,14 @@ Public Class FinestraImpostazioni
 
     End Sub
 
-    Private Sub btnSvuotaNavigazione_Click(sender As Object, e As EventArgs) Handles btnSvuotaNavigazione.Click
+    ''' <remarks>
+    ''' <b>La cancellazione va su un altro filo.</b> La cartella del browser sono migliaia
+    ''' di file piccoli, e cancellarli sul thread dell'interfaccia vuol dire una finestra
+    ''' che smette di rispondere proprio mentre dice di stare lavorando — con Windows che
+    ''' le sbianca sopra il suo «non risponde». Qui restano i comandi chiusi e la riga che
+    ''' racconta, che è il patto delle attese di questo programma (cap. 03.8).
+    ''' </remarks>
+    Private Async Sub btnSvuotaNavigazione_Click(sender As Object, e As EventArgs) Handles btnSvuotaNavigazione.Click
 
         ' Livello 5: si spiega e si parte da «No», come lo «Scarta» di P4 (cap. 03.3).
         Dim risposta As DialogResult = MessageBox.Show(
@@ -672,24 +699,40 @@ Public Class FinestraImpostazioni
 
         If risposta <> DialogResult.Yes Then Return
 
+        ChiudiIComandiDeiDati()
+        Racconta("Sto svuotando i dati di navigazione…", StileApp.TestoSecondario)
+
+        Dim detto As String
+        Dim colore As Color
+
         Try
-            If _pulizia.SvuotaNavigazione() Then
-                Racconta("Dati di navigazione svuotati.", StileApp.TestoSecondario)
-            Else
-                Racconta("Non c'era niente da svuotare.", StileApp.TestoSecondario)
-            End If
+            detto = If(Await Task.Run(Function() _pulizia.SvuotaNavigazione()).ConfigureAwait(True),
+                       "Dati di navigazione svuotati.",
+                       "Non c'era niente da svuotare.")
+            colore = StileApp.TestoSecondario
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
             ' Il browser incorporato tiene i suoi file aperti finché P3 è vivo.
-            Racconta($"Non si sono lasciati cancellare tutti ({ex.Message}): " &
-                     "chiudi la ricerca annunci e riprova.", StileApp.RossoTitoli)
+            detto = $"Non si sono lasciati cancellare tutti ({ex.Message}): " &
+                    "chiudi la ricerca annunci e riprova."
+            colore = StileApp.RossoTitoli
         End Try
 
+        ' Nel frattempo la finestra può essere stata chiusa: toccare i controlli di una
+        ' finestra smaltita solleverebbe, e per giunta in un punto che nessuno guarda.
+        If IsDisposed Then Return
+
+        Racconta(detto, colore)
         RaccontaCosaSiPuoPulire()
 
     End Sub
 
-    Private Sub btnEliminaTutto_Click(sender As Object, e As EventArgs) Handles btnEliminaTutto.Click
+    ''' <remarks>
+    ''' Come lo svuotamento qui sopra, e con più ragione: qui sparisce l'intera cartella
+    ''' dati — profilo, storico, candidature con i loro documenti, backup. Il mestiere va
+    ''' su un altro filo, e la finestra resta viva a dirlo.
+    ''' </remarks>
+    Private Async Sub btnEliminaTutto_Click(sender As Object, e As EventArgs) Handles btnEliminaTutto.Click
 
         Dim confermato As Boolean = FinestraConfermaCritica.Chiedi(
             Me,
@@ -707,26 +750,42 @@ Public Class FinestraImpostazioni
 
         If Not confermato Then Return
 
+        ChiudiIComandiDeiDati()
+        Racconta("Sto eliminando i tuoi dati…", StileApp.TestoSecondario)
+
+        Dim andate As Integer
+        Dim guasto As Exception = Nothing
+
         Try
-            Dim andate As Integer = _pulizia.EliminaTutto()
-            _DatiEliminati = True
-
-            MessageBox.Show(
-                Me,
-                $"Fatto: {andate} voci eliminate." & vbLf & vbLf &
-                "Chiudo l'applicazione: da qui in poi lavorerebbe su file che non ci sono più. " &
-                "Riaprendola, ricomincia come il primo giorno.",
-                "Dati eliminati", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
-            DialogResult = DialogResult.OK
-            Close()
+            andate = Await Task.Run(Function() _pulizia.EliminaTutto()).ConfigureAwait(True)
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
-            Racconta($"Non si è potuto eliminare tutto ({ex.Message}). " &
+            guasto = ex
+        End Try
+
+        ' Nel frattempo la finestra può essere stata chiusa: toccare i controlli di una
+        ' finestra smaltita solleverebbe, e per giunta in un punto che nessuno guarda.
+        If IsDisposed Then Return
+
+        If guasto IsNot Nothing Then
+            Racconta($"Non si è potuto eliminare tutto ({guasto.Message}). " &
                      "Qualcosa è ancora aperto: chiudi le altre finestre e riprova.",
                      StileApp.RossoTitoli)
             RaccontaCosaSiPuoPulire()
-        End Try
+            Return
+        End If
+
+        _DatiEliminati = True
+
+        MessageBox.Show(
+            Me,
+            $"Fatto: {andate} voci eliminate." & vbLf & vbLf &
+            "Chiudo l'applicazione: da qui in poi lavorerebbe su file che non ci sono più. " &
+            "Riaprendola, ricomincia come il primo giorno.",
+            "Dati eliminati", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+        DialogResult = DialogResult.OK
+        Close()
 
     End Sub
 
