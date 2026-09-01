@@ -405,6 +405,24 @@ il certificato per la firma) più quella.
 *L'unica voce — il giro dal vivo dello strumento di collaudo senza shell — è stata **chiusa
 il giorno stesso**, dal primo giro di collaudi UI che ha riacceso il server: è in «Chiuse».*
 
+## Dalla fase di fix UI della revisione (2026-09-01)
+
+- **La prova a 150 % delle cure DPI di F2-4.** Le tre finestre appena corrette —
+  Appunti, Documenti, «Modifica i testi» — e P7 vanno guardate a scala alta, come fu
+  fatto il 23 agosto per le quattro già curate: i collaudi nuovi sorvegliano tetto,
+  scorrimento e margine, ma a 96 DPI non vedono la conversione in sé (limite
+  dichiarato nel blocco). Si chiude nella stessa passata a 150 % delle voci DPI già
+  aperte qui sopra. *(decisione 15.7; blocco F2-4, `fix-ui-avanzamento.md`.)*
+- **Le prove dal vivo dei flussi AI dei blocchi F2-2 e F2-6.** Su questa macchina non
+  c'è la chiave API: l'import CV col filo unico nuovo (U1), gli «Annulla» di P6/P7
+  (U5), l'anti-flash dei 300 ms (U20) e l'indicatore d'attesa senza scudo (B6) sono
+  passati dal banco — col collaudo di U1 falsificato in due modi — ma nessuno li ha
+  visti su una chiamata vera. Con loro aspettano i due numeri dell'indicatore «da
+  giudicare guardando»: il velo bianco a 140 e l'alzata a 20 px. Si chiudono con una
+  sessione su una macchina con la chiave, o con la chiave digitata a mano qui (voce
+  della postazione del tutor, più sopra). *(cap. 03.8; blocchi F2-2/F2-6,
+  `fix-ui-avanzamento.md`.)*
+
 ## Chiuse
 
 - ✅ **Il collaudo dal vivo dello strumento di collaudo senza shell** *(aperta e **chiusa il
