@@ -410,8 +410,17 @@ Namespace Ui
                     Assert.IsFalse(consegnato)
                     Assert.AreEqual(1, lettore.Letture, "ci ha provato")
 
+                    Dim riga As Label = Etichetta(pannello, "lblStatoRicerca")
+
                     ' Il ripiego onesto: il testo si può sempre incollare a mano in P4.
-                    Assert.Contains(NomiUi.Confronto, Etichetta(pannello, "lblStatoRicerca").Text)
+                    Assert.Contains(NomiUi.Confronto, riga.Text)
+
+                    ' Dal 2026-09-01 un guasto in questo pannello si vede e si legge: fino
+                    ' ad allora finiva nel grigio delle didascalie, indistinguibile da
+                    ' «Ricerca salvata» (v. Segnalazioni).
+                    Assert.StartsWith(Segnalazioni.PrefissoErrore, riga.Text,
+                                      "la riga dice che è un errore, non solo col colore")
+                    Assert.AreEqual(StileApp.Pericolo, riga.ForeColor, "e il colore c'è lo stesso")
 
                 End Function)
 
@@ -432,11 +441,62 @@ Namespace Ui
 
                     Await pannello.CatturaAsync()
 
-                    Dim detto As String = Etichetta(pannello, "lblStatoRicerca").Text
+                    Dim riga As Label = Etichetta(pannello, "lblStatoRicerca")
 
-                    Assert.Contains("annullata", detto, "si dice com'è andata")
-                    Assert.DoesNotContain("Non sono riuscita a leggere", detto,
+                    Assert.Contains("annullata", riga.Text, "si dice com'è andata")
+                    Assert.DoesNotContain("Non sono riuscita a leggere", riga.Text,
                                           "e non si accusa la pagina, che non c'entra")
+
+                    ' L'altra metà della stessa onestà: chi ha fermato lui una lettura non
+                    ' deve trovarsi davanti la parola «Errore» e una riga rossa. È quel che
+                    ' tiene il prefisso una cosa che significa qualcosa (v. Segnalazioni).
+                    Assert.DoesNotContain(Segnalazioni.PrefissoErrore, riga.Text,
+                                          "un annullamento non è un errore")
+                    Assert.AreEqual(StileApp.TestoSecondario, riga.ForeColor, "e non si tinge")
+
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Dopo un errore, la riga torna grigia alla prima cosa che va bene.
+        ''' </summary>
+        ''' <remarks>
+        ''' È il difetto che il rosso si porta dietro: da quando questa riga sa tingersi
+        ''' (2026-09-01), se il colore non si riscrivesse a ogni giro resterebbe quello di
+        ''' prima — e «Catturato: …» comparirebbe in rosso perché dieci secondi fa una
+        ''' pagina non si era lasciata leggere. Nessun collaudo sul singolo messaggio se ne
+        ''' accorgerebbe: il difetto vive nella <i>successione</i> di due messaggi, ed è
+        ''' l'unico modo di vederlo.
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function DopoUnErroreLaRigaTornaGrigia() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Guasto = New InvalidOperationException("la vista non risponde")}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Await pannello.CatturaAsync()
+
+                    Dim riga As Label = Etichetta(pannello, "lblStatoRicerca")
+                    Assert.AreEqual(StileApp.Pericolo, riga.ForeColor, "prima è rossa")
+
+                    ' Adesso la pagina si lascia leggere, ed è un annuncio buono.
+                    lettore.Guasto = Nothing
+                    lettore.Pagina = New PaginaLetta With {
+                        .Titolo = "Magazziniere - Rossi S.p.A.",
+                        .Indirizzo = "https://it.indeed.com/viewjob?jk=9f3c1a",
+                        .Testo = TestoDiUnAnnuncio()}
+
+                    Await pannello.CatturaAsync()
+
+                    Assert.Contains("Catturato", riga.Text, "la cattura è andata")
+                    Assert.AreEqual(StileApp.TestoSecondario, riga.ForeColor,
+                                    "e il rosso di prima non le resta addosso")
+                    Assert.DoesNotContain(Segnalazioni.PrefissoErrore, riga.Text,
+                                          "né la parola")
 
                 End Function)
 

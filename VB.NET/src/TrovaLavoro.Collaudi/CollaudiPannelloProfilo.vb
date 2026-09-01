@@ -273,6 +273,8 @@ Namespace Ui
                         Assert.Contains("non si lascia leggere", stato.Text, "lo dice")
                         Assert.Contains("copia di sicurezza", stato.Text, "e dice della copia")
                         Assert.AreEqual(StileApp.Pericolo, stato.ForeColor, "con il colore dell'errore")
+                        Assert.StartsWith(Segnalazioni.PrefissoErrore, stato.Text,
+                                          "e con la parola, che il colore da solo non basta")
 
                         Assert.IsEmpty(Casella(pannello, "txtNome").Text, "niente dati inventati al posto suoi")
                         Assert.IsTrue(File.Exists(cartella.FileProfilo), "e il file rotto resta lì da recuperare")

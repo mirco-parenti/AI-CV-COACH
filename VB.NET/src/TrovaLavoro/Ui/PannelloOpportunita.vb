@@ -243,7 +243,7 @@ Public Class PannelloOpportunita
         If testo = "" Then Return
 
         If _pipeline Is Nothing Then
-            RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
+            RaccontaUnAvviso(MotivoSenzaAi())
             Return
         End If
 
@@ -300,8 +300,7 @@ Public Class PannelloOpportunita
             Catch ex As ErroreAi
                 ' Il messaggio è già quello da mostrare, e il testo incollato resta dov'è:
                 ' si riprova senza doverlo ritrovare.
-                RaccontaLoStato(ex.Message & vbLf & "Il testo dell'annuncio è ancora qui: puoi riprovare.",
-                                StileApp.Pericolo)
+                RaccontaUnErrore(ex.Message & vbLf & "Il testo dell'annuncio è ancora qui: puoi riprovare.")
 
             Finally
                 _annulla = Nothing
@@ -351,7 +350,7 @@ Public Class PannelloOpportunita
         If _opportunita Is Nothing OrElse _opportunita.Confrontata Then Return
 
         If _pipeline Is Nothing Then
-            RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
+            RaccontaUnAvviso(MotivoSenzaAi())
             Return
         End If
 
@@ -383,8 +382,7 @@ Public Class PannelloOpportunita
                                 StileApp.TestoSecondario)
 
             Catch ex As ErroreAi
-                RaccontaLoStato(ex.Message & vbLf & "La candidatura resta com'era: puoi riprovare.",
-                                StileApp.Pericolo)
+                RaccontaUnErrore(ex.Message & vbLf & "La candidatura resta com'era: puoi riprovare.")
 
             Finally
                 _annulla = Nothing
@@ -578,10 +576,9 @@ Public Class PannelloOpportunita
 
         Catch ex As Exception When TypeOf ex Is JsonException OrElse TypeOf ex Is IOException _
                                    OrElse TypeOf ex Is UnauthorizedAccessException
-            RaccontaLoStato(
+            RaccontaUnErrore(
                 $"Il profilo c'è ma non si lascia leggere: {ex.Message}" & vbLf &
-                "Aprilo dalla scheda «Profilo»: lì trovi come rimediare.",
-                StileApp.Pericolo)
+                "Aprilo dalla scheda «Profilo»: lì trovi come rimediare.")
             Return Nothing
         End Try
 
@@ -1084,6 +1081,26 @@ Public Class PannelloOpportunita
 
     End Sub
 
+    ''' <summary>
+    ''' Una riga che dice che qualcosa non è riuscito: la parola e il colore insieme
+    ''' (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    Private Sub RaccontaUnErrore(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoErrore & testo, StileApp.Pericolo)
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa manca prima ancora di provare — la chiave, i
+    ''' prompt: stesso colore dell'errore, parola diversa.
+    ''' </summary>
+    Private Sub RaccontaUnAvviso(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoAvviso & testo, StileApp.Pericolo)
+
+    End Sub
+
     ''' <summary>Il match in una riga, per la barra di stato del pannello.</summary>
     Private Function RiassuntoDelMatch() As String
 
@@ -1102,7 +1119,7 @@ Public Class PannelloOpportunita
     Private Sub RaccontaDaDoveSiComincia()
 
         If _pipeline Is Nothing Then
-            RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
+            RaccontaUnAvviso(MotivoSenzaAi())
             Return
         End If
 

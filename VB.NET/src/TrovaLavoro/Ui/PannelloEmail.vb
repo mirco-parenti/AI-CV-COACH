@@ -189,11 +189,10 @@ Public Class PannelloEmail
             RiprendiLaBozza(salvata)
 
             If InUnAltraLingua(salvata) Then
-                Racconta("Questa bozza è in " & LinguaDocumenti.Nome(salvata.Lingua).ToLowerInvariant() &
-                         ", ma i documenti adesso sono in " &
-                         LinguaDocumenti.Nome(_candidatura.Lingua).ToLowerInvariant() &
-                         ": premi «Fallo riscrivere» per rifare il messaggio nella loro lingua.",
-                         StileApp.Pericolo)
+                RaccontaUnAvviso("Questa bozza è in " & LinguaDocumenti.Nome(salvata.Lingua).ToLowerInvariant() &
+                                 ", ma i documenti adesso sono in " &
+                                 LinguaDocumenti.Nome(_candidatura.Lingua).ToLowerInvariant() &
+                                 ": premi «Fallo riscrivere» per rifare il messaggio nella loro lingua.")
             Else
                 Racconta("Bozza ripresa da dove l'avevi lasciata.", StileApp.TestoSecondario)
             End If
@@ -308,14 +307,12 @@ Public Class PannelloEmail
         If _candidatura Is Nothing OrElse _contesto Is Nothing Then Return
 
         If _compositore Is Nothing Then
-            Racconta("Senza chiave API non posso scrivere il messaggio: puoi scriverlo a mano qui sotto.",
-                     StileApp.Pericolo)
+            RaccontaUnAvviso("Senza chiave API non posso scrivere il messaggio: puoi scriverlo a mano qui sotto.")
             Return
         End If
 
         If _candidatura.Lettera Is Nothing Then
-            Racconta("Questa candidatura non ha ancora una lettera: l'email nasce da lì (cap. 07.1).",
-                     StileApp.Pericolo)
+            RaccontaUnAvviso("Questa candidatura non ha ancora una lettera: l'email nasce da lì (cap. 07.1).")
             Return
         End If
 
@@ -372,7 +369,7 @@ Public Class PannelloEmail
             Racconta("Scrittura annullata.", StileApp.TestoSecondario)
 
         Catch ex As ErroreAi
-            Racconta(ex.Message, StileApp.Pericolo)
+            RaccontaUnErrore(ex.Message)
 
         Finally
             _annulla?.Dispose()
@@ -666,9 +663,8 @@ Public Class PannelloEmail
 
             ' Il file c'è comunque, ed è la cosa che conta: Windows non sa con quale
             ' programma aprirlo, e dirglielo è una cosa che l'utente può fare.
-            Racconta($"Il messaggio è scritto in «{percorso}», ma Windows non sa con quale " &
-                     "programma aprire un file .eml. Aprilo dal tuo programma di posta.",
-                     StileApp.Pericolo)
+            RaccontaUnErrore($"Il messaggio è scritto in «{percorso}», ma Windows non sa con quale " &
+                             "programma aprire un file .eml. Aprilo dal tuo programma di posta.")
         End Try
 
         AggiornaComandi()
@@ -702,7 +698,7 @@ Public Class PannelloEmail
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException
 
-            Racconta($"Non sono riuscita a scrivere il messaggio: {ex.Message}", StileApp.Pericolo)
+            RaccontaUnErrore($"Non sono riuscita a scrivere il messaggio: {ex.Message}")
             Return Nothing
         End Try
 
@@ -752,7 +748,7 @@ Public Class PannelloEmail
                                    TypeOf ex Is UnauthorizedAccessException OrElse
                                    TypeOf ex Is InvalidOperationException
 
-            Racconta($"Non sono riuscita a segnarla come inviata: {ex.Message}", StileApp.Pericolo)
+            RaccontaUnErrore($"Non sono riuscita a segnarla come inviata: {ex.Message}")
         End Try
 
         AggiornaComandi()
@@ -879,22 +875,20 @@ Public Class PannelloEmail
         _contesto.Raccolta.Letta = Date.Now
 
         If trovati.Count = 0 Then
-            Racconta("In quella cartella non ci sono file che io sappia leggere (PDF, DOCX, TXT, MD).",
-                     StileApp.Pericolo)
+            RaccontaUnAvviso("In quella cartella non ci sono file che io sappia leggere (PDF, DOCX, TXT, MD).")
             Return
         End If
 
         ' Un elenco troncato in silenzio si leggerebbe come «nella cartella non c'era
         ' altro»: chi ha duecento file deve sapere che ne ho guardati sessanta.
         If lasciatiFuori > 0 Then
-            Racconta($"La cartella ha più di {ScansioneDocumenti.MassimoFile} documenti: " &
-                     $"ne ho letti i primi {trovati.Count} in ordine di nome, {lasciatiFuori} sono rimasti fuori.",
-                     StileApp.Pericolo)
+            RaccontaUnAvviso($"La cartella ha più di {ScansioneDocumenti.MassimoFile} documenti: " &
+                             $"ne ho letti i primi {trovati.Count} in ordine di nome, " &
+                             $"{lasciatiFuori} sono rimasti fuori.")
         End If
 
         If _classificatore Is Nothing Then
-            Racconta("Senza chiave API non posso riconoscerli: l'elenco c'è, la categoria mettila tu.",
-                     StileApp.Pericolo)
+            RaccontaUnAvviso("Senza chiave API non posso riconoscerli: l'elenco c'è, la categoria mettila tu.")
             Return
         End If
 
@@ -915,7 +909,7 @@ Public Class PannelloEmail
             Racconta("Lettura annullata: l'elenco resta com'era.", StileApp.TestoSecondario)
 
         Catch ex As ErroreAi
-            Racconta(ex.Message, StileApp.Pericolo)
+            RaccontaUnErrore(ex.Message)
 
         Finally
             _annulla?.Dispose()
@@ -936,7 +930,7 @@ Public Class PannelloEmail
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException
 
-            Racconta($"Non sono riuscita a salvare l'elenco dei documenti: {ex.Message}", StileApp.Pericolo)
+            RaccontaUnErrore($"Non sono riuscita a salvare l'elenco dei documenti: {ex.Message}")
         End Try
 
     End Sub
@@ -978,7 +972,7 @@ Public Class PannelloEmail
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException
 
-            Racconta($"Non sono riuscita a salvare la bozza: {ex.Message}", StileApp.Pericolo)
+            RaccontaUnErrore($"Non sono riuscita a salvare la bozza: {ex.Message}")
         End Try
 
     End Sub
@@ -1195,6 +1189,26 @@ Public Class PannelloEmail
 
         lblStatoEmail.Text = testo
         lblStatoEmail.ForeColor = colore
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa non è riuscito: la parola e il colore insieme
+    ''' (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    Private Sub RaccontaUnErrore(testo As String)
+
+        Racconta(Segnalazioni.PrefissoErrore & testo, StileApp.Pericolo)
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa manca, o è arrivato a metà, o non torna: stesso
+    ''' colore dell'errore, parola diversa — qui non è caduto niente.
+    ''' </summary>
+    Private Sub RaccontaUnAvviso(testo As String)
+
+        Racconta(Segnalazioni.PrefissoAvviso & testo, StileApp.Pericolo)
 
     End Sub
 

@@ -360,9 +360,8 @@ Public Class PannelloDocumenti
             ' dire è quella, perché è l'unica che l'utente non può vedere da sé — le due
             ' colonne sono lì, tutt'e due piene, e sembrano d'accordo.
             If candidatura.LetteraDaRiallineare Then
-                RaccontaLoStato("Il 🎯 CV l'hai riscritto tu: la ✉️ lettera racconta ancora la storia di prima." & vbLf &
-                                "Con «Rigenera la lettera» la riscrivo su quello che hai lasciato tu.",
-                                StileApp.Pericolo)
+                RaccontaUnAvviso("Il 🎯 CV l'hai riscritto tu: la ✉️ lettera racconta ancora la storia di prima." & vbLf &
+                                 "Con «Rigenera la lettera» la riscrivo su quello che hai lasciato tu.")
                 Return
             End If
 
@@ -435,8 +434,8 @@ Public Class PannelloDocumenti
             ' Come per il profilo (cap. 11.1): un file che non si lascia leggere si
             ' dichiara, non si scavalca in silenzio rigenerando — chi legge deve sapere
             ' che su disco c'era qualcosa.
-            RaccontaLoStato($"Il 📄 CV base c'è ma non si lascia leggere: {ex.Message}" & vbLf &
-                            "Con «Rigenera» lo riscrivo da capo.", StileApp.Pericolo)
+            RaccontaUnErrore($"Il 📄 CV base c'è ma non si lascia leggere: {ex.Message}" & vbLf &
+                             "Con «Rigenera» lo riscrivo da capo.")
             Return True
         End Try
 
@@ -537,7 +536,7 @@ Public Class PannelloDocumenti
     Private Async Function GeneraIlCvBaseAsync() As Task
 
         If _generatore Is Nothing Then
-            RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
+            RaccontaUnAvviso(MotivoSenzaAi())
             Return
         End If
 
@@ -573,7 +572,7 @@ Public Class PannelloDocumenti
                 RaccontaLoStato("Generazione annullata: non ho scritto niente.", StileApp.TestoSecondario)
 
             Catch ex As ErroreAi
-                RaccontaLoStato(ex.Message, StileApp.Pericolo)
+                RaccontaUnErrore(ex.Message)
 
             Finally
                 _annulla = Nothing
@@ -601,7 +600,7 @@ Public Class PannelloDocumenti
     Private Async Function GeneraLaCandidaturaAsync() As Task
 
         If _pipeline Is Nothing Then
-            RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
+            RaccontaUnAvviso(MotivoSenzaAi())
             Return
         End If
 
@@ -610,7 +609,7 @@ Public Class PannelloDocumenti
         ' lingua stanno più a monte perché là c'è dell'altro da non fare.
         Dim sparito As String = MotivoProfiloSparito()
         If sparito IsNot Nothing Then
-            RaccontaLoStato(sparito, StileApp.Pericolo)
+            RaccontaUnAvviso(sparito)
             Return
         End If
 
@@ -641,7 +640,7 @@ Public Class PannelloDocumenti
 
             Catch ex As ErroreAi
                 Mostra()
-                RaccontaLoStato(ex.Message & vbLf & "Puoi riprovare con «Rigenera».", StileApp.Pericolo)
+                RaccontaUnErrore(ex.Message & vbLf & "Puoi riprovare con «Rigenera».")
 
             Finally
                 _annulla = Nothing
@@ -891,11 +890,11 @@ Public Class PannelloDocumenti
         Catch ex As ErroreStampa
             ' Il messaggio si porta dietro il ripiego onesto: il DOCX c'è comunque
             ' (cap. 13.3).
-            RaccontaLoStato(ex.Message, StileApp.Pericolo)
+            RaccontaUnErrore(ex.Message)
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException
-            RaccontaLoStato($"Non sono riuscita a scrivere i file: {ex.Message}", StileApp.Pericolo)
+            RaccontaUnErrore($"Non sono riuscita a scrivere i file: {ex.Message}")
 
         Finally
             Cursor = Cursors.Default
@@ -1208,13 +1207,13 @@ Public Class PannelloDocumenti
         If _candidatura.Cv Is Nothing OrElse _candidatura.Lettera Is Nothing Then Return
 
         If _pipeline Is Nothing Then
-            RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
+            RaccontaUnAvviso(MotivoSenzaAi())
             Return
         End If
 
         Dim sparito As String = MotivoProfiloSparito()
         If sparito IsNot Nothing Then
-            RaccontaLoStato(sparito, StileApp.Pericolo)
+            RaccontaUnAvviso(sparito)
             Return
         End If
 
@@ -1258,9 +1257,8 @@ Public Class PannelloDocumenti
 
             Catch ex As ErroreAi
                 Mostra()
-                RaccontaLoStato(ex.Message & vbLf &
-                                "La lettera è rimasta com'era: riprova con «Rigenera la lettera».",
-                                StileApp.Pericolo)
+                RaccontaUnErrore(ex.Message & vbLf &
+                                 "La lettera è rimasta com'era: riprova con «Rigenera la lettera».")
 
             Finally
                 _annulla = Nothing
@@ -1553,7 +1551,7 @@ Public Class PannelloDocumenti
 
         Catch ex As Exception When TypeOf ex Is JsonException OrElse TypeOf ex Is IOException _
                                    OrElse TypeOf ex Is UnauthorizedAccessException
-            RaccontaLoStato($"Il profilo c'è ma non si lascia leggere: {ex.Message}", StileApp.Pericolo)
+            RaccontaUnErrore($"Il profilo c'è ma non si lascia leggere: {ex.Message}")
             Return Nothing
         End Try
 
@@ -1607,7 +1605,7 @@ Public Class PannelloDocumenti
         ' allora sono tutto quel che resta di quella candidatura.
         Dim sparito As String = MotivoProfiloSparito()
         If sparito IsNot Nothing Then
-            RaccontaLoStato(sparito, StileApp.Pericolo)
+            RaccontaUnAvviso(sparito)
             Return
         End If
 
@@ -1671,7 +1669,7 @@ Public Class PannelloDocumenti
         Dim sparito As String = MotivoProfiloSparito()
         If sparito IsNot Nothing Then
             AllestisciLaTendina(comEra)
-            RaccontaLoStato(sparito, StileApp.Pericolo)
+            RaccontaUnAvviso(sparito)
             Return
         End If
 
@@ -1899,7 +1897,7 @@ Public Class PannelloDocumenti
         Dim candidatura As Opportunita = LeggiSenzaLamentarsi(scelta.Cartella)
 
         If candidatura Is Nothing Then
-            RaccontaLoStato("Quel documento non si è lasciato leggere: riprova dalla Home.", StileApp.Pericolo)
+            RaccontaUnErrore("Quel documento non si è lasciato leggere: riprova dalla Home.")
             AllestisciLaTendinaDeiDocumenti()
             Return
         End If
@@ -2109,6 +2107,27 @@ Public Class PannelloDocumenti
 
         lblStatoDocumenti.Text = testo
         lblStatoDocumenti.ForeColor = colore
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa non è riuscito: la parola e il colore insieme
+    ''' (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    Private Sub RaccontaUnErrore(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoErrore & testo, StileApp.Pericolo)
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa manca o non torna — la chiave, il profilo di allora,
+    ''' una lettera rimasta indietro: stesso colore dell'errore, parola diversa. Qui non è
+    ''' caduto niente, e chiamarlo errore manderebbe a cercare un guasto che non c'è.
+    ''' </summary>
+    Private Sub RaccontaUnAvviso(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoAvviso & testo, StileApp.Pericolo)
 
     End Sub
 

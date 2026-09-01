@@ -137,7 +137,7 @@ Public Class FinestraBackup
         AggiornaIComandi()
 
         If guasto IsNot Nothing Then
-            RaccontaLoStato($"Non sono riuscita a scrivere «{percorso}»: {guasto.Message}", StileApp.Pericolo)
+            RaccontaUnErrore($"Non sono riuscita a scrivere «{percorso}»: {guasto.Message}")
             Return False
         End If
 
@@ -287,12 +287,18 @@ Public Class FinestraBackup
         AggiornaIComandi()
 
         If guasto IsNot Nothing Then
-            RaccontaLoStato($"Il ripristino si è fermato: {guasto.Message}", StileApp.Pericolo)
+            RaccontaUnErrore($"Il ripristino si è fermato: {guasto.Message}")
             Return Nothing
         End If
 
-        RaccontaLoStato(ComEAndata(esito),
-                        If(esito.Rifiutati.Count > 0, StileApp.Pericolo, StileApp.TestoSecondario))
+        ' Un ripristino con delle voci rifiutate è riuscito a metà, non fallito: la riga si
+        ' tinge come prima, ma la parola davanti dice «Attenzione» e non «Errore» — quel che
+        ' è tornato al suo posto è tornato davvero (v. ComEAndata).
+        If esito.Rifiutati.Count > 0 Then
+            RaccontaUnAvviso(ComEAndata(esito))
+        Else
+            RaccontaLoStato(ComEAndata(esito), StileApp.TestoSecondario)
+        End If
 
         Return esito
 
@@ -434,7 +440,7 @@ Public Class FinestraBackup
         _letto = Nothing
         txtAnteprima.Text = ""
         AggiornaIComandi()
-        RaccontaLoStato(perche, StileApp.Pericolo)
+        RaccontaUnErrore(perche)
 
         Return False
 
@@ -470,6 +476,26 @@ Public Class FinestraBackup
 
         lblStato.Text = testo
         lblStato.ForeColor = colore
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa non è riuscito: la parola e il colore insieme
+    ''' (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    Private Sub RaccontaUnErrore(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoErrore & testo, StileApp.Pericolo)
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa è riuscito solo a metà: stesso colore dell'errore,
+    ''' parola diversa — qui una parte del mestiere è andata a buon fine.
+    ''' </summary>
+    Private Sub RaccontaUnAvviso(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoAvviso & testo, StileApp.Pericolo)
 
     End Sub
 

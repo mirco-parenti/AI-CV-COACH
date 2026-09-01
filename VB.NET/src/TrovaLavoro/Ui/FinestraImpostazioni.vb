@@ -181,8 +181,7 @@ Public Class FinestraImpostazioni
         Try
             _contesto.Segreti.SalvaChiaveApi(digitata)
         Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
-            Racconta($"La chiave non si è potuta salvare ({ex.Message}): vale per questa sessione.",
-                     StileApp.RossoTitoli)
+            RaccontaUnErrore($"La chiave non si è potuta salvare ({ex.Message}): vale per questa sessione.")
         End Try
 
         _ChiaveCambiata = True
@@ -265,9 +264,8 @@ Public Class FinestraImpostazioni
             RaccontaCosaSiPuoPulire()
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
-            Racconta($"Le preferenze non si sono potute scrivere ({ex.Message}). " &
-                     "Valgono per questa sessione, ma al prossimo avvio saranno quelle di prima.",
-                     StileApp.RossoTitoli)
+            RaccontaUnErrore($"Le preferenze non si sono potute scrivere ({ex.Message}). " &
+                             "Valgono per questa sessione, ma al prossimo avvio saranno quelle di prima.")
         End Try
 
     End Sub
@@ -306,7 +304,7 @@ Public Class FinestraImpostazioni
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException OrElse
                                    TypeOf ex Is System.ComponentModel.Win32Exception
-            Racconta($"La cartella non si è lasciata aprire ({ex.Message}).", StileApp.RossoTitoli)
+            RaccontaUnErrore($"La cartella non si è lasciata aprire ({ex.Message}).")
         End Try
 
     End Sub
@@ -503,9 +501,8 @@ Public Class FinestraImpostazioni
 
         Catch ex As JsonException
             RiempiLeTendine()
-            Racconta("Il file modelli.json c'è ma non si lascia leggere: aprilo e correggilo " &
-                     "(o cancellalo, e torneranno i predefiniti). La scelta non è stata cambiata.",
-                     StileApp.RossoTitoli)
+            RaccontaUnErrore("Il file modelli.json c'è ma non si lascia leggere: aprilo e correggilo " &
+                             "(o cancellalo, e torneranno i predefiniti). La scelta non è stata cambiata.")
             Return
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse
@@ -513,8 +510,7 @@ Public Class FinestraImpostazioni
             ' La tendina torna su quel che vale davvero: lasciarla sul modello nuovo
             ' direbbe che il cambio è avvenuto, e non è avvenuto né qui né sul disco.
             RiempiLeTendine()
-            Racconta($"La scelta non si è potuta salvare ({ex.Message}): resta quella di prima.",
-                     StileApp.RossoTitoli)
+            RaccontaUnErrore($"La scelta non si è potuta salvare ({ex.Message}): resta quella di prima.")
             Return
         End Try
 
@@ -549,7 +545,7 @@ Public Class FinestraImpostazioni
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException OrElse
                                    TypeOf ex Is System.ComponentModel.Win32Exception
-            Racconta($"Non si è lasciato aprire ({ex.Message}).", StileApp.RossoTitoli)
+            RaccontaUnErrore($"Non si è lasciato aprire ({ex.Message}).")
         End Try
 
     End Sub
@@ -632,7 +628,7 @@ Public Class FinestraImpostazioni
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException OrElse
                                    TypeOf ex Is System.ComponentModel.Win32Exception
-            Racconta($"Non si è lasciato aprire ({ex.Message}).", StileApp.RossoTitoli)
+            RaccontaUnErrore($"Non si è lasciato aprire ({ex.Message}).")
         End Try
 
     End Sub
@@ -703,26 +699,32 @@ Public Class FinestraImpostazioni
         Racconta("Sto svuotando i dati di navigazione…", StileApp.TestoSecondario)
 
         Dim detto As String
-        Dim colore As Color
+        Dim andataStorta As Boolean = False
 
         Try
             detto = If(Await Task.Run(Function() _pulizia.SvuotaNavigazione()).ConfigureAwait(True),
                        "Dati di navigazione svuotati.",
                        "Non c'era niente da svuotare.")
-            colore = StileApp.TestoSecondario
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
             ' Il browser incorporato tiene i suoi file aperti finché P3 è vivo.
             detto = $"Non si sono lasciati cancellare tutti ({ex.Message}): " &
                     "chiudi la ricerca annunci e riprova."
-            colore = StileApp.RossoTitoli
+            andataStorta = True
         End Try
 
         ' Nel frattempo la finestra può essere stata chiusa: toccare i controlli di una
         ' finestra smaltita solleverebbe, e per giunta in un punto che nessuno guarda.
         If IsDisposed Then Return
 
-        Racconta(detto, colore)
+        ' Com'è andata si porta dietro il modo di dirlo: qui non si sceglie più un colore,
+        ' si sceglie fra due voci — e la parola e il colore viaggiano insieme.
+        If andataStorta Then
+            RaccontaUnErrore(detto)
+        Else
+            Racconta(detto, StileApp.TestoSecondario)
+        End If
+
         RaccontaCosaSiPuoPulire()
 
     End Sub
@@ -768,9 +770,8 @@ Public Class FinestraImpostazioni
         If IsDisposed Then Return
 
         If guasto IsNot Nothing Then
-            Racconta($"Non si è potuto eliminare tutto ({guasto.Message}). " &
-                     "Qualcosa è ancora aperto: chiudi le altre finestre e riprova.",
-                     StileApp.RossoTitoli)
+            RaccontaUnErrore($"Non si è potuto eliminare tutto ({guasto.Message}). " &
+                             "Qualcosa è ancora aperto: chiudi le altre finestre e riprova.")
             RaccontaCosaSiPuoPulire()
             Return
         End If
@@ -798,6 +799,21 @@ Public Class FinestraImpostazioni
 
         lblStato.Text = testo
         lblStato.ForeColor = colore
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa non è riuscito: la parola e il colore insieme
+    ''' (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    ''' <remarks>
+    ''' Fino al 2026-09-01 queste righe erano <c>RossoTitoli</c>, che è il rosso del
+    ''' <b>marchio</b>: nato per i titoli grandi, come testo piccolo non arriva alla soglia
+    ''' di leggibilità — e comunque diceva «guasto» col solo colore.
+    ''' </remarks>
+    Private Sub RaccontaUnErrore(testo As String)
+
+        Racconta(Segnalazioni.PrefissoErrore & testo, StileApp.Pericolo)
 
     End Sub
 

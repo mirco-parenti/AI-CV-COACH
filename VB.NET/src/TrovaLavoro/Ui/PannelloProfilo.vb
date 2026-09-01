@@ -275,12 +275,11 @@ Public Class PannelloProfilo
             Dim copia As String = _contesto.Archivio.MettiInSalvoIlCorrotto()
 
             Mostra(New Profilo())
-            RaccontaLoStato(
+            RaccontaUnErrore(
                 $"Il profilo c'è ma non si lascia leggere: {ex.Message}" & vbLf &
                 If(copia IsNot Nothing,
                    $"Ne ho messo una copia di sicurezza in {copia}: correggila a mano, oppure reimporta il CV.",
-                   $"Il file è {_contesto.Cartella.FileProfilo}: correggilo a mano, oppure reimporta il CV."),
-                StileApp.Pericolo)
+                   $"Il file è {_contesto.Cartella.FileProfilo}: correggilo a mano, oppure reimporta il CV."))
         End Try
 
     End Sub
@@ -346,6 +345,26 @@ Public Class PannelloProfilo
     Private Sub RaccontaLoStato(testo As String, colore As Color)
         lblStatoProfilo.Text = testo
         lblStatoProfilo.ForeColor = colore
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa non è riuscito: la parola e il colore insieme
+    ''' (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    Private Sub RaccontaUnErrore(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoErrore & testo, StileApp.Pericolo)
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa manca, o va fatto prima: stesso colore dell'errore,
+    ''' parola diversa — qui non è caduto niente.
+    ''' </summary>
+    Private Sub RaccontaUnAvviso(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoAvviso & testo, StileApp.Pericolo)
+
     End Sub
 
     ' ==================================================================
@@ -933,10 +952,9 @@ Public Class PannelloProfilo
                                    TypeOf ex Is UnauthorizedAccessException
             ' Il profilo buono di prima è ancora al suo posto (cap. 11.1): si dice cosa
             ' è successo, e quello che l'utente ha scritto resta nei campi.
-            RaccontaLoStato(
+            RaccontaUnErrore(
                 $"Non sono riuscita a salvare il profilo: {ex.Message}" & vbLf &
-                $"La cartella è {_contesto.Cartella.CartellaProfilo}. Le tue correzioni sono ancora qui.",
-                StileApp.Pericolo)
+                $"La cartella è {_contesto.Cartella.CartellaProfilo}. Le tue correzioni sono ancora qui.")
         End Try
 
     End Sub
@@ -1059,12 +1077,11 @@ Public Class PannelloProfilo
                                    TypeOf ex Is UnauthorizedAccessException
             ' Un file aperto in un altro programma può bloccare l'eliminazione a metà: si
             ' dice dov'è la cartella e non si finge che sia andata bene.
-            RaccontaLoStato(
+            RaccontaUnErrore(
                 $"Non sono riuscita a eliminare tutto: {ex.Message}" & vbLf &
                 $"La cartella è {_contesto.Cartella.CartellaProfilo} — qualche file potrebbe " &
                 "essere aperto altrove. Parte del profilo potrebbe essere già sparita: " &
-                "riapri la scheda per vedere cos'è rimasto.",
-                StileApp.Pericolo)
+                "riapri la scheda per vedere cos'è rimasto.")
             Return False
         End Try
 
@@ -1192,10 +1209,9 @@ Public Class PannelloProfilo
         If _annullaImport IsNot Nothing Then Return
 
         If _importCv Is Nothing Then
-            RaccontaLoStato(
+            RaccontaUnAvviso(
                 $"Per leggere un CV serve la chiave API ({ClientClaude.NomeVariabileChiave}), " &
-                "che qui non c'è.",
-                StileApp.Pericolo)
+                "che qui non c'è.")
             Return
         End If
 
@@ -1245,7 +1261,7 @@ Public Class PannelloProfilo
             Catch ex As Exception When TypeOf ex Is ErroreImport OrElse TypeOf ex Is ErroreAi
                 ' Questi messaggi sono già scritti per l'utente, e dove esiste una via
                 ' d'uscita se la portano dietro (cap. 05.1).
-                RaccontaLoStato(ex.Message, StileApp.Pericolo)
+                RaccontaUnErrore(ex.Message)
 
             Finally
                 _annullaImport = Nothing
@@ -1340,10 +1356,13 @@ Public Class PannelloProfilo
     Private Sub btnGeneraCv1_Click(sender As Object, e As EventArgs) Handles btnGeneraCv1.Click
 
         If _modificato Then
-            RaccontaLoStato(
+            ' Era l'unico messaggio scritto in StileApp.Avviso, che è un giallo da fondo:
+            ' come inchiostro su carta chiara non si legge (v. StileApp.Avviso, che sta
+            ' dietro i badge). Adesso è una riga d'avviso come tutte le altre — stesso
+            ' rosso, e la parola davanti a dire che è un avviso e non un guasto.
+            RaccontaUnAvviso(
                 "Hai correzioni non salvate: il 📄 CV base nasce dal profilo salvato." & vbLf &
-                "Salva prima, poi generalo.",
-                StileApp.Avviso)
+                "Salva prima, poi generalo.")
             Return
         End If
 

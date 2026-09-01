@@ -259,10 +259,9 @@ Public Class PannelloDialogo
 
         Dim chiStruttura As IStrutturatoreTurni = If(strutturatore, _contesto?.Strutturatore)
         If chiStruttura Is Nothing Then
-            RaccontaLoStato(
+            RaccontaUnAvviso(
                 $"Per costruire il profilo parlando serve la chiave API ({ClientClaude.NomeVariabileChiave}): " &
-                "ogni risposta passa dall'AI.",
-                StileApp.Pericolo)
+                "ogni risposta passa dall'AI.")
             Return
         End If
 
@@ -350,9 +349,8 @@ Public Class PannelloDialogo
         Dim chiRagiona As IBrainstormatore = If(mestiere, _contesto?.Brainstorm)
         If chiRagiona Is Nothing Then
             PassaAlModo(ModoDialogo.Brainstorming)
-            RaccontaLoStato(
-                $"Per ragionare su una candidatura serve la chiave API ({ClientClaude.NomeVariabileChiave}).",
-                StileApp.Pericolo)
+            RaccontaUnAvviso(
+                $"Per ragionare su una candidatura serve la chiave API ({ClientClaude.NomeVariabileChiave}).")
             Return
         End If
 
@@ -1341,6 +1339,22 @@ Public Class PannelloDialogo
 
         lblStatoDialogo.Text = testo
         lblStatoDialogo.ForeColor = colore
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa manca perché la conversazione possa cominciare: la
+    ''' parola e il colore insieme (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    ''' <remarks>
+    ''' Qui è sempre un avviso e mai un errore, e non per caso: un guasto dell'AI in questo
+    ''' pannello non finisce in questa riga ma <b>in una bolla</b>, dove sta il resto della
+    ''' conversazione (v. <c>EseguiAsync</c>). Quel che resta da dire di qui è che la chiave
+    ''' non c'è — e non darla è una risposta legittima (cap. 11.3), non un errore.
+    ''' </remarks>
+    Private Sub RaccontaUnAvviso(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoAvviso & testo, StileApp.Pericolo)
 
     End Sub
 

@@ -249,7 +249,15 @@ Public Class PannelloHome
                                    OrElse TypeOf ex Is UnauthorizedAccessException
             ' Il profilo è la sola cosa che l'utente non può rigenerare (cap. 11.1): se
             ' non si legge lo si dice subito, e si manda dove c'è scritto come rimediare.
-            lblProfilo.Text = $"C'è, ma non si lascia leggere: {ex.Message}" & vbLf &
+            '
+            ' Qui la riga porta la parola davanti, perché questa etichetta fa due mestieri:
+            ' di solito dice chi sei e di quando è il profilo, e in questo solo caso dice
+            ' che non si è potuto leggere. Distinguerli col colore soltanto è la cosa che
+            ' il 2026-09-01 si è smesso di fare (v. Segnalazioni). Il soggetto è tornato
+            ' nella frase — «Il profilo c'è» e non «C'è» — perché dopo un prefisso una
+            ' frase deve reggersi da sola.
+            lblProfilo.Text = Segnalazioni.PrefissoErrore &
+                              $"Il profilo c'è, ma non si lascia leggere: {ex.Message}" & vbLf &
                               "Aprilo dalla scheda «Profilo»: lì trovi come rimediare."
             lblProfilo.ForeColor = StileApp.Pericolo
         End Try
@@ -277,12 +285,19 @@ Public Class PannelloHome
             ' dati potrebbe non lasciarsi leggere affatto. Allora la coda resta vuota e lo
             ' si dice, invece di mostrare un elenco vuoto che sembra «non hai candidature».
             _registro = Nothing
-            RaccontaLoStato($"Non riesco a leggere le candidature: {ex.Message}", StileApp.Pericolo)
+            RaccontaUnErrore($"Non riesco a leggere le candidature: {ex.Message}")
             Return
         End Try
 
-        RaccontaLoStato(If(_registro.Avviso, String.Empty),
-                        If(_registro.Avviso Is Nothing, StileApp.TestoSecondario, StileApp.Pericolo))
+        ' L'avviso dell'indice dice che una parte delle cartelle non si è lasciata leggere:
+        ' la coda c'è e funziona, solo non è completa. È un «Attenzione», non un «Errore»
+        ' (v. Segnalazioni). Senza avviso la riga si svuota, e una riga vuota non si
+        ' prefissa: sarebbe una parola sola, senza niente dietro.
+        If _registro.Avviso Is Nothing Then
+            RaccontaLoStato(String.Empty, StileApp.TestoSecondario)
+        Else
+            RaccontaUnAvviso(_registro.Avviso)
+        End If
 
         Try
             _contesto.Registro.SalvaSeServe(_registro)
@@ -660,8 +675,7 @@ Public Class PannelloHome
 
         Catch ex As Exception When TypeOf ex Is JsonException OrElse TypeOf ex Is IOException _
                                    OrElse TypeOf ex Is UnauthorizedAccessException
-            RaccontaLoStato($"«{voce.Cartella}» non si è lasciata riaprire: {ex.Message}",
-                            StileApp.Pericolo)
+            RaccontaUnErrore($"«{voce.Cartella}» non si è lasciata riaprire: {ex.Message}")
         End Try
 
     End Sub
@@ -706,8 +720,7 @@ Public Class PannelloHome
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException
-            RaccontaLoStato($"«{voce.Cartella}» non si è lasciata eliminare: {ex.Message}",
-                            StileApp.Pericolo)
+            RaccontaUnErrore($"«{voce.Cartella}» non si è lasciata eliminare: {ex.Message}")
             Return
         End Try
 
@@ -857,8 +870,7 @@ Public Class PannelloHome
                                        TypeOf ex Is UnauthorizedAccessException OrElse
                                        TypeOf ex Is NotSupportedException
 
-                RaccontaLoStato($"Non sono riuscita a scrivere «{scelta.FileName}»: {ex.Message}",
-                                StileApp.Pericolo)
+                RaccontaUnErrore($"Non sono riuscita a scrivere «{scelta.FileName}»: {ex.Message}")
             End Try
 
         End Using
@@ -1014,6 +1026,26 @@ Public Class PannelloHome
 
         lblStatoHome.Text = testo
         lblStatoHome.ForeColor = colore
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa non è riuscito: la parola e il colore insieme
+    ''' (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    Private Sub RaccontaUnErrore(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoErrore & testo, StileApp.Pericolo)
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa manca o è arrivato a metà: stesso colore
+    ''' dell'errore, parola diversa — qui non è caduto niente.
+    ''' </summary>
+    Private Sub RaccontaUnAvviso(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoAvviso & testo, StileApp.Pericolo)
 
     End Sub
 

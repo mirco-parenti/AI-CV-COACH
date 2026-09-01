@@ -389,6 +389,12 @@ Namespace Ui
                     Dim stato As Label = Etichetta(pannello, "lblStatoDialogo")
                     Assert.Contains("chiave API", stato.Text, "lo dice")
                     Assert.AreEqual(StileApp.Pericolo, stato.ForeColor, "con il colore di chi non può funzionare")
+
+                    ' «Attenzione» e non «Errore»: non darla è una risposta legittima
+                    ' (cap. 11.3), e chiamarla errore manderebbe a cercare un guasto che
+                    ' non c'è (v. Segnalazioni).
+                    Assert.StartsWith(Segnalazioni.PrefissoAvviso, stato.Text,
+                                      "e con la parola che dice di che si tratta")
                 End Using
 
             Finally
