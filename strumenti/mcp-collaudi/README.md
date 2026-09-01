@@ -568,6 +568,21 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   che costa cara perché il messaggio d'errore del `BaseOutputPath` non parla: dice che manca
   una cartella, e sembra un guasto del banco. La cartella è ignorata da git
   (`VB.NET/src/.gitignore`).
+- **Un `Await` che attraversa un thread dentro una finestra del banco non torna mai.**
+  *(2026-09-01, il blocco F2-2 dei fix UI.)* Costruire un controllo installa sul thread il
+  contesto di sincronizzazione di Windows Forms, che rimanda ogni ritorno da un `Await`
+  alla pompa di messaggi della finestra — e nel banco la pompa non c'è, perché le finestre
+  si costruiscono e non si mostrano. Finché le finte rispondono in modo sincrono l'`Await`
+  non sospende e il problema non può presentarsi; il primo collaudo che ha attraversato
+  davvero un thread (il `Task.Run` dell'export del backup) non è diventato rosso: si è
+  **piantato**, dieci minuti senza un esito — e un collaudo appeso non è rosso, è niente.
+  La cura sta in `ConMotoreAsync` (`TrovaLavoro.Collaudi/CollaudiFinestraBackup.vb`): si
+  spegne `WindowsFormsSynchronizationContext.AutoInstall` **e** si azzera il contesto per
+  il tempo della prova, rimettendo poi entrambi dov'erano. Azzerare il contesto e basta
+  non basta: il primo controllo costruito lo rimette, che è precisamente il senso di
+  «AutoInstall» — ed è una manopola del **processo**, non del thread. Il codice di
+  produzione resta con `ConfigureAwait(True)`, che lì è la cosa giusta: nell'applicazione
+  vera la pompa gira, e la riga di stato va scritta dal thread che possiede la finestra.
 - **Rimettere a posto un file falsificato con `mv` non fa ricompilare.** *(2026-08-24, dal
   quinto tempo di T9e.)* Falsificare vuol dire rompere apposta il codice e guardare se il
   collaudo diventa rosso (regola 14): si mette da parte l'originale, si guasta il file, si
