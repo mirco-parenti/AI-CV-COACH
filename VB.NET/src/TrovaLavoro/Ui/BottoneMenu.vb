@@ -69,17 +69,11 @@ Public Class BottoneMenu
 
     ''' <summary>Quanto sono smussati gli angoli, in pixel.</summary>
     ''' <remarks>
-    ''' Appena smussati, non tondi: la pillola di prima aveva raggio pari a metà altezza,
-    ''' e su sei bottoni in colonna faceva una fila di losanghe. Sei pixel su
-    ''' cinquantatré sono la differenza fra un rettangolo duro e un rettangolo gentile.
+    ''' Il raggio è un token come le altre misure (<see cref="StileApp.RaggioAngolo"/>): fino
+    ''' al 2026-09-01 stava qui dentro, ed era il solo numero del disegno a non avere casa
+    ''' nella tabella del cap. 03.2.
     ''' </remarks>
-    Private Const RaggioAngolo As Single = 6.0F
-
-    ''' <summary>Quanto si scurisce il riempimento quando il mouse ci passa sopra.</summary>
-    Private Const ScurimentoSopra As Integer = 18
-
-    ''' <summary>Quanto si scurisce quando è premuto — e di quanto scende il testo.</summary>
-    Private Const ScurimentoPremuto As Integer = 36
+    Private Const RaggioAngolo As Single = StileApp.RaggioAngolo
 
     ''' <summary>Di quanti pixel scende il testo mentre il bottone è premuto.</summary>
     Private Const DiscesaDelPremuto As Integer = 2
@@ -143,16 +137,6 @@ Public Class BottoneMenu
 
     End Function
 
-    ''' <summary>Sposta un colore verso il bianco o verso il nero, restando nei limiti.</summary>
-    Private Shared Function Sposta(colore As Color, di As Integer) As Color
-
-        Return Color.FromArgb(colore.A,
-                              Math.Clamp(colore.R + di, 0, 255),
-                              Math.Clamp(colore.G + di, 0, 255),
-                              Math.Clamp(colore.B + di, 0, 255))
-
-    End Function
-
     ''' <summary>
     ''' Ritaglia il controllo alla sua sagoma, così fuori di lì si vede il pannello.
     ''' </summary>
@@ -200,18 +184,20 @@ Public Class BottoneMenu
                                        Math.Max(1.0F, Me.Height - SpessoreBordo))
 
         ' Quanto è scuro il riempimento dipende da cosa sta facendo il mouse: su un fondo
-        ' chiaro ci si accende scurendo, non schiarendo.
-        Dim spostamento As Integer = 0
+        ' chiaro ci si accende scurendo, non schiarendo. I due passi sono quelli di tutta
+        ' l'applicazione (cap. 03.2): dal 2026-09-01 li dichiara StileApp, perché lo stesso
+        ' gesto lo fanno anche i bottoni di sistema.
+        Dim scurimento As Integer = 0
         If _premuto Then
-            spostamento = -ScurimentoPremuto
+            scurimento = StileApp.ScurimentoPremuto
         ElseIf _sopra AndAlso Me.Enabled Then
-            spostamento = -ScurimentoSopra
+            scurimento = StileApp.ScurimentoSopra
         End If
 
         Using percorso As GraphicsPath = Sagoma(riquadro, RaggioAngolo)
 
             Using pennello As New SolidBrush(
-                If(Me.Enabled, Sposta(ColoreFondo, spostamento), ColoreFondoSpento))
+                If(Me.Enabled, StileApp.Scurito(ColoreFondo, scurimento), ColoreFondoSpento))
                 g.FillPath(pennello, percorso)
             End Using
 

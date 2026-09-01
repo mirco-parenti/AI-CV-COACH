@@ -162,7 +162,7 @@ Partial Class PannelloEmail
         'lblCorpo
         '
         Me.lblCorpo.Font = StileApp.FontTitoloGruppo
-        Me.lblCorpo.ForeColor = StileApp.RossoTitoli
+        Me.lblCorpo.ForeColor = StileApp.RossoCritico
         Me.lblCorpo.Location = New System.Drawing.Point(0, 0)
         Me.lblCorpo.Name = "lblCorpo"
         Me.lblCorpo.Size = New System.Drawing.Size(300, 18)
@@ -197,7 +197,7 @@ Partial Class PannelloEmail
         'lblAllegati
         '
         Me.lblAllegati.Font = StileApp.FontTitoloGruppo
-        Me.lblAllegati.ForeColor = StileApp.RossoTitoli
+        Me.lblAllegati.ForeColor = StileApp.RossoCritico
         Me.lblAllegati.Location = New System.Drawing.Point(0, 0)
         Me.lblAllegati.Name = "lblAllegati"
         Me.lblAllegati.Size = New System.Drawing.Size(300, 18)

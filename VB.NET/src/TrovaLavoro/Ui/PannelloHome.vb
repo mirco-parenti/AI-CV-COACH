@@ -604,7 +604,10 @@ Public Class PannelloHome
 
         If voce.Stato = StatoOpportunita.Scartata Then riga.ForeColor = StileApp.TestoSecondario
 
-        If giorniDiAttesa.HasValue Then riga.ForeColor = StileApp.Informazione
+        ' L'azzurro dei badge qui farebbe da inchiostro, e dietro non c'è un badge ma
+        ' l'avorio della coda: valeva 2,93 a 1. È il colore informativo scritto per essere
+        ' letto (6,36), non quello fatto per stare sotto il bianco.
+        If giorniDiAttesa.HasValue Then riga.ForeColor = StileApp.InformazioneTesto
 
         Return riga
 

@@ -77,6 +77,59 @@ Namespace Ui
             Assert.HasCount(fondi.Count, fondi.Distinct().ToList(), "nessun livello copia il fondo di un altro")
         End Sub
 
+        ''' <summary>
+        ''' Un bottone si scurisce sotto il puntatore, e di più mentre lo si preme.
+        ''' </summary>
+        ''' <remarks>
+        ''' Fino al 2026-09-01 nessun livello dichiarava <c>MouseOverBackColor</c>, e un
+        ''' bottone piatto con un colore suo resta <b>identico</b> sotto il puntatore: il
+        ''' colore diceva la conseguenza, ma niente diceva «questo si preme». È il difetto
+        ''' che non rompe niente — l'applicazione funziona, semplicemente non risponde — e
+        ''' per questo lo deve dire il banco. Si guarda la <b>luce</b> e non il colore
+        ''' esatto: quale sia il fondo di ciascun livello lo dice la tabella, quel che qui si
+        ''' sorveglia è che i tre momenti siano tre e nell'ordine giusto.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniBottoneSiScurisceSottoIlPuntatore()
+
+            For Each livello As LivelloBottone In [Enum].GetValues(GetType(LivelloBottone))
+                Using bottone As New Button()
+
+                    StileApp.VestiBottone(bottone, livello)
+
+                    Dim riposo As Single = bottone.BackColor.GetBrightness()
+                    Dim sopra As Single = bottone.FlatAppearance.MouseOverBackColor.GetBrightness()
+                    Dim premuto As Single = bottone.FlatAppearance.MouseDownBackColor.GetBrightness()
+
+                    Assert.IsLessThan(riposo, sopra, $"il livello {livello} si scurisce al passaggio")
+                    Assert.IsLessThan(sopra, premuto, $"e il livello {livello} di più da premuto")
+
+                End Using
+            Next
+
+        End Sub
+
+        ''' <summary>E lo fanno anche le caselle della barra, che sono la fila che si attraversa.</summary>
+        <TestMethod>
+        Public Sub AncheLeCaselleDellaBarraSiScurisconoSottoIlPuntatore()
+
+            For Each ruolo As RuoloBarra In [Enum].GetValues(GetType(RuoloBarra))
+                Using casella As New Button()
+
+                    StileApp.VestiBottoneBarra(casella, ruolo, attiva:=False)
+
+                    Dim riposo As Single = casella.BackColor.GetBrightness()
+                    Dim sopra As Single = casella.FlatAppearance.MouseOverBackColor.GetBrightness()
+                    Dim premuto As Single = casella.FlatAppearance.MouseDownBackColor.GetBrightness()
+
+                    Assert.IsLessThan(riposo, sopra, $"la casella {ruolo} si scurisce al passaggio")
+                    Assert.IsLessThan(sopra, premuto, $"e la casella {ruolo} di più da premuta")
+
+                End Using
+            Next
+
+        End Sub
+
         <TestMethod>
         Public Sub LaCasellaApertaSiDistingueSenzaCambiareFondo()
             ' Sulla barra il fondo dice il ruolo (azzurro le destinazioni, verde il

@@ -108,7 +108,7 @@ Partial Class PannelloRicerca
         'lblSalvate
         '
         Me.lblSalvate.Font = StileApp.FontTitoloGruppo
-        Me.lblSalvate.ForeColor = StileApp.RossoTitoli
+        Me.lblSalvate.ForeColor = StileApp.RossoCritico
         Me.lblSalvate.Location = New System.Drawing.Point(0, 6)
         Me.lblSalvate.Name = "lblSalvate"
         Me.lblSalvate.Size = New System.Drawing.Size(120, 18)
@@ -143,7 +143,7 @@ Partial Class PannelloRicerca
         'lblPortale
         '
         Me.lblPortale.Font = StileApp.FontTitoloGruppo
-        Me.lblPortale.ForeColor = StileApp.RossoTitoli
+        Me.lblPortale.ForeColor = StileApp.RossoCritico
         Me.lblPortale.Location = New System.Drawing.Point(0, 40)
         Me.lblPortale.Name = "lblPortale"
         Me.lblPortale.Size = New System.Drawing.Size(120, 18)

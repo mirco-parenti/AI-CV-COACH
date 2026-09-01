@@ -231,7 +231,7 @@ Partial Class PannelloDocumenti
         '
         Me.lblCv.Dock = System.Windows.Forms.DockStyle.Top
         Me.lblCv.Font = StileApp.FontTitoloGruppo
-        Me.lblCv.ForeColor = StileApp.RossoTitoli
+        Me.lblCv.ForeColor = StileApp.RossoCritico
         Me.lblCv.Location = New System.Drawing.Point(0, 0)
         Me.lblCv.Name = "lblCv"
         Me.lblCv.Size = New System.Drawing.Size(404, 18)
@@ -265,7 +265,7 @@ Partial Class PannelloDocumenti
         '
         Me.lblAnnuncio.Dock = System.Windows.Forms.DockStyle.Top
         Me.lblAnnuncio.Font = StileApp.FontTitoloGruppo
-        Me.lblAnnuncio.ForeColor = StileApp.RossoTitoli
+        Me.lblAnnuncio.ForeColor = StileApp.RossoCritico
         Me.lblAnnuncio.Location = New System.Drawing.Point(0, 0)
         Me.lblAnnuncio.Name = "lblAnnuncio"
         Me.lblAnnuncio.Size = New System.Drawing.Size(298, 18)
@@ -298,7 +298,7 @@ Partial Class PannelloDocumenti
         '
         Me.lblLettera.Dock = System.Windows.Forms.DockStyle.Top
         Me.lblLettera.Font = StileApp.FontTitoloGruppo
-        Me.lblLettera.ForeColor = StileApp.RossoTitoli
+        Me.lblLettera.ForeColor = StileApp.RossoCritico
         Me.lblLettera.Location = New System.Drawing.Point(0, 0)
         Me.lblLettera.Name = "lblLettera"
         Me.lblLettera.Size = New System.Drawing.Size(380, 18)

@@ -1080,7 +1080,7 @@ Public Class PannelloDialogo
         Dim righe As New List(Of Label)
 
         If Not String.IsNullOrEmpty(scheda.Titolo) Then
-            righe.Add(RigaDiTesto(scheda.Titolo, StileApp.FontTitoloGruppo, StileApp.RossoTitoli))
+            righe.Add(RigaDiTesto(scheda.Titolo, StileApp.FontTitoloGruppo, StileApp.RossoCritico))
         End If
 
         For Each riga As RigaScheda In scheda.Righe

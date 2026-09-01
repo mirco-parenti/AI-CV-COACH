@@ -119,7 +119,7 @@ Partial Class PannelloOpportunita
         'lblIncolla
         '
         Me.lblIncolla.Font = StileApp.FontTitoloGruppo
-        Me.lblIncolla.ForeColor = StileApp.RossoTitoli
+        Me.lblIncolla.ForeColor = StileApp.RossoCritico
         Me.lblIncolla.Location = New System.Drawing.Point(0, 0)
         Me.lblIncolla.Name = "lblIncolla"
         Me.lblIncolla.Size = New System.Drawing.Size(500, 18)
@@ -282,7 +282,7 @@ Partial Class PannelloOpportunita
         '
         Me.lblEtichettaSpiegazione.Dock = System.Windows.Forms.DockStyle.Top
         Me.lblEtichettaSpiegazione.Font = StileApp.FontTitoloGruppo
-        Me.lblEtichettaSpiegazione.ForeColor = StileApp.RossoTitoli
+        Me.lblEtichettaSpiegazione.ForeColor = StileApp.RossoCritico
         Me.lblEtichettaSpiegazione.Location = New System.Drawing.Point(0, 8)
         Me.lblEtichettaSpiegazione.Name = "lblEtichettaSpiegazione"
         Me.lblEtichettaSpiegazione.Size = New System.Drawing.Size(726, 18)
@@ -316,7 +316,7 @@ Partial Class PannelloOpportunita
         '
         Me.lblAnnuncioLetto.Dock = System.Windows.Forms.DockStyle.Top
         Me.lblAnnuncioLetto.Font = StileApp.FontTitoloGruppo
-        Me.lblAnnuncioLetto.ForeColor = StileApp.RossoTitoli
+        Me.lblAnnuncioLetto.ForeColor = StileApp.RossoCritico
         Me.lblAnnuncioLetto.Location = New System.Drawing.Point(0, 0)
         Me.lblAnnuncioLetto.Name = "lblAnnuncioLetto"
         Me.lblAnnuncioLetto.Size = New System.Drawing.Size(368, 18)

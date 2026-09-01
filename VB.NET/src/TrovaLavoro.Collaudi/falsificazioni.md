@@ -71,6 +71,10 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
 | «Chiudi» delle Impostazioni non scorre via | `TrovaLavoro/Ui/FinestraImpostazioni.Designer.vb` | `btnChiudi` torna dentro `pnlContenuto` invece che nella fascia | `ChiudiRestaInVistaAncheQuandoIlContenutoNonCiSta`, `QuandoSiScorreNienteFinisceSottoLaBarra` |
 | E la fascia si ancora davvero al fondo | `TrovaLavoro/Ui/FinestraImpostazioni.Designer.vb` | `pnlFascia.Dock` diventa `DockStyle.None` | `ChiudiRestaInVistaAncheQuandoIlContenutoNonCiSta` |
 
+| Il bianco si legge sul fondo che ha sotto, e la scala dei livelli sale fino in fondo | `TrovaLavoro/StileApp.vb` | nel `Case Else` di `Dipingi` il fondo torna `RossoTitoli` | `OgniBottoneColoratoPortaUnTestoCheSiLegge` |
+| Un inchiostro colorato si legge sul fondo su cui è scritto | `TrovaLavoro/StileApp.vb` | `Successo` torna a `#28A745` (o `InformazioneTesto` a `#17A2B8`, o `RossoCritico` a `#FA0825`) | `OgniInchiostroColoratoSiLeggeSuiFondiDellApplicazione` — e col solo verde anche `OgniBottoneColoratoPortaUnTestoCheSiLegge`, che è il bianco sul fondo del livello 1 |
+| Un fondo pieno reagisce al mouse | `TrovaLavoro/StileApp.vb` | si tolgono le due righe `MouseOverBackColor`/`MouseDownBackColor` in fondo a `Dipingi` **e** a `DipingiLaCasella` | `OgniBottoneSiScurisceSottoIlPuntatore`, `AncheLeCaselleDellaBarraSiScurisconoSottoIlPuntatore` |
+
 ## Tre cose imparate falsificando, che valgono più della tabella
 
 - **Un collaudo può restare verde per il motivo sbagliato.** Il primo collaudo dell'a capo
@@ -81,6 +85,15 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
   nomina, restava verde — perché quell'identificativo compariva anche nel corpo d'errore
   che l'API rimanda indietro, e il collaudo lo leggeva lì. Adesso il corpo finto **non**
   nomina il modello, e la prova riguarda solo quel che scriviamo noi. *(2026-08-27.)*
+- **Il metro sbagliato tiene il collaudo verde meglio di qualunque bug.** La prova che il
+  livello 6 ha il fondo più scuro del 5 era scritta con `Color.GetBrightness()`, che è la
+  luminosità **HSL**: per lei `#FA0825` (il rosso del marchio) è più scuro di `#DC3545`,
+  mentre l'occhio e WCAG vedono l'opposto — quel rosso ha il canale rosso quasi al massimo,
+  e la luminanza percepita lo conta per il 21% mentre l'HSL guarda solo il canale più alto e
+  il più basso. Rimettendo il rosso del marchio al livello 6 il collaudo restava **verde**:
+  misurava una proprietà vera di un colore, ma non quella che la regola nomina. Adesso si
+  misura quanto bianco ci si legge sopra, cioè con lo stesso metro con cui il capitolo 03.2
+  scrive tutti i suoi numeri. *(2026-09-01.)*
 - **Un collaudo appeso non è rosso, è niente.** Rompendo il tetto delle attese, il collaudo
   che lo sorveglia aspetterebbe per sempre: senza il suo `<Timeout(5000)>` la falsificazione
   non avrebbe prodotto nessun rosso, e sarebbe sembrata una prova superata.

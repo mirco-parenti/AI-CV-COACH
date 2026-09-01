@@ -99,7 +99,7 @@ Partial Class PannelloHome
         'lblEtichettaProfilo
         '
         Me.lblEtichettaProfilo.Font = StileApp.FontTitoloGruppo
-        Me.lblEtichettaProfilo.ForeColor = StileApp.RossoTitoli
+        Me.lblEtichettaProfilo.ForeColor = StileApp.RossoCritico
         Me.lblEtichettaProfilo.Location = New System.Drawing.Point(0, 4)
         Me.lblEtichettaProfilo.Name = "lblEtichettaProfilo"
         Me.lblEtichettaProfilo.Size = New System.Drawing.Size(200, 18)
@@ -151,7 +151,7 @@ Partial Class PannelloHome
         '
         Me.lblPromemoria.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblPromemoria.Font = StileApp.FontDidascalia
-        Me.lblPromemoria.ForeColor = StileApp.Informazione
+        Me.lblPromemoria.ForeColor = StileApp.InformazioneTesto
         Me.lblPromemoria.Location = New System.Drawing.Point(0, 30)
         Me.lblPromemoria.Name = "lblPromemoria"
         Me.lblPromemoria.Size = New System.Drawing.Size(1100, 20)

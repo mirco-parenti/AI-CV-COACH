@@ -171,7 +171,7 @@ Partial Class PannelloProfilo
         Me.grpDatiPersonali.Controls.Add(Me.txtCategorie)
         Me.grpDatiPersonali.Dock = System.Windows.Forms.DockStyle.Top
         Me.grpDatiPersonali.Font = StileApp.FontTitoloGruppo
-        Me.grpDatiPersonali.ForeColor = StileApp.RossoTitoli
+        Me.grpDatiPersonali.ForeColor = StileApp.RossoCritico
         Me.grpDatiPersonali.Location = New System.Drawing.Point(14, 74)
         Me.grpDatiPersonali.Name = "grpDatiPersonali"
         Me.grpDatiPersonali.Size = New System.Drawing.Size(1106, 146)

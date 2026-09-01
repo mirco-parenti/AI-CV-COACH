@@ -159,6 +159,117 @@ Namespace Ui
         End Sub
 
         ''' <summary>
+        ''' Ogni bottone colorato porta un testo che si legge, e la scala dei livelli sale
+        ''' fino in fondo.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>La didascalia era la coppia più <b>usata</b>, non l'unica, e guardare solo
+        ''' lei ha lasciato passare per undici tappe due fondi che non erano nemmeno di
+        ''' confine <i>(2026-09-01)</i>: il verde di <see cref="StileApp.Successo"/> col
+        ''' bianco sopra faceva <b>3,13 a 1</b> — ed è il fondo di «Salva profilo» e della
+        ''' casella «🎮 Menu» — e il rosso del livello 6 ne faceva 4,10.</para>
+        ''' <para>Si misurano i bottoni <b>vestiti</b> e non i colori della tabella, perché
+        ''' le due cose si possono rompere separatamente: un token può essere a posto e un
+        ''' livello pescare quello sbagliato. È esattamente il difetto che c'era — il livello
+        ''' 6 portava il rosso del <b>marchio</b>, che è di casa nei titoli.</para>
+        ''' <para>Nella stessa prova sta la <b>scala</b>: «la saturazione cresce con il peso
+        ''' della conseguenza» (cap. 03.3) smetteva di crescere all'ultimo gradino, e il
+        ''' gesto da cui non si torna indietro si vestiva del colore meno grave. Si guarda
+        ''' quanto bianco ci si legge sopra, che è la stessa domanda detta al contrario: più
+        ''' scuro è il fondo, più il bianco stacca. E si guarda <b>quella</b> e non
+        ''' <c>Color.GetBrightness</c>, che è la luminosità HSL e su questi due rossi dice il
+        ''' contrario: per lei <c>#FA0825</c> è più scuro di <c>#DC3545</c>, mentre l'occhio
+        ''' — e WCAG — vedono l'opposto. Scritta con quel metro la prova restava verde anche
+        ''' rimettendo il rosso del marchio al livello 6, cioè era verde per il motivo
+        ''' sbagliato.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniBottoneColoratoPortaUnTestoCheSiLegge()
+
+            Const soglia As Double = 4.5
+
+            For Each livello As LivelloBottone In [Enum].GetValues(GetType(LivelloBottone))
+                Using bottone As New Button()
+
+                    StileApp.VestiBottone(bottone, livello)
+
+                    Assert.IsGreaterThanOrEqualTo(
+                        soglia, Contrasto(bottone.ForeColor, bottone.BackColor),
+                        $"il testo del livello {livello} sul suo fondo")
+
+                End Using
+            Next
+
+            For Each ruolo As RuoloBarra In [Enum].GetValues(GetType(RuoloBarra))
+                For Each aperta As Boolean In {False, True}
+                    Using casella As New Button()
+
+                        StileApp.VestiBottoneBarra(casella, ruolo, aperta)
+
+                        Assert.IsGreaterThanOrEqualTo(
+                            soglia, Contrasto(casella.ForeColor, casella.BackColor),
+                            $"il testo della casella {ruolo}, aperta={aperta}")
+
+                    End Using
+                Next
+            Next
+
+            Using distruttivo As New Button(), critico As New Button()
+
+                StileApp.VestiBottone(distruttivo, LivelloBottone.Distruttivo)
+                StileApp.VestiBottone(critico, LivelloBottone.Critico)
+
+                Assert.IsGreaterThan(
+                    Contrasto(StileApp.SfondoContenuto, distruttivo.BackColor),
+                    Contrasto(StileApp.SfondoContenuto, critico.BackColor),
+                    "il fondo del livello 6 è più scuro di quello del livello 5")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' E ogni inchiostro colorato si legge su tutti i fondi su cui viene scritto.
+        ''' </summary>
+        ''' <remarks>
+        ''' È l'altra direzione della prova qui sopra, e va tenuta separata perché è un
+        ''' difetto di un'altra specie: un colore nato per stare <b>sotto</b> il bianco
+        ''' finisce a fare da <b>lettere</b> su un fondo chiaro, e lì non regge più. Nel
+        ''' 2026-09-01 ce n'erano due così — l'azzurro informativo, in Home usato per il
+        ''' promemoria dei solleciti e le righe da sollecitare (2,77 a 1), e il verde
+        ''' dell'esito «assunto» in P4 (2,85) — e per il primo è nato un token apposta.
+        ''' <para>Si provano tutti e quattro i fondi: un inchiostro può reggere sul bianco
+        ''' delle finestre e cadere sull'avorio delle pagine, che parte già più scuro.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniInchiostroColoratoSiLeggeSuiFondiDellApplicazione()
+
+            Const soglia As Double = 4.5
+
+            Dim fondiChiari As Color() = {StileApp.SfondoBase, StileApp.SfondoContenuto,
+                                          StileApp.FondoPagina, StileApp.FondoCasella}
+
+            For Each fondo As Color In fondiChiari
+
+                Dim dove As String = ColorTranslator.ToHtml(fondo)
+
+                Assert.IsGreaterThanOrEqualTo(
+                    soglia, Contrasto(StileApp.RossoCritico, fondo),
+                    $"il rosso dei titoli di gruppo su {dove}")
+
+                Assert.IsGreaterThanOrEqualTo(
+                    soglia, Contrasto(StileApp.InformazioneTesto, fondo),
+                    $"il testo informativo su {dove}")
+
+                Assert.IsGreaterThanOrEqualTo(
+                    soglia, Contrasto(StileApp.Successo, fondo),
+                    $"il verde dell'esito «assunto» su {dove}")
+
+            Next
+
+        End Sub
+
+        ''' <summary>
         ''' Il pannello del logo ha il suo filo nero, e il filo gira tutt'intorno.
         ''' </summary>
         ''' <remarks>

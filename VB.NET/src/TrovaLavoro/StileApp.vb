@@ -149,11 +149,29 @@ Public Module StileApp
     ''' <summary>Fondo del bottone d'azione principale del pannello.</summary>
     Public ReadOnly FondoAzione As Color = ColorTranslator.FromHtml("#C0E8FF")
 
-    ''' <summary>Titoli delle finestre e dei GroupBox, marker.</summary>
+    ''' <summary>Titoli delle finestre e dei pannelli, marker.</summary>
+    ''' <remarks>
+    ''' È il rosso del marchio, ed è acceso: come inchiostro fa <b>3,73 a 1</b> sul fondo
+    ''' delle pagine e 4,10 sul bianco, sotto il 4,5 che WCAG chiede a un testo piccolo.
+    ''' Per questo dal 2026-09-01 gli restano i titoli <b>grandi</b> — 14 e 16 punti, dove
+    ''' la soglia è 3 — mentre i titoli di gruppo, che sono 9 punti, passano a
+    ''' <see cref="RossoCritico"/>: all'occhio è lo stesso rosso di famiglia, ma si legge.
+    ''' </remarks>
     Public ReadOnly RossoTitoli As Color = ColorTranslator.FromHtml("#FA0825")
 
     ''' <summary>Azioni sicure/positive, badge OK.</summary>
-    Public ReadOnly Successo As Color = ColorTranslator.FromHtml("#28A745")
+    ''' <remarks>
+    ''' Dal 2026-09-01 è più scuro del <c>#28A745</c> da cui viene, e per una ragione che
+    ''' valeva in tutti e due i versi in cui questo verde si usa. Sotto il <b>bianco</b> —
+    ''' il bottone di livello 1 (cap. 03.3) e la casella «🎮 Menu» della barra (cap. 03.4),
+    ''' che è dove il token si vede più spesso — faceva <b>3,13 a 1</b>, lontano dal 4,5;
+    ''' adesso fa <b>5,14</b>. E come <b>inchiostro</b> — l'esito «Assunto 🎉» di P4 — sui
+    ''' fondi chiari faceva 2,85, cioè meno di quanto costi leggerlo: adesso fa 4,68 sul
+    ''' fondo delle pagine, 4,94 dentro le caselle e 5,14 sul bianco. Resta un verde solo
+    ''' per tutti i suoi usi: un colore che fa sia da fondo sia da testo deve reggere nei
+    ''' due versi, e sdoppiarlo avrebbe messo due verdi di famiglia nella stessa schermata.
+    ''' </remarks>
+    Public ReadOnly Successo As Color = ColorTranslator.FromHtml("#1E7E34")
 
     ''' <summary>Il contorno che va col fondo <see cref="Successo"/> (cap. 03.4).</summary>
     ''' <remarks>
@@ -222,8 +240,42 @@ Public Module StileApp
     ''' <summary>Azioni distruttive, badge errore.</summary>
     Public ReadOnly Pericolo As Color = ColorTranslator.FromHtml("#DC3545")
 
+    ''' <summary>Il fondo delle azioni critiche (livello 6) e l'inchiostro dei titoli di gruppo.</summary>
+    ''' <remarks>
+    ''' <para>Nasce il 2026-09-01 e toglie a <see cref="RossoTitoli"/> il mestiere che non
+    ''' era suo. Il livello 6 (cap. 03.3) portava il rosso del <b>marchio</b>, e ne
+    ''' venivano due guai insieme: il bianco sopra faceva 4,10 a 1, e soprattutto la
+    ''' saturazione <i>smetteva</i> di crescere col peso — il rosso acceso dei titoli è più
+    ''' chiaro del <see cref="Pericolo"/> di livello 5, così il gesto più grave si vestiva
+    ''' del colore meno grave. Questo rosso è più scuro di tutti e due e il bianco sopra ci
+    ''' fa <b>7,35</b>: la scala torna a salire, e il rosso del marchio resta ai titoli.</para>
+    ''' <para>Lo stesso colore fa da <b>inchiostro</b> ai titoli di gruppo (9 punti), dove
+    ''' vale da 6,70 sul fondo delle pagine a 7,35 sul bianco: all'occhio è ancora il rosso
+    ''' di casa, e finalmente si legge. Un colore solo per le due parti, perché sono la
+    ''' stessa cosa detta due volte — il rosso quando non deve gridare ma pesare.</para>
+    ''' </remarks>
+    Public ReadOnly RossoCritico As Color = ColorTranslator.FromHtml("#B00013")
+
     ''' <summary>Badge informativi.</summary>
+    ''' <remarks>
+    ''' È un fondo, non un inchiostro: su fondo chiaro fa <b>2,77 a 1</b>. A scrivere
+    ''' l'informazione c'è <see cref="InformazioneTesto"/>.
+    ''' </remarks>
     Public ReadOnly Informazione As Color = ColorTranslator.FromHtml("#17A2B8")
+
+    ''' <summary>Il testo informativo: l'azzurro dei badge, portato al buio.</summary>
+    ''' <remarks>
+    ''' Nasce il 2026-09-01 perché <see cref="Informazione"/> faceva due mestieri e uno
+    ''' non lo sapeva fare: dietro un badge è il fondo di un pannellino con sopra il
+    ''' bianco, ma in Home era diventato il colore di <i>lettere</i> — il promemoria dei
+    ''' solleciti e le righe «da sollecitare» della coda — e lì valeva <b>2,77</b> sul fondo
+    ''' delle pagine e 2,93 dentro la coda, cioè quasi il doppio sotto la soglia. Questo ne
+    ''' fa <b>6,03</b> e <b>6,36</b> sugli stessi due fondi. Sono due token e non uno per la
+    ''' ragione di sempre in questa tabella: un colore che sta <i>sotto</i> e un colore che
+    ''' sta <i>sopra</i> sono due ruoli, e chiedere a uno solo di fare tutti e due significa
+    ''' sceglierne uno che va bene per nessuno dei due.
+    ''' </remarks>
+    Public ReadOnly InformazioneTesto As Color = ColorTranslator.FromHtml("#0F6674")
 
     ' --- Font (cap. 03.2) ---
 
@@ -239,7 +291,8 @@ Public Module StileApp
     ''' <summary>Titolo di pannello più contenuto (con RossoTitoli).</summary>
     Public ReadOnly FontTitoloPannello As New Font(NomeFont, 14.0F, FontStyle.Bold)
 
-    ''' <summary>Titolo di GroupBox (con RossoTitoli).</summary>
+    ''' <summary>Titolo di GroupBox (con <see cref="RossoCritico"/>: a 9 punti il rosso
+    ''' del marchio non arriva alla soglia — v. <see cref="RossoTitoli"/>).</summary>
     Public ReadOnly FontTitoloGruppo As New Font(NomeFont, 9.0F, FontStyle.Bold)
 
     ''' <summary>Bottone d'azione principale del pannello (livello 3).</summary>
@@ -256,7 +309,15 @@ Public Module StileApp
     Public ReadOnly FontBottoneForte As New Font(NomeFont, 9.0F, FontStyle.Bold)
 
     ''' <summary>Didascalie e suggerimenti (con TestoSecondario).</summary>
-    Public ReadOnly FontDidascalia As New Font(NomeFont, 8.0F)
+    ''' <remarks>
+    ''' Dal 2026-09-01 sono 9 punti e non più 8, cioè il corpo del testo di lavoro. Otto
+    ''' punti sono circa 10,7 pixel a 96 DPI, e sotto gli 11 nessun contrasto basta: la
+    ''' didascalia porta il grigio più chiaro della tavolozza (<see cref="TestoSecondario"/>,
+    ''' che sta appena sopra la soglia) e le due economie si sommavano proprio sul testo
+    ''' che spiega perché un bottone è spento. Un punto in più costa qualche pixel di
+    ''' altezza a ogni riga di aiuto; non leggerla costa l'aiuto intero.
+    ''' </remarks>
+    Public ReadOnly FontDidascalia As New Font(NomeFont, 9.0F)
 
     ''' <summary>Punteggi, log e altri dati tecnici.</summary>
     Public ReadOnly FontDatiTecnici As New Font(NomeFontTecnico, 8.5F)
@@ -292,6 +353,47 @@ Public Module StileApp
     ''' due larghi quasi uguale sono una svista.
     ''' </remarks>
     Public ReadOnly BottoneBarraSuperioreLargo As New Size(210, 34)
+
+    ''' <summary>Quanto sono smussati gli angoli dei bottoni disegnati a mano, in pixel.</summary>
+    ''' <remarks>
+    ''' Appena smussati, non tondi: la pillola del menu di prima aveva raggio pari a metà
+    ''' altezza, e su sei bottoni in colonna faceva una fila di losanghe. Otto pixel su
+    ''' cinquantatré sono la differenza fra un rettangolo duro e un rettangolo gentile —
+    ''' erano sei fino al 2026-09-01, e sei si vedevano appena su un bottone così largo.
+    ''' <para>Sta qui e non dentro il disegno perché è una misura come le altre di questo
+    ''' capitolo: se un domani nascesse un secondo controllo disegnato a mano, dovrebbe
+    ''' avere gli stessi angoli senza che nessuno se lo ricordi.</para>
+    ''' </remarks>
+    Public Const RaggioAngolo As Single = 8.0F
+
+    ' --- Come reagisce al mouse quel che ha un fondo pieno (cap. 03.3) ---
+
+    ''' <summary>Di quanto si scurisce un fondo quando il mouse ci passa sopra.</summary>
+    ''' <remarks>
+    ''' <b>Sul chiaro ci si accende scurendo</b>, non schiarendo: è la manopola che
+    ''' <c>BottoneMenu</c> gira dal 2026-08-30, e dal 2026-09-01 la girano tutti i bottoni
+    ''' vestiti da qui. Prima nessuno la girava affatto: senza <c>MouseOverBackColor</c> un
+    ''' bottone piatto col suo colore resta identico sotto il puntatore, e un fondo saturo
+    ''' che non reagisce si legge come un'immagine, non come un comando.
+    ''' </remarks>
+    Public Const ScurimentoSopra As Integer = 18
+
+    ''' <summary>Di quanto si scurisce mentre è premuto.</summary>
+    ''' <remarks>
+    ''' Il doppio del passaggio, perché i due momenti dicono cose diverse — «il mouse è
+    ''' qui» e «lo stai premendo» — e fra i due la differenza si deve vedere.
+    ''' </remarks>
+    Public Const ScurimentoPremuto As Integer = 36
+
+    ''' <summary>Lo stesso colore spostato verso il nero, restando nei limiti.</summary>
+    Public Function Scurito(colore As Color, di As Integer) As Color
+
+        Return Color.FromArgb(colore.A,
+                              Math.Clamp(colore.R - di, 0, 255),
+                              Math.Clamp(colore.G - di, 0, 255),
+                              Math.Clamp(colore.B - di, 0, 255))
+
+    End Function
 
     ' --- I livelli di conseguenza (cap. 03.3) ---
 
@@ -408,11 +510,24 @@ Public Module StileApp
                 bottone.FlatAppearance.BorderColor = Pericolo
 
             Case Else ' Critico
-                bottone.BackColor = RossoTitoli
+                ' Il fondo è il rosso grave e non quello del marchio: la saturazione
+                ' cresce col peso (03.3), e il rosso acceso dei titoli è più chiaro del
+                ' Pericolo di livello 5 — il gesto più grave si vestiva del colore meno
+                ' grave, e col bianco sopra faceva 4,10 a 1. Questo ne fa 7,35, e il rosso
+                ' del marchio resta dov'è di casa: i titoli.
+                bottone.BackColor = RossoCritico
                 bottone.ForeColor = SfondoContenuto
-                bottone.FlatAppearance.BorderColor = RossoTitoli
+                bottone.FlatAppearance.BorderColor = RossoCritico
 
         End Select
+
+        ' Come reagisce al mouse: senza queste due righe un bottone piatto col suo colore
+        ' resta identico sotto il puntatore e mentre lo si preme — un fondo saturo che non
+        ' si muove si legge come un'immagine, non come un comando. Si scuriscono, perché
+        ' qui dentro ci si accende scurendo (v. ScurimentoSopra). Vale la pena farlo solo
+        ' da acceso: su un bottone spento Windows non dipinge nemmeno il passaggio.
+        bottone.FlatAppearance.MouseOverBackColor = Scurito(bottone.BackColor, ScurimentoSopra)
+        bottone.FlatAppearance.MouseDownBackColor = Scurito(bottone.BackColor, ScurimentoPremuto)
 
     End Sub
 
@@ -512,6 +627,12 @@ Public Module StileApp
             bottone.ForeColor = If(attiva, Accento, TestoPrimario)
             bottone.FlatAppearance.BorderColor = If(attiva, Accento, BordoForte)
         End If
+
+        ' E anche qui il fondo reagisce al mouse, per la ragione detta in Dipingi: la barra
+        ' è l'unica fila dell'applicazione che si attraversa col puntatore cercando dove
+        ' andare, e sette caselle colorate che non si muovono sono un disegno.
+        bottone.FlatAppearance.MouseOverBackColor = Scurito(bottone.BackColor, ScurimentoSopra)
+        bottone.FlatAppearance.MouseDownBackColor = Scurito(bottone.BackColor, ScurimentoPremuto)
 
     End Sub
 
