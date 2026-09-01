@@ -1245,7 +1245,9 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => {
+// Solo sull'interfaccia di loopback: il proxy porta la chiave API del server, e un
+// «listen» senza host lo esporrebbe a chiunque raggiunga la porta sulla rete locale.
+server.listen(PORT, "127.0.0.1", () => {
   console.log(`Server in ascolto su http://localhost:${PORT}`);
   console.log(`Endpoint: POST http://localhost:${PORT}/struttura`);
   console.log(`Endpoint: POST http://localhost:${PORT}/leggi-pdf`);
