@@ -335,6 +335,28 @@ di difetti prima della 1.0.
   rimettere mano a una quindicina di file di UI oggi costerebbe più di quanto protegga.
   *(2026-08-27 — revisione del giro D; cap. 02, cap. 03.)*
 
+Idee emerse dalla **revisione UI di finalizzazione** *(2026-09-01)*: sono le due **deroghe**
+dichiarate in quella revisione, cioè rilievi veri che si è deciso di **non** chiudere adesso
+e che restano qui come lavoro futuro, con il motivo per cui non è di oggi.
+- **L'applicazione è mono-lingua, e la localizzazione è un lavoro a sé.** Tutte le stringhe
+  dell'interfaccia stanno **nel codice**, in italiano, e non esiste nessun `.resx`: è una
+  scelta e non una dimenticanza — l'utente di riferimento è italiano, e un secondo strato di
+  risorse su una quindicina di file di UI costa oggi senza rendere niente. Il giorno che
+  servisse un'altra lingua il lavoro è tutto lì e si sa già qual è: estrarre le stringhe in
+  risorse, una per file, e far scegliere la cultura all'avvio. Da non confondere con la
+  **lingua dei documenti** (IT/EN), che è cosa diversa e c'è già da T7a: quella riguarda ciò
+  che l'AI scrive, questa ciò che l'applicazione dice.
+  *(2026-09-01 — deroga B8 della revisione UI di finalizzazione; cap. 03, cap. 10.5.)*
+- **Le Impostazioni a schede.** P8 è oggi una finestra sola con **sette sezioni** una sotto
+  l'altra e lo scorrimento, ed è coerente con quel che quella finestra è — una finestra che
+  **fa** e non raccoglie una decisione (cap. 03.4): si scorre, si cambia una cosa, è già
+  scritta. Riorganizzarla a **tab** darebbe una mappa più netta a chi ci entra la prima
+  volta, ma nasconderebbe sei sezioni su sette a chi cerca una voce di cui non ricorda il
+  nome — che è il caso vero — e vorrebbe rifare la disposizione appena curata a DPI alti
+  (decisione 15.7). È un raffinamento, non un difetto: si valuta quando le sezioni saranno
+  troppe perché lo scorrimento le tenga.
+  *(2026-09-01 — deroga B10 della stessa revisione; cap. 03.4, cap. 11.6.)*
+
 ## Collaudi e non-regressione (Fase VB.NET)
 
 Idee emerse **costruendo la batteria di T2** (cap. 14), quando il prototipo ha fatto da

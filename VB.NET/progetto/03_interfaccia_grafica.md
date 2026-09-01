@@ -13,7 +13,8 @@ applicazione deve avere.*
    rispondere da sola, con il colore e la posizione, prima ancora del testo.
 2. **Il colore di un bottone dice la conseguenza dell'azione**, non il marchio: un'azione
    sicura è verde, una esplorativa è tenue, una distruttiva è rossa. Il colore del brand
-   vive nei **titoli** e negli accenti, mai nei bottoni ordinari.
+   vive nei **titoli grandi** e negli accenti — e dal 2026-09-01 in **nessun** bottone,
+   nemmeno in quello critico, che ha il suo rosso grave (3.3).
 3. **Flat totale**: niente gradienti, ombre, bordi 3D. Bordi sottili da 1 px, superfici
    piatte, `FlatStyle.Flat`.
 4. **Un solo font**: Segoe UI ovunque (Consolas solo per dati tecnici). Mai font di
@@ -53,19 +54,21 @@ Tutti i colori e i font dell'applicazione vengono **da questa tabella e solo da 
 | `Accento` | `#0B06B0` | focus, link, selezione (blu profondo) |
 | `AccentoTenue` | `#E4E7FB` | riga selezionata, hover |
 | `FondoAzione` | `#C0E8FF` | fondo del bottone d'azione principale del pannello |
-| `RossoTitoli` | `#FA0825` | titoli delle finestre e dei GroupBox, marker |
-| `Successo` | `#28A745` | azioni sicure/positive, badge OK |
+| `RossoTitoli` | `#FA0825` | titoli **grandi** delle finestre e dei pannelli (14 e 16 pt), marker *(dal 2026-09-01 non è più l'inchiostro dei titoli di GroupBox: a 9 punti fa 3,73 : 1 sul fondo delle pagine e 4,10 sul bianco, sotto il 4,5 che WCAG chiede al testo piccolo, e quelli passano a `RossoCritico`. Sui titoli grandi la soglia è 3, e lì il rosso del marchio la supera)* |
+| `Successo` | `#1E7E34` | azioni sicure/positive, badge OK *(dal 2026-09-01: il `#28A745` da cui viene reggeva il bianco sopra a **3,13 : 1** — ed è il fondo del livello 1 e della casella «🎮 Menu» della barra, cioè dove il token si vede più spesso — mentre come **inchiostro**, l'esito «Assunto 🎉» di P4, faceva 2,85 sui fondi chiari. Adesso fa **5,14** sotto il bianco, e da 4,68 a 5,14 come testo. Resta un verde solo per i due usi: un colore che fa da fondo e da lettere deve reggere nei due versi, e sdoppiarlo metterebbe due verdi di famiglia nella stessa schermata)* |
 | `BordoSuccesso` | `#0A2C11` | contorno della casella verde della barra (cap. 03.4) *(dal 2026-08-30 sera)* |
-| `ArgentoDiAttesa` | `#E2E8F0` | i pallini che girano sullo scudo di caricamento (cap. 03.8) *(dal 2026-08-30)* |
-| `OmbraDiAttesa` | `#4A5568` | il contorno di quei pallini, che li stacca dalle parti chiare dello scudo *(dal 2026-08-30)* |
-| `VerdeDiAttesa` | `#0D7C0D` | il corpo della barra che si riempie sotto lo scudo (cap. 03.8) *(dal 2026-08-31)* |
+| `ArgentoDiAttesa` | `#E2E8F0` | i pallini della ruota dell'attesa (cap. 03.8) *(dal 2026-08-30)* |
+| `OmbraDiAttesa` | `#4A5568` | il contorno di quei pallini *(dal 2026-08-30; fino al 2026-09-01 serviva a staccarli dalle parti chiare dello stemma, che non c'è più — resta perché un pallino d'argento vuole comunque un profilo)* |
+| `VerdeDiAttesa` | `#0D7C0D` | il corpo della barra che si riempie sotto la ruota (cap. 03.8) *(dal 2026-08-31)* |
 | `VerdeSulFondo` | `#378B35` | il fondo di quella barra, dove la sfumatura verticale schiarisce *(dal 2026-08-31)* |
 | `VerdeInTesta` | `#34A936` | la punta accesa del riempimento, che è la parte che si vede muoversi *(dal 2026-08-31)* |
 | `FondoDiAttesa` | `#E4E6E6` | il grigio della barra ancora da riempire *(dal 2026-08-31)* |
 | `BordoDiAttesa` | `#CACBCC` | il filetto attorno alla barra, che la stacca dal desktop *(dal 2026-08-31)* |
 | `Avviso` | `#FFC107` | azioni che modificano, badge attenzione |
 | `Pericolo` | `#DC3545` | azioni distruttive, badge errore |
-| `Informazione` | `#17A2B8` | badge informativi |
+| `RossoCritico` | `#B00013` | fondo delle azioni **critiche** (livello 6) e inchiostro dei **titoli di GroupBox** (9 pt) *(dal 2026-09-01: toglie a `RossoTitoli` due mestieri che non erano suoi. Come fondo del livello 6 il rosso del marchio dava 4,10 : 1 col bianco sopra, ed era più chiaro del `Pericolo` di livello 5 — il gesto più grave si vestiva del colore meno grave; qui il bianco fa **7,35** e la scala torna a salire col peso. Come inchiostro a 9 punti vale da 6,70 sul fondo delle pagine a 7,35 sul bianco: all'occhio è ancora il rosso di casa, e si legge)* |
+| `Informazione` | `#17A2B8` | badge informativi, e **come fondo** soltanto (sopra ci va il bianco): da inchiostro su fondo chiaro fa 2,77 : 1 |
+| `InformazioneTesto` | `#0F6674` | le **lettere** informative: il promemoria dei solleciti e le righe «da sollecitare» della coda in Home *(dal 2026-09-01: `Informazione` faceva due mestieri e uno non lo sapeva fare — da inchiostro valeva 2,77 sul fondo delle pagine e 2,93 dentro la coda, quasi il doppio sotto la soglia. Questo ne fa **6,03** e **6,36**. Sono due token e non uno per la ragione di sempre in questa tabella: un colore che sta sotto e un colore che sta sopra sono due ruoli)* |
 
 **Due famiglie di fondi, e non è un doppione** *(dal 2026-08-31)*. `SfondoBase`/`SfondoContenuto`
 — il grigino e il bianco — restano i fondi delle **finestre**: impostazioni, backup, conferme,
@@ -87,11 +90,16 @@ menu compreso.
 | Ruolo | Font |
 |---|---|
 | Titolo finestra/pannello | Segoe UI 14–16 **Bold**, colore `RossoTitoli` |
-| Titolo GroupBox | Segoe UI 9 **Bold**, colore `RossoTitoli` |
+| Titolo GroupBox | Segoe UI 9 **Bold**, colore `RossoCritico` *(dal 2026-09-01: a 9 punti il rosso del marchio non arriva alla soglia — v. la tabella dei colori)* |
 | Bottone d'azione principale | Segoe UI 9.75 **Bold** |
 | Testo di lavoro e bottoni neutri | Segoe UI 9 |
-| Didascalie / hint | Segoe UI 8, colore `TestoSecondario` |
+| Didascalie / hint | Segoe UI **9**, colore `TestoSecondario` *(dal 2026-09-01: erano 8, cioè circa 10,7 pixel a 96 DPI, e sotto gli 11 nessun contrasto basta. La didascalia porta il grigio più chiaro della tavolozza, che sta appena sopra la soglia, e le due economie si sommavano proprio sul testo che spiega perché un bottone è spento: un punto in più costa qualche pixel per riga, non leggerla costa l'aiuto intero)* |
 | Dati tecnici (punteggi, log) | Consolas 8.5 |
+
+*Confermato nella stessa revisione: i titoli restano in **Bold**. A 14 e 16 punti il
+grassetto non serve a farli leggere — a quel corpo si leggono comunque — ma a dire che sono
+titoli: qui dentro il peso è il segno della gerarchia, e toglierlo lascerebbe la gerarchia
+al solo colore, che è esattamente quel che il resto di questa revisione ha smesso di fare.*
 
 ### Spaziature e dimensioni (regola 14 / 12 / 8)
 
@@ -100,6 +108,30 @@ menu compreso.
 - **8 px** minimo tra le righe (14–16 dove serve respiro).
 - Bottoni standard **110×32** (testo breve) o **130×32** (testo medio); bottoni della
   barra superiore **110×34**.
+- **8 px** di raggio agli angoli dei bottoni **disegnati a mano** (`RaggioAngolo`): appena
+  smussati, non tondi. Sta fra le misure di questo capitolo e non dentro il disegno del
+  menu per la ragione di sempre — se un domani nascesse un secondo controllo disegnato a
+  mano dovrebbe avere gli stessi angoli senza che nessuno se lo ricordi. *(Erano 6 fino al
+  2026-09-01, e su un bottone largo mezzo pannello si vedevano appena.)*
+
+**Come reagisce al mouse quel che ha un fondo pieno** *(dal 2026-09-01)*. Ogni fondo pieno
+si **scurisce** di 18 al passaggio del puntatore (`ScurimentoSopra`) e di 36 mentre è
+premuto (`ScurimentoPremuto`): il doppio, perché «il mouse è qui» e «lo stai premendo» sono
+due cose diverse e fra le due la differenza si deve vedere. Sul chiaro ci si accende
+scurendo, non schiarendo — è la manopola che il bottone del menu d'ingresso gira dal
+2026-08-30, e da questa data la girano **tutti** i bottoni vestiti dai livelli di 3.3 e le
+sette caselle della barra. Prima nessuno la girava: un bottone piatto col suo colore restava
+identico sotto il puntatore, e un fondo saturo che non si muove si legge come un'immagine,
+non come un comando.
+
+*Le misure di questa sezione sono state **riguardate e confermate** nella revisione di
+finalizzazione del 2026-09-01, e la conferma vale quanto un cambiamento: i bottoni restano
+alti **32 px** — è la misura standard di un desktop, mentre i 44 px che le linee guida
+d'accessibilità raccomandano sono la regola del **dito** su uno schermo che si tocca, non
+del puntatore su uno schermo che si guarda; la griglia resta
+**14 / 12 / 8**, che è già una progressione coerente e non chiede di diventare 16/12/8; e le
+caselle di testo restano alte **23–24 px**, l'altezza che Windows Forms dà loro col font di
+questo capitolo.*
 
 ## 3.3 I livelli di conseguenza dei bottoni
 
@@ -109,16 +141,52 @@ del colore cresce con il peso della conseguenza:
 | Livello | Quando | Aspetto |
 |---|---|---|
 | **0 — Neutro** | navigazione, annulla, chiudi | bianco, bordo `BordoLeggero`, Segoe UI 9 |
-| **1 — Sicuro positivo** | conferme senza rischio («Salva profilo», «Cattura annuncio») | fondo `Successo`, testo bianco, bold |
+| **1 — Sicuro positivo** | conferme senza rischio («Salva profilo», «Salva questa ricerca», «L'ho spedita») | fondo `Successo`, testo bianco, bold *(«Cattura annuncio» stava fra gli esempi di questa riga fino al 2026-09-01: è passata al livello 3, v. sotto)* |
 | **2 — Esplorativo leggero** | aprire, sfogliare, vedere anteprime | fondo `AccentoTenue`, bordo `Accento` **da 2 px**, **testo `Accento`** e carattere grassetto. *Il bordo era `BordoForte` fino al 2026-08-22: su una finestra già chiara quel fondo tenue col contorno grigio si legge come un bottone **spento**, e nella prova dal vivo di T9d «Esporta PDF» e «Esporta DOCX» sono stati creduti morti mentre funzionavano. Il bordo d'accento è la differenza più piccola che si veda a colpo d'occhio, e imparenta il livello 2 col 3 — che d'accento ha il bordo e in più il fondo azzurro e il carattere grande.* *Il bordo da solo non è bastato: alla **seconda** prova dal vivo dello stesso giorno gli stessi due bottoni erano ancora letti come spenti, e la ragione è che l'occhio giudica un bottone dal **testo** prima che dal contorno — nero su azzurrino è esattamente ciò che qui dentro significa spento (grigio su grigio), e un fondo tenue non basta a smentirlo. Dal 2026-08-22 le lettere sono d'accento, il contorno è doppio e il carattere è quello dei bottoni che pesano: **tre segnali invece di uno**, e nessuno tolto allo spento, che resta grigio in tutto. Vale per ogni livello 2 dell'applicazione — Home, Profilo, Email, Dialogo, Opportunità, Documenti e le tre finestre — perché è un sistema e non una riparazione locale* |
 | **3 — Azione principale del pannello** | il bottone «avanti» del flusso («Genera CV», «Confronta») | fondo `FondoAzione`, bordo `Accento`, Segoe UI 9.75 Bold |
 | **4 — Attenzione** | modifica dati esistenti («Sovrascrivi profilo», «Rigenera») | fondo `Avviso`, testo scuro, bold |
 | **5 — Distruttivo** | eliminare un'opportunità, scartare | fondo `Pericolo`, testo bianco, bold |
-| **6 — Critico** | inviare un'email, cancellazioni definitive | fondo `RossoTitoli`, testo bianco, bold — sempre preceduto da conferma |
+| **6 — Critico** | inviare un'email, cancellazioni definitive | fondo `RossoCritico`, testo bianco, bold — sempre preceduto da conferma |
 
-Regole: `FlatStyle.Flat`, `UseVisualStyleBackColor = False` ovunque; mai il rosso del
-brand su un bottone che non sia di livello 6; nel dubbio tra due livelli si sceglie il
-più alto.
+Regole: `FlatStyle.Flat`, `UseVisualStyleBackColor = False` ovunque; il rosso del **brand**
+non veste nessun bottone (è dei titoli, 3.2); nel dubbio tra due livelli si sceglie il più
+alto.
+
+**La saturazione torna a crescere col peso** *(2026-09-01)*. Fino a qui il livello 6 portava
+`RossoTitoli`, cioè il rosso **del marchio**, e ne venivano due guai insieme: il bianco
+sopra faceva 4,10 : 1, e soprattutto quel rosso acceso è più **chiaro** del `Pericolo` di
+livello 5 — il gesto più grave si vestiva del colore meno grave, e la scala di questa
+tabella si rompeva proprio all'ultimo gradino. Adesso il fondo è `RossoCritico`, più scuro
+di tutti e due; il rosso del marchio resta dov'è di casa, nei titoli.
+
+**Il livello 3 si conta per fascia, non per pannello** *(precisato 2026-09-01)*. «Azione
+principale del pannello» va letta come «azione principale della **sua fascia**»: P3 ne ha
+due, e non è un'eccezione — la fascia della ricerca ha «Cerca», la fascia dei comandi in
+fondo ha «Cattura annuncio», e ognuna delle due è il gesto avanti di quel gruppo. Un
+pannello con due fasce che fanno due mestieri diversi ha due azioni principali; due bottoni
+di livello 3 **nella stessa fascia** restano invece l'errore che questa riga vieta.
+
+**Correzioni di assegnazione della stessa revisione**, ognuna col suo perché:
+«Ripristina» della finestra di backup è **livello 4** e non 5 — sovrascrive il profilo di
+adesso con quello del backup, cioè modifica, non cancella; «Fallo riscrivere» di P7 è
+**livello 4**, e chiede conferma solo quando in casella c'è del lavoro dell'utente (quando
+il testo è tutto dell'AI il costo di un sì sarebbe un'attesa, non del lavoro perso);
+«Fai rileggere la cartella» della finestra documenti è **livello 2**, perché rilegge e non
+tocca niente; «Cattura annuncio» di P3 è **livello 3** (v. sopra) e «Importa CV da questa
+pagina», che le sta accanto, resta **livello 1**.
+
+**Le conferme di livello 5 passano tutte dalla `FinestraConferma`** *(2026-09-01)*, quella
+col verbo «Confermo» descritta in 3.4: l'eliminazione di una voce del profilo in P2, il
+«Dimentica» di una ricerca salvata in P3 e lo «Scarta» di P4 chiedevano ancora con una
+`MessageBox`, cioè con un Sì che risponde alla domanda invece che alla conseguenza. Un
+livello ha una sola forma di conferma, o non è un livello.
+
+**E un comando di livello 6 sta su una riga tutta sua anche fuori dai pannelli**
+*(2026-09-01)*. La regola della fascia dei comandi (3.4) valeva solo lì: nelle Impostazioni
+«ELIMINA TUTTI I DATI» stava nella stessa colonna, alla stessa larghezza e appena sotto
+«Svuota i dati di navigazione», con il solo vuoto sopra a difenderlo. Adesso ha il vuoto da
+tutti e due i lati e sta al **margine opposto**, così un clic scivolato trova il fondo della
+finestra e non l'eliminazione di tutto.
 
 ## 3.4 Architettura delle finestre
 
@@ -194,6 +262,13 @@ azzurro e prende contorno doppio e lettere del blu d'accento — due dei tre seg
 livello 2 (3.3), che qui dentro vogliono già dire «questo è vivo»; il terzo, il grassetto,
 non può distinguerla perché ce l'hanno tutte (v. sotto). Il fondo dice **che cosa** è una
 casella, la cornice **dove si è**: due domande diverse, due segnali diversi.
+
+*Che le sette caselle abbiano tutte un **fondo pieno** è stato riguardato il 2026-09-01 e
+confermato: una fila di sette colori accesi sembra molto, ma i colori sono **due** — azzurro
+le destinazioni, verde il ritorno — e dicono una cosa sola, «di che specie è questa casella».
+A distinguere quella aperta ci pensa la cornice, che è un segnale d'altra natura e non si
+somma al chiasso. Smorzarne il fondo per far risaltare l'aperta rifarebbe la fila bianca da
+cui questa scelta è nata.*
 
 E tutte e sette scrivono in **grassetto** (`FontBottoneForte`), come le voci del menu
 d'ingresso e per la stessa ragione: sono l'indice del programma, nomi che si leggono di
@@ -297,6 +372,10 @@ che parte una chiamata.
   per una ragione sua, diversa da quella della sorella: quella sa dire solo Sì e No, e un
   «Sì» risponde alla domanda mentre «Confermo» risponde alla **conseguenza**. Nasce per
   «Elimina candidatura» in P1 (cap. 11.5).
+  *Dal **2026-09-01** è la conferma di **tutto** il livello 5, non di un bottone solo:
+  ci passano anche l'eliminazione di una voce del profilo in P2, il «Dimentica» di una
+  ricerca salvata in P3 e lo «Scarta» di P4, che chiedevano ancora con una `MessageBox`.
+  Una forma di conferma per livello, o il livello non dice più niente (3.3).*
 - **Altre due finestre secondarie con T6** *(2026-08-14)*. `FinestraChiaveApi` chiede la
   chiave API quando non c'è (cap. 11.3): compare **prima** che i pannelli si colleghino al
   motore, con la casella mascherata e la spunta per rileggere quel che si è incollato, e
@@ -329,6 +408,11 @@ che parte una chiamata.
   provato dal vivo succede a 438 ms, molto prima della sua scadenza. Su uno schermo
   piccolo, o scalato, si rimpicciolisce per stare dentro il **70%** dell'area di lavoro
   senza deformarsi. Un clic la chiude.
+  *I cinque secondi sono stati riguardati il 2026-09-01 e **tenuti**: sono lunghi per il
+  costume corrente (una schermata d'avvio sta di norma un secondo e mezzo o due), ed è una
+  scelta di chi possiede il prodotto, non una svista — la marca vuole quel tempo. Le due
+  vie d'uscita restano quelle che la rendono accettabile: un clic la manda via, e chi sta
+  per aprire una finestra che chiede qualcosa la manda via da sé.*
   Nasce in `Programma.Main`, **dopo** la biforcazione del server: in modalità `--mcp` non
   esiste, come nessun'altra finestra (cap. 09). La seconda è **«Informazioni su…»**
   (`FinestraInformazioni`), e non ripete le Impostazioni: il marchio, la riga di versione e
@@ -367,6 +451,14 @@ che parte una chiamata.
   viveva identica in altre **tre** finestre — Backup, ChiaveApi, ConfermaCritica — e sono state
   curate tutte, non solo quella caduta: la ChiaveApi è quella che al primo avvio compare prima
   della finestra principale, e troncata lì non si sarebbe potuta inserire la chiave.
+  *E il 2026-09-01 la stessa cura arriva alle **ultime tre** finestre che ne erano rimaste
+  fuori — `FinestraAppunti`, `FinestraDocumenti` e `FinestraModificaTesti`, che si
+  dimensionavano anche loro sul proprio contenuto senza guardare quanto schermo ci fosse — e
+  P7 dichiara il proprio `AutoScaleMode` come tutti gli altri pannelli, che è la riga da cui
+  dipende se il contenuto cresce col DPI o resta indietro. La decisione 15.7 vale adesso su
+  ogni finestra dell'applicazione. La **prova a 150%** di queste tre non è stata fatta e
+  resta in riserva (`in_sospeso.md`): la cura è la stessa già misurata sulle altre, ma
+  «stessa cura» non è «misurata».*
   *E quella cura aveva un difetto suo, che si è visto usandola* **(rifiniture prima del
   giro D, 2026-08-24)**: con l'`AutoScroll` acceso la barra verticale si prende una fetta
   di larghezza, e la fila dei controlli — disposta sulla larghezza intera — le finisce
@@ -424,15 +516,16 @@ che parte una chiamata.
 ## 3.5 Il pannello del logo (in basso a sinistra)
 
 Elemento identitario irrinunciabile, presente in ogni momento nell'angolo in basso a
-sinistra della finestra principale:
+sinistra della finestra principale — ed è, dal **2026-09-01**, l'**unico** posto in cui il
+marchio vive:
 
 ```
 ┌──────────────────────────┐
 │        [immagine]        │   PictureBox 101×101, scudo Aviolab AI
 │                          │   (in forma binaria nel sorgente)
 │       AVIOLAB AI         │   Segoe UI 16 Bold, TestoPrimario, centrato
-│  Ver. 1.0.012 · Pool 1.03│   Segoe UI 8, TestoSecondario, centrato
-│ ©2026 Aviolab AI - Tutti │   Segoe UI 8, TestoSecondario, centrato
+│  Ver. 1.0.012 · Pool 1.03│   Segoe UI 9, TestoSecondario, centrato
+│ ©2026 Aviolab AI - Tutti │   Segoe UI 9, TestoSecondario, centrato
 │   i diritti riservati    │
 └──────────────────────────┘   contorno nero da 1 px, tutt'intorno
 ```
@@ -445,6 +538,23 @@ sinistra della finestra principale:
 > *(cambiato il 2026-08-22 insieme al banner del logo: prima era «e candidati con
 > il CV giusto, senza fatica»)*. *AI-CV-COACH* resta il nome del progetto e del
 > repository, non del prodotto.
+
+**Il marchio sta in un posto solo, e questo è quel posto** *(2026-09-01, revisione di
+finalizzazione col tutor — e **rovescia** due decisioni dei due giorni precedenti)*. Fra il
+30 e il 31 agosto lo stemma Aviolab era arrivato in altri due punti: il **mega stemma**
+dietro la colonna dei bottoni del menu d'ingresso (3.6) e lo **scudo dell'attesa** in mezzo
+allo schermo (3.8). Le tre presenze erano state dichiarate «irrinunciabili»; ne bastava una.
+La ragione generale è che un marchio ripetuto tre volte nella stessa applicazione non si
+legge tre volte: si legge come rumore, e alla terza non lo guarda più nessuno. E i due posti
+nuovi erano sbagliati per una ragione ciascuno. Nel menu lo stemma stava **dietro i
+bottoni**, cioè dietro l'unica cosa che lì si deve guardare, e per vedersi obbligava la
+colonna a stringersi. Nell'attesa prendeva il centro dello schermo con qualcosa che
+dell'attesa non dice niente: chi guarda sta aspettando, non ammirando — un'attesa non è il
+posto in cui firmarsi — e la ruota, per stargli addosso, doveva difendere i suoi pallini
+d'argento dal blu, dal bianco e dal giallo delle stelle. Restano perciò l'avorio, il nome e
+il sottotitolo nel menu, e in mezzo allo schermo un indicatore **neutro**: la ruota di
+pallini con la sua barra. Il marchio torna qui, dov'è di casa e dov'è a video in ogni
+momento — la presenza continua vale più della somma delle tre.
 
 - `Panel` di circa **261×216 px**, sfondo `SfondoBase`, ancorato **Bottom+Left**,
   aggiunto al form come elemento flottante sopra la struttura (così sopravvive ai
@@ -504,7 +614,7 @@ sinistra della finestra principale:
 | ID | Pannello | Contenuto principale |
 |---|---|---|
 | **P1 Home** | cruscotto | stato del profilo (esiste? aggiornato quando?), coda opportunità con stelle e stati, scorciatoie ai flussi («Nuova ricerca», «Aggiorna profilo»). *Costruito a T5c (2026-08-13), ed è il pannello su cui l'applicazione ora **si apre**. La coda è una lista in vista dettagli con sei colonne — **Match** (stelle, numero e ⛔), **Azienda**, **Ruolo**, **Stato**, **Da dove**, **Aggiornata** — ordinabile cliccando un'intestazione, con un filtro «Mostra» (Tutte · Da completare · Generate · Scartate) e i contatori del cap. 07.3; quello delle **inviate** è entrato con **T6** *(2026-08-14)*, cioè con la tappa che lo fa salire — prima sarebbe stato fermo a zero, e un contatore che non può muoversi non conta niente. *Con T6 la coda si filtra anche **per stelle** («almeno N»), e i due filtri si intersecano invece di sostituirsi: rispondono a domande diverse. Da qui l'elenco si può anche **esportare** in CSV o markdown (cap. 07.3).* Le **scartate restano** nell'elenco, scritte in grigio: scartare non è cancellare. Una candidatura si riapre dal bottone «Apri la candidatura» o dal doppio clic sulla riga. **Qui si guarda, non si decide**: il pannello non cambia lo stato di nessuna candidatura — nemmeno lo scarto sta qui, ma nella scheda che si sta guardando *(emendato il 2026-08-31: v. in fondo a questa riga)*. Senza profilo il cruscotto lo dice e il bottone accanto cambia mestiere («Costruisci il profilo» invece di «Apri il profilo»), perché da lì si comincia; «Aggiorna profilo» è lì spento col suo tooltip (flusso D), per la regola 3.8* *A **T9c** (2026-08-21) la Home impara a dire chi aspetta da troppo (cap. 07.3): sotto i contatori compare una riga — «⏳ 2 candidature spedite aspettano da più di 14 giorni; la più vecchia da 21 (Acme — Magazziniere)» — le righe interessate portano nella colonna «Stato» **da quanti giorni** aspettano («Inviata · 20 gg») e si isolano con la voce «Da sollecitare» del filtro «Mostra». Quando non c'è niente da ricordare la riga **sparisce** e la fascia dei filtri torna alta com'era, perché un avviso che occupa spazio anche da spento insegna a non guardarlo. La stessa colonna «Stato» dice ora l'**esito** quando c'è — «Rifiutata», non «Con esito» — e ai contatori se n'è aggiunto uno, «con esito», che prima sarebbe stato fermo a zero* *Il **2026-08-31** la Home prende il suo unico gesto che non è guardare: **«Elimina candidatura» (L5)**, al posto di «Aggiorna profilo» — un bottone che stava lì spento da T5c per una tappa mai arrivata (il flusso D), e che a furia di non accendersi mai aveva smesso di significare «arriverà» per significare «non funziona». Il principio in cima a questa riga si **emenda invece di aggirarlo**: qui si guarda, **e si toglie di mezzo**. Eliminare non decide niente *sulla* candidatura — la toglie dall'archivio (cap. 11.5) — e dopo non resterebbe nessuna scheda da cui farlo; la coda è anche il solo posto da cui si vedono tutte insieme, che è come ci si accorge del doppione e della prova da ripulire. È acceso **solo con una riga scelta**, come «Apri la candidatura», e sta **in fondo alla fila** proprio per quello: due bottoni che si accendono insieme e fanno il contrario non vanno sotto lo stesso dito — la stessa ragione per cui in P2 «ELIMINA PROFILO» sta all'estremo opposto rispetto a «Salva profilo». La conferma è di **livello 5** e passa dalla `FinestraConferma` (3.4): dice **quale** candidatura sparisce — azienda e ruolo, com'è scritta la riga — e che cosa c'era nella cartella, e si accetta con un clic su «Confermo». Dopo, i tre pannelli che potevano averla in mano — la scheda, i documenti, l'email — la **dimenticano**: non per pulire la vista, ma perché ognuno di loro scrive nella cartella della candidatura, e su un oggetto sopravvissuto alla propria cartella la ricreerebbero* |
-| **P0 Menu** | menu d'ingresso | **sei bottoni azzurri** su un fondo avorio, col nome del prodotto in cima e il mega stemma Aviolab dietro: «Le mie candidature» (P1), «Profilo e CV base» (P2), «Ricerca annuncio — ONLINE» (P3), «Confronta ANNUNCIO - CV / Match 1-5 ⭐» (P4), «Elabora Documentazione» (P6), «Impostazioni» (P8). *Nato il 2026-08-30.* È il pannello su cui l'applicazione **si apre**, e non sostituisce la barra: la precede. La barra resta e porta agli stessi posti; per tornare qui c'è la voce **«🎮 Menu»**, prima in barra — senza, dal menu si esce e non si rientra. **Il menu non sa dove portano i suoi bottoni**: preme quello corrispondente della barra, così i cammini restano quelli di prima per costruzione (dietro «Ricerca annuncio» c'è l'accensione del browser, dietro «Impostazioni» una finestra che rimonta il motore: riscriverli qui sarebbe stata una seconda strada destinata a divergere). Per la stessa ragione il menu **si spegne insieme alla barra** mentre l'AI lavora: gli stati non si riscrivono, si leggono dai bottoni. Lo sfondo, dal **2026-08-30 (sera)**, non è più il banner: si **dipinge**. Sono tre cose — l'avorio di `FondoMenu`, il **mega stemma** Aviolab dietro la colonna dei bottoni, e in cima le stesse due righe del banner (nome e sottotitolo), **centrate sull'asse** e senza il timbro che là sta a destra del nome. Il guadagno non è estetico: un fondo dipinto **segue la finestra**, mentre un'immagine può solo starci dentro o essere tagliata — e su una finestra panoramica il banner quasi quadrato lasciava blu ai lati. Il velo bianco resta e **li prende tutti e tre**: sull'avorio non si stende (`#FFFAF0` velato dà `#FFFDF8`, che è lo stesso colore, e il fondo va lasciato esatto) ma su quel che ci sta sopra — stemma, nome e sottotitolo insieme, perché sono tutti e tre sfondo e sfondo vuol dire stare dietro ai bottoni senza contendere. Tecnicamente: gli elementi si disegnano **a piena forza su una tela a parte**, e la tela si appoggia sull'avorio con l'opacità abbassata in una volta sola. Le due vie corte non funzionano — disegnare ciascuno con un colore già trasparente farebbe riaffiorare, dentro le lettere, il contorno nero sotto il riempimento bianco; un rettangolo bianco steso sopra tutto, com'era sul banner, schiarirebbe anche l'avorio. La colonna si centra ora nello spazio **sotto il nome**, che è l'erede della vecchia «zona dentro la cornice». Nella stessa sera i bottoni passano da **690×87 a 420×53**, ed è la stessa decisione vista dall'altra parte: con la colonna larga come prima lo scudo ci spariva sotto e se ne vedevano solo le strisce fra un bottone e l'altro — che non sembrava un marchio, sembrava un difetto. Il rapporto fra i due lati resta quello (7,9) perché il corpo del testo segue l'altezza: stringere la sola larghezza avrebbe lasciato lettere da bottone grande in un bottone corto. Il pavimento è il nome più lungo, «Confronta ANNUNCIO - CV / Match 1-5 ⭐», che a misura piena vuole 379 px: ne restano quaranta di margine, e il banco lo sorveglia. Nella stessa sera cambia anche **l'aspetto** dei bottoni: da pillola blu col bordo giallo e il testo bianco contornato a **rettangolo appena smussato**, riempito di `FondoAzione` con la cornice di `BordoForte`, un filo di `SfondoContenuto` fra le due e il testo in `TestoPrimario` — quattro token già in tabella, nessun colore nuovo. La ragione è la stessa di tutto il resto: cambiato il fondo, sei blocchi blu davanti a uno stemma blu si contendevano lo sguardo, e la cosa più scura della schermata erano i bottoni invece del marchio. Ne segue anche che al passaggio del mouse il riempimento ora **si scurisce** invece di schiarirsi: su un azzurro già chiarissimo, schiarire non si vedrebbe. Lo stemma, infine, non si ferma dove cominciano i bottoni ma **risale nel respiro** e arriva poco sotto il sottotitolo: quel vuoto serve a staccare il nome dalla prima pillola, non al marchio, e lasciarglielo significava una striscia di avorio che non era di nessuno. *Il 2026-08-30, guardandolo a video, quattro voci cambiano nome: il primo bottone e la seconda voce della barra si chiamano ora **allo stesso modo** («Le mie candidature»), e così il quarto bottone e il quinto della barra («Confronta ANNUNCIO - CV»), perché portano allo stesso pannello e sentirseli chiamare in due modi diversi è il modo più economico di credere che siano due posti; il quarto passa da «Incolla annuncio — OFFLINE» a **«Confronta ANNUNCIO - CV / Match 1-5 ⭐»**, che è la stessa porta chiamata col nome di quel che ne esce invece che con quello di come ci si entra; il quinto si accorcia in «Elabora Documentazione». La destinazione non cambia per nessuno: il menu preme sempre il bottone della barra, e i cammini restano quelli.* |
+| **P0 Menu** | menu d'ingresso | **sei bottoni azzurri** su un fondo avorio, col nome del prodotto e il sottotitolo in cima (e nient'altro dietro, dal 2026-09-01 — v. in fondo a questa riga): «Le mie candidature» (P1), «Profilo e CV base» (P2), «Ricerca annuncio — ONLINE» (P3), «Confronta ANNUNCIO - CV / Match 1-5 ⭐» (P4), «Elabora Documentazione» (P6), «Impostazioni» (P8). *Nato il 2026-08-30.* È il pannello su cui l'applicazione **si apre**, e non sostituisce la barra: la precede. La barra resta e porta agli stessi posti; per tornare qui c'è la voce **«🎮 Menu»**, prima in barra — senza, dal menu si esce e non si rientra. **Il menu non sa dove portano i suoi bottoni**: preme quello corrispondente della barra, così i cammini restano quelli di prima per costruzione (dietro «Ricerca annuncio» c'è l'accensione del browser, dietro «Impostazioni» una finestra che rimonta il motore: riscriverli qui sarebbe stata una seconda strada destinata a divergere). Per la stessa ragione il menu **si spegne insieme alla barra** mentre l'AI lavora: gli stati non si riscrivono, si leggono dai bottoni. Lo sfondo, dal **2026-08-30 (sera)**, non è più il banner: si **dipinge**. Sono tre cose — l'avorio di `FondoMenu`, il **mega stemma** Aviolab dietro la colonna dei bottoni, e in cima le stesse due righe del banner (nome e sottotitolo), **centrate sull'asse** e senza il timbro che là sta a destra del nome. Il guadagno non è estetico: un fondo dipinto **segue la finestra**, mentre un'immagine può solo starci dentro o essere tagliata — e su una finestra panoramica il banner quasi quadrato lasciava blu ai lati. Il velo bianco resta e **li prende tutti e tre**: sull'avorio non si stende (`#FFFAF0` velato dà `#FFFDF8`, che è lo stesso colore, e il fondo va lasciato esatto) ma su quel che ci sta sopra — stemma, nome e sottotitolo insieme, perché sono tutti e tre sfondo e sfondo vuol dire stare dietro ai bottoni senza contendere. Tecnicamente: gli elementi si disegnano **a piena forza su una tela a parte**, e la tela si appoggia sull'avorio con l'opacità abbassata in una volta sola. Le due vie corte non funzionano — disegnare ciascuno con un colore già trasparente farebbe riaffiorare, dentro le lettere, il contorno nero sotto il riempimento bianco; un rettangolo bianco steso sopra tutto, com'era sul banner, schiarirebbe anche l'avorio. La colonna si centra ora nello spazio **sotto il nome**, che è l'erede della vecchia «zona dentro la cornice». Nella stessa sera i bottoni passano da **690×87 a 420×53**, ed è la stessa decisione vista dall'altra parte: con la colonna larga come prima lo scudo ci spariva sotto e se ne vedevano solo le strisce fra un bottone e l'altro — che non sembrava un marchio, sembrava un difetto. Il rapporto fra i due lati resta quello (7,9) perché il corpo del testo segue l'altezza: stringere la sola larghezza avrebbe lasciato lettere da bottone grande in un bottone corto. Il pavimento è il nome più lungo, «Confronta ANNUNCIO - CV / Match 1-5 ⭐», che a misura piena vuole 379 px: ne restano quaranta di margine, e il banco lo sorveglia. Nella stessa sera cambia anche **l'aspetto** dei bottoni: da pillola blu col bordo giallo e il testo bianco contornato a **rettangolo appena smussato**, riempito di `FondoAzione` con la cornice di `BordoForte`, un filo di `SfondoContenuto` fra le due e il testo in `TestoPrimario` — quattro token già in tabella, nessun colore nuovo. La ragione è la stessa di tutto il resto: cambiato il fondo, sei blocchi blu davanti a uno stemma blu si contendevano lo sguardo, e la cosa più scura della schermata erano i bottoni invece del marchio. Ne segue anche che al passaggio del mouse il riempimento ora **si scurisce** invece di schiarirsi: su un azzurro già chiarissimo, schiarire non si vedrebbe. Lo stemma, infine, non si ferma dove cominciano i bottoni ma **risale nel respiro** e arriva poco sotto il sottotitolo: quel vuoto serve a staccare il nome dalla prima pillola, non al marchio, e lasciarglielo significava una striscia di avorio che non era di nessuno. *Il 2026-08-30, guardandolo a video, quattro voci cambiano nome: il primo bottone e la seconda voce della barra si chiamano ora **allo stesso modo** («Le mie candidature»), e così il quarto bottone e il quinto della barra («Confronta ANNUNCIO - CV»), perché portano allo stesso pannello e sentirseli chiamare in due modi diversi è il modo più economico di credere che siano due posti; il quarto passa da «Incolla annuncio — OFFLINE» a **«Confronta ANNUNCIO - CV / Match 1-5 ⭐»**, che è la stessa porta chiamata col nome di quel che ne esce invece che con quello di come ci si entra; il quinto si accorcia in «Elabora Documentazione». La destinazione non cambia per nessuno: il menu preme sempre il bottone della barra, e i cammini restano quelli.* *E il **2026-09-01**, con la revisione di finalizzazione, il **mega stemma se ne va**: il fondo resta l'avorio con il nome e il sottotitolo, e il marchio torna a vivere nel solo pannello del logo (3.5). Stava **dietro i bottoni**, cioè dietro l'unica cosa che qui si deve guardare, e per quanto sbiadito era pur sempre uno sfondo con cui contendere. Due conseguenze da tenere presenti. La prima: la misura dei bottoni **resta 420×53**, ma non è più quella misura per la ragione che l'aveva decisa — a stringerli era stato lo scudo dietro, che non c'è più; il numero si tiene perché a video funziona, e il pavimento resta il nome più lungo. La seconda: il velo bianco adesso prende **due** cose e non tre, nome e sottotitolo, e la ragione è la stessa di prima — sono sfondo, e sfondo vuol dire stare dietro ai bottoni senza contendere.* |
 | **P2 Profilo** | scheda del profilo | tutte le sezioni del profilo JSON **campo per campo, modificabili**; bottoni: «IMPORTA CV DA UN FILE» (L2), «IMPORTA CV DA LINKEDIN» (L2), «COSTRUISCI IL TUO CV - DIALOGO GUIDATO» (L2), «Sessione di aggiornamento» (L2), «Genera 📄 CV-1 base» (L3), «Esporta backup» (L2), **«Salva profilo» (L1)** — è la sola porta da cui il profilo entra nell'archivio, anche quando arriva dal dialogo (cap. 12.2) — e **«ELIMINA PROFILO - DEFINITIVO» (L6)**, che è la porta opposta. *Dalla revisione adversariale (2026-08-09): il salvataggio **pota le voci mai riempite** (un «Aggiungi» lasciato vuoto non diventa un'esperienza fantasma nei prompt), le categorie della patente valgono solo con il «sì», e la scheda del testo letto compare solo finché il profilo mostrato è quello importato.* *A T5d (2026-08-14) l'import diventa **due bottoni** invece di uno, e ognuno dice da dove legge: il vecchio si chiama ora «da un file…», il nuovo «da un sito…». Il secondo non legge niente — **porta in P3**, dove vive il browser, e il pannello che lo accoglie dice cosa fare. La scelta della strada sta qui perché è qui che si costruisce il profilo ed è qui che la si cerca; l'atto sta là perché è là che c'è una pagina aperta. Sono spenti insieme, per la stessa ragione: senza chiave nessuna delle due strade arriva da nessuna parte, e mandare l'utente in fondo a un corridoio per dirglielo lì sarebbe scortese* *Il 2026-08-14 le **tre porte del profilo cambiano nome** (i nomi qui sopra sono i nuovi; la nota di T5d racconta com'erano quando sono nate): maiuscolo e più espliciti, perché sono la prima cosa che un utente nuovo guarda in questo pannello. Due conseguenze da tenere presenti. La prima: «IMPORTA CV DA LINKEDIN» **promette meno di quello che fa** — porta in P3, dove il browser legge qualunque pagina che racconti un percorso, e a T5d si era deciso apposta di non controllare che il sito fosse LinkedIn (cap. 06.7); il nome sceglie il caso d'uso vero, e a dire il resto resta il pannello che accoglie. La seconda: il bottone del dialogo è passato da 200 a **300 px** perché l'etichetta non ci stava, e la fila di sinistra si è allungata di altrettanto — il che peggiora la sovrapposizione a finestra stretta annotata in `in_sospeso.md` (3.4)* *Il 2026-08-14 compare **«ELIMINA PROFILO - DEFINITIVO» (L6)**, la porta opposta al salvataggio: manda via la cartella `profilo\` intera — profilo, storico, 📄 CV-1 base e i suoi file — e **non tocca le candidature**, che restano nella Home con il loro registro (cap. 11.5). Sta nella fascia delle azioni **con «Salva profilo», ma all'estremo opposto della fila**: è il solo bottone del pannello da cui non si torna indietro, e non deve stare sotto il dito di chi sta salvando. Prima di eseguire passa dalla `FinestraConfermaCritica` (3.4), che elenca cosa sparisce e cosa resta e vuole la parola `TrovaLavoro` scritta a mano; è acceso solo quando c'è davvero qualcosa da eliminare — un profilo su disco o delle correzioni nei campi — perché un bottone rosso che non ha niente da fare insegna solo a non fidarsi del colore. Quando l'eliminazione avviene, si svuota **tutta l'applicazione**: i campi e la scheda «Testo letto» di P2, il dialogo guidato di P5 (che altrimenti riproporrebbe il profilo appena cancellato), il 📄 CV-1 base in mostra in P6 — mai i documenti di una candidatura — e la Home rilegge* *A T7d (2026-08-18) «Genera 📄 CV-1 base» **genera solo la prima volta**: se un CV-1 base c'è già, porta in P6 e lo mostra. Il verbo dell'etichetta promette più di quel che fa, ed è di proposito — è la stessa scelta di «Genera CV + lettera» in P4, dove il bottone è la porta di quei documenti e non solo il comando che li crea; a rifarli, in tutti e due i casi, c'è «Rigenera», che lo dichiara e lo chiede* *Il 2026-08-19 «IMPORTA CV DA UN FILE» smette di partire dal nulla: se la cartella documenti è stata classificata (cap. 05.2) e il CV più recente esiste ancora, il pannello **lo propone per nome** in una domanda a tre uscite — «Sì, usa questo», «No, scelgo io un altro file», «Annulla». È la porta «qui c'è tutto» che il capitolo dei documenti prometteva: si **propone e non si prende**, perché la conferma umana resta il passo che decide, e l'esistenza del file si verifica **al momento di proporlo** — fra la classificazione e l'import quel CV può essere stato spostato o buttato. Nessun controllo nuovo nel pannello: è una finestra di sistema, e il layout di P2 resta quello validato a video a T3* *A T9a (2026-08-21) «Esporta backup» si accende e diventa **«Backup…»**: apre la finestra di backup e ripristino (F7, cap. 11.4), che tiene insieme le due metà della stessa funzione. L'etichetta perde il verbo perché il bottone non esporta soltanto, e un bottone che dicesse «Esporta» per poi offrire anche il ritorno indietro nasconderebbe metà di quel che fa. Prima di aprirla, le correzioni non salvate si fanno confermare: nel backup finisce il profilo che sta **su disco**, e un ripristino le sostituirebbe senza preavviso; chiusa la finestra dopo un ripristino, il pannello **rilegge il profilo** invece di continuare a mostrare quello di prima* *Il 2026-08-24, chiudendo i reperti del collaudo dal vivo, due cure che il pannello aspettava dal principio. La prima: in **sei delle diciotto caselle** — Ruolo, Azienda, Cosa facevo (informale), Competenza, Titolo, Anno — scrivere «abc» lasciava a video «cba». Sono esattamente le caselle che alimentano l'**etichetta di una riga d'elenco**: riscrivere quella riga con `Items(i) = …` non la modifica, la **toglie e la rimette**, e nel farlo ripristina la selezione — un `SelectedIndexChanged` che nessuno ha chiesto, prima con la riga assente (e i campi si svuotano) e poi con la riga tornata. Chi lo ascolta ricarica i campi sotto la mano che scrive, e ricaricare un campo riporta il cursore a zero: la lettera dopo cade a sinistra di quella prima. La rinomina adesso avviene **dentro la guardia `Riempiendo`**, la stessa che già zittiva i gestori quando a scrivere è il programma. La seconda: senza nessuna voce scelta le caselle della scheda erano **scrivibili ma senza destinazione** — il testo veniva buttato in silenzio, e il primo «Aggiungi» ripuliva la casella. Adesso sono **in sola lettura finché una voce non è scelta**, esattamente come «Elimina» è spento davanti a un elenco vuoto (3.8); i dati personali, che nel profilo non stanno in un elenco, restano scrivibili sempre* *Il 2026-08-30 il pannello guadagna una **quinta scheda, «📄 CV base»**: il profilo mostrato nella forma di un CV, **senza chiamare l'AI**. Si rifà a ogni battuta di tasto dal profilo che si sta correggendo — aggiungi un'esperienza e compare mentre la scrivi — perché non è salvata da nessuna parte: non è un documento, è un riflesso. Si può fare perché lo schema del CV base è quasi tutto **campi-fatto ricopiati** dal profilo (nome, recapiti, patente, ruolo, azienda, durata, competenze, formazione), e i due soli campi-prosa restano dichiaratamente vuoti: il `sommario` e le `descrizione` riformulate le scrive l'AI con «Genera 📄 CV-1 base», che è lì sotto. La differenza fra le due cose è precisamente **cosa ci mette il modello**. Impagina con lo stesso `Impaginazione.PaginaCv` del documento vero, e una riga di stato dice se il 📄 CV-1 dell'AI esiste, di quando è e se il profilo è cambiato dopo — **riferisce, non decide**: rigenerare resta una scelta dell'utente, com'è in P6 dal principio, perché quel CV potrebbe essere quello già spedito* |
 | **P3 Ricerca** | browser integrato | WebView2 a tutta area; sopra: barra con ricerche salvate (ComboBox), campo link, bottone **«Cattura annuncio»** (L1); sotto: ultima cattura con esito. *Costruito a T5a (2026-08-12), la barra di sopra è risultata di tre righe invece di una, e la cattura è scesa in fondo: **ricerche salvate** (menù + «Apri» + «Dimentica»); **la ricerca nuova** (menù «Cerca su» dei portali, «cosa», «dove», «Cerca», «Salva questa ricerca»); **la navigazione** («◀», «⟳», casella dell'indirizzo, «Vai»). «Cattura annuncio» sta nella fascia delle azioni in basso, accanto alla riga che racconta l'esito — dov'è il bottone principale in tutti gli altri pannelli. I tre comandi senza etichetta dichiarano il proprio nome accessibile: senza, per chi non vede lo schermo sarebbero anonimi. La prima pagina che si apre è **scritta da noi e non tocca la rete**: dice in tre righe come si usa il pannello, ed è l'unica navigazione che parte da sola.* *A T5d (2026-08-14) accanto alla cattura compare **«Importa CV da questa pagina» (L1)**, che legge la pagina aperta — di norma la propria pagina profilo — e la porta a P2. Sono due bottoni e non uno con due usi, perché il testo va in due direzioni diverse: uno all'analisi dell'annuncio, l'altro alla scheda del profilo. La pagina di casa guadagna il suo quarto punto, e la riga di stato dice quanti caratteri sono stati letti — è il solo modo che l'utente ha di accorgersi che alla strutturazione è andata poca roba prima di guardare un profilo dimezzato e crederlo intero* *Il 2026-08-30 l'avviso di R5 — «questa è la pagina con l'elenco, non un annuncio» — esce dalla riga di stato e diventa una **finestra a comparsa**, e dice una cosa che prima non diceva: come si apre il singolo annuncio, cioè **clic destro sul titolo e «Apri collegamento in una nuova finestra»** (che il pannello intercetta e apre qui dentro, cap. 06.5). Il motivo è di misura, non di tono: quel testo chiede sei righe e la riga di stato ne ha due, quindi arrivava tagliato — e la metà che si perdeva era proprio la via d'uscita. Nella riga di stato resta la versione corta, come traccia. È il primo avviso di questo pannello che si deve chiudere: gli altri restano dove stavano, perché dicono cos'è successo, non cosa fare.* |
 | **P4 Opportunità** | dettaglio candidatura | annuncio estratto, **stelle 0–5 grandi**, elenco giudizi (✓ ~ ✗ ?) con ⛔ sugli eliminatori, note di clamp/gate, lettura d'insieme; bottoni: «Brainstorm» (L2), «Genera CV+lettera» (L3), «Scarta» (L5). *Deciso aprendo T4 (2026-08-10): il pannello nasce con in cima una **fascia d'ingresso** — casella multiriga «incolla qui il testo dell'annuncio» e bottone «Analizza» (L3) — perché a T4 quella è l'**unica** porta da cui un annuncio entra: la cattura dal browser è T5 e il flusso C (cap. 12.3) la dà già come ripiego permanente, non provvisorio. A T5 la fascia non sparisce: si affianca alla cattura, e resta la strada di chi ha in mano un testo e basta. A cattura avvenuta la fascia si richiude, per non rubare spazio ai giudizi.* *Ed è andata così (T5b, 2026-08-12), con un di più che non era scritto: l'annuncio catturato in P3 **entra proprio in quella casella**, e si vede. Non c'erano due strade da tenere allineate — ce n'è una sola, e chi guarda può leggere il testo che è stato mandato all'AI, correggerlo e rilanciare* *E a T5c (2026-08-13) il pannello ha preso il suo stato: in cima, accanto alle stelle, la scheda dice a che punto è quella candidatura, e da dove è stata riaperta. **«Scarta» si accende**, con la conferma che spiega cosa succede davvero («non cancello niente: resta nella sua cartella e la ritrovi nella Home. Ma la do per chiusa, e da uno scarto non si torna indietro»); dopo, la scheda **resta a video** con i comandi spenti — sparire sarebbe stato togliere all'utente la cosa che ha appena guardato* *A **T7c** (2026-08-18) si accende anche **«Brainstorm»**, che stava lì spento da T4 con scritto per quale tappa. Le condizioni sono tre e ognuna dice qualcosa: serve un **confronto già fatto** (prima non ci sarebbe niente di cui parlare, e il prompt vuole i giudizi), serve l'**AI** — a differenza dei documenti, che si riaprono anche senza — e la candidatura non deve essere **scartata**, per la stessa ragione per cui non le si scrive più un CV. Premendolo si va in P5, che per l'occasione fa l'altro dei suoi due mestieri* *A **T9c** (2026-08-21) arrivano due gesti che mancavano. Il primo è **«Com'è andata…» (L2)**, accanto agli altri comandi: apre un menù con «In attesa — nessuna risposta», poi i tre esiti — Colloquio · Rifiutata · Assunto 🎉 — e la spunta su quello di adesso (cap. 07.3). È acceso **solo da «inviata» in poi**, perché prima non c'è niente che possa essere andato in un modo o nell'altro, e non chiede conferma: un esito si disfa con un secondo clic sullo stesso menù, e la conferma resta dov'è servita — sullo scarto. Il menù si apre **sopra** il bottone: da lì in giù finirebbe fuori dalla finestra. Il secondo gesto non è un bottone nuovo ma un mestiere in più di «Analizza», che sulla candidatura riaperta **ferma al solo annuncio** diventa **«Confronta»** e fa il secondo passo da solo — è il vicolo cieco trovato dal collaudo di T8 (oggi quelle candidature le sa creare solo il server MCP, cap. 09.3): l'annuncio era già strutturato e rileggerlo sarebbe costato una chiamata per riottenere quel che c'era. Un testo incollato nella casella ha la precedenza e il bottone torna «Analizza», perché chi scrive lì vuole un annuncio nuovo* |
@@ -532,44 +642,75 @@ Prefissi standard, nome semantico in PascalCase: `pnl` (Panel), `btn` (Button),
 - Operazioni AI in corso: indicatore nella barra di stato — che **compare per questo** e
   se ne va appena finito — + testo in streaming dove previsto (cap. 02); mai una
   finestra bloccata.
-- **Lo scudo di caricamento** *(dal 2026-08-30)*. I due segnali di prima erano entrambi
+- **L'indicatore dell'attesa, al centro dello schermo** *(dal 2026-08-30; **neutro** dal
+  2026-09-01)*. I due segnali di prima erano entrambi
   **piccoli**: la rotellina del puntatore, che si vede solo se il mouse è sopra la
   finestra e lo si sta guardando, e la riga che si muove in fondo alla fascia di stato,
   che è alta due righe in un angolo. Un'attesa di trenta secondi va detta anche a chi
-  guarda da lontano, o si è alzato: mentre l'AI lavora compare perciò lo **stemma
-  Aviolab, al centro dello schermo**, con sopra una ruota di dodici pallini d'argento che
-  gira — quello che si è sempre visto girare, disegnato invece che animato: i pallini
-  stanno fermi sul loro cerchio, e a girare è quale di loro è acceso.
-  - **La misura**: al massimo **due decimi** dello schermo in orizzontale e **due sesti**
-    in verticale. Sono due **limiti**, non due misure: lo scudo ha le sue proporzioni
-    (200 × 242, più alto che largo) e stirarlo per riempire esattamente un rettangolo che
-    non è il suo vorrebbe dire deformare il marchio — la sola cosa che il marchio non
-    tollera. Si prende perciò il più grande scudo **non deformato** che ci sta dentro
-    tutti e due: su 1920 × 1080 fanno 298 × 360 invece di 384 × 360.
-  - **È lo scudo dello sfondo**, lo stesso PNG del mega stemma del menu (cap. 03.6) e con
-    lo stesso conto — la tela si chiede in proporzione, perché attorno allo scudo c'è
-    dell'aria trasparente e chiederla della misura dello scudo lo farebbe più basso del
-    6%. Qui però non passa sotto nessun velo: deve **vedersi**.
+  guarda da lontano, o si è alzato: mentre l'AI lavora compare perciò, **al centro dello
+  schermo**, una **ruota di dodici pallini d'argento** che gira — quello che si è sempre
+  visto girare, disegnato invece che animato: i pallini stanno fermi sul loro cerchio, e a
+  girare è quale di loro è acceso — con sotto la barra che si riempie.
+  - **Senza marchio** *(2026-09-01)*. Fra il 30 agosto e questa data sotto la ruota c'era
+    lo **stemma Aviolab**, grande un terzo dello schermo, e questo punto si chiamava «lo
+    scudo di caricamento». È stato tolto: il marchio vive nel solo pannello del logo
+    (3.5), e un'attesa non è il posto in cui firmarsi — chi guarda sta aspettando, non
+    ammirando. Lo stemma qui faceva due danni: prendeva il centro dello schermo con
+    qualcosa che dell'attesa non dice niente, e obbligava la ruota a stargli addosso, dove
+    i pallini d'argento dovevano difendersi dal blu, dal bianco e dal giallo delle stelle.
+    Adesso la ruota sta sul suo sfondo e basta. *(Nel codice il nome della classe è rimasto
+    quello dei giorni dello stemma: rinominarla toccherebbe finestra, banco e finestra
+    principale, ed è un giro a parte.)*
+  - **La misura**: al massimo **due decimi** dello schermo in orizzontale e **un quarto**
+    in verticale. Sono due **limiti**, non due misure: la figura ha le sue proporzioni — la
+    ruota è tonda, e la barra le sta sotto larga quanto tutto — e si prende la più grande
+    che ci sta dentro tutti e due. Su uno schermo comune, 1920 × 1080, fanno **316 × 269**.
+    *Il limite verticale era **due sesti** finché misurava il solo stemma, e il complesso lo
+    sforava perché la barra si aggiungeva dopo (297 × 397 contro i 360 dichiarati). Adesso
+    vale per **tutto quel che si vede**, ed è sceso a un quarto per una ragione precisa:
+    tolto lo stemma la figura si è abbassata di molto, e col vecchio limite sarebbe stata la
+    sola larghezza a comandare — l'indicatore sarebbe cresciuto di un terzo, e con lui la
+    barra che era stata tarata guardandola.*
+  - **Compare solo se l'attesa è un'attesa** *(2026-09-01)*: la finestra si apre dopo
+    **300 ms** di lavoro, e se la chiamata si chiude prima non si vede affatto. Non tutte le
+    chiamate all'AI durano mezzo minuto, e una figura grande un quarto dello schermo che
+    compare e sparisce in due decimi di secondo non si legge come «sto lavorando»: si legge
+    come un lampo, cioè come un difetto. Trecento millisecondi sono la misura sotto la quale
+    chi guarda non ha ancora fatto in tempo a chiedersi se il programma abbia sentito il
+    clic. Spegnere invece è immediato. Una soglia **già in corsa** non si riavvia, per la
+    stessa ragione per cui la barra non ricomincia da zero (v. sotto): chi accende
+    l'indicatore è la riga che spegne la barra di navigazione, e quella passa di lì più
+    volte nella stessa attesa.
+  - **Niente riguardo per la preferenza di sistema «riduci il movimento»**, ed è una
+    decisione e non una dimenticanza *(2026-09-01)*: la ruota è il **solo** movimento
+    dell'applicazione — non ci sono transizioni, comparse, scorrimenti animati — ed è anche
+    l'unica cosa che dice che il programma non è bloccato. Onorare la preferenza qui
+    vorrebbe dire spegnere l'unico segnale d'attesa per chi l'ha attivata, o inventare per
+    lui un secondo indicatore fermo: due strade che costano più di quel che rendono su un
+    movimento lento, piccolo e senza lampeggi.
   - **Non ruba niente**: non prende il fuoco, non compare in Alt-Tab e soprattutto **non
     intercetta i clic** — mentre l'AI lavora il bottone «Annulla» dev'essere premibile, ed
-    è proprio lì sotto. È una finestra a strati (*layered*), non un controllo, perché lo
-    scudo ha i bordi morbidi e il fondo trasparente: appoggiarlo su una finestra normale
-    lascerebbe attorno al disegno l'alone del colore reso invisibile.
+    è proprio lì sotto. È una finestra a strati (*layered*), non un controllo, perché il
+    disegno ha i bordi morbidi e il fondo trasparente: appoggiarlo su una finestra normale
+    lascerebbe attorno l'alone del colore reso invisibile.
   - **Sta sopra lo schermo di chi guarda**, non «sul primo»: con due monitor il centro
     dello schermo è il centro di quello dove sta la finestra principale.
-  - **Trenta pixel più in alto del centro** *(chiesti da Mirco il 2026-08-31, guardandolo
-    a video: prima venti, poi altri dieci quando sotto lo scudo è arrivata la barra — un
-    complesso più alto pesa più in basso, e per restare dov'era all'occhio deve salire)*. Non è una correzione di un conto sbagliato — il centro geometrico era esatto —
-    ma di come lo legge l'occhio: una figura appesa esattamente a metà di un rettangolo
-    sembra cadere verso il basso. L'alzata vale per il **complesso** — scudo, ruota e,
-    dal 31 agosto, barra: si sposta la finestra, non il disegno dentro di lei, o la ruota
-    si scollerebbe dallo scudo. *Da quando sotto c'è la barra il complesso è alto 397
-    pixel, cioè un numero dispari, e «la metà» sono due pixel diversi: l'aria che avanza
-    si divide arrotondando per eccesso, o il centro cadrebbe a ventun pixel dal centro
-    dello schermo invece che a venti.*
-  - **La barra che si riempie** *(dal 2026-08-31, chiesta da Mirco)*. Sotto lo scudo,
-    **larga esattamente quanto lui**, spessa il 7,4% di quella larghezza — ventidue pixel
-    su uno schermo comune — e staccata dal suo piede del 7%: misure in frazione e non in
+  - **Venti pixel più in alto del centro.** Non è la correzione di un conto sbagliato — il
+    centro geometrico è esatto — ma di come lo legge l'occhio: una figura appesa
+    esattamente a metà di un rettangolo sembra cadere verso il basso. L'alzata vale per il
+    **complesso** — ruota e barra insieme: si sposta la finestra, non il disegno dentro di
+    lei, o la barra scivolerebbe addosso alla ruota. *Il numero è stato **rifatto** quando
+    lo stemma se n'è andato, non lasciato dov'era. I trenta pixel chiesti da Mirco il
+    2026-08-31 guardando a video valevano per un complesso alto 397 px, ed erano il 7,6%
+    della sua altezza; quello di oggi è alto 269, e la stessa frazione fa venti. Che venti
+    sia anche il numero scelto la prima volta, quando sotto lo stemma non c'era ancora la
+    barra, è una conferma e non la ragione. Resta in pixel e non in frazione perché è un
+    numero deciso **guardando**, e va riguardato: il conto dice da dove ripartire, non che
+    sia giusto.*
+  - **La barra che si riempie** *(dal 2026-08-31, chiesta da Mirco)*. Sotto la ruota,
+    **larga quanto tutto l'indicatore** — la ruota no, ed è quel che le dà un principio e
+    una fine — spessa il 7,4% di quella larghezza, **ventitré pixel** su uno schermo
+    comune, e staccata dal piede della ruota del 7%: misure in frazione e non in
     pixel, o su un monitor 4K sarebbero un filo di capello. *(Lo spessore è passato dal
     5,5% al 6,5% al 7,4% nella stessa sera del 31 agosto, guardando la barra a video:
     quanto dev'essere spessa perché si veda da lontano non lo dice nessun conto. Che
@@ -594,18 +735,50 @@ Prefissi standard, nome semantico in PascalCase: `pnl` (Panel), `btn` (Button),
     trentacinque, il 92% a un minuto — i numeri che Mirco ha scelto vedendoli scritti).
     L'ultimo 5% lo riempie il **fatto**: l'AI ha risposto. Allora la barra scatta a uno,
     **resta piena tre battiti** — un quarto di secondo scarso, o quel compimento non lo
-    vedrebbe nessuno — e sparisce con lo scudo.
-  - **Un'attesa già in corso non fa ricominciare la barra.** Chi accende lo scudo è la
+    vedrebbe nessuno — e sparisce con la ruota.
+  - **Un'attesa già in corso non fa ricominciare la barra.** Chi accende l'indicatore è la
     stessa riga che spegne la barra di navigazione, e quella passa di lì più volte nella
     stessa attesa: con la sola ruota non si vedeva — un pallino vale l'altro — mentre una
     barra che torna a zero a metà strada non verrebbe più creduta.
   - Il filo che lo accende è **uno solo** — lo stesso che spegne la barra di navigazione
     (cap. 02.6) e fa parlare la fascia di stato — così i tre segnali non possono
-    smentirsi a vicenda.
+    smentirsi a vicenda. *E dal **2026-09-01** quel filo raccoglie anche l'**import del CV**
+    in P2, che era l'ultima chiamata all'AI a passare per conto proprio: lì la lettura di un
+    PDF può durare quanto un confronto, e l'unico segno era il cursore che cambia forma.
+    Un filo unico che ne lascia fuori uno non è un filo unico: è un filo con un'eccezione,
+    e l'eccezione è sempre quella che si dimentica.*
+- **Un'attesa lunga si annulla dal comando che l'ha avviata** *(2026-09-01)*. Vale ora anche
+  per P6 e P7, che erano rimasti gli ultimi a farsi aspettare senza via d'uscita: mentre
+  l'AI scrive, «Rigenera» e «⚠ Rigenera la lettera» in P6 e «Fallo riscrivere» in P7
+  diventano **«Annulla»** e fermano il lavoro. È il modo di P4 e di P2, e la ragione per cui
+  l'annulla sta **in quel** bottone e non in uno nuovo è che lì la mano sta già: chi ha
+  appena premuto guarda ancora il punto in cui ha premuto. Resta fuori il turno del dialogo
+  guidato (P5), per la ragione di sempre — lì si interromperebbe una **mossa** della
+  macchina, non una risposta (cap. 02.6).
 - Errori: messaggio in italiano nel contesto in cui è avvenuto (non solo un popup),
   sempre con un'azione possibile («Riprova», «Salta»). *Dal 2026-08-09 c'è anche
   l'ultima rete: un gestore globale delle eccezioni in italiano (in `Programma`),
   perché nemmeno l'imprevisto vero deve mostrare la finestra di crash di .NET.*
+- **Un guasto porta la parola, non solo il colore** *(2026-09-01)*. Le righe di stato che
+  dicono che qualcosa non va cominciano con **«Errore — »** o **«Attenzione — »**, e le due
+  parole stanno in un posto solo (il modulo `Segnalazioni`), portate nelle righe dai metodi
+  che mettono insieme parola e colore in un gesto unico — così non esiste il caso di una
+  riga rossa senza parola. Prima il guasto si distingueva dallo stato per il **solo colore**,
+  e in P3 nemmeno per quello: là tutto finiva nel grigio delle didascalie, e «Non sono
+  riuscita a salvare le ricerche» pesava quanto «Ricerca salvata». Un colore che porta da
+  solo un'informazione è ciò che WCAG 1.4.1 chiede di non fare, e la ragione non è formale:
+  c'è chi i due rossi non li distingue, chi legge con un lettore di schermo, chi guarda lo
+  schermo di traverso al sole.
+  Le **parole sono due** perché le righe rosse non raccontano tutte lo stesso fatto. Alcune
+  dicono che qualcosa **è andato storto** — un file che non si scrive, l'AI che risponde
+  male, una pagina che non si legge — e quelle sono errori. Altre dicono che qualcosa
+  **manca o non torna** prima ancora di provare: la chiave API che non c'è, un backup
+  rimesso solo in parte, una bozza scritta in un'altra lingua. Chiamare «Errore» la mancanza
+  della chiave sarebbe una bugia — non darla è una risposta legittima (cap. 11.3) — e dare
+  la stessa parola a due fatti diversi la svuota. Il colore resta lo stesso: per l'occhio la
+  gravità non cambia, cambia di che cosa si parla. *E sono parole e non icone per la lezione
+  già pagata dalla barra (3.4): i controlli li disegna GDI, che le emoji a colori non le sa
+  fare, e un lettore di schermo legge una parola invece di annunciare «segno di attenzione».*
 - **I bottoni delle tappe non ancora arrivate si vedono, spenti, con un tooltip che dice
   in che tappa arriveranno** — non si nascondono. Chi guarda l'applicazione a metà strada
   deve capire dove sta andando, e un bottone che sparisce e ricompare è più confondente di
