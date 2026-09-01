@@ -32,9 +32,9 @@ suona bene.
 questo programma, o una registrazione da qualche parte.
 
 Il PDF viene stampato dal motore **WebView2**, che in Windows 11 c'è già ed è aggiornato dal
-sistema. Se su un PC particolare mancasse, il programma non muore: te lo dice all'avvio, ti dà
-il link ufficiale di Microsoft per installarlo, e tutto quello che non lo usa continua a
-funzionare.
+sistema. Se su un PC particolare mancasse, il programma non muore: te lo dice la prima volta
+che serve — stampando un PDF, o aprendo la Ricerca — con il link ufficiale di Microsoft per
+installarlo, e tutto quello che non lo usa continua a funzionare.
 
 ---
 
@@ -66,9 +66,9 @@ Da lì in avanti la barra in alto è tutto il programma:
 | 🎮 **Menu** | la pagina d'ingresso: le sei cose che il programma sa fare, una per bottone |
 | 🏠 **Le mie candidature** | a che punto sei, e cosa conviene fare adesso |
 | 👤 **Profilo** | chi sei: si aggiorna quando vuoi, e ogni versione resta nello storico |
-| 🔍 **Ricerca** | trova annunci sui portali, o incolla il testo di uno che hai già |
-| **Confronta ⭐ ANNUNCIO - CV** | il confronto, le stelle, e la decisione se candidarsi |
-| 📄 **Documenti** | CV, lettera ed email: si rileggono, si correggono a mano, si salvano |
+| 🔍 **Ricerca** | trova annunci sui portali, o incolla il link di uno che hai già |
+| **Confronta ★ ANNUNCIO - CV** | il confronto, le stelle, e la decisione se candidarsi — qui si incolla anche il testo di un annuncio che hai già |
+| ▤ **Documenti** | CV, lettera ed email: si rileggono, si correggono a mano, si salvano |
 | ⚙ **Impostazioni** | la chiave, le preferenze, il backup, quanto hai speso |
 
 Il **Menu** e la barra portano nelle stesse stanze: la barra è sempre lì mentre lavori, il menu
@@ -155,7 +155,7 @@ renderebbe facile.
 
 ## Il backup
 
-Da *Impostazioni → Backup e ripristino*. Puoi salvare **solo il profilo** — con il suo storico
+Da *Impostazioni → Backup…* (si apre la finestra «Backup e ripristino»). Puoi salvare **solo il profilo** — con il suo storico
 e il CV base — oppure **tutto**: profilo, registro e candidature. Esce un **unico file `.json`**
 che puoi mettere dove vuoi — un altro disco, una chiavetta, il cloud.
 
@@ -168,8 +168,8 @@ utente di Windows: su un altro PC non servirebbe a niente) e il **diario tecnico
 che non è un tuo dato. I documenti già prodotti — i `.docx`, i `.pdf`, i `.eml` — sono file
 normali dentro le cartelle delle candidature: si copiano come qualunque altro file.
 
-Se vuoi ricominciare da zero, sempre dalle Impostazioni c'è **«Elimina tutto»**: chiede
-conferma scrivendo una parola, perché è un gesto che non si disfa.
+Se vuoi ricominciare da zero, sempre dalle Impostazioni c'è **«ELIMINA TUTTI I DATI»**:
+chiede conferma scrivendo una parola, perché è un gesto che non si disfa.
 
 ---
 

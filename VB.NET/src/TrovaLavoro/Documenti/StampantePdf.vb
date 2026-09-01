@@ -158,7 +158,9 @@ Namespace Documenti
                 ' mancare: l'app non muore e lo dice, perché il DOCX resta disponibile.
                 Throw New ErroreStampa(CausaStampa.MotoreAssente,
                     "Per creare il PDF serve il componente WebView2 di Windows, che su questo " &
-                    "computer non c'è. Il documento in formato Word è stato scritto lo stesso.", ex)
+                    "computer non c'è: si scarica dal sito ufficiale Microsoft " &
+                    "(https://developer.microsoft.com/microsoft-edge/webview2/). " &
+                    "Il documento in formato Word è stato scritto lo stesso.", ex)
 
             Catch ex As ErroreBrowser
                 ' Il motore c'è ma non si è acceso: il ripiego è lo stesso, e vale la pena

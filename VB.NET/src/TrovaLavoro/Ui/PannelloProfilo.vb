@@ -1480,7 +1480,8 @@ Public Class PannelloProfilo
     Private Sub DichiaraLeTappeCheMancano()
 
         _suggerimenti.SetToolTip(btnAggiornamento,
-            "La sessione di aggiornamento del profilo arriva più avanti (flusso D).")
+            "La sessione di aggiornamento del profilo è rimandata a una versione futura: " &
+            "intanto il profilo si aggiorna da questa scheda, campo per campo.")
 
         _suggerimenti.SetToolTip(btnEsportaBackup,
             "Porta via i tuoi dati in un file .json, o rimettili al loro posto da un backup.")

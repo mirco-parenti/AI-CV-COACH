@@ -231,8 +231,9 @@ Public Class PannelloRicerca
 
         Catch ex As ErroreBrowser When ex.MotoreAssente
             FuoriUso("Per cercare gli annunci serve il componente WebView2 di Windows, che su " &
-                     "questo computer non c'è. Puoi comunque incollare il testo di un annuncio " &
-                     $"nel pannello «{NomiUi.Confronto}».",
+                     "questo computer non c'è: si scarica dal sito ufficiale Microsoft " &
+                     "(https://developer.microsoft.com/microsoft-edge/webview2/). Puoi comunque " &
+                     $"incollare il testo di un annuncio nel pannello «{NomiUi.Confronto}».",
                      unGuasto:=False)
             Return
 

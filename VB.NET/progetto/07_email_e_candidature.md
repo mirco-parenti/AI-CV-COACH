@@ -133,9 +133,14 @@ risponde alla domanda «a che punto sono?».
 
 ```
 nuova ──► interessante ──► generata ──► inviata ──► esito
-  │              │                     (colloquio · rifiutata · assunto 🎉)
-  └──► scartata ◄┘
+  │              │             │       (colloquio · rifiutata · assunto 🎉)
+  └──► scartata ◄┴─────────────┘
 ```
+
+*(La freccia da `generata` mancava al disegno e c'è sempre stata nel codice, che la
+consente deliberatamente e la documenta — `StatoOpportunita.vb` — perché si scarta
+anche una candidatura coi documenti già scritti: allineata il 2026-09-01 dalla
+revisione di finalizzazione.)*
 
 *Gli esiti qui elencati erano quattro fino a **T9c** (2026-08-21): «in attesa» è uscito
 perché è già lo stato `inviata`, e nel menù è rimasto come il modo di **togliere** un
