@@ -269,11 +269,16 @@ Partial Class PannelloEmail
         '
         'btnHoSpedito
         '
+        ' L'ordine col tasto Tab segue quello dell'occhio, da sinistra a destra: torna ai
+        ' documenti, fallo riscrivere, scegli gli allegati, dichiara la spedizione, prepara
+        ' l'email. Fino al 2026-09-01 questo bottone e «Documenti da allegare…» portavano
+        ' lo stesso numero, e con due indici uguali a decidere è l'ordine con cui i
+        ' controlli sono stati aggiunti — cioè nulla che si veda guardando la fascia.
         Me.btnHoSpedito.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnHoSpedito.Location = New System.Drawing.Point(724, 12)
         Me.btnHoSpedito.Name = "btnHoSpedito"
         Me.btnHoSpedito.Size = New System.Drawing.Size(190, 32)
-        Me.btnHoSpedito.TabIndex = 2
+        Me.btnHoSpedito.TabIndex = 3
         Me.btnHoSpedito.Text = "L'ho spedita"
         '
         'btnPreparaEmail
@@ -282,7 +287,7 @@ Partial Class PannelloEmail
         Me.btnPreparaEmail.Location = New System.Drawing.Point(926, 12)
         Me.btnPreparaEmail.Name = "btnPreparaEmail"
         Me.btnPreparaEmail.Size = New System.Drawing.Size(180, 32)
-        Me.btnPreparaEmail.TabIndex = 3
+        Me.btnPreparaEmail.TabIndex = 4
         Me.btnPreparaEmail.Text = "Prepara l'email"
         '
         'PannelloEmail

@@ -80,9 +80,17 @@ Public Class FinestraDocumenti
             "Gli attestati compariranno fra gli allegati proposti quando prepari un'email — sempre da spuntare, " &
             "nessun file parte da solo."
 
-        lblCartella.Text = If(String.IsNullOrWhiteSpace(_raccolta.Cartella),
-                              "Nessuna cartella scelta.",
-                              $"Cartella: {_raccolta.Cartella}")
+        ' Un elenco vuoto, da solo, non dice se la cartella è quella sbagliata o se lì
+        ' dentro non c'era niente da riconoscere: la riga sopra la lista lo dichiara, e i
+        ' due comandi per rimediare — rileggere e cambiare cartella — sono già lì sotto.
+        If String.IsNullOrWhiteSpace(_raccolta.Cartella) Then
+            lblCartella.Text = "Nessuna cartella scelta."
+        ElseIf _raccolta.Documenti.Count = 0 Then
+            lblCartella.Text = $"Cartella: {_raccolta.Cartella}" & vbLf &
+                               "Nessun documento riconosciuto in questa cartella."
+        Else
+            lblCartella.Text = $"Cartella: {_raccolta.Cartella}"
+        End If
 
         For Each categoria As CategoriaDocumento In Categorie
             cmbCategoria.Items.Add(DocumentoClassificato.ComeSiLegge(categoria))

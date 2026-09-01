@@ -61,7 +61,7 @@ Partial Class FinestraConfermaCritica
         '
         'txtParola
         '
-        Me.txtParola.Location = New System.Drawing.Point(14, 154)
+        Me.txtParola.Location = New System.Drawing.Point(14, 153)
         Me.txtParola.Name = "txtParola"
         Me.txtParola.Size = New System.Drawing.Size(260, 23)
         Me.txtParola.TabIndex = 3
@@ -69,7 +69,7 @@ Partial Class FinestraConfermaCritica
         'btnAzione
         '
         Me.btnAzione.Enabled = False
-        Me.btnAzione.Location = New System.Drawing.Point(320, 196)
+        Me.btnAzione.Location = New System.Drawing.Point(320, 190)
         Me.btnAzione.Name = "btnAzione"
         Me.btnAzione.Size = New System.Drawing.Size(160, 32)
         Me.btnAzione.TabIndex = 4
@@ -77,7 +77,7 @@ Partial Class FinestraConfermaCritica
         '
         'btnAnnulla
         '
-        Me.btnAnnulla.Location = New System.Drawing.Point(492, 196)
+        Me.btnAnnulla.Location = New System.Drawing.Point(492, 190)
         Me.btnAnnulla.Name = "btnAnnulla"
         Me.btnAnnulla.Size = New System.Drawing.Size(110, 32)
         Me.btnAnnulla.TabIndex = 5
@@ -85,7 +85,7 @@ Partial Class FinestraConfermaCritica
         '
         'FinestraConfermaCritica
         '
-        Me.ClientSize = New System.Drawing.Size(620, 242)
+        Me.ClientSize = New System.Drawing.Size(620, 236)
         Me.Controls.Add(Me.lblTitolo)
         Me.Controls.Add(Me.lblSpiegazione)
         Me.Controls.Add(Me.lblRichiesta)

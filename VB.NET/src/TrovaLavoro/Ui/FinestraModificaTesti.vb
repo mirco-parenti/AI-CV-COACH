@@ -897,7 +897,13 @@ Public Class FinestraModificaTesti
                 lblModifica.Text = $"«{scelta.Etichetta}» viene dal profilo: qui puoi solo toglierla " &
                                    "da questo documento."
             Else
-                lblModifica.Text = "Scegli una riga dall'elenco."
+                ' Con l'elenco vuoto non c'è nessuna riga da scegliere: chiederlo lo stesso
+                ' manda a cercare qualcosa che non c'è. Un documento senza campi di prosa e
+                ' senza voci non è un errore — è un documento che non ha niente da
+                ' riscrivere, e va detto (v. il costruttore).
+                lblModifica.Text = If(lvwCampi.Items.Count = 0,
+                                      "Questo documento non ha testi da riscrivere.",
+                                      "Scegli una riga dall'elenco.")
             End If
 
         Finally

@@ -144,7 +144,7 @@ Partial Class PannelloHome
         Me.lblContatori.ForeColor = StileApp.TestoPrimario
         Me.lblContatori.Location = New System.Drawing.Point(0, 6)
         Me.lblContatori.Name = "lblContatori"
-        Me.lblContatori.Size = New System.Drawing.Size(620, 20)
+        Me.lblContatori.Size = New System.Drawing.Size(660, 20)
         Me.lblContatori.TabIndex = 0
         '
         'lblPromemoria
@@ -231,6 +231,11 @@ Partial Class PannelloHome
         '
         'colMatch
         '
+        ' Il punteggio è un numero, e i numeri si leggono incolonnati a destra come la
+        ' data dell'ultima colonna. Windows però tiene la prima colonna di una lista
+        ' sempre allineata a sinistra — WinForms rimette Left da sé appena si prova ad
+        ' assegnare altro — e riordinare le colonne per aggirarlo costerebbe la colonna
+        ' d'apertura della coda: qui resta com'è, e la nota è la sua spiegazione.
         Me.colMatch.Text = "Match"
         Me.colMatch.Width = 130
         '
@@ -256,7 +261,10 @@ Partial Class PannelloHome
         '
         'colQuando
         '
+        ' Una data è un numero incolonnato: allineata a destra, giorni e ore si leggono
+        ' uno sotto l'altro invece di ballare con la lunghezza del testo accanto.
         Me.colQuando.Text = "Aggiornata"
+        Me.colQuando.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         Me.colQuando.Width = 130
         '
         'pnlAzioni

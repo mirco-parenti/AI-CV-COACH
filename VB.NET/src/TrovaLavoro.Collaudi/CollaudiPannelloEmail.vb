@@ -1112,6 +1112,35 @@ Namespace Ui
 
         End Sub
 
+        <TestMethod>
+        Public Sub IlTastoTabPercorreLaFasciaComeLaLeggeLOcchio()
+
+            ' Fino al 2026-09-01 «Documenti da allegare…» e «L'ho spedita» portavano lo
+            ' stesso TabIndex: con due indici uguali a decidere è l'ordine in cui i
+            ' controlli sono stati aggiunti, che non si vede guardando la fascia — e chi
+            ' percorre l'applicazione col Tab si ritrova dall'altra parte dello schermo.
+            Using pannello As New PannelloEmail()
+
+                pannello.Width = 1890
+                pannello.ImpostaIngombroLogo(New Size(261, 188))
+
+                Dim fascia As Panel = DirectCast(
+                    pannello.Controls.Find("pnlAzioni", searchAllChildren:=True).Single(), Panel)
+
+                Dim inFila As List(Of Button) = fascia.Controls.OfType(Of Button)().
+                    OrderBy(Function(b) b.Top).ThenBy(Function(b) b.Left).ToList()
+
+                Assert.HasCount(5, inFila, "i cinque comandi della fascia")
+
+                For posto As Integer = 1 To inFila.Count - 1
+                    Assert.IsGreaterThan(inFila(posto - 1).TabIndex, inFila(posto).TabIndex,
+                                         $"«{inFila(posto).Text}» viene col Tab dopo «{inFila(posto - 1).Text}»")
+                Next
+
+            End Using
+
+        End Sub
+
         Private Shared Function PoolInesistente() As String
             Return Path.Combine(Path.GetTempPath(), "pool-inesistente")
         End Function

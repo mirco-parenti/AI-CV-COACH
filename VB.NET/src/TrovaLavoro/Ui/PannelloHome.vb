@@ -438,7 +438,14 @@ Public Class PannelloHome
     Private Sub MostraIContatori(quanteSeNeVedono As Integer)
 
         If _registro Is Nothing OrElse _registro.Voci.Count = 0 Then
-            lblContatori.Text = "Nessuna candidatura, per ora."
+            ' Una coda vuota che dice solo di essere vuota lascia fermo chi la guarda: qui
+            ' si dice anche il gesto per cominciare, e sono i due modi che ci sono. Il
+            ' comando si nomina come lo porta scritto il bottone qui sotto; la scheda del
+            ' confronto si nomina con la prima parola sola — il suo nome per esteso
+            ' (v. NomiUi.Confronto) manderebbe questa riga a capo, e la
+            ' fascia dei filtri è alta una riga.
+            lblContatori.Text = $"Nessuna candidatura, per ora. Comincia da «{btnNuovaRicerca.Text}», " &
+                                "o incolla un annuncio in «Confronta»."
             Return
         End If
 

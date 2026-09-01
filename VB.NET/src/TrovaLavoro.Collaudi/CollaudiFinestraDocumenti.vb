@@ -116,6 +116,21 @@ Namespace Ui
         End Sub
 
         <TestMethod>
+        Public Sub UnaCartellaSenzaDocumentiLoDiceInvecediMostrareUnaListaMuta()
+            ' Un elenco vuoto, da solo, non distingue «la cartella è quella sbagliata» da
+            ' «lì dentro non c'era niente da riconoscere»: le due cose si rimediano con due
+            ' bottoni diversi, e chi guarda deve sapere quale.
+            Using finestra As New FinestraDocumenti(New RaccoltaDocumenti With {.Cartella = "C:\vuota"})
+
+                Assert.IsEmpty(Lista(finestra).Items, "non c'è niente da confermare")
+                Assert.Contains("C:\vuota", Etichetta(finestra, "lblCartella").Text,
+                                "la cartella guardata resta scritta")
+                Assert.Contains("Nessun documento riconosciuto", Etichetta(finestra, "lblCartella").Text,
+                                "e l'elenco vuoto porta la sua ragione")
+            End Using
+        End Sub
+
+        <TestMethod>
         Public Sub SenzaRaccoltaNonSiApre()
             ' Una finestra che chiede di confermare il niente non ha senso, e il difetto
             ' sarebbe di chi l'ha aperta.

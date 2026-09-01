@@ -35,6 +35,7 @@ Partial Class PannelloRicerca
         Me.btnSalvaRicerca = New System.Windows.Forms.Button()
         Me.btnIndietro = New System.Windows.Forms.Button()
         Me.btnRicarica = New System.Windows.Forms.Button()
+        Me.lblIndirizzo = New System.Windows.Forms.Label()
         Me.txtIndirizzo = New System.Windows.Forms.TextBox()
         Me.btnVai = New System.Windows.Forms.Button()
         Me.pnlCorpo = New System.Windows.Forms.Panel()
@@ -104,6 +105,7 @@ Partial Class PannelloRicerca
         Me.pnlComandi.Controls.Add(Me.btnSalvaRicerca)
         Me.pnlComandi.Controls.Add(Me.btnIndietro)
         Me.pnlComandi.Controls.Add(Me.btnRicarica)
+        Me.pnlComandi.Controls.Add(Me.lblIndirizzo)
         Me.pnlComandi.Controls.Add(Me.txtIndirizzo)
         Me.pnlComandi.Controls.Add(Me.btnVai)
         Me.pnlComandi.Dock = System.Windows.Forms.DockStyle.Top
@@ -242,6 +244,20 @@ Partial Class PannelloRicerca
         Me.btnRicarica.TabIndex = 13
         Me.btnRicarica.Text = "⟳"
         '
+        'lblIndirizzo
+        '
+        ' L'etichetta della casella, non solo il suo suggerimento: quel testo sparisce
+        ' appena si incolla un link, e da lì in poi la riga più larga della fascia non
+        ' direbbe più che cosa contiene. Porta lo stesso nome che la casella dichiara a
+        ' chi non vede lo schermo (AccessibleName), come «cosa» e «dove» qui sopra.
+        Me.lblIndirizzo.Font = StileApp.FontDidascalia
+        Me.lblIndirizzo.ForeColor = StileApp.TestoSecondario
+        Me.lblIndirizzo.Location = New System.Drawing.Point(96, 87)
+        Me.lblIndirizzo.Name = "lblIndirizzo"
+        Me.lblIndirizzo.Size = New System.Drawing.Size(62, 18)
+        Me.lblIndirizzo.TabIndex = 14
+        Me.lblIndirizzo.Text = "Indirizzo"
+        '
         'txtIndirizzo
         '
         Me.txtIndirizzo.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
@@ -249,11 +265,11 @@ Partial Class PannelloRicerca
         Me.txtIndirizzo.AccessibleName = "Indirizzo"
         Me.txtIndirizzo.BackColor = StileApp.FondoCasella
         Me.txtIndirizzo.Font = StileApp.FontDatiTecnici
-        Me.txtIndirizzo.Location = New System.Drawing.Point(96, 84)
+        Me.txtIndirizzo.Location = New System.Drawing.Point(160, 84)
         Me.txtIndirizzo.Name = "txtIndirizzo"
         Me.txtIndirizzo.PlaceholderText = "…oppure incolla qui il link di un annuncio"
-        Me.txtIndirizzo.Size = New System.Drawing.Size(920, 23)
-        Me.txtIndirizzo.TabIndex = 14
+        Me.txtIndirizzo.Size = New System.Drawing.Size(856, 23)
+        Me.txtIndirizzo.TabIndex = 15
         '
         'btnVai
         '
@@ -261,7 +277,7 @@ Partial Class PannelloRicerca
         Me.btnVai.Location = New System.Drawing.Point(1026, 80)
         Me.btnVai.Name = "btnVai"
         Me.btnVai.Size = New System.Drawing.Size(80, StileApp.BottoneStandard.Height)
-        Me.btnVai.TabIndex = 15
+        Me.btnVai.TabIndex = 16
         Me.btnVai.Text = "Vai"
         '
         'pnlCorpo
@@ -369,6 +385,7 @@ Partial Class PannelloRicerca
     Friend WithEvents btnSalvaRicerca As System.Windows.Forms.Button
     Friend WithEvents btnIndietro As System.Windows.Forms.Button
     Friend WithEvents btnRicarica As System.Windows.Forms.Button
+    Friend WithEvents lblIndirizzo As System.Windows.Forms.Label
     Friend WithEvents txtIndirizzo As System.Windows.Forms.TextBox
     Friend WithEvents btnVai As System.Windows.Forms.Button
     Friend WithEvents pnlCorpo As System.Windows.Forms.Panel

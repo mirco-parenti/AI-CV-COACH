@@ -229,6 +229,32 @@ Namespace Ui
         End Function
 
         <TestMethod>
+        Public Async Function LaCasellaDellaRispostaPortaLaSuaEtichetta() As Task
+
+            ' Il testo dentro la casella sparisce appena si comincia a scrivere: da lì in
+            ' poi, senza un'etichetta, quel riquadro non direbbe più di che cosa è. E
+            ' l'etichetta va e viene con la casella: il momento che conta è il turno che
+            ' aspetta un bottone — lì la fascia resta a video e la casella no, e un nome
+            ' rimasto acceso sopra tre bottoni nominerebbe qualcosa che non c'è. Guardare
+            ' la fine del dialogo non basterebbe: là sparisce la fascia intera, e
+            ' l'etichetta risulterebbe nascosta anche se nessuno se ne fosse occupato.
+            Await ConDialogoApertoAsync(
+                New StrutturatoreFinto().Dara(FrNome),
+                Async Function(pannello)
+                    Dim nome As Label = Etichetta(pannello, "lblRisposta")
+
+                    Assert.IsTrue(nome.Visible, "col turno che chiede una risposta l'etichetta c'è")
+                    Assert.IsNotEmpty(nome.Text, "e dice qualcosa")
+
+                    Await RispondiAsync(pannello, "Mi chiamo Luca Ferrari")
+
+                    Assert.IsFalse(Casella(pannello).Visible, "adesso non si scrive, si sceglie")
+                    Assert.IsFalse(nome.Visible, "e il nome del campo se ne va con la sua casella")
+                End Function)
+
+        End Function
+
+        <TestMethod>
         Public Async Function AllaFineLaZonaDellaRispostaSiRitira() As Task
 
             ' A dialogo concluso casella e bottoni spariscono, e con loro tutta la loro

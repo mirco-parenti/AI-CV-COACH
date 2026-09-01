@@ -97,7 +97,7 @@ Partial Class FinestraAppunti
         'txtAppunto
         '
         Me.txtAppunto.Enabled = False
-        Me.txtAppunto.Location = New System.Drawing.Point(14, 386)
+        Me.txtAppunto.Location = New System.Drawing.Point(14, 387)
         Me.txtAppunto.Multiline = True
         Me.txtAppunto.Name = "txtAppunto"
         Me.txtAppunto.Size = New System.Drawing.Size(772, 52)
@@ -106,7 +106,7 @@ Partial Class FinestraAppunti
         'lblFattiTitolo
         '
         Me.lblFattiTitolo.AutoSize = True
-        Me.lblFattiTitolo.Location = New System.Drawing.Point(14, 450)
+        Me.lblFattiTitolo.Location = New System.Drawing.Point(14, 451)
         Me.lblFattiTitolo.MaximumSize = New System.Drawing.Size(772, 0)
         Me.lblFattiTitolo.Name = "lblFattiTitolo"
         Me.lblFattiTitolo.Size = New System.Drawing.Size(772, 30)
@@ -118,7 +118,7 @@ Partial Class FinestraAppunti
         Me.lvwFatti.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colFatto})
         Me.lvwFatti.FullRowSelect = True
         Me.lvwFatti.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None
-        Me.lvwFatti.Location = New System.Drawing.Point(14, 492)
+        Me.lvwFatti.Location = New System.Drawing.Point(14, 493)
         Me.lvwFatti.MultiSelect = False
         Me.lvwFatti.Name = "lvwFatti"
         Me.lvwFatti.Size = New System.Drawing.Size(772, 76)
@@ -133,7 +133,7 @@ Partial Class FinestraAppunti
         '
         'btnConferma
         '
-        Me.btnConferma.Location = New System.Drawing.Point(536, 588)
+        Me.btnConferma.Location = New System.Drawing.Point(536, 583)
         Me.btnConferma.Name = "btnConferma"
         Me.btnConferma.Size = New System.Drawing.Size(140, 32)
         Me.btnConferma.TabIndex = 7
@@ -141,7 +141,7 @@ Partial Class FinestraAppunti
         '
         'btnAnnulla
         '
-        Me.btnAnnulla.Location = New System.Drawing.Point(688, 588)
+        Me.btnAnnulla.Location = New System.Drawing.Point(688, 583)
         Me.btnAnnulla.Name = "btnAnnulla"
         Me.btnAnnulla.Size = New System.Drawing.Size(110, 32)
         Me.btnAnnulla.TabIndex = 8
@@ -149,7 +149,7 @@ Partial Class FinestraAppunti
         '
         'FinestraAppunti
         '
-        Me.ClientSize = New System.Drawing.Size(800, 634)
+        Me.ClientSize = New System.Drawing.Size(800, 629)
         Me.Controls.Add(Me.lblTitolo)
         Me.Controls.Add(Me.lblSpiegazione)
         Me.Controls.Add(Me.lvwAppunti)

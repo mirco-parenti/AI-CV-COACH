@@ -338,7 +338,7 @@ Partial Class PannelloDocumenti
         Me.btnTornaIndietro.Name = "btnTornaIndietro"
         Me.btnTornaIndietro.Size = New System.Drawing.Size(170, 32)
         Me.btnTornaIndietro.TabIndex = 0
-        Me.btnTornaIndietro.Text = "Torna all'opportunità"
+        Me.btnTornaIndietro.Text = "◀ Torna all'opportunità"
         '
         'btnRigenera
         '

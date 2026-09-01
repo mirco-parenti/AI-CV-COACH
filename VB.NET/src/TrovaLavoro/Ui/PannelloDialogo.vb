@@ -681,8 +681,9 @@ Public Class PannelloDialogo
                 "Ho davanti il tuo profilo, l'annuncio e il confronto già fatto. Decidiamo cosa mettere " &
                 "davanti e come nominare quello che manca: i fatti restano quelli del tuo profilo."
 
-            btnTornaAlProfilo.Text = "Torna alla candidatura"
+            btnTornaAlProfilo.Text = "◀ Torna alla candidatura"
             btnPortaNelProfilo.Text = "Trasforma in appunti"
+            lblRisposta.Text = "Il tuo messaggio"
             txtRisposta.PlaceholderText = "Scrivi quello che pensi…"
 
             NascondiLeScelte()
@@ -695,8 +696,9 @@ Public Class PannelloDialogo
                 "Un argomento alla volta: rispondi con parole tue, e prima di registrare qualcosa " &
                 "ti mostro cosa ho capito."
 
-            btnTornaAlProfilo.Text = "Torna al profilo"
+            btnTornaAlProfilo.Text = "◀ Torna al profilo"
             btnPortaNelProfilo.Text = "Porta nel profilo"
+            lblRisposta.Text = "La tua risposta"
             txtRisposta.PlaceholderText = "La tua risposta…"
 
             AdattaAlTesto()
@@ -1376,6 +1378,7 @@ Public Class PannelloDialogo
         ' Casella e bottone dei turni compaiono solo quando c'è davvero da scrivere: una
         ' casella accesa mentre il dialogo aspetta un bottone inviterebbe a fare la cosa
         ' sbagliata.
+        lblRisposta.Visible = chiedeUnaRisposta
         txtRisposta.Visible = chiedeUnaRisposta
         btnInvia.Visible = chiedeUnaRisposta
 
@@ -1412,6 +1415,7 @@ Public Class PannelloDialogo
 
         ' Qui si scrive sempre: non ci sono turni che aspettano un bottone, è una chat.
         pnlRisposta.Visible = conConversazione
+        lblRisposta.Visible = conConversazione
         txtRisposta.Visible = conConversazione
         btnInvia.Visible = conConversazione
 

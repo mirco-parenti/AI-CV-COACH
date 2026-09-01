@@ -73,7 +73,7 @@ Partial Class FinestraInformazioni
         '
         'btnCopiaDiagnostica
         '
-        Me.btnCopiaDiagnostica.Location = New System.Drawing.Point(172, 551)
+        Me.btnCopiaDiagnostica.Location = New System.Drawing.Point(176, 551)
         Me.btnCopiaDiagnostica.Name = "btnCopiaDiagnostica"
         Me.btnCopiaDiagnostica.Size = New System.Drawing.Size(134, 32)
         Me.btnCopiaDiagnostica.TabIndex = 4

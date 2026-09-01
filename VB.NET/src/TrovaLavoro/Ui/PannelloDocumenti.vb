@@ -1425,7 +1425,7 @@ Public Class PannelloDocumenti
         ' Il bottone del ritorno dice dove riporta, e le due strade per arrivare qui sono
         ' due: un'etichetta sbagliata manderebbe l'utente in un pannello dove non è mai
         ' stato.
-        btnTornaIndietro.Text = If(_candidatura Is Nothing, "Torna al profilo", "Torna all'opportunità")
+        btnTornaIndietro.Text = If(_candidatura Is Nothing, "◀ Torna al profilo", "◀ Torna all'opportunità")
 
         ' Il nome della colonna si decide dalla strada percorsa, non dal fatto che il
         ' documento sia già arrivato: nell'attesa non c'è ancora niente da mostrare, ma si

@@ -203,6 +203,10 @@ Namespace Ui
             Return DirectCast(finestra.Controls.Find("lvwCampi", searchAllChildren:=True).Single(), ListView)
         End Function
 
+        Private Shared Function Etichetta(finestra As Control, nome As String) As Label
+            Return DirectCast(finestra.Controls.Find(nome, searchAllChildren:=True).Single(), Label)
+        End Function
+
         <TestMethod>
         Public Sub IDueDocumentiDiUnaCandidaturaStannoInUnElencoSolo()
 
@@ -315,6 +319,42 @@ Namespace Ui
 
                 Assert.AreEqual(0, finestra.Quanti, "nessun campo di prosa")
                 Assert.AreEqual(0, finestra.Applica().Count, "e niente da applicare")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub AElencoVuotoNonSiChiedeDiSceglieUnaRiga()
+
+            ' «Scegli una riga dall'elenco» davanti a un elenco vuoto manda a cercare
+            ' qualcosa che non c'è: il documento senza prosa e senza voci lo dice.
+            Dim soloIntestazione As JsonNode = JsonNode.Parse(
+                "{""tipo"": ""cv_base"", ""intestazione"": {""nome"": ""Luca Ferrari""}}")
+
+            Using finestra As New FinestraModificaTesti(Aperti(soloIntestazione))
+
+                Assert.IsEmpty(Elenco(finestra).Items, "non c'è nessuna riga")
+                Assert.AreEqual("Questo documento non ha testi da riscrivere.",
+                                Etichetta(finestra, "lblModifica").Text,
+                                "e la riga sotto l'elenco lo dice invece di dare un ordine impossibile")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub ConLeRigheNonSiDiceCheNonCeNeSono()
+
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                ' Su una finestra mai mostrata la prima riga risulta scelta, come
+                ' all'apertura vera: si guarda che almeno nomini quella, e non l'elenco
+                ' vuoto.
+                Assert.IsNotEmpty(Elenco(finestra).Items, "le righe ci sono")
+                Assert.DoesNotContain("non ha testi da riscrivere",
+                                      Etichetta(finestra, "lblModifica").Text,
+                                      "e allora non si dice che non ce ne sono")
 
             End Using
 

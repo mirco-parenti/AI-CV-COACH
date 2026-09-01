@@ -98,8 +98,8 @@ Namespace Ui
 
             Await ConRagionamentoApertoAsync(finto,
                 Function(pannello, contesto)
-                    Assert.AreEqual("Torna alla candidatura", Bottone(pannello, "btnTornaAlProfilo").Text,
-                                    "l'uscita porta dove si è venuti")
+                    Assert.AreEqual("◀ Torna alla candidatura", Bottone(pannello, "btnTornaAlProfilo").Text,
+                                    "l'uscita porta dove si è venuti, e la freccia lo dice come negli altri pannelli")
                     Assert.AreEqual("Trasforma in appunti", Bottone(pannello, "btnPortaNelProfilo").Text,
                                     "e la conclusione è un'altra")
 
@@ -316,7 +316,7 @@ Namespace Ui
 
                     Await pannello.ApriIlDialogoAsync(New StrutturatoreFinto)
 
-                    Assert.AreEqual("Torna al profilo", Bottone(pannello, "btnTornaAlProfilo").Text,
+                    Assert.AreEqual("◀ Torna al profilo", Bottone(pannello, "btnTornaAlProfilo").Text,
                                     "i nomi tornano quelli del dialogo guidato")
                     Assert.AreEqual("Porta nel profilo", Bottone(pannello, "btnPortaNelProfilo").Text,
                                     "tutti e due")

@@ -65,7 +65,7 @@ Partial Class FinestraModificaTesti
         Me.lvwCampi.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colCampo, Me.colTesto, Me.colSegno})
         Me.lvwCampi.FullRowSelect = True
         Me.lvwCampi.HideSelection = False
-        Me.lvwCampi.Location = New System.Drawing.Point(14, 140)
+        Me.lvwCampi.Location = New System.Drawing.Point(14, 141)
         Me.lvwCampi.MultiSelect = False
         Me.lvwCampi.Name = "lvwCampi"
         Me.lvwCampi.Size = New System.Drawing.Size(540, 240)
@@ -111,7 +111,7 @@ Partial Class FinestraModificaTesti
         Me.lvwFuori.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colFuoriVoce, Me.colFuoriCosa})
         Me.lvwFuori.FullRowSelect = True
         Me.lvwFuori.HideSelection = False
-        Me.lvwFuori.Location = New System.Drawing.Point(690, 140)
+        Me.lvwFuori.Location = New System.Drawing.Point(690, 141)
         Me.lvwFuori.MultiSelect = False
         Me.lvwFuori.Name = "lvwFuori"
         Me.lvwFuori.Size = New System.Drawing.Size(296, 240)
@@ -150,7 +150,7 @@ Partial Class FinestraModificaTesti
         'lblModifica
         '
         Me.lblModifica.AutoSize = True
-        Me.lblModifica.Location = New System.Drawing.Point(14, 398)
+        Me.lblModifica.Location = New System.Drawing.Point(14, 399)
         Me.lblModifica.Name = "lblModifica"
         Me.lblModifica.Size = New System.Drawing.Size(400, 15)
         Me.lblModifica.TabIndex = 7
@@ -159,7 +159,7 @@ Partial Class FinestraModificaTesti
         'txtTesto
         '
         Me.txtTesto.Enabled = False
-        Me.txtTesto.Location = New System.Drawing.Point(14, 420)
+        Me.txtTesto.Location = New System.Drawing.Point(14, 422)
         Me.txtTesto.Multiline = True
         Me.txtTesto.Name = "txtTesto"
         Me.txtTesto.ScrollBars = System.Windows.Forms.ScrollBars.Vertical

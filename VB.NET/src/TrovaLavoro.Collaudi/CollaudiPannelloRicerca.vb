@@ -91,14 +91,20 @@ Namespace Ui
             ConPannello(
                 Sub(pannello, contesto, cartella)
 
-                    ' Due portano un simbolo al posto del testo e la casella dell'indirizzo
-                    ' non ha un'etichetta accanto: senza un nome accessibile sarebbero
-                    ' anonimi per chi non vede lo schermo. Il difetto è emerso guardando
-                    ' l'applicazione vera (2026-08-12), dove lo strumento di collaudo non
-                    ' riusciva a trovare la casella — e uno screen reader nemmeno.
+                    ' Due portano un simbolo al posto del testo: senza un nome accessibile
+                    ' sarebbero anonimi per chi non vede lo schermo. Il difetto è emerso
+                    ' guardando l'applicazione vera (2026-08-12), dove lo strumento di
+                    ' collaudo non riusciva a trovare la casella — e uno screen reader
+                    ' nemmeno. Dal 2026-09-01 la casella dell'indirizzo ha anche
+                    ' un'etichetta a video, e le due dicono la stessa parola: un campo che
+                    ' si chiama in un modo per chi guarda e in un altro per chi ascolta è
+                    ' un campo che non si nomina.
                     Assert.AreEqual("Indietro", Bottone(pannello, "btnIndietro").AccessibleName)
                     Assert.AreEqual("Ricarica", Bottone(pannello, "btnRicarica").AccessibleName)
                     Assert.AreEqual("Indirizzo", Casella(pannello, "txtIndirizzo").AccessibleName)
+                    Assert.AreEqual(Casella(pannello, "txtIndirizzo").AccessibleName,
+                                    Etichetta(pannello, "lblIndirizzo").Text,
+                                    "e l'etichetta a video dice la stessa parola")
 
                 End Sub)
 
@@ -273,7 +279,7 @@ Namespace Ui
                 New String() {"lblSalvate", "cboSalvate", "btnApri", "btnDimentica"},
                 New String() {"lblPortale", "cboPortali", "lblCosa", "txtCosa",
                               "lblDove", "txtDove", "btnCerca", "btnSalvaRicerca"},
-                New String() {"btnIndietro", "btnRicarica", "txtIndirizzo", "btnVai"}}
+                New String() {"btnIndietro", "btnRicarica", "lblIndirizzo", "txtIndirizzo", "btnVai"}}
 
             Using pannello As New PannelloRicerca()
 

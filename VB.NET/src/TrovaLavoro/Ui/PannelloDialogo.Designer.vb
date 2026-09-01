@@ -25,6 +25,7 @@ Partial Class PannelloDialogo
         Me.pnlScorrimento = New System.Windows.Forms.Panel()
         Me.flpConversazione = New System.Windows.Forms.FlowLayoutPanel()
         Me.pnlRisposta = New System.Windows.Forms.Panel()
+        Me.lblRisposta = New System.Windows.Forms.Label()
         Me.txtRisposta = New System.Windows.Forms.TextBox()
         Me.btnInvia = New System.Windows.Forms.Button()
         Me.btnScelta1 = New System.Windows.Forms.Button()
@@ -93,7 +94,7 @@ Partial Class PannelloDialogo
         Me.pnlConversazione.Location = New System.Drawing.Point(14, 74)
         Me.pnlConversazione.Name = "pnlConversazione"
         Me.pnlConversazione.Padding = New System.Windows.Forms.Padding(1)
-        Me.pnlConversazione.Size = New System.Drawing.Size(1106, 512)
+        Me.pnlConversazione.Size = New System.Drawing.Size(1106, 486)
         Me.pnlConversazione.TabIndex = 1
         '
         'pnlScorrimento
@@ -111,7 +112,7 @@ Partial Class PannelloDialogo
         Me.pnlScorrimento.Location = New System.Drawing.Point(1, 1)
         Me.pnlScorrimento.Name = "pnlScorrimento"
         Me.pnlScorrimento.Padding = New System.Windows.Forms.Padding(12)
-        Me.pnlScorrimento.Size = New System.Drawing.Size(1104, 510)
+        Me.pnlScorrimento.Size = New System.Drawing.Size(1104, 484)
         Me.pnlScorrimento.TabIndex = 0
         '
         'flpConversazione
@@ -132,16 +133,31 @@ Partial Class PannelloDialogo
         '
         'pnlRisposta
         '
+        Me.pnlRisposta.Controls.Add(Me.lblRisposta)
         Me.pnlRisposta.Controls.Add(Me.txtRisposta)
         Me.pnlRisposta.Controls.Add(Me.btnInvia)
         Me.pnlRisposta.Controls.Add(Me.btnScelta1)
         Me.pnlRisposta.Controls.Add(Me.btnScelta2)
         Me.pnlRisposta.Controls.Add(Me.btnScelta3)
         Me.pnlRisposta.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.pnlRisposta.Location = New System.Drawing.Point(14, 586)
+        Me.pnlRisposta.Location = New System.Drawing.Point(14, 560)
         Me.pnlRisposta.Name = "pnlRisposta"
-        Me.pnlRisposta.Size = New System.Drawing.Size(1106, 96)
+        Me.pnlRisposta.Size = New System.Drawing.Size(1106, 122)
         Me.pnlRisposta.TabIndex = 2
+        '
+        'lblRisposta
+        '
+        ' L'etichetta della casella, e non solo il suo suggerimento: il testo dentro la
+        ' casella sparisce appena si comincia a scrivere, e da lì in poi quel riquadro
+        ' non direbbe più di che cosa è. Il nome cambia col mestiere del pannello, come
+        ' i titoli (v. PassaAlModo).
+        Me.lblRisposta.Font = StileApp.FontTitoloGruppo
+        Me.lblRisposta.ForeColor = StileApp.RossoCritico
+        Me.lblRisposta.Location = New System.Drawing.Point(0, 14)
+        Me.lblRisposta.Name = "lblRisposta"
+        Me.lblRisposta.Size = New System.Drawing.Size(300, 18)
+        Me.lblRisposta.TabIndex = 0
+        Me.lblRisposta.Text = "La tua risposta"
         '
         'txtRisposta
         '
@@ -149,21 +165,21 @@ Partial Class PannelloDialogo
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.txtRisposta.BackColor = StileApp.FondoCasella
-        Me.txtRisposta.Location = New System.Drawing.Point(0, 14)
+        Me.txtRisposta.Location = New System.Drawing.Point(0, 40)
         Me.txtRisposta.Multiline = True
         Me.txtRisposta.Name = "txtRisposta"
         Me.txtRisposta.PlaceholderText = "La tua risposta…"
         Me.txtRisposta.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
         Me.txtRisposta.Size = New System.Drawing.Size(984, 68)
-        Me.txtRisposta.TabIndex = 0
+        Me.txtRisposta.TabIndex = 1
         '
         'btnInvia
         '
         Me.btnInvia.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnInvia.Location = New System.Drawing.Point(996, 14)
+        Me.btnInvia.Location = New System.Drawing.Point(996, 40)
         Me.btnInvia.Name = "btnInvia"
         Me.btnInvia.Size = New System.Drawing.Size(110, 32)
-        Me.btnInvia.TabIndex = 1
+        Me.btnInvia.TabIndex = 2
         Me.btnInvia.Text = "Invia"
         '
         'btnScelta1
@@ -173,33 +189,33 @@ Partial Class PannelloDialogo
         ' Etichetta, livello e posizione cambiano a ogni mossa; l'ingombro no.
         Me.btnScelta1.AutoSize = True
         Me.btnScelta1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.btnScelta1.Location = New System.Drawing.Point(0, 14)
+        Me.btnScelta1.Location = New System.Drawing.Point(0, 40)
         Me.btnScelta1.MinimumSize = New System.Drawing.Size(130, 32)
         Me.btnScelta1.Name = "btnScelta1"
         Me.btnScelta1.Size = New System.Drawing.Size(130, 32)
-        Me.btnScelta1.TabIndex = 2
+        Me.btnScelta1.TabIndex = 3
         Me.btnScelta1.Visible = False
         '
         'btnScelta2
         '
         Me.btnScelta2.AutoSize = True
         Me.btnScelta2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.btnScelta2.Location = New System.Drawing.Point(142, 14)
+        Me.btnScelta2.Location = New System.Drawing.Point(142, 40)
         Me.btnScelta2.MinimumSize = New System.Drawing.Size(130, 32)
         Me.btnScelta2.Name = "btnScelta2"
         Me.btnScelta2.Size = New System.Drawing.Size(130, 32)
-        Me.btnScelta2.TabIndex = 3
+        Me.btnScelta2.TabIndex = 4
         Me.btnScelta2.Visible = False
         '
         'btnScelta3
         '
         Me.btnScelta3.AutoSize = True
         Me.btnScelta3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
-        Me.btnScelta3.Location = New System.Drawing.Point(284, 14)
+        Me.btnScelta3.Location = New System.Drawing.Point(284, 40)
         Me.btnScelta3.MinimumSize = New System.Drawing.Size(130, 32)
         Me.btnScelta3.Name = "btnScelta3"
         Me.btnScelta3.Size = New System.Drawing.Size(130, 32)
-        Me.btnScelta3.TabIndex = 4
+        Me.btnScelta3.TabIndex = 5
         Me.btnScelta3.Visible = False
         '
         'pnlAzioni
@@ -219,7 +235,7 @@ Partial Class PannelloDialogo
         Me.btnTornaAlProfilo.Name = "btnTornaAlProfilo"
         Me.btnTornaAlProfilo.Size = New System.Drawing.Size(130, 32)
         Me.btnTornaAlProfilo.TabIndex = 0
-        Me.btnTornaAlProfilo.Text = "Torna al profilo"
+        Me.btnTornaAlProfilo.Text = "◀ Torna al profilo"
         '
         'btnRicomincia
         '
@@ -270,6 +286,7 @@ Partial Class PannelloDialogo
     Friend WithEvents pnlScorrimento As System.Windows.Forms.Panel
     Friend WithEvents flpConversazione As System.Windows.Forms.FlowLayoutPanel
     Friend WithEvents pnlRisposta As System.Windows.Forms.Panel
+    Friend WithEvents lblRisposta As System.Windows.Forms.Label
     Friend WithEvents txtRisposta As System.Windows.Forms.TextBox
     Friend WithEvents btnInvia As System.Windows.Forms.Button
     Friend WithEvents btnScelta1 As System.Windows.Forms.Button
