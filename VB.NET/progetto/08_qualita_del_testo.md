@@ -184,7 +184,16 @@ perde contro la forma.*
   offre di rifare il confronto, perché non si può: una candidatura già confrontata non ha un
   «riconfronta», e indicare un gesto che non esiste sarebbe peggio del silenzio — dice la cosa
   onesta, rifare la candidatura dal suo annuncio (cap. 11.1; il gesto mancante sta in
-  `idee_future.md`, col motivo per cui va maneggiato con cura).
+  `idee_future.md`, col motivo per cui va maneggiato con cura). *Emendato il **2026-09-02**:
+  il gesto adesso esiste, e il messaggio indica quello. «Analizza» prende il suo **quarto
+  mestiere** e su una candidatura confrontata con un profilo che non è più quello diventa
+  **«Riconfronta»**, rifacendo il solo secondo passo sull'annuncio già strutturato — mandare
+  a ricopiare a mano un annuncio che il programma ha già, e a pagare una lettura già pagata,
+  non era «la cosa onesta»: era l'unica che si sapesse fare. La cautela annotata in
+  `idee_future.md` è diventata la **conferma** che precede il gesto: dice che stelle e
+  giudizi vengono sostituiti, che i documenti già scritti invece restano dove sono, e — su
+  una candidatura **già partita** — che il punteggio con cui è stata spedita non resterà da
+  nessuna parte, perché il registro non lo conserva: lo rilegge dalle cartelle.*
 - **Il confronto dice «prima» e «adesso»** *(T9d)*, non più «prima» e «dopo». Il secondo
   termine è il documento **com'è in questo momento**: se in mezzo è passata anche la mano
   dell'utente, «adesso» resta vero e «dopo la rifinitura» no. Il «prima» invece non si

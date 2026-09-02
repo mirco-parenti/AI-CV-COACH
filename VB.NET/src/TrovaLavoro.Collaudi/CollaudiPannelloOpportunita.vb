@@ -842,6 +842,166 @@ Namespace Ui
         End Function
 
         ' ==================================================================
+        ' Il riconfronto: quando il profilo non è più quello (2026-09-02)
+        ' ==================================================================
+
+        ''' <summary>Una candidatura confrontata con una certa versione di profilo.</summary>
+        Private Shared Function ConfrontataCon(versione As String) As Opportunita
+
+            Dim o As Opportunita = SoloLAnnuncio()
+            o.Confronto = System.Text.Json.Nodes.JsonNode.Parse(ConfrontoPieno)
+            o.VersioneProfilo = versione
+            o.Avanza(StatoOpportunita.Interessante, o.Creata.AddMinutes(2))
+
+            Return o
+
+        End Function
+
+        ''' <summary>Salva un'altra versione del profilo: da qui in poi quella di prima è vecchia.</summary>
+        Private Shared Sub IlProfiloCambia(contesto As ContestoApp)
+            contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+        End Sub
+
+        <TestMethod>
+        Public Async Function IlProfiloCresciutoAccendeIlRiconfronto() As Task
+
+            ' Il difetto trovato usando il programma il 2026-09-02: cambiata la patente, le
+            ' candidature di prima mostravano le stelle di allora e non c'era modo di
+            ' rifarle. Adesso «Analizza» prende il suo quarto mestiere.
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Dim diAllora As String = contesto.Archivio.Versioni().Last()
+                    Dim dove As String = contesto.Opportunita.Salva(ConfrontataCon(diAllora))
+
+                    IlProfiloCambia(contesto)
+
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                    Dim analizza As Button = Bottone(pannello, "btnAnalizza")
+                    Assert.AreEqual("Riconfronta", analizza.Text,
+                                    "il bottone dice il mestiere che serve adesso")
+                    Assert.IsTrue(analizza.Enabled,
+                                  "e si preme con la casella vuota: l'annuncio è già nella cartella")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function AProfiloFermoIlRiconfrontoNonSiPropone() As Task
+
+            ' Un «Riconfronta» sempre acceso inviterebbe a ripagare una risposta che non
+            ' cambierebbe: a parità di profilo e di annuncio il confronto è lo stesso.
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Dim dove As String = contesto.Opportunita.Salva(
+                        ConfrontataCon(contesto.Archivio.Versioni().Last()))
+
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                    Dim analizza As Button = Bottone(pannello, "btnAnalizza")
+                    Assert.AreNotEqual("Riconfronta", analizza.Text,
+                                       "niente da rifare: la candidatura è in pari col profilo")
+                    Assert.IsFalse(analizza.Enabled, "e il bottone resta spento com'era")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function IlRiconfrontoRifaIGiudiziSenzaRileggereLAnnuncio() As Task
+
+            ' La ragione per cui il gesto vale la pena: l'annuncio è già letto e
+            ' strutturato: rifarlo da capo costerebbe una chiamata in più e chiederebbe
+            ' all'utente di ricopiare una cosa che il programma ha già.
+            Dim confrontatore As New ConfrontatoreFinto
+
+            Await ConPannelloAsync(
+                PipelineFinta(confrontatore:=confrontatore),
+                Async Function(pannello, contesto) As Task
+
+                    Dim dove As String = contesto.Opportunita.Salva(
+                        ConfrontataCon(contesto.Archivio.Versioni().Last()))
+
+                    IlProfiloCambia(contesto)
+
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+                    Await pannello.ConfrontaLaRiapertaAsync()
+
+                    Assert.AreEqual("confronto → mitigazione", confrontatore.LavoriChiesti(),
+                                    "l'annuncio non si rilegge: era già strutturato")
+
+                    Dim riletta As Opportunita = contesto.Opportunita.Carica(dove)
+                    Assert.AreEqual(contesto.Archivio.Versioni().Last(), riletta.VersioneProfilo,
+                                    "e la candidatura torna in pari col profilo di oggi")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaGiaSpeditaTieneIlGestoMaNonLoPropone() As Task
+
+            ' La cautela annotata in idee_future.md il 2026-08-24: rifare i giudizi cambia le
+            ' stelle di una candidatura che l'utente potrebbe aver già mandato, e il registro
+            ' non ne tiene uno storico — le rilegge dalle cartelle. Il gesto resta per chi lo
+            ' vuole (la conferma dice cosa si perde), ma la finestra non si apre da sola: quella
+            ' decisione è già stata presa, e lì l'utente sta solo riguardando.
+            '
+            ' RISERVA: il banco vede il bottone, non la finestra — che senza un Form attorno al
+            ' pannello non si apre affatto. Che non compaia sulla già spedita, e che la conferma
+            ' avverta della perdita, restano da provare a mano (v. in_sospeso.md).
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Dim spedita As Opportunita = ConfrontataCon(contesto.Archivio.Versioni().Last())
+                    spedita.Avanza(StatoOpportunita.Generata, spedita.Creata.AddMinutes(9))
+                    spedita.Avanza(StatoOpportunita.Inviata, spedita.Creata.AddMinutes(20))
+
+                    Dim dove As String = contesto.Opportunita.Salva(spedita)
+
+                    IlProfiloCambia(contesto)
+
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                    Assert.AreEqual("Riconfronta", Bottone(pannello, "btnAnalizza").Text,
+                                    "il gesto resta a disposizione anche a candidatura partita")
+
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function LaScartataNonSiRiconfronta() As Task
+
+            ' Quella è chiusa (cap. 07.3): rifarle i conti sarebbe lavorare per niente, la
+            ' stessa ragione per cui non le si scrive un CV.
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Dim scartata As Opportunita = ConfrontataCon(contesto.Archivio.Versioni().Last())
+                    scartata.Avanza(StatoOpportunita.Scartata, scartata.Creata.AddMinutes(5))
+
+                    Dim dove As String = contesto.Opportunita.Salva(scartata)
+
+                    IlProfiloCambia(contesto)
+
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                    Assert.AreNotEqual("Riconfronta", Bottone(pannello, "btnAnalizza").Text,
+                                       "sulla scartata il gesto non si propone")
+
+                End Function)
+
+        End Function
+
+        ' ==================================================================
         ' Com'è andata (T9c, cap. 07.3)
         ' ==================================================================
 

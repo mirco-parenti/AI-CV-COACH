@@ -486,6 +486,32 @@ Nessuna è grave; nessuna è stata provata a fondo, perché nessuna è stata toc
   del `Pane` che rendeva ciechi tutti gli attrezzi, chiusa il 30 agosto: lì la cura fu tenere
   solo le `Window` fra le finestre di primo livello. *(`strumenti/mcp-collaudi/`.)*
 
+## Dal riconfronto e dagli avvisi sul profilo cambiato (2026-09-02)
+
+*Nate da un giro dal vivo: cambiata la **patente** nel profilo, una candidatura riaperta
+mostrava ancora le stelle di prima e non c'era nessun modo di rifare il confronto. Il gesto
+adesso c'è — «Analizza» diventa «Riconfronta» (cap. 03 P4, cap. 08) — e il banco ne sorveglia
+la **decisione**: quando compare, quando no, e che rifaccia i giudizi senza rileggere
+l'annuncio. Queste due voci sono quel che il banco **non** può vedere, dichiarate qui invece
+di chiamarle provate (regola 15).*
+
+- **Le due finestre non sono sorvegliate dal banco.** Né quella che propone il riconfronto
+  riaprendo una candidatura, né quella che in P6 dice perché i documenti non si riscrivono.
+  Il motivo è strutturale e non si aggira con un collaudo più furbo: i collaudi realizzano il
+  pannello (`CreateControl()`) ma non lo appendono a nessun Form, e le due finestre si aprono
+  **solo** dentro un Form — la guardia è `FindForm() Is Nothing`, che è anche la condizione
+  vera perché una modale possa esistere. Un collaudo che le facesse aprire resterebbe appeso
+  a una finestra che nessuno viene a chiudere, cioè peggio di un rosso. Da provare **a mano**:
+  che la finestra compaia riaprendo una candidatura col profilo cambiato, che **non** compaia
+  su una già spedita, e che «Riconfronta ora» faccia partire il lavoro.
+  *(cap. 03 P4; `PannelloOpportunita.ProponiIlRiconfronto`, `PannelloDocumenti.NonSiPuoRiscrivere`.)*
+- **Il testo della conferma del riconfronto non è sorvegliato.** `SpiegazioneDelRiconfronto`
+  è privata e non passa da nessuna proprietà pubblica: il banco non legge che cosa promette.
+  È la parte che dice all'utente che stelle e giudizi vengono sostituiti, che i documenti già
+  scritti restano, e — sulla candidatura **già partita** — che il punteggio con cui è stata
+  spedita non resterà da nessuna parte. Vale la pena rileggerla dal vivo almeno una volta per
+  ciascuno dei tre casi. *(cap. 08; `PannelloOpportunita.SpiegazioneDelRiconfronto`.)*
+
 ## Chiuse
 
 - ✅ **Il flusso D non ha più nessun segno nell'interfaccia** *(aperta il 2026-08-31, **chiusa

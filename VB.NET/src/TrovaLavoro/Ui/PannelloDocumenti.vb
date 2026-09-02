@@ -456,11 +456,39 @@ Public Class PannelloDocumenti
         _vociTolteDalCvBase.Prendi(salvato.Tolte)
 
         Mostra()
-        RaccontaLoStato(DaDoveViene(salvato), StileApp.TestoSecondario)
+        RaccontaDaDoveViene(salvato)
 
         Return True
 
     End Function
+
+    ''' <summary>
+    ''' Dice da dove viene il 📄 CV base, e lo dice <b>con il peso che ha</b>: didascalia
+    ''' grigia quando non c'è niente da segnalare, avviso vero quando il profilo è cambiato
+    ''' dopo.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Fino al 2026-09-02 questa riga era grigia sempre, anche quando diceva la cosa
+    ''' più importante della schermata — che il CV a video ritrae un profilo che non è più
+    ''' quello di oggi. Il grigio di <see cref="StileApp.TestoSecondario"/> è l'inchiostro
+    ''' delle didascalie, cioè di quel che si può anche non leggere: metterci dentro un
+    ''' avviso lo nasconde in piena vista, e chi esporta quel CV non sa di star mandando il
+    ''' ritratto di ieri.</para>
+    ''' <para>Il colore da solo però non basta e non basterebbe qui più che altrove
+    ''' (cap. 03.8): a portarlo è <see cref="RaccontaUnAvviso"/>, che mette davanti la
+    ''' parola di <see cref="Segnalazioni.PrefissoAvviso"/> — così la riga si distingue
+    ''' anche da chi i due rossi non li separa, e da chi la ascolta invece di guardarla.</para>
+    ''' </remarks>
+    Private Sub RaccontaDaDoveViene(salvato As Dati.CvBase)
+
+        If ProfiloCambiatoDopo(salvato.VersioneProfilo) Then
+            RaccontaUnAvviso(DaDoveViene(salvato))
+            Return
+        End If
+
+        RaccontaLoStato(DaDoveViene(salvato), StileApp.TestoSecondario)
+
+    End Sub
 
     ''' <summary>
     ''' Di quale profilo è il ritratto il CV che si sta guardando, e di quando.
@@ -476,14 +504,16 @@ Public Class PannelloDocumenti
                                   "il " & salvato.Generato.ToString("d MMMM yyyy",
                                                                     CultureInfo.CurrentCulture))
 
-        Dim testo As String = $"Questo 📄 CV base l'ho scritto {quando}{InQuestaLingua()}."
-
+        ' Quando c'è qualcosa da segnalare va davanti, non in coda: la riga la legge chi sta
+        ' per esportare, e la prima metà è quella che arriva sempre.
         If ProfiloCambiatoDopo(salvato.VersioneProfilo) Then
-            Return testo & vbLf &
-                   "Da allora hai cambiato il profilo: con «Rigenera» lo riscrivo su quello di oggi."
+            Return $"Hai cambiato il profilo dopo averlo scritto: questo 📄 CV base l'ho scritto " &
+                   $"{quando}{InQuestaLingua()} e racconta quello di prima." & vbLf &
+                   "Con «Rigenera» lo riscrivo su quello di oggi."
         End If
 
-        Return testo & vbLf & "Puoi esportarlo così com'è, o riscriverlo con «Rigenera»."
+        Return $"Questo 📄 CV base l'ho scritto {quando}{InQuestaLingua()}." & vbLf &
+               "Puoi esportarlo così com'è, o riscriverlo con «Rigenera»."
 
     End Function
 
@@ -503,9 +533,11 @@ Public Class PannelloDocumenti
     ''' <i>cresce</i> cambia versione a ogni salvataggio, e con lui i vecchi documenti
     ''' restano spiegabili: fermarsi lì sarebbe un avviso a ogni giro, per un caso che
     ''' funziona (v. <see cref="Dati.ArchivioProfilo.CELaVersione"/>).</para>
-    ''' <para><b>Perché non si propone di rifare il confronto.</b> Perché non si può: una
-    ''' candidatura già confrontata non si riconfronta, e l'unica strada onesta è rifarla
-    ''' dal suo annuncio. Indicare un gesto che non esiste sarebbe peggio del silenzio.</para>
+    ''' <para><b>Il gesto che indica, dal 2026-09-02.</b> Fin qui questo testo mandava a
+    ''' rifare la candidatura da capo, incollando di nuovo l'annuncio: era l'unica strada,
+    ''' perché una candidatura già confrontata non si riconfrontava. Adesso si riconfronta —
+    ''' l'annuncio è già nella sua cartella, letto e strutturato — e la strada da indicare è
+    ''' quella, una chiamata invece di due e niente da ricopiare a mano.</para>
     ''' </remarks>
     Private Function MotivoProfiloSparito() As String
 
@@ -515,20 +547,53 @@ Public Class PannelloDocumenti
         Return "Questa candidatura è stata confrontata con un profilo che adesso non c'è più: " &
                "quello di allora è stato eliminato, e i giudizi e i documenti raccontano ancora lui." &
                vbLf &
-               "Riscriverli sul profilo di oggi mescolerebbe due storie diverse. Per averne di " &
-               $"nuovi, rifai la candidatura da «{NomiUi.Confronto}», incollando di nuovo l'annuncio."
+               "Riscriverli sul profilo di oggi mescolerebbe due storie diverse. Torna in " &
+               $"«{NomiUi.Confronto}» e premi «Riconfronta»: rifaccio il confronto sull'annuncio " &
+               "che è già lì, e da quel momento questi documenti si possono riscrivere."
 
     End Function
 
+    ''' <summary>
+    ''' Dice che i documenti non si possono riscrivere: nella riga di stato <b>e</b> in una
+    ''' finestra.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>La riga da sola non bastava, ed è il difetto trovato usando il programma il
+    ''' 2026-09-02: sta in alto a destra, mentre chi ha appena premuto «Rigenera» guarda il
+    ''' riquadro in mezzo — dove non compare niente. Un bottone che non fa niente e non dice
+    ''' niente si legge come un guasto, e manda a cercare il difetto dove non è.</para>
+    ''' <para>La riga <b>resta</b> comunque, e non è un doppione: la finestra si chiude e
+    ''' quel che ha detto se ne va con lei, mentre la riga rimane lì per chi torna a
+    ''' guardare la schermata cinque minuti dopo.</para>
+    ''' <para>Fuori da una finestra si scrive solo la riga. È il banco: i collaudi il
+    ''' pannello lo realizzano (<c>CreateControl()</c>, senza il quale metà delle proprietà
+    ''' mentono) ma non lo appendono a nessun Form — e una modale aperta lì resterebbe
+    ''' appesa a nessuno, che è peggio di un collaudo rosso perché non finisce mai. Non è un
+    ''' modo per riconoscere i collaudi: è la condizione vera perché una finestra si apra,
+    ''' cioè avere una finestra a cui appartenere.</para>
+    ''' </remarks>
+    Private Sub NonSiPuoRiscrivere(motivo As String)
+
+        RaccontaUnAvviso(motivo)
+
+        If FindForm() Is Nothing Then Return
+
+        MessageBox.Show(Me, motivo, "Non posso riscrivere questi documenti",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning)
+
+    End Sub
+
     ''' <summary>Se il profilo ha avuto altre versioni dopo quella da cui nacque il CV.</summary>
+    ''' <remarks>
+    ''' Il conto lo fa <see cref="Dati.ArchivioProfilo.CambiatoDopo"/>, che dal 2026-09-02 è
+    ''' il posto unico dove vive questa domanda: la stessa la fa P5 sulle candidature, e due
+    ''' copie della stessa regola sono due regole che prima o poi divergono.
+    ''' </remarks>
     Private Function ProfiloCambiatoDopo(versioneDelCv As String) As Boolean
 
-        If String.IsNullOrEmpty(versioneDelCv) Then Return False
+        If _contesto Is Nothing Then Return False
 
-        Dim ultima As String = _contesto.Archivio.Versioni().LastOrDefault()
-        If String.IsNullOrEmpty(ultima) Then Return False
-
-        Return Not String.Equals(ultima, versioneDelCv, StringComparison.Ordinal)
+        Return _contesto.Archivio.CambiatoDopo(versioneDelCv)
 
     End Function
 
@@ -609,7 +674,7 @@ Public Class PannelloDocumenti
         ' lingua stanno più a monte perché là c'è dell'altro da non fare.
         Dim sparito As String = MotivoProfiloSparito()
         If sparito IsNot Nothing Then
-            RaccontaUnAvviso(sparito)
+            NonSiPuoRiscrivere(sparito)
             Return
         End If
 
@@ -1213,7 +1278,7 @@ Public Class PannelloDocumenti
 
         Dim sparito As String = MotivoProfiloSparito()
         If sparito IsNot Nothing Then
-            RaccontaUnAvviso(sparito)
+            NonSiPuoRiscrivere(sparito)
             Return
         End If
 
@@ -1605,7 +1670,7 @@ Public Class PannelloDocumenti
         ' allora sono tutto quel che resta di quella candidatura.
         Dim sparito As String = MotivoProfiloSparito()
         If sparito IsNot Nothing Then
-            RaccontaUnAvviso(sparito)
+            NonSiPuoRiscrivere(sparito)
             Return
         End If
 

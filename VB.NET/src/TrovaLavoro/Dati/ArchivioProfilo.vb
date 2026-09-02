@@ -375,6 +375,39 @@ Namespace Dati
 
         End Function
 
+        ''' <summary>
+        ''' Se il profilo è cambiato <b>dopo</b> quella versione: nello storico ce n'è una
+        ''' più recente, e ciò che nacque da lì racconta un profilo che non è più quello di
+        ''' oggi.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È la domanda gemella di <see cref="CELaVersione"/>, e copre il caso
+        ''' opposto. Là il profilo di allora <b>non c'è più</b> — eliminato e rifatto — e i
+        ''' documenti parlano di un'altra persona. Qui il profilo <b>è cresciuto</b>: i
+        ''' documenti parlano ancora della stessa persona, ma di ieri.</para>
+        ''' <para><b>Perché il caso «cresciuto» ha smesso di essere innocuo.</b> Fino al
+        ''' 2026-09-01 questa differenza si segnalava solo sul 📄 CV base, e sulle
+        ''' candidature si taceva: dirlo a ogni salvataggio sarebbe stato un avviso a ogni
+        ''' giro, per un caso che funziona. Ma fra un salvataggio e l'altro può cambiare un
+        ''' <b>requisito eliminatorio</b> — la patente, un titolo, una disponibilità — e
+        ''' allora i giudizi di allora non sono soltanto vecchi: possono essere
+        ''' <b>sbagliati</b>, e con loro le stelle che l'utente legge per decidere se
+        ''' candidarsi. Il silenzio costava più dell'avviso.</para>
+        ''' <para>Una versione non annotata (vuota) risponde <c>False</c>, per la stessa
+        ''' ragione per cui <see cref="CELaVersione"/> risponde <c>True</c>: di un dubbio non
+        ''' si fa un allarme. E su uno storico vuoto non c'è nessun «dopo» da dichiarare.</para>
+        ''' </remarks>
+        Public Function CambiatoDopo(versione As String) As Boolean
+
+            If String.IsNullOrEmpty(versione) Then Return False
+
+            Dim ultima As String = Versioni().LastOrDefault()
+            If String.IsNullOrEmpty(ultima) Then Return False
+
+            Return Not String.Equals(ultima, versione, StringComparison.Ordinal)
+
+        End Function
+
         ''' <summary>Il profilo di una versione dello storico, così com'era quel giorno.</summary>
         Public Function CaricaVersione(versione As String) As Profilo
             Return Profilo.DaTesto(File.ReadAllText(PercorsoVersione(versione), Encoding.UTF8))

@@ -100,6 +100,11 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
 | E nemmeno la risposta d'errore che torna al client (R1-residuo) | `TrovaLavoro/Mcp/ServerMcp.vb` | si toglie `SenzaSegreti` da `ex.Message` nell'ultima rete di `RispondiAsync` | `UnaChiaveDentroUnEccezioneNonTornaAlClient` |
 | Un nome allegato tutto ASCII non salta la ripulitura dell'a capo | `TrovaLavoro/Documenti/ScrittoreEml.vb` | `PerIntestazione` torna `Codificata(…Replace(""""""…))` senza `SenzaACapo` | `UnACapoNelNomeDellAllegatoNonApreUnaRigaNuova` |
 | Un titolo abnorme non sfonda il nome della cartella | `TrovaLavoro/Dati/ArchivioOpportunita.vb` | si toglie `If costruito.Length >= Massimo Then Exit For` dallo slug | `UnTitoloAbnormeNonSfondaIlNomeDellaCartella` — rotto, cade prima l'`IOException` del sistema operativo dell'asserzione: è esattamente il danno che il tetto previene |
+| Un profilo **cresciuto** si riconosce da uno **sparito** (2026-09-02) | `TrovaLavoro/Dati/ArchivioProfilo.vb` | `CambiatoDopo` restituisce sempre `False` | `CambiatoDopoRiconosceSoloLeVersioniSuperate` |
+| «Analizza» prende il quarto mestiere | `TrovaLavoro/Ui/PannelloOpportunita.vb` | il testo del bottone perde il caso del riconfronto e resta `"Analizza"` | `IlProfiloCresciutoAccendeIlRiconfronto` |
+| La scartata resta chiusa anche al riconfronto | `TrovaLavoro/Ui/PannelloOpportunita.vb` | si toglie da `DaRiconfrontare` la riga sullo stato `Scartata` | `LaScartataNonSiRiconfronta` |
+| La porta del confronto si apre a chi i giudizi ce li ha già | `TrovaLavoro/Ui/PannelloOpportunita.vb` | `ConfrontaLaRiapertaAsync` torna a uscire appena vede `Confrontata` | `IlRiconfrontoRifaIGiudiziSenzaRileggereLAnnuncio` |
+| La riga sopra il 📄 CV base non è una didascalia | `TrovaLavoro/Ui/PannelloDocumenti.vb` | `RaccontaDaDoveViene` torna a `RaccontaLoStato(…, TestoSecondario)` per tutti i casi | `UnCvBaseDiUnProfiloVecchioLoDiceInveceDiRifarsi` |
 
 ## Tre cose imparate falsificando, che valgono più della tabella
 

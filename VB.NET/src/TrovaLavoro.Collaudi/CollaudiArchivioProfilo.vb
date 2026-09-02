@@ -145,6 +145,37 @@ Namespace Dati
         End Sub
 
         <TestMethod>
+        Public Sub CambiatoDopoRiconosceSoloLeVersioniSuperate()
+            ' Il gemello di CELaVersione, dal 2026-09-02. Là si chiede se il profilo di
+            ' allora esiste ancora — eliminato e rifatto, cioè un'altra persona; qui se ne è
+            ' arrivato uno più nuovo — la stessa persona, ma di ieri. È la domanda che
+            ' accende «Riconfronta» su una candidatura, e che toglie alla riga del 📄 CV
+            ' base il grigio delle didascalie.
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Assert.IsFalse(archivio.CambiatoDopo("2026-01-01_000000"),
+                                   "storico vuoto: non c'è nessun «dopo» da dichiarare")
+
+                    Dim p As TrovaLavoro.Dati.Profilo = ProfiloDiProva()
+                    Dim prima As String = archivio.Salva(p)
+
+                    Assert.IsFalse(archivio.CambiatoDopo(prima),
+                                   "l'unica versione che c'è è in pari con sé stessa")
+
+                    Dim dopo As String = archivio.Salva(p)
+
+                    Assert.AreNotEqual(prima, dopo, "due salvataggi lasciano due copie")
+                    Assert.IsTrue(archivio.CambiatoDopo(prima),
+                                  "e adesso la prima è superata: quel che nacque da lì è di ieri")
+                    Assert.IsFalse(archivio.CambiatoDopo(dopo),
+                                   "la seconda no: è il profilo di oggi")
+
+                    Assert.IsFalse(archivio.CambiatoDopo(""),
+                                   "di una versione non annotata non si fa un allarme")
+                End Sub)
+        End Sub
+
+        <TestMethod>
         Public Sub SenzaSalvataggioNonCEProfilo()
             ' La domanda del primo avvio (cap. 12, A2): «ce l'ho già» o «costruiamolo».
             ConArchivioTemporaneo(

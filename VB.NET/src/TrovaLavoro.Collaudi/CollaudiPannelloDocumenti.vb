@@ -303,9 +303,20 @@ Namespace Ui
 
                     Await pannello.MostraIlCvBaseAsync()
 
-                    Dim stato As String = Etichetta(pannello, "lblStatoDocumenti").Text
-                    Assert.Contains("hai cambiato il profilo", stato, "il pannello lo dice")
+                    Dim riga As Label = Etichetta(pannello, "lblStatoDocumenti")
+                    Dim stato As String = riga.Text
+                    Assert.Contains("Hai cambiato il profilo", stato, "il pannello lo dice")
                     Assert.Contains("Rigenera", stato, "e dice come si rimedia")
+
+                    ' Dal 2026-09-02 questa riga non è più una didascalia. Il grigio di
+                    ' TestoSecondario è l'inchiostro di quel che si può anche non leggere:
+                    ' metterci dentro «il CV a video ritrae un profilo che non c'è più» lo
+                    ' nascondeva in piena vista, e chi esportava mandava il ritratto di ieri
+                    ' senza saperlo. Adesso porta la parola e il colore dell'avviso (03.8).
+                    Assert.StartsWith(Segnalazioni.PrefissoAvviso, stato,
+                                      "con davanti la parola, non il solo colore")
+                    Assert.AreNotEqual(StileApp.TestoSecondario, riga.ForeColor,
+                                       "e senza il grigio delle didascalie")
                     Assert.Contains("Il ritratto del profilo.", Casella(pannello, "txtCv").Text,
                                     "intanto il CV che c'è resta a video")
                 End Function)
@@ -1626,8 +1637,14 @@ Namespace Ui
                     Assert.IsEmpty(generatore.LavoriChiesti(), "l'AI non è stata chiamata affatto")
                     Assert.Contains("non c'è più", Etichetta(pannello, "lblStatoDocumenti").Text,
                                     "e il pannello dice cos'è successo")
-                    Assert.Contains("rifai la candidatura", Etichetta(pannello, "lblStatoDocumenti").Text,
-                                    "e cosa si può fare")
+
+                    ' Dal 2026-09-02 il consiglio è cambiato perché è cambiato il programma:
+                    ' prima mandava a rifare la candidatura da capo incollando di nuovo
+                    ' l'annuncio — l'unica strada che c'era — e adesso indica «Riconfronta»,
+                    ' che rifà il confronto sull'annuncio già lì. Un messaggio che indica un
+                    ' gesto che non esiste più sarebbe peggio del silenzio.
+                    Assert.Contains("Riconfronta", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "e indica il gesto che adesso esiste")
                 End Function)
 
         End Function

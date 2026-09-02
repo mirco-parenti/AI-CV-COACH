@@ -311,18 +311,6 @@ di difetti prima della 1.0.
   adesso; ma è la cura vera se un domani i portali moltiplicano le pagine che ingannano la
   lettura di oggi. *(2026-08-23 — collaudo dal vivo di T9e, giro C; cap. 06.4;
   `LettorePagina`.)*
-- **Riconfrontare una candidatura già confrontata.** Oggi il confronto si fa una volta sola:
-  `ConfrontaLaRiapertaAsync` serve una candidatura riaperta che il confronto non ce l'ha, e su
-  una che ce l'ha non esiste nessun «confronta di nuovo». Finché il profilo cresce va bene —
-  i giudizi di allora restano spiegabili, ed è la ragione per cui la `versione_profilo` si
-  annota. Ma quando il profilo è stato **eliminato e rifatto**, quella candidatura resta
-  ferma a una persona che non c'è più: i documenti non si possono riscrivere (dal 2026-08-24
-  il pannello lo dice invece di finire in un errore dell'AI), e l'unica strada è rifarla
-  incollando di nuovo l'annuncio — che è lì, salvato, a un passo. Un «confronta di nuovo»
-  chiuderebbe il giro; da progettare con cura, perché rifare i giudizi cambia le **stelle** di
-  una candidatura che l'utente potrebbe aver già spedito, e quel numero è la cosa che non deve
-  cambiare sotto le mani senza che nessuno lo dica. *(2026-08-24 — emersa curando l'errore
-  criptico della lettera, ramo delle rifiniture prima del giro D; cap. 07.3, cap. 11.1.)*
 - **Spezzare i pannelli monolitici, rompere il ciclo `Dati` ↔ `Motore`, tipizzare gli
   artefatti JSON.** Tre debiti di **struttura** che la revisione del giro D elenca insieme e
   mette per ultimi, come opzionali. Il primo si misura: `Ui/PannelloDocumenti.vb` è di **2188
@@ -444,6 +432,23 @@ giudice per la prima volta.
 
 Idee del backlog ormai costruite. Si tengono qui (con il puntatore a dove sono narrate o
 implementate) per non perdere la storia, fuori dal backlog attivo qui sopra.
+- ✅ **Riconfrontare una candidatura già confrontata** — «Analizza» prende il suo **quarto
+  mestiere** e diventa **«Riconfronta»** quando la candidatura è stata confrontata con un
+  profilo che non è più quello: rifà il solo secondo passo sull'annuncio già strutturato,
+  senza rileggerlo e senza chiedere all'utente di ricopiare un testo che il programma ha già
+  nella sua cartella. Il gesto compare **solo quando ha una ragione** — a parità di profilo il
+  confronto direbbe le stesse cose — e mai sulla scartata. Nasce da un uso vero: cambiata la
+  **patente**, cioè un requisito **eliminatorio**, le candidature di prima mostravano ancora
+  le stelle di allora e non c'era modo di rifarle. Per questo copre anche il caso «profilo
+  **cresciuto**», che il progetto aveva scelto di tacere per non dare un avviso a ogni giro:
+  fra due salvataggi può cambiare un eliminatorio, e allora quei giudizi non sono vecchi —
+  sono un'altra risposta. La cautela annotata qui («quel numero non deve cambiare sotto le
+  mani senza che nessuno lo dica») è diventata la **conferma** prima del gesto, che elenca
+  cosa viene sostituito e cosa resta; sulla candidatura **già partita** la finestra non si
+  apre da sola e la conferma avverte che il punteggio con cui è stata spedita non resterà da
+  nessuna parte, perché il registro lo rilegge dalle cartelle invece di conservarlo.
+  *(annotata il 2026-08-24, realizzata il 2026-09-02 dopo un giro dal vivo; cap. 03 P4,
+  cap. 08; `PannelloOpportunita.DaRiconfrontare`, `ArchivioProfilo.CambiatoDopo`.)*
 - ✅ **Omissione mirata di contenuti off-target nel 🎯 CV-2** — realizzata, e in una forma che
   scioglie l'obiezione che l'aveva rimandata. Il dubbio del 2026-06-11 era che omettere fosse
   «già una *scelta*», che complica la verifica 1:1 e apre una porta all'anti-invenzione **per

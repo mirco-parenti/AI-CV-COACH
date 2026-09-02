@@ -191,8 +191,9 @@ Public Class PannelloOpportunita
 
         ' Da T9c. La candidatura riaperta al solo annuncio salta il primo passo: l'annuncio
         ' è già letto e strutturato, e rileggerlo costerebbe una chiamata per riottenere
-        ' quello che c'è già.
-        If DaConfrontare() Then
+        ' quello che c'è già. Dal 2026-09-02 la stessa scorciatoia vale per il riconfronto,
+        ' che è lo stesso secondo passo su una candidatura che il primo l'aveva già fatto.
+        If DaConfrontare() OrElse DaRiconfrontare() Then
             Await ConfrontaLaRiapertaAsync().ConfigureAwait(True)
             Return
         End If
@@ -337,6 +338,143 @@ Public Class PannelloOpportunita
     End Function
 
     ''' <summary>
+    ''' Che cosa non torna fra questa candidatura e il profilo di <b>oggi</b>, o
+    ''' <c>Nothing</c> se sono in pari.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>I casi sono due e non vanno confusi, perché uno è più grave dell'altro. Il
+    ''' profilo di allora può essere <b>sparito</b> — eliminato e rifatto, cap. 11.5 — e
+    ''' allora i giudizi raccontano un'altra persona; oppure può essere <b>cresciuto</b>, e
+    ''' allora raccontano la stessa persona di ieri. Si guarda prima lo sparito: quando una
+    ''' versione non c'è più anche <see cref="Dati.ArchivioProfilo.CambiatoDopo"/> risponde
+    ''' di sì, e il caso grave verrebbe raccontato con le parole di quello lieve.</para>
+    ''' <para><b>Perché il caso «cresciuto» adesso si dice.</b> Per un anno intero il
+    ''' programma ha taciuto: dirlo a ogni salvataggio del profilo sarebbe stato un avviso a
+    ''' ogni giro, per un caso in cui i documenti restano spiegabili. Ma un salvataggio può
+    ''' cambiare un <b>requisito eliminatorio</b> — la patente è quello che l'ha fatto
+    ''' vedere — e allora le stelle a video non sono vecchie: sono <b>un'altra risposta</b>,
+    ''' e l'utente le legge per decidere se candidarsi. Un punteggio sbagliato che tace è
+    ''' peggio di un avviso di troppo.</para>
+    ''' <para>Una candidatura senza versione annotata non è disallineata: non si sa da dove
+    ''' venga, e di un dubbio non si fa un allarme (v. <c>CELaVersione</c>, che di una
+    ''' versione vuota risponde di sì).</para>
+    ''' </remarks>
+    Private Function ProfiloDisallineato() As String
+
+        If _opportunita Is Nothing OrElse _contesto Is Nothing Then Return Nothing
+        If Not _opportunita.Confrontata Then Return Nothing
+
+        Dim versione As String = _opportunita.VersioneProfilo
+
+        If Not _contesto.Archivio.CELaVersione(versione) Then
+            Return "Questa candidatura è stata confrontata con un profilo che adesso non c'è " &
+                   "più: quello di allora è stato eliminato, e le stelle e i giudizi che vedi " &
+                   "raccontano ancora lui."
+        End If
+
+        If _contesto.Archivio.CambiatoDopo(versione) Then
+            Return "Hai cambiato il profilo dopo questo confronto: le stelle e i giudizi che " &
+                   "vedi sono quelli di allora, e se è cambiato un requisito eliminatorio — la " &
+                   "patente, un titolo, una disponibilità — il punteggio di oggi sarebbe un altro."
+        End If
+
+        Return Nothing
+
+    End Function
+
+    ''' <summary>
+    ''' Se questa candidatura si può <b>riconfrontare</b>: è già stata confrontata, ma con
+    ''' un profilo che non è più quello di oggi. Allora «Analizza» prende il suo quarto
+    ''' mestiere e diventa «Riconfronta».
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Che cosa rovescia.</b> Fino al 2026-09-02 una candidatura confrontata non
+    ''' si riconfrontava per scelta, e l'unica strada era rifarla da capo incollando di
+    ''' nuovo l'annuncio. Solo che l'annuncio <b>è già lì</b>, letto e strutturato nella sua
+    ''' cartella: rifarlo a mano era chiedere all'utente di ricopiare una cosa che il
+    ''' programma ha, e di pagare all'AI una lettura già pagata. Il motore sapeva già farlo —
+    ''' <c>ConfrontaAsync</c> vuole l'annuncio già strutturato — e come a T9c mancava solo
+    ''' il gesto.</para>
+    ''' <para><b>Perché solo quando il profilo è cambiato.</b> Un «Riconfronta» sempre acceso
+    ''' inviterebbe a ripagare una risposta che non cambierebbe: a parità di profilo e di
+    ''' annuncio il confronto è lo stesso. Il gesto compare quando ha una ragione, e la
+    ''' ragione si legge accanto al bottone.</para>
+    ''' <para>Sulla scartata no: quella è chiusa (cap. 07.3), e rifarle i conti sarebbe
+    ''' lavorare per niente — la stessa ragione per cui non le si scrive un CV. E se
+    ''' nella casella c'è del testo incollato, quello ha la precedenza: chi scrive lì vuole
+    ''' un annuncio nuovo, non ripescare questo.</para>
+    ''' </remarks>
+    Private Function DaRiconfrontare() As Boolean
+
+        If _opportunita Is Nothing OrElse Not _opportunita.Confrontata Then Return False
+        If _opportunita.Stato = StatoOpportunita.Scartata Then Return False
+        If _opportunita.AnnuncioVuoto Then Return False
+        If txtAnnuncio.Text.Trim() <> "" Then Return False
+
+        Return ProfiloDisallineato() IsNot Nothing
+
+    End Function
+
+    ''' <summary>Se questa candidatura ha già un 🎯 CV o una ✉️ lettera scritti.</summary>
+    Private Function ConDocumentiScritti() As Boolean
+
+        Return _opportunita IsNot Nothing AndAlso
+               (_opportunita.Cv IsNot Nothing OrElse _opportunita.Lettera IsNot Nothing)
+
+    End Function
+
+    ''' <summary>Se questa candidatura è già partita: spedita, o con un esito.</summary>
+    ''' <remarks>
+    ''' Conta perché il registro <b>non</b> è uno storico: si rigenera dalle cartelle delle
+    ''' candidature (<see cref="Dati.Registro"/>), quindi mostra le stelle di adesso, non
+    ''' quelle di quando la candidatura è stata mandata. Riconfrontarne una già partita fa
+    ''' sparire da ogni posto il punteggio con cui è stata spedita — e quello, a differenza
+    ''' dei giudizi, non serviva più a decidere: serviva a ricordare.
+    ''' </remarks>
+    Private Function GiaPartita() As Boolean
+
+        Return _opportunita IsNot Nothing AndAlso
+               (_opportunita.Stato = StatoOpportunita.Inviata OrElse
+                _opportunita.Stato = StatoOpportunita.Esito)
+
+    End Function
+
+    ''' <summary>
+    ''' Che cosa succede riconfrontando, e soprattutto che cosa <b>non</b> succede: la
+    ''' conferma del cap. 12.7 dice sempre anche quel che resta al suo posto, perché chi
+    ''' legge «rifai il confronto» può temere di perdere tutto il resto insieme.
+    ''' </summary>
+    Private Function SpiegazioneDelRiconfronto() As String
+
+        Dim testo As String =
+            "Rifaccio il confronto fra questo annuncio e il tuo profilo di oggi. L'annuncio " &
+            "non lo rileggo: quello resta com'è." & vbLf & vbLf &
+            "Le stelle e i giudizi che vedi adesso vengono sostituiti dai nuovi, e quelli di " &
+            "prima non si recuperano."
+
+        If ConDocumentiScritti() Then
+            testo &= vbLf & vbLf &
+                     "Il 🎯 CV e la ✉️ lettera già scritti invece non si toccano: restano dove " &
+                     "sono e si possono ancora esportare. Nascono dai giudizi di prima — per " &
+                     "allinearli al confronto nuovo, rigenerali da «Documenti»."
+        End If
+
+        ' Su una candidatura già partita c'è una perdita in più, e va detta per nome: il
+        ' registro non tiene uno storico dei punteggi, li rilegge dalle cartelle. Dopo il
+        ' riconfronto, con quante stelle questa candidatura è stata spedita non è più scritto
+        ' da nessuna parte — e quel numero non serviva a decidere, serviva a ricordare.
+        If GiaPartita() Then
+            testo &= vbLf & vbLf &
+                     "Attenzione: questa candidatura è già partita. Le stelle con cui l'hai " &
+                     "mandata non restano da nessuna parte — nemmeno nella Home, che le " &
+                     "rilegge da qui."
+        End If
+
+        Return testo
+
+    End Function
+
+    ''' <summary>
     ''' Confronta col profilo l'annuncio di una candidatura riaperta, senza rileggerlo:
     ''' è il solo secondo passo dei due (cap. 07.3; cap. 12, A5).
     ''' </summary>
@@ -347,7 +485,20 @@ Public Class PannelloOpportunita
     Public Async Function ConfrontaLaRiapertaAsync() As Task
 
         If AiAlLavoro Then Return
-        If _opportunita Is Nothing OrElse _opportunita.Confrontata Then Return
+        If _opportunita Is Nothing Then Return
+
+        ' Da T9c questa porta serviva alla sola candidatura rimasta senza giudizi. Dal
+        ' 2026-09-02 porta anche il riconfronto, e passa di qui perché è lo stesso identico
+        ' lavoro: l'annuncio è già strutturato, il profilo è quello di oggi. L'unica
+        ' differenza è che stavolta dei giudizi ci sono già, e vanno sostituiti.
+        '
+        ' La conferma non si chiede qui. Sta nel gesto — il clic sul bottone, e la finestra
+        ' che si apre alla riapertura — come per lo scarto: questo metodo è pubblico perché
+        ' lo chiama il banco, e una modale aperta qui dentro lascerebbe appeso un collaudo
+        ' che nessuno può venire a chiudere.
+        Dim riconfronto As Boolean = DaRiconfrontare()
+
+        If _opportunita.Confrontata AndAlso Not riconfronto Then Return
 
         If _pipeline Is Nothing Then
             RaccontaUnAvviso(MotivoSenzaAi())
@@ -373,11 +524,23 @@ Public Class PannelloOpportunita
                 MostraLOpportunita()
                 FasciaDIngresso(aperta:=False)
 
-                RaccontaLoStato(Archivia(candidatura, RiassuntoDelMatch()), StileApp.TestoSecondario)
+                Dim racconto As String = Archivia(candidatura, RiassuntoDelMatch())
+
+                ' I documenti nati dal confronto di prima non si toccano — potrebbero essere
+                ' quelli già spediti, ed è la stessa promessa che P6 fa al 📄 CV base — ma
+                ' non possono restare zitti: da adesso raccontano giudizi che non esistono
+                ' più, e chi esporta senza saperlo manda un testo scritto su un'altra misura.
+                If riconfronto AndAlso ConDocumentiScritti() Then
+                    RaccontaUnAvviso(racconto & vbLf &
+                                     "Il 🎯 CV e la ✉️ lettera di prima restano dove sono, ma nascono " &
+                                     "dai giudizi di allora: rigenerali da «Documenti» per allinearli.")
+                Else
+                    RaccontaLoStato(racconto, StileApp.TestoSecondario)
+                End If
 
             Catch ex As OperationCanceledException
-                ' Su disco non è cambiato niente: la cartella è quella di prima, con il suo
-                ' annuncio e senza giudizi.
+                ' Su disco non è cambiato niente: la cartella è quella di prima, com'era —
+                ' col suo annuncio, e con i giudizi di prima se ne aveva.
                 RaccontaLoStato("Confronto annullato: la candidatura resta com'era.",
                                 StileApp.TestoSecondario)
 
@@ -492,9 +655,91 @@ Public Class PannelloOpportunita
             racconto &= RiassuntoDelMatch()
         End If
 
-        RaccontaLoStato(racconto, StileApp.TestoSecondario)
+        ' Dal 2026-09-02 la riga dice anche se il profilo non è più quello del confronto, e
+        ' quando lo dice smette di essere una didascalia: prende la parola e il colore
+        ' dell'avviso, come ogni riga che segnala qualcosa che non torna (cap. 03.8).
+        Dim disallineato As String = ProfiloDisallineato()
+
+        If disallineato Is Nothing Then
+            RaccontaLoStato(racconto, StileApp.TestoSecondario)
+        Else
+            RaccontaUnAvviso(racconto & vbLf & disallineato)
+        End If
 
         AggiornaComandi()
+
+        ProponiIlRiconfronto()
+
+    End Sub
+
+    ''' <summary>
+    ''' Se il profilo non è più quello con cui questa candidatura fu confrontata, lo dice
+    ''' con una finestra e offre il gesto per rimettersi in pari.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Perché una finestra e non la sola riga di stato.</b> La riga c'è già e resta
+    ''' — ma è la stessa riga che dice «riaperta da…», e chi riapre una candidatura guarda le
+    ''' stelle grandi in mezzo allo schermo, non la didascalia sotto. Le stelle però sono
+    ''' esattamente il numero che non vale più: lasciarle leggere in silenzio è il difetto,
+    ''' e un avviso che si può non vedere non lo cura. Vale la spesa dell'interruzione perché
+    ''' il caso è raro (succede solo dopo che il profilo è cambiato) e perché la finestra
+    ''' non chiede soltanto di prendere atto: porta il gesto con sé.</para>
+    ''' <para><b>Perché non dentro la riapertura.</b> Chi apre la candidatura è la Home, che
+    ''' sta ancora eseguendo il suo clic: una modale aperta lì fermerebbe il pannello a metà
+    ''' disegno, e la finestra parlerebbe di una candidatura che chi legge non ha ancora
+    ''' visto. Con <c>BeginInvoke</c> si programma per subito dopo — a candidatura a video,
+    ''' con le sue stelle sotto gli occhi.</para>
+    ''' <para><b>Perché solo se c'è il gesto.</b> Su una candidatura scartata il profilo può
+    ''' essere cambiato quanto vuole: quella è chiusa (cap. 07.3), non le si rifanno i conti,
+    ''' e una finestra che dice una cosa a cui non si può rimediare è solo un ostacolo fra
+    ''' l'utente e quel che voleva guardare.</para>
+    ''' <para><b>Perché si guarda il Form e non l'handle.</b> L'handle qui c'è sempre, anche
+    ''' nel banco: i collaudi chiamano <c>CreateControl()</c> apposta, perché senza controlli
+    ''' realizzati metà delle proprietà mentono. Quel che il banco <b>non</b> ha è una
+    ''' finestra attorno al pannello — e quella è la condizione vera per aprire una modale,
+    ''' non un trucco per riconoscere i collaudi: una finestra che si apre ha bisogno di una
+    ''' finestra a cui appartenere. Fidarsi dell'handle avrebbe lasciato il banco appeso a
+    ''' una finestra che nessuno può venire a chiudere, che è peggio di un collaudo rosso
+    ''' perché non finisce mai. Quel che si collauda è la <b>decisione</b> —
+    ''' <see cref="ProfiloDisallineato"/> e <see cref="DaRiconfrontare"/> — non la finestra
+    ''' che ne segue.</para>
+    ''' </remarks>
+    ''' <remarks>
+    ''' <para><b>E perché non su una candidatura già partita.</b> L'avviso esiste per una
+    ''' ragione precisa: le stelle servono a decidere se candidarsi, e su un profilo vecchio
+    ''' possono dire il numero sbagliato. Ma se la candidatura è già stata spedita quella
+    ''' decisione è presa, e la finestra si metterebbe fra l'utente e una pratica che sta
+    ''' solo riguardando — per proporgli per giunta un gesto che gli farebbe perdere il
+    ''' punteggio con cui l'ha mandata. Il bottone «Riconfronta» resta dov'è per chi lo
+    ''' vuole davvero, con la sua conferma che lo dice.</para>
+    ''' </remarks>
+    Private Sub ProponiIlRiconfronto()
+
+        If Not IsHandleCreated OrElse FindForm() Is Nothing Then Return
+        If Not DaRiconfrontare() OrElse GiaPartita() Then Return
+
+        BeginInvoke(New Action(AddressOf ChiediSeRiconfrontare))
+
+    End Sub
+
+    ''' <summary>La domanda vera e propria, a candidatura già a video.</summary>
+    Private Async Sub ChiediSeRiconfrontare()
+
+        If AiAlLavoro OrElse Not DaRiconfrontare() Then Return
+
+        Dim motivo As String = ProfiloDisallineato()
+        If motivo Is Nothing Then Return
+
+        If Not FinestraConferma.Chiedi(
+            Me, "Il profilo non è più quello del confronto",
+            motivo & vbLf & vbLf &
+            "Posso rifare il confronto adesso, sull'annuncio che è già qui: non lo rileggo, " &
+            "quindi è una chiamata sola, e le stelle tornano a dire quello che direbbero oggi." &
+            vbLf & vbLf &
+            "Se preferisci farlo più tardi, il bottone «Riconfronta» resta dov'è.",
+            "Riconfronta ora") Then Return
+
+        Await ConfrontaLaRiapertaAsync()
 
     End Sub
 
@@ -767,6 +1012,13 @@ Public Class PannelloOpportunita
             AnnullaIlLavoro()
             Return
         End If
+
+        ' Il riconfronto sostituisce stelle e giudizi che l'utente ha già pagato: si chiede
+        ' prima, e si chiede qui — nel gesto, come per lo scarto (cap. 12.7) — perché il
+        ' lavoro vero è un metodo pubblico che chiama anche il banco.
+        If DaRiconfrontare() AndAlso
+           Not FinestraConferma.Chiedi(Me, "Rifai il confronto",
+                                       SpiegazioneDelRiconfronto(), "Riconfronta") Then Return
 
         Await AnalizzaLAnnuncioAsync()
 
@@ -1194,15 +1446,26 @@ Public Class PannelloOpportunita
         ' che il progetto ha già pagato in StatiOpportunita.Consentita.
         Dim soloIlConfronto As Boolean = DaConfrontare()
 
-        btnAnalizza.Text = If(occupato, "Annulla", If(soloIlConfronto, "Confronta", "Analizza"))
+        ' Il quarto mestiere, dal 2026-09-02: la candidatura confrontata con un profilo che
+        ' non è più quello di oggi. Il nome della locale non può essere «daRiconfrontare»
+        ' per la ragione scritta qui sopra — coprirebbe DaRiconfrontare(), e la chiamata
+        ' verrebbe letta come un indice su questo Boolean.
+        Dim rifareIlConfronto As Boolean = DaRiconfrontare()
+
+        btnAnalizza.Text = If(occupato, "Annulla",
+                              If(soloIlConfronto, "Confronta",
+                                 If(rifareIlConfronto, "Riconfronta", "Analizza")))
+
         btnAnalizza.Enabled = occupato OrElse
                               (conAi AndAlso conProfilo AndAlso
-                               (soloIlConfronto OrElse txtAnnuncio.Text.Trim() <> ""))
+                               (soloIlConfronto OrElse rifareIlConfronto OrElse
+                                txtAnnuncio.Text.Trim() <> ""))
 
         ' Un bottone spento senza una ragione a portata d'occhio si legge come
         ' un'applicazione rotta: la ragione si scrive sotto il bottone, dove chi voleva
         ' premerlo sta già guardando.
-        DiciPercheNonSiPuoAnalizzare(occupato, conAi, conProfilo, soloIlConfronto)
+        DiciPercheNonSiPuoAnalizzare(occupato, conAi, conProfilo,
+                                     soloIlConfronto OrElse rifareIlConfronto)
 
         txtAnnuncio.ReadOnly = occupato
         txtAnnuncio.BackColor = If(occupato, StileApp.FondoPagina, StileApp.FondoCasella)
