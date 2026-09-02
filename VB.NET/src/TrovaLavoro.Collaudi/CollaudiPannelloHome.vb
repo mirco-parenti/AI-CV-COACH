@@ -236,8 +236,8 @@ Namespace Ui
                     Assert.AreEqual("Rossi S.p.A.", righe(2).SubItems(0).Text)
 
                     Dim rossi As ListViewItem = righe(2)
-                    Assert.Contains("★★★★☆", rossi.SubItems(1).Text, "le stelle si vedono")
-                    Assert.Contains("4,1", rossi.SubItems(1).Text.Replace(".", ","), "col numero")
+                    Assert.Contains("★★★★☆", rossi.SubItems(3).Text, "le stelle si vedono")
+                    Assert.Contains("4,1", rossi.SubItems(3).Text.Replace(".", ","), "col numero")
                     Assert.AreEqual("CV mirato ✓ · lettera – · email –", rossi.SubItems(4).Text,
                                     "e a che punto è la procedura: il CV c'è, il resto no")
                     Assert.AreEqual("—", rossi.SubItems(5).Text, "non è finita in nessun modo")
@@ -571,8 +571,10 @@ Namespace Ui
                 Dim quando As ColumnHeader = coda.Columns(coda.Columns.Count - 1)
 
                 Assert.AreEqual("Azienda", azienda.Text, "la prima dice di chi si parla")
-                Assert.AreEqual("Match", coda.Columns(1).Text, "poi quanto vale")
-                Assert.AreEqual("Profilo", coda.Columns(2).Text, "e poi la spia, che è del match che parla")
+                Assert.AreEqual("Ruolo", coda.Columns(1).Text, "e la seconda di quale posto")
+                Assert.AreEqual("Profilo del match", coda.Columns(2).Text,
+                                "poi se il giudizio vale ancora — e l'intestazione dice di che parla")
+                Assert.AreEqual("Match", coda.Columns(3).Text, "e il giudizio, che la spia qualifica")
                 Assert.AreEqual("Stato", coda.Columns(4).Text, "a che punto è la procedura")
                 Assert.AreEqual("Esito", coda.Columns(5).Text, "e com'è andata")
                 Assert.AreEqual("Aggiornata", quando.Text, "l'ultima è la data")
@@ -697,9 +699,9 @@ Namespace Ui
                     Assert.AreEqual("Verdi & C., Rossi S.p.A., Bianchi S.r.l.", Aziende(pannello),
                                     "il secondo clic gira il verso")
 
-                    ' Colonna 1: il match. Le stelle partono dalla più alta, e quella senza
+                    ' Colonna 3: il match. Le stelle partono dalla più alta, e quella senza
                     ' punteggio finisce in fondo.
-                    pannello.OrdinaPer(1)
+                    pannello.OrdinaPer(3)
                     Assert.AreEqual("Rossi S.p.A., Bianchi S.r.l., Verdi & C.", Aziende(pannello))
                 End Sub, AddressOf TreCandidature)
         End Sub

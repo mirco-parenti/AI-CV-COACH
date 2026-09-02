@@ -3086,3 +3086,22 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Il testo l'ho scritto io e l'ho lasciato quasi intatto**, cambiando solo le virgolette di «Rigenera» in quelle a caporale che il programma usa per i nomi dei bottoni. Vale anche sul 📄 CV base, che da lì si rigenera allo stesso modo.
 
 > 💡 **Ho chiesto un messaggio per la schermata sbagliata, e la modifica giusta è stata spostarlo.** Il testo era buono: era il posto a non esserlo. Se l'avessi messo dov'è nato, avrei avuto un avviso perfettamente scritto che manda a cercare un bottone in una pagina che non ce l'ha — cioè un modo nuovo di far perdere tempo a chi legge, con la faccia di un aiuto.
+
+### Step 2.69 — Due colonne che parlavano della stessa cosa, e la parola che le ha legate
+
+*Ho scambiato «Match» e «Ruolo», e guardando il risultato mi è venuta un'altra idea: se la lucina parla del match, perché sono due colonne? Proponevo di fonderle. La risposta è stata no, e i motivi valevano più della proposta.*
+
+**Cosa ho fatto**
+- **Ho messo il ruolo accanto all'azienda.** Sono le due metà della stessa domanda — chi offre il posto e quale posto — e si leggono di fila come si dicono a voce. Il giudizio viene dopo: prima la lucina che lo qualifica, poi le stelle. L'ordine è **Azienda · Ruolo · Profilo del match · Match · Stato · Esito · Da dove · Aggiornata**.
+- **Ho tenuto il vuoto elastico dov'è.** Il ruolo si prende lo spazio che avanza, e ora quello spazio si apre in mezzo alla riga: a schermo intero fra il ruolo e la lucina restano ottocento pixel di bianco. L'ho guardato e va bene così — alla larghezza con cui la finestra si apre non esiste, e le colonne che contano restano nell'ordine giusto.
+- **Ho rinominato l'intestazione in «Profilo del match»** invece di fondere le due colonne. Novantotto pixel contro i centocinquanta della colonna: ci sta, e il legame lo dichiara il titolo.
+- **1435 verdi**, due falsificazioni nuove.
+
+**Cosa ho imparato**
+- **Fondere quelle due colonne non si poteva, ed è lo stesso limite di due giorni fa.** Un ListView dà **un inchiostro per cella**: lucina rossa e stelle nere insieme vorrebbero dire ridisegnare a mano tutta la coda. E le stelle rosse direbbero un'altra cosa ancora — su un punteggio il rosso si legge «vale poco», non «profilo vecchio». Misurato il resto, non restava nemmeno un vantaggio: unite occupano 225 px contro i 260 di adesso, e si perderebbe un ordinamento, perché le due domande sono diverse («quanto vale» e «quali sono da rifare»).
+- **Una falsificazione che fa cadere un collaudo solo è una notizia.** Ho rimesso le due colonne nell'ordine di prima nel designer lasciando le costanti dov'erano: è caduto **soltanto** il collaudo delle intestazioni. Il motivo è che le celle vanno dove dicono le costanti, quindi finiscono sotto l'intestazione sbagliata senza che nessun `SubItems(n)` se ne accorga — è il difetto del 2 settembre, quando si cliccava «Azienda» e la coda si ordinava per ruolo. A sorvegliarlo c'è quel collaudo e nient'altro, e adesso lo so.
+
+**Cosa ho deciso e perché**
+- **Il perché del «no» sta accanto al codice, non in una chat.** Nel designer, sopra la colonna, ci sono ora l'inchiostro unico per cella, i 225 px contro 260 e l'ordinamento che si perderebbe. Fra sei mesi quella domanda tornerà — è una domanda ragionevole — e la risposta dev'essere lì.
+
+> 💡 **La proposta era sbagliata, il problema no.** Le due colonne *sembravano* scollegate davvero: era vero il fastidio, non il rimedio che avevo in mente. Fondere sarebbe costato un controllo ridisegnato a mano, un ordinamento e un colore che mente; nominare il legame è costato una parola nell'intestazione. Quando una cosa non si può fare, vale la pena chiedersi cosa volevo davvero da quella cosa — quasi sempre c'è una strada più corta di quella che avevo immaginato.

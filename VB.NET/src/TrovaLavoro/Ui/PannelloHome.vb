@@ -98,9 +98,9 @@ Public Class PannelloHome
     ' si cliccava «Azienda» e la coda si ordinava per ruolo. Nessun collaudo lo vedeva,
     ' perché i due che provano l'ordinamento passano gli indici a mano.
     Private Const ColonnaAzienda As Integer = 0
-    Private Const ColonnaMatch As Integer = 1
+    Private Const ColonnaRuolo As Integer = 1
     Private Const ColonnaProfilo As Integer = 2
-    Private Const ColonnaRuolo As Integer = 3
+    Private Const ColonnaMatch As Integer = 3
     Private Const ColonnaStato As Integer = 4
     Private Const ColonnaEsito As Integer = 5
     Private Const ColonnaFonte As Integer = 6
@@ -690,9 +690,9 @@ Public Class PannelloHome
 
         Dim riga As New ListViewItem({
             AziendaDi(voce),
-            MatchScritto(voce),
-            spia.Scritta,
             RuoloDi(voce),
+            spia.Scritta,
+            MatchScritto(voce),
             ProceduraScritta(voce, documenti),
             EsitoScritto(voce, giorniDiAttesa),
             If(String.IsNullOrWhiteSpace(voce.Fonte), "incollato a mano", voce.Fonte),

@@ -218,7 +218,7 @@ Partial Class PannelloHome
         ' L'intestazione si può cliccare per ordinare, e il doppio clic riapre.
         Me.lvwCoda.BackColor = StileApp.FondoCasella
         Me.lvwCoda.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.lvwCoda.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colAzienda, Me.colMatch, Me.colProfilo, Me.colRuolo, Me.colStato, Me.colEsito, Me.colFonte, Me.colQuando})
+        Me.lvwCoda.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colAzienda, Me.colRuolo, Me.colProfilo, Me.colMatch, Me.colStato, Me.colEsito, Me.colFonte, Me.colQuando})
         Me.lvwCoda.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lvwCoda.Font = StileApp.FontTesto
         Me.lvwCoda.FullRowSelect = True
@@ -248,29 +248,44 @@ Partial Class PannelloHome
         Me.colAzienda.Text = "Azienda"
         Me.colAzienda.Width = 200
         '
+        'colRuolo
+        '
+        ' Segue l'azienda dal 2026-09-03: sono le due metà della stessa domanda — chi
+        ' offre il posto, e quale posto — e si leggono di fila come si dicono a voce.
+        ' È anche la colonna elastica (v. AdattaLeColonne): quel che avanza va a lei,
+        ' perché è la sola voce che si allunga davvero.
+        Me.colRuolo.Text = "Ruolo"
+        Me.colRuolo.Width = 300
+        '
+        'colProfilo
+        '
+        ' Apre la parte del giudizio e precede il match, che è di lui che parla: prima si
+        ' incontra se quel numero vale ancora, poi il numero. Fino al 2026-09-03 stavano
+        ' nell'altro verso, e a scambiarli non è stata una teoria — è che azienda e ruolo
+        ' vogliono stare vicini, e il punteggio con la sua qualifica dopo di loro.
+        ' Si chiama «Profilo del match» e non «Profilo» dal 2026-09-03: due colonne che
+        ' parlano della stessa cosa sembravano scollegate, e l'idea di fonderle in una si
+        ' fermava sul limite di sempre — un ListView dà un inchiostro per cella, e lucina
+        ' rossa e stelle nere nella stessa cella vorrebbero dire ridisegnare a mano tutta
+        ' la coda. Il legame lo dichiara l'intestazione: costa una parola, e lascia intatti
+        ' i due colori e i due ordinamenti (le due domande restano diverse — «quanto vale»
+        ' e «quali sono da rifare»).
+        ' 150 basta: la scritta più lunga — «● profilo usato: obsoleto» — misura 136 px col
+        ' carattere della coda, e l'intestazione 98; misurati, non stimati (v. i collaudi).
+        Me.colProfilo.Text = "Profilo del match"
+        Me.colProfilo.Width = 150
+        '
         'colMatch
         '
         ' Il punteggio è un numero, e i numeri si leggono incolonnati a destra come la data
         ' dell'ultima colonna. Fino al 2026-09-02 non ci arrivava, perché il match apriva la
         ' coda e la prima colonna a destra non ci va; da allora quel limite non lo tocca più
-        ' — prima ha aperto la spia, adesso l'azienda — ma l'allineamento resta a sinistra
-        ' finché non lo si guarda a video: è una misura da decidere guardando, non deducendo.
+        ' — quel posto è passato alla spia, poi all'azienda — ma l'allineamento resta a
+        ' sinistra finché non lo si guarda a video: è una misura da decidere guardando, non
+        ' deducendo.
         Me.colMatch.Text = "Match"
         Me.colMatch.Width = 110
-        '
-        'colProfilo
-        '
-        ' Segue il match, che è di lui che parla: le due colonne si leggono insieme, e in
-        ' questo verso si incontra prima il numero e poi se quel numero vale ancora.
-        ' 150 basta: la scritta più lunga — «● profilo usato: obsoleto» — misura 136 px col
-        ' carattere della coda, misurati e non stimati (v. CollaudiPannelloHome).
-        Me.colProfilo.Text = "Profilo"
-        Me.colProfilo.Width = 150
-        '
-        'colRuolo
-        '
-        Me.colRuolo.Text = "Ruolo"
-        Me.colRuolo.Width = 300
+
         '
         'colStato
         '
