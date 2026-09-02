@@ -512,6 +512,28 @@ di chiamarle provate (regola 15).*
   spedita non resterà da nessuna parte. Vale la pena rileggerla dal vivo almeno una volta per
   ciascuno dei tre casi. *(cap. 08; `PannelloOpportunita.SpiegazioneDelRiconfronto`.)*
 
+## Dal marchio senza timbro (2026-09-02)
+
+*Il banner ha perso il timbro Aviolab e il nome si è centrato; le misure non sono cambiate,
+e proprio per questo il banco non se ne accorge. Le due voci qui sotto sono quel che i 1400
+collaudi verdi **non** dicono, dichiarate invece di darle per provate (regola 15).*
+
+- **Nessun collaudo sorveglia *quale* marchio sta dentro l'eseguibile.** Quelli che ci sono
+  guardano le **misure** — 800×702 per la schermata di avvio, 1536×1348 per il banner
+  incorporato — e le misure non sono cambiate: la stessa immagine **col** timbro passerebbe
+  verde. Il 2 settembre la prova è stata fatta **a mano**, estraendo i PNG dall'assembly
+  compilato e confrontandone le impronte con i definitivi (tutt'e due «nuovo, senza timbro»),
+  ma quella verifica è vissuta in una sessione e non è entrata nel repo: un domani nessuno se
+  ne accorgerebbe. La strada, se la si vorrà, è un collaudo che guardi una **proprietà** del
+  contenuto e non un'impronta — un'impronta va rifatta a ogni ritocco del marchio e diventa
+  subito un fastidio. *(cap. 13.5; `CollaudiMarchio.LaSchermataDiAvvioEDentroLEseguibile`,
+  `CollaudiMenu.IlBannerEAncoraIncorporato`.)*
+- **La schermata di avvio e «Informazioni su…» non sono state riguardate dal vivo.** Il
+  riquadro non si sposta — l'immagine ha le stesse misure di prima, e le coordinate assolute
+  delle otto righe sotto il marchio non le tocca nessuno — ma il **contenuto** si vede solo
+  aprendo il programma. Da guardare una volta: che il nome sia centrato e che accanto non
+  resti niente. *(cap. 03.5, 13.5; `FinestraAvvio`, la finestra «Informazioni su…».)*
+
 ## Chiuse
 
 - ✅ **Il flusso D non ha più nessun segno nell'interfaccia** *(aperta il 2026-08-31, **chiusa

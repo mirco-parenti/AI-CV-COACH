@@ -32,6 +32,16 @@ alza per far stare il timbro, e con lei crescono le misure di tutti i formati de
 testata del README passa a **1200×1052**, la schermata di avvio a **800×702**. Chi rigenera
 dal prompt ottiene, come sempre, il disegno **prima** della lavorazione.
 
+**Revisione 5, 2026-09-02: il timbro esce, e il nome si mette in mezzo.** Ancora
+lavorazione e non prompt, ancora solo nella fascia del testo. Lo **stemma Aviolab** non
+compare più accanto al nome: c'era stato dodici giorni. Tolto lui, il nome non deve più far
+posto a nessuno e si **centra sull'asse**, come il sottotitolo che lo era già; il contorno
+nero del nome resta identico, spessore e chiusura. Le **misure non cambiano**, in nessuno
+dei formati: l'altezza della tela è imposta e la fascia è quel che avanza sopra il disegno,
+perciò togliere il timbro cambia soltanto *come* la fascia si riempie — e sotto la fascia il
+disegno è rimasto identico bit a bit. Dove il timbro riempiva la fascia bassa resta blu. Chi
+rigenera dal prompt ottiene, come sempre, il disegno **prima** della lavorazione.
+
 ---
 
 ## PROMPT A — illustrazione orizzontale (key visual: splash, primo avvio, README, banner)

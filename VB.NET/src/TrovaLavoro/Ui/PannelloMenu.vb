@@ -75,8 +75,10 @@ End Class
 ''' <para><b>Lo sfondo si dipinge, non si carica.</b> Dal 2026-08-30 (sera) il fondo non
 ''' è più il banner del marchio ma due cose disegnate a video: l'avorio di
 ''' <see cref="StileApp.FondoMenu"/>, e in cima <see cref="Titolo"/> e
-''' <see cref="Sottotitolo"/> — le stesse due righe del banner, centrate sull'asse e senza
-''' il timbro che sul banner sta a destra del nome. Il vantaggio non è estetico: un fondo
+''' <see cref="Sottotitolo"/> — le stesse due righe del banner, centrate sull'asse. Fino
+''' al 2026-09-02 quel «centrate» era una differenza dal banner, dove il nome stava a
+''' sinistra per far posto al timbro Aviolab: tolto il timbro dal banner, l'impaginazione
+''' è la stessa di qua e di là. Il vantaggio non è estetico: un fondo
 ''' dipinto <b>segue la finestra</b>, mentre un'immagine sola può solo starci dentro o
 ''' essere tagliata, e su una finestra panoramica il banner quasi quadrato lasciava blu ai
 ''' lati.</para>

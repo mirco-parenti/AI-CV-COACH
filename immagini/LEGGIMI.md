@@ -17,8 +17,13 @@ usare mai — è in [`../VB.NET/progetto/prompt-logo.md`](../VB.NET/progetto/pro
 disegno è a spicchi **rosso `#FA0825`** e **argento `#C0CFCB`**, i quattro colori dello
 stemma e nessun altro. Nella fascia del testo il nome è in Segoe UI Black bianco con un
 **contorno nero** spesso, che a quello spessore salda fra loro le lettere e fa della scritta
-un blocco unico; alla sua destra sta lo **stemma Aviolab come timbro**, col bordino argento;
-sotto, il sottotitolo in Segoe UI semi-grassetto **bianco pieno**. *(Dal 2026-08-30 lo sfondo
+un blocco unico, e sotto il sottotitolo in Segoe UI semi-grassetto **bianco pieno**:
+**centrati tutt'e due sull'asse dell'immagine**, e nient'altro accanto. *(Dal 2026-09-02 lo
+**stemma Aviolab non c'è più** nella fascia: stava alla destra del nome come timbro, e il
+nome gli faceva posto stando a sinistra. Tolto lui, il nome si è messo in mezzo. Le misure
+di tutti i formati sono rimaste **le stesse** — l'altezza è imposta e la fascia è quel che
+avanza sopra il disegno, quindi cambia solo come la si riempie — e il disegno sotto la
+fascia è **identico bit a bit** a prima.)* *(Dal 2026-08-30 lo sfondo
 interno non è più a spire concentriche ma a **spicchi**, con le diagonali dello scudetto
 Aviolab: il fondo del banner era `#000C38`, un blu che alla tavolozza non apparteneva. Dello
 stesso giorno è il filetto **tre volte più spesso** — una ventina di pixel sulla sorgente
@@ -29,10 +34,14 @@ testo si è alzata per far posto al timbro, e con lei sono cresciute le misure d
 formati — la testata passa da 1200×972 a 1200×1052, la schermata di avvio da 800×648 a
 800×702. Il sottotitolo, che era `#DDE5F7`, è diventato bianco pieno.)*
 
-**Lo stesso disegno vive anche dentro l'applicazione**: la schermata di avvio
+**Lo stesso disegno vive anche dentro l'applicazione**, in due risorse compilate
+nell'eseguibile — quindi cambiarle vuole una build. La schermata di avvio
 (`../VB.NET/src/TrovaLavoro/Risorse/schermata-avvio.png`, 800×702) nasce da questa sorgente
-con gli stessi valori di composizione, e cambia insieme a lei — è una risorsa compilata
-nell'eseguibile, quindi vuole una build.
+con gli stessi valori di composizione e cambia insieme a lei; accanto c'è il banner intero
+(`../VB.NET/src/TrovaLavoro/Risorse/sfondo-menu.png`, 1536×1348), che dal 2026-08-30 (sera)
+**non ha più nessun lettore nel prodotto** — il menu il suo fondo lo dipinge — e resta
+incorporato perché un giorno lo si possa riusare: si tiene allineato al marchio come gli
+altri, e un collaudo dice almeno che è integro.
 
 **Il nome sull'immagine è «TrovaLavoro»**, che è il nome del **prodotto**; `AI-CV-COACH`
 resta il nome del progetto e del repository (cap. 13.5, cap. 15 voce 3).
