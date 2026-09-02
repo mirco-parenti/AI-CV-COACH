@@ -102,9 +102,14 @@ Namespace Dati
         ''' </summary>
         ''' <remarks>
         ''' Chi guarda non pensa per stati: pensa «rifiutata», non «con esito». È il testo
-        ''' che va nella colonna «Stato» della Home e nella scheda di P4, e sta qui invece
-        ''' che nei due pannelli perché una candidatura assunta non può chiamarsi in un
-        ''' modo nell'elenco e in un altro nella sua scheda.
+        ''' che va nella scheda di P4 e nel riepilogo esportato, e sta qui invece che nei
+        ''' due pannelli perché una candidatura assunta non può chiamarsi in un modo
+        ''' nell'elenco e in un altro nella sua scheda.
+        ''' <para>Nella Home, dal 2026-09-03, questa parola sta nella colonna <b>«Esito»</b>:
+        ''' quella «Stato» ha cambiato mestiere e dice a che punto è la procedura. La coda
+        ''' non chiama più questa funzione — l'esito e lo scarto li scrive da sé, perché lì
+        ''' portano accanto anche i giorni di silenzio — ma la parola è la stessa, ed è
+        ''' questa la ragione per cui continua a vivere in un posto solo.</para>
         ''' </remarks>
         Public Shared Function EtichettaDi(stato As StatoOpportunita, esito As EsitoCandidatura?) As String
 

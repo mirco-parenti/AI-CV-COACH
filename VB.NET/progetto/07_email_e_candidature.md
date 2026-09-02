@@ -212,6 +212,15 @@ dal primo rilascio — **fatta il 2026-08-14**, v. più sotto.
   *(E aggiornamento del 2026-08-21, con **T9c**: sono arrivati anche quelli — con un
   campo `esito` nell'indice, aggiunto esattamente come il destinatario. Il debito di T6 è
   chiuso; v. «Com'è andata, e chi aspetta da troppo» più sotto.)*
+  *(Emendamento del **2026-09-03**, col blocco `documenti`: «si aggiunge una colonna senza
+  migrare niente» resta vero per la **scrittura**, ma non tutte le colonne nuove si possono
+  leggere allo stesso modo. Un campo assente vale «non lo so», e finché quel non-lo-so si
+  mostra come silenzio — la spia spenta di `versione_profilo` — l'indice vecchio si usa
+  com'è. Qui invece il non-lo-so si mostrerebbe come **«nessun documento»**, che è una
+  risposta e per giunta falsa: chi guarda leggerebbe «da fare» su un CV che ha già. Perciò
+  un indice che non porta quel blocco **si rigenera** dalle cartelle invece di essere usato.
+  Costa una scansione, non perde niente — l'indice è un riflesso — ed è la regola generale:
+  si migra quando il silenzio del file si travestirebbe da risposta.)*
 - **Chi cambia uno stato lo annota anche nell'indice** *(regola resa esplicita il
   2026-08-15, dopo un difetto)*. `registro.json` si fida di sé stesso finché **l'insieme
   delle cartelle** combacia: un cambiamento *dentro* una cartella non lo fa scattare, e
@@ -329,6 +338,14 @@ l'utente.
 - **La colonna «Stato» dice l'esito quando c'è** — «Rifiutata», non «Con esito» — e la
   stessa parola esce nel riepilogo esportato (7.3, «esce quel che si vede»). Chi guarda non
   pensa per stati.
+  *(Emendamento del **2026-09-03**: la parola è la stessa, la colonna no. «Stato» è passata
+  a dire a che punto è la **procedura** — CV mirato, lettera, email spedita — e com'è andata
+  ha una colonna sua, **«Esito»**, dove stanno anche lo scarto e i giorni di silenzio. Il
+  motivo è che le due domande sono diverse e finché rispondevano nello stesso posto se ne
+  poteva leggere una sola: «Generata» diceva che i documenti c'erano ma non se valevano
+  ancora, e «Rifiutata» copriva l'una e l'altra. Quel che l'utente **dichiara** — l'esito, lo
+  scarto — sta a destra; quel che si legge dalla **cartella** sta a sinistra. Il riepilogo
+  esportato non cambia: continua a scrivere la parola dell'esito.)*
 
 Uno stato che prima nessuno raggiungeva ha toccato anche **P7**: chi ripremeva «L'ho
 spedita» su una candidatura che aveva già un esito — per rimandare la stessa email —

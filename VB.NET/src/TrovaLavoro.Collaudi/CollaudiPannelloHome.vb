@@ -1,3 +1,4 @@
+Imports System.Drawing
 Imports System.IO
 Imports System.Linq
 Imports System.Text.Json.Nodes
@@ -98,11 +99,11 @@ Namespace Ui
             ConPannelloHome(
                 Sub(pannello, contesto)
                     Dim vecchia As ListViewItem = Coda(pannello).
-                        Single(Function(r) r.SubItems(2).Text = "Rossi S.p.A.")
+                        Single(Function(r) r.SubItems(0).Text = "Rossi S.p.A.")
 
-                    Assert.AreEqual("● profilo usato: obsoleto", vecchia.SubItems(0).Text,
+                    Assert.AreEqual("● profilo usato: obsoleto", vecchia.SubItems(2).Text,
                                     "il pallino non basta: la parola dev'esserci (cap. 03.8)")
-                    Assert.AreEqual(StileApp.RossoCritico, vecchia.SubItems(0).ForeColor,
+                    Assert.AreEqual(StileApp.RossoCritico, vecchia.SubItems(2).ForeColor,
                                     "e il rosso che si legge sull'avorio, non quello dei badge")
                     Assert.IsFalse(String.IsNullOrWhiteSpace(vecchia.ToolTipText),
                                    "il perché sta nel suggerimento della riga")
@@ -117,9 +118,9 @@ Namespace Ui
             ConPannelloHome(
                 Sub(pannello, contesto)
                     Dim mai As ListViewItem = Coda(pannello).
-                        Single(Function(r) r.SubItems(2).Text = "Bianchi S.r.l.")
+                        Single(Function(r) r.SubItems(0).Text = "Bianchi S.r.l.")
 
-                    Assert.AreEqual("", mai.SubItems(0).Text,
+                    Assert.AreEqual("", mai.SubItems(2).Text,
                                     "niente stelle, niente da qualificare: cella vuota")
                 End Sub, AddressOf DueDaGuardareConLaSpia)
 
@@ -154,16 +155,17 @@ Namespace Ui
         <TestMethod>
         Public Sub OrdinandoPerProfiloLeDaRifareSiTrovanoTutteInsieme()
 
-            ' La colonna «Profilo» apre la coda, ed è ordinabile come tutte le altre. La
+            ' La colonna «Profilo» sta in terza posizione dal 2026-09-03, ed è ordinabile
+            ' come tutte le altre. La
             ' domanda per cui uno ci clicca è una sola — «quali sono da rifare?» — e la
             ' risposta arriva al secondo clic, che gira il verso e le porta in cima.
             ConPannelloHome(
                 Sub(pannello, contesto)
-                    pannello.OrdinaPer(0)
+                    pannello.OrdinaPer(2)
                     Assert.AreEqual("Bianchi S.r.l., Verdi & C., Rossi S.p.A.", Aziende(pannello),
                                     "l'ordine è quello dell'enum: spenta, corrente, obsoleta")
 
-                    pannello.OrdinaPer(0)
+                    pannello.OrdinaPer(2)
                     Assert.AreEqual("Rossi S.p.A., Verdi & C., Bianchi S.r.l.", Aziende(pannello),
                                     "e il secondo clic mette in cima quelle da rifare")
                 End Sub, semina:=AddressOf TreSpieDiverse)
@@ -230,14 +232,16 @@ Namespace Ui
                     Assert.HasCount(3, righe, "una riga per cartella")
 
                     ' La più recente in cima: è l'ordine predefinito, per data.
-                    Assert.AreEqual("Verdi & C.", righe(0).SubItems(2).Text)
-                    Assert.AreEqual("Rossi S.p.A.", righe(2).SubItems(2).Text)
+                    Assert.AreEqual("Verdi & C.", righe(0).SubItems(0).Text)
+                    Assert.AreEqual("Rossi S.p.A.", righe(2).SubItems(0).Text)
 
                     Dim rossi As ListViewItem = righe(2)
                     Assert.Contains("★★★★☆", rossi.SubItems(1).Text, "le stelle si vedono")
                     Assert.Contains("4,1", rossi.SubItems(1).Text.Replace(".", ","), "col numero")
-                    Assert.AreEqual("Generata", rossi.SubItems(4).Text, "e lo stato")
-                    Assert.AreEqual("Indeed", rossi.SubItems(5).Text, "e da dove veniva")
+                    Assert.AreEqual("CV mirato ✓ · lettera – · email –", rossi.SubItems(4).Text,
+                                    "e a che punto è la procedura: il CV c'è, il resto no")
+                    Assert.AreEqual("—", rossi.SubItems(5).Text, "non è finita in nessun modo")
+                    Assert.AreEqual("Indeed", rossi.SubItems(6).Text, "e da dove veniva")
                 End Sub, AddressOf TreCandidature)
         End Sub
 
@@ -247,11 +251,230 @@ Namespace Ui
             ConPannelloHome(
                 Sub(pannello, contesto)
                     Dim scartata As ListViewItem = Coda(pannello).
-                        Single(Function(r) r.SubItems(2).Text = "Verdi & C.")
+                        Single(Function(r) r.SubItems(0).Text = "Verdi & C.")
 
-                    Assert.AreEqual("Scartata", scartata.SubItems(4).Text)
+                    Assert.AreEqual("Scartata", scartata.SubItems(5).Text)
                     Assert.AreEqual(StileApp.TestoSecondario, scartata.ForeColor, "scritta in grigio")
                 End Sub, AddressOf TreCandidature)
+        End Sub
+
+        ' ==================================================================
+        ' La colonna «Stato»: a che punto è la procedura (2026-09-03)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Sub LaColonnaStatoDiceAChePuntoELaProcedura()
+
+            ' Fino al 2026-09-03 questa colonna diceva il nome dello stato — «Interessante»,
+            ' «Generata» — che è come chiama le cose il programma, non chi si candida. Adesso
+            ' dice quali dei tre passi sono fatti, e i tre ci sono sempre tutti: una riga che
+            ' nomina solo quel che c'è si legge da sola più in fretta, ma in un elenco si
+            ' guarda in giù, e in giù si incolonna solo ciò che sta sempre nello stesso posto.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Assert.AreEqual("CV mirato – · lettera – · email –",
+                                    RigaDi(pannello, "Bianchi S.r.l.").SubItems(4).Text,
+                                    "confrontata e basta: nessun passo fatto")
+
+                    Assert.AreEqual("CV mirato ✓ · lettera – · email –",
+                                    RigaDi(pannello, "Rossi S.p.A.").SubItems(4).Text,
+                                    "il CV c'è, la lettera no")
+                End Sub, AddressOf TreCandidature)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LEmailSpuntaSoloQuandoLaCandidaturaEPartita()
+
+            ' A spedire è il programma di posta dell'utente: l'unica prova che l'app può
+            ' avere è la sua parola, cioè lo stato «inviata» (cap. 07.3). Una bozza pronta e
+            ' mai spedita non è una candidatura partita, e la colonna non deve dirlo.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Assert.AreEqual("CV mirato ✓ · lettera – · email ✓",
+                                    RigaDi(pannello, "Acme").SubItems(4).Text,
+                                    "spedita: la terza spunta è sua")
+
+                    Assert.AreEqual("CV mirato ✓ · lettera – · email –",
+                                    RigaDi(pannello, "Bozza S.r.l.").SubItems(4).Text,
+                                    "una bozza scritta e non spedita resta un trattino")
+                End Sub,
+                Sub(candidature)
+                    candidature.Salva(Spedita("Acme", giorniFa:=1))
+
+                    Dim conBozza As Opportunita = Candidatura("Bozza S.r.l.", 11, 3.0,
+                                                             StatoOpportunita.Generata)
+                    conBozza.Email = JsonNode.Parse("{""destinatario"": ""lavoro@bozza.example""}")
+                    candidature.Salva(conBozza)
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IDocumentiDiIeriLoDiconoAncheQuandoIlMatchEDiOggi()
+
+            ' Il caso per cui questa colonna è nata, ed è quello che il 2026-09-03 aveva
+            ' rotto la coincidenza fra le due versioni: aggiungo la patente al profilo,
+            ' rifaccio il match dalla candidatura — e la spia torna verde, giustamente,
+            ' perché il punteggio è di oggi. Ma il 🎯 CV e la ✉️ lettera sono ancora quelli
+            ' di prima, e nessuno lo diceva più.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim riga As ListViewItem = RigaDi(pannello, "Rossi S.p.A.")
+
+                    Assert.AreEqual("● profilo usato: corrente", riga.SubItems(2).Text,
+                                    "il match è stato rifatto: la spia è verde e ha ragione")
+                    Assert.AreEqual(StileApp.Successo, riga.SubItems(2).ForeColor)
+
+                    Assert.Contains("⚠ obsoleti", riga.SubItems(4).Text,
+                                    "ma i documenti sono di prima, e la colonna lo dice")
+                    Assert.AreEqual(StileApp.RossoCritico, riga.SubItems(4).ForeColor,
+                                    "in rosso, tutta la cella: un ListView colora per cella, non per parola")
+                    Assert.Contains("I documenti", riga.ToolTipText,
+                                    "e il perché per esteso sta nel suggerimento, col suo soggetto")
+                End Sub, semina:=AddressOf MatchDiOggiDocumentiDiIeri)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub CoiDocumentiInPariLaColonnaNonAggiungeNiente()
+
+            ' «Se è stato tutto generato con profilo corrente non compare nulla vicino oltre
+            ' alla spunta» (Mirco, 2026-09-03): il verde di conferma è la spunta stessa, e
+            ' una rassicurazione in più a ogni riga diventa rumore che si smette di leggere.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim riga As ListViewItem = RigaDi(pannello, "Verdi & C.")
+
+                    Assert.AreEqual("CV mirato ✓ · lettera ✓ · email –", riga.SubItems(4).Text,
+                                    "in pari: le tre spunte e nient'altro")
+                End Sub, semina:=AddressOf DocumentiInPari)
+
+        End Sub
+
+        ''' <summary>
+        ''' Una candidatura con CV e lettera nati dal profilo di <b>adesso</b>.
+        ''' </summary>
+        ''' <remarks>
+        ''' Ha una semina tutta sua e non quella grande apposta: là il profilo cambia dopo,
+        ''' e non c'è più niente in pari — il primo tentativo di questo collaudo usava
+        ''' quella, ed è caduto dicendo la verità.
+        ''' </remarks>
+        Private Shared Sub DocumentiInPari(contesto As ContestoApp)
+
+            Dim adesso As String = contesto.Archivio.Versioni().Last()
+
+            Dim inPari As Opportunita = Candidatura("Verdi & C.", 12, 2.0, StatoOpportunita.Generata)
+            inPari.Lettera = JsonNode.Parse("{""corpo"": ""Buongiorno""}")
+            inPari.VersioneProfilo = adesso
+            inPari.VersioneDeiDocumenti = adesso
+            contesto.Opportunita.Salva(inPari)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub SenzaDocumentiNonCENienteDaDichiarareObsoleto()
+
+            ' Una candidatura mai generata non ha documenti da qualificare: la spia dei
+            ' documenti resta spenta come quella del match su una mai confrontata, e la
+            ' colonna non avvisa di niente. Un ⚠ lì sarebbe un allarme su una cosa che non
+            ' esiste.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim riga As ListViewItem = RigaDi(pannello, "Bianchi S.r.l.")
+
+                    Assert.DoesNotContain("obsoleti", riga.SubItems(4).Text)
+                End Sub, semina:=AddressOf MatchDiOggiDocumentiDiIeri)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IlTestoDelloStatoCiStaNellaSuaColonna()
+
+            ' La lezione del giorno prima, applicata dove il testo è nato lungo: quel che non
+            ' ci sta in una cella non va a capo, sparisce — e a sparire è la coda, cioè
+            ' proprio l'avviso. Qui si misura il testo che il pannello scrive davvero contro
+            ' la larghezza che il designer dà alla colonna.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim coda As ListView = Lista(pannello)
+                    Dim colonna As Integer = coda.Columns(4).Width
+
+                    For Each riga As ListViewItem In coda.Items
+                        Dim serve As Integer = TextRenderer.MeasureText(
+                            riga.SubItems(4).Text, coda.Font).Width
+
+                        Assert.IsLessThanOrEqualTo(colonna - MargineDellaCella, serve,
+                                                   $"«{riga.SubItems(4).Text}» non ci sta")
+                    Next
+                End Sub, semina:=AddressOf MatchDiOggiDocumentiDiIeri)
+
+        End Sub
+
+        ''' <summary>
+        ''' Quanto un ListView si tiene per sé ai lati di una cella: il testo comincia
+        ''' rientrato, e una colonna larga quanto il testo lo taglia lo stesso.
+        ''' </summary>
+        Private Const MargineDellaCella As Integer = 8
+
+        <TestMethod>
+        Public Sub OrdinandoPerStatoVengonoPrimaQuelleIndietro()
+
+            ' La domanda per cui si clicca questa colonna è «cosa mi manca da fare»: prima
+            ' chi è più indietro. Il secondo clic gira il verso, come su ogni altra.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    pannello.OrdinaPer(4)
+                    Assert.AreEqual("Bianchi S.r.l., Rossi S.p.A., Verdi & C.", Aziende(pannello),
+                                    "zero passi, uno, due")
+
+                    pannello.OrdinaPer(4)
+                    Assert.AreEqual("Verdi & C., Rossi S.p.A., Bianchi S.r.l.", Aziende(pannello),
+                                    "e il secondo clic gira")
+                End Sub, semina:=AddressOf MatchDiOggiDocumentiDiIeri)
+
+        End Sub
+
+        ''' <summary>
+        ''' Tre candidature con tre procedure diverse, e il profilo cambiato in mezzo: una
+        ''' mai generata, una col solo CV di ieri e il match rifatto oggi, una con CV e
+        ''' lettera in pari.
+        ''' </summary>
+        ''' <remarks>
+        ''' Le aziende sono scelte perché <b>nessun altro ordinamento</b> dia la sequenza
+        ''' dell'avanzamento: per azienda verrebbe «Bianchi, Rossi, Verdi» — che è la stessa,
+        ''' e per questo Rossi ha una data più recente di Verdi e stelle più alte, così né
+        ''' l'ordine per data né quello per match la ripetono.
+        ''' </remarks>
+        Private Shared Sub MatchDiOggiDocumentiDiIeri(contesto As ContestoApp)
+
+            Dim diIeri As String = contesto.Archivio.Versioni().Last()
+
+            ' Il CV e la lettera nascono ieri, insieme.
+            Dim inPari As Opportunita = Candidatura("Verdi & C.", 12, 2.0, StatoOpportunita.Generata)
+            inPari.Lettera = JsonNode.Parse("{""corpo"": ""Buongiorno""}")
+            inPari.VersioneProfilo = diIeri
+            inPari.VersioneDeiDocumenti = diIeri
+            contesto.Opportunita.Salva(inPari)
+
+            Dim soloIlCv As Opportunita = Candidatura("Rossi S.p.A.", 14, 4.5, StatoOpportunita.Generata)
+            soloIlCv.VersioneProfilo = diIeri
+            soloIlCv.VersioneDeiDocumenti = diIeri
+            Dim dove As String = contesto.Opportunita.Salva(soloIlCv)
+
+            Dim maiGenerata As Opportunita = Candidatura("Bianchi S.r.l.", 11, 1.0,
+                                                        StatoOpportunita.Interessante)
+            maiGenerata.VersioneProfilo = diIeri
+            contesto.Opportunita.Salva(maiGenerata)
+
+            ' Il profilo cambia — è la patente aggiunta — e su una sola delle tre si rifà il
+            ' match: quella torna in pari col punteggio e resta indietro coi documenti.
+            contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+
+            Dim riconfrontata As Opportunita = contesto.Opportunita.Carica(dove)
+            riconfrontata.VersioneProfilo = contesto.Archivio.Versioni().Last()
+            contesto.Opportunita.Salva(riconfrontata)
+
         End Sub
 
         <TestMethod>
@@ -334,27 +557,31 @@ Namespace Ui
             ' sotto l'altra invece di ballare con la lunghezza del testo accanto. La data ci
             ' arriva; e chi apre la coda non ci arriverebbe comunque — Windows tiene la prima
             ' colonna di una lista sempre a sinistra e WinForms rimette Left da sé appena si
-            ' prova ad assegnare altro. Dal 2026-09-02 quel posto è della spia, che è testo e
-            ' a sinistra ci sta di suo: il limite c'è ancora, ma non morde più nessuno.
+            ' prova ad assegnare altro. Dal 2026-09-03 quel posto è dell'azienda, che è testo
+            ' e a sinistra ci sta di suo: il limite c'è ancora, ma non morde più nessuno.
             Using pannello As New PannelloHome()
 
                 Dim coda As ListView = DirectCast(
                     pannello.Controls.Find("lvwCoda", searchAllChildren:=True).Single(), ListView)
 
-                ' Le colonne si prendono per posizione, che è come le dichiara il designer:
-                ' la prima è «Profilo», la seconda «Match», l'ultima «Aggiornata».
-                Dim profilo As ColumnHeader = coda.Columns(0)
+                ' Le colonne si prendono per posizione, che è come le dichiara il designer.
+                ' L'ordine è quello deciso il 2026-09-03: prima di chi è l'annuncio, poi
+                ' quanto vale, poi se quel valore è ancora buono.
+                Dim azienda As ColumnHeader = coda.Columns(0)
                 Dim quando As ColumnHeader = coda.Columns(coda.Columns.Count - 1)
 
-                Assert.AreEqual("Profilo", profilo.Text, "la prima è la spia")
-                Assert.AreEqual("Match", coda.Columns(1).Text, "e il punteggio la segue")
+                Assert.AreEqual("Azienda", azienda.Text, "la prima dice di chi si parla")
+                Assert.AreEqual("Match", coda.Columns(1).Text, "poi quanto vale")
+                Assert.AreEqual("Profilo", coda.Columns(2).Text, "e poi la spia, che è del match che parla")
+                Assert.AreEqual("Stato", coda.Columns(4).Text, "a che punto è la procedura")
+                Assert.AreEqual("Esito", coda.Columns(5).Text, "e com'è andata")
                 Assert.AreEqual("Aggiornata", quando.Text, "l'ultima è la data")
 
                 Assert.AreEqual(HorizontalAlignment.Right, quando.TextAlign,
                                 "«Aggiornata» si legge incolonnata a destra")
 
-                profilo.TextAlign = HorizontalAlignment.Right
-                Assert.AreEqual(HorizontalAlignment.Left, profilo.TextAlign,
+                azienda.TextAlign = HorizontalAlignment.Right
+                Assert.AreEqual(HorizontalAlignment.Left, azienda.TextAlign,
                                 "e la prima colonna resta a sinistra per quanto gliela si cambi")
 
             End Using
@@ -368,13 +595,13 @@ Namespace Ui
                     Dim mostra As ComboBox = Tendina(pannello, "cboMostra")
 
                     mostra.SelectedItem = "Generate"
-                    Assert.AreEqual("Rossi S.p.A.", Coda(pannello).Single().SubItems(2).Text)
+                    Assert.AreEqual("Rossi S.p.A.", Coda(pannello).Single().SubItems(0).Text)
 
                     mostra.SelectedItem = "Da completare"
-                    Assert.AreEqual("Bianchi S.r.l.", Coda(pannello).Single().SubItems(2).Text)
+                    Assert.AreEqual("Bianchi S.r.l.", Coda(pannello).Single().SubItems(0).Text)
 
                     mostra.SelectedItem = "Scartate"
-                    Assert.AreEqual("Verdi & C.", Coda(pannello).Single().SubItems(2).Text)
+                    Assert.AreEqual("Verdi & C.", Coda(pannello).Single().SubItems(0).Text)
 
                     mostra.SelectedItem = "Tutte"
                     Assert.HasCount(3, Coda(pannello))
@@ -395,7 +622,7 @@ Namespace Ui
                     Dim stelle As ComboBox = Tendina(pannello, "cboStelle")
 
                     stelle.SelectedItem = "almeno 3 ★"
-                    Assert.AreEqual("Rossi S.p.A.", Coda(pannello).Single().SubItems(2).Text,
+                    Assert.AreEqual("Rossi S.p.A.", Coda(pannello).Single().SubItems(0).Text,
                                     "solo quella da 4,1")
 
                     stelle.SelectedItem = "almeno 2 ★"
@@ -414,7 +641,7 @@ Namespace Ui
                 Sub(pannello, contesto)
                     Tendina(pannello, "cboMostra").SelectedItem = "Generate"
                     Tendina(pannello, "cboStelle").SelectedItem = "almeno 4 ★"
-                    Assert.AreEqual("Rossi S.p.A.", Coda(pannello).Single().SubItems(2).Text)
+                    Assert.AreEqual("Rossi S.p.A.", Coda(pannello).Single().SubItems(0).Text)
 
                     Tendina(pannello, "cboMostra").SelectedItem = "Da completare"
                     Assert.IsEmpty(Coda(pannello), "da completare ce n'è una, ma vale 2,3")
@@ -431,7 +658,7 @@ Namespace Ui
                     Assert.HasCount(2, Coda(pannello), "senza filtro ci sono entrambe")
 
                     Tendina(pannello, "cboStelle").SelectedItem = "almeno 1 ★"
-                    Assert.AreEqual("Rossi S.p.A.", Coda(pannello).Single().SubItems(2).Text,
+                    Assert.AreEqual("Rossi S.p.A.", Coda(pannello).Single().SubItems(0).Text,
                                     "quella mai confrontata resta fuori")
                 End Sub,
                 Sub(candidature)
@@ -463,10 +690,10 @@ Namespace Ui
                     ' 2026-09-02 i due numeri qui sotto erano 1 e 0, e le costanti del
                     ' pannello dicevano lo stesso — sbagliate tutte e due allo stesso modo,
                     ' che è il solo modo in cui un collaudo così può restare verde.
-                    pannello.OrdinaPer(2)
+                    pannello.OrdinaPer(0)
                     Assert.AreEqual("Bianchi S.r.l., Rossi S.p.A., Verdi & C.", Aziende(pannello))
 
-                    pannello.OrdinaPer(2)
+                    pannello.OrdinaPer(0)
                     Assert.AreEqual("Verdi & C., Rossi S.p.A., Bianchi S.r.l.", Aziende(pannello),
                                     "il secondo clic gira il verso")
 
@@ -514,7 +741,7 @@ Namespace Ui
                     AddHandler pannello.CandidaturaScelta,
                         Sub(mittente, e) uscita = e.Candidatura
 
-                    Coda(pannello).Single(Function(r) r.SubItems(2).Text = "Rossi S.p.A.").Selected = True
+                    Coda(pannello).Single(Function(r) r.SubItems(0).Text = "Rossi S.p.A.").Selected = True
                     Bottone(pannello, "btnApriCandidatura").PerformClick()
 
                     Assert.IsNotNull(uscita, "la candidatura è arrivata a chi mostra P4")
@@ -565,7 +792,7 @@ Namespace Ui
             ConPannelloHome(
                 Sub(pannello, contesto)
                     Dim voce As VoceRegistro = DirectCast(
-                        Coda(pannello).Single(Function(r) r.SubItems(2).Text = "Rossi S.p.A.").Tag,
+                        Coda(pannello).Single(Function(r) r.SubItems(0).Text = "Rossi S.p.A.").Tag,
                         VoceRegistro)
 
                     Dim domanda As String = PannelloHome.SpiegazioneDellEliminazione(voce)
@@ -645,7 +872,7 @@ Namespace Ui
                     AddHandler pannello.CandidaturaScelta, Sub(mittente, e) aperta = True
 
                     Dim spostata As String = contesto.Opportunita.Elenco().First()
-                    Coda(pannello).Single(Function(r) r.SubItems(2).Text = "Rossi S.p.A.").Selected = True
+                    Coda(pannello).Single(Function(r) r.SubItems(0).Text = "Rossi S.p.A.").Selected = True
 
                     Directory.Move(spostata, spostata & "-altrove")
                     Bottone(pannello, "btnApriCandidatura").PerformClick()
@@ -675,7 +902,7 @@ Namespace Ui
                     pannello.Aggiorna()
 
                     Assert.HasCount(4, Coda(pannello))
-                    Assert.AreEqual("Neri S.p.A.", Coda(pannello).First().SubItems(2).Text,
+                    Assert.AreEqual("Neri S.p.A.", Coda(pannello).First().SubItems(0).Text,
                                     "ed è la più recente")
                 End Sub, AddressOf TreCandidature)
         End Sub
@@ -745,16 +972,16 @@ Namespace Ui
                     ' La riga stessa lo dice, e non solo col colore: un colore da solo si
                     ' legge «importante» tanto quanto «in ritardo».
                     Dim ferma As ListViewItem = Coda(pannello).
-                        Single(Function(r) r.SubItems(2).Text = "Acme")
-                    Assert.Contains("20 gg", ferma.SubItems(4).Text)
+                        Single(Function(r) r.SubItems(0).Text = "Acme")
+                    Assert.Contains("20 gg", ferma.SubItems(5).Text)
 
                     Dim fresca As ListViewItem = Coda(pannello).
-                        Single(Function(r) r.SubItems(2).Text = "Bianchi")
-                    Assert.AreEqual("Inviata", fresca.SubItems(4).Text, "quella di ieri no")
+                        Single(Function(r) r.SubItems(0).Text = "Bianchi")
+                    Assert.AreEqual("—", fresca.SubItems(5).Text, "quella di ieri no")
 
                     ' E si isolano dal filtro, che è quello che serve su una coda lunga.
                     Tendina(pannello, "cboMostra").SelectedItem = "Da sollecitare"
-                    Assert.AreEqual("Acme", Coda(pannello).Single().SubItems(2).Text)
+                    Assert.AreEqual("Acme", Coda(pannello).Single().SubItems(0).Text)
                 End Sub,
                 Sub(candidature)
                     candidature.Salva(Spedita("Acme", giorniFa:=20))
@@ -782,7 +1009,7 @@ Namespace Ui
                                    "una risposta è arrivata: l'attesa è finita, anche se è un no")
 
                     Dim riga As ListViewItem = Coda(pannello).Single()
-                    Assert.AreEqual("Rifiutata", riga.SubItems(4).Text,
+                    Assert.AreEqual("Rifiutata", riga.SubItems(5).Text,
                                     "e la colonna dice com'è andata, non «con esito»")
 
                     Assert.Contains("1 con esito", Etichetta(pannello, "lblContatori").Text)
@@ -826,16 +1053,34 @@ Namespace Ui
 
         Private Shared Function Coda(pannello As Control) As List(Of ListViewItem)
 
-            Dim elenco As ListView = DirectCast(
+            Return Lista(pannello).Items.Cast(Of ListViewItem)().ToList()
+
+        End Function
+
+        ''' <summary>La coda come controllo, per chi deve guardare le colonne e non le righe.</summary>
+        Private Shared Function Lista(pannello As Control) As ListView
+
+            Return DirectCast(
                 pannello.Controls.Find("lvwCoda", searchAllChildren:=True).Single(), ListView)
 
-            Return elenco.Items.Cast(Of ListViewItem)().ToList()
+        End Function
+
+        ''' <summary>La riga di quell'azienda; fallisce se non c'è o se ce n'è più d'una.</summary>
+        ''' <remarks>
+        ''' Non può chiamarsi «Riga»: in VB una locale con quel nome — e in questi collaudi
+        ''' ce ne sono tre — coprirebbe la funzione, e la chiamata verrebbe letta come un
+        ''' indice sul <c>ListViewItem</c> (BC30367). È la trappola che il progetto ha già
+        ''' pagato altrove, v. <c>StatiOpportunita.DaNome</c>.
+        ''' </remarks>
+        Private Shared Function RigaDi(pannello As Control, azienda As String) As ListViewItem
+
+            Return Coda(pannello).Single(Function(r) r.SubItems(0).Text = azienda)
 
         End Function
 
         ''' <summary>Le aziende nell'ordine in cui la coda le mostra.</summary>
         Private Shared Function Aziende(pannello As Control) As String
-            Return String.Join(", ", Coda(pannello).Select(Function(r) r.SubItems(2).Text))
+            Return String.Join(", ", Coda(pannello).Select(Function(r) r.SubItems(0).Text))
         End Function
 
         Private Shared Function Bottone(pannello As Control, nome As String) As Button

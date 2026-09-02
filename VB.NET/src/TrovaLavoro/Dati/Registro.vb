@@ -89,8 +89,48 @@ Namespace Dati
         ''' una versione vuota: la spia resta <b>spenta</b>, che è la risposta giusta per
         ''' «non lo so» e non costringe a buttare via il file. Al primo giro di ricognizione
         ''' delle cartelle la voce si riscrive da <see cref="Da"/> e il campo torna.</para>
+        ''' <para>Dal 2026-09-03 quel giro arriva <b>subito</b> per i file di ieri, che non
+        ''' portano nemmeno il blocco dei documenti e fanno rigenerare l'indice
+        ''' (<see cref="DiceDeiDocumenti"/>). Il ripiego qui sopra resta per il caso che lo
+        ''' merita davvero: un file corretto a mano, a cui manchi questa sola riga.</para>
         ''' </remarks>
         Public Property VersioneProfilo As String
+
+        ''' <summary>
+        ''' Se il 🎯 CV mirato e la ✉️ lettera sono stati scritti, e con quale versione di
+        ''' profilo: è quel che la colonna «Stato» della Home racconta (cap. 07.3).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Sono tre campi e una domanda sola — <b>a che punto è questa candidatura,
+        ''' e quel che ha addosso vale ancora?</b> — e stanno insieme perché insieme si
+        ''' scrivono e insieme si leggono. L'invio non è qui: quello lo dice già lo
+        ''' <see cref="Stato"/>, ed è la parola dell'utente, non un file su disco.</para>
+        ''' <para>La versione è quella dei <b>documenti</b>
+        ''' (<see cref="Opportunita.VersioneDeiDocumenti"/>), non quella del confronto: dal
+        ''' 2026-09-03 le due possono divergere, e la Home dev'essere in grado di dire il
+        ''' caso che le ha separate — match rifatto oggi, documenti di ieri.</para>
+        ''' </remarks>
+        Public Property CEIlCvMirato As Boolean
+        Public Property CELaLettera As Boolean
+        Public Property VersioneDeiDocumenti As String
+
+        ''' <summary>
+        ''' Se la voce, com'era scritta nel file, sapeva dire dei documenti.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Un <c>registro.json</c> scritto prima del 2026-09-03 non ha il blocco
+        ''' <c>documenti</c>, e riletto darebbe di ogni candidatura la stessa risposta:
+        ''' nessun documento. Non è un dato mancante come gli altri — è un dato
+        ''' <b>sbagliato</b>, perché «no» e «non lo so» in quella colonna si scrivono
+        ''' diversi, e chi guarda leggerebbe «da fare» su un CV che ha già.</para>
+        ''' <para>Per questo un registro con anche una sola voce muta si
+        ''' <b>rigenera</b> invece di essere usato (<see cref="ArchivioRegistro.Carica"/>):
+        ''' l'indice è un riflesso delle cartelle, rifarlo costa una scansione e non perde
+        ''' niente. È la differenza fra questo campo e <see cref="VersioneProfilo"/>, che
+        ''' quando manca lascia la spia <b>spenta</b> — lì il silenzio è una risposta
+        ''' onesta, qui sarebbe una bugia.</para>
+        ''' </remarks>
+        Public Property DiceDeiDocumenti As Boolean
 
         ''' <summary>Quando la cartella è nata e quando è stata toccata l'ultima volta.</summary>
         Public Property Creata As Date
@@ -145,6 +185,10 @@ Namespace Dati
                 .Stelle = opportunita.Match?.Stelle,
                 .GateEliminatorio = opportunita.Match IsNot Nothing AndAlso opportunita.Match.GateEliminatorio,
                 .VersioneProfilo = opportunita.VersioneProfilo,
+                .CEIlCvMirato = opportunita.Cv IsNot Nothing,
+                .CELaLettera = opportunita.Lettera IsNot Nothing,
+                .VersioneDeiDocumenti = opportunita.VersioneDeiDocumenti,
+                .DiceDeiDocumenti = True,
                 .Creata = opportunita.Creata,
                 .Aggiornata = opportunita.Aggiornata}
 
@@ -188,6 +232,10 @@ Namespace Dati
                 {"stelle", Stelle},
                 {"gate_eliminatorio", GateEliminatorio},
                 {"versione_profilo", VersioneProfilo},
+                {"documenti", New JsonObject From {
+                    {"cv_mirato", CEIlCvMirato},
+                    {"lettera", CELaLettera},
+                    {"versione_profilo", VersioneDeiDocumenti}}},
                 {"creata", CampiJson.Quando(Creata)},
                 {"aggiornata", CampiJson.Quando(Aggiornata)}}
 
@@ -212,6 +260,11 @@ Namespace Dati
             Dim esito As EsitoCandidatura? = EsitiCandidatura.DaNome(CampiJson.Testo(scritta, "esito"))
             EsitiCandidatura.Concorda(letto, esito)
 
+            ' Il blocco dei documenti c'è dal 2026-09-03. Che manchi non si legge come
+            ' «nessun documento» ma come «questo file non lo sa dire», e chi carica il
+            ' registro rifà l'indice dalle cartelle (v. DiceDeiDocumenti).
+            Dim documenti As JsonObject = TryCast(CampiJson.Nodo(scritta, "documenti"), JsonObject)
+
             Dim voce As New VoceRegistro With {
                 .Cartella = cartella.Trim(),
                 .Stato = letto,
@@ -225,6 +278,10 @@ Namespace Dati
                 .Stelle = CampiJson.Numero(scritta, "stelle"),
                 .GateEliminatorio = CampiJson.Vero(scritta, "gate_eliminatorio"),
                 .VersioneProfilo = CampiJson.Testo(scritta, "versione_profilo"),
+                .CEIlCvMirato = CampiJson.Vero(documenti, "cv_mirato"),
+                .CELaLettera = CampiJson.Vero(documenti, "lettera"),
+                .VersioneDeiDocumenti = CampiJson.Testo(documenti, "versione_profilo"),
+                .DiceDeiDocumenti = documenti IsNot Nothing,
                 .Creata = CampiJson.Istante(scritta, "creata"),
                 .Aggiornata = CampiJson.Istante(scritta, "aggiornata")}
 
@@ -262,6 +319,21 @@ Namespace Dati
 
         ''' <summary>Cosa c'è da sapere; <c>Nothing</c> se non c'è niente da dire.</summary>
         Public Property Avviso As String
+
+        ''' <summary>
+        ''' Se ogni voce sa dire tutto quel che l'indice di oggi racconta. Un registro
+        ''' scritto da una versione precedente non lo sa, e va rifatto invece che usato
+        ''' (v. <see cref="VoceRegistro.DiceDeiDocumenti"/>).
+        ''' </summary>
+        ''' <remarks>
+        ''' Un registro <b>vuoto</b> è completo: non ha voci mute perché non ha voci, e
+        ''' rigenerarlo darebbe lo stesso vuoto dopo aver scandito la cartella per niente.
+        ''' </remarks>
+        Public ReadOnly Property SaDireTutto As Boolean
+            Get
+                Return Voci.All(Function(v) v.DiceDeiDocumenti)
+            End Get
+        End Property
 
         ''' <summary>La voce di quella cartella, o <c>Nothing</c>.</summary>
         Public Function Trova(cartella As String) As VoceRegistro
@@ -455,7 +527,12 @@ Namespace Dati
                 Dim letto As Registro = Registro.DaJson(
                     File.ReadAllText(_cartella.FileRegistro, Encoding.UTF8))
 
-                If letto.Combacia(cartelle.Select(Function(c) Path.GetFileName(c))) Then Return letto
+                ' Due modi di essere fuori corso, e uno solo di andare bene: l'indice deve
+                ' descrivere esattamente le cartelle che ci sono, e saper dire di ognuna
+                ' tutto quel che oggi la coda mostra. Il secondo controllo è del
+                ' 2026-09-03, con il blocco dei documenti (v. VoceRegistro).
+                If letto.Combacia(cartelle.Select(Function(c) Path.GetFileName(c))) AndAlso
+                   letto.SaDireTutto Then Return letto
 
             Catch ex As Exception When TypeOf ex Is JsonException OrElse TypeOf ex Is IOException _
                                        OrElse TypeOf ex Is UnauthorizedAccessException

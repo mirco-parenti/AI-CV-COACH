@@ -38,6 +38,7 @@ Partial Class PannelloHome
         Me.colAzienda = New System.Windows.Forms.ColumnHeader()
         Me.colRuolo = New System.Windows.Forms.ColumnHeader()
         Me.colStato = New System.Windows.Forms.ColumnHeader()
+        Me.colEsito = New System.Windows.Forms.ColumnHeader()
         Me.colFonte = New System.Windows.Forms.ColumnHeader()
         Me.colQuando = New System.Windows.Forms.ColumnHeader()
         Me.pnlAzioni = New System.Windows.Forms.Panel()
@@ -217,7 +218,7 @@ Partial Class PannelloHome
         ' L'intestazione si può cliccare per ordinare, e il doppio clic riapre.
         Me.lvwCoda.BackColor = StileApp.FondoCasella
         Me.lvwCoda.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.lvwCoda.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colProfilo, Me.colMatch, Me.colAzienda, Me.colRuolo, Me.colStato, Me.colFonte, Me.colQuando})
+        Me.lvwCoda.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colAzienda, Me.colMatch, Me.colProfilo, Me.colRuolo, Me.colStato, Me.colEsito, Me.colFonte, Me.colQuando})
         Me.lvwCoda.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lvwCoda.Font = StileApp.FontTesto
         Me.lvwCoda.FullRowSelect = True
@@ -233,34 +234,38 @@ Partial Class PannelloHome
         Me.lvwCoda.UseCompatibleStateImageBehavior = False
         Me.lvwCoda.View = System.Windows.Forms.View.Details
         '
-        'colProfilo
+        'colAzienda
         '
-        ' Apre la coda, e il match la segue: deciso a video il 2026-09-02, guardando le tre
-        ' righe affiancate. Le due colonne vanno lette insieme — è del match che la spia
-        ' parla — e in questo verso si incontra prima la qualifica e poi il numero
-        ' qualificato, invece del contrario.
+        ' Apre la coda dal 2026-09-03: è il nome con cui una candidatura si chiama quando
+        ' se ne parla («quella della Rossi»), ed è da lì che l'occhio la cerca in un elenco.
+        ' Prima aprivano la spia e il match — cioè un giudizio su una riga di cui non si era
+        ' ancora detto il soggetto.
         ' Windows tiene la prima colonna di una lista sempre allineata a sinistra (WinForms
         ' rimette Left da sé appena si prova ad assegnare altro): qui non costa niente,
         ' perché è testo, e il testo a sinistra ci sta di suo.
-        ' La larghezza è 190 e non 170 da quando le parole della spia sono diventate
-        ' «profilo usato: corrente» e «profilo usato: obsoleto».
-        Me.colProfilo.Text = "Profilo"
-        Me.colProfilo.Width = 190
+        ' 200 e non più 250: i 50 px vanno alle due colonne nuove, e sull'azienda si
+        ' perde solo aria — v. il commento in cima ad AdattaLeColonne.
+        Me.colAzienda.Text = "Azienda"
+        Me.colAzienda.Width = 200
         '
         'colMatch
         '
         ' Il punteggio è un numero, e i numeri si leggono incolonnati a destra come la data
         ' dell'ultima colonna. Fino al 2026-09-02 non ci arrivava, perché il match apriva la
-        ' coda e la prima colonna a destra non ci va; adesso che apre la spia il limite non
-        ' lo tocca più, ma l'allineamento resta a sinistra finché non lo si guarda a video —
-        ' è una misura da decidere guardando, non deducendo.
+        ' coda e la prima colonna a destra non ci va; da allora quel limite non lo tocca più
+        ' — prima ha aperto la spia, adesso l'azienda — ma l'allineamento resta a sinistra
+        ' finché non lo si guarda a video: è una misura da decidere guardando, non deducendo.
         Me.colMatch.Text = "Match"
-        Me.colMatch.Width = 130
+        Me.colMatch.Width = 110
         '
-        'colAzienda
+        'colProfilo
         '
-        Me.colAzienda.Text = "Azienda"
-        Me.colAzienda.Width = 250
+        ' Segue il match, che è di lui che parla: le due colonne si leggono insieme, e in
+        ' questo verso si incontra prima il numero e poi se quel numero vale ancora.
+        ' 150 basta: la scritta più lunga — «● profilo usato: obsoleto» — misura 136 px col
+        ' carattere della coda, misurati e non stimati (v. CollaudiPannelloHome).
+        Me.colProfilo.Text = "Profilo"
+        Me.colProfilo.Width = 150
         '
         'colRuolo
         '
@@ -269,13 +274,26 @@ Partial Class PannelloHome
         '
         'colStato
         '
+        ' Dal 2026-09-03 dice a che punto è la procedura — «CV mirato ✓ · lettera ✓ · email
+        ' ✓» — e non più il nome dello stato. 250 px perché la riga più lunga, quella con in
+        ' coda l'avviso «⚠ obsoleti», ne misura 239: è la lezione del giorno prima, quando
+        ' due righe di stato tagliavano in silenzio proprio la parte che diceva cosa fare.
         Me.colStato.Text = "Stato"
-        Me.colStato.Width = 130
+        Me.colStato.Width = 250
+        '
+        'colEsito
+        '
+        ' Nata il 2026-09-03 dalla colonna «Stato», che ha cambiato mestiere. Tiene le due
+        ' cose che i file non sanno e le dice l'utente — com'è finita e se ha lasciato
+        ' perdere — più i giorni d'attesa di una spedita senza risposta. «Assunto 🎉» è la
+        ' voce più larga con 65 px.
+        Me.colEsito.Text = "Esito"
+        Me.colEsito.Width = 100
         '
         'colFonte
         '
         Me.colFonte.Text = "Da dove"
-        Me.colFonte.Width = 130
+        Me.colFonte.Width = 110
         '
         'colQuando
         '
@@ -283,7 +301,8 @@ Partial Class PannelloHome
         ' uno sotto l'altro invece di ballare con la lunghezza del testo accanto.
         Me.colQuando.Text = "Aggiornata"
         Me.colQuando.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
-        Me.colQuando.Width = 130
+        Me.colQuando.Width = 110
+
         '
         'pnlAzioni
         '
@@ -389,6 +408,7 @@ Partial Class PannelloHome
     Friend WithEvents colAzienda As System.Windows.Forms.ColumnHeader
     Friend WithEvents colRuolo As System.Windows.Forms.ColumnHeader
     Friend WithEvents colStato As System.Windows.Forms.ColumnHeader
+    Friend WithEvents colEsito As System.Windows.Forms.ColumnHeader
     Friend WithEvents colFonte As System.Windows.Forms.ColumnHeader
     Friend WithEvents colQuando As System.Windows.Forms.ColumnHeader
     Friend WithEvents pnlAzioni As System.Windows.Forms.Panel

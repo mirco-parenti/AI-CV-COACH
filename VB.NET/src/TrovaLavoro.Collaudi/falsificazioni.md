@@ -129,6 +129,13 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
 | La spia di P4 si rifà quando il pannello torna in vista | `TrovaLavoro/Ui/PannelloOpportunita.vb` | si toglie `MostraLaSpiaDelProfilo()` da `OnVisibleChanged` | `LaSpiaSiRifaTornandoInVista` |
 | Alla riga di stato va il testo che ci **entra** — P6 | `TrovaLavoro/Ui/PannelloDocumenti.vb` | in `NonSiPuoRiscrivere`, `RaccontaUnAvviso(motivo)` invece di `MotivoInBreve()` | `IlRifiutoEntraNellaRigaDiStato` (dichiara quante righe cadono fuori: tre) |
 | Alla riga di stato va il testo che ci **entra** — P4 | `TrovaLavoro/Ui/PannelloOpportunita.vb` | in `MostraLOpportunita`, `racconto & vbLf & disallineato` invece di `DisallineatoInBreve()` | `IlDisallineamentoEntraNellaRigaDiStato` |
+| La coda dichiara i documenti obsoleti (2026-09-03) | `TrovaLavoro/Ui/PannelloHome.vb` | in `ProceduraScritta` non si aggiunge mai `AvvisoObsoleti` | `IDocumentiDiIeriLoDiconoAncheQuandoIlMatchEDiOggi` |
+| E li dichiara **anche col colore** | `TrovaLavoro/Ui/PannelloHome.vb` | si toglie da `TingiLeSpie` la riga che tinge `ColonnaStato` | `IDocumentiDiIeriLoDiconoAncheQuandoIlMatchEDiOggi` |
+| La coda giudica i documenti con la **loro** versione | `TrovaLavoro/Ui/PannelloHome.vb` | `SpiaDeiDocumenti` legge `voce.VersioneProfilo` invece di `voce.VersioneDeiDocumenti` | `IDocumentiDiIeriLoDiconoAncheQuandoIlMatchEDiOggi` |
+| L'email spunta solo se è **partita** | `TrovaLavoro/Ui/PannelloHome.vb` | `Spedita` risponde alla presenza del destinatario invece che allo stato | `LEmailSpuntaSoloQuandoLaCandidaturaEPartita` |
+| Il registro porta i documenti | `TrovaLavoro/Dati/Registro.vb` | si toglie il blocco `{"documenti", …}` da `VoceRegistro.ComeJson` | `LaVocePortaIDocumentiELaLoroVersione`, e con lui `UnIndiceCheCombaciaSiLeggeDalFile` — che cade perché senza quel blocco **ogni** indice si rifà, ed è la rete che si vede funzionare |
+| Un indice che non sa dei documenti si rifà | `TrovaLavoro/Dati/Registro.vb` | in `ArchivioRegistro.Carica` si toglie l'`AndAlso letto.SaDireTutto` | `UnIndiceCheNonSaDeiDocumentiSiRifa` |
+| Il testo della colonna «Stato» ci **entra** | `TrovaLavoro/Ui/PannelloHome.Designer.vb` | `colStato.Width` torna a 200, che era la stima prima di misurare | `IlTestoDelloStatoCiStaNellaSuaColonna` |
 
 ## Tre cose imparate falsificando, che valgono più della tabella
 

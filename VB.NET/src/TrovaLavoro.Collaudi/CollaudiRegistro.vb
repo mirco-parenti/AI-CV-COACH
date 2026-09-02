@@ -353,6 +353,66 @@ Namespace Dati
         End Sub
 
         <TestMethod>
+        Public Sub LaVocePortaIDocumentiELaLoroVersione()
+
+            ' Dal 2026-09-03. La colonna «Stato» della Home dice quali passi sono fatti, e
+            ' la Home legge il registro: senza questi campi direbbe «niente fatto» di ogni
+            ' candidatura. Il giro completo conta più dei campi — basta che ComeJson ne
+            ' dimentichi uno, e la colonna mente senza che niente diventi rosso.
+            ConArchivioTemporaneo(
+                Sub(indice, candidature, cartella)
+                    Dim o As Opportunita = Candidatura("Rossi S.p.A.")
+                    o.Cv = JsonNode.Parse("{""intestazione"": {}}")
+                    o.Lettera = JsonNode.Parse("{""corpo"": ""Buongiorno""}")
+                    o.VersioneProfilo = "2026-09-03_120000"
+                    o.VersioneDeiDocumenti = "2026-09-02_101500"
+                    candidature.Salva(o)
+                    indice.Salva(indice.Carica())
+
+                    Dim voce As VoceRegistro = Registro.DaJson(
+                        File.ReadAllText(cartella.FileRegistro)).Voci.Single()
+
+                    Assert.IsTrue(voce.CEIlCvMirato, "il CV mirato c'è")
+                    Assert.IsTrue(voce.CELaLettera, "e la lettera pure")
+                    Assert.AreEqual("2026-09-02_101500", voce.VersioneDeiDocumenti,
+                                    "con la versione con cui sono stati scritti, non quella del confronto")
+                    Assert.AreEqual("2026-09-03_120000", voce.VersioneProfilo,
+                                    "che resta un'altra cosa, ed è il caso dopo un riconfronto")
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnIndiceCheNonSaDeiDocumentiSiRifa()
+
+            ' Un registro.json scritto prima del 2026-09-03 non ha il blocco «documenti»:
+            ' riletto com'è, direbbe di ogni candidatura che non ha né CV né lettera. Non è
+            ' un campo mancante come gli altri — è una risposta sbagliata, e in quella
+            ' colonna «no» e «non lo so» si scrivono diversi. Si rifà l'indice, che costa
+            ' una scansione e non perde niente.
+            ConArchivioTemporaneo(
+                Sub(indice, candidature, cartella)
+                    Dim o As Opportunita = Candidatura("Rossi S.p.A.")
+                    o.Cv = JsonNode.Parse("{""intestazione"": {}}")
+                    candidature.Salva(o)
+                    indice.Salva(indice.Carica())
+
+                    ' Il file di ieri: le stesse cartelle, ma senza il blocco nuovo.
+                    Dim comEra As JsonObject = JsonNode.Parse(
+                        File.ReadAllText(cartella.FileRegistro)).AsObject()
+                    comEra("voci").AsArray().Single().AsObject().Remove("documenti")
+                    File.WriteAllText(cartella.FileRegistro, comEra.ToJsonString())
+
+                    Dim letto As Registro = indice.Carica()
+
+                    Assert.IsTrue(letto.Rigenerato, "l'indice muto si rifà invece di essere usato")
+                    Assert.IsTrue(letto.Voci.Single().CEIlCvMirato,
+                                  "e rifatto dalle cartelle sa di nuovo che il CV c'è")
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
         Public Sub UnaVoceSenzaCartellaNonServeANiente()
             ' La cartella è l'identità della voce: senza, non si sa nemmeno di chi parla.
             Dim letto As Registro = Registro.DaJson(

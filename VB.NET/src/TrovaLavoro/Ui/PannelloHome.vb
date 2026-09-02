@@ -44,7 +44,8 @@ End Class
 
 ''' <summary>
 ''' Pannello P1 — la Home (cap. 03.6): lo stato del profilo, la coda delle opportunità
-''' con stelle e stati, i contatori e le scorciatoie ai flussi. È il cruscotto che
+''' con stelle, spie e a che punto è ciascuna, i contatori e le scorciatoie ai flussi. È
+''' il cruscotto che
 ''' risponde alla domanda del cap. 07.3, «a che punto sono?».
 ''' </summary>
 ''' <remarks>
@@ -96,13 +97,14 @@ Public Class PannelloHome
     ' quelli di prima, e ogni intestazione da lì in poi ordinava per la colonna successiva —
     ' si cliccava «Azienda» e la coda si ordinava per ruolo. Nessun collaudo lo vedeva,
     ' perché i due che provano l'ordinamento passano gli indici a mano.
-    Private Const ColonnaProfilo As Integer = 0
+    Private Const ColonnaAzienda As Integer = 0
     Private Const ColonnaMatch As Integer = 1
-    Private Const ColonnaAzienda As Integer = 2
+    Private Const ColonnaProfilo As Integer = 2
     Private Const ColonnaRuolo As Integer = 3
     Private Const ColonnaStato As Integer = 4
-    Private Const ColonnaFonte As Integer = 5
-    Private Const ColonnaQuando As Integer = 6
+    Private Const ColonnaEsito As Integer = 5
+    Private Const ColonnaFonte As Integer = 6
+    Private Const ColonnaQuando As Integer = 7
 
     ' Le voci del filtro «Mostra», nell'ordine in cui entrano nella tendina.
     Private Const FiltroTutte As Integer = 0
@@ -328,7 +330,8 @@ Public Class PannelloHome
         lvwCoda.Items.Clear()
 
         For Each voce As VoceRegistro In Ordinate(Filtrate())
-            lvwCoda.Items.Add(RigaDellaVoce(voce, AttesaDaSegnalare(voce), SpiaDi(voce)))
+            lvwCoda.Items.Add(RigaDellaVoce(voce, AttesaDaSegnalare(voce),
+                                            SpiaDi(voce), SpiaDeiDocumenti(voce)))
         Next
 
         lvwCoda.EndUpdate()
@@ -552,10 +555,12 @@ Public Class PannelloHome
     ''' a Windows.
     ''' </summary>
     ''' <remarks>
-    ''' Ordinando per «Profilo» gli stati si calcolano <b>prima</b>, una volta per
-    ''' candidatura: la spia interroga lo storico del profilo, che sta su disco, e un
-    ''' ordinamento che lo chiedesse a ogni confronto lo rileggerebbe n·log n volte per
-    ''' rispondere sempre la stessa cosa.
+    ''' Ordinando per «Profilo» — e dal 2026-09-03 anche per «Stato», che a parità di passi
+    ''' guarda i documenti — gli stati si calcolano <b>prima</b>, una volta per candidatura:
+    ''' la spia interroga lo storico del profilo, che sta su disco, e un ordinamento che lo
+    ''' chiedesse a ogni confronto lo rileggerebbe n·log n volte per rispondere sempre la
+    ''' stessa cosa. Le due tabelle sono separate perché le due colonne chiedono di due
+    ''' versioni diverse, e una sola le farebbe rispondere l'una per l'altra.
     ''' </remarks>
     Private Function Ordinate(voci As IEnumerable(Of VoceRegistro)) As List(Of VoceRegistro)
 
@@ -566,12 +571,18 @@ Public Class PannelloHome
             For Each voce As VoceRegistro In elenco
                 _statiDellaSpia(voce.Cartella) = SpiaDi(voce).Stato
             Next
+        ElseIf _ordinePer = ColonnaStato Then
+            _statiDeiDocumenti = New Dictionary(Of String, StatoSpia)(StringComparer.Ordinal)
+            For Each voce As VoceRegistro In elenco
+                _statiDeiDocumenti(voce.Cartella) = SpiaDeiDocumenti(voce).Stato
+            Next
         End If
 
         elenco.Sort(AddressOf ConfrontaSecondoLaColonna)
         If _discendente Then elenco.Reverse()
 
         _statiDellaSpia = Nothing
+        _statiDeiDocumenti = Nothing
 
         Return elenco
 
@@ -583,6 +594,12 @@ Public Class PannelloHome
     ''' ridisegno e l'altro e una tabella tenuta viva direbbe cose vecchie.
     ''' </summary>
     Private _statiDellaSpia As Dictionary(Of String, StatoSpia)
+
+    ''' <summary>
+    ''' La stessa cosa per i documenti, e per l'ordinamento sulla colonna «Stato»: vale la
+    ''' stessa regola — fuori da <see cref="Ordinate"/> è <c>Nothing</c>.
+    ''' </summary>
+    Private _statiDeiDocumenti As Dictionary(Of String, StatoSpia)
 
     ''' <summary>
     ''' Il confronto fra due righe secondo la colonna scelta. A parità decide il nome
@@ -610,12 +627,21 @@ Public Class PannelloHome
             Case ColonnaRuolo
                 esito = String.Compare(a.Titolo, b.Titolo, StringComparison.CurrentCultureIgnoreCase)
 
+            ' Quante delle tre tappe sono fatte: il primo clic mette in cima chi è più
+            ' indietro, che è la domanda di questa colonna — «cosa mi manca da fare».
             Case ColonnaStato
-                esito = a.Stato.CompareTo(b.Stato)
+                esito = AvanzamentoDi(a).CompareTo(AvanzamentoDi(b))
 
-                ' Da T9c due candidature «con esito» non sono più la stessa cosa: a parità
-                ' di stato decide com'è finita, nell'ordine dell'enum — colloquio,
-                ' rifiutata, assunto.
+                ' A pari passo va in fondo chi ha i documenti da rifare, così il secondo
+                ' clic — quello che gira il verso — li porta tutti in cima.
+                If esito = 0 Then esito = ObsoletiDi(a).CompareTo(ObsoletiDi(b))
+
+            ' Il criterio che fino al 2026-09-03 era di «Stato», e che è venuto qui con la
+            ' colonna: da T9c due candidature «con esito» non sono la stessa cosa, e a
+            ' parità di stato decide com'è finita, nell'ordine dell'enum — colloquio,
+            ' rifiutata, assunto.
+            Case ColonnaEsito
+                esito = a.Stato.CompareTo(b.Stato)
                 If esito = 0 Then esito = Nullable.Compare(Of EsitoCandidatura)(a.Esito, b.Esito)
 
             Case ColonnaFonte
@@ -646,25 +672,29 @@ Public Class PannelloHome
     ''' <c>Shared</c> e l'archivio del profilo non ce l'ha: chi disegna una riga non deve
     ''' avere anche le chiavi dei dati.
     ''' </param>
+    ''' <param name="documenti">
+    ''' La stessa domanda fatta ai <b>documenti</b>, che dal 2026-09-03 possono venire da
+    ''' un profilo diverso da quello del confronto.
+    ''' </param>
     ''' <remarks>
-    ''' Da T9c la colonna «Stato» dice l'<b>esito</b> quando c'è — «Rifiutata», non «Con
-    ''' esito» — e per le candidature ferme aggiunge da quanto aspettano. Il colore le fa
-    ''' notare, ma è il numero a dire perché sono lì: un colore da solo si può leggere
-    ''' come «importante» tanto quanto «in ritardo».
+    ''' Dal 2026-09-03 la colonna «Stato» dice a che punto è la <b>procedura</b> — quali
+    ''' dei tre passi sono fatti — e l'esito ha una colonna sua. Le tre voci ci sono
+    ''' sempre, nello stesso ordine e con un segno ciascuna: una riga che nomina solo
+    ''' quel che c'è si legge più in fretta da sola, ma in colonna non si incolonna con
+    ''' le altre, e in un elenco si guarda giù, non a destra.
     ''' </remarks>
     Private Shared Function RigaDellaVoce(voce As VoceRegistro,
                                           giorniDiAttesa As Integer?,
-                                          spia As LetturaSpia) As ListViewItem
-
-        Dim aCheStato As String = EsitiCandidatura.EtichettaDi(voce.Stato, voce.Esito)
-        If giorniDiAttesa.HasValue Then aCheStato &= $" · {giorniDiAttesa.Value} gg"
+                                          spia As LetturaSpia,
+                                          documenti As LetturaSpia) As ListViewItem
 
         Dim riga As New ListViewItem({
-            spia.Scritta,
-            MatchScritto(voce),
             AziendaDi(voce),
+            MatchScritto(voce),
+            spia.Scritta,
             RuoloDi(voce),
-            aCheStato,
+            ProceduraScritta(voce, documenti),
+            EsitoScritto(voce, giorniDiAttesa),
             If(String.IsNullOrWhiteSpace(voce.Fonte), "incollato a mano", voce.Fonte),
             QuandoScritto(voce.Aggiornata)}) With {.Tag = voce}
 
@@ -675,14 +705,93 @@ Public Class PannelloHome
         ' letto (6,36), non quello fatto per stare sotto il bianco.
         If giorniDiAttesa.HasValue Then riga.ForeColor = StileApp.InformazioneTesto
 
-        TingiLaSpia(riga, spia)
+        TingiLeSpie(riga, spia, documenti)
 
         Return riga
 
     End Function
 
     ''' <summary>
-    ''' Dà alla cella della spia il suo inchiostro, lasciando alle altre quello della riga.
+    ''' A che punto è la procedura: il 🎯 CV mirato, la ✉️ lettera, l'email spedita — e in
+    ''' coda l'avviso quando i documenti che ci sono non vengono dal profilo di oggi.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Il CV si nomina «CV mirato» e non «CV»: in questo programma di CV ce ne sono
+    ''' due, e quello base non appartiene a nessuna candidatura (cap. 08.1). Una colonna
+    ''' che dicesse «CV ✓» sulla riga di un'azienda lascerebbe a chi legge il compito di
+    ''' ricordarsi quale dei due.</para>
+    ''' <para>L'email spunta quando è <b>partita</b>, non quando c'è una bozza: a spedire è
+    ''' il programma di posta dell'utente e l'unica prova che l'applicazione ha è la sua
+    ''' parola, che è poi lo stato «inviata» (cap. 07.3). Una bozza pronta e non spedita
+    ''' resta un trattino, ed è la verità: la candidatura non è partita.</para>
+    ''' <para>L'avviso è uno per tutti e due i documenti perché una <b>versione</b> sola li
+    ''' copre (v. <c>Opportunita.VersioneDeiDocumenti</c>): nascono dalla stessa
+    ''' generazione.</para>
+    ''' </remarks>
+    Private Shared Function ProceduraScritta(voce As VoceRegistro, documenti As LetturaSpia) As String
+
+        Dim scritta As String = $"CV mirato {Segno(voce.CEIlCvMirato)} · " &
+                                $"lettera {Segno(voce.CELaLettera)} · " &
+                                $"email {Segno(Spedita(voce))}"
+
+        If documenti.Stato = StatoSpia.Disallineato Then scritta &= "  " & AvvisoObsoleti
+
+        Return scritta
+
+    End Function
+
+    ''' <summary>Quel che si scrive in coda alla procedura quando i documenti sono di ieri.</summary>
+    ''' <remarks>
+    ''' Corto per forza: la cella si legge tutta o non serve a niente, e con questa coda la
+    ''' riga più lunga misura 239 px contro i 250 della colonna (v. i collaudi che la
+    ''' misurano). Il perché per esteso sta nel suggerimento della riga, che è dove uno lo
+    ''' va a cercare — la stessa divisione del lavoro delle righe di stato di P4 e P6.
+    ''' </remarks>
+    Friend Const AvvisoObsoleti As String = "⚠ obsoleti"
+
+    ''' <summary>Il segno di un passo fatto, e quello di un passo che manca.</summary>
+    Private Shared Function Segno(fatto As Boolean) As String
+        Return If(fatto, "✓", "–")
+    End Function
+
+    ''' <summary>
+    ''' Se la candidatura è partita. Lo dice lo stato e nient'altro: dopo l'invio si va
+    ''' solo verso l'esito, e da lì non si torna indietro (cap. 07.3).
+    ''' </summary>
+    Private Shared Function Spedita(voce As VoceRegistro) As Boolean
+
+        Return voce.Stato = StatoOpportunita.Inviata OrElse voce.Stato = StatoOpportunita.Esito
+
+    End Function
+
+    ''' <summary>
+    ''' Com'è finita: l'esito quando c'è, lo scarto quando è stato deciso, i giorni di
+    ''' silenzio quando una spedita è ferma da troppo, il trattino quando non c'è ancora
+    ''' niente da dire.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Questa colonna nasce il 2026-09-03 da quella «Stato», che ha cambiato
+    ''' mestiere. Tiene insieme le due cose che <b>nessun file può sapere</b> e che dice
+    ''' l'utente — com'è andata, e se ha lasciato perdere — mentre a sinistra restano
+    ''' quelle che si leggono dalla cartella.</para>
+    ''' <para>Lo scarto viene prima dell'esito, e non capita mai che si contendano il
+    ''' posto: dallo scarto non si arriva all'esito né viceversa
+    ''' (<c>StatiOpportunita</c>). Viene prima lo stesso, perché è la notizia che spiega
+    ''' perché quella riga è lì e ferma.</para>
+    ''' </remarks>
+    Private Shared Function EsitoScritto(voce As VoceRegistro, giorniDiAttesa As Integer?) As String
+
+        If voce.Stato = StatoOpportunita.Scartata Then Return StatiOpportunita.Etichetta(voce.Stato)
+        If voce.Esito.HasValue Then Return EsitiCandidatura.Etichetta(voce.Esito.Value)
+        If giorniDiAttesa.HasValue Then Return $"{giorniDiAttesa.Value} gg"
+
+        Return "—"
+
+    End Function
+
+    ''' <summary>
+    ''' Dà il suo inchiostro alle celle che hanno qualcosa da segnalare — la spia del
+    ''' profilo, e i documenti obsoleti — lasciando alle altre quello della riga.
     ''' </summary>
     ''' <remarks>
     ''' <para>Un ListView colora <b>tutta</b> la riga con lo stile dell'elemento, e
@@ -690,14 +799,21 @@ Public Class PannelloHome
     ''' rimette d'ufficio ogni cella al colore del controllo: la riga grigia di una
     ''' candidatura scartata, e l'azzurro di una da sollecitare, tornerebbero neri senza che
     ''' nessuno abbia toccato <c>ForeColor</c>. Per questo il colore della riga si riscrive
-    ''' cella per cella <b>prima</b> di dare il suo alla spia — quel che qui sembra un giro
+    ''' cella per cella <b>prima</b> di dare il suo alle spie — quel che qui sembra un giro
     ''' inutile è l'unico modo perché i tre colori convivano.</para>
-    ''' <para>A spia spenta non si spegne l'interruttore: una riga senza niente da dire
+    ''' <para><b>La cella dei documenti va in rosso tutta intera</b>, spunte comprese, e non
+    ''' la sola coda «⚠ obsoleti»: un ListView colora per cella, non per parola, e il solo
+    ''' modo di fare altrimenti sarebbe ridisegnare a mano l'intera coda. Non è un ripiego
+    ''' che stona — è la riga che dice «questi documenti non valgono più», e le spunte fanno
+    ''' parte di quella frase.</para>
+    ''' <para>A spie spente non si spegne l'interruttore: una riga senza niente da dire
     ''' resta una riga normale, e meno cose si toccano meno se ne rompono.</para>
     ''' </remarks>
-    Private Shared Sub TingiLaSpia(riga As ListViewItem, spia As LetturaSpia)
+    Private Shared Sub TingiLeSpie(riga As ListViewItem, spia As LetturaSpia, documenti As LetturaSpia)
 
-        If Not spia.Accesa Then Return
+        Dim obsoleti As Boolean = documenti.Stato = StatoSpia.Disallineato
+
+        If Not spia.Accesa AndAlso Not obsoleti Then Return
 
         riga.UseItemStyleForSubItems = False
 
@@ -705,10 +821,41 @@ Public Class PannelloHome
             cella.ForeColor = riga.ForeColor
         Next
 
-        riga.SubItems(ColonnaProfilo).ForeColor = spia.Colore
-        riga.ToolTipText = spia.Perche
+        If spia.Accesa Then riga.SubItems(ColonnaProfilo).ForeColor = spia.Colore
+        If obsoleti Then riga.SubItems(ColonnaStato).ForeColor = documenti.Colore
+
+        riga.ToolTipText = SuggerimentoDellaRiga(spia, documenti)
 
     End Sub
+
+    ''' <summary>
+    ''' Il suggerimento della riga: i perché delle spie accese, ciascuno col suo soggetto.
+    ''' </summary>
+    ''' <remarks>
+    ''' Il suggerimento è <b>della riga</b> e non della cella — un ListView non ne ha per
+    ''' cella — e con due spie che possono parlare insieme va detto di chi si sta parlando,
+    ''' altrimenti chi legge attribuisce alla terza colonna una frase che riguarda la
+    ''' quinta. Quando le due dicono la stessa identica cosa — il caso normale, perché
+    ''' quasi sempre match e documenti nascono dalla stessa versione — si scrive una volta
+    ''' sola con tutti e due i soggetti: ripetere la stessa frase due righe di fila fa
+    ''' sembrare che siano due problemi.
+    ''' </remarks>
+    Private Shared Function SuggerimentoDellaRiga(spia As LetturaSpia, documenti As LetturaSpia) As String
+
+        Dim suIlPunteggio As Boolean = spia.Accesa
+        Dim suIDocumenti As Boolean = documenti.Stato = StatoSpia.Disallineato
+
+        If suIlPunteggio AndAlso suIDocumenti AndAlso spia.Perche = documenti.Perche Then
+            Return "Il punteggio e i documenti — " & spia.Perche
+        End If
+
+        Dim righe As New List(Of String)
+        If suIlPunteggio Then righe.Add("Il punteggio — " & spia.Perche)
+        If suIDocumenti Then righe.Add("I documenti — " & documenti.Perche)
+
+        Return String.Join(Environment.NewLine, righe)
+
+    End Function
 
     ''' <summary>
     ''' Com'è messa questa candidatura rispetto al profilo di oggi.
@@ -738,6 +885,68 @@ Public Class PannelloHome
            _statiDellaSpia.TryGetValue(voce.Cartella, stato) Then Return stato
 
         Return SpiaDi(voce).Stato
+
+    End Function
+
+    ''' <summary>
+    ''' Com'è messo rispetto al profilo di oggi quel che di questa candidatura è già
+    ''' <b>scritto</b>: il 🎯 CV mirato e la ✉️ lettera.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>È la gemella di <see cref="SpiaDi"/> e legge lo stesso posto unico
+    ''' (<see cref="SpiaDelProfilo"/>), ma un'altra versione: quella con cui i documenti
+    ''' sono stati scritti, non quella del confronto. Fino al 2026-09-03 le due domande
+    ''' avevano una risposta sola perché ne esisteva una versione sola; «⚠ Riconfronta» le
+    ''' ha separate, ed è proprio il caso in cui questa colonna serve — match rifatto oggi,
+    ''' documenti di ieri.</para>
+    ''' <para>Senza documenti la spia è <b>spenta</b>, non verde: su ciò che non è stato
+    ''' scritto non c'è niente da qualificare, e la colonna infatti non scrive nulla.</para>
+    ''' </remarks>
+    Private Function SpiaDeiDocumenti(voce As VoceRegistro) As LetturaSpia
+
+        If _contesto Is Nothing Then Return SpiaDelProfilo.Spenta
+
+        Return SpiaDelProfilo.Leggi(_contesto.Archivio, voce.VersioneDeiDocumenti,
+                                    voce.CEIlCvMirato OrElse voce.CELaLettera)
+
+    End Function
+
+    ''' <summary>
+    ''' Se i documenti di questa voce sono da rifare, preso dalla tabella che
+    ''' <see cref="Ordinate"/> prepara. Vale la stessa regola della spia: senza tabella si
+    ''' chiede al profilo, che costa di più ma risponde giusto.
+    ''' </summary>
+    Private Function ObsoletiDi(voce As VoceRegistro) As Boolean
+
+        Dim stato As StatoSpia
+
+        If _statiDeiDocumenti Is Nothing OrElse
+           Not _statiDeiDocumenti.TryGetValue(voce.Cartella, stato) Then
+            stato = SpiaDeiDocumenti(voce).Stato
+        End If
+
+        Return stato = StatoSpia.Disallineato
+
+    End Function
+
+    ''' <summary>
+    ''' Quante delle tre tappe della procedura sono fatte: è la chiave con cui si ordina
+    ''' la colonna «Stato».
+    ''' </summary>
+    ''' <remarks>
+    ''' Conta i passi, non la strada: un CV senza lettera e una lettera senza CV valgono
+    ''' uno tutti e due, ed è giusto così — sono due candidature a metà, e quale metà
+    ''' manchi lo dice la riga, che si legge.
+    ''' </remarks>
+    Private Shared Function AvanzamentoDi(voce As VoceRegistro) As Integer
+
+        Dim quante As Integer = 0
+
+        If voce.CEIlCvMirato Then quante += 1
+        If voce.CELaLettera Then quante += 1
+        If Spedita(voce) Then quante += 1
+
+        Return quante
 
     End Function
 
@@ -1093,7 +1302,7 @@ Public Class PannelloHome
     Private Sub AdattaLeColonne()
 
         Dim fisse As Integer = colProfilo.Width + colMatch.Width + colAzienda.Width +
-                               colStato.Width + colFonte.Width + colQuando.Width
+                               colStato.Width + colEsito.Width + colFonte.Width + colQuando.Width
 
         colRuolo.Width = Math.Max(LarghezzaMinimaRuolo,
                                   lvwCoda.ClientSize.Width - fisse - SystemInformation.VerticalScrollBarWidth)
