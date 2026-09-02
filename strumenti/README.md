@@ -135,3 +135,46 @@ Non è un browser e non pretende di esserlo: i limiti di quel che può dire stan
 nel [suo README](collauda-copioni/README.md), insieme alla ragione per cui, se il sorgente
 cambia forma, l'attrezzo **si ferma** invece di continuare a dire «tutto bene».
 *(Nato a T9d, 2026-08-22.)*
+
+## Perché esiste `apri-app.bat`
+
+Aprire il riferimento del Desktop sembra la cosa più semplice del mondo, e da WSL non lo
+è: il 2026-09-02 l'assistente ha creduto per cinque minuti di aver aperto l'applicazione
+mentre non era partito niente, e più tardi ha annunciato che non era partita mentre stava
+aperta lì davanti. Due bugie opposte, e nessuna delle due si vede da un codice d'uscita.
+
+```bash
+cmd.exe /c "C:\Users\Mirco Parenti\Desktop\FIRST PROJECT\GITHub repository\AI-CV-COACH\strumenti\apri-app.bat"
+```
+
+Il lanciatore non compila niente — per rifare l'eseguibile c'è `aggiorna-riferimento.bat`
+qui accanto — e non apre una seconda finestra se ce n'è già una: due finestre della stessa
+applicazione si distinguono solo dalla barra del titolo, e un giro di collaudo intero è già
+finito una volta su quella sbagliata. Quel che fa in più di uno `start` è **andare a
+guardare** se la finestra c'è davvero, dichiarare il pid, il titolo e quanti secondi ci ha
+messo.
+
+Le tre trappole che ha già pagato, perché non le paghi di nuovo qualcun altro:
+
+1. **`start` non dice se ha aperto qualcosa.** Invocato da WSL come
+   `cmd.exe /c start "" "…\TrovaLavoro.exe"`, il percorso con gli spazi si perde fra le due
+   shell: a volte risponde «Accesso negato», a volte — ed è il caso peggiore — **esce a zero
+   senza aprire niente**. Il rimedio non è un quoting più furbo, è non credere all'esito.
+2. **Di `TrovaLavoro.exe` ce n'è più d'uno.** Il server MCP del prodotto gira come
+   `TrovaLavoro.exe --mcp` e non ha nessuna finestra: chi cerca «il primo processo che si
+   chiama così» trova quasi sempre lui e conclude che l'applicazione non è partita. Il
+   filtro giusto è `MainWindowHandle`, non il nome.
+3. **Dentro le virgolette di `-Command`, il `^` non è un escape.** Un `^|` scritto lì non
+   viene consumato da cmd: arriva a PowerShell tale e quale e gli rompe il comando in faccia
+   (*«Impossibile trovare un parametro posizionale che accetta l'argomento '^'»*). Con un
+   `2>nul` in coda a nascondere l'errore, il controllo rispondeva sempre «nessuna finestra»
+   — che è anche la risposta giusta quasi sempre, ed è per questo che una cecità del genere
+   campa. Fuori dalle virgolette il `^` invece serve davvero: il `2^>nul` degli altri
+   attrezzi sta bene dov'è. La stessa cosa si dice senza pipe con `.Where({…})`.
+
+Una nota per chi lo chiama **da WSL**: `cmd.exe /c apri-app.bat` **non torna** finché
+l'applicazione resta aperta, perché l'interoperabilità aspetta anche i discendenti — e un
+discendente questo lanciatore lo lascia per mestiere. Va lanciato in background, leggendone
+l'uscita da un file; l'attesa vera, misurata, è di **due secondi**.
+
+*(Nato il 2026-09-02, curato lo stesso giorno da tre difetti suoi.)*
