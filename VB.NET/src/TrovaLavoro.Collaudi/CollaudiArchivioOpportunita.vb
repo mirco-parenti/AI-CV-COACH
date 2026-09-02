@@ -193,6 +193,31 @@ Namespace Dati
         End Sub
 
         <TestMethod>
+        Public Sub UnTitoloAbnormeNonSfondaIlNomeDellaCartella()
+            ' Azienda e titolo vengono dall'annuncio, cioè da un testo che l'utente non ha
+            ' scritto: senza un tetto un titolo lungo si riverserebbe tutto nel percorso,
+            ' e la cartella diventerebbe una che il disco fatica a reggere.
+            ' (Revisione di sicurezza, 2026-09-01.)
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim azienda As String = String.Concat(Enumerable.Repeat("Rossi Industrie Riunite ", 20))
+                    Dim titolo As String = String.Concat(Enumerable.Repeat("Tecnico manutenzione impianti ", 20))
+
+                    Dim abnorme As Opportunita = OpportunitaDiProva()
+                    abnorme.Annuncio = JsonNode.Parse($"{{""titolo"": ""{titolo}"", ""azienda"": ""{azienda}""}}")
+
+                    Dim nome As String = Path.GetFileName(archivio.Salva(abnorme))
+
+                    ' La data in testa è nostra e non si tocca: il tetto vale sui due pezzi
+                    ' che arrivano dall'annuncio.
+                    For Each pezzo As String In nome.Split("_"c).Skip(1)
+                        Assert.IsLessThanOrEqualTo(40, pezzo.Length,
+                                                   $"«{pezzo}» sfora il tetto dei 40 caratteri")
+                    Next
+                End Sub)
+        End Sub
+
+        <TestMethod>
         Public Sub LaProvenienzaSiScriveESiRilegge()
             ' Da T5b un annuncio catturato porta con sé da dove viene (cap. 06.4): il
             ' link è ciò che permette di tornare all'originale mesi dopo.

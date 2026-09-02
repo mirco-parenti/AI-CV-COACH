@@ -1,6 +1,7 @@
 ﻿Imports System.Drawing
 Imports System.IO
 Imports System.Linq
+Imports System.Reflection
 Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro
@@ -92,14 +93,21 @@ Namespace Ui
                                               "nome, versione e copyright: le tre scritte ci sono")
 
                 ' La soglia non è il 4,5 di WCAG per decreto: è il contrasto che
-                ' l'applicazione **già** usa per ogni didascalia — TestoSecondario su
-                ' SfondoBase. Le scritte del marchio devono leggersi almeno quanto tutte
-                ' le altre; se la tavolozza va rivista, si rivede là e questo collaudo si
-                ' adegua da sé. Fino al 2026-08-30 quella coppia valeva 4,45 a 1, un
-                ' centesimo sotto il 4,5, e il metro relativo serviva anche a non fingere
-                ' che passasse: adesso passa (4,57), e a sorvegliarlo c'è il collaudo qui
-                ' sotto.
-                Dim soglia As Double = Contrasto(StileApp.TestoSecondario, StileApp.SfondoBase)
+                ' l'applicazione **già** usa per una didascalia sul fondo peggiore che le
+                ' capita — TestoSecondario sul fondo caldo delle pagine. Le scritte del
+                ' marchio devono leggersi almeno quanto tutte le altre; se la tavolozza va
+                ' rivista, si rivede là e questo collaudo si adegua da sé. Fino al
+                ' 2026-08-30 la coppia di riferimento valeva 4,45 a 1, un centesimo sotto
+                ' il 4,5, e il metro relativo serviva anche a non fingere che passasse; a
+                ' sorvegliare il 4,5 vero c'è il collaudo qui sotto.
+                '
+                ' Il fondo del metro era SfondoBase (4,71) fino al 2026-09-01, quando il
+                ' pannello del logo ha smesso di avere un fondo suo per prendere quello di
+                ' chi gli sta sotto: sulle pagine è FondoPagina, dove la stessa coppia fa
+                ' 4,52. Non è un peggioramento delle scritte del marchio — è il fondo
+                ' dell'applicazione che si è scaldato il 2026-08-31, e su quel fondo ogni
+                ' didascalia delle sei pagine sta già.
+                Dim soglia As Double = Contrasto(StileApp.TestoSecondario, StileApp.FondoPagina)
 
                 For Each etichetta As Label In etichette
                     Assert.IsGreaterThanOrEqualTo(
@@ -159,38 +167,136 @@ Namespace Ui
         End Sub
 
         ''' <summary>
-        ''' Il pannello del logo ha il suo filo nero, e il filo gira tutt'intorno.
+        ''' Ogni bottone colorato porta un testo che si legge, e la scala dei livelli sale
+        ''' fino in fondo.
         ''' </summary>
         ''' <remarks>
-        ''' <para>Si fotografa il pannello vero e si guardano i pixel del bordo, invece di
-        ''' rileggere il codice che li disegna: un contorno è una cosa che o si vede o non
-        ''' si vede, e le due maniere di sbagliarlo non lasciano altra traccia. La prima è
-        ''' disegnare il rettangolo sulle misure piene invece che a <c>-1</c>, e allora due
-        ''' lati su quattro cadono fuori dall'area. La seconda è più insidiosa: le tre
-        ''' etichette sono larghe quanto il pannello e hanno il fondo opaco, e i figli si
-        ''' disegnano dopo il genitore — alla larghezza piena mangiano il filo verticale
-        ''' <b>solo alle righe che occupano</b>. Il contorno resterebbe lì, interrotto tre
-        ''' volte, e a occhio sembrerebbe intero. Per questo fra i punti misurati ce n'è
-        ''' uno preso apposta all'altezza del nome.</para>
+        ''' <para>La didascalia era la coppia più <b>usata</b>, non l'unica, e guardare solo
+        ''' lei ha lasciato passare per undici tappe due fondi che non erano nemmeno di
+        ''' confine <i>(2026-09-01)</i>: il verde di <see cref="StileApp.Successo"/> col
+        ''' bianco sopra faceva <b>3,13 a 1</b> — ed è il fondo di «Salva profilo» e della
+        ''' casella «🎮 Menu» — e il rosso del livello 6 ne faceva 4,10.</para>
+        ''' <para>Si misurano i bottoni <b>vestiti</b> e non i colori della tabella, perché
+        ''' le due cose si possono rompere separatamente: un token può essere a posto e un
+        ''' livello pescare quello sbagliato. È esattamente il difetto che c'era — il livello
+        ''' 6 portava il rosso del <b>marchio</b>, che è di casa nei titoli.</para>
+        ''' <para>Nella stessa prova sta la <b>scala</b>: «la saturazione cresce con il peso
+        ''' della conseguenza» (cap. 03.3) smetteva di crescere all'ultimo gradino, e il
+        ''' gesto da cui non si torna indietro si vestiva del colore meno grave. Si guarda
+        ''' quanto bianco ci si legge sopra, che è la stessa domanda detta al contrario: più
+        ''' scuro è il fondo, più il bianco stacca. E si guarda <b>quella</b> e non
+        ''' <c>Color.GetBrightness</c>, che è la luminosità HSL e su questi due rossi dice il
+        ''' contrario: per lei <c>#FA0825</c> è più scuro di <c>#DC3545</c>, mentre l'occhio
+        ''' — e WCAG — vedono l'opposto. Scritta con quel metro la prova restava verde anche
+        ''' rimettendo il rosso del marchio al livello 6, cioè era verde per il motivo
+        ''' sbagliato.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniBottoneColoratoPortaUnTestoCheSiLegge()
+
+            Const soglia As Double = 4.5
+
+            For Each livello As LivelloBottone In [Enum].GetValues(GetType(LivelloBottone))
+                Using bottone As New Button()
+
+                    StileApp.VestiBottone(bottone, livello)
+
+                    Assert.IsGreaterThanOrEqualTo(
+                        soglia, Contrasto(bottone.ForeColor, bottone.BackColor),
+                        $"il testo del livello {livello} sul suo fondo")
+
+                End Using
+            Next
+
+            For Each ruolo As RuoloBarra In [Enum].GetValues(GetType(RuoloBarra))
+                For Each aperta As Boolean In {False, True}
+                    Using casella As New Button()
+
+                        StileApp.VestiBottoneBarra(casella, ruolo, aperta)
+
+                        Assert.IsGreaterThanOrEqualTo(
+                            soglia, Contrasto(casella.ForeColor, casella.BackColor),
+                            $"il testo della casella {ruolo}, aperta={aperta}")
+
+                    End Using
+                Next
+            Next
+
+            Using distruttivo As New Button(), critico As New Button()
+
+                StileApp.VestiBottone(distruttivo, LivelloBottone.Distruttivo)
+                StileApp.VestiBottone(critico, LivelloBottone.Critico)
+
+                Assert.IsGreaterThan(
+                    Contrasto(StileApp.SfondoContenuto, distruttivo.BackColor),
+                    Contrasto(StileApp.SfondoContenuto, critico.BackColor),
+                    "il fondo del livello 6 è più scuro di quello del livello 5")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' E ogni inchiostro colorato si legge su tutti i fondi su cui viene scritto.
+        ''' </summary>
+        ''' <remarks>
+        ''' È l'altra direzione della prova qui sopra, e va tenuta separata perché è un
+        ''' difetto di un'altra specie: un colore nato per stare <b>sotto</b> il bianco
+        ''' finisce a fare da <b>lettere</b> su un fondo chiaro, e lì non regge più. Nel
+        ''' 2026-09-01 ce n'erano due così — l'azzurro informativo, in Home usato per il
+        ''' promemoria dei solleciti e le righe da sollecitare (2,77 a 1), e il verde
+        ''' dell'esito «assunto» in P4 (2,85) — e per il primo è nato un token apposta.
+        ''' <para>Si provano tutti e quattro i fondi: un inchiostro può reggere sul bianco
+        ''' delle finestre e cadere sull'avorio delle pagine, che parte già più scuro.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniInchiostroColoratoSiLeggeSuiFondiDellApplicazione()
+
+            Const soglia As Double = 4.5
+
+            Dim fondiChiari As Color() = {StileApp.SfondoBase, StileApp.SfondoContenuto,
+                                          StileApp.FondoPagina, StileApp.FondoCasella}
+
+            For Each fondo As Color In fondiChiari
+
+                Dim dove As String = ColorTranslator.ToHtml(fondo)
+
+                Assert.IsGreaterThanOrEqualTo(
+                    soglia, Contrasto(StileApp.RossoCritico, fondo),
+                    $"il rosso dei titoli di gruppo su {dove}")
+
+                Assert.IsGreaterThanOrEqualTo(
+                    soglia, Contrasto(StileApp.InformazioneTesto, fondo),
+                    $"il testo informativo su {dove}")
+
+                Assert.IsGreaterThanOrEqualTo(
+                    soglia, Contrasto(StileApp.Successo, fondo),
+                    $"il verde dell'esito «assunto» su {dove}")
+
+            Next
+
+        End Sub
+
+        ''' <summary>
+        ''' Il pannello del logo non ha nessun contorno: si fonde con quel che ha sotto.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Fino al 2026-09-01 attorno al pannello girava un <b>filo nero</b>, e
+        ''' questo collaudo era il suo guardiano: fotografava il pannello e contava i pixel
+        ''' del perimetro, perché un contorno è una cosa che o si vede o non si vede. Il
+        ''' tutor l'ha fatto togliere quel giorno — via il filo, via il fondo proprio — e
+        ''' adesso il collaudo difende l'<b>assenza</b>, con la stessa fotografia e lo
+        ''' stesso perimetro: dove c'era il filo si deve leggere il fondo del pannello, in
+        ''' tutti e quattro i lati. Rimettere la penna nera lo fa cadere a ogni pixel.</para>
         ''' <para>Il pannello va costruito (<c>CreateControl</c>) o non ha finestra da
         ''' fotografare; costruire un figlio costruisce anche la finestra principale, ma
         ''' <b>non</b> ne fa girare il <c>Load</c> — quello lo chiama solo chi la mostra.
-        ''' </para>
-        ''' <para><b>Quel che la fotografia NON può vedere, e perché il rientro si misura
-        ''' invece di guardarlo.</b> Su una finestra mai mostrata i figli sono
-        ''' <c>Visible = False</c> per eredità, quindi <c>CreateControl</c> non dà loro una
-        ''' finestra e <c>DrawToBitmap</c> non li stampa: nella foto ci sono solo il fondo
-        ''' e il filo, zero pixel d'altro. Detto altrimenti, questa foto **non può**
-        ''' accorgersi di un'etichetta che copre il contorno, e provandolo apposta —
-        ''' rimettendo le etichette a tutta larghezza — il collaudo restava verde. Il
-        ''' rischio è vero lo stesso: nel programma vero le etichette si vedono eccome. Per
-        ''' questo il rientro si verifica sui <b>bordi</b>, che sono veri anche senza una
-        ''' finestra, e non sui pixel. Le due misure guardano due cose diverse: la foto
-        ''' che il filo ci sia e sia chiuso a <c>-1</c>, la geometria che nessuno glielo
-        ''' vada sopra.</para>
+        ''' Per la stessa ragione nella foto ci sono solo il fondo e quel che il pannello
+        ''' dipinge da sé: i figli, invisibili per eredità su una finestra mai mostrata,
+        ''' non si stampano.</para>
         ''' </remarks>
         <TestMethod>
-        Public Sub IlPannelloDelMarchioHaIlSuoContorno()
+        Public Sub IlPannelloDelMarchioNonHaContorno()
 
             Using form As New FormPrincipale()
 
@@ -206,31 +312,23 @@ Namespace Ui
 
                     pannello.DrawToBitmap(foto, New Rectangle(0, 0, pannello.Width, pannello.Height))
 
-                    Dim atteso As Integer = StileApp.BordoMarchio.ToArgb()
+                    Dim atteso As Integer = pannello.BackColor.ToArgb()
 
-                    ' Si guarda il perimetro **tutto**, non qualche punto scelto: dove il
-                    ' filo si interrompe dipende da dove capitano le etichette, e quello
-                    ' cambia con la modalità (piena o compatta) e con il DPI della
-                    ' macchina. Un collaudo che sceglie i punti a mano sceglie anche, senza
-                    ' saperlo, di non guardare dove il difetto sarebbe.
+                    ' Il perimetro **tutto**, non qualche punto scelto: un filo rimasto
+                    ' anche su un lato solo è il riquadro che si voleva togliere.
                     For x As Integer = 0 To destra
                         Assert.AreEqual(atteso, foto.GetPixel(x, 0).ToArgb(),
-                                        $"il filo di sopra si interrompe in x={x}")
+                                        $"in cima, in x={x}, c'è ancora un contorno")
                         Assert.AreEqual(atteso, foto.GetPixel(x, fondo).ToArgb(),
-                                        $"il filo di sotto si interrompe in x={x}")
+                                        $"in fondo, in x={x}, c'è ancora un contorno")
                     Next
 
                     For y As Integer = 0 To fondo
                         Assert.AreEqual(atteso, foto.GetPixel(0, y).ToArgb(),
-                                        $"il filo di sinistra si interrompe in y={y}")
+                                        $"a sinistra, in y={y}, c'è ancora un contorno")
                         Assert.AreEqual(atteso, foto.GetPixel(destra, y).ToArgb(),
-                                        $"il filo di destra si interrompe in y={y}")
+                                        $"a destra, in y={y}, c'è ancora un contorno")
                     Next
-
-                    ' E dentro no: un contorno che riempie non è un contorno.
-                    Assert.AreEqual(pannello.BackColor.ToArgb(),
-                                    foto.GetPixel(4, fondo - 4).ToArgb(),
-                                    "appena dentro il filo il fondo è quello del pannello")
 
                 End Using
 
@@ -239,64 +337,122 @@ Namespace Ui
         End Sub
 
         ''' <summary>
-        ''' Nessuna scritta del pannello va a finire sopra il filo del contorno, in
-        ''' nessuna delle due modalità.
+        ''' Il pannello del logo porta il fondo di quel che gli sta sotto, e cambia con lui.
         ''' </summary>
         ''' <remarks>
-        ''' <para>È la metà del collaudo che la fotografia non può fare (v.
-        ''' <see cref="IlPannelloDelMarchioHaIlSuoContorno"/>): i figli si misurano dai
-        ''' loro bordi, che esistono anche su una finestra mai mostrata, invece che dai
-        ''' pixel, che non esistono.</para>
-        ''' <para><b>Perché due modalità e non una.</b> Il pannello si dispone in due modi
-        ''' — pieno e compatto — e i due non riguardano gli stessi controlli: in compatto
-        ''' restano lo stemma rimpicciolito e la sola riga della versione, e nome e
-        ''' copyright si nascondono. Provare una modalità sola vuol dire non guardare le
-        ''' due etichette che l'altra dispone. La larghezza che sceglie la modalità si
-        ''' misura in unità di progetto, cioè scalata col DPI: 4000 pixel sono modalità
-        ''' piena fino al 280%, 900 sono compatta sempre. Un numero al limite avrebbe
-        ''' collaudato una cosa diversa sulla macchina del tutor.</para>
+        ''' <para>È l'altra metà della rifinitura del 2026-09-01: tolto il filo, un fondo
+        ''' <b>suo</b> lascerebbe comunque un rettangolo visibile: il riquadro senza il
+        ''' bordo, che è quasi peggio. E il fondo sotto non è uno solo — avorio nel menu
+        ''' d'ingresso, caldo nelle sei pagine — quindi non basta scegliere bene una volta:
+        ''' il pannello lo deve <b>seguire</b>.</para>
+        ''' <para>Si guarda il valore di riposo del designer, che è quello delle pagine, e
+        ''' poi si apre il menu d'ingresso dalla strada della finestra: se
+        ''' <c>MostraPannello</c> smettesse di riallineare il fondo, il logo tornerebbe a
+        ''' essere un rettangolo grigino sull'avorio.</para>
         ''' </remarks>
         <TestMethod>
-        Public Sub NessunaScrittaVaSopraIlContorno()
+        Public Sub IlPannelloDelMarchioPrendeIlFondoDiChiGliStaSotto()
 
             Using form As New FormPrincipale()
 
-                ' Piena: ci stanno tutte e tre le scritte.
-                ControllaIlRientro(form, 4000, {"lblMarchio", "lblVersione", "lblCopyright"})
+                Dim pannello As Control =
+                    form.Controls.Find("pnlLogo", searchAllChildren:=True).Single()
+                Dim centrale As Control =
+                    form.Controls.Find("pnlAreaCentrale", searchAllChildren:=True).Single()
 
-                ' Compatta: il pannello si stringe e dispone la sola riga della versione.
-                ControllaIlRientro(form, 900, {"lblVersione"})
+                Assert.AreEqual(centrale.BackColor, pannello.BackColor,
+                                "a riposo è il fondo dell'area centrale")
+
+                Dim menu As Control = form.Controls.Find("pnlMenu", searchAllChildren:=True).Single()
+                Dim bottone As Button =
+                    DirectCast(form.Controls.Find("btnMenu", searchAllChildren:=True).Single(), Button)
+
+                ApriIlPannelloDaFuori(form, menu, bottone)
+
+                Assert.AreEqual(menu.BackColor, pannello.BackColor,
+                                "aperto il menu d'ingresso, prende l'avorio della soglia")
+                Assert.AreNotEqual(centrale.BackColor, pannello.BackColor,
+                                   "che è un altro colore: se fossero uguali questo collaudo non direbbe niente")
 
             End Using
 
         End Sub
 
         ''' <summary>
-        ''' Porta la finestra alla larghezza chiesta e verifica che le scritte indicate
-        ''' stiano dentro il pannello del logo, lasciando libero il pixel del contorno.
+        ''' Lo stemma non invita più a un clic, perché non risponde più a nessuno.
         ''' </summary>
-        Private Shared Sub ControllaIlRientro(form As Form, larghezza As Integer, scritte As String())
+        ''' <remarks>
+        ''' <para>Fino al 2026-09-01 il pannello del logo era la <b>porta</b> di
+        ''' «Informazioni su…»: cliccandolo — su una qualunque delle sue cinque parti — si
+        ''' apriva quella finestra, e per dirlo portava il puntatore a mano e il
+        ''' suggerimento «Informazioni su TrovaLavoro». Su indicazione del tutor la porta è
+        ''' stata tolta: lo stemma è un'insegna, e «Informazioni su…» si raggiunge dalle
+        ''' Impostazioni (v. <c>CollaudiFinestraImpostazioni</c>).</para>
+        ''' <para>Qui si difende l'<b>assenza</b>, e si difende quel che l'utente vede: la
+        ''' mano e il suggerimento sono l'invito, e un invito sopra qualcosa che non
+        ''' risponde è peggio di nessun invito — è la lezione di T9d («quel che è acceso
+        ''' deve sembrarlo») letta al contrario. Il gestore del clic non lascia traccia che
+        ''' si possa interrogare da fuori; l'invito sì, e rimetterne anche solo metà fa
+        ''' cadere questo collaudo.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LoStemmaNonInvitaPiuAUnClic()
 
-            form.ClientSize = New Size(larghezza, 800)
+            Using form As New FormPrincipale()
 
-            Dim pannello As Control =
-                form.Controls.Find("pnlLogo", searchAllChildren:=True).Single()
+                Dim pannello As Control =
+                    form.Controls.Find("pnlLogo", searchAllChildren:=True).Single()
 
-            For Each nome As String In scritte
+                Dim suggerimenti As ToolTip = SuggerimentiDellaFinestra(form)
 
-                Dim scritta As Control =
-                    pannello.Controls.Find(nome, searchAllChildren:=False).Single()
+                Dim parti As New List(Of Control) From {pannello}
+                parti.AddRange(pannello.Controls.Cast(Of Control)())
 
-                Assert.IsGreaterThanOrEqualTo(1, scritta.Left,
-                    $"a {larghezza} px «{nome}» arriva sul filo di sinistra")
-                Assert.IsLessThanOrEqualTo(pannello.Width - 1, scritta.Right,
-                    $"a {larghezza} px «{nome}» arriva sul filo di destra")
-                Assert.IsGreaterThanOrEqualTo(1, scritta.Top,
-                    $"a {larghezza} px «{nome}» arriva sul filo di sopra")
-                Assert.IsLessThanOrEqualTo(pannello.Height - 1, scritta.Bottom,
-                    $"a {larghezza} px «{nome}» arriva sul filo di sotto")
+                Assert.IsGreaterThanOrEqualTo(4, parti.Count,
+                    "il pannello e le sue parti: se fossero meno, il collaudo guarderebbe quasi niente")
 
-            Next
+                For Each parte As Control In parti
+
+                    Assert.AreNotEqual(Cursors.Hand, parte.Cursor,
+                                       $"«{parte.Name}» promette ancora un clic col puntatore a mano")
+
+                    Assert.IsEmpty(suggerimenti.GetToolTip(parte),
+                                   $"«{parte.Name}» promette ancora un clic col suggerimento")
+
+                Next
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Il fornitore di suggerimenti della finestra principale. Non è un controllo e non
+        ''' si trova con <c>Controls.Find</c>: è un componente, e da fuori si arriva solo al
+        ''' campo che lo tiene — come già si fa qui sotto per <c>MostraPannello</c>.
+        ''' </summary>
+        Private Shared Function SuggerimentiDellaFinestra(form As Form) As ToolTip
+
+            Dim campo As FieldInfo = form.GetType().GetField(
+                "_ttSuggerimenti", BindingFlags.Instance Or BindingFlags.NonPublic)
+
+            Assert.IsNotNull(campo, "la finestra ha ancora il suo fornitore di suggerimenti")
+
+            Return DirectCast(campo.GetValue(form), ToolTip)
+
+        End Function
+
+        ''' <summary>
+        ''' Chiama <c>MostraPannello</c> per la strada che percorre la finestra quando si
+        ''' preme una casella della barra.
+        ''' </summary>
+        Private Shared Sub ApriIlPannelloDaFuori(form As Form, pannello As Control, bottone As Button)
+
+            Dim mostra As MethodInfo = form.GetType().GetMethod(
+                "MostraPannello", BindingFlags.Instance Or BindingFlags.NonPublic)
+
+            Assert.IsNotNull(mostra, "la finestra ha ancora il suo MostraPannello")
+
+            mostra.Invoke(form, New Object() {pannello, bottone})
 
         End Sub
 
@@ -413,6 +569,113 @@ Namespace Ui
             Assert.AreEqual(New Size(800, 702),
                             FinestraAvvio.MisuraDaMostrare(New Size(800, 702), Size.Empty),
                             "senza spazio noto non si inventa una riduzione")
+
+        End Sub
+
+        ''' <summary>Il minimo garantito è quello che il capitolo promette: dieci secondi.</summary>
+        ''' <remarks>
+        ''' Erano cinque fino al 2026-09-01, quando il tutor li ha raddoppiati. È l'unico
+        ''' numero di questa finestra che nessun altro collaudo può vedere: tutti gli altri
+        ''' si passano un minimo <b>loro</b> dal costruttore, apposta per non aspettare
+        ''' davvero, e resterebbero verdi anche se il valore predefinito sparisse.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub IlMinimoAVideoEQuelloDichiarato()
+
+            Assert.AreEqual(TimeSpan.FromSeconds(10), FinestraAvvio.MinimoAVideo,
+                            "dieci secondi, come dice il cap. 03.4")
+
+        End Sub
+
+        ''' <summary>Invio manda via la schermata, e si mangia il tasto.</summary>
+        ''' <remarks>
+        ''' <para>Il tasto arriva da un <b>filtro dei messaggi</b> e non da un
+        ''' <c>KeyDown</c>, perché la schermata il fuoco della tastiera non ce l'ha quasi
+        ''' mai: la finestra principale si apre e si attiva mentre lo splash è ancora a
+        ''' video (v. <c>FinestraAvvio.PreFilterMessage</c>). Il collaudo entra dalla stessa
+        ''' porta da cui entrerebbe Windows, costruendo il messaggio a mano: non serve né
+        ''' mostrare la finestra né avere una tastiera.</para>
+        ''' <para>Si guarda anche che il tasto sia <b>consumato</b>: l'Invio che manda via
+        ''' la schermata non deve arrivare anche al bottone che ha il fuoco dietro di lei.
+        ''' </para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub InvioMandaViaLaSchermataSenzaAspettareIlMinimo()
+
+            Const WmKeyDown As Integer = &H100
+
+            Using schermata As New FinestraAvvio(Nothing, TimeSpan.FromMinutes(10))
+
+                Dim altroTasto As Message = Message.Create(
+                    IntPtr.Zero, WmKeyDown, New IntPtr(CInt(Keys.A)), IntPtr.Zero)
+
+                Assert.IsFalse(schermata.PreFilterMessage(altroTasto),
+                               "gli altri tasti passano oltre, non sono suoi")
+                Assert.IsFalse(schermata.GiaChiusa, "e non la mandano via")
+
+                Dim invio As Message = Message.Create(
+                    IntPtr.Zero, WmKeyDown, New IntPtr(CInt(Keys.Enter)), IntPtr.Zero)
+
+                Assert.IsTrue(schermata.PreFilterMessage(invio), "l'Invio se lo tiene")
+                Assert.IsTrue(schermata.GiaChiusa, "e la manda via, minimo o non minimo")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>E il clic la manda via come ha sempre fatto.</summary>
+        ''' <remarks>
+        ''' <para>Il clic c'era da prima di Invio, e il tutor l'ha voluto <b>dichiarato</b>:
+        ''' con il minimo passato da cinque a dieci secondi, la via d'uscita di sempre
+        ''' diventa più importante di prima, e quel che non è scritto da nessuna parte si
+        ''' perde alla prima riscrittura.</para>
+        ''' <para>Si chiama il gestore per riflesso e non <c>PerformClick</c>: su una
+        ''' finestra mai mostrata quello non fa niente e non lo dice. Il collaudo prova
+        ''' quindi che <b>al clic la schermata si chiude</b>, non che il clic ci arrivi:
+        ''' l'aggancio è la clausola <c>Handles</c>, che il compilatore verifica —
+        ''' <c>picSchermata</c> che sparisse o cambiasse nome non compilerebbe.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub IlClicMandaViaLaSchermataSenzaAspettareIlMinimo()
+
+            Using schermata As New FinestraAvvio(Nothing, TimeSpan.FromMinutes(10))
+
+                Dim cliccata As MethodInfo = GetType(FinestraAvvio).GetMethod(
+                    "Cliccata", BindingFlags.Instance Or BindingFlags.NonPublic)
+
+                Assert.IsNotNull(cliccata, "«Cliccata» è la porta da cui il clic la chiude")
+
+                cliccata.Invoke(schermata, New Object() {Nothing, EventArgs.Empty})
+
+                Assert.IsTrue(schermata.GiaChiusa, "un clic la manda via, minimo o non minimo")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>E una volta andata via non si mangia più niente.</summary>
+        ''' <remarks>
+        ''' Il filtro si toglie alla chiusura vera (<c>OnFormClosed</c>), ma nel banco la
+        ''' finestra non si mostra e non si chiude davvero: questa guardia è sulla prima
+        ''' riga del filtro, quella che si ferma se la schermata è già andata. Senza,
+        ''' <c>ChiudiSubito</c> verrebbe chiamato a ogni Invio del programma.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub UnaSchermataGiaChiusaNonSiMangiaPiuLInvio()
+
+            Const WmKeyDown As Integer = &H100
+
+            Using schermata As New FinestraAvvio(Nothing, TimeSpan.FromMinutes(10))
+
+                schermata.ChiudiSubito()
+
+                Dim invio As Message = Message.Create(
+                    IntPtr.Zero, WmKeyDown, New IntPtr(CInt(Keys.Enter)), IntPtr.Zero)
+
+                Assert.IsFalse(schermata.PreFilterMessage(invio),
+                               "l'Invio torna a chi lo aspettava")
+
+            End Using
 
         End Sub
 

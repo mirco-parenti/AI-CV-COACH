@@ -92,99 +92,51 @@ Public Class FormPrincipale
         Marchio.Vesti(Me)
         _argomenti = If(argomenti, ArgomentiAvvio.Leggi(Nothing))
         _schermataDiAvvio = schermataDiAvvio
-        DichiaraLaPortaDelleInformazioni()
+        DichiaraISuggerimenti()
 
     End Sub
 
     ''' <summary>
-    ''' Il pannello del logo è cliccabile e deve sembrarlo: mano sul puntatore e
-    ''' suggerimento, su tutte le sue parti. Senza, sarebbe una porta senza maniglia —
-    ''' la lezione di T9d, «quel che è acceso deve sembrarlo», applicata a un pannello
-    ''' che per undici tappe è stato solo un'insegna.
-    ''' </summary>
-    Private Sub DichiaraLaPortaDelleInformazioni()
-
-        For Each parte As Control In PartiDelPannelloLogo()
-            parte.Cursor = Cursors.Hand
-            ttSuggerimenti.SetToolTip(parte, "Informazioni su TrovaLavoro")
-        Next
-
-    End Sub
-
-    ''' <summary>
-    ''' Le parti del pannello del logo, in un posto solo: le vestono il puntatore, il
-    ''' suggerimento e il clic che apre «Informazioni su…», e tre elenchi separati
-    ''' finirebbero per non dire più la stessa cosa.
-    ''' </summary>
-    Private Function PartiDelPannelloLogo() As Control()
-        Return New Control() {pnlLogo, picLogo, lblMarchio, lblVersione, lblCopyright}
-    End Function
-
-    ''' <summary>
-    ''' Apre «Informazioni su…» (cap. 03.4). La porta è il pannello del logo, che è dove
-    ''' versione e pool si vanno già a leggere (cap. 03.5): nessun bottone nuovo in
-    ''' barra, e il gesto è quello che si prova per primo.
-    ''' </summary>
-    Private Sub ApriLeInformazioni(mittente As Object, e As EventArgs) _
-        Handles pnlLogo.Click, picLogo.Click, lblMarchio.Click, lblVersione.Click, lblCopyright.Click
-
-        FinestraInformazioni.Mostra(Me, EtichettaDelPool(), AddressOf ComponiLaDiagnostica)
-
-    End Sub
-
-    ''' <summary>
-    ''' Il filo nero che contorna il pannello del logo (cap. 03.5).
+    ''' I suggerimenti dei comandi della finestra.
     ''' </summary>
     ''' <remarks>
-    ''' <para><b>Perché non <c>BorderStyle = FixedSingle</c>.</b> Quello non è nero: lo
-    ''' disegna Windows col colore di sistema — un grigio che cambia col tema — e sul
-    ''' fondo chiaro del pannello si vedrebbe appena. Il colore lo decide la tavolozza,
-    ''' come per ogni altra cosa colorata di questa finestra.</para>
-    ''' <para><b>Perché <c>-1</c>.</b> Un rettangolo disegnato sulle misure piene chiude
-    ''' il lato destro a <c>Width</c> e quello inferiore a <c>Height</c>, cioè sulla prima
-    ''' colonna e sulla prima riga <i>fuori</i> dall'area: si vedrebbero due lati su
-    ''' quattro, e sembrerebbe un difetto di disegno invece che un errore di un pixel.</para>
-    ''' <para><b>Le tre etichette sono rientrate di 1 px per lato</b> (qui sotto e nel
-    ''' designer) proprio per questo filo: sono larghe quanto il pannello, hanno il fondo
-    ''' opaco che ereditano da lui, e i figli si disegnano <i>dopo</i> il genitore — alla
-    ''' larghezza piena cancellerebbero il contorno sui due lati verticali, ma solo alle
-    ''' righe che occupano. Il risultato sarebbe un contorno interrotto tre volte: il
-    ''' genere di difetto che si vede solo guardando, e solo se si sa dove.</para>
+    ''' <para>Fino al 2026-09-01 qui si vestiva anche il <b>pannello del logo</b>: mano sul
+    ''' puntatore e «Informazioni su TrovaLavoro» su tutte le sue parti, perché il clic
+    ''' sullo stemma apriva quella finestra. Su indicazione del tutor quel gesto non c'è
+    ''' più — il pannello è tornato a essere quello che era per undici tappe, un'insegna —
+    ''' e con lui se ne sono andati il puntatore a mano, il suggerimento e l'elenco delle
+    ''' parti da vestire: un invito al clic sopra qualcosa che non risponde è peggio di
+    ''' nessun invito.</para>
+    ''' <para>«Informazioni su…» non si è persa per strada: vive nelle Impostazioni
+    ''' (cap. 03.4), che è il posto da cui si arriva anche a «Come funziona…».</para>
     ''' </remarks>
-    Private Sub DisegnaIlContornoDelLogo(mittente As Object, e As PaintEventArgs) Handles pnlLogo.Paint
+    Private Sub DichiaraISuggerimenti()
 
-        Using penna As New Pen(StileApp.BordoMarchio)
-            e.Graphics.DrawRectangle(penna, 0, 0, pnlLogo.Width - 1, pnlLogo.Height - 1)
-        End Using
+        ttSuggerimenti.SetToolTip(btnAiuto, "Come funziona")
 
     End Sub
 
     ''' <summary>
-    ''' Il foglietto da mettere negli appunti quando si chiede «Copia diagnostica»
-    ''' (cap. 11.1). Si compone al momento del clic e non all'apertura della finestra:
-    ''' fra le due cose può esserci passato di mezzo il guasto che si vuole raccontare.
+    ''' Riapre l'informativa del primo avvio (cap. 11.2).
     ''' </summary>
-    Private Function ComponiLaDiagnostica() As String
+    ''' <remarks>
+    ''' <para>Nasce il 2026-09-01, su indicazione del tutor, per un buco che il capitolo
+    ''' non dichiarava: «Come funziona, e cosa esce dal tuo PC» compariva una volta sola, al
+    ''' primo avvio, e da lì in poi si poteva ritrovare <b>soltanto</b> aprendo le
+    ''' Impostazioni e cercandola in fondo a una finestra che scorre. Chi si domanda cosa
+    ''' esce dal proprio computer se lo domanda mentre lavora, non mentre configura.</para>
+    ''' <para>Il «?» sta in coda alla barra ma <b>non è l'ottava casella</b>: la barra è
+    ''' l'indice dei pannelli e quello non porta a un pannello. Per questo è vestito neutro
+    ''' e non del colore delle destinazioni, ed è l'unico bottone lassù che <b>resta acceso
+    ''' mentre l'AI lavora</b>: l'informativa non fa uscire da nessuna parte, e il momento in
+    ''' cui ci si chiede cosa stia succedendo è proprio quello in cui qualcosa sta
+    ''' succedendo.</para>
+    ''' </remarks>
+    Private Sub btnAiuto_Click(sender As Object, e As EventArgs) Handles btnAiuto.Click
 
-        Return Diagnostica.Componi(
-            Date.Now,
-            Versione.Riga(EtichettaDelPool()),
-            Versione.RigaDelSorgente(),
-            _contesto?.Cartella?.Radice,
-            ModelliInVigore(),
-            _contesto?.Diario?.UltimeRighe(Diagnostica.RigheDiDiario))
+        FinestraInformativa.Mostra(Me)
 
-    End Function
-
-    ''' <summary>I due modelli in vigore, scritti come si leggono; <c>Nothing</c> se non ci sono.</summary>
-    Private Function ModelliInVigore() As String
-
-        Dim modelli As Ai.Modelli = _contesto?.Modelli
-        If modelli Is Nothing Then Return Nothing
-
-        Return $"{modelli.ModelloSemplice?.Id} (estrazione) · {modelli.ModelloRagionamento?.Id} (ragionamento)"
-
-    End Function
+    End Sub
 
     ''' <summary>La schermata di avvio da togliere, se l'avvio ne ha aperta una.</summary>
     Private ReadOnly _schermataDiAvvio As ISchermataDiAvvio
@@ -264,6 +216,43 @@ Public Class FormPrincipale
     Private Sub FormPrincipale_Shown(sender As Object, e As EventArgs) Handles MyBase.Shown
         _schermataDiAvvio?.ChiudiQuandoPuoi()
         RiapplicaIlMinimoDellaFinestra()
+        ApriALaSuaMisura()
+    End Sub
+
+    ''' <summary>
+    ''' Dà alla finestra la misura con cui si apre, e la mette in mezzo allo schermo
+    ''' (cap. 03.4).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Dal 2026-09-01, su indicazione del tutor, l'applicazione <b>non si apre più
+    ''' massimizzata</b>: parte in stato normale, grande al massimo quanto dice
+    ''' <see cref="ScalaSchermo.TettoDiApertura"/>, e su uno schermo che non lo contiene
+    ''' prende quel che c'è. Massimizzare resta un gesto dell'utente — cambia lo stato
+    ''' d'apertura, non quello che si può fare dopo.</para>
+    ''' <para>Si fa nello <c>Shown</c> e dopo il minimo, per la ragione di
+    ''' <see cref="RiapplicaIlMinimoDellaFinestra"/>: la scalatura automatica deve avere
+    ''' già detto la sua, e il minimo deve essere quello vero prima che qualcuno gli
+    ''' confronti una misura. Se la finestra fosse stata massimizzata a mano nel frattempo
+    ''' non si tocca niente: la regola è dell'<b>apertura</b>.</para>
+    ''' <para>Il centraggio è a mano e non <c>CenterScreen</c>: quello vale al momento in
+    ''' cui la finestra si mostra, cioè con la misura di prima, e cambiandogliela dopo la
+    ''' lascerebbe fuori centro di mezza differenza.</para>
+    ''' </remarks>
+    Private Sub ApriALaSuaMisura()
+
+        If Me.WindowState <> FormWindowState.Normal Then Return
+
+        Dim schermo As Screen = Screen.FromControl(Me)
+        Dim areaDiLavoro As Rectangle = If(schermo Is Nothing, Rectangle.Empty, schermo.WorkingArea)
+
+        Me.Size = ScalaSchermo.MisuraDiApertura(areaDiLavoro.Size, Me.MinimumSize, Me.DeviceDpi)
+
+        If areaDiLavoro.Width <= 0 OrElse areaDiLavoro.Height <= 0 Then Return
+
+        Me.Location = New Point(
+            areaDiLavoro.X + Math.Max(0, (areaDiLavoro.Width - Me.Width) \ 2),
+            areaDiLavoro.Y + Math.Max(0, (areaDiLavoro.Height - Me.Height) \ 2))
+
     End Sub
 
     ''' <summary>
@@ -326,6 +315,15 @@ Public Class FormPrincipale
                                        RuoloDellaCasella(navigazione),
                                        attiva:=navigazione Is bottone)
         Next
+
+        ' Il pannello del logo prende il fondo di quel che gli sta sotto (cap. 03.5): dal
+        ' 2026-09-01, su indicazione del tutor, non è più un riquadro appoggiato sopra
+        ' l'area — niente filo nero attorno, niente fondo suo — ma il marchio posato
+        ' sull'angolo. E il fondo sotto non è uno solo: avorio nel menu d'ingresso
+        ' (FondoMenu), caldo nelle sei pagine (FondoPagina). Un colore fisso si fonderebbe
+        ' con uno dei due e lascerebbe un rettangolo visibile sull'altro, che è
+        ' esattamente il riquadro che si è tolto.
+        pnlLogo.BackColor = pannello.BackColor
 
         pnlLogo.BringToFront()
 
@@ -788,6 +786,22 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
+    ''' Come per gli altri pannelli: mentre l'AI legge un CV la barra non porta via.
+    ''' </summary>
+    ''' <remarks>
+    ''' È l'attesa più lunga di P2 ed era la sola che qui non passava: la scheda spegneva i
+    ''' propri comandi, ma dalla barra si usciva lo stesso e da un altro pannello partiva
+    ''' una seconda chiamata mentre la prima era in volo. Il filo del lavoro dell'AI è uno
+    ''' solo (cap. 03.8), e adesso ci passa anche l'import.
+    ''' </remarks>
+    Private Sub pnlProfilo_LavoroAiCambiato(sender As Object, e As EventArgs) _
+        Handles pnlProfilo.LavoroAiCambiato
+
+        BarraDiNavigazione(libera:=Not pnlProfilo.HaUnaLetturaInCorso)
+
+    End Sub
+
+    ''' <summary>
     ''' Il profilo costruito parlando arriva nella scheda, dove l'utente lo controlla e
     ''' lo salva. Se preferisce tenersi le correzioni che aveva in sospeso, la scheda
     ''' rifiuta la proposta e si resta nel dialogo, che è ancora tutto lì.
@@ -943,7 +957,24 @@ Public Class FormPrincipale
     Private _scudoDiCaricamento As FinestraDiCaricamento
 
     ''' <summary>
-    ''' Se lo scudo dell'attesa <b>deve</b> vedersi adesso (cap. 03.8).
+    ''' Quanto deve durare un'attesa perché lo scudo si faccia vedere.
+    ''' </summary>
+    ''' <remarks>
+    ''' Non tutte le chiamate all'AI durano mezzo minuto: qualcuna si chiude in un
+    ''' battito, e uno scudo grande quanto un terzo dello schermo che compare e sparisce
+    ''' in duecento millisecondi non si legge come «sto lavorando» — si legge come un
+    ''' lampo, cioè come un difetto. Trecento millisecondi sono la misura sotto la quale
+    ''' un'attesa non è ancora un'attesa: chi guarda non ha fatto in tempo a chiedersi se
+    ''' il programma abbia sentito il clic. Sopra, lo scudo arriva e resta finché serve.
+    ''' </remarks>
+    Private Const SogliaDelloScudoInMillisecondi As Integer = 300
+
+    ''' <summary>Il conto alla rovescia che apre lo scudo, se l'attesa dura abbastanza.</summary>
+    Private _sogliaDelloScudo As System.Windows.Forms.Timer
+
+    ''' <summary>
+    ''' Se lo scudo dell'attesa <b>è dovuto</b> adesso (cap. 03.8) — cioè se una chiamata
+    ''' all'AI è in volo. <b>Quando</b> si veda lo decide la soglia qui sopra.
     ''' </summary>
     ''' <remarks>
     ''' È la <i>decisione</i>, non lo stato della finestra, e la differenza qui non è un
@@ -960,10 +991,11 @@ Public Class FormPrincipale
     ''' Accende o spegne lo scudo grande al centro dello schermo.
     ''' </summary>
     ''' <remarks>
-    ''' <para>La finestra si tiene da parte invece di rifarla ogni volta: fra la fine di
-    ''' un'attesa e l'inizio della successiva passano spesso pochi secondi — si analizza,
-    ''' si confronta, si genera — e ricostruire una finestra a strati a ogni giro
-    ''' significa rifare l'handle, il timer e le risorse grafiche per niente.</para>
+    ''' <para><b>Accendere non vuol dire subito.</b> Lo scudo si apre solo se il lavoro è
+    ''' ancora in corso dopo la <see cref="SogliaDelloScudoInMillisecondi">soglia</see>:
+    ''' un'attesa che si chiude prima non lo fa comparire affatto, e chi guarda non vede
+    ''' nessun lampo. Spegnere invece è immediato — la soglia si ferma e, se lo scudo era
+    ''' arrivato, se ne va col suo compimento.</para>
     ''' <para><b>Se la finestra principale non è a video non si apre niente</b>, e non è
     ''' una prudenza teorica: senza questa riga il banco farebbe comparire uno scudo
     ''' Aviolab in mezzo allo schermo di chi sta lanciando i collaudi, una volta per ogni
@@ -976,16 +1008,64 @@ Public Class FormPrincipale
         If Not IsHandleCreated OrElse Not Visible Then Return
 
         If acceso Then
-
-            If _scudoDiCaricamento Is Nothing OrElse _scudoDiCaricamento.IsDisposed Then
-                _scudoDiCaricamento = New FinestraDiCaricamento()
-            End If
-
-            _scudoDiCaricamento.Accendi(Me)
-
+            AspettaLaSogliaDelloScudo()
         Else
+            _sogliaDelloScudo?.Stop()
             _scudoDiCaricamento?.Spegni()
         End If
+
+    End Sub
+
+    ''' <summary>
+    ''' Mette in conto lo scudo, che si aprirà se fra un attimo il lavoro sarà ancora lì.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Uno scudo <b>già a video</b> la soglia l'ha passata: la sua attesa continua e
+    ''' si riaccende subito — rimetterlo in coda vorrebbe dire farlo sparire e tornare in
+    ''' mezzo allo stesso lavoro. Ed è <see cref="FinestraDiCaricamento.Accendi"/> a sapere
+    ''' che una barra in corsa non ricomincia da zero.</para>
+    ''' <para>Una soglia <b>già in corsa</b> non si riavvia, per la stessa ragione per cui
+    ''' la barra non ricomincia: chi accende lo scudo è la riga che spegne la barra di
+    ''' navigazione, e quella passa di qui più volte nella stessa attesa — riavviarla
+    ''' rimanderebbe lo scudo di altri trecento millisecondi ogni volta.</para>
+    ''' </remarks>
+    Private Sub AspettaLaSogliaDelloScudo()
+
+        If _scudoDiCaricamento IsNot Nothing AndAlso _scudoDiCaricamento.Visible Then
+            _scudoDiCaricamento.Accendi(Me)
+            Return
+        End If
+
+        If _sogliaDelloScudo Is Nothing Then
+            _sogliaDelloScudo = New System.Windows.Forms.Timer() With {
+                .Interval = SogliaDelloScudoInMillisecondi}
+            AddHandler _sogliaDelloScudo.Tick, AddressOf LaSogliaEScaduta
+        End If
+
+        If Not _sogliaDelloScudo.Enabled Then _sogliaDelloScudo.Start()
+
+    End Sub
+
+    ''' <summary>
+    ''' La soglia è scaduta: se il lavoro è ancora in volo, adesso lo scudo si vede.
+    ''' </summary>
+    ''' <remarks>
+    ''' La finestra si tiene da parte invece di rifarla ogni volta: fra la fine di
+    ''' un'attesa e l'inizio della successiva passano spesso pochi secondi — si analizza,
+    ''' si confronta, si genera — e ricostruire una finestra a strati a ogni giro
+    ''' significa rifare l'handle, il timer e le risorse grafiche per niente.
+    ''' </remarks>
+    Private Sub LaSogliaEScaduta(mittente As Object, e As EventArgs)
+
+        _sogliaDelloScudo.Stop()
+
+        If Not LoScudoDeveVedersi Then Return
+
+        If _scudoDiCaricamento Is Nothing OrElse _scudoDiCaricamento.IsDisposed Then
+            _scudoDiCaricamento = New FinestraDiCaricamento()
+        End If
+
+        _scudoDiCaricamento.Accendi(Me)
 
     End Sub
 
@@ -1166,13 +1246,12 @@ Public Class FormPrincipale
     End Sub
 
     ''' <summary>
-    ''' Come si chiama la libreria in vigore: la dichiara lei stessa — sorgente e stato,
-    ''' asterisco compreso (cap. 04.5) — e il «Pool —» resta per l'anomalia totale,
-    ''' quando non si è aperta affatto. Sta in un metodo perché la leggono in due: il
-    ''' pannello del logo e «Informazioni su…».
+    ''' Come si chiama la libreria in vigore. La frase la compone il contesto
+    ''' (<see cref="ContestoApp.EtichettaDelPool"/>), che è chi ha la libreria in mano; qui
+    ''' resta il caso in cui il contesto non c'è ancora, che è solo di questa finestra.
     ''' </summary>
     Private Function EtichettaDelPool() As String
-        Return If(_contesto?.Libreria IsNot Nothing, _contesto.Libreria.Etichetta, "Pool —")
+        Return If(_contesto?.EtichettaDelPool, "Pool —")
     End Function
 
     ''' <summary>
@@ -1267,20 +1346,18 @@ Public Class FormPrincipale
         lblMarchio.Visible = Not compatta
         lblCopyright.Visible = Not compatta
 
-        ' Le etichette rientrano di un pixel per lato: alla larghezza piena il loro fondo
-        ' opaco coprirebbe il filo del contorno sui due lati verticali (v.
-        ' DisegnaIlContornoDelLogo). Il testo resta centrato: si toglie lo stesso pixel
-        ' da destra e da sinistra.
-        Dim rientro As Integer = larghezza - 2
-
+        ' Le etichette prendono tutta la larghezza. Fino al 2026-09-01 rientravano di un
+        ' pixel per lato, e non per estetica: il pannello aveva un filo nero attorno, il
+        ' loro fondo opaco lo avrebbe coperto sui due lati verticali, e il contorno sarebbe
+        ' rimasto interrotto tre volte. Tolto il filo, è caduto il motivo del rientro.
         Dim riga As Integer = margine + lato + StileApp.InterlineaMinima
         If Not compatta Then
-            lblMarchio.SetBounds(1, riga, rientro, AltezzaRigaNome)
+            lblMarchio.SetBounds(0, riga, larghezza, AltezzaRigaNome)
             riga += AltezzaRigaNome + 2
         End If
-        lblVersione.SetBounds(1, riga, rientro, AltezzaRigaDidascalia)
+        lblVersione.SetBounds(0, riga, larghezza, AltezzaRigaDidascalia)
         If Not compatta Then
-            lblCopyright.SetBounds(1, riga + AltezzaRigaDidascalia + 2, rientro, AltezzaRigaDidascalia)
+            lblCopyright.SetBounds(0, riga + AltezzaRigaDidascalia + 2, larghezza, AltezzaRigaDidascalia)
         End If
 
         ' La barra di stato scrive a destra del pannello logo, che le sta sopra.

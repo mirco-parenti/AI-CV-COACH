@@ -273,6 +273,8 @@ Namespace Ui
                         Assert.Contains("non si lascia leggere", stato.Text, "lo dice")
                         Assert.Contains("copia di sicurezza", stato.Text, "e dice della copia")
                         Assert.AreEqual(StileApp.Pericolo, stato.ForeColor, "con il colore dell'errore")
+                        Assert.StartsWith(Segnalazioni.PrefissoErrore, stato.Text,
+                                          "e con la parola, che il colore da solo non basta")
 
                         Assert.IsEmpty(Casella(pannello, "txtNome").Text, "niente dati inventati al posto suoi")
                         Assert.IsTrue(File.Exists(cartella.FileProfilo), "e il file rotto resta lì da recuperare")
@@ -469,6 +471,21 @@ Namespace Ui
                     Assert.IsFalse(Bottone(pannello, "btnEliminaLavoro").Enabled,
                                    "senza selezione no")
                 End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub TogliereUnaVoceDiceQualeEQuandoArrivaSulDisco()
+
+            ' Il testo della conferma di livello 5, letto da qui perché di una finestra
+            ' modale il banco non può aspettare la chiusura (come in P1). La riga sul
+            ' salvataggio non è un dettaglio tecnico: è la via d'uscita di chi si accorge
+            ' dopo di aver tolto la voce sbagliata.
+            Dim domanda As String = PannelloProfilo.SpiegazioneDellaVoceTolta(
+                "Magazziniere presso Rossi S.p.A.")
+
+            Assert.Contains("Magazziniere presso Rossi S.p.A.", domanda, "quale voce sparisce")
+            Assert.Contains("Salva profilo", domanda, "e quando la sparizione arriva sul disco")
+
         End Sub
 
         <TestMethod>

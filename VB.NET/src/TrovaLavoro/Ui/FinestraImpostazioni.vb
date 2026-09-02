@@ -2,6 +2,7 @@
 Imports System.Drawing
 Imports System.IO
 Imports System.Text.Json
+Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Motore
@@ -21,9 +22,11 @@ Imports TrovaLavoro.Motore
 ''' <para><b>Richiama invece di rifare.</b> La chiave passa dalla
 ''' <see cref="FinestraChiaveApi"/> del primo avvio, il backup dalla
 ''' <see cref="FinestraBackup"/> nata a T9a, l'eliminazione totale dalla
-''' <see cref="FinestraConfermaCritica"/> che chiede la parola. Tre finestre che esistono
-''' già e che qui non hanno un sosia: se un giorno cambia il modo di chiedere una chiave,
-''' cambia in un posto solo.</para>
+''' <see cref="FinestraConfermaCritica"/> che chiede la parola, e dal 2026-09-01 la carta
+''' d'identità del programma dalla <see cref="FinestraInformazioni"/>, che prima si apriva
+''' cliccando il pannello del logo. Quattro finestre che esistono già e che qui non hanno
+''' un sosia: se un giorno cambia il modo di chiedere una chiave, cambia in un posto
+''' solo.</para>
 ''' <para><b>Quel che non si tocca da qui.</b> La <i>cartella dati</i> si mostra e si apre
 ''' ma non si sposta: il lucchetto è preso all'avvio e per tutta la sessione (cap. 09.4),
 ''' e cambiarla a metà partita vorrebbe dire spostare file sotto i piedi di chi ci sta
@@ -170,6 +173,87 @@ Public Class FinestraImpostazioni
         FinestraInformativa.Mostra(Me)
     End Sub
 
+    ' ==================================================================
+    ' «Informazioni su…» (2026-09-01, su indicazione del tutor)
+    ' ==================================================================
+
+    ''' <summary>
+    ''' Apre «Informazioni su…» (cap. 03.4): chi è questo programma, che versione è, e da
+    ''' lì «Cerca aggiornamenti» e «Copia diagnostica».
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Fino al 2026-09-01 quella finestra si apriva <b>cliccando il pannello del
+    ''' logo</b> in basso a sinistra. Su indicazione del tutor il gesto è stato tolto — lo
+    ''' stemma è un'insegna, non una porta — e la finestra è venuta qui, accanto a «Come
+    ''' funziona…»: sono le due voci che parlano <b>del programma</b> invece che delle
+    ''' scelte che lo governano, e stanno insieme in cima, prima che le impostazioni vere e
+    ''' proprie comincino.</para>
+    ''' <para>Non è un dettaglio di comodo: dentro «Informazioni su…» vivono il controllo
+    ''' degli aggiornamenti e la copia della diagnostica, cioè le due cose che si vanno a
+    ''' cercare quando qualcosa non torna. Toglierle la porta senza dargliene un'altra
+    ''' sarebbe stato perderle in silenzio.</para>
+    ''' </remarks>
+    Private Sub btnInformazioni_Click(sender As Object, e As EventArgs) Handles btnInformazioni.Click
+
+        Using finestra As FinestraInformazioni = InformazioniSuTrovaLavoro()
+            finestra.ShowDialog(Me)
+        End Using
+
+    End Sub
+
+    ''' <summary>
+    ''' «Informazioni su…» già rifornita di quel che sa questa finestra: l'etichetta del
+    ''' pool e il foglietto di diagnostica.
+    ''' </summary>
+    ''' <remarks>
+    ''' Sta in un metodo suo, e non dentro il gestore del bottone, perché è la <b>consegna</b>
+    ''' la cosa che può rompersi: una finestra aperta senza il foglietto perde «Copia
+    ''' diagnostica» senza dirlo a nessuno. Di una finestra modale il banco non può aspettare
+    ''' la chiusura, ma di questa può chiedere la <i>stessa</i> che il bottone aprirebbe —
+    ''' che è l'unico modo di collaudare la consegna invece di ricostruirla nel collaudo, e
+    ''' di ricostruirla giusta per sbaglio.
+    ''' </remarks>
+    Public Function InformazioniSuTrovaLavoro() As FinestraInformazioni
+
+        Return New FinestraInformazioni(_contesto.EtichettaDelPool, AddressOf ComponiLaDiagnostica)
+
+    End Function
+
+    ''' <summary>
+    ''' Il foglietto da mettere negli appunti quando si chiede «Copia diagnostica»
+    ''' (cap. 11.1). Si compone al momento del clic e non all'apertura della finestra:
+    ''' fra le due cose può esserci passato di mezzo il guasto che si vuole raccontare.
+    ''' </summary>
+    ''' <remarks>
+    ''' Pubblica per il banco, come gli altri mestieri di questa finestra: «Informazioni
+    ''' su…» è modale e di una finestra modale non si può aspettare la chiusura, quindi
+    ''' quel che vale la pena controllare — che il foglietto sia davvero pieno — si legge
+    ''' da qui. Viveva in <c>FormPrincipale</c> finché la porta era il pannello del logo;
+    ''' è venuta con la porta, e sta bene qui: tutto quel che le serve è nel contesto, che
+    ''' questa finestra ha già in mano.
+    ''' </remarks>
+    Public Function ComponiLaDiagnostica() As String
+
+        Return Diagnostica.Componi(
+            Date.Now,
+            Versione.Riga(_contesto.EtichettaDelPool),
+            Versione.RigaDelSorgente(),
+            _contesto.Cartella?.Radice,
+            ModelliInVigore(),
+            _contesto.Diario?.UltimeRighe(Diagnostica.RigheDiDiario))
+
+    End Function
+
+    ''' <summary>I due modelli in vigore, scritti come si leggono; <c>Nothing</c> se non ci sono.</summary>
+    Private Function ModelliInVigore() As String
+
+        Dim modelli As Ai.Modelli = _contesto.Modelli
+        If modelli Is Nothing Then Return Nothing
+
+        Return $"{modelli.ModelloSemplice?.Id} (estrazione) · {modelli.ModelloRagionamento?.Id} (ragionamento)"
+
+    End Function
+
     Private Sub btnCambiaChiave_Click(sender As Object, e As EventArgs) Handles btnCambiaChiave.Click
 
         Dim illeggibile As Boolean
@@ -180,8 +264,7 @@ Public Class FinestraImpostazioni
         Try
             _contesto.Segreti.SalvaChiaveApi(digitata)
         Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
-            Racconta($"La chiave non si è potuta salvare ({ex.Message}): vale per questa sessione.",
-                     StileApp.RossoTitoli)
+            RaccontaUnErrore($"La chiave non si è potuta salvare ({ex.Message}): vale per questa sessione.")
         End Try
 
         _ChiaveCambiata = True
@@ -264,9 +347,8 @@ Public Class FinestraImpostazioni
             RaccontaCosaSiPuoPulire()
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
-            Racconta($"Le preferenze non si sono potute scrivere ({ex.Message}). " &
-                     "Valgono per questa sessione, ma al prossimo avvio saranno quelle di prima.",
-                     StileApp.RossoTitoli)
+            RaccontaUnErrore($"Le preferenze non si sono potute scrivere ({ex.Message}). " &
+                             "Valgono per questa sessione, ma al prossimo avvio saranno quelle di prima.")
         End Try
 
     End Sub
@@ -305,7 +387,7 @@ Public Class FinestraImpostazioni
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException OrElse
                                    TypeOf ex Is System.ComponentModel.Win32Exception
-            Racconta($"La cartella non si è lasciata aprire ({ex.Message}).", StileApp.RossoTitoli)
+            RaccontaUnErrore($"La cartella non si è lasciata aprire ({ex.Message}).")
         End Try
 
     End Sub
@@ -502,9 +584,8 @@ Public Class FinestraImpostazioni
 
         Catch ex As JsonException
             RiempiLeTendine()
-            Racconta("Il file modelli.json c'è ma non si lascia leggere: aprilo e correggilo " &
-                     "(o cancellalo, e torneranno i predefiniti). La scelta non è stata cambiata.",
-                     StileApp.RossoTitoli)
+            RaccontaUnErrore("Il file modelli.json c'è ma non si lascia leggere: aprilo e correggilo " &
+                             "(o cancellalo, e torneranno i predefiniti). La scelta non è stata cambiata.")
             Return
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse
@@ -512,8 +593,7 @@ Public Class FinestraImpostazioni
             ' La tendina torna su quel che vale davvero: lasciarla sul modello nuovo
             ' direbbe che il cambio è avvenuto, e non è avvenuto né qui né sul disco.
             RiempiLeTendine()
-            Racconta($"La scelta non si è potuta salvare ({ex.Message}): resta quella di prima.",
-                     StileApp.RossoTitoli)
+            RaccontaUnErrore($"La scelta non si è potuta salvare ({ex.Message}): resta quella di prima.")
             Return
         End Try
 
@@ -548,7 +628,7 @@ Public Class FinestraImpostazioni
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException OrElse
                                    TypeOf ex Is System.ComponentModel.Win32Exception
-            Racconta($"Non si è lasciato aprire ({ex.Message}).", StileApp.RossoTitoli)
+            RaccontaUnErrore($"Non si è lasciato aprire ({ex.Message}).")
         End Try
 
     End Sub
@@ -631,7 +711,7 @@ Public Class FinestraImpostazioni
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException OrElse
                                    TypeOf ex Is System.ComponentModel.Win32Exception
-            Racconta($"Non si è lasciato aprire ({ex.Message}).", StileApp.RossoTitoli)
+            RaccontaUnErrore($"Non si è lasciato aprire ({ex.Message}).")
         End Try
 
     End Sub
@@ -642,8 +722,27 @@ Public Class FinestraImpostazioni
 
     Private Sub RaccontaCosaSiPuoPulire()
 
+        btnBackup.Enabled = True
         btnSvuotaNavigazione.Enabled = Directory.Exists(_contesto.Cartella.CartellaWebView2)
         btnEliminaTutto.Enabled = _pulizia.CEQualcosa
+
+    End Sub
+
+    ''' <summary>
+    ''' Chiude i tre comandi della sezione «I tuoi dati» mentre una pulizia è in corso.
+    ''' </summary>
+    ''' <remarks>
+    ''' Riaprirli non tocca a questo metodo ma a <see cref="RaccontaCosaSiPuoPulire"/>, che
+    ''' li riaccende <b>secondo quel che è rimasto</b>: dopo un'eliminazione riuscita non
+    ''' c'è più niente da eliminare, e riaccendere alla cieca il bottone rosso direbbe il
+    ''' contrario. Sono tre e non due perché lavorano sugli stessi file: un backup avviato
+    ''' in mezzo a un'eliminazione leggerebbe una cartella che sta sparendo.
+    ''' </remarks>
+    Private Sub ChiudiIComandiDeiDati()
+
+        btnBackup.Enabled = False
+        btnSvuotaNavigazione.Enabled = False
+        btnEliminaTutto.Enabled = False
 
     End Sub
 
@@ -658,7 +757,14 @@ Public Class FinestraImpostazioni
 
     End Sub
 
-    Private Sub btnSvuotaNavigazione_Click(sender As Object, e As EventArgs) Handles btnSvuotaNavigazione.Click
+    ''' <remarks>
+    ''' <b>La cancellazione va su un altro filo.</b> La cartella del browser sono migliaia
+    ''' di file piccoli, e cancellarli sul thread dell'interfaccia vuol dire una finestra
+    ''' che smette di rispondere proprio mentre dice di stare lavorando — con Windows che
+    ''' le sbianca sopra il suo «non risponde». Qui restano i comandi chiusi e la riga che
+    ''' racconta, che è il patto delle attese di questo programma (cap. 03.8).
+    ''' </remarks>
+    Private Async Sub btnSvuotaNavigazione_Click(sender As Object, e As EventArgs) Handles btnSvuotaNavigazione.Click
 
         ' Livello 5: si spiega e si parte da «No», come lo «Scarta» di P4 (cap. 03.3).
         Dim risposta As DialogResult = MessageBox.Show(
@@ -672,24 +778,46 @@ Public Class FinestraImpostazioni
 
         If risposta <> DialogResult.Yes Then Return
 
+        ChiudiIComandiDeiDati()
+        Racconta("Sto svuotando i dati di navigazione…", StileApp.TestoSecondario)
+
+        Dim detto As String
+        Dim andataStorta As Boolean = False
+
         Try
-            If _pulizia.SvuotaNavigazione() Then
-                Racconta("Dati di navigazione svuotati.", StileApp.TestoSecondario)
-            Else
-                Racconta("Non c'era niente da svuotare.", StileApp.TestoSecondario)
-            End If
+            detto = If(Await Task.Run(Function() _pulizia.SvuotaNavigazione()).ConfigureAwait(True),
+                       "Dati di navigazione svuotati.",
+                       "Non c'era niente da svuotare.")
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
             ' Il browser incorporato tiene i suoi file aperti finché P3 è vivo.
-            Racconta($"Non si sono lasciati cancellare tutti ({ex.Message}): " &
-                     "chiudi la ricerca annunci e riprova.", StileApp.RossoTitoli)
+            detto = $"Non si sono lasciati cancellare tutti ({ex.Message}): " &
+                    "chiudi la ricerca annunci e riprova."
+            andataStorta = True
         End Try
+
+        ' Nel frattempo la finestra può essere stata chiusa: toccare i controlli di una
+        ' finestra smaltita solleverebbe, e per giunta in un punto che nessuno guarda.
+        If IsDisposed Then Return
+
+        ' Com'è andata si porta dietro il modo di dirlo: qui non si sceglie più un colore,
+        ' si sceglie fra due voci — e la parola e il colore viaggiano insieme.
+        If andataStorta Then
+            RaccontaUnErrore(detto)
+        Else
+            Racconta(detto, StileApp.TestoSecondario)
+        End If
 
         RaccontaCosaSiPuoPulire()
 
     End Sub
 
-    Private Sub btnEliminaTutto_Click(sender As Object, e As EventArgs) Handles btnEliminaTutto.Click
+    ''' <remarks>
+    ''' Come lo svuotamento qui sopra, e con più ragione: qui sparisce l'intera cartella
+    ''' dati — profilo, storico, candidature con i loro documenti, backup. Il mestiere va
+    ''' su un altro filo, e la finestra resta viva a dirlo.
+    ''' </remarks>
+    Private Async Sub btnEliminaTutto_Click(sender As Object, e As EventArgs) Handles btnEliminaTutto.Click
 
         Dim confermato As Boolean = FinestraConfermaCritica.Chiedi(
             Me,
@@ -707,26 +835,41 @@ Public Class FinestraImpostazioni
 
         If Not confermato Then Return
 
+        ChiudiIComandiDeiDati()
+        Racconta("Sto eliminando i tuoi dati…", StileApp.TestoSecondario)
+
+        Dim andate As Integer
+        Dim guasto As Exception = Nothing
+
         Try
-            Dim andate As Integer = _pulizia.EliminaTutto()
-            _DatiEliminati = True
-
-            MessageBox.Show(
-                Me,
-                $"Fatto: {andate} voci eliminate." & vbLf & vbLf &
-                "Chiudo l'applicazione: da qui in poi lavorerebbe su file che non ci sono più. " &
-                "Riaprendola, ricomincia come il primo giorno.",
-                "Dati eliminati", MessageBoxButtons.OK, MessageBoxIcon.Information)
-
-            DialogResult = DialogResult.OK
-            Close()
+            andate = Await Task.Run(Function() _pulizia.EliminaTutto()).ConfigureAwait(True)
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse TypeOf ex Is UnauthorizedAccessException
-            Racconta($"Non si è potuto eliminare tutto ({ex.Message}). " &
-                     "Qualcosa è ancora aperto: chiudi le altre finestre e riprova.",
-                     StileApp.RossoTitoli)
-            RaccontaCosaSiPuoPulire()
+            guasto = ex
         End Try
+
+        ' Nel frattempo la finestra può essere stata chiusa: toccare i controlli di una
+        ' finestra smaltita solleverebbe, e per giunta in un punto che nessuno guarda.
+        If IsDisposed Then Return
+
+        If guasto IsNot Nothing Then
+            RaccontaUnErrore($"Non si è potuto eliminare tutto ({guasto.Message}). " &
+                             "Qualcosa è ancora aperto: chiudi le altre finestre e riprova.")
+            RaccontaCosaSiPuoPulire()
+            Return
+        End If
+
+        _DatiEliminati = True
+
+        MessageBox.Show(
+            Me,
+            $"Fatto: {andate} voci eliminate." & vbLf & vbLf &
+            "Chiudo l'applicazione: da qui in poi lavorerebbe su file che non ci sono più. " &
+            "Riaprendola, ricomincia come il primo giorno.",
+            "Dati eliminati", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+        DialogResult = DialogResult.OK
+        Close()
 
     End Sub
 
@@ -739,6 +882,21 @@ Public Class FinestraImpostazioni
 
         lblStato.Text = testo
         lblStato.ForeColor = colore
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa non è riuscito: la parola e il colore insieme
+    ''' (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    ''' <remarks>
+    ''' Fino al 2026-09-01 queste righe erano <c>RossoTitoli</c>, che è il rosso del
+    ''' <b>marchio</b>: nato per i titoli grandi, come testo piccolo non arriva alla soglia
+    ''' di leggibilità — e comunque diceva «guasto» col solo colore.
+    ''' </remarks>
+    Private Sub RaccontaUnErrore(testo As String)
+
+        Racconta(Segnalazioni.PrefissoErrore & testo, StileApp.Pericolo)
 
     End Sub
 
@@ -804,6 +962,7 @@ Public Class FinestraImpostazioni
         numFollowUp.ForeColor = StileApp.TestoPrimario
 
         StileApp.VestiBottone(btnComeFunziona, LivelloBottone.Esplorativo)
+        StileApp.VestiBottone(btnInformazioni, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnCambiaChiave, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnApriCartellaDati, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnGestisciDocumenti, LivelloBottone.Esplorativo)
@@ -887,65 +1046,136 @@ Public Class FinestraImpostazioni
         End Get
     End Property
 
+    ''' <summary>I comandi di sezione: quelli che vivono nella colonna di destra.</summary>
+    ''' <remarks>
+    ''' In un posto solo perché di cose che valgono per tutti ce ne sono due — la larghezza
+    ''' unica e la colonna — e due elenchi separati finirebbero per non dire più la stessa
+    ''' cosa. «Chiudi» non c'è: vive nella fascia in fondo, che non scorre.
+    ''' </remarks>
+    Private Function ComandiDiSezione() As Button()
+
+        Return New Button() {btnComeFunziona, btnInformazioni, btnCambiaChiave,
+                             btnApriCartellaDati, btnGestisciDocumenti, btnApriModelli,
+                             btnApriChiamate, btnBackup, btnSvuotaNavigazione, btnEliminaTutto}
+
+    End Function
+
     ''' <summary>
-    ''' Mette i controlli in colonna dentro questa larghezza, e dice fin dove arrivano. Il
-    ''' conto lo fa il codice e non il designer, perché i testi qui dentro cambiano
+    ''' Mette i controlli in due colonne dentro questa larghezza, e dice fin dove arrivano.
+    ''' Il conto lo fa il codice e non il designer, perché i testi qui dentro cambiano
     ''' lunghezza con quel che c'è nella cartella dati.
     ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Due terzi ai testi, un terzo ai comandi</b> *(2026-09-01, su indicazione
+    ''' del tutor)*. Fino a quel giorno era una colonna sola: titolo di sezione, il
+    ''' paragrafo che spiega, e <b>sotto</b> il bottone — ognuno largo quanto la propria
+    ''' scritta. Ne veniva una colonna sfrangiata, con otto bottoni di otto larghezze
+    ''' diverse, e la sezione «I tuoi dati» era la peggiore: due bottoni disuguali a
+    ''' sinistra e l'eliminazione di tutto che galleggiava a destra in mezzo al vuoto.
+    ''' Adesso i comandi stanno in colonna a destra, <b>tutti della stessa larghezza</b> —
+    ''' quella della colonna (<see cref="StileApp.FrazioneColonnaDeiComandi"/>) — e ciascuno
+    ''' all'altezza della sua sezione: il bottone si legge accanto a quel che spiega a cosa
+    ''' serve, invece che dopo.</para>
+    ''' <para><b>Che cosa resta nel flusso del testo</b>, e perché: la tendina della lingua,
+    ''' il numerico dei giorni e le due tendine dei modelli. Non sono comandi ma
+    ''' <b>valori</b> — si leggono insieme alla frase che li introduce, e «italiano» accanto
+    ''' a «Lingua dei documenti» è una riga sola che si capisce; spostarli a destra
+    ''' spezzerebbe la frase per farne una colonna.</para>
+    ''' <para><b>Il critico ha la sua riga nella colonna</b>. Il vuoto attorno resta la
+    ''' difesa (cap. 11.5), ma è tutto <b>verticale</b>: stessa larghezza degli altri, sulla
+    ''' sua riga, con lo stacco doppio sopra e sotto. Fino a stamattina stava al margine
+    ''' opposto, e in una fascia orizzontale larga quel salto si legge come una scelta —
+    ''' in una colonna stretta si legge come un avanzo.</para>
+    ''' </remarks>
     Private Function MettiInFila(larghezza As Integer) As Integer
 
         Dim sinistra As Integer = StileApp.MargineRiquadro
         Dim larghezzaUtile As Integer = larghezza - 2 * StileApp.MargineRiquadro
 
+        ' Le due colonne: un terzo ai comandi, il resto ai testi meno lo stacco fra loro.
+        Dim colonnaComandi As Integer =
+            CInt(Math.Floor(larghezzaUtile * StileApp.FrazioneColonnaDeiComandi))
+        Dim colonnaTesto As Integer = larghezzaUtile - StileApp.DistanzaControlli - colonnaComandi
+        Dim destra As Integer = sinistra + larghezzaUtile - colonnaComandi
+
         For Each testo As Label In {lblSpiegazione, lblStatoChiave, lblRifinituraNota,
                                     lblFollowUpNota, lblCartellaDati, lblCartellaDocumenti,
                                     lblModelloRagionamento, lblModelloSemplice,
-                                    lblModelli, lblPool, lblConsumo, lblStato}
-            testo.MaximumSize = New Size(larghezzaUtile, 0)
+                                    lblModelli, lblPool, lblConsumo}
+            testo.MaximumSize = New Size(colonnaTesto, 0)
         Next
 
-        ' Le tendine dei modelli si prendono tutta la larghezza: un identificativo con
+        ' Lo stato finale sta in fondo e sotto di lui non c'è nessun comando: si prende
+        ' tutta la larghezza, come si prenderebbe una riga di piè di pagina.
+        lblStato.MaximumSize = New Size(larghezzaUtile, 0)
+
+        ' Le tendine dei modelli si prendono la colonna del testo: un identificativo con
         ' accanto il nome leggibile non sta in una casella da 180 pixel, e una tendina che
         ' tronca proprio l'id è una tendina che nasconde la cosa che conta.
         For Each tendina As ComboBox In {cmbModelloRagionamento, cmbModelloSemplice}
-            tendina.Width = larghezzaUtile
+            tendina.Width = colonnaTesto
+        Next
+
+        ' Una larghezza sola per tutti, ed è quella della colonna: è la regola del tutor
+        ' («i bottoni non sono grossi quanto la scritta che c'è dentro») applicata alla
+        ' finestra che ne aveva più bisogno.
+        For Each comando As Button In ComandiDiSezione()
+            comando.Width = colonnaComandi
         Next
 
         lblTitolo.Location = New Point(sinistra, StileApp.MargineRiquadro)
         lblSpiegazione.Location = New Point(sinistra, lblTitolo.Bottom + StileApp.DistanzaControlli)
 
-        btnComeFunziona.Location = New Point(sinistra, lblSpiegazione.Bottom + StileApp.DistanzaControlli)
+        ' Le due voci che parlano del programma, in cima e una sotto l'altra: «Come
+        ' funziona…» è l'informativa del cap. 11.2, «Informazioni su…» è la carta
+        ' d'identità dell'eseguibile e la strada per gli aggiornamenti e la diagnostica.
+        ' Nessuna delle due è una scelta da fare, e per questo stanno prima delle sezioni.
+        btnComeFunziona.Location = New Point(destra, lblSpiegazione.Top)
+        btnInformazioni.Location = New Point(destra, btnComeFunziona.Bottom + StileApp.DistanzaControlli)
 
-        lblSezioneChiave.Location = New Point(sinistra, btnComeFunziona.Bottom + StileApp.MargineRiquadro)
+        Dim sotto As Integer = Math.Max(lblSpiegazione.Bottom, btnInformazioni.Bottom)
+
+        ' --- La chiave ---
+        lblSezioneChiave.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
         lblStatoChiave.Location = New Point(sinistra, lblSezioneChiave.Bottom + StileApp.InterlineaMinima)
-        btnCambiaChiave.Location = New Point(sinistra, lblStatoChiave.Bottom + StileApp.InterlineaMinima)
+        btnCambiaChiave.Location = New Point(destra, lblSezioneChiave.Top)
+        sotto = Math.Max(lblStatoChiave.Bottom, btnCambiaChiave.Bottom)
 
-        lblSezioneDocumenti.Location = New Point(sinistra, btnCambiaChiave.Bottom + StileApp.MargineRiquadro)
+        ' --- I documenti: niente comandi, solo valori che stanno nella frase ---
+        lblSezioneDocumenti.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
         lblLingua.Location = New Point(sinistra, lblSezioneDocumenti.Bottom + StileApp.InterlineaMinima + 4)
         cmbLingua.Location = New Point(lblLingua.Right + StileApp.InterlineaMinima,
                                        lblSezioneDocumenti.Bottom + StileApp.InterlineaMinima)
         chkRifinitura.Location = New Point(sinistra, cmbLingua.Bottom + StileApp.DistanzaControlli)
         lblRifinituraNota.Location = New Point(sinistra, chkRifinitura.Bottom + StileApp.InterlineaMinima)
+        sotto = lblRifinituraNota.Bottom
 
-        lblSezioneCandidature.Location = New Point(sinistra, lblRifinituraNota.Bottom + StileApp.MargineRiquadro)
+        ' --- Le candidature: idem, il numerico sta nella frase ---
+        lblSezioneCandidature.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
         lblFollowUp.Location = New Point(sinistra, lblSezioneCandidature.Bottom + StileApp.InterlineaMinima + 4)
         numFollowUp.Location = New Point(lblFollowUp.Right + StileApp.InterlineaMinima,
                                          lblSezioneCandidature.Bottom + StileApp.InterlineaMinima)
         lblGiorni.Location = New Point(numFollowUp.Right + StileApp.InterlineaMinima,
                                        lblFollowUp.Top)
         lblFollowUpNota.Location = New Point(sinistra, numFollowUp.Bottom + StileApp.InterlineaMinima)
+        sotto = lblFollowUpNota.Bottom
 
-        lblSezioneCartelle.Location = New Point(sinistra, lblFollowUpNota.Bottom + StileApp.MargineRiquadro)
+        ' --- Le cartelle: due comandi, e ognuno all'altezza del testo che lo spiega ---
+        lblSezioneCartelle.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
         lblCartellaDati.Location = New Point(sinistra, lblSezioneCartelle.Bottom + StileApp.InterlineaMinima)
-        btnApriCartellaDati.Location = New Point(sinistra, lblCartellaDati.Bottom + StileApp.InterlineaMinima)
-        lblCartellaDocumenti.Location = New Point(sinistra, btnApriCartellaDati.Bottom + StileApp.DistanzaControlli)
-        btnGestisciDocumenti.Location = New Point(sinistra, lblCartellaDocumenti.Bottom + StileApp.InterlineaMinima)
+        btnApriCartellaDati.Location = New Point(destra, lblCartellaDati.Top)
 
-        lblSezioneMotore.Location = New Point(sinistra, btnGestisciDocumenti.Bottom + StileApp.MargineRiquadro)
+        sotto = Math.Max(lblCartellaDati.Bottom, btnApriCartellaDati.Bottom)
+        lblCartellaDocumenti.Location = New Point(sinistra, sotto + StileApp.DistanzaControlli)
+        btnGestisciDocumenti.Location = New Point(destra, lblCartellaDocumenti.Top)
+        sotto = Math.Max(lblCartellaDocumenti.Bottom, btnGestisciDocumenti.Bottom)
+
+        ' --- Il motore ---
+        lblSezioneMotore.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
 
         ' Etichetta sopra e tendina sotto, e non affiancate come la lingua: qui
         ' l'etichetta è una frase e il valore un identificativo lungo, e in fila
-        ' finirebbero fuori dalla larghezza di progetto proprio a DPI alti.
+        ' finirebbero fuori dalla colonna proprio a DPI alti.
         lblModelloRagionamento.Location = New Point(sinistra, lblSezioneMotore.Bottom + StileApp.InterlineaMinima)
         cmbModelloRagionamento.Location = New Point(sinistra, lblModelloRagionamento.Bottom + StileApp.InterlineaMinima)
         lblModelloSemplice.Location = New Point(sinistra, cmbModelloRagionamento.Bottom + StileApp.DistanzaControlli)
@@ -953,22 +1183,31 @@ Public Class FinestraImpostazioni
 
         lblModelli.Location = New Point(sinistra, cmbModelloSemplice.Bottom + StileApp.InterlineaMinima)
         lblPool.Location = New Point(sinistra, lblModelli.Bottom + StileApp.InterlineaMinima)
-        btnApriModelli.Location = New Point(sinistra, lblPool.Bottom + StileApp.InterlineaMinima)
+        btnApriModelli.Location = New Point(destra, lblSezioneMotore.Top)
+        sotto = Math.Max(lblPool.Bottom, btnApriModelli.Bottom)
 
-        lblSezioneConsumo.Location = New Point(sinistra, btnApriModelli.Bottom + StileApp.MargineRiquadro)
+        ' --- Quanto è costato ---
+        lblSezioneConsumo.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
         lblConsumo.Location = New Point(sinistra, lblSezioneConsumo.Bottom + StileApp.InterlineaMinima)
-        btnApriChiamate.Location = New Point(sinistra, lblConsumo.Bottom + StileApp.InterlineaMinima)
+        btnApriChiamate.Location = New Point(destra, lblSezioneConsumo.Top)
+        sotto = Math.Max(lblConsumo.Bottom, btnApriChiamate.Bottom)
 
-        lblSezioneDati.Location = New Point(sinistra, btnApriChiamate.Bottom + StileApp.MargineRiquadro)
-        btnBackup.Location = New Point(sinistra, lblSezioneDati.Bottom + StileApp.InterlineaMinima)
-        btnSvuotaNavigazione.Location = New Point(sinistra, btnBackup.Bottom + StileApp.DistanzaControlli)
+        ' --- I tuoi dati ---
+        lblSezioneDati.Location = New Point(sinistra, sotto + StileApp.MargineRiquadro)
+        btnBackup.Location = New Point(destra, lblSezioneDati.Top)
+        btnSvuotaNavigazione.Location = New Point(destra, btnBackup.Bottom + StileApp.DistanzaControlli)
 
         ' L'azione che non si disfa sta lontana dalle altre: è una difesa, non una
-        ' spaziatura (cap. 11.5, la stessa regola della fascia dei comandi).
-        btnEliminaTutto.Location = New Point(sinistra,
+        ' spaziatura (cap. 11.5, la stessa regola della fascia dei comandi). Qui la difesa è
+        ' tutta verticale — riga sua, stacco doppio sopra e sotto — e la larghezza è quella
+        ' di tutti: dal 2026-09-01 i comandi stanno in colonna, e un bottone spostato al
+        ' margine opposto, che in una fascia orizzontale si legge come una scelta, in una
+        ' colonna si legge come un avanzo. Un clic scivolato sotto «Svuota i dati di
+        ' navigazione» trova il vuoto, non l'eliminazione di tutto.
+        btnEliminaTutto.Location = New Point(destra,
                                              btnSvuotaNavigazione.Bottom + FasciaDeiComandi.StaccoDelCritico)
 
-        lblStato.Location = New Point(sinistra, btnEliminaTutto.Bottom + StileApp.MargineRiquadro)
+        lblStato.Location = New Point(sinistra, btnEliminaTutto.Bottom + FasciaDeiComandi.StaccoDelCritico)
 
         ' «Chiudi» non sta più in coda al contenuto: vive nella fascia, che non scorre.
         Return lblStato.Bottom + StileApp.MargineRiquadro

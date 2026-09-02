@@ -410,11 +410,11 @@ Namespace Ui
                 generatore,
                 Async Function(pannello, contesto, documenti)
                     Await pannello.MostraIlCvBaseAsync()
-                    Assert.AreEqual("Torna al profilo", Bottone(pannello, "btnTornaIndietro").Text,
+                    Assert.AreEqual("◀ Torna al profilo", Bottone(pannello, "btnTornaIndietro").Text,
                                     "dal CV base si torna al profilo, che è dove è nato")
 
                     Await pannello.MostraLaCandidaturaAsync(Confrontata(contesto))
-                    Assert.AreEqual("Torna all'opportunità", Bottone(pannello, "btnTornaIndietro").Text,
+                    Assert.AreEqual("◀ Torna all'opportunità", Bottone(pannello, "btnTornaIndietro").Text,
                                     "e dalla candidatura si torna alla sua scheda")
                 End Function)
 

@@ -91,14 +91,20 @@ Namespace Ui
             ConPannello(
                 Sub(pannello, contesto, cartella)
 
-                    ' Due portano un simbolo al posto del testo e la casella dell'indirizzo
-                    ' non ha un'etichetta accanto: senza un nome accessibile sarebbero
-                    ' anonimi per chi non vede lo schermo. Il difetto è emerso guardando
-                    ' l'applicazione vera (2026-08-12), dove lo strumento di collaudo non
-                    ' riusciva a trovare la casella — e uno screen reader nemmeno.
+                    ' Due portano un simbolo al posto del testo: senza un nome accessibile
+                    ' sarebbero anonimi per chi non vede lo schermo. Il difetto è emerso
+                    ' guardando l'applicazione vera (2026-08-12), dove lo strumento di
+                    ' collaudo non riusciva a trovare la casella — e uno screen reader
+                    ' nemmeno. Dal 2026-09-01 la casella dell'indirizzo ha anche
+                    ' un'etichetta a video, e le due dicono la stessa parola: un campo che
+                    ' si chiama in un modo per chi guarda e in un altro per chi ascolta è
+                    ' un campo che non si nomina.
                     Assert.AreEqual("Indietro", Bottone(pannello, "btnIndietro").AccessibleName)
                     Assert.AreEqual("Ricarica", Bottone(pannello, "btnRicarica").AccessibleName)
                     Assert.AreEqual("Indirizzo", Casella(pannello, "txtIndirizzo").AccessibleName)
+                    Assert.AreEqual(Casella(pannello, "txtIndirizzo").AccessibleName,
+                                    Etichetta(pannello, "lblIndirizzo").Text,
+                                    "e l'etichetta a video dice la stessa parola")
 
                 End Sub)
 
@@ -230,6 +236,117 @@ Namespace Ui
                     End Try
 
                 End Sub)
+
+        End Sub
+
+        ' ==================================================================
+        ' Le misure e i livelli della fascia dei comandi (cap. 03.2, 03.3)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Sub IComandiDellaRicercaSonoAltiComeGliAltriDellApplicazione()
+
+            ' Fino al 2026-09-01 erano alti 26 pixel: gli unici sette bottoni fuori dal
+            ' token in tutta l'applicazione, in mezzo a una fascia di caselle alte 23 e
+            ' sotto due bottoni alti 32. L'atteso si prende da un bottone del pannello
+            ' stesso e non dal numero 32, perché con AutoScaleMode.Font le misure crescono
+            ' col carattere: quel che deve valere è che crescano <b>insieme</b>.
+            Using pannello As New PannelloRicerca()
+
+                Dim atteso As Integer = Bottone(pannello, "btnCattura").Height
+
+                Assert.IsGreaterThanOrEqualTo(StileApp.BottoneStandard.Height, atteso,
+                                              "il metro è il bottone standard del progetto")
+
+                For Each nome As String In {"btnApri", "btnDimentica", "btnCerca", "btnSalvaRicerca",
+                                            "btnIndietro", "btnRicarica", "btnVai"}
+                    Assert.AreEqual(atteso, Bottone(pannello, nome).Height,
+                                    $"«{nome}» è alto quanto gli altri comandi del pannello")
+                Next
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LeTreRigheDellaFasciaNonSiPestanoIPiedi()
+
+            ' La proprietà che i sei pixel in più a bottone mettevano a rischio: fra una
+            ' riga e l'altra ci deve restare almeno l'interlinea minima (cap. 03.2), e
+            ' tutto deve stare dentro la fascia. Le righe si dichiarano qui perché è la
+            ' sola cosa che il designer sa e il collaudo no.
+            Dim righe As String()() = {
+                New String() {"lblSalvate", "cboSalvate", "btnApri", "btnDimentica"},
+                New String() {"lblPortale", "cboPortali", "lblCosa", "txtCosa",
+                              "lblDove", "txtDove", "btnCerca", "btnSalvaRicerca"},
+                New String() {"btnIndietro", "btnRicarica", "lblIndirizzo", "txtIndirizzo", "btnVai"}}
+
+            Using pannello As New PannelloRicerca()
+
+                Dim fascia As Panel = DirectCast(
+                    pannello.Controls.Find("pnlComandi", searchAllChildren:=True).Single(), Panel)
+
+                Dim cime As New List(Of Integer)
+                Dim fondi As New List(Of Integer)
+
+                For Each riga As String() In righe
+                    Dim controlli As Control() = riga.Select(
+                        Function(nome) fascia.Controls.Find(nome, searchAllChildren:=True).Single()).ToArray()
+
+                    cime.Add(controlli.Min(Function(c) c.Top))
+                    fondi.Add(controlli.Max(Function(c) c.Bottom))
+                Next
+
+                Assert.IsGreaterThanOrEqualTo(0, cime.First(), "la prima riga non esce dalla fascia in alto")
+
+                For riga As Integer = 0 To righe.Length - 2
+                    Assert.IsGreaterThanOrEqualTo(fondi(riga) + StileApp.InterlineaMinima, cime(riga + 1),
+                                                  $"fra la riga {riga + 1} e la {riga + 2} manca l'interlinea")
+                Next
+
+                Assert.IsGreaterThanOrEqualTo(fondi.Last(), fascia.Height,
+                                              "e l'ultima riga sta dentro la fascia")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LaCatturaNonEPiuLaGemellaDellImportDelCv()
+
+            ' Due bottoni pieni dello stesso colore, affiancati, per due azioni diverse:
+            ' dentro un sistema in cui il colore dice la conseguenza, quella era la coppia
+            ' che lo smentiva. La cattura è l'azione principale del pannello (livello 3),
+            ' l'import del CV una conferma senza rischio (livello 1).
+            Using pannello As New PannelloRicerca()
+
+                Assert.AreEqual(LivelloBottone.AzionePrincipale, Bottone(pannello, "btnCattura").Tag)
+                Assert.AreEqual(LivelloBottone.SicuroPositivo, Bottone(pannello, "btnImportaCv").Tag)
+
+                ' Senza una pagina aperta i due comandi sono spenti, e da spenti sono
+                ' grigi tutti e due com'è giusto: il colore che li distingue è quello che
+                ' si vede quando si possono premere.
+                Bottone(pannello, "btnCattura").Enabled = True
+                Bottone(pannello, "btnImportaCv").Enabled = True
+
+                Assert.AreNotEqual(Bottone(pannello, "btnCattura").BackColor,
+                                   Bottone(pannello, "btnImportaCv").BackColor,
+                                   "e a occhio nudo non si somigliano più")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub DimenticareUnaRicercaDiceCheCosaSparisceEChePuoTornare()
+
+            ' Il testo della conferma di livello 5: il banco lo legge da qui, perché di una
+            ' finestra modale non può aspettare la chiusura (come in P1).
+            Dim domanda As String = PannelloRicerca.SpiegazioneDelDimenticare("Muletto a Chiavari")
+
+            Assert.Contains("Muletto a Chiavari", domanda, "quale ricerca sparisce")
+            Assert.Contains("candidature", domanda, "e che cosa non si tocca")
+            Assert.Contains("si rifà", domanda, "e che una ricerca si può rifare")
 
         End Sub
 
@@ -410,8 +527,17 @@ Namespace Ui
                     Assert.IsFalse(consegnato)
                     Assert.AreEqual(1, lettore.Letture, "ci ha provato")
 
+                    Dim riga As Label = Etichetta(pannello, "lblStatoRicerca")
+
                     ' Il ripiego onesto: il testo si può sempre incollare a mano in P4.
-                    Assert.Contains(NomiUi.Confronto, Etichetta(pannello, "lblStatoRicerca").Text)
+                    Assert.Contains(NomiUi.Confronto, riga.Text)
+
+                    ' Dal 2026-09-01 un guasto in questo pannello si vede e si legge: fino
+                    ' ad allora finiva nel grigio delle didascalie, indistinguibile da
+                    ' «Ricerca salvata» (v. Segnalazioni).
+                    Assert.StartsWith(Segnalazioni.PrefissoErrore, riga.Text,
+                                      "la riga dice che è un errore, non solo col colore")
+                    Assert.AreEqual(StileApp.Pericolo, riga.ForeColor, "e il colore c'è lo stesso")
 
                 End Function)
 
@@ -432,11 +558,62 @@ Namespace Ui
 
                     Await pannello.CatturaAsync()
 
-                    Dim detto As String = Etichetta(pannello, "lblStatoRicerca").Text
+                    Dim riga As Label = Etichetta(pannello, "lblStatoRicerca")
 
-                    Assert.Contains("annullata", detto, "si dice com'è andata")
-                    Assert.DoesNotContain("Non sono riuscita a leggere", detto,
+                    Assert.Contains("annullata", riga.Text, "si dice com'è andata")
+                    Assert.DoesNotContain("Non sono riuscita a leggere", riga.Text,
                                           "e non si accusa la pagina, che non c'entra")
+
+                    ' L'altra metà della stessa onestà: chi ha fermato lui una lettura non
+                    ' deve trovarsi davanti la parola «Errore» e una riga rossa. È quel che
+                    ' tiene il prefisso una cosa che significa qualcosa (v. Segnalazioni).
+                    Assert.DoesNotContain(Segnalazioni.PrefissoErrore, riga.Text,
+                                          "un annullamento non è un errore")
+                    Assert.AreEqual(StileApp.TestoSecondario, riga.ForeColor, "e non si tinge")
+
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Dopo un errore, la riga torna grigia alla prima cosa che va bene.
+        ''' </summary>
+        ''' <remarks>
+        ''' È il difetto che il rosso si porta dietro: da quando questa riga sa tingersi
+        ''' (2026-09-01), se il colore non si riscrivesse a ogni giro resterebbe quello di
+        ''' prima — e «Catturato: …» comparirebbe in rosso perché dieci secondi fa una
+        ''' pagina non si era lasciata leggere. Nessun collaudo sul singolo messaggio se ne
+        ''' accorgerebbe: il difetto vive nella <i>successione</i> di due messaggi, ed è
+        ''' l'unico modo di vederlo.
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function DopoUnErroreLaRigaTornaGrigia() As Task
+
+            Dim lettore As New LettorePaginaFinto With {
+                .Guasto = New InvalidOperationException("la vista non risponde")}
+
+            Await ConPannelloAsync(lettore,
+                Async Function(pannello, contesto, cartella) As Task
+
+                    Await pannello.CatturaAsync()
+
+                    Dim riga As Label = Etichetta(pannello, "lblStatoRicerca")
+                    Assert.AreEqual(StileApp.Pericolo, riga.ForeColor, "prima è rossa")
+
+                    ' Adesso la pagina si lascia leggere, ed è un annuncio buono.
+                    lettore.Guasto = Nothing
+                    lettore.Pagina = New PaginaLetta With {
+                        .Titolo = "Magazziniere - Rossi S.p.A.",
+                        .Indirizzo = "https://it.indeed.com/viewjob?jk=9f3c1a",
+                        .Testo = TestoDiUnAnnuncio()}
+
+                    Await pannello.CatturaAsync()
+
+                    Assert.Contains("Catturato", riga.Text, "la cattura è andata")
+                    Assert.AreEqual(StileApp.TestoSecondario, riga.ForeColor,
+                                    "e il rosso di prima non le resta addosso")
+                    Assert.DoesNotContain(Segnalazioni.PrefissoErrore, riga.Text,
+                                          "né la parola")
 
                 End Function)
 

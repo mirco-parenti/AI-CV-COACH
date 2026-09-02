@@ -68,7 +68,7 @@ Partial Class FinestraChiaveApi
         'lblRichiesta
         '
         Me.lblRichiesta.AutoSize = True
-        Me.lblRichiesta.Location = New System.Drawing.Point(14, 210)
+        Me.lblRichiesta.Location = New System.Drawing.Point(14, 209)
         Me.lblRichiesta.MaximumSize = New System.Drawing.Size(592, 0)
         Me.lblRichiesta.Name = "lblRichiesta"
         Me.lblRichiesta.Size = New System.Drawing.Size(592, 15)
@@ -77,7 +77,7 @@ Partial Class FinestraChiaveApi
         '
         'txtChiave
         '
-        Me.txtChiave.Location = New System.Drawing.Point(14, 234)
+        Me.txtChiave.Location = New System.Drawing.Point(14, 232)
         Me.txtChiave.Name = "txtChiave"
         Me.txtChiave.Size = New System.Drawing.Size(420, 23)
         Me.txtChiave.TabIndex = 4
@@ -86,7 +86,7 @@ Partial Class FinestraChiaveApi
         'chkMostra
         '
         Me.chkMostra.AutoSize = True
-        Me.chkMostra.Location = New System.Drawing.Point(446, 236)
+        Me.chkMostra.Location = New System.Drawing.Point(446, 234)
         Me.chkMostra.Name = "chkMostra"
         Me.chkMostra.Size = New System.Drawing.Size(140, 19)
         Me.chkMostra.TabIndex = 5
@@ -95,7 +95,7 @@ Partial Class FinestraChiaveApi
         'lblForma
         '
         Me.lblForma.AutoSize = True
-        Me.lblForma.Location = New System.Drawing.Point(14, 266)
+        Me.lblForma.Location = New System.Drawing.Point(14, 263)
         Me.lblForma.MaximumSize = New System.Drawing.Size(592, 0)
         Me.lblForma.Name = "lblForma"
         Me.lblForma.Size = New System.Drawing.Size(592, 15)
@@ -106,7 +106,7 @@ Partial Class FinestraChiaveApi
         'lblEsitoProva
         '
         Me.lblEsitoProva.AutoSize = True
-        Me.lblEsitoProva.Location = New System.Drawing.Point(14, 290)
+        Me.lblEsitoProva.Location = New System.Drawing.Point(14, 286)
         Me.lblEsitoProva.Name = "lblEsitoProva"
         Me.lblEsitoProva.Size = New System.Drawing.Size(592, 15)
         Me.lblEsitoProva.TabIndex = 7
@@ -117,16 +117,16 @@ Partial Class FinestraChiaveApi
         '
         Me.btnProva.Location = New System.Drawing.Point(150, 324)
         Me.btnProva.Name = "btnProva"
-        Me.btnProva.Size = New System.Drawing.Size(160, 32)
+        Me.btnProva.Size = StileApp.BottoneLargo
         Me.btnProva.TabIndex = 8
         Me.btnProva.Text = "Prova la chiave"
         '
         'btnSalva
         '
         Me.btnSalva.Enabled = False
-        Me.btnSalva.Location = New System.Drawing.Point(320, 300)
+        Me.btnSalva.Location = New System.Drawing.Point(290, 300)
         Me.btnSalva.Name = "btnSalva"
-        Me.btnSalva.Size = New System.Drawing.Size(160, 32)
+        Me.btnSalva.Size = StileApp.BottoneLargo
         Me.btnSalva.TabIndex = 9
         Me.btnSalva.Text = "Salva la chiave"
         '
@@ -134,7 +134,7 @@ Partial Class FinestraChiaveApi
         '
         Me.btnNonAdesso.Location = New System.Drawing.Point(492, 300)
         Me.btnNonAdesso.Name = "btnNonAdesso"
-        Me.btnNonAdesso.Size = New System.Drawing.Size(110, 32)
+        Me.btnNonAdesso.Size = StileApp.BottoneStandard
         Me.btnNonAdesso.TabIndex = 10
         Me.btnNonAdesso.Text = "Non adesso"
         '

@@ -35,6 +35,7 @@ Partial Class PannelloRicerca
         Me.btnSalvaRicerca = New System.Windows.Forms.Button()
         Me.btnIndietro = New System.Windows.Forms.Button()
         Me.btnRicarica = New System.Windows.Forms.Button()
+        Me.lblIndirizzo = New System.Windows.Forms.Label()
         Me.txtIndirizzo = New System.Windows.Forms.TextBox()
         Me.btnVai = New System.Windows.Forms.Button()
         Me.pnlCorpo = New System.Windows.Forms.Panel()
@@ -81,8 +82,15 @@ Partial Class PannelloRicerca
         '
         'pnlComandi
         '
-        ' Quattro righe: le ricerche messe da parte, la ricerca da comporre, e i comandi
+        ' Tre righe: le ricerche messe da parte, la ricerca da comporre, e i comandi
         ' di navigazione con l'indirizzo — che dice dove sei e serve per andare altrove.
+        '
+        ' Le righe cominciano a 0, 40 e 80, e sono alte quanto un bottone standard: dal
+        ' 2026-09-01 i sette comandi di questa fascia prendono l'altezza dal token
+        ' (StileApp.BottoneStandard), com'è ovunque nell'applicazione, e i 6 pixel guadagnati
+        ' da ciascuno avrebbero portato le righe a sfiorarsi. Caselle e tendine restano dove
+        ' erano rispetto al centro della loro riga; a scendere sono le righe, e con loro
+        ' l'altezza della fascia.
         Me.pnlComandi.Controls.Add(Me.lblSalvate)
         Me.pnlComandi.Controls.Add(Me.cboSalvate)
         Me.pnlComandi.Controls.Add(Me.btnApri)
@@ -97,19 +105,20 @@ Partial Class PannelloRicerca
         Me.pnlComandi.Controls.Add(Me.btnSalvaRicerca)
         Me.pnlComandi.Controls.Add(Me.btnIndietro)
         Me.pnlComandi.Controls.Add(Me.btnRicarica)
+        Me.pnlComandi.Controls.Add(Me.lblIndirizzo)
         Me.pnlComandi.Controls.Add(Me.txtIndirizzo)
         Me.pnlComandi.Controls.Add(Me.btnVai)
         Me.pnlComandi.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlComandi.Location = New System.Drawing.Point(14, 70)
         Me.pnlComandi.Name = "pnlComandi"
-        Me.pnlComandi.Size = New System.Drawing.Size(1106, 116)
+        Me.pnlComandi.Size = New System.Drawing.Size(1106, 128)
         Me.pnlComandi.TabIndex = 1
         '
         'lblSalvate
         '
         Me.lblSalvate.Font = StileApp.FontTitoloGruppo
-        Me.lblSalvate.ForeColor = StileApp.RossoTitoli
-        Me.lblSalvate.Location = New System.Drawing.Point(0, 6)
+        Me.lblSalvate.ForeColor = StileApp.RossoCritico
+        Me.lblSalvate.Location = New System.Drawing.Point(0, 7)
         Me.lblSalvate.Name = "lblSalvate"
         Me.lblSalvate.Size = New System.Drawing.Size(120, 18)
         Me.lblSalvate.TabIndex = 0
@@ -119,32 +128,32 @@ Partial Class PannelloRicerca
         '
         Me.cboSalvate.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cboSalvate.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.cboSalvate.Location = New System.Drawing.Point(126, 2)
+        Me.cboSalvate.Location = New System.Drawing.Point(126, 4)
         Me.cboSalvate.Name = "cboSalvate"
         Me.cboSalvate.Size = New System.Drawing.Size(420, 23)
         Me.cboSalvate.TabIndex = 1
         '
         'btnApri
         '
-        Me.btnApri.Location = New System.Drawing.Point(558, 1)
+        Me.btnApri.Location = New System.Drawing.Point(558, 0)
         Me.btnApri.Name = "btnApri"
-        Me.btnApri.Size = New System.Drawing.Size(90, 26)
+        Me.btnApri.Size = StileApp.BottoneStandard
         Me.btnApri.TabIndex = 2
         Me.btnApri.Text = "Apri"
         '
         'btnDimentica
         '
-        Me.btnDimentica.Location = New System.Drawing.Point(656, 1)
+        Me.btnDimentica.Location = New System.Drawing.Point(680, 0)
         Me.btnDimentica.Name = "btnDimentica"
-        Me.btnDimentica.Size = New System.Drawing.Size(110, 26)
+        Me.btnDimentica.Size = StileApp.BottoneStandard
         Me.btnDimentica.TabIndex = 3
         Me.btnDimentica.Text = "Dimentica"
         '
         'lblPortale
         '
         Me.lblPortale.Font = StileApp.FontTitoloGruppo
-        Me.lblPortale.ForeColor = StileApp.RossoTitoli
-        Me.lblPortale.Location = New System.Drawing.Point(0, 40)
+        Me.lblPortale.ForeColor = StileApp.RossoCritico
+        Me.lblPortale.Location = New System.Drawing.Point(0, 47)
         Me.lblPortale.Name = "lblPortale"
         Me.lblPortale.Size = New System.Drawing.Size(120, 18)
         Me.lblPortale.TabIndex = 4
@@ -154,7 +163,7 @@ Partial Class PannelloRicerca
         '
         Me.cboPortali.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cboPortali.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.cboPortali.Location = New System.Drawing.Point(126, 36)
+        Me.cboPortali.Location = New System.Drawing.Point(126, 44)
         Me.cboPortali.Name = "cboPortali"
         Me.cboPortali.Size = New System.Drawing.Size(190, 23)
         Me.cboPortali.TabIndex = 5
@@ -163,7 +172,7 @@ Partial Class PannelloRicerca
         '
         Me.lblCosa.Font = StileApp.FontDidascalia
         Me.lblCosa.ForeColor = StileApp.TestoSecondario
-        Me.lblCosa.Location = New System.Drawing.Point(328, 40)
+        Me.lblCosa.Location = New System.Drawing.Point(328, 47)
         Me.lblCosa.Name = "lblCosa"
         Me.lblCosa.Size = New System.Drawing.Size(40, 18)
         Me.lblCosa.TabIndex = 6
@@ -172,7 +181,7 @@ Partial Class PannelloRicerca
         'txtCosa
         '
         Me.txtCosa.BackColor = StileApp.FondoCasella
-        Me.txtCosa.Location = New System.Drawing.Point(370, 36)
+        Me.txtCosa.Location = New System.Drawing.Point(370, 44)
         Me.txtCosa.Name = "txtCosa"
         Me.txtCosa.PlaceholderText = "magazziniere, perito elettronico…"
         Me.txtCosa.Size = New System.Drawing.Size(230, 23)
@@ -182,7 +191,7 @@ Partial Class PannelloRicerca
         '
         Me.lblDove.Font = StileApp.FontDidascalia
         Me.lblDove.ForeColor = StileApp.TestoSecondario
-        Me.lblDove.Location = New System.Drawing.Point(612, 40)
+        Me.lblDove.Location = New System.Drawing.Point(612, 47)
         Me.lblDove.Name = "lblDove"
         Me.lblDove.Size = New System.Drawing.Size(40, 18)
         Me.lblDove.TabIndex = 8
@@ -191,25 +200,25 @@ Partial Class PannelloRicerca
         'txtDove
         '
         Me.txtDove.BackColor = StileApp.FondoCasella
-        Me.txtDove.Location = New System.Drawing.Point(654, 36)
+        Me.txtDove.Location = New System.Drawing.Point(654, 44)
         Me.txtDove.Name = "txtDove"
         Me.txtDove.PlaceholderText = "Genova, Chiavari…"
-        Me.txtDove.Size = New System.Drawing.Size(170, 23)
+        Me.txtDove.Size = New System.Drawing.Size(128, 23)
         Me.txtDove.TabIndex = 9
         '
         'btnCerca
         '
-        Me.btnCerca.Location = New System.Drawing.Point(836, 35)
+        Me.btnCerca.Location = New System.Drawing.Point(794, 40)
         Me.btnCerca.Name = "btnCerca"
-        Me.btnCerca.Size = New System.Drawing.Size(100, 26)
+        Me.btnCerca.Size = StileApp.BottoneStandard
         Me.btnCerca.TabIndex = 10
         Me.btnCerca.Text = "Cerca"
         '
         'btnSalvaRicerca
         '
-        Me.btnSalvaRicerca.Location = New System.Drawing.Point(944, 35)
+        Me.btnSalvaRicerca.Location = New System.Drawing.Point(916, 40)
         Me.btnSalvaRicerca.Name = "btnSalvaRicerca"
-        Me.btnSalvaRicerca.Size = New System.Drawing.Size(162, 26)
+        Me.btnSalvaRicerca.Size = StileApp.BottoneLargo
         Me.btnSalvaRicerca.TabIndex = 11
         Me.btnSalvaRicerca.Text = "Salva questa ricerca"
         '
@@ -220,20 +229,34 @@ Partial Class PannelloRicerca
         ' quindi senza AccessibleName resterebbero anonimi per chi non vede lo schermo —
         ' e per gli strumenti che guidano l'applicazione.
         Me.btnIndietro.AccessibleName = "Indietro"
-        Me.btnIndietro.Location = New System.Drawing.Point(0, 74)
+        Me.btnIndietro.Location = New System.Drawing.Point(0, 80)
         Me.btnIndietro.Name = "btnIndietro"
-        Me.btnIndietro.Size = New System.Drawing.Size(40, 26)
+        Me.btnIndietro.Size = StileApp.BottoneIcona
         Me.btnIndietro.TabIndex = 12
         Me.btnIndietro.Text = "◀"
         '
         'btnRicarica
         '
         Me.btnRicarica.AccessibleName = "Ricarica"
-        Me.btnRicarica.Location = New System.Drawing.Point(46, 74)
+        Me.btnRicarica.Location = New System.Drawing.Point(46, 80)
         Me.btnRicarica.Name = "btnRicarica"
-        Me.btnRicarica.Size = New System.Drawing.Size(40, 26)
+        Me.btnRicarica.Size = StileApp.BottoneIcona
         Me.btnRicarica.TabIndex = 13
         Me.btnRicarica.Text = "⟳"
+        '
+        'lblIndirizzo
+        '
+        ' L'etichetta della casella, non solo il suo suggerimento: quel testo sparisce
+        ' appena si incolla un link, e da lì in poi la riga più larga della fascia non
+        ' direbbe più che cosa contiene. Porta lo stesso nome che la casella dichiara a
+        ' chi non vede lo schermo (AccessibleName), come «cosa» e «dove» qui sopra.
+        Me.lblIndirizzo.Font = StileApp.FontDidascalia
+        Me.lblIndirizzo.ForeColor = StileApp.TestoSecondario
+        Me.lblIndirizzo.Location = New System.Drawing.Point(96, 87)
+        Me.lblIndirizzo.Name = "lblIndirizzo"
+        Me.lblIndirizzo.Size = New System.Drawing.Size(62, 18)
+        Me.lblIndirizzo.TabIndex = 14
+        Me.lblIndirizzo.Text = "Indirizzo"
         '
         'txtIndirizzo
         '
@@ -242,19 +265,19 @@ Partial Class PannelloRicerca
         Me.txtIndirizzo.AccessibleName = "Indirizzo"
         Me.txtIndirizzo.BackColor = StileApp.FondoCasella
         Me.txtIndirizzo.Font = StileApp.FontDatiTecnici
-        Me.txtIndirizzo.Location = New System.Drawing.Point(96, 76)
+        Me.txtIndirizzo.Location = New System.Drawing.Point(160, 84)
         Me.txtIndirizzo.Name = "txtIndirizzo"
         Me.txtIndirizzo.PlaceholderText = "…oppure incolla qui il link di un annuncio"
-        Me.txtIndirizzo.Size = New System.Drawing.Size(920, 23)
-        Me.txtIndirizzo.TabIndex = 14
+        Me.txtIndirizzo.Size = New System.Drawing.Size(826, 23)
+        Me.txtIndirizzo.TabIndex = 15
         '
         'btnVai
         '
         Me.btnVai.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnVai.Location = New System.Drawing.Point(1026, 74)
+        Me.btnVai.Location = New System.Drawing.Point(996, 80)
         Me.btnVai.Name = "btnVai"
-        Me.btnVai.Size = New System.Drawing.Size(80, 26)
-        Me.btnVai.TabIndex = 15
+        Me.btnVai.Size = StileApp.BottoneStandard
+        Me.btnVai.TabIndex = 16
         Me.btnVai.Text = "Vai"
         '
         'pnlCorpo
@@ -299,16 +322,16 @@ Partial Class PannelloRicerca
         Me.btnCattura.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btnCattura.Location = New System.Drawing.Point(0, 12)
         Me.btnCattura.Name = "btnCattura"
-        Me.btnCattura.Size = New System.Drawing.Size(180, 32)
+        Me.btnCattura.Size = StileApp.BottoneLargo
         Me.btnCattura.TabIndex = 0
         Me.btnCattura.Text = "Cattura annuncio"
         '
         'btnImportaCv
         '
         Me.btnImportaCv.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.btnImportaCv.Location = New System.Drawing.Point(192, 12)
+        Me.btnImportaCv.Location = New System.Drawing.Point(202, 12)
         Me.btnImportaCv.Name = "btnImportaCv"
-        Me.btnImportaCv.Size = New System.Drawing.Size(210, 32)
+        Me.btnImportaCv.Size = StileApp.BottoneMoltoLargo
         Me.btnImportaCv.TabIndex = 1
         Me.btnImportaCv.Text = "Importa CV da questa pagina"
         '
@@ -362,6 +385,7 @@ Partial Class PannelloRicerca
     Friend WithEvents btnSalvaRicerca As System.Windows.Forms.Button
     Friend WithEvents btnIndietro As System.Windows.Forms.Button
     Friend WithEvents btnRicarica As System.Windows.Forms.Button
+    Friend WithEvents lblIndirizzo As System.Windows.Forms.Label
     Friend WithEvents txtIndirizzo As System.Windows.Forms.TextBox
     Friend WithEvents btnVai As System.Windows.Forms.Button
     Friend WithEvents pnlCorpo As System.Windows.Forms.Panel

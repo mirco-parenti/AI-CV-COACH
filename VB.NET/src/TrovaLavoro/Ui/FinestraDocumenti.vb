@@ -1,3 +1,4 @@
+Imports System.Drawing
 Imports System.Windows.Forms
 Imports TrovaLavoro.Dati
 
@@ -39,6 +40,12 @@ End Enum
 ''' </remarks>
 Public Class FinestraDocumenti
 
+    ''' <summary>Quanto è larga la finestra, e quindi il testo che ci sta dentro.</summary>
+    Private Const LarghezzaFinestra As Integer = 800
+
+    ''' <summary>Quanto è alto l'elenco dei documenti.</summary>
+    Private Const AltezzaElenco As Integer = 300
+
     ''' <summary>Le categorie come si offrono, nell'ordine in cui si incontrano.</summary>
     Private Shared ReadOnly Categorie As CategoriaDocumento() = {
         CategoriaDocumento.Cv, CategoriaDocumento.Attestato,
@@ -73,9 +80,17 @@ Public Class FinestraDocumenti
             "Gli attestati compariranno fra gli allegati proposti quando prepari un'email — sempre da spuntare, " &
             "nessun file parte da solo."
 
-        lblCartella.Text = If(String.IsNullOrWhiteSpace(_raccolta.Cartella),
-                              "Nessuna cartella scelta.",
-                              $"Cartella: {_raccolta.Cartella}")
+        ' Un elenco vuoto, da solo, non dice se la cartella è quella sbagliata o se lì
+        ' dentro non c'era niente da riconoscere: la riga sopra la lista lo dichiara, e i
+        ' due comandi per rimediare — rileggere e cambiare cartella — sono già lì sotto.
+        If String.IsNullOrWhiteSpace(_raccolta.Cartella) Then
+            lblCartella.Text = "Nessuna cartella scelta."
+        ElseIf _raccolta.Documenti.Count = 0 Then
+            lblCartella.Text = $"Cartella: {_raccolta.Cartella}" & vbLf &
+                               "Nessun documento riconosciuto in questa cartella."
+        Else
+            lblCartella.Text = $"Cartella: {_raccolta.Cartella}"
+        End If
 
         For Each categoria As CategoriaDocumento In Categorie
             cmbCategoria.Items.Add(DocumentoClassificato.ComeSiLegge(categoria))
@@ -83,6 +98,8 @@ Public Class FinestraDocumenti
 
         Vesti()
         MostraIDocumenti()
+        PortaLeMisureInPixelVeri()
+        Disponi()
 
         ' Esc annulla; nessun bottone appeso a Invio, perché l'elenco si percorre con la
         ' tastiera e un Invio di passaggio chiuderebbe la finestra a metà lavoro.
@@ -119,12 +136,125 @@ Public Class FinestraDocumenti
 
         lvwDocumenti.BackColor = StileApp.SfondoContenuto
 
-        StileApp.VestiBottone(btnRileggi, LivelloBottone.AzionePrincipale)
+        ' Rileggere è di livello 2 e non 3: l'azione principale di questa finestra è
+        ' <b>confermare</b> quel che si è riconosciuto — è il passo 4 del cap. 05.2, e il
+        ' motivo per cui la finestra si apre. Far rileggere la cartella è il suo vicino di
+        ' riga, come «cambia cartella»: si torna indietro di un passo, non si va avanti.
+        ' Fino al 2026-09-01 erano due i bottoni che dicevano «vai avanti», e nessuno dei
+        ' due era quello che chiude il lavoro.
+        StileApp.VestiBottone(btnRileggi, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnCambiaCartella, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnConferma, LivelloBottone.SicuroPositivo)
         StileApp.VestiBottone(btnAnnulla, LivelloBottone.Neutro)
 
     End Sub
+
+    ''' <summary>
+    ''' Porta in pixel veri le misure che il designer dichiara in unità di progetto e che
+    ''' la fila non ricalcola: la grandezza dei bottoni e la larghezza delle colonne
+    ''' dell'elenco. Si fa <b>una volta sola</b>, alla costruzione — rifarla
+    ''' moltiplicherebbe una seconda volta quel che è già convertito (decisione 15.7).
+    ''' </summary>
+    Private Sub PortaLeMisureInPixelVeri()
+
+        ' «Fai rileggere la cartella» in un bottone largo quanto lo voleva il progetto, con
+        ' dentro un testo cresciuto col DPI, si legge a metà.
+        For Each bottone As Button In {btnRileggi, btnCambiaCartella, btnConferma, btnAnnulla}
+            bottone.Size = New Size(ScalaSchermo.InPixelDelloSchermo(bottone.Width, Me.DeviceDpi),
+                                    ScalaSchermo.InPixelDelloSchermo(bottone.Height, Me.DeviceDpi))
+        Next
+
+        cmbCategoria.Width = ScalaSchermo.InPixelDelloSchermo(cmbCategoria.Width, Me.DeviceDpi)
+
+        For Each colonna As ColumnHeader In lvwDocumenti.Columns
+            colonna.Width = ScalaSchermo.InPixelDelloSchermo(colonna.Width, Me.DeviceDpi)
+        Next
+
+    End Sub
+
+    ''' <summary>Mette in colonna quel che si vede, nello spazio che lo schermo concede.</summary>
+    Private Sub Disponi()
+
+        DisponiIn(ScalaSchermo.SpazioClienteDisponibile(
+            Screen.FromControl(Me).WorkingArea.Height, Me.Height - Me.ClientSize.Height))
+
+    End Sub
+
+    ''' <summary>
+    ''' Mette in colonna quel che si vede come se in altezza ci fosse questo spazio.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Le misure del progetto diventano qui <b>pixel veri</b>: dichiararle crude
+    ''' stringeva la finestra mentre i testi dentro crescevano col DPI, ed è quel che a
+    ''' 150% troncava la riga della cartella e le etichette dei bottoni (cap. 03.4,
+    ''' decisione 15.7).</para>
+    ''' <para>Un tetto sullo spazio che c'è, e lo scorrimento per quel che non ci sta: le
+    ''' due cose insieme, perché il tetto da solo taglierebbe e lo scorrimento da solo
+    ''' lascerebbe la finestra fuori schermo.</para>
+    ''' <para><b>Quando si scorre, la fila si fa due volte.</b> La barra verticale si prende
+    ''' una fetta di larghezza, e il contenuto messo in fila senza saperlo le va a finire
+    ''' sotto: allora si accende anche la barra orizzontale, che non ha niente da mostrare.
+    ''' La seconda fila sta dentro quel che resta.</para>
+    ''' <para>Lo spazio si <b>riceve</b> invece di leggerlo qui dentro: quello vero lo detta
+    ''' lo schermo su cui la finestra si apre, e un collaudo non può cambiare schermo —
+    ''' mentre è proprio quando il contenuto non ci sta che questa disposizione fa qualcosa
+    ''' di diverso.</para>
+    ''' </remarks>
+    Public Sub DisponiIn(altezzaDisponibile As Integer)
+
+        Dim larghezza As Integer = ScalaSchermo.InPixelDelloSchermo(LarghezzaFinestra, Me.DeviceDpi)
+
+        Dim voluta As Integer = MettiInFila(larghezza)
+        Dim siScorre As Boolean = ScalaSchermo.ServeScorrimento(voluta, altezzaDisponibile)
+
+        If siScorre Then
+            voluta = MettiInFila(ScalaSchermo.LarghezzaSenzaLaBarra(
+                larghezza, siScorre, SystemInformation.VerticalScrollBarWidth))
+        End If
+
+        Me.AutoScroll = siScorre
+        ClientSize = New Size(larghezza, ScalaSchermo.AltezzaSostenibile(voluta, altezzaDisponibile))
+
+    End Sub
+
+    ''' <summary>
+    ''' Mette i controlli in colonna dentro questa larghezza, e dice fin dove arrivano.
+    ''' </summary>
+    Private Function MettiInFila(larghezza As Integer) As Integer
+
+        Dim sinistra As Integer = StileApp.MargineRiquadro
+        Dim larghezzaUtile As Integer = larghezza - 2 * StileApp.MargineRiquadro
+
+        For Each testo As Label In {lblSpiegazione, lblCartella}
+            testo.MaximumSize = New Size(larghezzaUtile, 0)
+        Next
+
+        lblTitolo.Location = New Point(sinistra, StileApp.MargineRiquadro)
+        lblSpiegazione.Location = New Point(sinistra, lblTitolo.Bottom + StileApp.DistanzaControlli)
+        lblCartella.Location = New Point(sinistra, lblSpiegazione.Bottom + StileApp.InterlineaMinima)
+
+        lvwDocumenti.Location = New Point(sinistra, lblCartella.Bottom + StileApp.DistanzaControlli)
+        lvwDocumenti.Size = New Size(larghezzaUtile,
+                                     ScalaSchermo.InPixelDelloSchermo(AltezzaElenco, Me.DeviceDpi))
+
+        ' L'etichetta e la tendina in fila, come la lingua nelle Impostazioni: i quattro
+        ' pixel in più portano il testo all'altezza di quel che sceglie.
+        cmbCategoria.Location = New Point(sinistra + lblScelta.Width + StileApp.InterlineaMinima,
+                                          lvwDocumenti.Bottom + StileApp.DistanzaControlli)
+        lblScelta.Location = New Point(sinistra, cmbCategoria.Top + 4)
+
+        ' I due comandi che rifanno il lavoro stanno a sinistra; a destra la coppia che
+        ' chiude, con l'annulla al posto d'onore.
+        Dim riga As Integer = cmbCategoria.Bottom + StileApp.MargineRiquadro
+        btnRileggi.Location = New Point(sinistra, riga)
+        btnCambiaCartella.Location = New Point(btnRileggi.Right + StileApp.DistanzaControlli, riga)
+
+        btnAnnulla.Location = New Point(larghezza - StileApp.MargineRiquadro - btnAnnulla.Width, riga)
+        btnConferma.Location = New Point(btnAnnulla.Left - StileApp.DistanzaControlli - btnConferma.Width, riga)
+
+        Return btnAnnulla.Bottom + StileApp.MargineRiquadro
+
+    End Function
 
     ''' <summary>Riempie l'elenco con quel che si sa dei documenti, in ordine di nome.</summary>
     Private Sub MostraIDocumenti()

@@ -171,7 +171,7 @@ Partial Class PannelloProfilo
         Me.grpDatiPersonali.Controls.Add(Me.txtCategorie)
         Me.grpDatiPersonali.Dock = System.Windows.Forms.DockStyle.Top
         Me.grpDatiPersonali.Font = StileApp.FontTitoloGruppo
-        Me.grpDatiPersonali.ForeColor = StileApp.RossoTitoli
+        Me.grpDatiPersonali.ForeColor = StileApp.RossoCritico
         Me.grpDatiPersonali.Location = New System.Drawing.Point(14, 74)
         Me.grpDatiPersonali.Name = "grpDatiPersonali"
         Me.grpDatiPersonali.Size = New System.Drawing.Size(1106, 146)
@@ -454,7 +454,7 @@ Partial Class PannelloProfilo
         '
         Me.lblTipo.Font = StileApp.FontTesto
         Me.lblTipo.ForeColor = StileApp.TestoPrimario
-        Me.lblTipo.Location = New System.Drawing.Point(386, 71)
+        Me.lblTipo.Location = New System.Drawing.Point(380, 71)
         Me.lblTipo.Name = "lblTipo"
         Me.lblTipo.Size = New System.Drawing.Size(100, 20)
         Me.lblTipo.TabIndex = 6
@@ -463,7 +463,7 @@ Partial Class PannelloProfilo
         'txtTipo
         '
         Me.txtTipo.BackColor = StileApp.FondoCasella
-        Me.txtTipo.Location = New System.Drawing.Point(492, 68)
+        Me.txtTipo.Location = New System.Drawing.Point(486, 68)
         Me.txtTipo.Name = "txtTipo"
         Me.txtTipo.Size = New System.Drawing.Size(200, 23)
         Me.txtTipo.TabIndex = 7
@@ -884,6 +884,15 @@ Partial Class PannelloProfilo
         '
         'pnlAzioni
         '
+        ' Le coordinate qui sotto sono quelle che la FasciaDeiComandi calcola per questa
+        ' larghezza: i quattro comandi del profilo su una riga da sinistra, le
+        ' tre uscite sulla riga sotto allineate a destra, e l'eliminazione definitiva sulla
+        ' sua riga in alto, staccata dal resto (cap. 11.5). A finestra larga — com'è quasi
+        ' sempre, l'applicazione si apre massimizzata — le due file stanno su una riga
+        ' sola: è la fascia a rifare i conti a ogni ridimensionamento.
+        ' Fino al 2026-09-01 il designer diceva un'altra cosa ancora: «COSTRUISCI IL TUO
+        ' CV» copriva «IMPORTA CV DA LINKEDIN» per trenta pixel, e chi apriva questo file
+        ' per capire com'è fatta la fascia leggeva una disposizione che non esiste.
         Me.pnlAzioni.Controls.Add(Me.btnImporta)
         Me.pnlAzioni.Controls.Add(Me.btnImportaDaSito)
         Me.pnlAzioni.Controls.Add(Me.btnDialogo)
@@ -901,72 +910,72 @@ Partial Class PannelloProfilo
         'btnImporta
         '
         Me.btnImporta.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.btnImporta.Location = New System.Drawing.Point(273, 142)
+        Me.btnImporta.Location = New System.Drawing.Point(0, 102)
         Me.btnImporta.Name = "btnImporta"
-        Me.btnImporta.Size = New System.Drawing.Size(190, 32)
+        Me.btnImporta.Size = StileApp.BottoneLargo
         Me.btnImporta.TabIndex = 0
         Me.btnImporta.Text = "IMPORTA CV DA UN FILE"
         '
         'btnImportaDaSito
         '
         Me.btnImportaDaSito.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.btnImportaDaSito.Location = New System.Drawing.Point(475, 142)
+        Me.btnImportaDaSito.Location = New System.Drawing.Point(202, 102)
         Me.btnImportaDaSito.Name = "btnImportaDaSito"
-        Me.btnImportaDaSito.Size = New System.Drawing.Size(190, 32)
+        Me.btnImportaDaSito.Size = StileApp.BottoneLargo
         Me.btnImportaDaSito.TabIndex = 1
         Me.btnImportaDaSito.Text = "IMPORTA CV DA LINKEDIN"
         '
         'btnDialogo
         '
         Me.btnDialogo.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.btnDialogo.Location = New System.Drawing.Point(445, 142)
+        Me.btnDialogo.Location = New System.Drawing.Point(404, 102)
         Me.btnDialogo.Name = "btnDialogo"
-        Me.btnDialogo.Size = New System.Drawing.Size(300, 32)
+        Me.btnDialogo.Size = StileApp.BottoneMassimo
         Me.btnDialogo.TabIndex = 2
         Me.btnDialogo.Text = "COSTRUISCI IL TUO CV - DIALOGO GUIDATO"
         '
         'btnAggiornamento
         '
         Me.btnAggiornamento.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.btnAggiornamento.Location = New System.Drawing.Point(657, 142)
+        Me.btnAggiornamento.Location = New System.Drawing.Point(716, 102)
         Me.btnAggiornamento.Name = "btnAggiornamento"
-        Me.btnAggiornamento.Size = New System.Drawing.Size(190, 32)
+        Me.btnAggiornamento.Size = StileApp.BottoneLargo
         Me.btnAggiornamento.TabIndex = 3
         Me.btnAggiornamento.Text = "Sessione di aggiornamento"
         '
         'btnGeneraCv1
         '
         Me.btnGeneraCv1.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnGeneraCv1.Location = New System.Drawing.Point(700, 142)
+        Me.btnGeneraCv1.Location = New System.Drawing.Point(638, 142)
         Me.btnGeneraCv1.Name = "btnGeneraCv1"
-        Me.btnGeneraCv1.Size = New System.Drawing.Size(170, 32)
+        Me.btnGeneraCv1.Size = StileApp.BottoneLargo
         Me.btnGeneraCv1.TabIndex = 4
         Me.btnGeneraCv1.Text = "Genera 📄 CV-1 base"
         '
         'btnEsportaBackup
         '
         Me.btnEsportaBackup.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnEsportaBackup.Location = New System.Drawing.Point(882, 142)
+        Me.btnEsportaBackup.Location = New System.Drawing.Point(820, 142)
         Me.btnEsportaBackup.Name = "btnEsportaBackup"
-        Me.btnEsportaBackup.Size = New System.Drawing.Size(130, 32)
+        Me.btnEsportaBackup.Size = StileApp.BottoneMedio
         Me.btnEsportaBackup.TabIndex = 5
         Me.btnEsportaBackup.Text = "Backup…"
         '
         'btnSalva
         '
         Me.btnSalva.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnSalva.Location = New System.Drawing.Point(1024, 142)
+        Me.btnSalva.Location = New System.Drawing.Point(962, 142)
         Me.btnSalva.Name = "btnSalva"
-        Me.btnSalva.Size = New System.Drawing.Size(130, 32)
+        Me.btnSalva.Size = StileApp.BottoneMedio
         Me.btnSalva.TabIndex = 6
         Me.btnSalva.Text = "Salva profilo"
         '
         'btnEliminaProfilo
         '
         Me.btnEliminaProfilo.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnEliminaProfilo.Location = New System.Drawing.Point(924, 86)
+        Me.btnEliminaProfilo.Location = New System.Drawing.Point(862, 46)
         Me.btnEliminaProfilo.Name = "btnEliminaProfilo"
-        Me.btnEliminaProfilo.Size = New System.Drawing.Size(230, 32)
+        Me.btnEliminaProfilo.Size = StileApp.BottoneMoltoLargo
         Me.btnEliminaProfilo.TabIndex = 7
         Me.btnEliminaProfilo.Text = "ELIMINA PROFILO - DEFINITIVO"
         '

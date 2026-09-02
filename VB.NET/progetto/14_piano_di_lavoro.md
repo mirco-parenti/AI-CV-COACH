@@ -1315,7 +1315,8 @@ il prodotto.
 - **Il marchio e l'eseguibile di riferimento** *(30 agosto)*. Dentro la cornice del marchio
   entra la **girella a spicchi**, e poco dopo il **filetto giallo tre volte più spesso**
   (`immagini/LEGGIMI.md`, `prompt-logo.md`); la **schermata di avvio** resta a video **cinque
-  secondi** (cap. 03.4). Nasce l'**eseguibile di riferimento** sul Desktop — uno solo, per chi
+  secondi** (cap. 03.4) — che dal 1º settembre diventano **dieci**, con un clic o un Invio a
+  chiuderla subito. Nasce l'**eseguibile di riferimento** sul Desktop — uno solo, per chi
   costruisce e per chi prova — con `strumenti/aggiorna-riferimento.bat`, che lo rifà con i
   parametri di rilascio del 13.2 (cap. 13.7); e con lui si scopre che in `publish.bat` un
   `git -C "%~dp0"` non ha mai funzionato, tenendo **spente due guardie** del rilascio — il
@@ -1325,6 +1326,54 @@ il prodotto.
 *Nello stesso 30 agosto le cartelle dati di prova hanno smesso di contenere dati veri: profilo,
 candidature e documenti sono ora quelli di una persona inventata. Non tocca il repo — quelle
 cartelle vivono in `%APPDATA%` — ma è la condizione che rende mostrabile una schermata.*
+
+*Dopo T9 — **la revisione di finalizzazione** (2026-09-01, ramo `feature/finalizzazione`).*
+La seconda lettura da fuori, e la più larga: tre fasi condotte col tutor su tutto il prodotto,
+con una regola scritta in apertura — **nessun fix senza approvazione, voce per voce** — e la
+pull request verso `main` come sbocco, dove il merge lo fa Mirco (regola 11).
+
+**Fase 1, sicurezza.** Perimetro (prodotto, strumenti, prototipo) e modello di minaccia
+fissati prima di cercare: macchina Windows mono-utente fidata, avversari il contenuto web
+ostile, i file CV ostili, l'output del modello, la rete, il client MCP. Cinque rilievi (R1–R5)
+più due emersi in verifica, tutti chiusi in quattro blocchi: la redazione che mancava sullo
+`stderr` del server MCP e nelle due risposte d'errore JSON-RPC, i nomi allegato che saltavano
+la ripulitura degli a capo, il tetto allo slug di azienda+titolo, il prototipo che ascoltava su
+tutte le interfacce (commit a parte: `HTML+JS/` è congelato), lo strumento di collaudo che
+passava gli argomenti da una riga di shell — cinque siti, non tre come stimato. Più la mappa
+della prompt injection rifatta sink per sink, che non trova percorsi dal testo ostile a
+un'esecuzione o a una scrittura fuori dalla cartella dati, e il **confine di fiducia col
+client** scritto in coda al §9.5. Quattro collaudi nuovi, tutti visti rossi.
+
+**Fase 2, interfaccia**, misurata contro sessantasei criteri industriali e con una clausola
+insolita: **le linee guida di progetto sono esse stesse in discussione**. Ne sono usciti venti
+difetti di implementazione (categoria A) e dodici divergenze di sistema (categoria B). Gli A
+approvati tutti, con una sola riduzione — dello scudo senza soglia si è preso il solo
+anti-flash a ~300 ms. Dei B, **undici tenuti** e annotati come deroghe consapevoli (3.2, 3.3,
+3.4) e **uno rovesciato**: il marchio torna a vivere in un posto solo (3.5), via il mega
+stemma da P0 e via lo scudo dall'indicatore d'attesa. Sette blocchi in ordine — token,
+comportamenti, errori, DPI, livelli e conferme, marchio, micro-fix — ciascuno chiuso col banco
+verde, 33 collaudi nuovi tutti falsificati, e il cap. 03 riallineato in chiusura.
+
+**Fase 3, il dichiarato contro il fatto.** Dieci scostamenti fra ciò che README, GUIDA e
+capitoli promettono e ciò che il programma fa: cinque nomi di comandi rimasti indietro nella
+GUIDA, il conteggio dei collaudi nel README, un debito che il §12 dichiarava aperto e che era
+chiuso dal 19 agosto, una freccia mancante nel diagramma del §07.3, il link a WebView2 che la
+GUIDA prometteva e il codice non dava (aggiunto ai due messaggi, invece di abbassare la
+promessa). E una decisione che chiude una promessa di progetto: il **flusso D** dichiarato
+**fuori dalla 1.0** nel §12.4.
+
+**La coda dal vivo.** Otto rifiniture dettate dal tutor guardando l'applicazione — il logo
+senza box, la scritta del menu che scala con la finestra, i bottoni su una scala di misure
+fisse, `FlatStyle.Standard` ovunque, lo splash a dieci secondi con clic e Invio, il bottone
+«?» in barra con i Credits, l'apertura **a misura** invece che massimizzata (3.4), le
+Impostazioni a due colonne (3.4) — e due fix finali: i fermi del clamp della scritta di P0
+confrontati in unità sbagliate (la trappola della 15.7 ripresentata identica), e «Informazioni
+su…» che trasloca nelle Impostazioni come porta unica.
+
+**Bilancio**: ventitré commit, banco da **1335 a 1394 collaudi**, verde a fine di ogni blocco,
+una sessantina di collaudi nuovi tutti provati a fallire prima di dirli buoni. Restano **due
+riserve dichiarate** in `in_sospeso.md` — la prova a 150 % e i flussi AI dal vivo — più i fuori
+perimetro annotati, che il perimetro stretto voleva scritti e non corretti in corsa.
 
 Versione **1.0.000** e **Pool 1.13** restano dove erano: nessun prompt è stato toccato dal 24
 agosto. Le due voci aperte dal giro D — rifarlo sull'eseguibile giusto e la firma del codice —

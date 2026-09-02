@@ -126,13 +126,6 @@ Public Class PannelloDialogo
     ''' </summary>
     Private _grezzoDellaBollaViva As String
 
-    ''' <summary>
-    ''' Quanto erano larghi nel disegno i due bottoni che cambiano nome col mestiere del
-    ''' pannello: è il minimo sotto cui non si scende quando il testo è più corto.
-    ''' </summary>
-    Private _larghezzaUscita As Integer
-    Private _larghezzaConclusione As Integer
-
     ''' <summary>Chiede alla finestra di riportare in vista la scheda del profilo.</summary>
     Public Event TornaAlProfilo As EventHandler
 
@@ -164,9 +157,6 @@ Public Class PannelloDialogo
     Public Sub New()
 
         InitializeComponent()
-
-        _larghezzaUscita = btnTornaAlProfilo.Width
-        _larghezzaConclusione = btnPortaNelProfilo.Width
 
         VestiIBottoni()
         AggiornaComandi()
@@ -259,10 +249,9 @@ Public Class PannelloDialogo
 
         Dim chiStruttura As IStrutturatoreTurni = If(strutturatore, _contesto?.Strutturatore)
         If chiStruttura Is Nothing Then
-            RaccontaLoStato(
+            RaccontaUnAvviso(
                 $"Per costruire il profilo parlando serve la chiave API ({ClientClaude.NomeVariabileChiave}): " &
-                "ogni risposta passa dall'AI.",
-                StileApp.Pericolo)
+                "ogni risposta passa dall'AI.")
             Return
         End If
 
@@ -350,9 +339,8 @@ Public Class PannelloDialogo
         Dim chiRagiona As IBrainstormatore = If(mestiere, _contesto?.Brainstorm)
         If chiRagiona Is Nothing Then
             PassaAlModo(ModoDialogo.Brainstorming)
-            RaccontaLoStato(
-                $"Per ragionare su una candidatura serve la chiave API ({ClientClaude.NomeVariabileChiave}).",
-                StileApp.Pericolo)
+            RaccontaUnAvviso(
+                $"Per ragionare su una candidatura serve la chiave API ({ClientClaude.NomeVariabileChiave}).")
             Return
         End If
 
@@ -672,6 +660,20 @@ Public Class PannelloDialogo
     ''' Passa il pannello da un mestiere all'altro: cambiano i titoli, i nomi dei bottoni
     ''' e dove portano. Quello che non è di questo modo si spegne e si dimentica.
     ''' </summary>
+    ''' <remarks>
+    ''' <para><b>I due bottoni che cambiano nome non cambiano misura.</b> Fino al
+    ''' 2026-09-01 la prendevano dal testo (<c>PreferredSize</c>), e quel meccanismo era
+    ''' nato da un difetto vero, trovato guardando l'applicazione in faccia nel collaudo di
+    ''' T7c: «◀ Torna alla candidatura» non stava dove stava «◀ Torna al profilo», e a
+    ''' video si leggeva «Torna alla». Da quel giorno la larghezza di un bottone viene
+    ''' dalla scala di <c>StileApp</c>, e questi due prendono nel disegno il gradino che
+    ''' contiene il <b>più lungo</b> dei loro due nomi: il difetto di T7c resta impossibile,
+    ''' e a sorvegliarlo c'è lo stesso collaudo di allora, che misura quanto testo ci entra
+    ''' senza sapere come sia stato deciso il numero.</para>
+    ''' <para>La fascia si rifà lo stesso a ogni passaggio: i nomi nuovi non cambiano le
+    ''' larghezze, ma <see cref="DisponiLeAzioni"/> è anche quella che decide se i comandi
+    ''' stanno su una riga o due.</para>
+    ''' </remarks>
     Private Sub PassaAlModo(modo As ModoDialogo)
 
         _modo = modo
@@ -683,12 +685,13 @@ Public Class PannelloDialogo
                 "Ho davanti il tuo profilo, l'annuncio e il confronto già fatto. Decidiamo cosa mettere " &
                 "davanti e come nominare quello che manca: i fatti restano quelli del tuo profilo."
 
-            btnTornaAlProfilo.Text = "Torna alla candidatura"
+            btnTornaAlProfilo.Text = "◀ Torna alla candidatura"
             btnPortaNelProfilo.Text = "Trasforma in appunti"
+            lblRisposta.Text = "Il tuo messaggio"
             txtRisposta.PlaceholderText = "Scrivi quello che pensi…"
 
             NascondiLeScelte()
-            AdattaAlTesto()
+            DisponiLeAzioni()
 
         Else
 
@@ -697,35 +700,16 @@ Public Class PannelloDialogo
                 "Un argomento alla volta: rispondi con parole tue, e prima di registrare qualcosa " &
                 "ti mostro cosa ho capito."
 
-            btnTornaAlProfilo.Text = "Torna al profilo"
+            btnTornaAlProfilo.Text = "◀ Torna al profilo"
             btnPortaNelProfilo.Text = "Porta nel profilo"
+            lblRisposta.Text = "La tua risposta"
             txtRisposta.PlaceholderText = "La tua risposta…"
 
-            AdattaAlTesto()
+            DisponiLeAzioni()
 
         End If
 
         AggiornaComandi()
-
-    End Sub
-
-    ''' <summary>
-    ''' Dà ai due bottoni che cambiano nome la larghezza che il loro testo chiede, senza
-    ''' scendere sotto quella del disegno.
-    ''' </summary>
-    ''' <remarks>
-    ''' Trovato guardando l'applicazione in faccia nel collaudo di T7c: «Torna alla
-    ''' candidatura» non sta dove stava «Torna al profilo», e a video si leggeva «Torna
-    ''' alla». Un bottone tagliato a metà non è un dettaglio estetico — è un comando che
-    ''' non dice più dove porta, e nessun collaudo del banco poteva accorgersene, perché
-    ''' il banco vede il testo del bottone, non quanto ne entra.
-    ''' </remarks>
-    Private Sub AdattaAlTesto()
-
-        btnTornaAlProfilo.Width = Math.Max(_larghezzaUscita, btnTornaAlProfilo.PreferredSize.Width)
-        btnPortaNelProfilo.Width = Math.Max(_larghezzaConclusione, btnPortaNelProfilo.PreferredSize.Width)
-
-        DisponiLeAzioni()
 
     End Sub
 
@@ -955,8 +939,10 @@ Public Class PannelloDialogo
             bottone.Location = New Point(sinistra, txtRisposta.Top)
             bottone.Visible = True
 
-            sinistra += Math.Max(bottone.MinimumSize.Width, bottone.PreferredSize.Width) +
-                        StileApp.DistanzaControlli
+            ' Il passo è la misura del bottone, non quella che il suo testo chiederebbe:
+            ' dal 2026-09-01 un bottone è largo quanto dice la scala di StileApp, e una
+            ' fila spaziata sul testo lascerebbe buchi diversi a ogni mossa dell'AI.
+            sinistra += bottone.Width + StileApp.DistanzaControlli
 
         Next
 
@@ -1080,7 +1066,7 @@ Public Class PannelloDialogo
         Dim righe As New List(Of Label)
 
         If Not String.IsNullOrEmpty(scheda.Titolo) Then
-            righe.Add(RigaDiTesto(scheda.Titolo, StileApp.FontTitoloGruppo, StileApp.RossoTitoli))
+            righe.Add(RigaDiTesto(scheda.Titolo, StileApp.FontTitoloGruppo, StileApp.RossoCritico))
         End If
 
         For Each riga As RigaScheda In scheda.Righe
@@ -1345,6 +1331,22 @@ Public Class PannelloDialogo
     End Sub
 
     ''' <summary>
+    ''' Una riga che dice che qualcosa manca perché la conversazione possa cominciare: la
+    ''' parola e il colore insieme (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    ''' <remarks>
+    ''' Qui è sempre un avviso e mai un errore, e non per caso: un guasto dell'AI in questo
+    ''' pannello non finisce in questa riga ma <b>in una bolla</b>, dove sta il resto della
+    ''' conversazione (v. <c>EseguiAsync</c>). Quel che resta da dire di qui è che la chiave
+    ''' non c'è — e non darla è una risposta legittima (cap. 11.3), non un errore.
+    ''' </remarks>
+    Private Sub RaccontaUnAvviso(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoAvviso & testo, StileApp.Pericolo)
+
+    End Sub
+
+    ''' <summary>
     ''' Decide, in un posto solo, che cosa si può fare adesso. Le domande sono: c'è una
     ''' conversazione, che cosa sta aspettando, e l'AI sta già lavorando?
     ''' </summary>
@@ -1362,6 +1364,7 @@ Public Class PannelloDialogo
         ' Casella e bottone dei turni compaiono solo quando c'è davvero da scrivere: una
         ' casella accesa mentre il dialogo aspetta un bottone inviterebbe a fare la cosa
         ' sbagliata.
+        lblRisposta.Visible = chiedeUnaRisposta
         txtRisposta.Visible = chiedeUnaRisposta
         btnInvia.Visible = chiedeUnaRisposta
 
@@ -1398,6 +1401,7 @@ Public Class PannelloDialogo
 
         ' Qui si scrive sempre: non ci sono turni che aspettano un bottone, è una chat.
         pnlRisposta.Visible = conConversazione
+        lblRisposta.Visible = conConversazione
         txtRisposta.Visible = conConversazione
         btnInvia.Visible = conConversazione
 

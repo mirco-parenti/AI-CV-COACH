@@ -231,8 +231,10 @@ Public Class PannelloRicerca
 
         Catch ex As ErroreBrowser When ex.MotoreAssente
             FuoriUso("Per cercare gli annunci serve il componente WebView2 di Windows, che su " &
-                     "questo computer non c'è. Puoi comunque incollare il testo di un annuncio " &
-                     $"nel pannello «{NomiUi.Confronto}».")
+                     "questo computer non c'è: si scarica dal sito ufficiale Microsoft " &
+                     "(https://developer.microsoft.com/microsoft-edge/webview2/). Puoi comunque " &
+                     $"incollare il testo di un annuncio nel pannello «{NomiUi.Confronto}».",
+                     unGuasto:=False)
             Return
 
         Catch ex As Exception
@@ -245,7 +247,8 @@ Public Class PannelloRicerca
             ' guasto. Restringerla qui non darebbe all'utente una parola in più: gli
             ' toglierebbe il ripiego, che è la sola cosa che gli serve.
             FuoriUso($"Il browser integrato non si è avviato ({ex.Message}). Puoi comunque " &
-                     $"incollare il testo di un annuncio nel pannello «{NomiUi.Confronto}».")
+                     $"incollare il testo di un annuncio nel pannello «{NomiUi.Confronto}».",
+                     unGuasto:=True)
             Return
 
         End Try
@@ -405,14 +408,11 @@ Public Class PannelloRicerca
         Dim salvata As RicercaSalvata = SalvataScelta()
         If salvata Is Nothing Then Return
 
-        ' Cancellare è di livello 5: si chiede prima (cap. 03.3, cap. 12.7).
-        Dim risposta As DialogResult = MessageBox.Show(
-            $"Dimentico la ricerca «{salvata.Nome}»?" & vbLf &
-            "Le ricerche salvate si possono rifare in qualunque momento.",
-            "Ricerca", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-            MessageBoxDefaultButton.Button2)
-
-        If risposta <> DialogResult.Yes Then Return
+        ' Cancellare è di livello 5: si chiede prima (cap. 03.3, cap. 12.7), e lo si chiede
+        ' con la finestra nata per quel livello — dove il bottone che esegue porta il verbo
+        ' dell'azione invece di un «Sì» che risponde soltanto alla domanda.
+        If Not FinestraConferma.Chiedi(Me, "Dimentica la ricerca",
+                                       SpiegazioneDelDimenticare(salvata.Nome), "Confermo") Then Return
 
         _ricerche.Dimentica(salvata.Nome)
 
@@ -423,6 +423,22 @@ Public Class PannelloRicerca
         Racconta($"Ricerca dimenticata: «{salvata.Nome}».")
 
     End Sub
+
+    ''' <summary>
+    ''' Il testo della conferma: quale ricerca sparisce, e quanto costa riaverla.
+    ''' </summary>
+    ''' <remarks>
+    ''' È pubblica perché la legge il banco, come <c>PannelloHome.SpiegazioneDellEliminazione</c>:
+    ''' premere il bottone aprirebbe una finestra modale, e di quella un collaudo non può
+    ''' aspettare la chiusura.
+    ''' </remarks>
+    Public Shared Function SpiegazioneDelDimenticare(nome As String) As String
+
+        Return $"«{nome}»" & vbLf & vbLf &
+               "Sparisce dalle ricerche salvate. Non tocco né gli annunci né le candidature: " &
+               "una ricerca si rifà in qualunque momento, scrivendo di nuovo cosa e dove. Confermi?"
+
+    End Function
 
     ''' <summary>
     ''' Il nome che si propone per una ricerca nuova: portale, cosa e dove. È prevedibile
@@ -452,8 +468,8 @@ Public Class PannelloRicerca
 
         Catch ex As Exception When TypeOf ex Is IO.IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException
-            Racconta($"Non sono riuscita a salvare le ricerche ({ex.Message}). " &
-                     "Per questa sessione valgono comunque.")
+            RaccontaUnErrore($"Non sono riuscita a salvare le ricerche ({ex.Message}). " &
+                             "Per questa sessione valgono comunque.")
             Return False
 
         End Try
@@ -687,7 +703,7 @@ Public Class PannelloRicerca
             ' La rete resta larga per la stessa ragione dell'accensione: di là c'è la
             ' pagina di qualcun altro dentro un browser che non è nostro, e il ripiego
             ' tiene in piedi il giro.
-            Racconta($"Non sono riuscita a leggere questa pagina ({ex.Message}). " & ripiego)
+            RaccontaUnErrore($"Non sono riuscita a leggere questa pagina ({ex.Message}). " & ripiego)
             Return Nothing
 
         End Try
@@ -845,7 +861,7 @@ Public Class PannelloRicerca
 
         If guaio Is Nothing Then Return
 
-        Racconta(guaio)
+        RaccontaUnErrore(guaio)
 
     End Sub
 
@@ -898,17 +914,67 @@ Public Class PannelloRicerca
     End Sub
 
     ''' <summary>Il browser non c'è: si dice una volta e i comandi che navigano si spengono.</summary>
-    Private Sub FuoriUso(perche As String)
+    ''' <param name="unGuasto">
+    ''' Se il browser <b>è caduto</b> mentre si accendeva, oppure se su questa macchina non
+    ''' c'è affatto. L'esito per l'utente è lo stesso — di qui non si naviga — ma non sono
+    ''' la stessa cosa, e la riga le nomina in modo diverso (v. <see cref="Segnalazioni"/>).
+    ''' </param>
+    Private Sub FuoriUso(perche As String, unGuasto As Boolean)
 
         _browserFuoriUso = True
-        Racconta(perche)
+
+        If unGuasto Then
+            RaccontaUnErrore(perche)
+        Else
+            RaccontaUnAvviso(perche)
+        End If
+
         AggiornaComandi()
 
     End Sub
 
-    ''' <summary>La riga di stato del pannello; <c>Nothing</c> la svuota.</summary>
+    ''' <summary>
+    ''' La riga di stato del pannello, per quel che <b>sta succedendo</b>; <c>Nothing</c>
+    ''' la svuota.
+    ''' </summary>
+    ''' <remarks>
+    ''' Il colore si riscrive a ogni giro, e non è un di più: dal 2026-09-01 questa riga sa
+    ''' anche diventare rossa (v. <see cref="RaccontaUnErrore"/>), e senza rimetterla al
+    ''' grigio il guasto di prima colorerebbe lo stato di adesso — «Leggo la pagina…»
+    ''' scritto in rosso perché dieci secondi fa qualcosa non era riuscito.
+    ''' </remarks>
     Private Sub Racconta(testo As String)
+
         lblStatoRicerca.Text = If(testo, String.Empty)
+        lblStatoRicerca.ForeColor = StileApp.TestoSecondario
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa non è riuscito: la parola e il colore insieme
+    ''' (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    ''' <remarks>
+    ''' Fino al 2026-09-01 questo pannello non aveva nessun modo di dirlo: tutto finiva nel
+    ''' grigio delle didascalie, e «Non sono riuscita a salvare le ricerche» si leggeva
+    ''' esattamente come «Ricerca salvata».
+    ''' </remarks>
+    Private Sub RaccontaUnErrore(testo As String)
+
+        lblStatoRicerca.Text = Segnalazioni.PrefissoErrore & testo
+        lblStatoRicerca.ForeColor = StileApp.Pericolo
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa manca: stesso colore dell'errore, parola diversa —
+    ''' qui non è caduto niente (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    Private Sub RaccontaUnAvviso(testo As String)
+
+        lblStatoRicerca.Text = Segnalazioni.PrefissoAvviso & testo
+        lblStatoRicerca.ForeColor = StileApp.Pericolo
+
     End Sub
 
     ''' <summary>
@@ -990,10 +1056,18 @@ Public Class PannelloRicerca
 
         StileApp.VestiBottone(btnCerca, LivelloBottone.AzionePrincipale)
         StileApp.VestiBottone(btnSalvaRicerca, LivelloBottone.SicuroPositivo)
-        StileApp.VestiBottone(btnCattura, LivelloBottone.SicuroPositivo)
 
-        ' Come la cattura: costa una chiamata all'AI e propone qualcosa, ma non scrive
-        ' niente su disco — il profilo si salva solo dal suo pannello.
+        ' La cattura è l'azione principale del pannello: è il motivo per cui P3 esiste — si
+        ' naviga per arrivare a premere lei — e dal 2026-09-01 lo dice il livello 3 invece
+        ' del verde delle conferme senza rischio. Fino ad allora stava accanto all'import
+        ' del CV vestita <b>identica</b>, e due verdi pieni gemelli affiancati disfano
+        ' proprio la regola che li vestiva: il colore non diceva più la conseguenza, diceva
+        ' «bottone». Adesso i due si distinguono a colpo d'occhio, e resta distinto anche
+        ' quello che fanno.
+        StileApp.VestiBottone(btnCattura, LivelloBottone.AzionePrincipale)
+
+        ' L'import del CV resta di livello 1: costa una chiamata all'AI e propone qualcosa,
+        ' ma non scrive niente su disco — il profilo si salva solo dal suo pannello.
         StileApp.VestiBottone(btnImportaCv, LivelloBottone.SicuroPositivo)
         StileApp.VestiBottone(btnApri, LivelloBottone.Esplorativo)
         StileApp.VestiBottone(btnVai, LivelloBottone.Esplorativo)

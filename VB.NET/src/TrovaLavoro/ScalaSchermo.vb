@@ -1,4 +1,6 @@
-﻿''' <summary>
+﻿Imports System.Drawing
+
+''' <summary>
 ''' Le misure dell'interfaccia rispetto al DPI dello schermo (cap. 03.4, decisione 15.7).
 '''
 ''' Le costanti di <see cref="StileApp"/>, le misure scritte nei Designer e le soglie
@@ -58,6 +60,52 @@ Public Module ScalaSchermo
                                      sogliaDiProgetto As Integer) As Boolean
 
         Return InUnitaDiProgetto(larghezzaDelloSchermo, dpi) < sogliaDiProgetto
+
+    End Function
+
+    ''' <summary>
+    ''' Quanto grande si apre la finestra principale, in unità di progetto (cap. 03.4).
+    ''' </summary>
+    ''' <remarks>
+    ''' Dal 2026-09-01, su indicazione del tutor, l'applicazione non si apre più
+    ''' massimizzata: parte in stato normale, grande al massimo così, e centrata. La
+    ''' massimizzazione resta un gesto dell'utente, e cambia soltanto lo stato d'apertura.
+    ''' </remarks>
+    Public ReadOnly TettoDiApertura As New Size(1920, 1024)
+
+    ''' <summary>
+    ''' La misura con cui aprire la finestra principale su un dato schermo.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Il tetto è in unità di progetto</b>, come il minimo della finestra e come
+    ''' la soglia della modalità compatta, e si converte in pixel dello schermo prima di
+    ''' confrontarlo con l'area di lavoro — che in pixel dello schermo è già. È la
+    ''' convenzione di tutto questo modulo, e qui vuol dire una cosa precisa: a 150% di
+    ''' scala la finestra si apre grande <i>una volta e mezza</i>, perché deve contenere lo
+    ''' stesso disegno. Confrontare 1920 pixel di progetto con 1920 pixel di schermo a 150%
+    ''' darebbe una finestra che a video mostra 1280 unità di progetto, cioè poco più del
+    ''' minimo: l'applicazione si aprirebbe quasi stretta proprio sulle macchine che hanno
+    ''' lo schermo più grande.</para>
+    ''' <para>Su uno schermo che il tetto non lo contiene, la finestra prende l'area di
+    ''' lavoro e basta — che è il caso di ogni portatile a scala alta, e assomiglia a una
+    ''' massimizzazione senza esserlo. Il <b>minimo</b> vince comunque su tutto: una
+    ''' finestra più piccola del suo <c>MinimumSize</c> non esiste, e chiederla vorrebbe
+    ''' dire farla decidere due volte.</para>
+    ''' <para>Un'area di lavoro non nota (zero o negativa) lascia passare il tetto: nel banco
+    ''' non c'è nessuno schermo, e una finestra di misura zero non è un ripiego, è un guasto.
+    ''' </para>
+    ''' </remarks>
+    Public Function MisuraDiApertura(areaDiLavoro As Size, minimoDelloSchermo As Size,
+                                     dpi As Integer) As Size
+
+        Dim larghezza As Integer = InPixelDelloSchermo(TettoDiApertura.Width, dpi)
+        Dim altezza As Integer = InPixelDelloSchermo(TettoDiApertura.Height, dpi)
+
+        If areaDiLavoro.Width > 0 Then larghezza = Math.Min(larghezza, areaDiLavoro.Width)
+        If areaDiLavoro.Height > 0 Then altezza = Math.Min(altezza, areaDiLavoro.Height)
+
+        Return New Size(Math.Max(larghezza, minimoDelloSchermo.Width),
+                        Math.Max(altezza, minimoDelloSchermo.Height))
 
     End Function
 

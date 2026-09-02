@@ -59,7 +59,7 @@ Partial Class FinestraDocumenti
         'lblCartella
         '
         Me.lblCartella.AutoSize = True
-        Me.lblCartella.Location = New System.Drawing.Point(14, 110)
+        Me.lblCartella.Location = New System.Drawing.Point(14, 109)
         Me.lblCartella.MaximumSize = New System.Drawing.Size(772, 0)
         Me.lblCartella.Name = "lblCartella"
         Me.lblCartella.Size = New System.Drawing.Size(772, 15)
@@ -71,7 +71,7 @@ Partial Class FinestraDocumenti
         Me.lvwDocumenti.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colDocumento, Me.colCategoria, Me.colMotivo})
         Me.lvwDocumenti.FullRowSelect = True
         Me.lvwDocumenti.HideSelection = False
-        Me.lvwDocumenti.Location = New System.Drawing.Point(14, 134)
+        Me.lvwDocumenti.Location = New System.Drawing.Point(14, 132)
         Me.lvwDocumenti.MultiSelect = False
         Me.lvwDocumenti.Name = "lvwDocumenti"
         Me.lvwDocumenti.Size = New System.Drawing.Size(772, 300)
@@ -97,7 +97,7 @@ Partial Class FinestraDocumenti
         'lblScelta
         '
         Me.lblScelta.AutoSize = True
-        Me.lblScelta.Location = New System.Drawing.Point(14, 446)
+        Me.lblScelta.Location = New System.Drawing.Point(14, 444)
         Me.lblScelta.Name = "lblScelta"
         Me.lblScelta.Size = New System.Drawing.Size(150, 15)
         Me.lblScelta.TabIndex = 4
@@ -107,46 +107,46 @@ Partial Class FinestraDocumenti
         '
         Me.cmbCategoria.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cmbCategoria.Enabled = False
-        Me.cmbCategoria.Location = New System.Drawing.Point(174, 442)
+        Me.cmbCategoria.Location = New System.Drawing.Point(174, 440)
         Me.cmbCategoria.Name = "cmbCategoria"
         Me.cmbCategoria.Size = New System.Drawing.Size(180, 23)
         Me.cmbCategoria.TabIndex = 5
         '
         'btnRileggi
         '
-        Me.btnRileggi.Location = New System.Drawing.Point(14, 486)
+        Me.btnRileggi.Location = New System.Drawing.Point(14, 477)
         Me.btnRileggi.Name = "btnRileggi"
-        Me.btnRileggi.Size = New System.Drawing.Size(220, 32)
+        Me.btnRileggi.Size = StileApp.BottoneMoltoLargo
         Me.btnRileggi.TabIndex = 6
         Me.btnRileggi.Text = "Fai rileggere la cartella"
         '
         'btnCambiaCartella
         '
-        Me.btnCambiaCartella.Location = New System.Drawing.Point(246, 486)
+        Me.btnCambiaCartella.Location = New System.Drawing.Point(266, 477)
         Me.btnCambiaCartella.Name = "btnCambiaCartella"
-        Me.btnCambiaCartella.Size = New System.Drawing.Size(180, 32)
+        Me.btnCambiaCartella.Size = StileApp.BottoneLargo
         Me.btnCambiaCartella.TabIndex = 7
         Me.btnCambiaCartella.Text = "Cambia cartella…"
         '
         'btnConferma
         '
-        Me.btnConferma.Location = New System.Drawing.Point(556, 486)
+        Me.btnConferma.Location = New System.Drawing.Point(546, 477)
         Me.btnConferma.Name = "btnConferma"
-        Me.btnConferma.Size = New System.Drawing.Size(120, 32)
+        Me.btnConferma.Size = StileApp.BottoneMedio
         Me.btnConferma.TabIndex = 8
         Me.btnConferma.Text = "Conferma"
         '
         'btnAnnulla
         '
-        Me.btnAnnulla.Location = New System.Drawing.Point(688, 486)
+        Me.btnAnnulla.Location = New System.Drawing.Point(688, 477)
         Me.btnAnnulla.Name = "btnAnnulla"
-        Me.btnAnnulla.Size = New System.Drawing.Size(110, 32)
+        Me.btnAnnulla.Size = StileApp.BottoneStandard
         Me.btnAnnulla.TabIndex = 9
         Me.btnAnnulla.Text = "Annulla"
         '
         'FinestraDocumenti
         '
-        Me.ClientSize = New System.Drawing.Size(800, 532)
+        Me.ClientSize = New System.Drawing.Size(800, 523)
         Me.Controls.Add(Me.lblTitolo)
         Me.Controls.Add(Me.lblSpiegazione)
         Me.Controls.Add(Me.lblCartella)

@@ -53,6 +53,7 @@ Public Class FinestraInformativa
         lblTitolo.Text = "Come funziona, e cosa esce dal tuo PC"
 
         StileApp.VestiBottone(btnChiudi, LivelloBottone.Neutro)
+        StileApp.VestiBottone(btnCredits, LivelloBottone.Esplorativo)
 
         Scrivi()
         Disponi()
@@ -117,6 +118,63 @@ Public Class FinestraInformativa
                 "Ogni testo generato lo puoi rileggere e riscrivere a mano prima che diventi un documento.")}
 
     End Function
+
+    ''' <summary>
+    ''' I crediti del prodotto: di chi è, chi l'ha fatto, su che cosa poggia.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Nasce il 2026-09-01, su indicazione del tutor, e sta <b>dentro l'aiuto</b> e
+    ''' non in una finestra sua: sono la stessa domanda in due tempi — «che cos'è questo
+    ''' programma» e «di chi è» — e una finestra in più per quattro righe sarebbe una porta
+    ''' per una stanza.</para>
+    ''' <para>Le tecnologie si nominano perché chi legge l'informativa ha appena letto che
+    ''' cosa esce dal suo computer, e sapere <b>attraverso che cosa</b> esce è la stessa
+    ''' informazione detta dall'altra parte. Si nomina quel che il prodotto <i>è</i>, mai
+    ''' come è stato costruito.</para>
+    ''' </remarks>
+    Public Shared Function Crediti() As VoceInformativa
+
+        Return New VoceInformativa("Credits",
+            "TrovaLavoro — © 2026 Aviolab AI. Tutti i diritti riservati." & vbLf &
+            "Ideazione e sviluppo: Mirco Parenti." & vbLf &
+            "Il programma è scritto per Microsoft .NET con Windows Forms; il browser " &
+            "incorporato è Microsoft Edge WebView2; il motore che ragiona sui testi sono le " &
+            "API Claude di Anthropic, a cui si parla con la chiave dell'utente." & vbLf &
+            "I marchi citati appartengono ai rispettivi proprietari.")
+
+    End Function
+
+    ''' <summary>Se i crediti sono già in mostra. Per il banco.</summary>
+    Public ReadOnly Property CreditiInMostra As Boolean
+        Get
+            Return _creditiInMostra
+        End Get
+    End Property
+
+    Private _creditiInMostra As Boolean
+
+    ''' <summary>
+    ''' Mette in coda i crediti e rifà la disposizione. Il bottone si spegne: mostrarli due
+    ''' volte vorrebbe dire scriverli due volte nella stessa finestra.
+    ''' </summary>
+    Private Sub MostraICrediti(mittente As Object, e As EventArgs) Handles btnCredits.Click
+
+        If _creditiInMostra Then Return
+        _creditiInMostra = True
+
+        Dim voce As VoceInformativa = Crediti()
+        _righe.Add(NuovaRiga(voce.Titolo, StileApp.FontTitoloGruppo, StileApp.TestoPrimario))
+        _righe.Add(NuovaRiga(voce.Testo, StileApp.FontTesto, StileApp.TestoPrimario))
+
+        btnCredits.Enabled = False
+
+        Disponi()
+
+        ' Se la finestra ha cominciato a scorrere, quel che si è appena chiesto sta in
+        ' fondo: portarcelo è meno sorprendente che lasciarlo cercare.
+        If AutoScroll Then ScrollControlIntoView(_righe.Last())
+
+    End Sub
 
     ''' <summary>Apre l'informativa davanti a chi l'ha chiesta.</summary>
     Public Shared Sub Mostra(proprietario As IWin32Window)
@@ -220,6 +278,11 @@ Public Class FinestraInformativa
 
         btnChiudi.Location = New Point(larghezza - StileApp.MargineRiquadro - btnChiudi.Width,
                                        sotto + StileApp.MargineRiquadro)
+
+        ' I crediti stanno accanto a «Ho capito», non da un'altra parte: sono un di più che
+        ' si legge alla fine, e chi non li cerca non li deve incontrare per strada.
+        btnCredits.Location = New Point(btnChiudi.Left - StileApp.DistanzaControlli - btnCredits.Width,
+                                        btnChiudi.Top)
 
         Return btnChiudi.Bottom + StileApp.MargineRiquadro
 

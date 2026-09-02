@@ -1,4 +1,5 @@
-﻿Imports System.Linq
+﻿Imports System.Drawing
+Imports System.Linq
 Imports System.Text.Json.Nodes
 Imports System.Windows.Forms
 Imports TrovaLavoro.Dati
@@ -101,6 +102,18 @@ Public Class FinestraModificaTesti
 
     ''' <summary>Il segno che marca, nell'elenco, i campi scritti a mano dall'utente.</summary>
     Private Const SegnoRiscritto As String = "✎"
+
+    ''' <summary>Quanto è larga la finestra, e quindi il testo che ci sta dentro.</summary>
+    Private Const LarghezzaFinestra As Integer = 1000
+
+    ''' <summary>Quanto è largo l'elenco di sinistra, quello del documento.</summary>
+    Private Const LarghezzaElencoDentro As Integer = 540
+
+    ''' <summary>Quanto sono alti i due elenchi affiancati.</summary>
+    Private Const AltezzaElenchi As Integer = 240
+
+    ''' <summary>Quanto è alta la casella in cui si riscrive il testo scelto.</summary>
+    Private Const AltezzaCasella As Integer = 110
 
     ''' <summary>Un campo di prosa aperto alla riscrittura, con tutto ciò che lo riguarda.</summary>
     Private Class Voce
@@ -222,6 +235,8 @@ Public Class FinestraModificaTesti
         Vesti()
         MostraICampi()
         MostraIlCampoScelto()
+        PortaLeMisureInPixelVeri()
+        Disponi()
 
         ' Esc annulla; nessun bottone appeso a Invio, perché si scrive nella casella del
         ' testo e un Invio di passaggio chiuderebbe la finestra a metà lavoro.
@@ -481,6 +496,127 @@ Public Class FinestraModificaTesti
         StileApp.VestiBottone(btnAnnulla, LivelloBottone.Neutro)
 
     End Sub
+
+    ''' <summary>
+    ''' Porta in pixel veri le misure che il designer dichiara in unità di progetto e che
+    ''' la fila non ricalcola: la grandezza dei bottoni e la larghezza delle colonne dei
+    ''' due elenchi. Si fa <b>una volta sola</b>, alla costruzione — rifarla
+    ''' moltiplicherebbe una seconda volta quel che è già convertito (decisione 15.7).
+    ''' </summary>
+    Private Sub PortaLeMisureInPixelVeri()
+
+        ' Un bottone largo quanto lo voleva il progetto, con dentro un testo cresciuto col
+        ' DPI, tronca proprio il verbo che dice cosa fa.
+        For Each bottone As Button In {btnTogli, btnRimetti, btnSalva, btnAnnulla}
+            bottone.Size = New Size(ScalaSchermo.InPixelDelloSchermo(bottone.Width, Me.DeviceDpi),
+                                    ScalaSchermo.InPixelDelloSchermo(bottone.Height, Me.DeviceDpi))
+        Next
+
+        For Each elenco As ListView In {lvwCampi, lvwFuori}
+            For Each colonna As ColumnHeader In elenco.Columns
+                colonna.Width = ScalaSchermo.InPixelDelloSchermo(colonna.Width, Me.DeviceDpi)
+            Next
+        Next
+
+    End Sub
+
+    ''' <summary>Mette in fila quel che si vede, nello spazio che lo schermo concede.</summary>
+    Private Sub Disponi()
+
+        DisponiIn(ScalaSchermo.SpazioClienteDisponibile(
+            Screen.FromControl(Me).WorkingArea.Height, Me.Height - Me.ClientSize.Height))
+
+    End Sub
+
+    ''' <summary>
+    ''' Mette in fila quel che si vede come se in altezza ci fosse questo spazio.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Le misure del progetto diventano qui <b>pixel veri</b>: dichiararle crude
+    ''' stringeva la finestra mentre i testi dentro crescevano col DPI, ed è quel che a
+    ''' 150% mandava l'elenco di destra fuori dal bordo (cap. 03.4, decisione 15.7).</para>
+    ''' <para>Un tetto sullo spazio che c'è, e lo scorrimento per quel che non ci sta: le
+    ''' due cose insieme, perché il tetto da solo taglierebbe e lo scorrimento da solo
+    ''' lascerebbe la finestra fuori schermo.</para>
+    ''' <para><b>Quando si scorre, la fila si fa due volte.</b> La barra verticale si prende
+    ''' una fetta di larghezza, e il contenuto messo in fila senza saperlo le va a finire
+    ''' sotto: allora si accende anche la barra orizzontale, che non ha niente da mostrare.
+    ''' La seconda fila sta dentro quel che resta.</para>
+    ''' <para>Lo spazio si <b>riceve</b> invece di leggerlo qui dentro: quello vero lo detta
+    ''' lo schermo su cui la finestra si apre, e un collaudo non può cambiare schermo —
+    ''' mentre è proprio quando il contenuto non ci sta che questa disposizione fa qualcosa
+    ''' di diverso.</para>
+    ''' </remarks>
+    Public Sub DisponiIn(altezzaDisponibile As Integer)
+
+        Dim larghezza As Integer = ScalaSchermo.InPixelDelloSchermo(LarghezzaFinestra, Me.DeviceDpi)
+
+        Dim voluta As Integer = MettiInFila(larghezza)
+        Dim siScorre As Boolean = ScalaSchermo.ServeScorrimento(voluta, altezzaDisponibile)
+
+        If siScorre Then
+            voluta = MettiInFila(ScalaSchermo.LarghezzaSenzaLaBarra(
+                larghezza, siScorre, SystemInformation.VerticalScrollBarWidth))
+        End If
+
+        Me.AutoScroll = siScorre
+        ClientSize = New Size(larghezza, ScalaSchermo.AltezzaSostenibile(voluta, altezzaDisponibile))
+
+    End Sub
+
+    ''' <summary>
+    ''' Mette i controlli in fila dentro questa larghezza, e dice fin dove arrivano.
+    ''' </summary>
+    Private Function MettiInFila(larghezza As Integer) As Integer
+
+        Dim sinistra As Integer = StileApp.MargineRiquadro
+        Dim larghezzaUtile As Integer = larghezza - 2 * StileApp.MargineRiquadro
+
+        lblSpiegazione.MaximumSize = New Size(larghezzaUtile, 0)
+
+        ' I due elenchi con in mezzo la colonna dei due comandi: quel che resta della
+        ' larghezza va all'elenco di destra, così nessuno dei tre sfonda il margine.
+        Dim larghezzaDentro As Integer = ScalaSchermo.InPixelDelloSchermo(LarghezzaElencoDentro, Me.DeviceDpi)
+        Dim larghezzaFuori As Integer = larghezzaUtile - larghezzaDentro - btnTogli.Width -
+                                        2 * StileApp.DistanzaControlli
+        Dim altezzaElenchi As Integer = ScalaSchermo.InPixelDelloSchermo(AltezzaElenchi, Me.DeviceDpi)
+
+        Dim colonnaComandi As Integer = sinistra + larghezzaDentro + StileApp.DistanzaControlli
+        Dim colonnaFuori As Integer = colonnaComandi + btnTogli.Width + StileApp.DistanzaControlli
+
+        lblTitolo.Location = New Point(sinistra, StileApp.MargineRiquadro)
+        lblSpiegazione.Location = New Point(sinistra, lblTitolo.Bottom + StileApp.DistanzaControlli)
+
+        Dim intestazioni As Integer = lblSpiegazione.Bottom + StileApp.DistanzaControlli
+        lblNelDocumento.Location = New Point(sinistra, intestazioni)
+        lblFuori.Location = New Point(colonnaFuori, intestazioni)
+
+        Dim cimaElenchi As Integer = lblNelDocumento.Bottom + StileApp.InterlineaMinima
+        lvwCampi.Location = New Point(sinistra, cimaElenchi)
+        lvwCampi.Size = New Size(larghezzaDentro, altezzaElenchi)
+        lvwFuori.Location = New Point(colonnaFuori, cimaElenchi)
+        lvwFuori.Size = New Size(larghezzaFuori, altezzaElenchi)
+
+        ' I due comandi al centro dell'altezza degli elenchi: sono le frecce che spostano
+        ' una voce dall'uno all'altro, e stanno dove il gesto le cerca.
+        Dim altezzaCoppia As Integer = btnTogli.Height + StileApp.DistanzaControlli + btnRimetti.Height
+        btnTogli.Location = New Point(colonnaComandi, cimaElenchi + (altezzaElenchi - altezzaCoppia) \ 2)
+        btnRimetti.Location = New Point(colonnaComandi, btnTogli.Bottom + StileApp.DistanzaControlli)
+
+        lblModifica.Location = New Point(sinistra, lvwCampi.Bottom + StileApp.DistanzaControlli)
+        txtTesto.Location = New Point(sinistra, lblModifica.Bottom + StileApp.InterlineaMinima)
+        txtTesto.Size = New Size(larghezzaUtile,
+                                 ScalaSchermo.InPixelDelloSchermo(AltezzaCasella, Me.DeviceDpi))
+
+        ' L'annulla in fondo a destra: il posto d'onore va alla via d'uscita, come nelle
+        ' altre finestre del programma.
+        Dim riga As Integer = txtTesto.Bottom + StileApp.MargineRiquadro
+        btnAnnulla.Location = New Point(larghezza - StileApp.MargineRiquadro - btnAnnulla.Width, riga)
+        btnSalva.Location = New Point(btnAnnulla.Left - StileApp.DistanzaControlli - btnSalva.Width, riga)
+
+        Return btnAnnulla.Bottom + StileApp.MargineRiquadro
+
+    End Function
 
     ''' <summary>
     ''' Riempie i due elenchi tenendo ferma la scelta di chi ci sta lavorando.
@@ -761,7 +897,13 @@ Public Class FinestraModificaTesti
                 lblModifica.Text = $"«{scelta.Etichetta}» viene dal profilo: qui puoi solo toglierla " &
                                    "da questo documento."
             Else
-                lblModifica.Text = "Scegli una riga dall'elenco."
+                ' Con l'elenco vuoto non c'è nessuna riga da scegliere: chiederlo lo stesso
+                ' manda a cercare qualcosa che non c'è. Un documento senza campi di prosa e
+                ' senza voci non è un errore — è un documento che non ha niente da
+                ' riscrivere, e va detto (v. il costruttore).
+                lblModifica.Text = If(lvwCampi.Items.Count = 0,
+                                      "Questo documento non ha testi da riscrivere.",
+                                      "Scegli una riga dall'elenco.")
             End If
 
         Finally

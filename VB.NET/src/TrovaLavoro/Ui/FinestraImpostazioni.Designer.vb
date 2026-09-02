@@ -25,6 +25,7 @@ Partial Class FinestraImpostazioni
         Me.lblTitolo = New System.Windows.Forms.Label()
         Me.lblSpiegazione = New System.Windows.Forms.Label()
         Me.btnComeFunziona = New System.Windows.Forms.Button()
+        Me.btnInformazioni = New System.Windows.Forms.Button()
         Me.lblSezioneChiave = New System.Windows.Forms.Label()
         Me.lblStatoChiave = New System.Windows.Forms.Label()
         Me.btnCambiaChiave = New System.Windows.Forms.Button()
@@ -83,9 +84,16 @@ Partial Class FinestraImpostazioni
         'btnComeFunziona
         '
         Me.btnComeFunziona.Name = "btnComeFunziona"
-        Me.btnComeFunziona.Size = New System.Drawing.Size(300, 32)
+        Me.btnComeFunziona.Size = StileApp.BottoneMedio
         Me.btnComeFunziona.TabIndex = 2
-        Me.btnComeFunziona.Text = "Come funziona, e cosa esce dal tuo PC"
+        Me.btnComeFunziona.Text = "Come funziona…"
+        '
+        'btnInformazioni
+        '
+        Me.btnInformazioni.Name = "btnInformazioni"
+        Me.btnInformazioni.Size = StileApp.BottoneMedio
+        Me.btnInformazioni.TabIndex = 3
+        Me.btnInformazioni.Text = "Informazioni su…"
         '
         'lblSezioneChiave
         '
@@ -104,7 +112,7 @@ Partial Class FinestraImpostazioni
         'btnCambiaChiave
         '
         Me.btnCambiaChiave.Name = "btnCambiaChiave"
-        Me.btnCambiaChiave.Size = New System.Drawing.Size(190, 32)
+        Me.btnCambiaChiave.Size = StileApp.BottoneLargo
         Me.btnCambiaChiave.TabIndex = 4
         Me.btnCambiaChiave.Text = "Cambia la chiave…"
         '
@@ -199,7 +207,7 @@ Partial Class FinestraImpostazioni
         'btnApriCartellaDati
         '
         Me.btnApriCartellaDati.Name = "btnApriCartellaDati"
-        Me.btnApriCartellaDati.Size = New System.Drawing.Size(190, 32)
+        Me.btnApriCartellaDati.Size = StileApp.BottoneLargo
         Me.btnApriCartellaDati.TabIndex = 12
         Me.btnApriCartellaDati.Text = "Apri la cartella dati"
         '
@@ -213,7 +221,7 @@ Partial Class FinestraImpostazioni
         'btnGestisciDocumenti
         '
         Me.btnGestisciDocumenti.Name = "btnGestisciDocumenti"
-        Me.btnGestisciDocumenti.Size = New System.Drawing.Size(230, 32)
+        Me.btnGestisciDocumenti.Size = StileApp.BottoneMoltoLargo
         Me.btnGestisciDocumenti.TabIndex = 14
         Me.btnGestisciDocumenti.Text = "Gestisci i documenti…"
         '
@@ -271,7 +279,7 @@ Partial Class FinestraImpostazioni
         'btnApriModelli
         '
         Me.btnApriModelli.Name = "btnApriModelli"
-        Me.btnApriModelli.Size = New System.Drawing.Size(230, 32)
+        Me.btnApriModelli.Size = StileApp.BottoneMoltoLargo
         Me.btnApriModelli.TabIndex = 18
         Me.btnApriModelli.Text = "Apri modelli.json"
         '
@@ -292,7 +300,7 @@ Partial Class FinestraImpostazioni
         'btnApriChiamate
         '
         Me.btnApriChiamate.Name = "btnApriChiamate"
-        Me.btnApriChiamate.Size = New System.Drawing.Size(230, 32)
+        Me.btnApriChiamate.Size = StileApp.BottoneMoltoLargo
         Me.btnApriChiamate.TabIndex = 22
         Me.btnApriChiamate.Text = "Apri il conto delle chiamate"
         '
@@ -306,21 +314,21 @@ Partial Class FinestraImpostazioni
         'btnBackup
         '
         Me.btnBackup.Name = "btnBackup"
-        Me.btnBackup.Size = New System.Drawing.Size(190, 32)
+        Me.btnBackup.Size = StileApp.BottoneLargo
         Me.btnBackup.TabIndex = 20
         Me.btnBackup.Text = "Backup…"
         '
         'btnSvuotaNavigazione
         '
         Me.btnSvuotaNavigazione.Name = "btnSvuotaNavigazione"
-        Me.btnSvuotaNavigazione.Size = New System.Drawing.Size(280, 32)
+        Me.btnSvuotaNavigazione.Size = StileApp.BottoneMassimo
         Me.btnSvuotaNavigazione.TabIndex = 21
         Me.btnSvuotaNavigazione.Text = "Svuota i dati di navigazione"
         '
         'btnEliminaTutto
         '
         Me.btnEliminaTutto.Name = "btnEliminaTutto"
-        Me.btnEliminaTutto.Size = New System.Drawing.Size(280, 32)
+        Me.btnEliminaTutto.Size = StileApp.BottoneMassimo
         Me.btnEliminaTutto.TabIndex = 22
         Me.btnEliminaTutto.Text = "ELIMINA TUTTI I DATI"
         '
@@ -334,7 +342,7 @@ Partial Class FinestraImpostazioni
         'btnChiudi
         '
         Me.btnChiudi.Name = "btnChiudi"
-        Me.btnChiudi.Size = New System.Drawing.Size(110, 32)
+        Me.btnChiudi.Size = StileApp.BottoneStandard
         Me.btnChiudi.TabIndex = 24
         Me.btnChiudi.Text = "Chiudi"
         Me.ClientSize = New System.Drawing.Size(660, 760)
@@ -362,6 +370,7 @@ Partial Class FinestraImpostazioni
         Me.pnlContenuto.Controls.Add(Me.lblTitolo)
         Me.pnlContenuto.Controls.Add(Me.lblSpiegazione)
         Me.pnlContenuto.Controls.Add(Me.btnComeFunziona)
+        Me.pnlContenuto.Controls.Add(Me.btnInformazioni)
         Me.pnlContenuto.Controls.Add(Me.lblSezioneChiave)
         Me.pnlContenuto.Controls.Add(Me.lblStatoChiave)
         Me.pnlContenuto.Controls.Add(Me.btnCambiaChiave)
@@ -414,6 +423,7 @@ Partial Class FinestraImpostazioni
     Friend WithEvents lblTitolo As System.Windows.Forms.Label
     Friend WithEvents lblSpiegazione As System.Windows.Forms.Label
     Friend WithEvents btnComeFunziona As System.Windows.Forms.Button
+    Friend WithEvents btnInformazioni As System.Windows.Forms.Button
     Friend WithEvents lblSezioneChiave As System.Windows.Forms.Label
     Friend WithEvents lblStatoChiave As System.Windows.Forms.Label
     Friend WithEvents btnCambiaChiave As System.Windows.Forms.Button

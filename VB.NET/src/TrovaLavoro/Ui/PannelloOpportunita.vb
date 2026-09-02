@@ -243,7 +243,7 @@ Public Class PannelloOpportunita
         If testo = "" Then Return
 
         If _pipeline Is Nothing Then
-            RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
+            RaccontaUnAvviso(MotivoSenzaAi())
             Return
         End If
 
@@ -300,8 +300,7 @@ Public Class PannelloOpportunita
             Catch ex As ErroreAi
                 ' Il messaggio è già quello da mostrare, e il testo incollato resta dov'è:
                 ' si riprova senza doverlo ritrovare.
-                RaccontaLoStato(ex.Message & vbLf & "Il testo dell'annuncio è ancora qui: puoi riprovare.",
-                                StileApp.Pericolo)
+                RaccontaUnErrore(ex.Message & vbLf & "Il testo dell'annuncio è ancora qui: puoi riprovare.")
 
             Finally
                 _annulla = Nothing
@@ -351,7 +350,7 @@ Public Class PannelloOpportunita
         If _opportunita Is Nothing OrElse _opportunita.Confrontata Then Return
 
         If _pipeline Is Nothing Then
-            RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
+            RaccontaUnAvviso(MotivoSenzaAi())
             Return
         End If
 
@@ -383,8 +382,7 @@ Public Class PannelloOpportunita
                                 StileApp.TestoSecondario)
 
             Catch ex As ErroreAi
-                RaccontaLoStato(ex.Message & vbLf & "La candidatura resta com'era: puoi riprovare.",
-                                StileApp.Pericolo)
+                RaccontaUnErrore(ex.Message & vbLf & "La candidatura resta com'era: puoi riprovare.")
 
             Finally
                 _annulla = Nothing
@@ -578,10 +576,9 @@ Public Class PannelloOpportunita
 
         Catch ex As Exception When TypeOf ex Is JsonException OrElse TypeOf ex Is IOException _
                                    OrElse TypeOf ex Is UnauthorizedAccessException
-            RaccontaLoStato(
+            RaccontaUnErrore(
                 $"Il profilo c'è ma non si lascia leggere: {ex.Message}" & vbLf &
-                "Aprilo dalla scheda «Profilo»: lì trovi come rimediare.",
-                StileApp.Pericolo)
+                "Aprilo dalla scheda «Profilo»: lì trovi come rimediare.")
             Return Nothing
         End Try
 
@@ -804,18 +801,18 @@ Public Class PannelloOpportunita
     ''' niente. Si chiede conferma prima — è una decisione che non si disfa, e la regola
     ''' del cap. 12.7 è che nessuno scriva senza un passaggio esplicito.
     ''' </summary>
+    ''' <remarks>
+    ''' Dal 2026-09-01 lo chiede la <see cref="FinestraConferma"/> e non più una
+    ''' <c>MessageBox</c> con Sì e No: lo scarto pesa quanto l'eliminazione di una
+    ''' candidatura in P1 — è una strada che non si ripercorre — e due conferme dello
+    ''' stesso livello non possono avere due forme diverse (cap. 03.3).
+    ''' </remarks>
     Private Sub btnScarta_Click(sender As Object, e As EventArgs) Handles btnScarta.Click
 
         If _opportunita Is Nothing OrElse AiAlLavoro Then Return
 
-        Dim risposta As DialogResult = MessageBox.Show(
-            "Vuoi scartare questa candidatura?" & vbLf &
-            "Non cancello niente: resta nella sua cartella e la ritrovi nella Home. " &
-            "Ma la do per chiusa, e da uno scarto non si torna indietro.",
-            "Scarta l'opportunità", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
-            MessageBoxDefaultButton.Button2)
-
-        If risposta <> DialogResult.Yes Then Return
+        If Not FinestraConferma.Chiedi(Me, "Scarta la candidatura",
+                                       SpiegazioneDelloScarto(), "Confermo") Then Return
 
         _opportunita.Avanza(StatoOpportunita.Scartata)
 
@@ -826,6 +823,24 @@ Public Class PannelloOpportunita
         AggiornaComandi()
 
     End Sub
+
+    ''' <summary>
+    ''' Il testo della conferma: che cosa succede scartando, e soprattutto che cosa
+    ''' <b>non</b> succede — qui non sparisce niente, e chi legge «scarta» può temere il
+    ''' contrario.
+    ''' </summary>
+    ''' <remarks>
+    ''' È pubblica perché la legge il banco, come <c>PannelloHome.SpiegazioneDellEliminazione</c>:
+    ''' premere il bottone aprirebbe una finestra modale, e di quella un collaudo non può
+    ''' aspettare la chiusura.
+    ''' </remarks>
+    Public Shared Function SpiegazioneDelloScarto() As String
+
+        Return "Non cancello niente: la candidatura resta nella sua cartella e la ritrovi " &
+               "nella Home, con i documenti che le hai fatto scrivere." & vbLf & vbLf &
+               "Ma la do per chiusa, e da uno scarto non si torna indietro. Confermi?"
+
+    End Function
 
     ''' <summary>
     ''' Di che colore si scrive a che punto è. Il rosso resta allo scarto — è l'unica
@@ -1084,6 +1099,26 @@ Public Class PannelloOpportunita
 
     End Sub
 
+    ''' <summary>
+    ''' Una riga che dice che qualcosa non è riuscito: la parola e il colore insieme
+    ''' (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    Private Sub RaccontaUnErrore(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoErrore & testo, StileApp.Pericolo)
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa manca prima ancora di provare — la chiave, i
+    ''' prompt: stesso colore dell'errore, parola diversa.
+    ''' </summary>
+    Private Sub RaccontaUnAvviso(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoAvviso & testo, StileApp.Pericolo)
+
+    End Sub
+
     ''' <summary>Il match in una riga, per la barra di stato del pannello.</summary>
     Private Function RiassuntoDelMatch() As String
 
@@ -1102,7 +1137,7 @@ Public Class PannelloOpportunita
     Private Sub RaccontaDaDoveSiComincia()
 
         If _pipeline Is Nothing Then
-            RaccontaLoStato(MotivoSenzaAi(), StileApp.Pericolo)
+            RaccontaUnAvviso(MotivoSenzaAi())
             Return
         End If
 

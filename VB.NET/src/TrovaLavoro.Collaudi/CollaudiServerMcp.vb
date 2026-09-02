@@ -2,6 +2,7 @@ Imports System.IO
 Imports System.Text
 Imports System.Text.Json
 Imports System.Text.Json.Nodes
+Imports System.Threading
 Imports System.Threading.Tasks
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro.Mcp
@@ -552,6 +553,100 @@ Namespace Mcp
 
             End Using
         End Function
+
+#End Region
+
+#Region "Niente segreti fuori di qui"
+
+        ''' <summary>
+        ''' Una chiave API finta, nella forma in cui il diario le riconosce. Di una chiave
+        ''' si può scrivere solo la coda, come fa l'interfaccia (cap. 11.3).
+        ''' </summary>
+        Private Const ChiaveApiFinta As String = "sk-ant-api03-nondeveuscire-9999"
+
+        Private Const CodaMascherata As String = "sk-…9999"
+
+        <TestMethod>
+        Public Sub UnaChiaveDentroUnaRigaDelDiarioNonEsceDiQui()
+            ' Il diario di questo server non è un file di casa: è stderr, e il client MCP
+            ' lo raccoglie nei propri log. Un guasto della rete può ristampare
+            ' l'intestazione che porta la chiave, e da lì uscirebbe senza che nessuno la
+            ' guardi. (R1 della revisione di sicurezza, 2026-09-01.)
+            Dim radice As String = CartellaTemporanea()
+            Using contesto As ContestoApp = Monta(radice)
+
+                Dim diario As New StringWriter()
+                Dim server As New ServerMcp(contesto, TextReader.Null, TextWriter.Null, diario)
+
+                server.Annota($"Errore imprevisto su «tools/call»: la chiamata portava {ChiaveApiFinta}")
+
+                Dim scritto As String = diario.ToString()
+                Assert.DoesNotContain(ChiaveApiFinta, scritto, "la chiave in chiaro non esce di qui")
+                Assert.Contains(CodaMascherata, scritto, "resta la coda, che basta a riconoscerla")
+                Assert.Contains("tools/call", scritto, "e il resto della riga si legge come prima")
+
+            End Using
+        End Sub
+
+        <TestMethod>
+        Public Async Function UnaChiaveDentroUnEccezioneNonTornaAlClient() As Task
+            ' L'altra porta della stessa stanza: il messaggio dell'eccezione non va solo
+            ' nel diario, torna anche al client dentro la risposta d'errore — e lì entra
+            ' nel contesto di un modello, che è il posto peggiore in cui possa finire.
+            Dim radice As String = CartellaTemporanea()
+            Using contesto As ContestoApp = Monta(radice)
+
+                Dim server As New ServerMcp(New CatalogoCheScoppia(contesto),
+                                            TextReader.Null, TextWriter.Null, TextWriter.Null)
+
+                Dim risposta As String = Await server.RispondiAsync(
+                    Richiesta("tools/call", EraMcp.Moderna,
+                              New JsonObject From {{"name", CatalogoCheScoppia.Scoppia}}))
+
+                Assert.AreEqual(ProtocolloMcp.ErroreInterno, CodiceErrore(risposta), "l'ultima rete ha risposto")
+
+                ' Il messaggio si guarda decodificato: nella riga JSON i puntini di
+                ' sospensione della mascheratura viaggiano come sequenza di escape.
+                Dim spiegazione As String =
+                    TryCast(Letta(risposta)("error"), JsonObject)("message").GetValue(Of String)()
+
+                Assert.DoesNotContain(ChiaveApiFinta, spiegazione, "la chiave non torna al client")
+                Assert.Contains(CodaMascherata, spiegazione, "resta la coda, e il messaggio resta utile")
+
+            End Using
+        End Function
+
+        ''' <summary>
+        ''' Una vetrina con un tool che scoppia, e scoppia dicendo qualcosa che non deve
+        ''' uscire: nessuno dei tool veri sa fallire su comando.
+        ''' </summary>
+        Private NotInheritable Class CatalogoCheScoppia
+            Inherits CatalogoTool
+
+            Public Const Scoppia As String = "scoppia"
+
+            Public Sub New(contesto As ContestoApp)
+                MyBase.New(contesto)
+            End Sub
+
+            Public Overrides Function Conosce(nome As String) As Boolean
+                Return Scoppia.Equals(nome, StringComparison.Ordinal) OrElse MyBase.Conosce(nome)
+            End Function
+
+            Public Overrides Function EseguiAsync(nome As String, argomenti As JsonObject,
+                                                  Optional annulla As CancellationToken = Nothing) _
+                                                  As Task(Of EsitoTool)
+
+                If Not Scoppia.Equals(nome, StringComparison.Ordinal) Then
+                    Return MyBase.EseguiAsync(nome, argomenti, annulla)
+                End If
+
+                Throw New InvalidOperationException(
+                    $"La chiamata è stata rifiutata con la chiave {ChiaveApiFinta}.")
+
+            End Function
+
+        End Class
 
 #End Region
 

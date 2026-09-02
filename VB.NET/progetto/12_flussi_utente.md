@@ -45,8 +45,11 @@ opportunità sono esaurite.
    *E a T6 (2026-08-14) è arrivata **metà**: la cartella si sceglie, si legge e si
    conferma, ma da lì escono gli **attestati per l'email**, non il profilo. Il CV più
    recente la classificazione lo indica già — è scritto in `documenti.json` — e a non
-   leggerlo è l'import, che continua a chiedere un file singolo. Questo punto 2 resta
-   quindi una promessa a metà, annotata in `in_sospeso.md`.*
+   leggerlo era l'import, che continuava a chiedere un file singolo. **L'altra metà è
+   arrivata il 2026-08-19**: l'import propone per nome il CV più recente, con le tre
+   uscite «Sì, usa questo / No, scelgo io un altro file / Annulla» (cap. 03.6, P2), e
+   la voce di `in_sospeso.md` è in «Chiuse». (Questa nota era rimasta ferma alla metà:
+   allineata il 2026-09-01 dalla revisione di finalizzazione.)*
 3. *Da T5d (2026-08-14) c'è una **terza porta**, e il bivio del punto 1 diventa un
    trivio: il CV può non essere un file.* Se il proprio percorso è già scritto in una
    pagina — di norma la **propria** pagina LinkedIn — la si apre nel browser integrato e
@@ -288,6 +291,13 @@ l'utente lo chiede) l'app propone una **sessione di aggiornamento**:
 3. Ogni modifica passa dalla solita scheda di conferma; il profilo aggiornato viene
    salvato e **versionato** (si conserva lo storico: cap. 11), così i CV già inviati
    restano riconducibili al profilo con cui furono generati.
+
+*Dichiarato **fuori dalla 1.0** il 2026-09-01, dalla revisione di finalizzazione: dei
+tre passi non ne è stato costruito nessuno — il bottone «Sessione di aggiornamento» in
+P2 è il segnaposto spento della regola 3.8, e dal 2026-08-31 il richiamo dalla Home
+non c'è più (v. `in_sospeso.md`). Il flusso resta disegnato qui per quando si farà, e
+l'infrastruttura del passo 3 — lo storico versionato — esiste già (cap. 11);
+l'aggiornamento del profilo, intanto, passa dalla scheda di P2, campo per campo.*
 
 ## 12.5 Flusso E — Backup e ripristino (F7)
 

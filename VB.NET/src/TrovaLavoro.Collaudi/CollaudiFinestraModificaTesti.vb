@@ -203,6 +203,10 @@ Namespace Ui
             Return DirectCast(finestra.Controls.Find("lvwCampi", searchAllChildren:=True).Single(), ListView)
         End Function
 
+        Private Shared Function Etichetta(finestra As Control, nome As String) As Label
+            Return DirectCast(finestra.Controls.Find(nome, searchAllChildren:=True).Single(), Label)
+        End Function
+
         <TestMethod>
         Public Sub IDueDocumentiDiUnaCandidaturaStannoInUnElencoSolo()
 
@@ -315,6 +319,42 @@ Namespace Ui
 
                 Assert.AreEqual(0, finestra.Quanti, "nessun campo di prosa")
                 Assert.AreEqual(0, finestra.Applica().Count, "e niente da applicare")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub AElencoVuotoNonSiChiedeDiSceglieUnaRiga()
+
+            ' «Scegli una riga dall'elenco» davanti a un elenco vuoto manda a cercare
+            ' qualcosa che non c'è: il documento senza prosa e senza voci lo dice.
+            Dim soloIntestazione As JsonNode = JsonNode.Parse(
+                "{""tipo"": ""cv_base"", ""intestazione"": {""nome"": ""Luca Ferrari""}}")
+
+            Using finestra As New FinestraModificaTesti(Aperti(soloIntestazione))
+
+                Assert.IsEmpty(Elenco(finestra).Items, "non c'è nessuna riga")
+                Assert.AreEqual("Questo documento non ha testi da riscrivere.",
+                                Etichetta(finestra, "lblModifica").Text,
+                                "e la riga sotto l'elenco lo dice invece di dare un ordine impossibile")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub ConLeRigheNonSiDiceCheNonCeNeSono()
+
+            Using finestra As New FinestraModificaTesti(Aperti(Cv()))
+
+                ' Su una finestra mai mostrata la prima riga risulta scelta, come
+                ' all'apertura vera: si guarda che almeno nomini quella, e non l'elenco
+                ' vuoto.
+                Assert.IsNotEmpty(Elenco(finestra).Items, "le righe ci sono")
+                Assert.DoesNotContain("non ha testi da riscrivere",
+                                      Etichetta(finestra, "lblModifica").Text,
+                                      "e allora non si dice che non ce ne sono")
 
             End Using
 
@@ -529,6 +569,42 @@ Namespace Ui
                 Assert.IsTrue(finestra.Riscrivi(0, "L'ho riscritto io."), "lo riscrive adesso")
 
                 Assert.AreEqual("✎", Segno(Elenco(finestra), 0), "e il segno compare")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub QuandoNonCiStaSiScorreInveceDiTagliare()
+
+            ' A 150% i testi crescono e la finestra cresce con loro, ma non oltre lo
+            ' spazio che c'è: il tetto e lo scorrimento vanno insieme, o quel che resta
+            ' fuori cade fuori dalla finestra e nessuno spostamento lo recupera
+            ' (decisione 15.7).
+            Using finestra As New FinestraModificaTesti(Aperti(Cv(), Lettera()))
+
+                finestra.DisponiIn(200)
+
+                Assert.IsTrue(finestra.AutoScroll, "con questo spazio si scorre")
+                Assert.IsLessThanOrEqualTo(200, finestra.ClientSize.Height,
+                                           "e la finestra sta nello spazio che c'è")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LElencoDiDestraArrivaFinoAlMargine()
+
+            ' I due elenchi si spartiscono la larghezza della finestra invece di stare su
+            ' due costanti: è quel che a DPI alti mandava quello di destra oltre il bordo.
+            Using finestra As New FinestraModificaTesti(Aperti(Cv(), Lettera()))
+
+                finestra.DisponiIn(4000)
+
+                Assert.IsFalse(finestra.AutoScroll, "con tutto questo spazio non si scorre")
+                Assert.AreEqual(finestra.ClientSize.Width - StileApp.MargineRiquadro,
+                                Fuori(finestra).Bounds.Right, "e l'elenco di destra finisce al margine")
 
             End Using
 

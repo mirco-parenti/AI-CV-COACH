@@ -65,7 +65,7 @@ Partial Class FinestraModificaTesti
         Me.lvwCampi.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colCampo, Me.colTesto, Me.colSegno})
         Me.lvwCampi.FullRowSelect = True
         Me.lvwCampi.HideSelection = False
-        Me.lvwCampi.Location = New System.Drawing.Point(14, 140)
+        Me.lvwCampi.Location = New System.Drawing.Point(14, 141)
         Me.lvwCampi.MultiSelect = False
         Me.lvwCampi.Name = "lvwCampi"
         Me.lvwCampi.Size = New System.Drawing.Size(540, 240)
@@ -111,7 +111,7 @@ Partial Class FinestraModificaTesti
         Me.lvwFuori.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colFuoriVoce, Me.colFuoriCosa})
         Me.lvwFuori.FullRowSelect = True
         Me.lvwFuori.HideSelection = False
-        Me.lvwFuori.Location = New System.Drawing.Point(690, 140)
+        Me.lvwFuori.Location = New System.Drawing.Point(690, 141)
         Me.lvwFuori.MultiSelect = False
         Me.lvwFuori.Name = "lvwFuori"
         Me.lvwFuori.Size = New System.Drawing.Size(296, 240)
@@ -134,7 +134,7 @@ Partial Class FinestraModificaTesti
         Me.btnTogli.Enabled = False
         Me.btnTogli.Location = New System.Drawing.Point(566, 200)
         Me.btnTogli.Name = "btnTogli"
-        Me.btnTogli.Size = New System.Drawing.Size(110, 32)
+        Me.btnTogli.Size = StileApp.BottoneStandard
         Me.btnTogli.TabIndex = 3
         Me.btnTogli.Text = "Togli →"
         '
@@ -143,14 +143,14 @@ Partial Class FinestraModificaTesti
         Me.btnRimetti.Enabled = False
         Me.btnRimetti.Location = New System.Drawing.Point(566, 244)
         Me.btnRimetti.Name = "btnRimetti"
-        Me.btnRimetti.Size = New System.Drawing.Size(110, 32)
+        Me.btnRimetti.Size = StileApp.BottoneStandard
         Me.btnRimetti.TabIndex = 4
         Me.btnRimetti.Text = "← Rimetti"
         '
         'lblModifica
         '
         Me.lblModifica.AutoSize = True
-        Me.lblModifica.Location = New System.Drawing.Point(14, 398)
+        Me.lblModifica.Location = New System.Drawing.Point(14, 399)
         Me.lblModifica.Name = "lblModifica"
         Me.lblModifica.Size = New System.Drawing.Size(400, 15)
         Me.lblModifica.TabIndex = 7
@@ -159,7 +159,7 @@ Partial Class FinestraModificaTesti
         'txtTesto
         '
         Me.txtTesto.Enabled = False
-        Me.txtTesto.Location = New System.Drawing.Point(14, 420)
+        Me.txtTesto.Location = New System.Drawing.Point(14, 422)
         Me.txtTesto.Multiline = True
         Me.txtTesto.Name = "txtTesto"
         Me.txtTesto.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
@@ -168,9 +168,9 @@ Partial Class FinestraModificaTesti
         '
         'btnSalva
         '
-        Me.btnSalva.Location = New System.Drawing.Point(724, 546)
+        Me.btnSalva.Location = New System.Drawing.Point(674, 546)
         Me.btnSalva.Name = "btnSalva"
-        Me.btnSalva.Size = New System.Drawing.Size(140, 32)
+        Me.btnSalva.Size = StileApp.BottoneLargo
         Me.btnSalva.TabIndex = 9
         Me.btnSalva.Text = "Salva"
         '
@@ -178,7 +178,7 @@ Partial Class FinestraModificaTesti
         '
         Me.btnAnnulla.Location = New System.Drawing.Point(876, 546)
         Me.btnAnnulla.Name = "btnAnnulla"
-        Me.btnAnnulla.Size = New System.Drawing.Size(110, 32)
+        Me.btnAnnulla.Size = StileApp.BottoneStandard
         Me.btnAnnulla.TabIndex = 10
         Me.btnAnnulla.Text = "Annulla"
         '

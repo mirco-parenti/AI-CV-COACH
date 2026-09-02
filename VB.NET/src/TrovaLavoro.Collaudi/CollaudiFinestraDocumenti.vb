@@ -116,6 +116,21 @@ Namespace Ui
         End Sub
 
         <TestMethod>
+        Public Sub UnaCartellaSenzaDocumentiLoDiceInvecediMostrareUnaListaMuta()
+            ' Un elenco vuoto, da solo, non distingue «la cartella è quella sbagliata» da
+            ' «lì dentro non c'era niente da riconoscere»: le due cose si rimediano con due
+            ' bottoni diversi, e chi guarda deve sapere quale.
+            Using finestra As New FinestraDocumenti(New RaccoltaDocumenti With {.Cartella = "C:\vuota"})
+
+                Assert.IsEmpty(Lista(finestra).Items, "non c'è niente da confermare")
+                Assert.Contains("C:\vuota", Etichetta(finestra, "lblCartella").Text,
+                                "la cartella guardata resta scritta")
+                Assert.Contains("Nessun documento riconosciuto", Etichetta(finestra, "lblCartella").Text,
+                                "e l'elenco vuoto porta la sua ragione")
+            End Using
+        End Sub
+
+        <TestMethod>
         Public Sub SenzaRaccoltaNonSiApre()
             ' Una finestra che chiede di confermare il niente non ha senso, e il difetto
             ' sarebbe di chi l'ha aperta.
@@ -123,6 +138,51 @@ Namespace Ui
                 Sub()
                     Dim inutile As New FinestraDocumenti(Nothing)
                 End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub QuandoNonCiStaSiScorreInveceDiTagliare()
+            ' A 150% i testi crescono e la finestra cresce con loro, ma non oltre lo
+            ' spazio che c'è: il tetto e lo scorrimento vanno insieme, o quel che resta
+            ' fuori cade fuori dalla finestra e nessuno spostamento lo recupera
+            ' (decisione 15.7).
+            Using finestra As New FinestraDocumenti(ConTreDocumenti())
+
+                finestra.DisponiIn(200)
+
+                Assert.IsTrue(finestra.AutoScroll, "con questo spazio si scorre")
+                Assert.IsLessThanOrEqualTo(200, finestra.ClientSize.Height,
+                                           "e la finestra sta nello spazio che c'è")
+            End Using
+        End Sub
+
+        <TestMethod>
+        Public Sub LElencoArrivaFinoAlMargine()
+            ' L'elenco si misura sulla larghezza della finestra e non su una costante:
+            ' è quel che a DPI alti gli faceva lasciare una fascia vuota a destra.
+            Using finestra As New FinestraDocumenti(ConTreDocumenti())
+
+                finestra.DisponiIn(4000)
+
+                Assert.IsFalse(finestra.AutoScroll, "con tutto questo spazio non si scorre")
+                Assert.AreEqual(finestra.ClientSize.Width - StileApp.MargineRiquadro,
+                                Lista(finestra).Bounds.Right, "e l'elenco finisce al margine")
+            End Using
+        End Sub
+
+        <TestMethod>
+        Public Sub LAzionePrincipaleDiQuestaFinestraEConfermare()
+            ' Il passo 4 del cap. 05.2 è la conferma umana: è per quella che la finestra si
+            ' apre. Far rileggere la cartella è il vicino di riga di «cambia cartella» — si
+            ' torna indietro di un passo — e dal 2026-09-01 porta il suo livello 2: due
+            ' bottoni che dicono «vai avanti» ne lasciano zero che dicano «hai finito».
+            Using finestra As New FinestraDocumenti(ConTreDocumenti())
+
+                Assert.AreEqual(LivelloBottone.SicuroPositivo, Bottone(finestra, "btnConferma").Tag)
+                Assert.AreEqual(LivelloBottone.Esplorativo, Bottone(finestra, "btnRileggi").Tag)
+                Assert.AreEqual(LivelloBottone.Esplorativo, Bottone(finestra, "btnCambiaCartella").Tag)
+
+            End Using
         End Sub
 
         Private Shared Function Lista(finestra As Control) As ListView

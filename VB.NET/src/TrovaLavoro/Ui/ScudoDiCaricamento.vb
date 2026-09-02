@@ -2,9 +2,8 @@ Imports System.Drawing
 Imports System.Drawing.Drawing2D
 
 ''' <summary>
-''' Il segno grande che l'AI sta lavorando: lo <b>stemma Aviolab</b> al centro dello
-''' schermo, con sopra una ruota di pallini che gira e sotto una barra che si riempie
-''' (cap. 03.8).
+''' Il segno grande che l'AI sta lavorando: una <b>ruota di pallini</b> che gira al centro
+''' dello schermo, con sotto una barra che si riempie (cap. 03.8).
 ''' </summary>
 ''' <remarks>
 ''' <para><b>Perché non bastava quel che c'era.</b> Fino al 2026-08-30 un'attesa di
@@ -13,47 +12,65 @@ Imports System.Drawing.Drawing2D
 ''' che si muove in fondo alla fascia di stato (<see cref="SegnaleDiAttesa"/>), che è alta
 ''' due righe in un angolo. Chi aspetta guarda altrove, e da lontano la finestra sembra
 ''' ferma. Questo si vede dall'altra parte della stanza.</para>
+''' <para><b>Perché il marchio non c'è.</b> Fra il 2026-08-30 e il 2026-09-01 sotto la
+''' ruota c'è stato lo <b>stemma Aviolab</b>, grande un terzo dello schermo: è stato
+''' tolto, e il marchio è tornato a vivere in un posto solo, il pannello del logo in basso
+''' a sinistra (cap. 03.5). Un'attesa non è il posto in cui firmarsi — chi guarda sta
+''' aspettando, non ammirando — e lo stemma qui faceva due danni: prendeva il centro dello
+''' schermo con qualcosa che non dice nulla sull'attesa, e obbligava la ruota a stargli
+''' addosso, dove i pallini argento dovevano difendersi dal blu, dal bianco e dal giallo
+''' delle stelle. Adesso la ruota sta sul suo sfondo e basta.</para>
 ''' <para><b>Qui c'è solo il conto e il disegno, non la finestra.</b> È la stessa
 ''' divisione di <see cref="SegnaleDiAttesa"/>, e per la stessa ragione: quel che può
-''' rompersi — la misura sullo schermo, le proporzioni dello scudo, il fatto che la ruota
-''' giri davvero e torni al punto di partenza, che la barra cresca e non torni mai
-''' indietro — si collauda su un <c>Bitmap</c>, senza aprire niente. La finestra vera, che è codice di Windows e non di logica, sta in
-''' <see cref="FinestraDiCaricamento"/> e si guarda con gli occhi.</para>
+''' rompersi — la misura sullo schermo, il fatto che la ruota giri davvero e torni al
+''' punto di partenza, che la barra cresca e non torni mai indietro — si collauda su un
+''' <c>Bitmap</c>, senza aprire niente. La finestra vera, che è codice di Windows e non di
+''' logica, sta in <see cref="FinestraDiCaricamento"/> e si guarda con gli occhi.</para>
+''' <para><i>Il nome della classe è rimasto quello dei giorni dello stemma: rinominarla
+''' toccherebbe la finestra, il banco e la finestra principale, ed è un giro a parte.</i></para>
 ''' </remarks>
 Public NotInheritable Class ScudoDiCaricamento
 
     ''' <summary>
-    ''' Quanto dello schermo occupa lo scudo: due decimi in orizzontale, due sesti in
+    ''' Quanto dello schermo occupa l'indicatore: due decimi in orizzontale, un quarto in
     ''' verticale.
     ''' </summary>
     ''' <remarks>
-    ''' <para>Sono le misure chieste da Mirco, e sono <b>due limiti</b>, non due misure da
-    ''' imporre: lo scudo ha le sue proporzioni — 200 × 242, più alto che largo — e
-    ''' stirarlo per riempire esattamente un rettangolo che non è il suo vorrebbe dire
-    ''' deformare il marchio, che è la sola cosa che il marchio non tollera. Perciò si
-    ''' prende il più grande scudo <b>non deformato</b> che ci sta dentro tutti e due:
-    ''' su uno schermo 1920 × 1080 fanno 297 × 360 invece di 384 × 360.</para>
-    ''' <para>Su uno schermo molto largo e basso comanda l'altezza, su uno stretto e alto
-    ''' comanda la larghezza; in ogni caso nessuno dei due limiti si sfora.</para>
+    ''' <para>Sono <b>due limiti</b>, non due misure da imporre: la figura ha le sue
+    ''' proporzioni — la ruota è tonda, e la barra sta sotto, larga quanto tutto — e si
+    ''' prende la più grande che ci sta dentro tutti e due. Su uno schermo molto largo e
+    ''' basso comanda l'altezza, su uno stretto e alto comanda la larghezza.</para>
+    ''' <para>Il limite verticale era <b>due sesti</b> quando misurava il solo stemma, e il
+    ''' complesso lo sforava perché la barra si aggiungeva dopo: su 1920 × 1080 erano 297 di
+    ''' larghezza e 397 di altezza, contro i 360 dichiarati. Adesso vale per <b>tutto quel
+    ''' che si vede</b>, ed è sceso a un quarto per una ragione precisa: togliendo lo stemma
+    ''' la figura si è abbassata di molto, e con il vecchio limite sarebbe stata la sola
+    ''' larghezza a comandare — l'indicatore sarebbe cresciuto di un terzo, e con lui la
+    ''' barra che Mirco aveva tarato a video. A un quarto le misure restano quelle di prima:
+    ''' su 1920 × 1080 fanno 316 × 269, con la barra spessa 23 px contro i 22 di ieri.</para>
     ''' </remarks>
     Public Const QuotaOrizzontale As Double = 2.0 / 10.0
-    Public Const QuotaVerticale As Double = 2.0 / 6.0
+    Public Const QuotaVerticale As Double = 1.0 / 4.0
 
     ''' <summary>
     ''' Di quanti pixel il complesso sta <b>più in alto</b> del centro dello schermo.
     ''' </summary>
     ''' <remarks>
-    ''' Trenta pixel, chiesti da Mirco guardandolo a video il 2026-08-31 — prima venti,
-    ''' poi dieci di più quando sotto lo scudo è arrivata la barra: un complesso più alto
-    ''' pesa più in basso, e per restare dov'era all'occhio deve salire. Non è una
-    ''' correzione di un conto sbagliato — il centro geometrico era giusto — ma di come lo
-    ''' legge l'occhio: una figura appesa esattamente a metà di un rettangolo sembra
-    ''' cadere verso il basso, e si guarda meglio un filo più su. Vale per il
-    ''' <b>complesso</b> — scudo, ruota e barra insieme: si sposta la finestra, non il
-    ''' disegno dentro di lei, o la ruota si scollerebbe dallo scudo e la barra gli
-    ''' scivolerebbe addosso.
+    ''' <para>Non è la correzione di un conto sbagliato — il centro geometrico è giusto —
+    ''' ma di come lo legge l'occhio: una figura appesa esattamente a metà di un rettangolo
+    ''' sembra cadere verso il basso, e si guarda meglio un filo più su.</para>
+    ''' <para>Il numero è stato <b>rifatto</b> quando lo stemma se n'è andato, non lasciato
+    ''' dov'era. I trenta pixel chiesti da Mirco guardando a video il 2026-08-31 valevano
+    ''' per un complesso alto 397 px su uno schermo comune — erano il 7,6% della sua
+    ''' altezza. Quello di oggi, ruota e barra soltanto, è alto 269, e la stessa frazione fa
+    ''' venti. Che venti sia anche il numero che Mirco aveva scelto la prima volta, quando
+    ''' sotto lo stemma non c'era ancora la barra, è una conferma e non la ragione.</para>
+    ''' <para>Resta in pixel e non in frazione perché è un numero deciso <b>guardando</b>, e
+    ''' va riguardato: il conto qui sopra dice da dove ripartire, non che sia giusto. Vale
+    ''' per il <b>complesso</b> — si sposta la finestra, non il disegno dentro di lei, o la
+    ''' barra scivolerebbe addosso alla ruota.</para>
     ''' </remarks>
-    Public Const AlzataInPixel As Integer = 30
+    Public Const AlzataInPixel As Integer = 20
 
     ''' <summary>Quanti pallini formano la ruota.</summary>
     Public Const Pallini As Integer = 12
@@ -65,38 +82,63 @@ Public NotInheritable Class ScudoDiCaricamento
     ''' </remarks>
     Public Const IntervalloInMillisecondi As Integer = 80
 
-    ''' <summary>Il raggio della ruota, in frazione della larghezza dello scudo.</summary>
+    ''' <summary>Il raggio del cerchio su cui stanno i pallini, in frazione della larghezza.</summary>
     Private Const QuotaDelRaggio As Double = 0.3
 
     ''' <summary>Il raggio del pallino più grande, in frazione della larghezza.</summary>
     Private Const QuotaDelPallino As Double = 0.055
 
+    ''' <summary>Quanto è larga la ruota <b>tutta</b>, pallini compresi.</summary>
+    ''' <remarks>
+    ''' Poco più di due terzi della tela, e la differenza non è aria sprecata: la barra
+    ''' sotto è larga quanto la tela, la ruota no, e una barra un filo più larga del cerchio
+    ''' che le sta sopra è ciò che le dà un principio e una fine. Questa quota però serve
+    ''' soprattutto in <b>altezza</b> — la ruota è tonda, quindi è anche quanto è alta — e
+    ''' di lì viene la fetta di tela che le si dà: v. <see cref="AltezzaDellaRuota"/>.
+    ''' </remarks>
+    Private Const QuotaDellaRuota As Double = (QuotaDelRaggio + QuotaDelPallino) * 2.0
+
     ''' <summary>Quanto resta visibile il pallino più spento, da 0 a 255.</summary>
     Private Const AlfaMinima As Integer = 35
 
-    ''' <summary>Lo spessore della barra, in frazione della larghezza dello scudo.</summary>
+    ''' <summary>Lo spessore della barra, in frazione della larghezza dell'indicatore.</summary>
     ''' <remarks>
-    ''' Le misure della barra si dicono <b>in frazione dello scudo</b> e non in pixel, per
-    ''' la ragione per cui lo scudo stesso si misura in frazione dello schermo: su un
-    ''' monitor 4K, o a 150 punti per pollice, venti pixel sono un filo di capello. Così
-    ''' invece la barra cresce con lui, e il gruppo resta quello che si è guardato a video.
-    ''' <para>Il 7,4% — <b>ventidue pixel</b> su uno schermo comune — è la terza misura,
+    ''' Le misure della barra si dicono <b>in frazione della larghezza</b> e non in pixel,
+    ''' per la ragione per cui la larghezza stessa si misura in frazione dello schermo: su
+    ''' un monitor 4K, o a 150 punti per pollice, venti pixel sono un filo di capello. Così
+    ''' invece la barra cresce col resto, e il gruppo resta quello che si è guardato a video.
+    ''' <para>Il 7,4% — <b>ventitré pixel</b> su uno schermo comune — è la terza misura,
     ''' e le tre raccontano com'è andata: 5,5% scritto a tavolino, poi 6,5% e infine
     ''' questa, tutte e due chieste da Mirco guardando la barra a video il 2026-08-31.
     ''' Nessun conto ci sarebbe arrivato: quanto dev'essere spessa una barra perché si
     ''' veda bene da lontano è una cosa che si sa solo vedendola.</para>
-    ''' <para>È di un pixel più alta dello stacco che la separa dallo scudo, e va bene
+    ''' <para>È di un pixel più alta dello stacco che la separa dalla ruota, e va bene
     ''' così: quel che conta è che ci resti dell'aria vera in mezzo, non che l'aria vinca
     ''' il confronto. Il banco sorveglia la proprietà, non il pareggio.</para>
     ''' </remarks>
     Public Const QuotaDelloSpessore As Double = 0.074
 
-    ''' <summary>Quanto la barra sta staccata dallo scudo, in frazione della larghezza.</summary>
+    ''' <summary>Quanto la barra sta staccata dalla ruota, in frazione della larghezza.</summary>
     ''' <remarks>
-    ''' Lo stacco non è aria sprecata: appoggiata al piede dello scudo la barra sembrerebbe
-    ''' un pezzo del marchio, e il marchio non ha una striscia verde sotto.
+    ''' Lo stacco non è aria sprecata: appoggiata al piede della ruota la barra sembrerebbe
+    ''' il pavimento su cui i pallini girano, e non la seconda cosa che dice l'attesa.
+    ''' Quando sotto la ruota c'era lo stemma serviva a un'altra cosa ancora — tenere la
+    ''' striscia verde fuori dal marchio — e la misura era la stessa.
     ''' </remarks>
     Public Const QuotaDelDistacco As Double = 0.07
+
+    ''' <summary>
+    ''' Quanto viene alto tutto l'indicatore, in frazione della sua larghezza.
+    ''' </summary>
+    ''' <remarks>
+    ''' La ruota, l'aria e la barra, sommate. Serve a fare il conto <b>all'indietro</b>: il
+    ''' limite dello schermo si dà sull'altezza, e la misura da cui discende tutto è invece
+    ''' la larghezza. Si tiene qui, ricavata dalle tre quote vere, perché scriverla a mano
+    ''' vorrebbe dire due numeri da tenere d'accordo — e il giorno che uno si muove da solo,
+    ''' l'indicatore sfora il limite senza che nessuno se ne accorga.
+    ''' </remarks>
+    Private Const QuotaDellAltezza As Double =
+        QuotaDellaRuota + QuotaDelDistacco + QuotaDelloSpessore
 
     ''' <summary>Quanto è lunga la sfumatura chiara sulla testa, in frazione della barra.</summary>
     Private Const QuotaDellaTesta As Double = 0.13
@@ -126,61 +168,68 @@ Public NotInheritable Class ScudoDiCaricamento
     Private Const FormaDellaCurva As Double = 0.86
 
     ''' <summary>
-    ''' Il più grande scudo non deformato che sta dentro i due limiti dello schermo.
+    ''' La larghezza dell'indicatore: la misura da cui discende tutto il resto.
     ''' </summary>
-    Public Shared Function MisuraSulloSchermo(schermo As Size) As Size
+    ''' <remarks>
+    ''' Il limite orizzontale si applica com'è; quello verticale riguarda l'altezza, e qui
+    ''' si comanda la larghezza — perciò si divide per <see cref="QuotaDellAltezza"/>, che è
+    ''' il conto all'indietro. Si arrotonda per difetto e non al più vicino: i due limiti
+    ''' sono limiti, e passarli di un pixel per un arrotondamento sarebbe passarli.
+    ''' </remarks>
+    Public Shared Function LarghezzaSulloSchermo(schermo As Size) As Integer
 
-        Dim scudo As Rectangle = LogoAviolab.ScudoDentroLaTela
-        If schermo.Width <= 0 OrElse schermo.Height <= 0 OrElse
-           scudo.Width <= 0 OrElse scudo.Height <= 0 Then Return Size.Empty
-
-        Dim largoAlMassimo As Double = schermo.Width * QuotaOrizzontale
-        Dim altoAlMassimo As Double = schermo.Height * QuotaVerticale
+        If schermo.Width <= 0 OrElse schermo.Height <= 0 Then Return 0
 
         ' Si entra in tutti e due i limiti: comanda quello che si tocca per primo.
         Dim larghezza As Double = Math.Min(
-            largoAlMassimo, altoAlMassimo * scudo.Width / scudo.Height)
+            schermo.Width * QuotaOrizzontale,
+            schermo.Height * QuotaVerticale / QuotaDellAltezza)
 
-        Return New Size(
-            Math.Max(1, CInt(Math.Round(larghezza))),
-            Math.Max(1, CInt(Math.Round(larghezza * scudo.Height / scudo.Width))))
+        Return Math.Max(1, CInt(Math.Floor(larghezza)))
 
     End Function
 
-    ''' <summary>Lo spessore della barra sotto uno scudo largo così.</summary>
-    Public Shared Function SpessoreDellaBarra(larghezzaDelloScudo As Integer) As Integer
-        Return Math.Max(3, CInt(Math.Round(larghezzaDelloScudo * QuotaDelloSpessore)))
+    ''' <summary>Lo spessore della barra sotto un indicatore largo così.</summary>
+    Public Shared Function SpessoreDellaBarra(larghezza As Integer) As Integer
+        Return Math.Max(3, CInt(Math.Round(larghezza * QuotaDelloSpessore)))
     End Function
 
-    ''' <summary>Quanta aria fra il piede dello scudo e la barra.</summary>
-    Public Shared Function DistaccoDellaBarra(larghezzaDelloScudo As Integer) As Integer
-        Return Math.Max(2, CInt(Math.Round(larghezzaDelloScudo * QuotaDelDistacco)))
+    ''' <summary>Quanta aria fra il piede della ruota e la barra.</summary>
+    Public Shared Function DistaccoDellaBarra(larghezza As Integer) As Integer
+        Return Math.Max(2, CInt(Math.Round(larghezza * QuotaDelDistacco)))
+    End Function
+
+    ''' <summary>Quanto è alta la ruota: quanto è larga, perché è tonda.</summary>
+    ''' <remarks>
+    ''' È la fetta di tela che si dà alla ruota, e non è tutta la tela: la barra vuole la
+    ''' sua in fondo. Finché sotto c'era lo stemma questa fetta era alta quanto <b>lui</b>,
+    ''' e la ruota ci nuotava dentro perché è larga poco più di due terzi; adesso che lo
+    ''' stemma non c'è, dargliela ancora così lascerebbe due dita di vuoto sopra e sotto i
+    ''' pallini, e la barra sembrerebbe scivolata via da sola.
+    ''' </remarks>
+    Public Shared Function AltezzaDellaRuota(larghezza As Integer) As Integer
+        Return Math.Max(1, CInt(Math.Round(larghezza * QuotaDellaRuota)))
     End Function
 
     ''' <summary>
-    ''' Quanto ingombra tutto insieme: lo scudo, l'aria e la barra.
+    ''' Quanto ingombra tutto insieme: la ruota, l'aria e la barra.
     ''' </summary>
     ''' <remarks>
-    ''' I due limiti dello schermo restano quelli dello <b>scudo</b>, che è il marchio e
-    ''' l'unica cosa che non si può né deformare né rimpicciolire a piacere: la barra si
-    ''' aggiunge sotto, e il complesso è più alto di lui. Su 1920 × 1080 sono 297 × 397
-    ''' invece di 297 × 360.
+    ''' È l'altezza da cui <see cref="LarghezzaSulloSchermo"/> è partita all'indietro, e qui
+    ''' si ricompone con le misure vere — quelle arrotondate, coi loro pavimenti — invece di
+    ''' rifare la moltiplicazione. Chi disegna userà queste, e due conti che dicono quasi la
+    ''' stessa cosa lascerebbero un pixel di tela senza padrone.
     ''' </remarks>
     Public Shared Function MisuraDelComplesso(schermo As Size) As Size
 
-        Dim scudo As Size = MisuraSulloSchermo(schermo)
-        If scudo.IsEmpty Then Return Size.Empty
+        Dim larghezza As Integer = LarghezzaSulloSchermo(schermo)
+        If larghezza <= 0 Then Return Size.Empty
 
         Return New Size(
-            scudo.Width,
-            scudo.Height + DistaccoDellaBarra(scudo.Width) + SpessoreDellaBarra(scudo.Width))
+            larghezza,
+            AltezzaDellaRuota(larghezza) + DistaccoDellaBarra(larghezza) +
+            SpessoreDellaBarra(larghezza))
 
-    End Function
-
-    ''' <summary>Quanto è alto il solo scudo dentro una tela grande così.</summary>
-    Public Shared Function AltezzaDelloScudo(complesso As Size) As Integer
-        Return complesso.Height - DistaccoDellaBarra(complesso.Width) -
-               SpessoreDellaBarra(complesso.Width)
     End Function
 
     ''' <summary>
@@ -215,11 +264,11 @@ Public NotInheritable Class ScudoDiCaricamento
         If misura.IsEmpty Then Return Rectangle.Empty
 
         ' L'aria che avanza si divide in due, e il pixel dispari va sopra e a sinistra.
-        ' Non è pignoleria: da quando sotto lo scudo c'è la barra il complesso è alto 397
-        ' pixel su uno schermo comune, e con un'altezza dispari «la metà» sono due pixel
-        ' diversi. Scegliendo di arrotondare per eccesso, il centro del complesso torna a
-        ' cadere esattamente sull'alzata chiesta invece che un pixel più in basso —
-        ' che è la misura decisa a video, e quella che il banco sorveglia da ieri.
+        ' Non è pignoleria: il complesso è alto 269 pixel su uno schermo comune, e con
+        ' un'altezza dispari «la metà» sono due pixel diversi. Scegliendo di arrotondare
+        ' per eccesso, il centro del complesso torna a cadere esattamente sull'alzata
+        ' chiesta invece che un pixel più in basso — che è la misura decisa a video, e
+        ' quella che il banco sorveglia.
         Return New Rectangle(
             schermo.Left + (schermo.Width - misura.Width + 1) \ 2,
             schermo.Top + (schermo.Height - misura.Height + 1) \ 2 - AlzataInPixel,
@@ -227,7 +276,7 @@ Public NotInheritable Class ScudoDiCaricamento
 
     End Function
 
-    ''' <summary>Disegna il complesso: lo scudo, la sua ruota e la barra sotto.</summary>
+    ''' <summary>Disegna il complesso: la ruota e la barra sotto.</summary>
     ''' <param name="area">La tela, grande quanto il <see cref="MisuraDelComplesso">complesso</see>.</param>
     ''' <param name="passo">Quanti scatti ha già fatto la ruota; cresce e basta.</param>
     ''' <param name="quotaPiena">Quanta barra è piena, da 0 a 1.</param>
@@ -236,55 +285,19 @@ Public NotInheritable Class ScudoDiCaricamento
 
         If disegno Is Nothing OrElse area.Width <= 0 OrElse area.Height <= 0 Then Return
 
-        ' Lo scudo e la ruota non sanno che sotto di loro adesso c'è dell'altro: si dà
-        ' loro la propria fetta di tela, e disegnano come hanno sempre fatto. È anche
-        ' quel che tiene la ruota incollata allo scudo — se il centro lo prendessero
-        ' dalla tela intera, scivolerebbe in giù di mezza barra.
-        Dim soloScudo As New Size(area.Width, AltezzaDelloScudo(area))
+        ' La ruota non sa che sotto di lei c'è dell'altro: si dà la sua fetta di tela, e
+        ' disegna al centro di quella. Se il centro lo prendesse dalla tela intera,
+        ' scivolerebbe in giù di mezza barra.
+        Dim soloRuota As New Size(area.Width, AltezzaDellaRuota(area.Width))
 
-        If soloScudo.Height > 0 Then
-            DisegnaLoScudo(disegno, soloScudo)
-            DisegnaLaRuota(disegno, soloScudo, passo)
-        End If
+        If soloRuota.Height > 0 Then DisegnaLaRuota(disegno, soloRuota, passo)
 
         DisegnaLaBarra(disegno, area, quotaPiena)
 
     End Sub
 
     ''' <summary>
-    ''' Lo stemma, grande quanto la tela e centrato su di essa.
-    ''' </summary>
-    ''' <remarks>
-    ''' Il conto è quello del mega stemma del menu (cap. 03.6), e per lo stesso motivo:
-    ''' il PNG ha dell'aria trasparente attorno allo scudo, quindi una tela alta quanto lo
-    ''' scudo darebbe uno scudo più basso del 6%. La tela si chiede <b>in proporzione</b>,
-    ''' e poi si sposta perché sia lo <b>scudo</b> a stare in mezzo.
-    ''' </remarks>
-    Private Shared Sub DisegnaLoScudo(disegno As Graphics, area As Size)
-
-        Dim scudo As Rectangle = LogoAviolab.ScudoDentroLaTela
-        If scudo.Height <= 0 Then Return
-
-        Dim lato As Integer = Math.Max(1, CInt(Math.Round(
-            area.Height * LogoAviolab.LatoDellaTela / CDbl(scudo.Height))))
-
-        Dim centroX As Double = (scudo.Left + scudo.Right) / 2.0 / LogoAviolab.LatoDellaTela
-        Dim centroY As Double = (scudo.Top + scudo.Bottom) / 2.0 / LogoAviolab.LatoDellaTela
-
-        disegno.InterpolationMode = InterpolationMode.HighQualityBicubic
-        disegno.PixelOffsetMode = PixelOffsetMode.HighQuality
-
-        Using stemma As Bitmap = LogoAviolab.Genera(lato)
-            disegno.DrawImage(stemma, New Rectangle(
-                CInt(Math.Round(area.Width / 2.0 - lato * centroX)),
-                CInt(Math.Round(area.Height / 2.0 - lato * centroY)),
-                lato, lato))
-        End Using
-
-    End Sub
-
-    ''' <summary>
-    ''' La ruota dei pallini, sopra lo scudo.
+    ''' La ruota dei pallini.
     ''' </summary>
     ''' <remarks>
     ''' <para>È il simbolo di sempre, disegnato invece che animato: i pallini stanno
@@ -292,9 +305,11 @@ Public NotInheritable Class ScudoDiCaricamento
     ''' testa è pieno e grande, gli altri sbiadiscono all'indietro fino a
     ''' <see cref="AlfaMinima"/> — che non è zero apposta: una ruota con un buco dentro si
     ''' legge come un difetto, non come un movimento.</para>
-    ''' <para>Ogni pallino ha un contorno d'ombra perché lo scudo, sotto, non è di un
-    ''' colore solo: passa dal blu al bianco al giallo delle stelle, e l'argento da solo
-    ''' sparirebbe proprio sulle parti chiare.</para>
+    ''' <para>Ogni pallino ha un contorno d'ombra. Serviva contro lo stemma, che sotto
+    ''' passava dal blu al bianco al giallo delle stelle e faceva sparire l'argento sulle
+    ''' parti chiare; adesso che lo stemma non c'è serve <b>di più</b>, non di meno — la
+    ''' finestra è trasparente, e sotto ci sono i pannelli dell'applicazione, che l'argento
+    ''' se lo mangiano uguale.</para>
     ''' </remarks>
     Private Shared Sub DisegnaLaRuota(disegno As Graphics, area As Size, passo As Integer)
 
@@ -335,7 +350,7 @@ Public NotInheritable Class ScudoDiCaricamento
     End Sub
 
     ''' <summary>
-    ''' La barra sotto lo scudo: il fondo grigio, il verde che avanza, la testa chiara.
+    ''' La barra sotto la ruota: il fondo grigio, il verde che avanza, la testa chiara.
     ''' </summary>
     ''' <remarks>
     ''' <para><b>Perché è dipinta e non è un <c>ProgressBar</c>.</b> Un controllo qui non
@@ -358,9 +373,9 @@ Public NotInheritable Class ScudoDiCaricamento
         If tutta.Width < 4 OrElse tutta.Height < 3 Then Return
 
         ' Niente antialias e nessuno spostamento di mezzo pixel: la barra è fatta di
-        ' rettangoli, e i bordi sfumati la farebbero sembrare fuori fuoco accanto allo
-        ' scudo, che invece è nitido. Si dichiarano tutte e due, e non si lasciano come
-        ' stanno: chi ha disegnato lo scudo un attimo fa le ha messe a modo suo.
+        ' rettangoli, e i bordi sfumati la farebbero sembrare fuori fuoco. Si dichiarano
+        ' tutte e due, e non si lasciano come stanno: chi ha disegnato la ruota un attimo
+        ' fa le ha messe a modo suo, che è il contrario di quel che serve qui.
         disegno.SmoothingMode = SmoothingMode.None
         disegno.PixelOffsetMode = PixelOffsetMode.None
 

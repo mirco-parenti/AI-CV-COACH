@@ -99,7 +99,11 @@ Public Class FinestraChiaveApi
 
         lblRichiesta.Text = "Incolla qui la chiave:"
 
-        lblForma.Text = $"Di solito le chiavi di Anthropic cominciano per «{PrefissoAtteso}». " &
+        ' «Attenzione» e non «Errore»: qui non è fallito niente, e la riga stessa dice che
+        ' si può salvare lo stesso (v. Segnalazioni). La parola c'è perché il colore da
+        ' solo non basta a dire che questa riga non è una spiegazione come le altre.
+        lblForma.Text = Segnalazioni.PrefissoAvviso &
+                        $"Di solito le chiavi di Anthropic cominciano per «{PrefissoAtteso}». " &
                         "Questa non lo fa: se sei sicuro, salvala pure."
 
         Vesti()
@@ -143,7 +147,9 @@ Public Class FinestraChiaveApi
         lblSpiegazione.ForeColor = StileApp.TestoPrimario
         lblSalvata.ForeColor = StileApp.TestoSecondario
         lblRichiesta.ForeColor = StileApp.TestoPrimario
-        lblForma.ForeColor = StileApp.RossoTitoli
+        ' Il rosso di chi segnala, non quello del marchio: RossoTitoli è nato per i titoli
+        ' grandi e a questa misura non si legge abbastanza (v. StileApp.RossoTitoli).
+        lblForma.ForeColor = StileApp.Pericolo
 
         txtChiave.BackColor = StileApp.SfondoContenuto
         chkMostra.ForeColor = StileApp.TestoSecondario

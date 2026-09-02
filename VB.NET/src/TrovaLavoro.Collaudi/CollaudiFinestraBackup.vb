@@ -1,6 +1,8 @@
 Imports System.IO
 Imports System.Linq
 Imports System.Text.Json.Nodes
+Imports System.Threading
+Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports TrovaLavoro
@@ -121,11 +123,11 @@ Namespace Ui
         End Sub
 
         <TestMethod>
-        Public Sub ApertoIlBackupLAnteprimaDiceCosaContieneECosaSovrascrive()
+        Public Async Function ApertoIlBackupLAnteprimaDiceCosaContieneECosaSovrascrive() As Task
 
             ' È il passo 2 del cap. 11.4, quello che l'utente legge prima di confermare.
-            ConMotore(
-                Sub(contesto)
+            Await ConMotoreAsync(
+                Async Function(contesto)
 
                     ConUnProfiloEUnaCandidatura(contesto)
                     Dim dove As String = Path.Combine(contesto.Cartella.Radice, "prova.json")
@@ -133,7 +135,7 @@ Namespace Ui
                     Using finestra As New FinestraBackup(contesto)
 
                         Bottone(finestra, "rdoTutto").Checked = True
-                        Assert.IsTrue(finestra.EsportaVerso(dove), "il backup si scrive")
+                        Assert.IsTrue(Await finestra.EsportaVersoAsync(dove), "il backup si scrive")
                         Assert.IsTrue(finestra.Apri(dove), "e si rilegge")
 
                         Dim anteprima As String = Casella(finestra, "txtAnteprima").Text
@@ -147,18 +149,18 @@ Namespace Ui
 
                     End Using
 
-                End Sub)
+                End Function)
 
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub IlGiroCompletoDallaFinestraRiportaIlProfilo()
+        Public Async Function IlGiroCompletoDallaFinestraRiportaIlProfilo() As Task
 
             ' Esporta, perdi tutto, ripristina — passando dalle stesse porte che usano i
             ' bottoni. E la finestra dichiara che il profilo su disco è cambiato: senza
             ' quella riga, il pannello continuerebbe a mostrare quello di prima.
-            ConMotore(
-                Sub(contesto)
+            Await ConMotoreAsync(
+                Async Function(contesto)
 
                     ConUnProfiloEUnaCandidatura(contesto)
                     Dim dove As String = Path.Combine(contesto.Cartella.Radice, "prova.json")
@@ -166,13 +168,13 @@ Namespace Ui
                     Using finestra As New FinestraBackup(contesto)
 
                         Bottone(finestra, "rdoTutto").Checked = True
-                        finestra.EsportaVerso(dove)
+                        Await finestra.EsportaVersoAsync(dove)
 
                         Directory.Delete(contesto.Cartella.CartellaProfilo, recursive:=True)
                         Assert.IsFalse(contesto.Archivio.Esiste, "il profilo è perso")
 
                         finestra.Apri(dove)
-                        Dim esito As EsitoRipristino = finestra.Ripristina()
+                        Dim esito As EsitoRipristino = Await finestra.RipristinaAsync()
 
                         Assert.IsTrue(esito.ProfiloRipristinato, "il ripristino dice di averlo fatto")
                         Assert.IsTrue(contesto.Archivio.Esiste, "e il profilo è tornato sul disco")
@@ -184,17 +186,17 @@ Namespace Ui
 
                     End Using
 
-                End Sub)
+                End Function)
 
-        End Sub
+        End Function
 
         <TestMethod>
-        Public Sub LeVociRifiutateSiDicono()
+        Public Async Function LeVociRifiutateSiDicono() As Task
 
             ' Se un backup contiene un nome che non è un nome di file, non si scrive — e
             ' non si tace: è l'unico modo che l'utente ha di accorgersene.
-            ConMotore(
-                Sub(contesto)
+            Await ConMotoreAsync(
+                Async Function(contesto)
 
                     Dim costruito As New TrovaLavoro.Dati.Backup With {.Data = Date.Now}
                     Dim cattiva As New OpportunitaInBackup With {.Cartella = "..\..\fuori"}
@@ -208,7 +210,7 @@ Namespace Ui
                     Using finestra As New FinestraBackup(contesto)
 
                         finestra.Apri(dove)
-                        finestra.Ripristina()
+                        Await finestra.RipristinaAsync()
 
                         Assert.Contains("non è un nome di file", Etichetta(finestra, "lblStato").Text,
                                         "quel che si è rifiutato si dice")
@@ -217,6 +219,26 @@ Namespace Ui
 
                     End Using
 
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Sub RipristinareModificaMaNonDistrugge()
+
+            ' Cap. 03.3: il livello 5 è di chi elimina, il 4 di chi «modifica dati
+            ' esistenti» — e un ripristino è il secondo, come il commento della vestizione
+            ' diceva già mentre il bottone portava il rosso del primo. Un rosso che grida
+            ' più forte del gesto insegna a non credere ai rossi.
+            ConMotore(
+                Sub(contesto)
+                    Using finestra As New FinestraBackup(contesto)
+
+                        Assert.AreEqual(LivelloBottone.Attenzione, Comando(finestra, "btnRipristina").Tag)
+                        Assert.AreEqual(LivelloBottone.AzionePrincipale, Comando(finestra, "btnEsporta").Tag,
+                                        "portare via i propri dati resta l'azione principale della finestra")
+
+                    End Using
                 End Sub)
 
         End Sub
@@ -238,6 +260,53 @@ Namespace Ui
             End Try
 
         End Sub
+
+        ''' <summary>
+        ''' Come <see cref="ConMotore"/>, per una prova che deve aspettare il disco:
+        ''' l'export e il ripristino lavorano su un altro filo, e di là si torna con un
+        ''' <c>Await</c>.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para><b>Il contesto di sincronizzazione si mette da parte</b>, e senza questa
+        ''' riga il banco non finirebbe più. Costruire un controllo installa sul thread il
+        ''' contesto di Windows Forms, che rimanda ogni ritorno da un <c>Await</c> alla
+        ''' <i>pompa di messaggi</i> della finestra; qui la pompa non c'è — le finestre si
+        ''' costruiscono e non si mostrano — e quel ritorno resterebbe in coda per sempre,
+        ''' con la prova ferma ad aspettarlo. Provato: il banco intero si è piantato al
+        ''' primo export.</para>
+        ''' <para>Fuori di qui il rimando è giusto ed è quel che serve: nell'applicazione
+        ''' vera la pompa gira, e la riga di stato dev'essere scritta dal thread che
+        ''' possiede la finestra. Perciò si mette da parte <b>qui</b>, per il tempo della
+        ''' prova, e si rimette dov'era: il thread è condiviso con i collaudi che verranno
+        ''' dopo.</para>
+        ''' <para><b>L'auto-installazione è una manopola del processo</b>, non del thread:
+        ''' spegnendola si spegne per tutti finché la prova non l'ha rimessa. Non fa danno
+        ''' — nel banco nessuno pompa messaggi, quindi un collaudo che nel frattempo
+        ''' costruisce una finestra sta meglio senza — ma è bene saperlo prima di
+        ''' copiare queste righe altrove.</para>
+        ''' </remarks>
+        Private Shared Async Function ConMotoreAsync(prova As Func(Of ContestoApp, Task)) As Task
+
+            Dim radice As String = Path.Combine(Path.GetTempPath(), "finestra-backup-" & Guid.NewGuid().ToString("N"))
+            Dim quelloDiPrima As SynchronizationContext = SynchronizationContext.Current
+            Dim siInstallavaDaSe As Boolean = WindowsFormsSynchronizationContext.AutoInstall
+
+            ' Toglierlo e basta non basterebbe: il primo controllo costruito lo rimette
+            ' proprio perché non c'è (è quel che vuol dire «AutoInstall»).
+            WindowsFormsSynchronizationContext.AutoInstall = False
+            SynchronizationContext.SetSynchronizationContext(Nothing)
+
+            Try
+                Using contesto As ContestoApp = ContestoApp.Monta(radice, ChiaveFinta)
+                    Await prova(contesto)
+                End Using
+            Finally
+                WindowsFormsSynchronizationContext.AutoInstall = siInstallavaDaSe
+                SynchronizationContext.SetSynchronizationContext(quelloDiPrima)
+                CartelleDiProva.PortaVia(radice)
+            End Try
+
+        End Function
 
         Private Shared Sub ConUnProfiloEUnaCandidatura(contesto As ContestoApp)
 

@@ -378,13 +378,9 @@ il certificato per la firma) più quella.
 
 ## Da «Elimina candidatura» in Home (2026-08-31)
 
-- **Il flusso D non ha più nessun segno nell'interfaccia.** «Aggiorna profilo» era il suo
-  unico segnaposto — un bottone spento in P1 col tooltip che diceva in quale tappa sarebbe
-  arrivato (regola 3.8 del cap. 03) — e ha ceduto il posto a «Elimina candidatura». La
-  sessione di aggiornamento del profilo resta prevista dal progetto (cap. 12, flusso D) e
-  in P2 il suo bottone c'è: quel che è sparito è il richiamo dalla Home. *Da decidere: o il
-  flusso D si fa, e allora la sua porta è quella di P2; o si dichiara fuori dalla 1.0, e
-  allora va scritto nel cap. 12 invece di restare implicito in un bottone che non c'è più.*
+*La voce sul **flusso D** è stata chiusa il 2026-09-01 dalla revisione di finalizzazione, che
+ha preso la decisione che chiedeva: è in «Chiuse».*
+
 - **Un collaudo della `FinestraConfermaCritica` è cieco, ed è stato provato.**
   `SenzaLaParolaNemmenoUnClicConferma` preme il bottone e verifica che non abbia
   confermato; ma `PerformClick` passa da `CanSelect`, che su una finestra **mai mostrata**
@@ -399,8 +395,123 @@ il certificato per la firma) più quella.
   di navigazione» delle Impostazioni. Non è una divergenza da chiudere di corsa — il verbo
   sul bottone serve dove il gesto cancella qualcosa — ma è una scelta da rendere esplicita:
   o le altre conferme di livello 5 passano di lì, o il cap. 03.3 dice perché no.
+  **Aggiornamento del 2026-09-01**: la revisione ha scelto la prima strada e il fix U8 ha
+  portato alla `FinestraConferma` tre delle quattro — eliminazione di una voce del profilo,
+  «Dimentica» una ricerca, «Scarta» — ma **«Svuota i dati di navigazione» è rimasto fuori**:
+  il rilievo U8 non lo elencava, e nessuno l'ha aggiunto in corsa (perimetro stretto). Il suo
+  bottone è vestito `Distruttivo`, cioè livello 5, e il commento accanto adesso è **falso**:
+  dice «come lo *Scarta* di P4», e lo Scarta è passato dall'altra parte. Resta perciò una
+  conferma di livello 5 in forma di `MessageBox`, che è esattamente la divergenza che questa
+  voce chiedeva di chiudere. *(Il censimento delle altre quindici `MessageBox` Sì/No del
+  programma — quasi tutte di livello 3 o 4, «butto via le correzioni?», «rigenero?» — non è
+  stato fatto: qui si parla solo delle conferme di livello 5.)*
+  *(`Ui/FinestraImpostazioni.vb:767`; cap. 03.3; blocco F2-5.)*
+
+## Dalla fase di fix della revisione di sicurezza (2026-09-01)
+
+*L'unica voce — il giro dal vivo dello strumento di collaudo senza shell — è stata **chiusa
+il giorno stesso**, dal primo giro di collaudi UI che ha riacceso il server: è in «Chiuse».*
+
+## Dalla fase di fix UI della revisione (2026-09-01)
+
+- **La prova a 150 % delle cure DPI di F2-4.** Le tre finestre appena corrette —
+  Appunti, Documenti, «Modifica i testi» — e P7 vanno guardate a scala alta, come fu
+  fatto il 23 agosto per le quattro già curate: i collaudi nuovi sorvegliano tetto,
+  scorrimento e margine, ma a 96 DPI non vedono la conversione in sé (limite
+  dichiarato nel blocco). Si chiude nella stessa passata a 150 % delle voci DPI già
+  aperte qui sopra. *(decisione 15.7; blocco F2-4, `fix-ui-avanzamento.md`.)*
+- **Le prove dal vivo dei flussi AI dei blocchi F2-2 e F2-6.** Su questa macchina non
+  c'è la chiave API: l'import CV col filo unico nuovo (U1), gli «Annulla» di P6/P7
+  (U5), l'anti-flash dei 300 ms (U20) e l'indicatore d'attesa senza scudo (B6) sono
+  passati dal banco — col collaudo di U1 falsificato in due modi — ma nessuno li ha
+  visti su una chiamata vera. Con loro aspettano i due numeri dell'indicatore «da
+  giudicare guardando»: il velo bianco a 140 e l'alzata a 20 px. Si chiudono con una
+  sessione su una macchina con la chiave, o con la chiave digitata a mano qui (voce
+  della postazione del tutor, più sopra). *(cap. 03.8; blocchi F2-2/F2-6,
+  `fix-ui-avanzamento.md`.)*
+
+## Dalla revisione di finalizzazione — i fuori perimetro annotati (2026-09-01)
+
+*Le istruzioni dei fix erano di **perimetro stretto**: un difetto trovato fuori dalle voci
+approvate si annota e non si corregge, altrimenti il diff di ogni blocco non si può più
+rivedere contro il piano. Queste sono quelle annotazioni, raccolte qui perché è il solo posto
+in cui sopravvivono a `fix-ui-avanzamento.md`, che a pull request integrata può sparire.
+Nessuna è grave; nessuna è stata provata a fondo, perché nessuna è stata toccata.*
+
+- **La geometria del menu P0 non scala col DPI.** I bottoni del menu d'ingresso sono
+  420×53, e con loro le distanze e il corpo del testo: misure in unità di progetto usate
+  dove il DPI le ha già moltiplicate. È la **specie delle «~83 somme»** già aperta qui sopra,
+  vista stavolta in un punto preciso invece che come nota generale — e P0 è la prima cosa che
+  si vede aprendo il programma. Si chiude con quella voce, o prima di lei se si vuole cominciare
+  da dove si nota di più. *(cap. 03.4 e 15.7; vista chiudendo i fix finali.)*
+- **Due pannelli e due finestre restano fuori dalle cure DPI di F2-4.** Il rilievo U6 diceva
+  che P7 era **l'unico** pannello senza `AutoScaleMode`, e non era vero: anche
+  `PannelloMenu.Designer.vb` non lo dichiara. E la correzione `ScalaSchermo` della decisione
+  15.7, portata in tre finestre, non tocca `FinestraAvvio` né `FinestraInformazioni`, che U6
+  non elencava. Nessuna delle due cose è stata corretta perché fuori dal piano approvato.
+  *(decisione 15.7; blocco F2-4.)*
+- **I cugini dei micro-fix, in file che il piano non nominava.** `FinestraInformazioni` ha
+  `btnChiudi` e `lblEsitoVersione` con lo stesso `TabIndex = 5` (la specie di U18); il
+  Designer di `FinestraChiaveApi` porta coordinate che non corrispondono a quel che si vede a
+  runtime (la specie di U19); `grpDatiPersonali` di P2 ha stacchi 22/11 px fuori dalla griglia
+  di progetto; e le etichette dei tre bottoni-scelta di P5, quando le scrive l'AI, possono
+  troncare a 130 px — difetto preesistente, visto guardando l'app dal vivo.
+  *(blocchi F2-7 e rifiniture.)*
+- **La coda di U4: dove l'errore non ha ancora né parola né colore.** Il giro degli errori si
+  è fermato al perimetro approvato, e restano fuori: i fallimenti **parziali** raccontati in
+  grigio da funzioni che tornano una `String` senza gravità (`PannelloDocumenti.vb` 665, 817,
+  1283, 1411; `PannelloOpportunita.vb:437`), gli esiti negativi in grigio di
+  `FinestraInformazioni` e della prova della chiave, e in P5 i **guasti dell'AI dentro le
+  bolle**, indistinguibili da una risposta. Quest'ultimo è il solo che valga una decisione di
+  disegno, non una riga di colore. *(cap. 03.8; blocco F2-3.)*
+- **`email.json` non registra quali testi l'utente ha riscritto a mano.** Il CV lo sa (gli id
+  dei campi riscritti vivono accanto al documento, dal quinto tempo di T9e), l'email no: per
+  questo la conferma di «Fallo riscrivere» su una bozza ripresa è **prudenziale** — chiede
+  anche quando forse non servirebbe. Chiuderla vuol dire toccare il formato del file, che è
+  dato dell'utente. *(cap. 07.1; blocco F2-5.)*
+- **Due nomi e due timer rimasti indietro.** La classe si chiama ancora `ScudoDiCaricamento`
+  ma dal fix B6 non disegna più uno scudo (ruota e barra); e `FormPrincipale` non smaltisce i
+  `Timer` che crea a mano (`_battitoDellAttesa`, `_sogliaDelloScudo`): vivono quanto il
+  processo, che è un'incoerenza col `ToolTip` dei pannelli, non un guasto.
+  *(blocchi F2-2 e F2-6.)*
+- **Da decidere: «Cerca» di P3 resta di livello 3?** Col fix U11 «Cattura annuncio» è passato
+  a L3, e adesso P3 ha **due L3 in due fasce diverse** — «Cerca» lo era già. Il cap. 03
+  dichiara ora il criterio «uno per fascia», quindi la cosa è dentro le regole; ma se si
+  volesse una gerarchia più netta il candidato al declassamento è «Cerca». *(cap. 03.3;
+  blocco F2-5.)*
+- **Lo strumento di collaudo: `ridimensiona` ha preso una finestra sbagliata.** In corsa, nel
+  giro dei fix finali, l'attrezzo ha ridimensionato una finestra 160×28 — probabilmente un
+  tooltip — invece di quella dell'applicazione. Non è stato investigato perché era in corso
+  una sessione dal vivo e fermarla sarebbe costato più del difetto. È della stessa famiglia
+  del `Pane` che rendeva ciechi tutti gli attrezzi, chiusa il 30 agosto: lì la cura fu tenere
+  solo le `Window` fra le finestre di primo livello. *(`strumenti/mcp-collaudi/`.)*
 
 ## Chiuse
+
+- ✅ **Il flusso D non ha più nessun segno nell'interfaccia** *(aperta il 2026-08-31, **chiusa
+  il 2026-09-01** dalla revisione di finalizzazione — non facendolo, ma decidendo)*. La voce
+  chiedeva una scelta fra due — o il flusso D si fa, o si dichiara fuori dalla 1.0 — e la
+  Fase 3 della revisione l'ha presa: **fuori dalla 1.0**, scritto nel §12.4 invece di restare
+  implicito in un bottone tolto dalla Home. Il rilievo che l'ha portata al tavolo (V8) partiva
+  dal codice: `btnAggiornamento` di P2 era spento **senza gestore**, e l'infrastruttura di
+  versionamento del profilo esisteva senza che nessuno la usasse. Il bottone resta dov'è, ma il
+  suo tooltip non promette più una tappa che arriva: dice che la sessione di aggiornamento è
+  «rimandata a una versione futura» e che intanto il profilo si aggiorna dalla scheda, campo
+  per campo. La funzione non è morta — è tornata a essere una cosa da valutare, non un debito.
+  *(cap. 12.4; `revisione-finalizzazione.md`, Fase 3, rilievo V8; diario Step 2.60.)*
+
+- ✅ **Il collaudo dal vivo dello strumento di collaudo senza shell** *(aperta e **chiusa il
+  2026-09-01**, dentro la fase di fix della revisione di sicurezza)*. Il fix di R4
+  (`227fde8`) aveva tolto `bash -lc` da tutte le chiamate di
+  `strumenti/mcp-collaudi/server.mjs`, provate a pezzi ma mai in un giro intero, perché il
+  server era in uso da un'altra sessione sulla porta 3300. L'ha chiusa proprio quella
+  sessione: riavviato il server col codice nuovo (16 attrezzi), il giro a vista dei fix UI
+  F2-1+F2-2 è passato tutto da lì — `compila`, `avvia` manuale, `stato_app`, `clic` (otto,
+  su due giri), `rispondi_finestra` in lettura e con risposta «Yes», sei `schermata`,
+  `chiudi_app` — e ogni attrezzo ha risposto come prima, accenti e apostrofi compresi nelle
+  finestre lette. Sono esattamente i siti che passavano dalla shell, compreso quello
+  dell'interpolazione degli argomenti di `rispondi_finestra`. *(`revisione-sicurezza.md`,
+  blocco S3; la trappola resta annotata nel README dello strumento.)*
 
 - ✅ **`scegli_riga` toccava solo il primo elenco della finestra** *(aperta il 2026-08-24 col
   reperto R6, **chiusa il 2026-08-30**)*. L'attrezzo raccoglieva tutte le liste e poi ne

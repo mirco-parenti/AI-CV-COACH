@@ -162,7 +162,7 @@ Partial Class PannelloEmail
         'lblCorpo
         '
         Me.lblCorpo.Font = StileApp.FontTitoloGruppo
-        Me.lblCorpo.ForeColor = StileApp.RossoTitoli
+        Me.lblCorpo.ForeColor = StileApp.RossoCritico
         Me.lblCorpo.Location = New System.Drawing.Point(0, 0)
         Me.lblCorpo.Name = "lblCorpo"
         Me.lblCorpo.Size = New System.Drawing.Size(300, 18)
@@ -197,7 +197,7 @@ Partial Class PannelloEmail
         'lblAllegati
         '
         Me.lblAllegati.Font = StileApp.FontTitoloGruppo
-        Me.lblAllegati.ForeColor = StileApp.RossoTitoli
+        Me.lblAllegati.ForeColor = StileApp.RossoCritico
         Me.lblAllegati.Location = New System.Drawing.Point(0, 0)
         Me.lblAllegati.Name = "lblAllegati"
         Me.lblAllegati.Size = New System.Drawing.Size(300, 18)
@@ -247,7 +247,7 @@ Partial Class PannelloEmail
         '
         Me.btnTornaAiDocumenti.Location = New System.Drawing.Point(0, 12)
         Me.btnTornaAiDocumenti.Name = "btnTornaAiDocumenti"
-        Me.btnTornaAiDocumenti.Size = New System.Drawing.Size(190, 32)
+        Me.btnTornaAiDocumenti.Size = StileApp.BottoneLargo
         Me.btnTornaAiDocumenti.TabIndex = 0
         Me.btnTornaAiDocumenti.Text = "◀ Torna ai documenti"
         '
@@ -255,7 +255,7 @@ Partial Class PannelloEmail
         '
         Me.btnRiscrivi.Location = New System.Drawing.Point(202, 12)
         Me.btnRiscrivi.Name = "btnRiscrivi"
-        Me.btnRiscrivi.Size = New System.Drawing.Size(190, 32)
+        Me.btnRiscrivi.Size = StileApp.BottoneLargo
         Me.btnRiscrivi.TabIndex = 1
         Me.btnRiscrivi.Text = "Fallo riscrivere"
         '
@@ -263,17 +263,22 @@ Partial Class PannelloEmail
         '
         Me.btnDocumenti.Location = New System.Drawing.Point(404, 12)
         Me.btnDocumenti.Name = "btnDocumenti"
-        Me.btnDocumenti.Size = New System.Drawing.Size(240, 32)
+        Me.btnDocumenti.Size = StileApp.BottoneMoltoLargo
         Me.btnDocumenti.TabIndex = 2
         Me.btnDocumenti.Text = "Documenti da allegare…"
         '
         'btnHoSpedito
         '
+        ' L'ordine col tasto Tab segue quello dell'occhio, da sinistra a destra: torna ai
+        ' documenti, fallo riscrivere, scegli gli allegati, dichiara la spedizione, prepara
+        ' l'email. Fino al 2026-09-01 questo bottone e «Documenti da allegare…» portavano
+        ' lo stesso numero, e con due indici uguali a decidere è l'ordine con cui i
+        ' controlli sono stati aggiunti — cioè nulla che si veda guardando la fascia.
         Me.btnHoSpedito.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnHoSpedito.Location = New System.Drawing.Point(724, 12)
         Me.btnHoSpedito.Name = "btnHoSpedito"
-        Me.btnHoSpedito.Size = New System.Drawing.Size(190, 32)
-        Me.btnHoSpedito.TabIndex = 2
+        Me.btnHoSpedito.Size = StileApp.BottoneLargo
+        Me.btnHoSpedito.TabIndex = 3
         Me.btnHoSpedito.Text = "L'ho spedita"
         '
         'btnPreparaEmail
@@ -281,12 +286,14 @@ Partial Class PannelloEmail
         Me.btnPreparaEmail.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnPreparaEmail.Location = New System.Drawing.Point(926, 12)
         Me.btnPreparaEmail.Name = "btnPreparaEmail"
-        Me.btnPreparaEmail.Size = New System.Drawing.Size(180, 32)
-        Me.btnPreparaEmail.TabIndex = 3
+        Me.btnPreparaEmail.Size = StileApp.BottoneLargo
+        Me.btnPreparaEmail.TabIndex = 4
         Me.btnPreparaEmail.Text = "Prepara l'email"
         '
         'PannelloEmail
         '
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
+        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = StileApp.FondoPagina
         Me.Controls.Add(Me.pnlCorpo)
         Me.Controls.Add(Me.pnlCampi)

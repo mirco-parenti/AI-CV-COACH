@@ -98,8 +98,8 @@ Namespace Ui
 
             Await ConRagionamentoApertoAsync(finto,
                 Function(pannello, contesto)
-                    Assert.AreEqual("Torna alla candidatura", Bottone(pannello, "btnTornaAlProfilo").Text,
-                                    "l'uscita porta dove si è venuti")
+                    Assert.AreEqual("◀ Torna alla candidatura", Bottone(pannello, "btnTornaAlProfilo").Text,
+                                    "l'uscita porta dove si è venuti, e la freccia lo dice come negli altri pannelli")
                     Assert.AreEqual("Trasforma in appunti", Bottone(pannello, "btnPortaNelProfilo").Text,
                                     "e la conclusione è un'altra")
 
@@ -316,7 +316,7 @@ Namespace Ui
 
                     Await pannello.ApriIlDialogoAsync(New StrutturatoreFinto)
 
-                    Assert.AreEqual("Torna al profilo", Bottone(pannello, "btnTornaAlProfilo").Text,
+                    Assert.AreEqual("◀ Torna al profilo", Bottone(pannello, "btnTornaAlProfilo").Text,
                                     "i nomi tornano quelli del dialogo guidato")
                     Assert.AreEqual("Porta nel profilo", Bottone(pannello, "btnPortaNelProfilo").Text,
                                     "tutti e due")
@@ -518,6 +518,24 @@ Namespace Ui
             Using finestra As New FinestraAppunti(Proposti())
                 Assert.AreEqual(EsitoAppunti.Annullato, finestra.Esito,
                                 "finché non decide, la risposta è no")
+            End Using
+
+        End Sub
+
+        <TestMethod>
+        Public Sub QuandoNonCiStaSiScorreInveceDiTagliare()
+            ' A 150% i testi crescono e la finestra cresce con loro, ma non oltre lo
+            ' spazio che c'è: il tetto e lo scorrimento vanno insieme, o quel che resta
+            ' fuori cade fuori dalla finestra e nessuno spostamento lo recupera
+            ' (decisione 15.7).
+            Using finestra As New FinestraAppunti(Proposti())
+
+                finestra.DisponiIn(200)
+
+                Assert.IsTrue(finestra.AutoScroll, "con questo spazio si scorre")
+                Assert.IsLessThanOrEqualTo(200, finestra.ClientSize.Height,
+                                           "e la finestra sta nello spazio che c'è")
+
             End Using
 
         End Sub

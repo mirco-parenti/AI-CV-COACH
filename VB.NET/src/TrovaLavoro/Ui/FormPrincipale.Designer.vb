@@ -33,6 +33,7 @@ Partial Class FormPrincipale
         Me.btnCandidatura = New System.Windows.Forms.Button()
         Me.btnDocumenti = New System.Windows.Forms.Button()
         Me.btnImpostazioni = New System.Windows.Forms.Button()
+        Me.btnAiuto = New System.Windows.Forms.Button()
         Me.pnlBordoBarraSuperiore = New System.Windows.Forms.Panel()
         Me.pnlAreaCentrale = New System.Windows.Forms.Panel()
         Me.pnlFasciaInferiore = New System.Windows.Forms.Panel()
@@ -87,6 +88,7 @@ Partial Class FormPrincipale
         Me.pnlBarraSuperiore.Controls.Add(Me.btnCandidatura)
         Me.pnlBarraSuperiore.Controls.Add(Me.btnDocumenti)
         Me.pnlBarraSuperiore.Controls.Add(Me.btnImpostazioni)
+        Me.pnlBarraSuperiore.Controls.Add(Me.btnAiuto)
         Me.pnlBarraSuperiore.Controls.Add(Me.pnlBordoBarraSuperiore)
         Me.pnlBarraSuperiore.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlBarraSuperiore.Location = New System.Drawing.Point(0, 0)
@@ -164,6 +166,19 @@ Partial Class FormPrincipale
         Me.btnImpostazioni.TabIndex = 6
         Me.btnImpostazioni.Text = "⚙ Impostazioni"
         StileApp.VestiBottoneBarra(Me.btnImpostazioni, RuoloBarra.Destinazione, attiva:=False)
+        '
+        'btnAiuto
+        '
+        ' L'aiuto sta in coda alla barra ma **non e' una casella della barra**: le sette
+        ' caselle sono l'indice dei pannelli, questo apre l'informativa e non porta da
+        ' nessuna parte. Per questo e' vestito neutro e non col colore delle destinazioni,
+        ' ed e' stretto: chi lo cerca cerca un punto interrogativo, non un nome.
+        Me.btnAiuto.Location = New System.Drawing.Point(1068, 7)
+        Me.btnAiuto.Name = "btnAiuto"
+        Me.btnAiuto.Size = StileApp.BottoneBarraSuperioreIcona
+        Me.btnAiuto.TabIndex = 7
+        Me.btnAiuto.Text = "?"
+        StileApp.VestiBottone(Me.btnAiuto, LivelloBottone.Neutro)
         '
         'pnlBordoBarraSuperiore
         '
@@ -300,7 +315,7 @@ Partial Class FormPrincipale
         'pnlLogo
         '
         Me.pnlLogo.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
-        Me.pnlLogo.BackColor = StileApp.SfondoBase
+        Me.pnlLogo.BackColor = StileApp.FondoPagina
         Me.pnlLogo.Controls.Add(Me.picLogo)
         Me.pnlLogo.Controls.Add(Me.lblMarchio)
         Me.pnlLogo.Controls.Add(Me.lblVersione)
@@ -323,9 +338,9 @@ Partial Class FormPrincipale
         '
         Me.lblMarchio.Font = StileApp.FontTitoloFinestra
         Me.lblMarchio.ForeColor = StileApp.TestoPrimario
-        Me.lblMarchio.Location = New System.Drawing.Point(1, 123)
+        Me.lblMarchio.Location = New System.Drawing.Point(0, 123)
         Me.lblMarchio.Name = "lblMarchio"
-        Me.lblMarchio.Size = New System.Drawing.Size(259, 30)
+        Me.lblMarchio.Size = New System.Drawing.Size(261, 30)
         Me.lblMarchio.TabIndex = 1
         Me.lblMarchio.Text = "AVIOLAB AI"
         Me.lblMarchio.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -334,9 +349,9 @@ Partial Class FormPrincipale
         '
         Me.lblVersione.Font = StileApp.FontDidascalia
         Me.lblVersione.ForeColor = StileApp.TestoSecondario
-        Me.lblVersione.Location = New System.Drawing.Point(1, 155)
+        Me.lblVersione.Location = New System.Drawing.Point(0, 155)
         Me.lblVersione.Name = "lblVersione"
-        Me.lblVersione.Size = New System.Drawing.Size(259, 15)
+        Me.lblVersione.Size = New System.Drawing.Size(261, 15)
         Me.lblVersione.TabIndex = 2
         Me.lblVersione.Text = "Ver. — · Pool —"
         Me.lblVersione.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -345,9 +360,9 @@ Partial Class FormPrincipale
         '
         Me.lblCopyright.Font = StileApp.FontDidascalia
         Me.lblCopyright.ForeColor = StileApp.TestoSecondario
-        Me.lblCopyright.Location = New System.Drawing.Point(1, 172)
+        Me.lblCopyright.Location = New System.Drawing.Point(0, 172)
         Me.lblCopyright.Name = "lblCopyright"
-        Me.lblCopyright.Size = New System.Drawing.Size(259, 15)
+        Me.lblCopyright.Size = New System.Drawing.Size(261, 15)
         Me.lblCopyright.TabIndex = 3
         Me.lblCopyright.Text = "©2026 Aviolab AI - Tutti i diritti riservati"
         Me.lblCopyright.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -366,7 +381,6 @@ Partial Class FormPrincipale
         Me.Name = "FormPrincipale"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "TrovaLavoro"
-        Me.WindowState = System.Windows.Forms.FormWindowState.Maximized
         Me.tlpStruttura.ResumeLayout(False)
         Me.pnlBarraSuperiore.ResumeLayout(False)
         Me.pnlAreaCentrale.ResumeLayout(False)
@@ -385,6 +399,7 @@ Partial Class FormPrincipale
     Friend WithEvents btnCandidatura As System.Windows.Forms.Button
     Friend WithEvents btnDocumenti As System.Windows.Forms.Button
     Friend WithEvents btnImpostazioni As System.Windows.Forms.Button
+    Friend WithEvents btnAiuto As System.Windows.Forms.Button
     Friend WithEvents pnlBordoBarraSuperiore As System.Windows.Forms.Panel
     Friend WithEvents pnlAreaCentrale As System.Windows.Forms.Panel
     Friend WithEvents pnlMenu As PannelloMenu

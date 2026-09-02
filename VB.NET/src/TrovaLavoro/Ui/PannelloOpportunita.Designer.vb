@@ -119,7 +119,7 @@ Partial Class PannelloOpportunita
         'lblIncolla
         '
         Me.lblIncolla.Font = StileApp.FontTitoloGruppo
-        Me.lblIncolla.ForeColor = StileApp.RossoTitoli
+        Me.lblIncolla.ForeColor = StileApp.RossoCritico
         Me.lblIncolla.Location = New System.Drawing.Point(0, 0)
         Me.lblIncolla.Name = "lblIncolla"
         Me.lblIncolla.Size = New System.Drawing.Size(500, 18)
@@ -145,7 +145,7 @@ Partial Class PannelloOpportunita
         Me.btnAnalizza.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnAnalizza.Location = New System.Drawing.Point(996, 22)
         Me.btnAnalizza.Name = "btnAnalizza"
-        Me.btnAnalizza.Size = New System.Drawing.Size(110, 32)
+        Me.btnAnalizza.Size = StileApp.BottoneStandard
         Me.btnAnalizza.TabIndex = 2
         Me.btnAnalizza.Text = "Analizza"
         '
@@ -282,7 +282,7 @@ Partial Class PannelloOpportunita
         '
         Me.lblEtichettaSpiegazione.Dock = System.Windows.Forms.DockStyle.Top
         Me.lblEtichettaSpiegazione.Font = StileApp.FontTitoloGruppo
-        Me.lblEtichettaSpiegazione.ForeColor = StileApp.RossoTitoli
+        Me.lblEtichettaSpiegazione.ForeColor = StileApp.RossoCritico
         Me.lblEtichettaSpiegazione.Location = New System.Drawing.Point(0, 8)
         Me.lblEtichettaSpiegazione.Name = "lblEtichettaSpiegazione"
         Me.lblEtichettaSpiegazione.Size = New System.Drawing.Size(726, 18)
@@ -316,7 +316,7 @@ Partial Class PannelloOpportunita
         '
         Me.lblAnnuncioLetto.Dock = System.Windows.Forms.DockStyle.Top
         Me.lblAnnuncioLetto.Font = StileApp.FontTitoloGruppo
-        Me.lblAnnuncioLetto.ForeColor = StileApp.RossoTitoli
+        Me.lblAnnuncioLetto.ForeColor = StileApp.RossoCritico
         Me.lblAnnuncioLetto.Location = New System.Drawing.Point(0, 0)
         Me.lblAnnuncioLetto.Name = "lblAnnuncioLetto"
         Me.lblAnnuncioLetto.Size = New System.Drawing.Size(368, 18)
@@ -352,7 +352,7 @@ Partial Class PannelloOpportunita
         '
         Me.btnNuovoAnnuncio.Location = New System.Drawing.Point(0, 18)
         Me.btnNuovoAnnuncio.Name = "btnNuovoAnnuncio"
-        Me.btnNuovoAnnuncio.Size = New System.Drawing.Size(200, 32)
+        Me.btnNuovoAnnuncio.Size = StileApp.BottoneMoltoLargo
         Me.btnNuovoAnnuncio.TabIndex = 0
         Me.btnNuovoAnnuncio.Text = "Incolla annuncio manualmente"
         '
@@ -360,7 +360,7 @@ Partial Class PannelloOpportunita
         '
         Me.btnBrainstorm.Location = New System.Drawing.Point(142, 18)
         Me.btnBrainstorm.Name = "btnBrainstorm"
-        Me.btnBrainstorm.Size = New System.Drawing.Size(130, 32)
+        Me.btnBrainstorm.Size = StileApp.BottoneMedio
         Me.btnBrainstorm.TabIndex = 1
         Me.btnBrainstorm.Text = "Brainstorm"
         '
@@ -368,7 +368,7 @@ Partial Class PannelloOpportunita
         '
         Me.btnEsito.Location = New System.Drawing.Point(284, 18)
         Me.btnEsito.Name = "btnEsito"
-        Me.btnEsito.Size = New System.Drawing.Size(130, 32)
+        Me.btnEsito.Size = StileApp.BottoneMedio
         Me.btnEsito.TabIndex = 2
         Me.btnEsito.Text = "Com'è andata…"
         '
@@ -376,7 +376,7 @@ Partial Class PannelloOpportunita
         '
         Me.btnScarta.Location = New System.Drawing.Point(426, 18)
         Me.btnScarta.Name = "btnScarta"
-        Me.btnScarta.Size = New System.Drawing.Size(110, 32)
+        Me.btnScarta.Size = StileApp.BottoneStandard
         Me.btnScarta.TabIndex = 3
         Me.btnScarta.Text = "Scarta"
         '
@@ -385,7 +385,7 @@ Partial Class PannelloOpportunita
         Me.btnGeneraDocumenti.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnGeneraDocumenti.Location = New System.Drawing.Point(916, 18)
         Me.btnGeneraDocumenti.Name = "btnGeneraDocumenti"
-        Me.btnGeneraDocumenti.Size = New System.Drawing.Size(190, 32)
+        Me.btnGeneraDocumenti.Size = StileApp.BottoneLargo
         Me.btnGeneraDocumenti.TabIndex = 4
         Me.btnGeneraDocumenti.Text = "Genera CV + lettera"
         '

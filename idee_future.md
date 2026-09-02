@@ -335,6 +335,47 @@ di difetti prima della 1.0.
   rimettere mano a una quindicina di file di UI oggi costerebbe più di quanto protegga.
   *(2026-08-27 — revisione del giro D; cap. 02, cap. 03.)*
 
+Idee emerse dalla **revisione UI di finalizzazione** *(2026-09-01)*: sono le due **deroghe**
+dichiarate in quella revisione, cioè rilievi veri che si è deciso di **non** chiudere adesso
+e che restano qui come lavoro futuro, con il motivo per cui non è di oggi.
+- **L'applicazione è mono-lingua, e la localizzazione è un lavoro a sé.** Tutte le stringhe
+  dell'interfaccia stanno **nel codice**, in italiano, e non esiste nessun `.resx`: è una
+  scelta e non una dimenticanza — l'utente di riferimento è italiano, e un secondo strato di
+  risorse su una quindicina di file di UI costa oggi senza rendere niente. Il giorno che
+  servisse un'altra lingua il lavoro è tutto lì e si sa già qual è: estrarre le stringhe in
+  risorse, una per file, e far scegliere la cultura all'avvio. Da non confondere con la
+  **lingua dei documenti** (IT/EN), che è cosa diversa e c'è già da T7a: quella riguarda ciò
+  che l'AI scrive, questa ciò che l'applicazione dice.
+  *(2026-09-01 — deroga B8 della revisione UI di finalizzazione; cap. 03, cap. 10.5.)*
+- **Le Impostazioni a schede.** P8 è oggi una finestra sola con **sette sezioni** una sotto
+  l'altra e lo scorrimento, ed è coerente con quel che quella finestra è — una finestra che
+  **fa** e non raccoglie una decisione (cap. 03.4): si scorre, si cambia una cosa, è già
+  scritta. Riorganizzarla a **tab** darebbe una mappa più netta a chi ci entra la prima
+  volta, ma nasconderebbe sei sezioni su sette a chi cerca una voce di cui non ricorda il
+  nome — che è il caso vero — e vorrebbe rifare la disposizione appena curata a DPI alti
+  (decisione 15.7). È un raffinamento, non un difetto: si valuta quando le sezioni saranno
+  troppe perché lo scorrimento le tenga.
+  *(2026-09-01 — deroga B10 della stessa revisione; cap. 03.4, cap. 11.6.)*
+- **Rispettare la preferenza di sistema per il movimento ridotto.** Windows ha un
+  interruttore («Effetti di animazione») con cui chi soffre di cinetosi, o semplicemente non
+  li sopporta, spegne le animazioni: lo scudo d'attesa non lo legge, e la sua comparsa è
+  l'unica animazione del programma. Il rilievo U20 lo chiedeva insieme alla soglia
+  anti-flash; **la soglia si è fatta, questo no**, ed è una scelta dichiarata: l'attesa vera
+  è la ruota che gira, che non si può togliere senza togliere l'informazione, e spegnere la
+  sola comparsa cambierebbe pochissimo a fronte di una preferenza che nessuno ha mai chiesto
+  qui. Resta un raffinamento di accessibilità vero, e il giorno che si faccia costa una
+  lettura di `SystemInformation` e un ramo.
+  *(2026-09-01 — metà non approvata del rilievo U20 della revisione UI; cap. 03.8.)*
+- **Un token `AvvisoTesto`, gemello di `InformazioneTesto`.** Il giro degli errori (U4) ha
+  dato al testo *informativo* un colore leggibile a 9 pt — `InformazioneTesto`, perché
+  `Informazione` come inchiostro faceva ≈2,8:1 — e ha lasciato l'ambra `Avviso` ai soli
+  badge, dove sta su un fondo e non è testo. Se un giorno servirà **scrivere** un avviso (non
+  un errore: qualcosa di intermedio, «attento a questo») quel colore oggi non c'è, e la
+  tentazione sarà riusare l'ambra da fondo come inchiostro — che è precisamente il difetto
+  curato in `PannelloProfilo.vb`. Il token costa tre righe e una misura di contrasto; si fa
+  quando ci sarà la prima riga che lo vuole, non prima.
+  *(2026-09-01 — proposta dell'implementatore del blocco F2-3, non fatta; cap. 03.2.)*
+
 ## Collaudi e non-regressione (Fase VB.NET)
 
 Idee emerse **costruendo la batteria di T2** (cap. 14), quando il prototipo ha fatto da

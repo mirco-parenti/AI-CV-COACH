@@ -474,6 +474,246 @@ Namespace Ui
 
         End Sub
 
+        ''' <summary>
+        ''' I comandi delle Impostazioni stanno in colonna, tutti della stessa larghezza.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Il difetto che il tutor ha fotografato il 2026-09-01: otto bottoni di otto
+        ''' larghezze diverse, ognuna cucita sulla propria scritta, e la colonna che ne
+        ''' veniva era sfrangiata. È un difetto che non rompe niente e che nessun collaudo
+        ''' di comportamento può vedere — la finestra funziona, semplicemente non sembra
+        ''' disegnata — e per questo lo deve dire il banco.</para>
+        ''' <para>Si guardano le due cose che fanno la colonna: la stessa larghezza e lo
+        ''' stesso margine sinistro. Non si guarda <i>quale</i> larghezza: quella è un terzo
+        ''' della finestra (cap. 03.2) e cambia col DPI.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub IComandiDelleImpostazioniStannoInUnaColonnaSola()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        finestra.DisponiIn(4000)
+
+                        Dim comandi As Button() = ComandiDiSezione(finestra)
+
+                        Dim primo As Button = comandi.First()
+
+                        For Each comando As Button In comandi
+                            Assert.AreEqual(primo.Width, comando.Width,
+                                            $"«{comando.Text}» ha una larghezza sua")
+                            Assert.AreEqual(primo.Left, comando.Left,
+                                            $"«{comando.Text}» non sta nella colonna")
+                        Next
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        ''' <summary>E dentro quella larghezza ogni scritta ci sta per intero.</summary>
+        ''' <remarks>
+        ''' È la metà che rende sopportabile la colonna unica: un bottone non manda a capo e
+        ''' non mette i puntini, taglia. Prima della colonna il rischio non c'era per
+        ''' costruzione — ogni bottone era largo quanto il suo testo — e adesso che la
+        ''' misura viene da fuori qualcuno deve dire che ci sta.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniComandoDelleImpostazioniDiceIlProprioNomePerIntero()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        finestra.DisponiIn(4000)
+
+                        For Each comando As Button In ComandiDiSezione(finestra)
+                            Assert.IsLessThanOrEqualTo(
+                                comando.Width,
+                                TextRenderer.MeasureText(comando.Text, comando.Font).Width,
+                                $"«{comando.Text}» non ci sta nella colonna")
+                        Next
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        ''' <summary>
+        ''' Ogni comando sta all'altezza della sezione che lo spiega, non sotto il paragrafo.
+        ''' </summary>
+        ''' <remarks>
+        ''' È l'altra metà della forma nuova: i due terzi di sinistra tengono i testi, il
+        ''' terzo di destra i comandi, e il legame fra le due colonne è che il bottone si
+        ''' legge <b>accanto</b> a quel che dice a cosa serve. Si misura sui due che il
+        ''' difetto lo mostravano meglio: «Cambia la chiave», che stava sotto due righe di
+        ''' stato, e «Backup», che apriva la sezione dei dati.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub OgniComandoStaAllAltezzaDellaSuaSezione()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        finestra.DisponiIn(4000)
+
+                        For Each coppia As String() In New String()() {
+                            New String() {"lblSezioneChiave", "btnCambiaChiave"},
+                            New String() {"lblCartellaDati", "btnApriCartellaDati"},
+                            New String() {"lblSezioneMotore", "btnApriModelli"},
+                            New String() {"lblSezioneConsumo", "btnApriChiamate"},
+                            New String() {"lblSezioneDati", "btnBackup"}}
+
+                            Dim titolo As Control =
+                                finestra.Controls.Find(coppia(0), searchAllChildren:=True).Single()
+                            ' La variabile non può chiamarsi «comando»: coprirebbe la
+                            ' funzione «Comando» qui sotto (trappola di casa, in VB le
+                            ' maiuscole non distinguono).
+                            Dim bottone As Button = Comando(finestra, coppia(1))
+
+                            Assert.AreEqual(titolo.Top, bottone.Top,
+                                            $"«{bottone.Text}» non è all'altezza di «{titolo.Text}»")
+                            Assert.IsGreaterThanOrEqualTo(titolo.Right, bottone.Left,
+                                                          "e sta nell'altra colonna, non sopra il testo")
+
+                        Next
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        ''' <summary>
+        ''' L'eliminazione di tutto ha la sua riga nella colonna, col vuoto sopra e sotto.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Cap. 11.5: il vuoto intorno è la prima difesa di un'azione critica. Fino
+        ''' al mattino del 2026-09-01 ce n'era solo metà — il vuoto sopra, mentre il bottone
+        ''' stava nella stessa colonna del rosso di sopra e a un dito di distanza — e la cura
+        ''' di quel giorno l'aveva spostato al <b>margine opposto</b>. In una fascia
+        ''' orizzontale larga quel salto si legge come una scelta; nella colonna stretta
+        ''' delle Impostazioni si leggeva come un avanzo, ed è quel che il tutor ha visto
+        ''' nella fotografia della sezione «I tuoi dati».</para>
+        ''' <para>La forma di adesso: <b>stessa larghezza, stessa colonna, riga sua</b>, e
+        ''' la difesa è tutta verticale — lo stacco doppio sopra e sotto. Quel che si
+        ''' sorveglia è il vuoto, che è la difesa, e non più il salto orizzontale, che era
+        ''' solo il modo di ottenerlo.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LEliminazioneDiTuttoHaUnaRigaTuttaSua()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        finestra.DisponiIn(4000)
+
+                        Dim critico As Button = Comando(finestra, "btnEliminaTutto")
+                        Dim distruttivo As Button = Comando(finestra, "btnSvuotaNavigazione")
+                        Dim stato As Control = finestra.Controls.Find("lblStato", searchAllChildren:=True).Single()
+
+                        Assert.AreEqual(LivelloBottone.Critico, critico.Tag, "è il livello 6")
+
+                        Assert.IsGreaterThanOrEqualTo(distruttivo.Bottom + FasciaDeiComandi.StaccoDelCritico,
+                                                      critico.Top, "il vuoto sopra")
+                        Assert.IsGreaterThanOrEqualTo(critico.Bottom + FasciaDeiComandi.StaccoDelCritico,
+                                                      stato.Top, "e il vuoto sotto")
+
+                        Assert.AreEqual(distruttivo.Left, critico.Left,
+                                        "e sta nella colonna come gli altri: la difesa è il vuoto, non il salto")
+                        Assert.AreEqual(distruttivo.Width, critico.Width, "con la larghezza di tutti")
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        ' ==================================================================
+        ' «Informazioni su…», che dal 2026-09-01 si apre di qui
+        ' ==================================================================
+
+        ''' <summary>
+        ''' Dalle Impostazioni si arriva a «Informazioni su…», e ci si arriva con tutto.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Fino al 2026-09-01 quella finestra si apriva <b>cliccando il pannello del
+        ''' logo</b>. Su indicazione del tutor il clic sullo stemma è stato tolto
+        ''' (v. <c>CollaudiMarchio</c>), e la finestra è venuta qui: perché dentro ci vivono
+        ''' «Cerca aggiornamenti» e «Copia diagnostica», cioè le due cose che si cercano
+        ''' quando qualcosa non torna, e toglier loro la porta senza dargliene un'altra
+        ''' sarebbe stato perderle in silenzio.</para>
+        ''' <para>Non basta quindi che il bottone ci sia: si guarda che le Impostazioni
+        ''' sappiano consegnare a quella finestra le <b>due cose che prima le dava la
+        ''' finestra principale</b> — l'etichetta del pool e il foglietto di diagnostica —
+        ''' e lo si guarda costruendo davvero «Informazioni su…» con quel che passerebbe il
+        ''' bottone. Un bottone che apre una finestra vuota è un bottone che non ha spostato
+        ''' niente.</para>
+        ''' <para>Il clic non si può premere: «Informazioni su…» è modale, e di una finestra
+        ''' modale il banco non può aspettare la chiusura (cap. 14). Si prova quindi la
+        ''' consegna, che è la parte che può rompersi.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub DalleImpostazioniSiArrivaAInformazioniSu()
+
+            ConMotore(
+                Sub(contesto)
+
+                    Using finestra As New FinestraImpostazioni(contesto)
+
+                        finestra.DisponiIn(4000)
+
+                        Dim bottone As Button = Comando(finestra, "btnInformazioni")
+
+                        Assert.IsTrue(bottone.Enabled, "il bottone è acceso: la porta è aperta sempre")
+                        Assert.AreEqual(Comando(finestra, "btnComeFunziona").Left, bottone.Left,
+                                        "e sta nella colonna dei comandi, come tutti gli altri")
+
+                        ' La finestra vera che il bottone aprirebbe, chiesta a chi la
+                        ' rifornisce: ricostruirla qui vorrebbe dire collaudare il collaudo.
+                        Using informazioni As FinestraInformazioni = finestra.InformazioniSuTrovaLavoro()
+
+                            StringAssert.Contains(informazioni.RigaDiVersione, contesto.EtichettaDelPool,
+                                                  "la riga di versione dice con quale pool si sta lavorando")
+
+                            Assert.IsTrue(informazioni.PuoCopiareLaDiagnostica,
+                                          "e «Copia diagnostica» c'è: senza il foglietto il bottone sparirebbe")
+
+                        End Using
+
+                        ' Il foglietto è pieno davvero, non una scatola con dentro i ripieghi.
+                        Dim foglietto As String = finestra.ComponiLaDiagnostica()
+
+                        StringAssert.Contains(foglietto, contesto.Cartella.Radice,
+                                              "dice dove sta la cartella dati")
+                        StringAssert.Contains(foglietto, contesto.Modelli.ModelloRagionamento.Id,
+                                              "e con quali modelli si sta lavorando")
+
+                    End Using
+
+                End Sub)
+
+        End Sub
+
+        ''' <summary>I comandi di sezione della finestra, per i collaudi della colonna.</summary>
+        Private Shared Function ComandiDiSezione(finestra As Control) As Button()
+
+            Return {"btnComeFunziona", "btnInformazioni", "btnCambiaChiave",
+                    "btnApriCartellaDati", "btnGestisciDocumenti", "btnApriModelli",
+                    "btnApriChiamate", "btnBackup", "btnSvuotaNavigazione", "btnEliminaTutto"}.
+                Select(Function(nome) Comando(finestra, nome)).ToArray()
+
+        End Function
+
         ' ==================================================================
         ' Quanto è costato (2026-08-27)
         ' ==================================================================

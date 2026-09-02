@@ -200,6 +200,56 @@ Namespace Ui
         End Sub
 
         <TestMethod>
+        Public Sub UnaCodaVuotaDiceAncheDaDoveSiComincia()
+            ' Dire soltanto che non c'è niente lascia fermo chi guarda: le due strade per
+            ' cominciare sono la ricerca e l'annuncio incollato nel confronto, e si nominano
+            ' come le porta scritte l'applicazione. Il nome del comando si prende dal
+            ' bottone stesso: due scritte diverse per lo stesso gesto sono un gesto che non
+            ' si trova.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim detto As String = Etichetta(pannello, "lblContatori").Text
+
+                    Assert.Contains(Bottone(pannello, "btnNuovaRicerca").Text, detto,
+                                    "il comando si chiama come il suo bottone")
+                    Assert.Contains("Confronta", detto, "e l'altra strada è la scheda del confronto")
+                End Sub)
+        End Sub
+
+        <TestMethod>
+        Public Sub IlPunteggioELaDataSiLeggonoIncolonnati()
+
+            ' Regola dei numeri in tabella: allineati a destra, così le cifre stanno una
+            ' sotto l'altra invece di ballare con la lunghezza del testo accanto. La data
+            ' ci arriva; il punteggio no, e non per una dimenticanza — Windows tiene la
+            ' prima colonna di una lista sempre a sinistra e WinForms rimette Left da sé
+            ' appena si prova ad assegnare altro. È scritto qui perché la prossima persona
+            ' che legge «Match» a sinistra sappia che è un limite e non una svista.
+            Using pannello As New PannelloHome()
+
+                Dim coda As ListView = DirectCast(
+                    pannello.Controls.Find("lvwCoda", searchAllChildren:=True).Single(), ListView)
+
+                ' Le colonne si prendono per posizione, che è come le dichiara il designer:
+                ' la prima è «Match», l'ultima «Aggiornata».
+                Dim match As ColumnHeader = coda.Columns(0)
+                Dim quando As ColumnHeader = coda.Columns(coda.Columns.Count - 1)
+
+                Assert.AreEqual("Match", match.Text, "la prima è il punteggio")
+                Assert.AreEqual("Aggiornata", quando.Text, "l'ultima è la data")
+
+                Assert.AreEqual(HorizontalAlignment.Right, quando.TextAlign,
+                                "«Aggiornata» si legge incolonnata a destra")
+
+                match.TextAlign = HorizontalAlignment.Right
+                Assert.AreEqual(HorizontalAlignment.Left, match.TextAlign,
+                                "e la prima colonna resta a sinistra per quanto gliela si cambi")
+
+            End Using
+
+        End Sub
+
+        <TestMethod>
         Public Sub IlFiltroMostraSoloQuelloCheDice()
             ConPannelloHome(
                 Sub(pannello, contesto)

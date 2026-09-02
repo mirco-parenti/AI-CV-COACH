@@ -136,8 +136,7 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    stessa riga del diario, del README e del tag `v1.0`, era rimasta invisibile per diciannove
    giorni. Non l'ha trovata nessun controllo su quel che era stato fatto: l'ha trovata la
    rilettura di quel che era stato promesso.)*
-
-17. 🔖 **REGOLA NUOVA/regole_di_progetto — «fammi vedde» vuol dire *aprimi l'app*, e
+17. **«fammi vedde» vuol dire *aprimi l'app*, e
    aggiornata**: quando dico **«fammi vedde»** (o «fammi vedere», «aprimi l'app»), non mi
    mandi schermate né percorsi di immagini: **mi apri l'eseguibile che sta sul Desktop**,
    `C:\Users\Mirco Parenti\Desktop\TrovaLavoro.exe`, dopo esserti **assicurata prima** che
@@ -149,7 +148,8 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    impronta di quel che ha appena scritto: quella riga è la prova che l'exe è aggiornato,
    e va guardata. Il riferimento sul Desktop **dev'essere pronto all'uso in ogni momento e
    sempre aggiornato all'ultima modifica**: è *l'app*, non una copia di comodo, e un exe
-   vecchio che si apre senza dirlo è peggio di nessun exe. *(Dettata il 2026-08-31.)*
+   vecchio che si apre senza dirlo è peggio di nessun exe. *(Dettata il 2026-08-31,
+   ratificata il 2026-09-01.)*
 
 ## Contesto del progetto (fatti stabili + puntatori, niente stato copiato)
 
@@ -253,6 +253,7 @@ un file nuovo, aggiungi qui la sua riga.
 | `strumenti/**` | Attrezzi di sviluppo, **fuori dal prodotto** (non entrano nell'exe, non si distribuiscono). Stessa regola del codice: non si riscrivono per allineamento, si toccano quando servono. Il loro `README.md` però sì: ogni trappola nuova pagata sul campo va scritta lì, perché è il solo posto in cui quel sapere sopravvive. |
 | `HTML+JS/**` | **Fuori dal rito** *(dal 2026-08-06)*: prototipo congelato. Si tocca solo per manutenzione che chiedo esplicitamente; in quel caso valgono le regole 1 e 3. |
 | `situazione-*.txt` in radice | **Mai aggiornate**: sono fotografie di una situazione a una certa data (come uno Step del diario), e riscriverle ne distruggerebbe il senso. Si toccano solo per cancellarle, se e quando lo dico. |
+| `revisione-*.md`, `istruzioni-fix-ui.md`, `fix-ui-avanzamento.md` | **Mai aggiornati** *(dal 2026-09-01)*: sono i registri della revisione di finalizzazione — traccia delle tre fasi, report di sicurezza, mandato e log dell'orchestrazione dei fix UI. Documenti **di lavoro**, non documentazione del prodotto: come le `situazione-*.txt` valgono per la data che portano, e riscriverli ne cancellerebbe il senso. Si toccano solo per cancellarli, a pull request integrata. Quel che di loro deve sopravvivere è già nel `diario_di_bordo.md` e in `in_sospeso.md`. |
 | `.gitignore`, `.gitattributes` | Config: solo se serve un cambiamento concreto. |
 | `.mcp.json` | Config dello **strumento di collaudo** (dichiara il server MCP locale su `127.0.0.1:3300`, vedi `strumenti/mcp-collaudi/`): si tocca solo se cambia il modo di accenderlo. Non è configurazione del prodotto. |
 | `.env`, `.claude/`, `node_modules/`, gitignored | **MAI** toccati. |

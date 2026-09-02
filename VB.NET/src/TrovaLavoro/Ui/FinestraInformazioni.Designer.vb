@@ -73,9 +73,9 @@ Partial Class FinestraInformazioni
         '
         'btnCopiaDiagnostica
         '
-        Me.btnCopiaDiagnostica.Location = New System.Drawing.Point(172, 551)
+        Me.btnCopiaDiagnostica.Location = New System.Drawing.Point(216, 551)
         Me.btnCopiaDiagnostica.Name = "btnCopiaDiagnostica"
-        Me.btnCopiaDiagnostica.Size = New System.Drawing.Size(134, 32)
+        Me.btnCopiaDiagnostica.Size = StileApp.BottoneLargo
         Me.btnCopiaDiagnostica.TabIndex = 4
         Me.btnCopiaDiagnostica.Text = "Copia diagnostica"
         '
@@ -92,7 +92,7 @@ Partial Class FinestraInformazioni
         '
         Me.btnControllaVersione.Location = New System.Drawing.Point(14, 551)
         Me.btnControllaVersione.Name = "btnControllaVersione"
-        Me.btnControllaVersione.Size = New System.Drawing.Size(150, 32)
+        Me.btnControllaVersione.Size = StileApp.BottoneLargo
         Me.btnControllaVersione.TabIndex = 6
         Me.btnControllaVersione.Text = "Cerca aggiornamenti"
         '
@@ -100,15 +100,15 @@ Partial Class FinestraInformazioni
         '
         Me.btnComeFunziona.Location = New System.Drawing.Point(14, 637)
         Me.btnComeFunziona.Name = "btnComeFunziona"
-        Me.btnComeFunziona.Size = New System.Drawing.Size(260, 32)
+        Me.btnComeFunziona.Size = StileApp.BottoneMedio
         Me.btnComeFunziona.TabIndex = 7
-        Me.btnComeFunziona.Text = "Come funziona, e cosa esce dal tuo PC"
+        Me.btnComeFunziona.Text = "Come funziona…"
         '
         'btnChiudi
         '
         Me.btnChiudi.Location = New System.Drawing.Point(424, 637)
         Me.btnChiudi.Name = "btnChiudi"
-        Me.btnChiudi.Size = New System.Drawing.Size(110, 32)
+        Me.btnChiudi.Size = StileApp.BottoneStandard
         Me.btnChiudi.TabIndex = 5
         Me.btnChiudi.Text = "Chiudi"
         '

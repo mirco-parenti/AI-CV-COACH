@@ -224,7 +224,9 @@ finché l'unico utente era Mirco la differenza non si vedeva. Adesso c'è una fi
 «Come funziona, e cosa esce dal tuo PC» — che dice le stesse cose a chi usa il programma:
 compare **una volta sola al primo avvio, prima della richiesta della chiave** (è lì che si
 decide se fidarsi, e informare dopo quel momento è informare tardi), e si riapre quando la si
-cerca, da «Informazioni» e dalle Impostazioni. Il suo testo sta in un posto solo,
+cerca. *Dal 2026-09-01 le porte sono tre e una è in vista: il bottone **«?»** in coda alla
+barra superiore, che la riapre da qualunque pannello (cap. 03.4), più «Come funziona…» nelle
+Impostazioni e il suo gemello dentro «Informazioni su…» — stesso nome, stessa finestra.* Il suo testo sta in un posto solo,
 `FinestraInformativa.Voci()`, ed è **collaudato**: un collaudo verifica che nomini ogni porta
 da cui qualcosa esce, così una porta nuova aggiunta al programma e dimenticata
 nell'informativa diventa un rosso invece di una bugia.

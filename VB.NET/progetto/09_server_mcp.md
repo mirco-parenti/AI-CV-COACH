@@ -302,6 +302,48 @@ detto.
   e hard-gate valgono anche quando a chiamare è un'AI esterna. Il punteggio non si può
   «convincere»: è calcolato dal codice.
 
+### Il confine di fiducia col client (2026-09-01)
+
+*Tre cose che da questo lato della porta sono già decise, e che chi collega un client deve
+sapere lo stesso: le prime due sono limiti che restano a lui, la terza è un vincolo che
+teniamo noi. Le scrive qui la revisione di sicurezza della finalizzazione, che le ha
+verificate una per una.*
+
+**Quel che esce dai tool di lettura non l'abbiamo scritto noi.** `leggi_registro`,
+`leggi_opportunita` e `leggi_profilo` consegnano l'archivio **tale e quale**, ed è giusto
+così: sono tool di lettura, non filtri. Dentro l'archivio però c'è il testo degli annunci,
+e quello l'ha scritto qualcun altro — una pagina web che nessuno ha verificato. Un annuncio
+ostile può portare istruzioni rivolte non all'utente ma al modello che prima o poi lo
+leggerà, e attraverso questi tool quel testo entra nel contesto del client come se fosse
+roba di casa: è l'iniezione **di secondo ordine**, quella in cui il colpo non parte dove
+arriva. Dentro l'applicazione la difesa c'è, e sta nei prompt del pool, che il testo non
+fidato lo racchiudono fra tag e lo dichiarano dato e mai istruzione (cap. 04); ma quando la
+porta è MCP il prompt lo compone il client, non noi, e lì la difesa spetta a lui — è il suo
+threat model, non c'è modo che diventi il nostro. Quel che possiamo fare è **dichiarare il
+confine**, ed è quello che fa questo paragrafo: chi collega un client agentico a questi tool
+sta dando in pasto al proprio modello testo di provenienza pubblica.
+
+**I tool che passano dall'AI spendono soldi senza che nessuno prema un bottone.** Sono i
+sette di §9.3 — `analizza_annuncio`, `confronta`, `mitiga`, `struttura_cv`, `genera_cv`,
+`genera_lettera`, `rifinisci_testo` —, chiamano l'AI con la chiave dell'utente, e ogni
+chiamata la paga lui: è la stessa riga in `chiamate_ai.csv` che l'applicazione annota per
+sé. Solo che nell'applicazione c'è sempre un dito che decide, mentre qui l'unico freno è il
+client: un assistente che decide da sé di valutare quaranta annunci li valuta, e la fattura
+arriva. Non è una falla — è la natura di un tool che costa — ma va saputa **prima**, perché
+il posto dove si mette il limite (conferme, tetti di spesa) è la configurazione del client,
+e da questa parte della porta non c'è.
+
+**Verso il disco, invece, il confine lo teniamo noi.** `esporta_backup` scrive nella
+cartella `backup\` della cartella dati e da nessun'altra parte: il client sceglie **cosa**
+salvare — il profilo o tutto — e mai **dove**, che non è un parametro e non lo diventa; il
+nome del file lo decide il programma (§9.3). Vale poi la regola generale dei tool che
+scrivono: l'unico pezzo di percorso che arriva da fuori è il **nome** di una
+cartella-opportunità, e passa da una guardia che ammette un nome e nient'altro — niente
+percorsi, niente `.`, niente `..` —, la stessa per i tool di lettura e per quelli di
+scrittura, perché due copie della stessa regola prima o poi divergono e la più permissiva
+sarebbe proprio quella che scrive. Il ripristino di un backup, che sovrascriverebbe roba
+dell'utente, da qui non si fa affatto (§9.3).
+
 ## 9.6 Perché ne vale la pena
 
 - **Dimostrabilità**: per il portfolio, un'app che è anche server MCP mostra competenza

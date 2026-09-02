@@ -199,6 +199,38 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
 
 ## Le trappole già pagate
 
+- **Un argomento che passa da `bash -lc` non è un argomento: è codice.** *(Trovata dalla
+  revisione di sicurezza della finalizzazione — rilievo R4 — e curata il 2026-09-01.)*
+  Ogni comando di questo server si eseguiva così: si **componeva una stringa** e la si dava
+  a `spawn("bash", ["-lc", …])`. Dentro quella stringa i chiamanti interpolavano anche gli
+  argomenti degli attrezzi — il `filtro` di `collaudi`, la cartella `dati` di `avvia_app`, il
+  `percorso` di `scegli_file` e di `cartella_dati`, il `file` di `aspetta_che` — protetti da
+  virgolette doppie e nient'altro. Ma le virgolette non sono una difesa: basta che il valore
+  ne contenga una per uscirne, e da lì il resto è una riga di shell come tutte. Falsificato
+  proprio così, sul sito di `cartella_dati`: chiedendo la cartella
+  `/tmp"; touch /tmp/PROVA-INIEZIONE-R4; echo "` la forma vecchia **crea il file**, e non lo
+  dice a nessuno; la nuova risponde «La cartella dati non esiste ancora» e lascia l'argomento
+  dov'era. È un server di sviluppo, in ascolto solo su `127.0.0.1` e senza autenticazione:
+  il rischio vero è basso, ma il modo di scrivere queste chiamate era sbagliato lo stesso, e
+  chi copia il codice di un attrezzo per farne uno nuovo si porta dietro il difetto.
+
+  **Adesso di bash non ce n'è più nemmeno uno**: `esegui` vuole il programma e i suoi
+  argomenti in un **array**, e li dà a `spawn` così come sono — un `;` o un backtick dentro
+  un valore resta un carattere qualunque. Le tre cose che la shell faceva davvero hanno
+  ciascuna la sua strada: la cartella di lavoro è l'opzione `cartella` (era `cd … &&`),
+  l'unione di stderr nell'uscita è `unisciErrori` (era `2>&1`), e il `2>/dev/null` non serve
+  perché gli errori stanno in un campo loro che chi non li vuole non guarda. I `wslpath`
+  sparsi ovunque sono diventati due funzioni, `versoWindows` e `versoWsl`. Due dettagli che
+  vale la pena sapere prima di toccare questo codice: senza shell, un programma **che non
+  esiste** non è più un codice 127 sull'uscita ma un evento `error` che, se nessuno lo
+  ascolta, fa cadere il server intero (`esegui` lo ascolta e risponde `codice: -1`); e gli
+  eseguibili si cercano nel `PATH` che il processo Node ha ereditato, non più in quello di
+  una shell di login — in WSL è lo stesso, perché i percorsi di Windows ce li mette
+  l'interoperabilità, ma un server avviato da un ambiente spoglio non troverebbe più
+  `powershell.exe`. Quel che il figlio riceve, invece, **non è cambiato di una virgola**:
+  l'array di argomenti è identico a quello che bash gli passava, e i percorsi
+  `\\wsl.localhost\…` arrivano a PowerShell interi come prima — provato.
+
 - **Di due elenchi nella stessa finestra ne guidava uno solo.** *(Debito annotato il
   2026-08-24 con R6; **curato il 2026-08-30**.)* `scegli_riga` raccoglieva tutte le liste
   della finestra e poi prendeva `$tabelle[0]`: la prima e basta. In «Modifica i testi», che
@@ -238,7 +270,14 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   davvero sotto la scrivania —
   `FindAll(Children, ProcessId)` e il `ControlType` di ciascuna. *(Il `Pane` era transitorio
   e non si è saputo riprodurre: la cura è ragionata sul dump, e questa è la sola delle tre
-  che non si è potuta falsificare.)*
+  che non si è potuta falsificare.)* *E il **2026-09-01** la stessa cosa si è vista di
+  nuovo, con la cura dentro: durante il giro dei fix finali `ridimensiona` ha preso una
+  finestra di **160 × 28**, probabilmente un tooltip. Non è stata investigata — era in corso
+  una sessione dal vivo col tutor, e fermarla sarebbe costato più del difetto — quindi non
+  si sa se il filtro sulle `Window` sia stato aggirato o se quella cosa si dichiari `Window`
+  davvero. Sta come voce aperta in `in_sospeso.md`; fino ad allora, se `ridimensiona`
+  risponde con una misura assurda, la risposta è la stessa di sopra: guarda che cosa c'è
+  sotto la scrivania prima di dare la colpa all'attrezzo.*
 
 - **Il «Premuto» che non aveva premuto.** *(Trappola del 2026-08-27, guardando a occhio le
   tre cose nuove; **curata il 2026-08-29**.)* Per tutta la sua vita `clic` aveva riferito un
@@ -536,6 +575,32 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   che costa cara perché il messaggio d'errore del `BaseOutputPath` non parla: dice che manca
   una cartella, e sembra un guasto del banco. La cartella è ignorata da git
   (`VB.NET/src/.gitignore`).
+- **Un `Await` che attraversa un thread dentro una finestra del banco non torna mai.**
+  *(2026-09-01, il blocco F2-2 dei fix UI.)* Costruire un controllo installa sul thread il
+  contesto di sincronizzazione di Windows Forms, che rimanda ogni ritorno da un `Await`
+  alla pompa di messaggi della finestra — e nel banco la pompa non c'è, perché le finestre
+  si costruiscono e non si mostrano. Finché le finte rispondono in modo sincrono l'`Await`
+  non sospende e il problema non può presentarsi; il primo collaudo che ha attraversato
+  davvero un thread (il `Task.Run` dell'export del backup) non è diventato rosso: si è
+  **piantato**, dieci minuti senza un esito — e un collaudo appeso non è rosso, è niente.
+  La cura sta in `ConMotoreAsync` (`TrovaLavoro.Collaudi/CollaudiFinestraBackup.vb`): si
+  spegne `WindowsFormsSynchronizationContext.AutoInstall` **e** si azzera il contesto per
+  il tempo della prova, rimettendo poi entrambi dov'erano. Azzerare il contesto e basta
+  non basta: il primo controllo costruito lo rimette, che è precisamente il senso di
+  «AutoInstall» — ed è una manopola del **processo**, non del thread. Il codice di
+  produzione resta con `ConfigureAwait(True)`, che lì è la cosa giusta: nell'applicazione
+  vera la pompa gira, e la riga di stato va scritta dal thread che possiede la finestra.
+- **Davanti alla sola informativa del primo avvio gli attrezzi dicono «non ha una
+  finestra aperta».** *(2026-09-01, il giro delle rifiniture del tutor.)* Al primo avvio
+  su una cartella dati vergine l'informativa modale si apre dal `Load`, prima che la
+  finestra principale esista: il processo ha **una sola** finestra di primo livello —
+  l'informativa, `ControlType.Window`, coi suoi bottoni — eppure `controlli` e `clic`
+  hanno risposto «TrovaLavoro non ha una finestra aperta», tre volte su tre, mentre una
+  UIA scritta a mano la vedeva benissimo: un `FindAll` sui figli della radice con
+  `ProcessIdProperty` l'ha elencata e un `InvokePattern` ha premuto «Ho capito» al primo
+  colpo. Quale filtro dello script la scarti non si è ancora capito — non è il `Pane`
+  della trappola qui sopra: il tipo è `Window` — e finché non lo si trova, il ripiego è
+  quello: PowerShell diretto, finestre del processo per `ProcessId`, bottone per nome.
 - **Rimettere a posto un file falsificato con `mv` non fa ricompilare.** *(2026-08-24, dal
   quinto tempo di T9e.)* Falsificare vuol dire rompere apposta il codice e guardare se il
   collaudo diventa rosso (regola 14): si mette da parte l'originale, si guasta il file, si

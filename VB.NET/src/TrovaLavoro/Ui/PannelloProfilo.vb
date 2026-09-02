@@ -122,6 +122,19 @@ Public Class PannelloProfilo
     ''' </summary>
     Public Event ProfiloEliminato As EventHandler
 
+    ''' <summary>
+    ''' L'AI ha cominciato o finito di leggere un CV: «mentre l'AI lavora non si esce»
+    ''' vale anche per la barra di navigazione, che questo pannello non può spegnere da sé
+    ''' (cap. 02.6).
+    ''' </summary>
+    ''' <remarks>
+    ''' È l'unico filo che qui mancava, ed era proprio quello dell'attesa più lunga di P2:
+    ''' la guardia interna spegneva i comandi del pannello, ma dalla barra si usciva lo
+    ''' stesso — e da un altro pannello partiva una seconda chiamata mentre la prima era in
+    ''' volo, contro il filo unico del cap. 03.8.
+    ''' </remarks>
+    Public Event LavoroAiCambiato As EventHandler
+
     Public Sub New()
 
         InitializeComponent()
@@ -262,12 +275,11 @@ Public Class PannelloProfilo
             Dim copia As String = _contesto.Archivio.MettiInSalvoIlCorrotto()
 
             Mostra(New Profilo())
-            RaccontaLoStato(
+            RaccontaUnErrore(
                 $"Il profilo c'è ma non si lascia leggere: {ex.Message}" & vbLf &
                 If(copia IsNot Nothing,
                    $"Ne ho messo una copia di sicurezza in {copia}: correggila a mano, oppure reimporta il CV.",
-                   $"Il file è {_contesto.Cartella.FileProfilo}: correggilo a mano, oppure reimporta il CV."),
-                StileApp.Pericolo)
+                   $"Il file è {_contesto.Cartella.FileProfilo}: correggilo a mano, oppure reimporta il CV."))
         End Try
 
     End Sub
@@ -333,6 +345,26 @@ Public Class PannelloProfilo
     Private Sub RaccontaLoStato(testo As String, colore As Color)
         lblStatoProfilo.Text = testo
         lblStatoProfilo.ForeColor = colore
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa non è riuscito: la parola e il colore insieme
+    ''' (v. <see cref="Segnalazioni"/>).
+    ''' </summary>
+    Private Sub RaccontaUnErrore(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoErrore & testo, StileApp.Pericolo)
+
+    End Sub
+
+    ''' <summary>
+    ''' Una riga che dice che qualcosa manca, o va fatto prima: stesso colore dell'errore,
+    ''' parola diversa — qui non è caduto niente.
+    ''' </summary>
+    Private Sub RaccontaUnAvviso(testo As String)
+
+        RaccontaLoStato(Segnalazioni.PrefissoAvviso & testo, StileApp.Pericolo)
+
     End Sub
 
     ' ==================================================================
@@ -874,16 +906,20 @@ Public Class PannelloProfilo
     ''' Toglie la voce selezionata, dopo averlo chiesto: è un'azione distruttiva
     ''' (livello 5, cap. 03.3) e quello che si cancella è il racconto dell'utente.
     ''' </summary>
+    ''' <remarks>
+    ''' Dal 2026-09-01 lo chiede la <see cref="FinestraConferma"/>, come l'eliminazione di
+    ''' una candidatura in P1: un'azione di livello 5 si conferma premendo il verbo di
+    ''' quel che si sta facendo, e due conferme dello stesso peso non possono avere due
+    ''' forme diverse a seconda del pannello in cui capitano.
+    ''' </remarks>
     Private Sub EliminaVoce(Of T)(elenco As ListBox, voci As List(Of T), come As String)
 
         Dim indice As Integer = elenco.SelectedIndex
         If indice < 0 OrElse indice >= voci.Count Then Return
 
-        Dim risposta As DialogResult = MessageBox.Show(
-            $"Vuoi togliere {come} dal profilo?" & vbLf & vbLf & elenco.Items(indice).ToString(),
-            NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2)
-
-        If risposta <> DialogResult.Yes Then Return
+        If Not FinestraConferma.Chiedi(Me, $"Togli {come} dal profilo",
+                                       SpiegazioneDellaVoceTolta(elenco.Items(indice).ToString()),
+                                       "Confermo") Then Return
 
         voci.RemoveAt(indice)
         elenco.Items.RemoveAt(indice)
@@ -898,6 +934,25 @@ Public Class PannelloProfilo
         SegnaModificato()
 
     End Sub
+
+    ''' <summary>
+    ''' Il testo della conferma: la voce che sparisce, e quando la sua sparizione arriva
+    ''' sul disco. La seconda riga non è un dettaglio tecnico — è la sola via d'uscita che
+    ''' resta a chi si accorge dopo di aver tolto quella sbagliata: uscire senza salvare.
+    ''' </summary>
+    ''' <remarks>
+    ''' È pubblica perché la legge il banco, come <c>PannelloHome.SpiegazioneDellEliminazione</c>:
+    ''' premere il bottone aprirebbe una finestra modale, e di quella un collaudo non può
+    ''' aspettare la chiusura.
+    ''' </remarks>
+    Public Shared Function SpiegazioneDellaVoceTolta(etichetta As String) As String
+
+        Return etichetta & vbLf & vbLf &
+               "Sparisce dalla scheda che stai compilando. Sul disco il profilo cambia " &
+               "quando premi «Salva profilo»: finché non lo fai, la versione salvata resta " &
+               "com'era. Confermi?"
+
+    End Function
 
     ' ==================================================================
     ' Salvare
@@ -920,10 +975,9 @@ Public Class PannelloProfilo
                                    TypeOf ex Is UnauthorizedAccessException
             ' Il profilo buono di prima è ancora al suo posto (cap. 11.1): si dice cosa
             ' è successo, e quello che l'utente ha scritto resta nei campi.
-            RaccontaLoStato(
+            RaccontaUnErrore(
                 $"Non sono riuscita a salvare il profilo: {ex.Message}" & vbLf &
-                $"La cartella è {_contesto.Cartella.CartellaProfilo}. Le tue correzioni sono ancora qui.",
-                StileApp.Pericolo)
+                $"La cartella è {_contesto.Cartella.CartellaProfilo}. Le tue correzioni sono ancora qui.")
         End Try
 
     End Sub
@@ -1046,12 +1100,11 @@ Public Class PannelloProfilo
                                    TypeOf ex Is UnauthorizedAccessException
             ' Un file aperto in un altro programma può bloccare l'eliminazione a metà: si
             ' dice dov'è la cartella e non si finge che sia andata bene.
-            RaccontaLoStato(
+            RaccontaUnErrore(
                 $"Non sono riuscita a eliminare tutto: {ex.Message}" & vbLf &
                 $"La cartella è {_contesto.Cartella.CartellaProfilo} — qualche file potrebbe " &
                 "essere aperto altrove. Parte del profilo potrebbe essere già sparita: " &
-                "riapri la scheda per vedere cos'è rimasto.",
-                StileApp.Pericolo)
+                "riapri la scheda per vedere cos'è rimasto.")
             Return False
         End Try
 
@@ -1179,10 +1232,9 @@ Public Class PannelloProfilo
         If _annullaImport IsNot Nothing Then Return
 
         If _importCv Is Nothing Then
-            RaccontaLoStato(
+            RaccontaUnAvviso(
                 $"Per leggere un CV serve la chiave API ({ClientClaude.NomeVariabileChiave}), " &
-                "che qui non c'è.",
-                StileApp.Pericolo)
+                "che qui non c'è.")
             Return
         End If
 
@@ -1232,7 +1284,7 @@ Public Class PannelloProfilo
             Catch ex As Exception When TypeOf ex Is ErroreImport OrElse TypeOf ex Is ErroreAi
                 ' Questi messaggi sono già scritti per l'utente, e dove esiste una via
                 ' d'uscita se la portano dietro (cap. 05.1).
-                RaccontaLoStato(ex.Message, StileApp.Pericolo)
+                RaccontaUnErrore(ex.Message)
 
             Finally
                 _annullaImport = Nothing
@@ -1296,12 +1348,18 @@ Public Class PannelloProfilo
     End Sub
 
     ''' <summary>Il pannello mentre l'AI lavora: niente si tocca, e si può rinunciare.</summary>
+    ''' <remarks>
+    ''' L'ultima riga è quella che manda il fatto <b>fuori</b> di qui: i comandi del
+    ''' pannello li spegne <see cref="AggiornaComandi"/>, la barra di navigazione no —
+    ''' quella la governa la finestra, ed è lei che deve saperlo (cap. 02.6).
+    ''' </remarks>
     Private Sub LetturaInCorso(inCorso As Boolean)
 
         btnImporta.Text = If(inCorso, "Annulla lettura", "IMPORTA CV DA UN FILE")
         Cursor = If(inCorso, Cursors.AppStarting, Cursors.Default)
 
         AggiornaComandi()
+        RaiseEvent LavoroAiCambiato(Me, EventArgs.Empty)
 
     End Sub
 
@@ -1321,10 +1379,13 @@ Public Class PannelloProfilo
     Private Sub btnGeneraCv1_Click(sender As Object, e As EventArgs) Handles btnGeneraCv1.Click
 
         If _modificato Then
-            RaccontaLoStato(
+            ' Era l'unico messaggio scritto in StileApp.Avviso, che è un giallo da fondo:
+            ' come inchiostro su carta chiara non si legge (v. StileApp.Avviso, che sta
+            ' dietro i badge). Adesso è una riga d'avviso come tutte le altre — stesso
+            ' rosso, e la parola davanti a dire che è un avviso e non un guasto.
+            RaccontaUnAvviso(
                 "Hai correzioni non salvate: il 📄 CV base nasce dal profilo salvato." & vbLf &
-                "Salva prima, poi generalo.",
-                StileApp.Avviso)
+                "Salva prima, poi generalo.")
             Return
         End If
 
@@ -1419,7 +1480,8 @@ Public Class PannelloProfilo
     Private Sub DichiaraLeTappeCheMancano()
 
         _suggerimenti.SetToolTip(btnAggiornamento,
-            "La sessione di aggiornamento del profilo arriva più avanti (flusso D).")
+            "La sessione di aggiornamento del profilo è rimandata a una versione futura: " &
+            "intanto il profilo si aggiorna da questa scheda, campo per campo.")
 
         _suggerimenti.SetToolTip(btnEsportaBackup,
             "Porta via i tuoi dati in un file .json, o rimettili al loro posto da un backup.")

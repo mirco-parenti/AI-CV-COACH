@@ -99,7 +99,7 @@ Partial Class PannelloHome
         'lblEtichettaProfilo
         '
         Me.lblEtichettaProfilo.Font = StileApp.FontTitoloGruppo
-        Me.lblEtichettaProfilo.ForeColor = StileApp.RossoTitoli
+        Me.lblEtichettaProfilo.ForeColor = StileApp.RossoCritico
         Me.lblEtichettaProfilo.Location = New System.Drawing.Point(0, 4)
         Me.lblEtichettaProfilo.Name = "lblEtichettaProfilo"
         Me.lblEtichettaProfilo.Size = New System.Drawing.Size(200, 18)
@@ -118,9 +118,9 @@ Partial Class PannelloHome
         'btnApriProfilo
         '
         Me.btnApriProfilo.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnApriProfilo.Location = New System.Drawing.Point(936, 16)
+        Me.btnApriProfilo.Location = New System.Drawing.Point(916, 16)
         Me.btnApriProfilo.Name = "btnApriProfilo"
-        Me.btnApriProfilo.Size = New System.Drawing.Size(170, 32)
+        Me.btnApriProfilo.Size = StileApp.BottoneLargo
         Me.btnApriProfilo.TabIndex = 2
         Me.btnApriProfilo.Text = "Apri il profilo"
         '
@@ -144,14 +144,14 @@ Partial Class PannelloHome
         Me.lblContatori.ForeColor = StileApp.TestoPrimario
         Me.lblContatori.Location = New System.Drawing.Point(0, 6)
         Me.lblContatori.Name = "lblContatori"
-        Me.lblContatori.Size = New System.Drawing.Size(620, 20)
+        Me.lblContatori.Size = New System.Drawing.Size(660, 20)
         Me.lblContatori.TabIndex = 0
         '
         'lblPromemoria
         '
         Me.lblPromemoria.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblPromemoria.Font = StileApp.FontDidascalia
-        Me.lblPromemoria.ForeColor = StileApp.Informazione
+        Me.lblPromemoria.ForeColor = StileApp.InformazioneTesto
         Me.lblPromemoria.Location = New System.Drawing.Point(0, 30)
         Me.lblPromemoria.Name = "lblPromemoria"
         Me.lblPromemoria.Size = New System.Drawing.Size(1100, 20)
@@ -231,6 +231,11 @@ Partial Class PannelloHome
         '
         'colMatch
         '
+        ' Il punteggio è un numero, e i numeri si leggono incolonnati a destra come la
+        ' data dell'ultima colonna. Windows però tiene la prima colonna di una lista
+        ' sempre allineata a sinistra — WinForms rimette Left da sé appena si prova ad
+        ' assegnare altro — e riordinare le colonne per aggirarlo costerebbe la colonna
+        ' d'apertura della coda: qui resta com'è, e la nota è la sua spiegazione.
         Me.colMatch.Text = "Match"
         Me.colMatch.Width = 130
         '
@@ -256,7 +261,10 @@ Partial Class PannelloHome
         '
         'colQuando
         '
+        ' Una data è un numero incolonnato: allineata a destra, giorni e ore si leggono
+        ' uno sotto l'altro invece di ballare con la lunghezza del testo accanto.
         Me.colQuando.Text = "Aggiornata"
+        Me.colQuando.TextAlign = System.Windows.Forms.HorizontalAlignment.Right
         Me.colQuando.Width = 130
         '
         'pnlAzioni
@@ -278,7 +286,7 @@ Partial Class PannelloHome
         '
         Me.btnApriCandidatura.Location = New System.Drawing.Point(0, 12)
         Me.btnApriCandidatura.Name = "btnApriCandidatura"
-        Me.btnApriCandidatura.Size = New System.Drawing.Size(190, 32)
+        Me.btnApriCandidatura.Size = StileApp.BottoneLargo
         Me.btnApriCandidatura.TabIndex = 0
         Me.btnApriCandidatura.Text = "Apri la candidatura"
         '
@@ -286,7 +294,7 @@ Partial Class PannelloHome
         '
         Me.btnNuovaRicerca.Location = New System.Drawing.Point(944, 12)
         Me.btnNuovaRicerca.Name = "btnNuovaRicerca"
-        Me.btnNuovaRicerca.Size = New System.Drawing.Size(150, 32)
+        Me.btnNuovaRicerca.Size = StileApp.BottoneLargo
         Me.btnNuovaRicerca.TabIndex = 3
         Me.btnNuovaRicerca.Text = "Nuova ricerca"
         '
@@ -294,7 +302,7 @@ Partial Class PannelloHome
         '
         Me.btnEsportaRegistro.Location = New System.Drawing.Point(202, 12)
         Me.btnEsportaRegistro.Name = "btnEsportaRegistro"
-        Me.btnEsportaRegistro.Size = New System.Drawing.Size(170, 32)
+        Me.btnEsportaRegistro.Size = StileApp.BottoneLargo
         Me.btnEsportaRegistro.TabIndex = 1
         Me.btnEsportaRegistro.Text = "Esporta l'elenco…"
         '
@@ -304,7 +312,7 @@ Partial Class PannelloHome
         ' che accende «Apri la candidatura», e i due non devono stare sotto lo stesso dito.
         Me.btnEliminaCandidatura.Location = New System.Drawing.Point(384, 12)
         Me.btnEliminaCandidatura.Name = "btnEliminaCandidatura"
-        Me.btnEliminaCandidatura.Size = New System.Drawing.Size(190, 32)
+        Me.btnEliminaCandidatura.Size = StileApp.BottoneLargo
         Me.btnEliminaCandidatura.TabIndex = 2
         Me.btnEliminaCandidatura.Text = "Elimina candidatura"
         '

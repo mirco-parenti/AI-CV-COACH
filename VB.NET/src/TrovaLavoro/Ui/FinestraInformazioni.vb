@@ -3,9 +3,17 @@ Imports System.Windows.Forms
 
 ''' <summary>
 ''' «Informazioni su…» (cap. 03.4): chi è questo programma, che versione è, con quale
-''' libreria di prompt sta lavorando. Si apre dal pannello del logo, in basso a sinistra
-''' (cap. 03.5), che è il posto dove quei numeri si vanno già a cercare.
+''' libreria di prompt sta lavorando. Si apre dalle <see cref="FinestraImpostazioni">
+''' Impostazioni</see>, accanto a «Come funziona…»: sono le due voci che parlano <i>del
+''' programma</i> invece che delle scelte che lo governano.
 ''' </summary>
+''' <remarks>
+''' <para>Fino al 2026-09-01 la porta era il <b>pannello del logo</b> in basso a sinistra
+''' (cap. 03.5), che è il posto dove versione e pool si vanno già a cercare. Su indicazione
+''' del tutor quel clic è stato tolto — lo stemma è un'insegna — e la finestra è passata
+''' alle Impostazioni, perché «Cerca aggiornamenti» e «Copia diagnostica» vivono qui dentro
+''' e senza una porta si sarebbero perse in silenzio.</para>
+''' </remarks>
 ''' <remarks>
 ''' <para><b>Non ripete le Impostazioni.</b> La cartella dati, i modelli, le preferenze
 ''' e le pulizie stanno in P8, e una seconda vetrina degli stessi valori sarebbe la
@@ -129,15 +137,6 @@ Public Class FinestraInformazioni
 
     ''' <summary>Se il marchio è nel disegno della finestra (v. la proprietà qui sopra).</summary>
     Private ReadOnly _marchioInMostra As Boolean
-
-    ''' <summary>Apre la finestra davanti a chi l'ha chiesta.</summary>
-    Public Shared Sub Mostra(proprietario As IWin32Window, etichettaPool As String,
-                             Optional diagnostica As Func(Of String) = Nothing,
-                             Optional controllo As Func(Of Task(Of Motore.EsitoVersione)) = Nothing)
-        Using finestra As New FinestraInformazioni(etichettaPool, diagnostica, controllo)
-            finestra.ShowDialog(proprietario)
-        End Using
-    End Sub
 
     ''' <summary>
     ''' Chiude il vuoto lasciato dall'immagine mancante, tirando su le righe e
