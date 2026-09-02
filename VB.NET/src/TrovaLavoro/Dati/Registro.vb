@@ -75,6 +75,23 @@ Namespace Dati
         ''' <summary>Se un requisito eliminatorio è rimasto scoperto: è il ⛔ del cap. 07.3.</summary>
         Public Property GateEliminatorio As Boolean
 
+        ''' <summary>
+        ''' Con quale versione di profilo fu fatto il confronto: è quel che accende la spia
+        ''' nell'elenco (<see cref="Ui.SpiaDelProfilo"/>).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Vive già sull'opportunità dal 2026-09-02, ma la coda della Home le
+        ''' opportunità non le apre: legge il registro, ed era l'unico posto del programma in
+        ''' cui una candidatura disallineata non lo diceva. Arriva qui perché la Home possa
+        ''' dirlo <b>su tutte insieme</b>, che è la domanda vera di quella schermata — non
+        ''' «questa com'è messa», ma «quali devo rifare».</para>
+        ''' <para>Un registro scritto prima di oggi non ha il campo, e chi lo rilegge trova
+        ''' una versione vuota: la spia resta <b>spenta</b>, che è la risposta giusta per
+        ''' «non lo so» e non costringe a buttare via il file. Al primo giro di ricognizione
+        ''' delle cartelle la voce si riscrive da <see cref="Da"/> e il campo torna.</para>
+        ''' </remarks>
+        Public Property VersioneProfilo As String
+
         ''' <summary>Quando la cartella è nata e quando è stata toccata l'ultima volta.</summary>
         Public Property Creata As Date
         Public Property Aggiornata As Date
@@ -127,6 +144,7 @@ Namespace Dati
                 .Destinatario = DestinatarioDellaBozza(opportunita.Email),
                 .Stelle = opportunita.Match?.Stelle,
                 .GateEliminatorio = opportunita.Match IsNot Nothing AndAlso opportunita.Match.GateEliminatorio,
+                .VersioneProfilo = opportunita.VersioneProfilo,
                 .Creata = opportunita.Creata,
                 .Aggiornata = opportunita.Aggiornata}
 
@@ -169,6 +187,7 @@ Namespace Dati
                 {"destinatario", Destinatario},
                 {"stelle", Stelle},
                 {"gate_eliminatorio", GateEliminatorio},
+                {"versione_profilo", VersioneProfilo},
                 {"creata", CampiJson.Quando(Creata)},
                 {"aggiornata", CampiJson.Quando(Aggiornata)}}
 
@@ -205,6 +224,7 @@ Namespace Dati
                 .Destinatario = CampiJson.Testo(scritta, "destinatario"),
                 .Stelle = CampiJson.Numero(scritta, "stelle"),
                 .GateEliminatorio = CampiJson.Vero(scritta, "gate_eliminatorio"),
+                .VersioneProfilo = CampiJson.Testo(scritta, "versione_profilo"),
                 .Creata = CampiJson.Istante(scritta, "creata"),
                 .Aggiornata = CampiJson.Istante(scritta, "aggiornata")}
 

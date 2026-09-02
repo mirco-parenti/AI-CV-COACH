@@ -25,8 +25,10 @@ Imports System.Windows.Forms
 ''' ha avviato sarebbe un difetto grave, non un vezzo.</para>
 ''' <para>Un clic la manda via, e dal 2026-09-01 anche <b>Invio</b>: chi conosce già il
 ''' programma non deve aspettare, e dieci secondi sono lunghi da aspettare col mouse in
-''' mano. Perché Invio abbia bisogno di un filtro dei messaggi e non basti un
-''' <c>KeyDown</c>, v. <see cref="PreFilterMessage"/>.</para>
+''' mano. Dal 2026-09-02 il clic vale <b>ovunque nell'applicazione</b>, non solo sulla
+''' schermata: chi clicca guarda il programma dietro, non il riquadro in mezzo. Perché
+''' l'uno e l'altro abbiano bisogno di un filtro dei messaggi e non bastino un
+''' <c>KeyDown</c> o un gestore <c>Click</c>, v. <see cref="PreFilterMessage"/>.</para>
 ''' </remarks>
 Public Class FinestraAvvio
     Implements ISchermataDiAvvio
@@ -42,6 +44,15 @@ Public Class FinestraAvvio
 
     ''' <summary>Il messaggio di Windows «un tasto è stato premuto».</summary>
     Private Const WmKeyDown As Integer = &H100
+
+    ''' <summary>Il messaggio «è stato premuto il tasto sinistro del mouse».</summary>
+    ''' <remarks>
+    ''' Solo il sinistro, e solo dentro l'area di lavoro delle finestre: il destro apre
+    ''' menù contestuali, e il clic sul bordo o sulla barra del titolo — che a Windows è un
+    ''' altro messaggio — serve a spostare e a ridimensionare. Mangiarsi quelli per chiudere
+    ''' uno splash sarebbe barattare un fastidio con tre.
+    ''' </remarks>
+    Private Const WmClicSinistro As Integer = &H201
 
     ''' <summary>
     ''' Quanta parte dello schermo può occupare al massimo. L'immagine è disegnata per
@@ -158,7 +169,7 @@ Public Class FinestraAvvio
 
     End Sub
 
-    ''' <summary>Invio la manda via, da qualunque finestra lo si prema.</summary>
+    ''' <summary>Invio e un clic la mandano via, da qualunque finestra arrivino.</summary>
     ''' <remarks>
     ''' <para><b>Perché un filtro dei messaggi e non un <c>KeyDown</c> di questa
     ''' finestra.</b> La schermata è <c>TopMost</c> e resta davanti, ma il <b>fuoco della
@@ -168,13 +179,32 @@ Public Class FinestraAvvio
     ''' questa finestra non scatterebbe mai, e il tasto sembrerebbe non funzionare a caso.
     ''' Il filtro vede invece i tasti di <b>tutto</b> il ciclo dei messaggi, cioè anche
     ''' quelli diretti alla finestra principale.</para>
-    ''' <para>Il tasto si <b>consuma</b> (<c>True</c>): l'Invio che manda via la schermata
-    ''' non deve arrivare anche al bottone che ha il fuoco dietro di lei.</para>
+    ''' <para><b>E dal 2026-09-02 vale anche per il clic</b>, per la stessa ragione
+    ''' rovesciata. Un clic <i>sulla schermata</i> la mandava già via, ma la schermata è un
+    ''' riquadro in mezzo a un desktop: chi ha la mano sul mouse clicca dove sta guardando,
+    ''' e quello che sta guardando è l'applicazione dietro. Il clic finiva lì, non
+    ''' succedeva niente, e uno splash che non se ne va quando gli clicchi accanto sembra
+    ''' un programma piantato.</para>
+    ''' <para>Il tasto e il clic si <b>consumano</b> (<c>True</c>): l'Invio che manda via la
+    ''' schermata non deve arrivare anche al bottone che ha il fuoco dietro di lei, e a
+    ''' maggior ragione il clic non deve premere un bottone che chi clicca non stava nemmeno
+    ''' guardando. Il primo gesto serve a togliere di mezzo la schermata; il secondo è
+    ''' quello vero.</para>
     ''' </remarks>
     Public Function PreFilterMessage(ByRef messaggio As Message) As Boolean _
         Implements IMessageFilter.PreFilterMessage
 
-        If _chiusa OrElse messaggio.Msg <> WmKeyDown Then Return False
+        If _chiusa Then Return False
+
+        ' Un clic qualunque, ovunque nell'applicazione. Il gestore Cliccata copre la
+        ' schermata e la sua immagine; questo copre tutto il resto — cioè la finestra
+        ' principale, che è quella grande dietro e quella su cui il mouse si trova già.
+        If messaggio.Msg = WmClicSinistro Then
+            ChiudiSubito()
+            Return True
+        End If
+
+        If messaggio.Msg <> WmKeyDown Then Return False
         If messaggio.WParam.ToInt32() <> CInt(Keys.Enter) Then Return False
 
         ChiudiSubito()

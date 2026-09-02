@@ -89,13 +89,20 @@ Public Class PannelloHome
     Private Const AltezzaFiltroConPromemoria As Integer = 56
 
     ' Le colonne della coda, nell'ordine in cui il designer le dichiara: servono a
-    ' sapere per quale si sta ordinando.
-    Private Const ColonnaMatch As Integer = 0
-    Private Const ColonnaAzienda As Integer = 1
-    Private Const ColonnaRuolo As Integer = 2
-    Private Const ColonnaStato As Integer = 3
-    Private Const ColonnaFonte As Integer = 4
-    Private Const ColonnaQuando As Integer = 5
+    ' sapere per quale si sta ordinando, e a scrivere ogni cella al suo posto.
+    '
+    ' Vanno tenute in pari con l'AddRange di lvwCoda, e non è una raccomandazione di stile:
+    ' aggiungendo «Profilo» in seconda posizione il 2026-09-02 questi numeri erano rimasti
+    ' quelli di prima, e ogni intestazione da lì in poi ordinava per la colonna successiva —
+    ' si cliccava «Azienda» e la coda si ordinava per ruolo. Nessun collaudo lo vedeva,
+    ' perché i due che provano l'ordinamento passano gli indici a mano.
+    Private Const ColonnaProfilo As Integer = 0
+    Private Const ColonnaMatch As Integer = 1
+    Private Const ColonnaAzienda As Integer = 2
+    Private Const ColonnaRuolo As Integer = 3
+    Private Const ColonnaStato As Integer = 4
+    Private Const ColonnaFonte As Integer = 5
+    Private Const ColonnaQuando As Integer = 6
 
     ' Le voci del filtro «Mostra», nell'ordine in cui entrano nella tendina.
     Private Const FiltroTutte As Integer = 0
@@ -321,7 +328,7 @@ Public Class PannelloHome
         lvwCoda.Items.Clear()
 
         For Each voce As VoceRegistro In Ordinate(Filtrate())
-            lvwCoda.Items.Add(RigaDellaVoce(voce, AttesaDaSegnalare(voce)))
+            lvwCoda.Items.Add(RigaDellaVoce(voce, AttesaDaSegnalare(voce), SpiaDi(voce)))
         Next
 
         lvwCoda.EndUpdate()
@@ -544,16 +551,38 @@ Public Class PannelloHome
     ''' le righe si disegnano già in ordine, e il banco può leggerlo senza chiedere niente
     ''' a Windows.
     ''' </summary>
+    ''' <remarks>
+    ''' Ordinando per «Profilo» gli stati si calcolano <b>prima</b>, una volta per
+    ''' candidatura: la spia interroga lo storico del profilo, che sta su disco, e un
+    ''' ordinamento che lo chiedesse a ogni confronto lo rileggerebbe n·log n volte per
+    ''' rispondere sempre la stessa cosa.
+    ''' </remarks>
     Private Function Ordinate(voci As IEnumerable(Of VoceRegistro)) As List(Of VoceRegistro)
 
         Dim elenco As New List(Of VoceRegistro)(voci)
 
+        If _ordinePer = ColonnaProfilo Then
+            _statiDellaSpia = New Dictionary(Of String, StatoSpia)(StringComparer.Ordinal)
+            For Each voce As VoceRegistro In elenco
+                _statiDellaSpia(voce.Cartella) = SpiaDi(voce).Stato
+            Next
+        End If
+
         elenco.Sort(AddressOf ConfrontaSecondoLaColonna)
         If _discendente Then elenco.Reverse()
+
+        _statiDellaSpia = Nothing
 
         Return elenco
 
     End Function
+
+    ''' <summary>
+    ''' Gli stati della spia calcolati per l'ordinamento in corso, e solo per quello: fuori
+    ''' da <see cref="Ordinate"/> è <c>Nothing</c>, perché il profilo può cambiare fra un
+    ''' ridisegno e l'altro e una tabella tenuta viva direbbe cose vecchie.
+    ''' </summary>
+    Private _statiDellaSpia As Dictionary(Of String, StatoSpia)
 
     ''' <summary>
     ''' Il confronto fra due righe secondo la colonna scelta. A parità decide il nome
@@ -565,6 +594,12 @@ Public Class PannelloHome
         Dim esito As Integer
 
         Select Case _ordinePer
+
+            ' Le tre spie nell'ordine dell'enum: spenta, corrente, obsoleta. Cliccando due
+            ' volte si gira il verso e le obsolete salgono in cima, che è la domanda per cui
+            ' questa colonna si ordina — «quali sono da rifare?».
+            Case ColonnaProfilo
+                esito = StatoDellaSpia(a).CompareTo(StatoDellaSpia(b))
 
             Case ColonnaMatch
                 esito = Nullable.Compare(Of Double)(a.Stelle, b.Stelle)
@@ -605,18 +640,27 @@ Public Class PannelloHome
     ''' Da quanti giorni questa candidatura aspetta, se è una di quelle da sollecitare;
     ''' <c>Nothing</c> per tutte le altre (cap. 07.3).
     ''' </param>
+    ''' <param name="spia">
+    ''' Se il punteggio di questa riga è ancora quello del profilo di oggi
+    ''' (<see cref="SpiaDelProfilo"/>). Arriva già letta perché questa funzione è
+    ''' <c>Shared</c> e l'archivio del profilo non ce l'ha: chi disegna una riga non deve
+    ''' avere anche le chiavi dei dati.
+    ''' </param>
     ''' <remarks>
     ''' Da T9c la colonna «Stato» dice l'<b>esito</b> quando c'è — «Rifiutata», non «Con
     ''' esito» — e per le candidature ferme aggiunge da quanto aspettano. Il colore le fa
     ''' notare, ma è il numero a dire perché sono lì: un colore da solo si può leggere
     ''' come «importante» tanto quanto «in ritardo».
     ''' </remarks>
-    Private Shared Function RigaDellaVoce(voce As VoceRegistro, giorniDiAttesa As Integer?) As ListViewItem
+    Private Shared Function RigaDellaVoce(voce As VoceRegistro,
+                                          giorniDiAttesa As Integer?,
+                                          spia As LetturaSpia) As ListViewItem
 
         Dim aCheStato As String = EsitiCandidatura.EtichettaDi(voce.Stato, voce.Esito)
         If giorniDiAttesa.HasValue Then aCheStato &= $" · {giorniDiAttesa.Value} gg"
 
         Dim riga As New ListViewItem({
+            spia.Scritta,
             MatchScritto(voce),
             AziendaDi(voce),
             RuoloDi(voce),
@@ -631,7 +675,69 @@ Public Class PannelloHome
         ' letto (6,36), non quello fatto per stare sotto il bianco.
         If giorniDiAttesa.HasValue Then riga.ForeColor = StileApp.InformazioneTesto
 
+        TingiLaSpia(riga, spia)
+
         Return riga
+
+    End Function
+
+    ''' <summary>
+    ''' Dà alla cella della spia il suo inchiostro, lasciando alle altre quello della riga.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Un ListView colora <b>tutta</b> la riga con lo stile dell'elemento, e
+    ''' l'interruttore per uscirne è <c>UseItemStyleForSubItems</c>. Solo che spegnerlo
+    ''' rimette d'ufficio ogni cella al colore del controllo: la riga grigia di una
+    ''' candidatura scartata, e l'azzurro di una da sollecitare, tornerebbero neri senza che
+    ''' nessuno abbia toccato <c>ForeColor</c>. Per questo il colore della riga si riscrive
+    ''' cella per cella <b>prima</b> di dare il suo alla spia — quel che qui sembra un giro
+    ''' inutile è l'unico modo perché i tre colori convivano.</para>
+    ''' <para>A spia spenta non si spegne l'interruttore: una riga senza niente da dire
+    ''' resta una riga normale, e meno cose si toccano meno se ne rompono.</para>
+    ''' </remarks>
+    Private Shared Sub TingiLaSpia(riga As ListViewItem, spia As LetturaSpia)
+
+        If Not spia.Accesa Then Return
+
+        riga.UseItemStyleForSubItems = False
+
+        For Each cella As ListViewItem.ListViewSubItem In riga.SubItems
+            cella.ForeColor = riga.ForeColor
+        Next
+
+        riga.SubItems(ColonnaProfilo).ForeColor = spia.Colore
+        riga.ToolTipText = spia.Perche
+
+    End Sub
+
+    ''' <summary>
+    ''' Com'è messa questa candidatura rispetto al profilo di oggi.
+    ''' </summary>
+    ''' <remarks>
+    ''' Le stelle sono la prova che un confronto c'è stato: senza, non c'è nessun giudizio
+    ''' da qualificare e la spia resta spenta (v. <see cref="StatoSpia.Spenta"/>).
+    ''' </remarks>
+    Private Function SpiaDi(voce As VoceRegistro) As LetturaSpia
+
+        If _contesto Is Nothing Then Return SpiaDelProfilo.Spenta
+
+        Return SpiaDelProfilo.Leggi(_contesto.Archivio, voce.VersioneProfilo, voce.Stelle.HasValue)
+
+    End Function
+
+    ''' <summary>
+    ''' Lo stato della spia di questa voce, preso dalla tabella che
+    ''' <see cref="Ordinate"/> prepara. Senza tabella lo si chiede al profilo: costa di più,
+    ''' ma una risposta giusta e lenta è meglio di una veloce e finta.
+    ''' </summary>
+    Private Function StatoDellaSpia(voce As VoceRegistro) As StatoSpia
+
+        Dim stato As StatoSpia
+
+        If _statiDellaSpia IsNot Nothing AndAlso
+           _statiDellaSpia.TryGetValue(voce.Cartella, stato) Then Return stato
+
+        Return SpiaDi(voce).Stato
 
     End Function
 
@@ -986,7 +1092,7 @@ Public Class PannelloHome
     ''' </remarks>
     Private Sub AdattaLeColonne()
 
-        Dim fisse As Integer = colMatch.Width + colAzienda.Width +
+        Dim fisse As Integer = colProfilo.Width + colMatch.Width + colAzienda.Width +
                                colStato.Width + colFonte.Width + colQuando.Width
 
         colRuolo.Width = Math.Max(LarghezzaMinimaRuolo,

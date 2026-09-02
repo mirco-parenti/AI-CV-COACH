@@ -715,6 +715,39 @@ Public Class PannelloProfilo
 
         lblStatoCvBase.Text = StatoDelCvBase()
 
+        MostraLaSpiaDelCvBase()
+
+    End Sub
+
+    ''' <summary>
+    ''' Accende la spia sopra il 📄 CV base: se quel CV è ancora il ritratto del profilo
+    ''' che si sta guardando.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Qui la domanda ha una risposta in più che altrove, ed è la più immediata di
+    ''' tutte: se ci sono correzioni <b>a video e non salvate</b>, il profilo è già cambiato
+    ''' e nessuna versione su disco lo racconta ancora. È la stessa sfumatura che
+    ''' <see cref="ProfiloCambiatoDopoIlCvBase"/> tratta per la riga di testo, e passa alla
+    ''' spia per la stessa strada — un parametro — invece che con una regola parallela: due
+    ''' copie della stessa domanda sono due risposte che prima o poi divergono.</para>
+    ''' </remarks>
+    Private Sub MostraLaSpiaDelCvBase()
+
+        Dim salvato As Dati.CvBase = CvBaseSuDisco()
+        Dim ceUnCv As Boolean = salvato IsNot Nothing AndAlso salvato.Cv IsNot Nothing
+
+        Dim spia As LetturaSpia = SpiaDelProfilo.Spenta
+
+        If _contesto IsNot Nothing AndAlso ceUnCv Then
+            spia = SpiaDelProfilo.Leggi(_contesto.Archivio, salvato.VersioneProfilo,
+                                        ceQualcosa:=True, giaCambiato:=_modificato)
+        End If
+
+        lblSpiaCvBase.Text = spia.Scritta
+        lblSpiaCvBase.ForeColor = spia.Colore
+        lblSpiaCvBase.Visible = spia.Accesa
+        _suggerimenti.SetToolTip(lblSpiaCvBase, spia.Perche)
+
     End Sub
 
     ''' <summary>

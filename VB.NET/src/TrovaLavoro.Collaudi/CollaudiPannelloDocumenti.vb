@@ -1700,12 +1700,23 @@ Namespace Ui
 
         End Function
 
+        ''' <summary>
+        ''' Anche il profilo <b>soltanto cresciuto</b> ferma la riscrittura, dal 2026-09-02.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Fin qui questo collaudo diceva l'opposto — «il giro si rifà tutto, come
+        ''' sempre» — e la ragione era che i <b>fatti</b> restano quelli del profilo di oggi.
+        ''' Ma un CV mirato non è un elenco di fatti: è una scelta di cosa mettere in
+        ''' risalto, e quella la fanno i <b>giudizi</b>, che sono di allora. Fra un
+        ''' salvataggio e l'altro può essere cambiato un requisito eliminatorio, e allora il
+        ''' documento non è vecchio: è scritto sulla misura sbagliata, e una volta esportato
+        ''' non lo dichiara a nessuno.</para>
+        ''' <para>Non è un collaudo riscritto per farlo tornare verde: è la regola che è
+        ''' cambiata, e questo è il posto dove si vede che è cambiata.</para>
+        ''' </remarks>
         <TestMethod>
-        Public Async Function UnProfiloSoloCresciutoNonFermaLaRigenerazione() As Task
+        Public Async Function UnProfiloSoloCresciutoFermaLaRigenerazione() As Task
 
-            ' Il rovescio, ed è il caso frequente: il profilo cambia versione a ogni
-            ' salvataggio, e i vecchi documenti restano spiegabili. Fermarsi anche qui
-            ' sarebbe un avviso a ogni giro, per qualcosa che funziona.
             Dim generatore As New GeneratoreFinto
             generatore.Dara(CvMirato).Dara(Lettera).Dara(CvMirato).Dara(Lettera)
 
@@ -1716,13 +1727,155 @@ Namespace Ui
                     candidatura.VersioneProfilo = contesto.Archivio.Versioni().Last()
 
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(),
+                                    "in pari col profilo i documenti si scrivono")
 
-                    ' Il profilo cresce: versione nuova, ma quella di allora è ancora lì.
+                    ' Il profilo cresce: versione nuova, e quella di allora è ancora lì.
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+                    Await pannello.RigeneraAsync()
+
+                    Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(),
+                                    "l'AI non è stata richiamata: prima si rifà il match")
+                    Assert.Contains("Riconfronta", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "e il pannello dice da dove si passa")
+                    Assert.IsNotNull(candidatura.Cv,
+                                     "i documenti di prima restano: «Rigenera» li azzera prima " &
+                                     "di riscriverli, e fermarsi dopo li avrebbe distrutti per niente")
+                    Assert.IsNotNull(candidatura.Lettera)
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SuUnProfiloCresciutoLaLetteraNonSiRiallinea() As Task
+
+            ' Stessa regola dall'altra porta: il riallineo della lettera è una riscrittura
+            ' come le altre, e passa dallo stesso cancello.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.VersioneProfilo = contesto.Archivio.Versioni().Last()
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+
+                    Await pannello.RiallineaLaLetteraAsync()
+
+                    Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(),
+                                    "la lettera non è stata riscritta")
+                    Assert.Contains("Riconfronta", Etichetta(pannello, "lblStatoDocumenti").Text)
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function ArrivandoDallaBarraSiGuardaSenzaGenerare() As Task
+
+            ' La voce «📄 Documenti» della barra passa di qui con generaSeManca:=False.
+            ' Chi preme lì ha chiesto di guardare: far partire una chiamata all'AI perché è
+            ' passato di là sarebbe una spesa che non ha chiesto.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura, generaSeManca:=False)
+
+                    Assert.IsEmpty(generatore.LavoriChiesti(), "guardare non spende")
+                    Assert.Contains("Genera CV + lettera", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "e si dice dov'è il gesto che li scrive")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function ColProfiloObsoletoRigeneraNonSiPremeAffatto() As Task
+
+            ' La segnalazione del 2026-09-02, alla lettera: «mi fa vedere che posso cliccare
+            ' rigenera». Rifiutare dopo il clic non basta — un bottone che sembra pronto è un
+            ' invito. Adesso è spento, e il perché è a portata d'occhio: la riga di stato lo
+            ' dice, e il suggerimento manda dove sta il rimedio.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.VersioneProfilo = contesto.Archivio.Versioni().Last()
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    Assert.IsTrue(Bottone(pannello, "btnRigenera").Enabled,
+                                  "in pari col profilo si rigenera come sempre")
+
+                    ' Il profilo cambia, e si torna a guardare i documenti.
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+                    Await pannello.MostraLaCandidaturaAsync(candidatura, generaSeManca:=False)
+
+                    Assert.IsFalse(Bottone(pannello, "btnRigenera").Enabled,
+                                   "adesso non si preme affatto")
+                    Assert.Contains("Riconfronta", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                    "e la riga di stato dice dove si passa, invece di invitare a rigenerare")
+                    Assert.DoesNotContain("puoi rigenerarli", Etichetta(pannello, "lblStatoDocumenti").Text,
+                                          "l'invito di prima sarebbe un invito a premere un bottone spento")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function ScegliendoloDallaTendinaIlProfiloObsoletoFermaLoStesso() As Task
+
+            ' L'altra porta della stessa stanza: la tendina «Documento:».
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera).Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.VersioneProfilo = contesto.Archivio.Versioni().Last()
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+
+                    Await pannello.ApriDallaTendinaAsync(0)
+                    Await pannello.RigeneraAsync()
+
+                    Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(),
+                                    "nemmeno da qui si riscrive")
+                End Function)
+
+        End Function
+
+        <TestMethod>
+        Public Async Function SenzaVersioneAnnotataNonSiFermaNiente() As Task
+
+            ' Le candidature nate prima che la versione di profilo si annotasse non hanno
+            ' niente addosso, e di un dubbio non si fa un divieto: quelle si riscrivono come
+            ' sempre. Senza questo controllo il cancello nuovo chiuderebbe la porta a tutto
+            ' quel che c'era prima.
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera).Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
                     contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
                     Await pannello.RigeneraAsync()
 
                     Assert.AreEqual("cv_mirato → lettera → cv_mirato → lettera",
-                                    generatore.LavoriChiesti(), "il giro si rifà tutto, come sempre")
+                                    generatore.LavoriChiesti(), "il giro si rifà tutto")
                 End Function)
 
         End Function

@@ -167,8 +167,26 @@ del profilo alla conversazione su una candidatura.
    lettura e non lo era. Adesso il pannello se ne accorge **prima** di chiamare l'AI e lo dice
    in chiaro, da qualunque parte ci si arrivi: quel che l'utente legge è cos'è successo e qual
    è l'unica strada, rifare la candidatura dal suo annuncio, che è lì, salvato, a un passo.
-   Dove sta la guardia, su quali comandi e perché il segno è la versione **mancante** e non
-   una versione diversa: cap. 08.4 e cap. 11.1.*
+   Dove sta la guardia e su quali comandi: cap. 08.4 e cap. 11.1.*
+
+   *E dal **2026-09-02** la stessa guardia vale anche per il profilo **soltanto cambiato**,
+   non più solo per quello sparito. Fin qui il segno era la versione **mancante**, e la
+   ragione era che i **fatti** restano quelli del profilo di oggi: un profilo che cresce
+   lascia documenti ancora spiegabili, e fermarsi lì sarebbe stato un avviso a ogni giro.
+   Quel ragionamento guardava la cosa sbagliata. Un CV mirato non è un elenco di fatti: è
+   una scelta di **che cosa mettere in risalto**, e a farla sono i **giudizi**, che sono di
+   allora. Fra un salvataggio e l'altro può cambiare un requisito **eliminatorio** — la
+   patente è quello che l'ha fatto vedere — e allora il documento non è vecchio: è scritto
+   sulla misura sbagliata, e a differenza delle stelle non lo dichiara a nessuno. Un CV così,
+   una volta esportato, è indistinguibile da uno buono. **Prima si rifà il match, poi si
+   scrivono i documenti**: il pannello rifiuta e indica il gesto — «⚠ Riconfronta» in P4 —
+   che costa una chiamata sola e non chiede di ricopiare niente. Si rifiuta invece di
+   chiedere «lo scrivo comunque?» perché quella domanda metterebbe l'utente a decidere di
+   una cosa che non può vedere, la differenza fra i giudizi di ieri e quelli di oggi, e la
+   risposta comoda è sempre sì. Il 📄 CV base non passa da questa guardia e non deve: nasce
+   dal solo profilo, senza giudizi, e riscriverlo è esattamente il modo di rimetterlo in
+   pari. Le candidature **senza versione annotata** — quelle nate prima che si annotasse —
+   non si fermano affatto: di un dubbio non si fa un divieto.*
 5. Alla conferma, l'app produce i file: **DOCX e/o PDF** del CV, testo della lettera
    (nel corpo email e/o come allegato).
 

@@ -32,12 +32,14 @@ Partial Class PannelloDocumenti
         Me.pnlCorpo = New System.Windows.Forms.Panel()
         Me.pnlCv = New System.Windows.Forms.Panel()
         Me.lblCv = New System.Windows.Forms.Label()
+        Me.lblSpiaCv = New System.Windows.Forms.Label()
         Me.txtCv = New System.Windows.Forms.TextBox()
         Me.pnlAnnuncio = New System.Windows.Forms.Panel()
         Me.lblAnnuncio = New System.Windows.Forms.Label()
         Me.txtAnnuncio = New System.Windows.Forms.TextBox()
         Me.pnlLettera = New System.Windows.Forms.Panel()
         Me.lblLettera = New System.Windows.Forms.Label()
+        Me.lblSpiaLettera = New System.Windows.Forms.Label()
         Me.txtLettera = New System.Windows.Forms.TextBox()
         Me.pnlAzioni = New System.Windows.Forms.Panel()
         Me.btnTornaIndietro = New System.Windows.Forms.Button()
@@ -219,6 +221,7 @@ Partial Class PannelloDocumenti
         'pnlCv
         '
         Me.pnlCv.Controls.Add(Me.txtCv)
+        Me.pnlCv.Controls.Add(Me.lblSpiaCv)
         Me.pnlCv.Controls.Add(Me.lblCv)
         Me.pnlCv.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlCv.Location = New System.Drawing.Point(310, 0)
@@ -237,6 +240,22 @@ Partial Class PannelloDocumenti
         Me.lblCv.Size = New System.Drawing.Size(404, 18)
         Me.lblCv.TabIndex = 0
         Me.lblCv.Text = "CV"
+        '
+        'lblSpiaCv
+        '
+        ' Sotto il titolo della colonna e sopra il testo: la spia sta attaccata al
+        ' documento di cui parla, che è quel che si chiedeva (v. SpiaDelProfilo). Docked in
+        ' cima come il titolo, e con l'ordine di aggiunta che la mette fra i due; a spia
+        ' spenta si nasconde, e con Dock la riga si richiude da sé invece di lasciare un
+        ' buco alto diciotto punti.
+        Me.lblSpiaCv.Dock = System.Windows.Forms.DockStyle.Top
+        Me.lblSpiaCv.Font = StileApp.FontTitoloGruppo
+        Me.lblSpiaCv.ForeColor = StileApp.TestoSecondario
+        Me.lblSpiaCv.Location = New System.Drawing.Point(0, 18)
+        Me.lblSpiaCv.Name = "lblSpiaCv"
+        Me.lblSpiaCv.Size = New System.Drawing.Size(404, 18)
+        Me.lblSpiaCv.TabIndex = 1
+        Me.lblSpiaCv.Visible = False
         '
         'txtCv
         '
@@ -287,6 +306,7 @@ Partial Class PannelloDocumenti
         'pnlLettera
         '
         Me.pnlLettera.Controls.Add(Me.txtLettera)
+        Me.pnlLettera.Controls.Add(Me.lblSpiaLettera)
         Me.pnlLettera.Controls.Add(Me.lblLettera)
         Me.pnlLettera.Dock = System.Windows.Forms.DockStyle.Right
         Me.pnlLettera.Location = New System.Drawing.Point(726, 0)
@@ -304,6 +324,20 @@ Partial Class PannelloDocumenti
         Me.lblLettera.Size = New System.Drawing.Size(380, 18)
         Me.lblLettera.TabIndex = 0
         Me.lblLettera.Text = "Lettera di presentazione"
+        '
+        'lblSpiaLettera
+        '
+        ' Come lblSpiaCv, sull'altra colonna: due documenti nati dallo stesso confronto
+        ' portano la stessa firma, ma chi guarda la lettera guarda la lettera, e una spia
+        ' sull'altra colonna non è una spia sua.
+        Me.lblSpiaLettera.Dock = System.Windows.Forms.DockStyle.Top
+        Me.lblSpiaLettera.Font = StileApp.FontTitoloGruppo
+        Me.lblSpiaLettera.ForeColor = StileApp.TestoSecondario
+        Me.lblSpiaLettera.Location = New System.Drawing.Point(0, 18)
+        Me.lblSpiaLettera.Name = "lblSpiaLettera"
+        Me.lblSpiaLettera.Size = New System.Drawing.Size(380, 18)
+        Me.lblSpiaLettera.TabIndex = 1
+        Me.lblSpiaLettera.Visible = False
         '
         'txtLettera
         '
@@ -439,6 +473,8 @@ Partial Class PannelloDocumenti
     Friend WithEvents txtAnnuncio As System.Windows.Forms.TextBox
     Friend WithEvents pnlCv As System.Windows.Forms.Panel
     Friend WithEvents lblCv As System.Windows.Forms.Label
+    Friend WithEvents lblSpiaCv As System.Windows.Forms.Label
+    Friend WithEvents lblSpiaLettera As System.Windows.Forms.Label
     Friend WithEvents txtCv As System.Windows.Forms.TextBox
     Friend WithEvents pnlLettera As System.Windows.Forms.Panel
     Friend WithEvents lblLettera As System.Windows.Forms.Label

@@ -14,6 +14,17 @@ REM     Il rimedio non e' un quoting piu' furbo: e' non credere all'esito e anda
 REM     guardare se la finestra c'e'. Lo fa questo file, e per questo va invocato lui
 REM     e non "start": un .bat passa come argomento unico, e li' il quoting regge.
 REM
+REM  2b. E MainWindowHandle e' la finestra PRINCIPALE, che non e' sempre la prima. Al
+REM      primissimo avvio su una cartella dati mai usata, prima di lei si apre
+REM      l'informativa (cap. 11.3) e subito dopo la richiesta della chiave: finche' quelle
+REM      restano a video la finestra principale non esiste ancora, il processo risponde
+REM      handle=0 e questo lanciatore direbbe "NON e' partita" mentre a video c'e'
+REM      eccome qualcosa. Visto il 2026-09-02 aprendo l'app su una cartella usa-e-getta.
+REM      Non e' un difetto da curare qui: quelle due finestre aspettano una risposta, e
+REM      un lanciatore che le contasse come "aperta" direbbe una cosa altrettanto falsa.
+REM      E' un caso da riconoscere - se non parte al primo avvio, guarda se c'e' una
+REM      finestra che ti sta chiedendo qualcosa.
+REM
 REM  2. Di TrovaLavoro.exe ce n'e' piu' D'UNO. Il server MCP del prodotto gira come
 REM     TrovaLavoro.exe --mcp e non ha NESSUNA finestra. Chi cerca "il primo processo
 REM     che si chiama cosi'" trova quasi sempre lui, e conclude che l'applicazione non

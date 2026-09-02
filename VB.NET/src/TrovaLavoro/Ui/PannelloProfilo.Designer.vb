@@ -84,6 +84,7 @@ Partial Class PannelloProfilo
         Me.tabTestoLetto = New System.Windows.Forms.TabPage()
         Me.tabCvBase = New System.Windows.Forms.TabPage()
         Me.lblStatoCvBase = New System.Windows.Forms.Label()
+        Me.lblSpiaCvBase = New System.Windows.Forms.Label()
         Me.txtCvBase = New System.Windows.Forms.TextBox()
         Me.lblTestoLetto = New System.Windows.Forms.Label()
         Me.txtTestoLetto = New System.Windows.Forms.TextBox()
@@ -851,6 +852,7 @@ Partial Class PannelloProfilo
         '
         Me.tabCvBase.BackColor = StileApp.FondoCasella
         Me.tabCvBase.Controls.Add(Me.txtCvBase)
+        Me.tabCvBase.Controls.Add(Me.lblSpiaCvBase)
         Me.tabCvBase.Controls.Add(Me.lblStatoCvBase)
         Me.tabCvBase.Location = New System.Drawing.Point(4, 24)
         Me.tabCvBase.Name = "tabCvBase"
@@ -869,6 +871,20 @@ Partial Class PannelloProfilo
         Me.lblStatoCvBase.Size = New System.Drawing.Size(1070, 34)
         Me.lblStatoCvBase.TabIndex = 0
         Me.lblStatoCvBase.Text = ""
+        '
+        'lblSpiaCvBase
+        '
+        ' Fra la riga che racconta il CV base e il CV stesso, docked come loro: la riga
+        ' spiega, la spia dichiara (v. SpiaDelProfilo). Sono due mestieri diversi e stanno
+        ' bene vicini — a spia spenta questa sparisce e la riga si riprende lo spazio.
+        Me.lblSpiaCvBase.Dock = System.Windows.Forms.DockStyle.Top
+        Me.lblSpiaCvBase.Font = StileApp.FontTitoloGruppo
+        Me.lblSpiaCvBase.ForeColor = StileApp.TestoSecondario
+        Me.lblSpiaCvBase.Location = New System.Drawing.Point(14, 48)
+        Me.lblSpiaCvBase.Name = "lblSpiaCvBase"
+        Me.lblSpiaCvBase.Size = New System.Drawing.Size(1070, 18)
+        Me.lblSpiaCvBase.TabIndex = 1
+        Me.lblSpiaCvBase.Visible = False
         '
         'txtCvBase
         '
@@ -1082,6 +1098,7 @@ Partial Class PannelloProfilo
     Friend WithEvents tabTestoLetto As System.Windows.Forms.TabPage
     Friend WithEvents tabCvBase As System.Windows.Forms.TabPage
     Friend WithEvents lblStatoCvBase As System.Windows.Forms.Label
+    Friend WithEvents lblSpiaCvBase As System.Windows.Forms.Label
     Friend WithEvents txtCvBase As System.Windows.Forms.TextBox
     Friend WithEvents lblTestoLetto As System.Windows.Forms.Label
     Friend WithEvents txtTestoLetto As System.Windows.Forms.TextBox

@@ -341,7 +341,14 @@ Public Class PannelloDocumenti
     ''' Mostra i documenti di una candidatura, generandoli se non ci sono ancora. È la
     ''' strada che arriva da P4 (cap. 12, A7).
     ''' </summary>
-    Public Async Function MostraLaCandidaturaAsync(candidatura As Opportunita) As Task
+    ''' <param name="generaSeManca">
+    ''' Se scriverli quando non ci sono. <c>True</c> per chi è arrivato premendo «Genera CV +
+    ''' lettera», che è una richiesta esplicita; <c>False</c> per chi è arrivato dalla
+    ''' <b>barra</b>, dal 2026-09-02: lì l'utente ha chiesto di <i>guardare</i>, e far partire
+    ''' una chiamata all'AI perché è passato di qua sarebbe una spesa che non ha chiesto.
+    ''' </param>
+    Public Async Function MostraLaCandidaturaAsync(candidatura As Opportunita,
+                                                   Optional generaSeManca As Boolean = True) As Task
 
         If candidatura Is Nothing Then Throw New ArgumentNullException(NameOf(candidatura))
         If AiAlLavoro Then Return
@@ -365,8 +372,27 @@ Public Class PannelloDocumenti
                 Return
             End If
 
-            RaccontaLoStato("Rileggili con calma: se qualcosa non ti convince, puoi rigenerarli.",
-                            StileApp.TestoSecondario)
+            ' E se il profilo non è più quello, quella è la prima cosa da dire: «puoi
+            ' rigenerarli» sarebbe un invito a premere un bottone che rifiuterà.
+            Dim nonPiuQuello As String = MotivoProfiloNonPiuQuello()
+
+            If nonPiuQuello IsNot Nothing Then
+                RaccontaUnAvviso(nonPiuQuello)
+            Else
+                RaccontaLoStato("Rileggili con calma: se qualcosa non ti convince, puoi rigenerarli.",
+                                StileApp.TestoSecondario)
+            End If
+
+            Return
+        End If
+
+        ' Chi è arrivato dalla barra voleva guardare, non spendere: se non c'è niente da
+        ' mostrare glielo si dice, e la generazione resta il gesto esplicito di P4.
+        If Not generaSeManca Then
+            RaccontaLoStato(
+                "Questa candidatura non ha ancora documenti: si scrivono da «Genera CV + lettera», " &
+                $"nella scheda «{NomiUi.Confronto}».",
+                StileApp.TestoSecondario)
             Return
         End If
 
@@ -519,7 +545,7 @@ Public Class PannelloDocumenti
 
     ''' <summary>
     ''' Perché questa candidatura non si può riscrivere, o <c>Nothing</c> se si può: il
-    ''' profilo con cui fu confrontata non c'è più.
+    ''' profilo con cui fu confrontata non è più quello di oggi.
     ''' </summary>
     ''' <remarks>
     ''' <para><b>Cosa succedeva senza.</b> Alla generazione arrivano tre cose: il profilo
@@ -529,27 +555,60 @@ Public Class PannelloDocumenti
     ''' che col documento chiesto: quel che l'utente leggeva era «l'AI ha risposto in una
     ''' forma che non riesco a leggere», che manda a cercare il guasto dalla parte
     ''' sbagliata.</para>
-    ''' <para><b>Perché la versione mancante e non quella diversa.</b> Un profilo che
-    ''' <i>cresce</i> cambia versione a ogni salvataggio, e con lui i vecchi documenti
-    ''' restano spiegabili: fermarsi lì sarebbe un avviso a ogni giro, per un caso che
-    ''' funziona (v. <see cref="Dati.ArchivioProfilo.CELaVersione"/>).</para>
+    ''' <para><b>Dal 2026-09-02 il cancello vale anche per il profilo soltanto
+    ''' cambiato</b>, e non più solo per quello sparito. Fin qui la regola era l'opposta, ed
+    ''' era scritta qui: un profilo che <i>cresce</i> cambia versione a ogni salvataggio, e
+    ''' con lui i vecchi documenti restano spiegabili — fermarsi lì sarebbe stato un avviso a
+    ''' ogni giro, per un caso che funziona. Quel ragionamento guardava i <b>fatti</b>, che
+    ''' in effetti restano quelli del profilo di oggi. Ma un CV mirato non è un elenco di
+    ''' fatti: è una scelta di <b>che cosa mettere in risalto</b>, e quella scelta la fanno i
+    ''' <i>giudizi</i>, che sono di allora. Fra un salvataggio e l'altro può essere cambiato
+    ''' un requisito <b>eliminatorio</b> — la patente è quello che l'ha fatto vedere — e
+    ''' allora il documento non è vecchio: è scritto sulla misura sbagliata, e a differenza
+    ''' delle stelle non lo dichiara a nessuno. Un CV così, una volta esportato, è
+    ''' indistinguibile da uno buono.</para>
+    ''' <para><b>Perché si rifiuta invece di chiedere conferma.</b> Un «vuoi che lo scriva
+    ''' comunque?» metterebbe l'utente a decidere di una cosa che non può vedere — la
+    ''' differenza fra i giudizi di ieri e quelli di oggi — e la risposta comoda è sempre
+    ''' «sì». Il rimedio invece è a un clic e costa una chiamata sola: si rifiuta, e si dice
+    ''' dove sta il bottone.</para>
     ''' <para><b>Il gesto che indica, dal 2026-09-02.</b> Fin qui questo testo mandava a
     ''' rifare la candidatura da capo, incollando di nuovo l'annuncio: era l'unica strada,
     ''' perché una candidatura già confrontata non si riconfrontava. Adesso si riconfronta —
     ''' l'annuncio è già nella sua cartella, letto e strutturato — e la strada da indicare è
     ''' quella, una chiamata invece di due e niente da ricopiare a mano.</para>
+    ''' <para>Il 📄 CV base non passa di qui e non deve: nasce dal solo profilo, senza
+    ''' giudizi, e riscriverlo è esattamente il modo di rimetterlo in pari.</para>
     ''' </remarks>
-    Private Function MotivoProfiloSparito() As String
+    Private Function MotivoProfiloNonPiuQuello() As String
 
         If _sulCvBase OrElse _candidatura Is Nothing OrElse _contesto Is Nothing Then Return Nothing
-        If _contesto.Archivio.CELaVersione(_candidatura.VersioneProfilo) Then Return Nothing
 
-        Return "Questa candidatura è stata confrontata con un profilo che adesso non c'è più: " &
-               "quello di allora è stato eliminato, e i giudizi e i documenti raccontano ancora lui." &
-               vbLf &
-               "Riscriverli sul profilo di oggi mescolerebbe due storie diverse. Torna in " &
-               $"«{NomiUi.Confronto}» e premi «Riconfronta»: rifaccio il confronto sull'annuncio " &
-               "che è già lì, e da quel momento questi documenti si possono riscrivere."
+        Dim versione As String = _candidatura.VersioneProfilo
+
+        ' Prima lo sparito, poi il cresciuto: quando una versione non c'è più anche
+        ' CambiatoDopo risponde di sì, e il caso grave verrebbe raccontato con le parole di
+        ' quello lieve. È lo stesso ordine di SpiaDelProfilo.Leggi.
+        If Not _contesto.Archivio.CELaVersione(versione) Then
+            Return "Questa candidatura è stata confrontata con un profilo che adesso non c'è più: " &
+                   "quello di allora è stato eliminato, e i giudizi e i documenti raccontano ancora lui." &
+                   vbLf &
+                   "Riscriverli sul profilo di oggi mescolerebbe due storie diverse. Torna in " &
+                   $"«{NomiUi.Confronto}» e premi «⚠ Riconfronta»: rifaccio il confronto sull'annuncio " &
+                   "che è già lì, e da quel momento questi documenti si possono riscrivere."
+        End If
+
+        If _contesto.Archivio.CambiatoDopo(versione) Then
+            Return "Hai cambiato il profilo dopo il confronto di questa candidatura: i giudizi e le " &
+                   "stelle che decidono cosa mettere in risalto sono ancora quelli di allora." &
+                   vbLf &
+                   "Prima si rifà il match, poi si scrivono i documenti — altrimenti verrebbero " &
+                   $"scritti sulla misura sbagliata senza dirlo. Torna in «{NomiUi.Confronto}» e premi " &
+                   "«⚠ Riconfronta»: è una chiamata sola, l'annuncio non lo rileggo, e da quel " &
+                   "momento questi documenti si possono scrivere."
+        End If
+
+        Return Nothing
 
     End Function
 
@@ -672,9 +731,9 @@ Public Class PannelloDocumenti
         ' L'ultimo cancello prima dell'AI, e vale anche per la generazione che parte da
         ' sola aprendo una candidatura senza documenti: quelli di «Rigenera» e della
         ' lingua stanno più a monte perché là c'è dell'altro da non fare.
-        Dim sparito As String = MotivoProfiloSparito()
-        If sparito IsNot Nothing Then
-            NonSiPuoRiscrivere(sparito)
+        Dim nonPiuQuello As String = MotivoProfiloNonPiuQuello()
+        If nonPiuQuello IsNot Nothing Then
+            NonSiPuoRiscrivere(nonPiuQuello)
             Return
         End If
 
@@ -1276,9 +1335,9 @@ Public Class PannelloDocumenti
             Return
         End If
 
-        Dim sparito As String = MotivoProfiloSparito()
-        If sparito IsNot Nothing Then
-            NonSiPuoRiscrivere(sparito)
+        Dim nonPiuQuello As String = MotivoProfiloNonPiuQuello()
+        If nonPiuQuello IsNot Nothing Then
+            NonSiPuoRiscrivere(nonPiuQuello)
             Return
         End If
 
@@ -1504,6 +1563,7 @@ Public Class PannelloDocumenti
                                                                       _vociTolteDalCvBase),
                                    "Il CV non è ancora stato scritto.")
             txtLettera.Text = "La lettera si scrive su un annuncio: qui non ce n'è uno."
+            MostraLeSpie()
             AggiornaComandi()
             Return
         End If
@@ -1514,6 +1574,7 @@ Public Class PannelloDocumenti
             txtAnnuncio.Clear()
             txtCv.Clear()
             txtLettera.Clear()
+            MostraLeSpie()
             AggiornaComandi()
             Return
         End If
@@ -1535,7 +1596,55 @@ Public Class PannelloDocumenti
                                     Function(d) Impaginazione.PaginaLettera(d, lingua),
                                     "La lettera non è ancora stata scritta.")
 
+        MostraLeSpie()
         AggiornaComandi()
+
+    End Sub
+
+    ''' <summary>
+    ''' Accende la spia in cima a ciascun documento: se quel che si sta guardando è nato
+    ''' dal profilo di oggi.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Perché due spie e non una.</b> Il 🎯 CV mirato e la lettera di una stessa
+    ''' candidatura nascono dallo stesso confronto e portano la stessa firma: una spia sola
+    ''' in cima al pannello direbbe esattamente la stessa cosa, e costerebbe una riga invece
+    ''' di due. Ma chi sta per esportare la lettera guarda la colonna della lettera, e un
+    ''' avviso sull'altra metà dello schermo è un avviso che non c'è — è lo stesso difetto
+    ''' che il 2026-09-02 ha fatto nascere la finestra di <see cref="NonSiPuoRiscrivere"/>,
+    ''' scoperto proprio qui.</para>
+    ''' <para>Sul 📄 CV base la colonna della lettera non ha nessun documento — la lettera
+    ''' vuole un annuncio — e la sua spia resta spenta: su quel che non esiste non si dice
+    ''' né bene né male.</para>
+    ''' </remarks>
+    Private Sub MostraLeSpie()
+
+        If _sulCvBase Then
+            Accendi(lblSpiaCv, _versioneDelCvBase, _cvBase IsNot Nothing)
+            Accendi(lblSpiaLettera, Nothing, False)
+            Return
+        End If
+
+        Dim versione As String = If(_candidatura Is Nothing, Nothing, _candidatura.VersioneProfilo)
+
+        Accendi(lblSpiaCv, versione, _candidatura IsNot Nothing AndAlso _candidatura.Cv IsNot Nothing)
+        Accendi(lblSpiaLettera, versione, _candidatura IsNot Nothing AndAlso _candidatura.Lettera IsNot Nothing)
+
+    End Sub
+
+    ''' <summary>Mette una spia su un'etichetta, o la fa sparire se non c'è niente da dire.</summary>
+    Private Sub Accendi(dove As Label, versione As String, ceQualcosa As Boolean)
+
+        Dim spia As LetturaSpia = SpiaDelProfilo.Spenta
+
+        If _contesto IsNot Nothing Then
+            spia = SpiaDelProfilo.Leggi(_contesto.Archivio, versione, ceQualcosa)
+        End If
+
+        dove.Text = spia.Scritta
+        dove.ForeColor = spia.Colore
+        dove.Visible = spia.Accesa
+        _suggerimenti.SetToolTip(dove, spia.Perche)
 
     End Sub
 
@@ -1668,9 +1777,9 @@ Public Class PannelloDocumenti
 
         ' Prima di buttare via quel che c'è: se non si può riscrivere, i documenti di
         ' allora sono tutto quel che resta di quella candidatura.
-        Dim sparito As String = MotivoProfiloSparito()
-        If sparito IsNot Nothing Then
-            NonSiPuoRiscrivere(sparito)
+        Dim nonPiuQuello As String = MotivoProfiloNonPiuQuello()
+        If nonPiuQuello IsNot Nothing Then
+            NonSiPuoRiscrivere(nonPiuQuello)
             Return
         End If
 
@@ -1731,10 +1840,10 @@ Public Class PannelloDocumenti
         ' Qui la guardia sta prima della domanda: chiedere «li riscrivo in inglese?» per poi
         ' dire che non si possono riscrivere sarebbe una domanda a vuoto. La tendina torna
         ' dov'era, come quando è l'utente a dire di no.
-        Dim sparito As String = MotivoProfiloSparito()
-        If sparito IsNot Nothing Then
+        Dim nonPiuQuello As String = MotivoProfiloNonPiuQuello()
+        If nonPiuQuello IsNot Nothing Then
             AllestisciLaTendina(comEra)
-            RaccontaUnAvviso(sparito)
+            RaccontaUnAvviso(nonPiuQuello)
             Return
         End If
 
@@ -2245,12 +2354,28 @@ Public Class PannelloDocumenti
 
         btnRigenera.Text = If(annullaLaGenerazione, "Annulla", "Rigenera")
 
+        ' Dal 2026-09-02: su una candidatura il cui profilo non è più quello del confronto,
+        ' «Rigenera» non si preme affatto. Prima si poteva premere e il programma rifiutava
+        ' dopo — ma un bottone che sembra pronto è un invito, e la segnalazione che l'ha
+        ' fatto cambiare diceva proprio così: «mi fa vedere che posso cliccare rigenera».
+        ' La ragione non resta nascosta (cap. 03.3): sta nel suggerimento qui sotto, nella
+        ' riga di stato e nelle due spie in cima alle colonne.
+        Dim daRimettereInPari As Boolean = MotivoProfiloNonPiuQuello() IsNot Nothing
+
         ' Anche dopo una generazione andata storta: è da qui che si riprova, e un
         ' «Rigenera» spento lascerebbe come unica via il ritorno al profilo.
         btnRigenera.Enabled = annullaLaGenerazione OrElse
-                              (Not occupato AndAlso
+                              (Not occupato AndAlso Not daRimettereInPari AndAlso
                                (_sulCvBase OrElse _candidatura IsNot Nothing) AndAlso
                                (_pipeline IsNot Nothing OrElse _generatore IsNot Nothing))
+
+        If daRimettereInPari Then
+            _suggerimenti.SetToolTip(btnRigenera,
+                "Il profilo non è più quello con cui questa candidatura è stata confrontata." & vbLf &
+                $"Prima si rifà il match: nella scheda «{NomiUi.Confronto}» premi «⚠ Riconfronta».")
+        Else
+            _suggerimenti.SetToolTip(btnRigenera, Nothing)
+        End If
 
         btnTornaIndietro.Enabled = Not occupato
 
@@ -2275,7 +2400,8 @@ Public Class PannelloDocumenti
 
         btnRigeneraLettera.Text = If(annullaIlRiallineo, "Annulla", "⚠ Rigenera la lettera")
         btnRigeneraLettera.Enabled = annullaIlRiallineo OrElse
-                                     (daRiallineare AndAlso Not occupato AndAlso _pipeline IsNot Nothing)
+                                     (daRiallineare AndAlso Not occupato AndAlso
+                                      Not daRimettereInPari AndAlso _pipeline IsNot Nothing)
 
         If daRiallineare Then
             _suggerimenti.SetToolTip(btnRigeneraLettera,

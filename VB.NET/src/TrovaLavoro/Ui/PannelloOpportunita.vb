@@ -83,6 +83,17 @@ Public Class PannelloOpportunita
     Private _fasciaAperta As Boolean = True
 
     ''' <summary>
+    ''' Se l'attesa in corso è un <b>riconfronto</b>, e non una delle altre.
+    ''' </summary>
+    ''' <remarks>
+    ''' Serve a una cosa sola: tenere a video «⚠ Riconfronta» mentre il lavoro che ha
+    ''' chiesto è in volo, perché faccia da annulla. Non si può dedurre da
+    ''' <see cref="DaRiconfrontare"/> — quella resta vera per tutta la durata della chiamata,
+    ''' e direbbe di sì anche per un'attesa cominciata da un altro comando.
+    ''' </remarks>
+    Private _riconfrontoInVolo As Boolean
+
+    ''' <summary>
     ''' L'utente chiede i documenti per l'opportunità in mostra: la finestra porta in
     ''' vista P6. Il pannello non conosce gli altri pannelli — dice cosa vuole.
     ''' </summary>
@@ -191,9 +202,11 @@ Public Class PannelloOpportunita
 
         ' Da T9c. La candidatura riaperta al solo annuncio salta il primo passo: l'annuncio
         ' è già letto e strutturato, e rileggerlo costerebbe una chiamata per riottenere
-        ' quello che c'è già. Dal 2026-09-02 la stessa scorciatoia vale per il riconfronto,
-        ' che è lo stesso secondo passo su una candidatura che il primo l'aveva già fatto.
-        If DaConfrontare() OrElse DaRiconfrontare() Then
+        ' quello che c'è già. Il riconfronto è lo stesso secondo passo su una candidatura che
+        ' il primo l'aveva già fatto, ma non passa più di qui: ha il suo bottone
+        ' (btnRiconfronta), perché questo vive nella fascia d'ingresso ed è chiusa proprio
+        ' quando servirebbe (v. DaRiconfrontare).
+        If DaConfrontare() Then
             Await ConfrontaLaRiapertaAsync().ConfigureAwait(True)
             Return
         End If
@@ -383,9 +396,40 @@ Public Class PannelloOpportunita
     End Function
 
     ''' <summary>
+    ''' Accende la spia accanto alle stelle: se il punteggio a video è ancora la risposta
+    ''' del profilo di oggi.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Questo pannello lo <b>diceva già</b>, dal 2026-09-02: nella riga di stato in
+    ''' alto a destra, in una finestra alla riapertura, e nel bottone «Riconfronta». Tre modi
+    ''' che hanno tutti lo stesso limite — arrivano una volta, e chi li ha già letti o chiusi
+    ''' torna a guardare le stelle senza più niente accanto. La spia non annuncia:
+    ''' <b>resta</b>, ed è la differenza fra un avviso e un'etichetta.</para>
+    ''' <para>Il colore da solo non basta e qui meno che mai (cap. 03.8): la parola c'è
+    ''' sempre, e il perché sta nel suggerimento — con la distinzione fra il profilo
+    ''' cresciuto e quello rifatto da capo, che <see cref="ProfiloDisallineato"/> continua a
+    ''' fare per i suoi messaggi lunghi.</para>
+    ''' </remarks>
+    Private Sub MostraLaSpiaDelProfilo()
+
+        Dim spia As LetturaSpia = SpiaDelProfilo.Spenta
+
+        If _opportunita IsNot Nothing AndAlso _contesto IsNot Nothing Then
+            spia = SpiaDelProfilo.Leggi(_contesto.Archivio,
+                                        _opportunita.VersioneProfilo,
+                                        _opportunita.Confrontata)
+        End If
+
+        lblSpiaProfilo.Text = spia.Scritta
+        lblSpiaProfilo.ForeColor = spia.Colore
+        _suggerimenti.SetToolTip(lblSpiaProfilo, spia.Perche)
+
+    End Sub
+
+    ''' <summary>
     ''' Se questa candidatura si può <b>riconfrontare</b>: è già stata confrontata, ma con
-    ''' un profilo che non è più quello di oggi. Allora «Analizza» prende il suo quarto
-    ''' mestiere e diventa «Riconfronta».
+    ''' un profilo che non è più quello di oggi. Allora in fondo al pannello compare
+    ''' «⚠ Riconfronta».
     ''' </summary>
     ''' <remarks>
     ''' <para><b>Che cosa rovescia.</b> Fino al 2026-09-02 una candidatura confrontata non
@@ -399,6 +443,16 @@ Public Class PannelloOpportunita
     ''' inviterebbe a ripagare una risposta che non cambierebbe: a parità di profilo e di
     ''' annuncio il confronto è lo stesso. Il gesto compare quando ha una ragione, e la
     ''' ragione si legge accanto al bottone.</para>
+    ''' <para><b>Dove sta il bottone, e perché è cambiato posto lo stesso giorno.</b> Il
+    ''' gesto era nato come <b>quarto mestiere di «Analizza»</b>, ed era irraggiungibile:
+    ''' «Analizza» vive dentro la fascia d'ingresso, e una candidatura già confrontata — cioè
+    ''' l'unica su cui il riconfronto esista — si riapre con quella fascia <b>chiusa</b>. Chi
+    ''' chiudeva la finestra della riapertura restava senza nessun modo di rifare i conti, e
+    ''' la finestra intanto prometteva che «il bottone Riconfronta resta dov'è». Ora il gesto
+    ''' ha un comando suo in fondo al pannello, <c>btnRiconfronta</c>, che <b>c'è solo quando
+    ''' serve</b> — la stessa regola di «⚠ Rigenera la lettera» in P6 (cap. 03.3: quel che
+    ''' non serve non deve nemmeno esserci). Il quarto mestiere di «Analizza» è stato tolto:
+    ''' due bottoni con lo stesso nome a video sono peggio di nessuno.</para>
     ''' <para>Sulla scartata no: quella è chiusa (cap. 07.3), e rifarle i conti sarebbe
     ''' lavorare per niente — la stessa ragione per cui non le si scrive un CV. E se
     ''' nella casella c'è del testo incollato, quello ha la precedenza: chi scrive lì vuole
@@ -513,6 +567,7 @@ Public Class PannelloOpportunita
         Using filo As New CancellationTokenSource()
 
             _annulla = filo
+            _riconfrontoInVolo = riconfronto
             LavoroInCorso(True)
 
             Try
@@ -549,6 +604,10 @@ Public Class PannelloOpportunita
 
             Finally
                 _annulla = Nothing
+
+                ' Prima di rivedere i comandi, non dopo: è AggiornaComandi a decidere se
+                ' «⚠ Riconfronta» resta a video, e da qui in poi non fa più da annulla.
+                _riconfrontoInVolo = False
                 LavoroInCorso(False)
             End Try
 
@@ -710,8 +769,14 @@ Public Class PannelloOpportunita
     ''' possono dire il numero sbagliato. Ma se la candidatura è già stata spedita quella
     ''' decisione è presa, e la finestra si metterebbe fra l'utente e una pratica che sta
     ''' solo riguardando — per proporgli per giunta un gesto che gli farebbe perdere il
-    ''' punteggio con cui l'ha mandata. Il bottone «Riconfronta» resta dov'è per chi lo
-    ''' vuole davvero, con la sua conferma che lo dice.</para>
+    ''' punteggio con cui l'ha mandata. Il bottone «⚠ Riconfronta» resta in fondo al
+    ''' pannello per chi lo vuole davvero, con la sua conferma che lo dice.</para>
+    ''' <para><b>E perché la finestra non è più l'unica via.</b> Chi risponde «Annulla» a
+    ''' questa domanda deve poterla rifare dopo. Fino al 2026-09-02 non poteva: il gesto
+    ''' stava su «Analizza», che qui non è nemmeno a video, e chiudendo la finestra la
+    ''' candidatura restava con le sue stelle vecchie e nessun modo di rifarle. Adesso la
+    ''' finestra propone e il bottone <b>resta</b>: proporre una volta e restare disponibile
+    ''' sono due mestieri diversi, e servono tutti e due (v. <see cref="DaRiconfrontare"/>).</para>
     ''' </remarks>
     Private Sub ProponiIlRiconfronto()
 
@@ -736,7 +801,8 @@ Public Class PannelloOpportunita
             "Posso rifare il confronto adesso, sull'annuncio che è già qui: non lo rileggo, " &
             "quindi è una chiamata sola, e le stelle tornano a dire quello che direbbero oggi." &
             vbLf & vbLf &
-            "Se preferisci farlo più tardi, il bottone «Riconfronta» resta dov'è.",
+            "Se preferisci farlo più tardi, il bottone «⚠ Riconfronta» resta in fondo alla " &
+            "pagina finché il profilo non torna in pari.",
             "Riconfronta ora") Then Return
 
         Await ConfrontaLaRiapertaAsync()
@@ -854,6 +920,7 @@ Public Class PannelloOpportunita
 
         If vista Is Nothing Then
             lblStelle.Text = ""
+            MostraLaSpiaDelProfilo()
             MostraLaNota("", StileApp.TestoSecondario)
             lvwGiudizi.EndUpdate()
             MostraLaLetturaDInsieme()
@@ -863,6 +930,7 @@ Public Class PannelloOpportunita
         End If
 
         lblStelle.Text = StelleScritte(vista.Stelle)
+        MostraLaSpiaDelProfilo()
 
         For Each giudizio As GiudizioMostrato In vista.Giudizi
             lvwGiudizi.Items.Add(RigaDelGiudizio(giudizio))
@@ -1013,14 +1081,35 @@ Public Class PannelloOpportunita
             Return
         End If
 
-        ' Il riconfronto sostituisce stelle e giudizi che l'utente ha già pagato: si chiede
-        ' prima, e si chiede qui — nel gesto, come per lo scarto (cap. 12.7) — perché il
-        ' lavoro vero è un metodo pubblico che chiama anche il banco.
-        If DaRiconfrontare() AndAlso
-           Not FinestraConferma.Chiedi(Me, "Rifai il confronto",
+        Await AnalizzaLAnnuncioAsync()
+
+    End Sub
+
+    ''' <summary>
+    ''' Rifà il confronto col profilo di oggi, sull'annuncio che è già nella cartella.
+    ''' </summary>
+    ''' <remarks>
+    ''' Il riconfronto sostituisce stelle e giudizi che l'utente ha già pagato: si chiede
+    ''' prima, e si chiede qui — nel gesto, come per lo scarto (cap. 12.7) — perché il lavoro
+    ''' vero è un metodo pubblico che chiama anche il banco, e una modale aperta là dentro
+    ''' lascerebbe appeso un collaudo che nessuno può venire a chiudere.
+    ''' </remarks>
+    Private Async Sub btnRiconfronta_Click(sender As Object, e As EventArgs) Handles btnRiconfronta.Click
+
+        ' Anche questa attesa si annulla, e dal comando che l'ha chiesta: sparire mentre il
+        ' lavoro che si è appena chiesto è in volo lascerebbe l'attesa senza uscita — e qui
+        ' «Analizza», che altrove fa da annulla, non è nemmeno a video.
+        If AiAlLavoro Then
+            AnnullaIlLavoro()
+            Return
+        End If
+
+        If Not DaRiconfrontare() Then Return
+
+        If Not FinestraConferma.Chiedi(Me, "Rifai il confronto",
                                        SpiegazioneDelRiconfronto(), "Riconfronta") Then Return
 
-        Await AnalizzaLAnnuncioAsync()
+        Await ConfrontaLaRiapertaAsync()
 
     End Sub
 
@@ -1251,7 +1340,7 @@ Public Class PannelloOpportunita
 
         If _comandi Is Nothing Then
             _comandi = New FasciaDeiComandi(pnlAzioni)
-            _comandi.ASinistra(btnNuovoAnnuncio, btnBrainstorm, btnEsito, btnScarta)
+            _comandi.ASinistra(btnNuovoAnnuncio, btnRiconfronta, btnBrainstorm, btnEsito, btnScarta)
             _comandi.ADestra(btnGeneraDocumenti)
         End If
 
@@ -1277,6 +1366,10 @@ Public Class PannelloOpportunita
         StileApp.VestiBottone(btnGeneraDocumenti, LivelloBottone.AzionePrincipale)
         StileApp.VestiBottone(btnNuovoAnnuncio, LivelloBottone.Neutro)
         StileApp.VestiBottone(btnBrainstorm, LivelloBottone.Esplorativo)
+
+        ' Rifare il confronto butta via stelle e giudizi già pagati: pesa come «⚠ Rigenera
+        ' la lettera» in P6, e porta lo stesso segno.
+        StileApp.VestiBottone(btnRiconfronta, LivelloBottone.Attenzione)
 
         ' Segnare com'è andata non consuma niente e si disfa: è un comando neutro.
         StileApp.VestiBottone(btnEsito, LivelloBottone.Neutro)
@@ -1446,26 +1539,45 @@ Public Class PannelloOpportunita
         ' che il progetto ha già pagato in StatiOpportunita.Consentita.
         Dim soloIlConfronto As Boolean = DaConfrontare()
 
-        ' Il quarto mestiere, dal 2026-09-02: la candidatura confrontata con un profilo che
-        ' non è più quello di oggi. Il nome della locale non può essere «daRiconfrontare»
-        ' per la ragione scritta qui sopra — coprirebbe DaRiconfrontare(), e la chiamata
-        ' verrebbe letta come un indice su questo Boolean.
-        Dim rifareIlConfronto As Boolean = DaRiconfrontare()
-
-        btnAnalizza.Text = If(occupato, "Annulla",
-                              If(soloIlConfronto, "Confronta",
-                                 If(rifareIlConfronto, "Riconfronta", "Analizza")))
+        btnAnalizza.Text = If(occupato, "Annulla", If(soloIlConfronto, "Confronta", "Analizza"))
 
         btnAnalizza.Enabled = occupato OrElse
                               (conAi AndAlso conProfilo AndAlso
-                               (soloIlConfronto OrElse rifareIlConfronto OrElse
-                                txtAnnuncio.Text.Trim() <> ""))
+                               (soloIlConfronto OrElse txtAnnuncio.Text.Trim() <> ""))
 
         ' Un bottone spento senza una ragione a portata d'occhio si legge come
         ' un'applicazione rotta: la ragione si scrive sotto il bottone, dove chi voleva
         ' premerlo sta già guardando.
-        DiciPercheNonSiPuoAnalizzare(occupato, conAi, conProfilo,
-                                     soloIlConfronto OrElse rifareIlConfronto)
+        DiciPercheNonSiPuoAnalizzare(occupato, conAi, conProfilo, soloIlConfronto)
+
+        ' Il riconfronto, dal 2026-09-02: la candidatura confrontata con un profilo che non
+        ' è più quello di oggi. Il nome della locale non può essere «daRiconfrontare» per la
+        ' ragione scritta qui sopra — coprirebbe DaRiconfrontare(), e la chiamata verrebbe
+        ' letta come un indice su questo Boolean.
+        '
+        ' Il comando c'è solo quando serve e non occupa posto da spento (cap. 03.3, come
+        ' «⚠ Rigenera la lettera» in P6). Resta però finché la sua attesa è in volo: sparire
+        ' mentre il lavoro che ha chiesto sta girando lascerebbe l'attesa senza uscita.
+        Dim rifareIlConfronto As Boolean = DaRiconfrontare()
+        Dim annullaIlRiconfronto As Boolean = occupato AndAlso _riconfrontoInVolo
+        Dim inFascia As Boolean = rifareIlConfronto OrElse annullaIlRiconfronto
+
+        If btnRiconfronta.Visible <> inFascia Then
+            btnRiconfronta.Visible = inFascia
+            DisponiLeAzioni()
+        End If
+
+        btnRiconfronta.Text = If(annullaIlRiconfronto, "Annulla", "⚠ Riconfronta")
+        btnRiconfronta.Enabled = annullaIlRiconfronto OrElse
+                                 (rifareIlConfronto AndAlso Not occupato AndAlso
+                                  conAi AndAlso conProfilo)
+
+        If rifareIlConfronto Then
+            _suggerimenti.SetToolTip(btnRiconfronta,
+                "Le stelle che vedi sono la risposta del profilo di allora." & vbLf &
+                "Premi qui e rifaccio il confronto su quello di oggi: l'annuncio è già " &
+                "nella cartella, non lo rileggo.")
+        End If
 
         txtAnnuncio.ReadOnly = occupato
         txtAnnuncio.BackColor = If(occupato, StileApp.FondoPagina, StileApp.FondoCasella)
@@ -1479,6 +1591,21 @@ Public Class PannelloOpportunita
         btnGeneraDocumenti.Enabled = Not occupato AndAlso
                                      _opportunita IsNot Nothing AndAlso _opportunita.Confrontata AndAlso
                                      _opportunita.Stato <> StatoOpportunita.Scartata
+
+        ' Il pannello dei documenti si rifiuta di scrivere su un confronto che non è più
+        ' quello del profilo di oggi (cap. 08.4), e fa bene: un CV mirato sceglie cosa
+        ' mettere in risalto in base ai giudizi, e quelli sarebbero di ieri. Il bottone
+        ' resta premibile — di là si va anche solo a guardare i documenti già scritti — ma
+        ' qui si dice prima, perché qui c'è il rimedio: è il bottone accanto.
+        If btnGeneraDocumenti.Enabled AndAlso rifareIlConfronto Then
+            _suggerimenti.SetToolTip(btnGeneraDocumenti,
+                "I giudizi sono quelli del profilo di prima, e sono loro a decidere cosa il CV " &
+                "mette in risalto." & vbLf &
+                "Prima si rifà il match: premi «⚠ Riconfronta» qui accanto, poi i documenti si " &
+                "possono scrivere.")
+        Else
+            _suggerimenti.SetToolTip(btnGeneraDocumenti, Nothing)
+        End If
 
         ' Ragionare ha senso quando c'è già un confronto: prima non ci sarebbe niente di
         ' cui parlare, e il prompt vuole i giudizi (cap. 12, A6.2). Qui l'AI serve davvero

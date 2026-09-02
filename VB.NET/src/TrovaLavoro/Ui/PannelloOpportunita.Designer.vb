@@ -35,6 +35,7 @@ Partial Class PannelloOpportunita
         Me.colEsito = New System.Windows.Forms.ColumnHeader()
         Me.pnlPunteggio = New System.Windows.Forms.Panel()
         Me.lblStelle = New System.Windows.Forms.Label()
+        Me.lblSpiaProfilo = New System.Windows.Forms.Label()
         Me.lblStatoCandidatura = New System.Windows.Forms.Label()
         Me.lblNota = New System.Windows.Forms.Label()
         Me.pnlSpiegazione = New System.Windows.Forms.Panel()
@@ -45,6 +46,7 @@ Partial Class PannelloOpportunita
         Me.txtAnnuncioLetto = New System.Windows.Forms.TextBox()
         Me.pnlAzioni = New System.Windows.Forms.Panel()
         Me.btnNuovoAnnuncio = New System.Windows.Forms.Button()
+        Me.btnRiconfronta = New System.Windows.Forms.Button()
         Me.btnBrainstorm = New System.Windows.Forms.Button()
         Me.btnEsito = New System.Windows.Forms.Button()
         Me.btnScarta = New System.Windows.Forms.Button()
@@ -224,6 +226,7 @@ Partial Class PannelloOpportunita
         '
         'pnlPunteggio
         '
+        Me.pnlPunteggio.Controls.Add(Me.lblSpiaProfilo)
         Me.pnlPunteggio.Controls.Add(Me.lblStelle)
         Me.pnlPunteggio.Controls.Add(Me.lblStatoCandidatura)
         Me.pnlPunteggio.Controls.Add(Me.lblNota)
@@ -240,8 +243,26 @@ Partial Class PannelloOpportunita
         Me.lblStelle.ForeColor = StileApp.TestoPrimario
         Me.lblStelle.Location = New System.Drawing.Point(0, 0)
         Me.lblStelle.Name = "lblStelle"
-        Me.lblStelle.Size = New System.Drawing.Size(500, 32)
+        Me.lblStelle.Size = New System.Drawing.Size(240, 32)
         Me.lblStelle.TabIndex = 0
+        '
+        'lblSpiaProfilo
+        '
+        ' La spia sta accanto alle stelle e non altrove, perché è delle stelle che parla:
+        ' dice se quel numero è la risposta di oggi o quella di ieri (v. SpiaDelProfilo).
+        ' Le stelle sono larghe 240 — «Match non calcolabile» a 16 punti è la scritta più
+        ' lunga che ci può stare — e questa comincia dove finiscono.
+        ' La larghezza è 230 e non 172 dal 2026-09-02, quando le parole della spia sono
+        ' diventate «profilo usato: corrente» e «profilo usato: obsoleto»: tre caratteri in
+        ' più della coppia di prima, e la vecchia misura le avrebbe tagliate. Lo spazio l'ha
+        ' ceduto lblStatoCandidatura, che è allineata a destra e lo lasciava vuoto.
+        Me.lblSpiaProfilo.Font = StileApp.FontTitoloGruppo
+        Me.lblSpiaProfilo.ForeColor = StileApp.TestoSecondario
+        Me.lblSpiaProfilo.Location = New System.Drawing.Point(248, 8)
+        Me.lblSpiaProfilo.Name = "lblSpiaProfilo"
+        Me.lblSpiaProfilo.Size = New System.Drawing.Size(230, 20)
+        Me.lblSpiaProfilo.TabIndex = 3
+        Me.lblSpiaProfilo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'lblStatoCandidatura
         '
@@ -250,9 +271,9 @@ Partial Class PannelloOpportunita
         Me.lblStatoCandidatura.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblStatoCandidatura.Font = StileApp.FontTitoloGruppo
         Me.lblStatoCandidatura.ForeColor = StileApp.TestoSecondario
-        Me.lblStatoCandidatura.Location = New System.Drawing.Point(426, 10)
+        Me.lblStatoCandidatura.Location = New System.Drawing.Point(486, 10)
         Me.lblStatoCandidatura.Name = "lblStatoCandidatura"
-        Me.lblStatoCandidatura.Size = New System.Drawing.Size(300, 20)
+        Me.lblStatoCandidatura.Size = New System.Drawing.Size(240, 20)
         Me.lblStatoCandidatura.TabIndex = 1
         Me.lblStatoCandidatura.TextAlign = System.Drawing.ContentAlignment.TopRight
         '
@@ -338,6 +359,7 @@ Partial Class PannelloOpportunita
         'pnlAzioni
         '
         Me.pnlAzioni.Controls.Add(Me.btnNuovoAnnuncio)
+        Me.pnlAzioni.Controls.Add(Me.btnRiconfronta)
         Me.pnlAzioni.Controls.Add(Me.btnBrainstorm)
         Me.pnlAzioni.Controls.Add(Me.btnEsito)
         Me.pnlAzioni.Controls.Add(Me.btnScarta)
@@ -356,12 +378,27 @@ Partial Class PannelloOpportunita
         Me.btnNuovoAnnuncio.TabIndex = 0
         Me.btnNuovoAnnuncio.Text = "Incolla annuncio manualmente"
         '
+        'btnRiconfronta
+        '
+        ' Il comando che rimette in pari le stelle quando il profilo è cambiato dopo il
+        ' confronto. Nasce NASCOSTO e la fascia dei comandi non gli lascia posto da spento:
+        ' c'è solo quando ha una ragione (cap. 03.3), come «⚠ Rigenera la lettera» in P6.
+        ' Sta accanto a «Incolla annuncio manualmente» perché parlano della stessa cosa —
+        ' l'analisi — e non in fondo, dove ci sono i gesti che chiudono la candidatura.
+        ' La posizione qui è solo un seme: a disporli è FasciaDeiComandi.
+        Me.btnRiconfronta.Location = New System.Drawing.Point(252, 18)
+        Me.btnRiconfronta.Name = "btnRiconfronta"
+        Me.btnRiconfronta.Size = StileApp.BottoneLargo
+        Me.btnRiconfronta.TabIndex = 1
+        Me.btnRiconfronta.Text = "⚠ Riconfronta"
+        Me.btnRiconfronta.Visible = False
+        '
         'btnBrainstorm
         '
         Me.btnBrainstorm.Location = New System.Drawing.Point(142, 18)
         Me.btnBrainstorm.Name = "btnBrainstorm"
         Me.btnBrainstorm.Size = StileApp.BottoneMedio
-        Me.btnBrainstorm.TabIndex = 1
+        Me.btnBrainstorm.TabIndex = 2
         Me.btnBrainstorm.Text = "Brainstorm"
         '
         'btnEsito
@@ -369,7 +406,7 @@ Partial Class PannelloOpportunita
         Me.btnEsito.Location = New System.Drawing.Point(284, 18)
         Me.btnEsito.Name = "btnEsito"
         Me.btnEsito.Size = StileApp.BottoneMedio
-        Me.btnEsito.TabIndex = 2
+        Me.btnEsito.TabIndex = 3
         Me.btnEsito.Text = "Com'è andata…"
         '
         'btnScarta
@@ -377,7 +414,7 @@ Partial Class PannelloOpportunita
         Me.btnScarta.Location = New System.Drawing.Point(426, 18)
         Me.btnScarta.Name = "btnScarta"
         Me.btnScarta.Size = StileApp.BottoneStandard
-        Me.btnScarta.TabIndex = 3
+        Me.btnScarta.TabIndex = 4
         Me.btnScarta.Text = "Scarta"
         '
         'btnGeneraDocumenti
@@ -386,7 +423,7 @@ Partial Class PannelloOpportunita
         Me.btnGeneraDocumenti.Location = New System.Drawing.Point(916, 18)
         Me.btnGeneraDocumenti.Name = "btnGeneraDocumenti"
         Me.btnGeneraDocumenti.Size = StileApp.BottoneLargo
-        Me.btnGeneraDocumenti.TabIndex = 4
+        Me.btnGeneraDocumenti.TabIndex = 5
         Me.btnGeneraDocumenti.Text = "Genera CV + lettera"
         '
         'PannelloOpportunita
@@ -433,6 +470,7 @@ Partial Class PannelloOpportunita
     Friend WithEvents pnlValutazione As System.Windows.Forms.Panel
     Friend WithEvents pnlPunteggio As System.Windows.Forms.Panel
     Friend WithEvents lblStelle As System.Windows.Forms.Label
+    Friend WithEvents lblSpiaProfilo As System.Windows.Forms.Label
     Friend WithEvents lblStatoCandidatura As System.Windows.Forms.Label
     Friend WithEvents lblNota As System.Windows.Forms.Label
     Friend WithEvents lvwGiudizi As System.Windows.Forms.ListView
@@ -445,6 +483,7 @@ Partial Class PannelloOpportunita
     Friend WithEvents txtSpiegazione As System.Windows.Forms.TextBox
     Friend WithEvents pnlAzioni As System.Windows.Forms.Panel
     Friend WithEvents btnNuovoAnnuncio As System.Windows.Forms.Button
+    Friend WithEvents btnRiconfronta As System.Windows.Forms.Button
     Friend WithEvents btnBrainstorm As System.Windows.Forms.Button
     Friend WithEvents btnEsito As System.Windows.Forms.Button
     Friend WithEvents btnScarta As System.Windows.Forms.Button

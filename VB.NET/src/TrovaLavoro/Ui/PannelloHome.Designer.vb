@@ -33,6 +33,7 @@ Partial Class PannelloHome
         Me.cboMostra = New System.Windows.Forms.ComboBox()
         Me.pnlCorpo = New System.Windows.Forms.Panel()
         Me.lvwCoda = New System.Windows.Forms.ListView()
+        Me.colProfilo = New System.Windows.Forms.ColumnHeader()
         Me.colMatch = New System.Windows.Forms.ColumnHeader()
         Me.colAzienda = New System.Windows.Forms.ColumnHeader()
         Me.colRuolo = New System.Windows.Forms.ColumnHeader()
@@ -216,26 +217,43 @@ Partial Class PannelloHome
         ' L'intestazione si può cliccare per ordinare, e il doppio clic riapre.
         Me.lvwCoda.BackColor = StileApp.FondoCasella
         Me.lvwCoda.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.lvwCoda.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colMatch, Me.colAzienda, Me.colRuolo, Me.colStato, Me.colFonte, Me.colQuando})
+        Me.lvwCoda.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colProfilo, Me.colMatch, Me.colAzienda, Me.colRuolo, Me.colStato, Me.colFonte, Me.colQuando})
         Me.lvwCoda.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lvwCoda.Font = StileApp.FontTesto
         Me.lvwCoda.FullRowSelect = True
         Me.lvwCoda.HideSelection = False
         Me.lvwCoda.Location = New System.Drawing.Point(0, 0)
         Me.lvwCoda.MultiSelect = False
+        ' Il suggerimento della riga: è dove la spia del profilo spiega il perché, che nella
+        ' colonna non ci starebbe (v. SpiaDelProfilo).
+        Me.lvwCoda.ShowItemToolTips = True
         Me.lvwCoda.Name = "lvwCoda"
         Me.lvwCoda.Size = New System.Drawing.Size(1106, 516)
         Me.lvwCoda.TabIndex = 0
         Me.lvwCoda.UseCompatibleStateImageBehavior = False
         Me.lvwCoda.View = System.Windows.Forms.View.Details
         '
+        'colProfilo
+        '
+        ' Apre la coda, e il match la segue: deciso a video il 2026-09-02, guardando le tre
+        ' righe affiancate. Le due colonne vanno lette insieme — è del match che la spia
+        ' parla — e in questo verso si incontra prima la qualifica e poi il numero
+        ' qualificato, invece del contrario.
+        ' Windows tiene la prima colonna di una lista sempre allineata a sinistra (WinForms
+        ' rimette Left da sé appena si prova ad assegnare altro): qui non costa niente,
+        ' perché è testo, e il testo a sinistra ci sta di suo.
+        ' La larghezza è 190 e non 170 da quando le parole della spia sono diventate
+        ' «profilo usato: corrente» e «profilo usato: obsoleto».
+        Me.colProfilo.Text = "Profilo"
+        Me.colProfilo.Width = 190
+        '
         'colMatch
         '
-        ' Il punteggio è un numero, e i numeri si leggono incolonnati a destra come la
-        ' data dell'ultima colonna. Windows però tiene la prima colonna di una lista
-        ' sempre allineata a sinistra — WinForms rimette Left da sé appena si prova ad
-        ' assegnare altro — e riordinare le colonne per aggirarlo costerebbe la colonna
-        ' d'apertura della coda: qui resta com'è, e la nota è la sua spiegazione.
+        ' Il punteggio è un numero, e i numeri si leggono incolonnati a destra come la data
+        ' dell'ultima colonna. Fino al 2026-09-02 non ci arrivava, perché il match apriva la
+        ' coda e la prima colonna a destra non ci va; adesso che apre la spia il limite non
+        ' lo tocca più, ma l'allineamento resta a sinistra finché non lo si guarda a video —
+        ' è una misura da decidere guardando, non deducendo.
         Me.colMatch.Text = "Match"
         Me.colMatch.Width = 130
         '
@@ -366,6 +384,7 @@ Partial Class PannelloHome
     Friend WithEvents cboMostra As System.Windows.Forms.ComboBox
     Friend WithEvents pnlCorpo As System.Windows.Forms.Panel
     Friend WithEvents lvwCoda As System.Windows.Forms.ListView
+    Friend WithEvents colProfilo As System.Windows.Forms.ColumnHeader
     Friend WithEvents colMatch As System.Windows.Forms.ColumnHeader
     Friend WithEvents colAzienda As System.Windows.Forms.ColumnHeader
     Friend WithEvents colRuolo As System.Windows.Forms.ColumnHeader

@@ -867,7 +867,12 @@ Namespace Ui
 
             ' Il difetto trovato usando il programma il 2026-09-02: cambiata la patente, le
             ' candidature di prima mostravano le stelle di allora e non c'era modo di
-            ' rifarle. Adesso «Analizza» prende il suo quarto mestiere.
+            ' rifarle. Adesso in fondo al pannello compare «⚠ Riconfronta».
+            '
+            ' Il gesto era nato come quarto mestiere di «Analizza», e questo collaudo ne
+            ' guardava il testo: verde, mentre a video quel bottone non c'era: «Analizza»
+            ' vive nella fascia d'ingresso, che su una candidatura confrontata è chiusa.
+            ' Adesso si guarda quel che si vede.
             Await ConPannelloAsync(
                 PipelineFinta(),
                 Async Function(pannello, contesto) As Task
@@ -879,11 +884,15 @@ Namespace Ui
 
                     pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
 
-                    Dim analizza As Button = Bottone(pannello, "btnAnalizza")
-                    Assert.AreEqual("Riconfronta", analizza.Text,
-                                    "il bottone dice il mestiere che serve adesso")
-                    Assert.IsTrue(analizza.Enabled,
-                                  "e si preme con la casella vuota: l'annuncio è già nella cartella")
+                    Dim riconfronta As Button = Bottone(pannello, "btnRiconfronta")
+                    Assert.IsTrue(riconfronta.Visible,
+                                  "il comando è a video: sta in fondo al pannello, non nella fascia chiusa")
+                    Assert.AreEqual("⚠ Riconfronta", riconfronta.Text)
+                    Assert.IsTrue(riconfronta.Enabled,
+                                  "e si preme senza incollare niente: l'annuncio è già nella cartella")
+
+                    Assert.IsFalse(Bottone(pannello, "btnAnalizza").Visible,
+                                   "ed è per questo che il gesto non poteva stare su «Analizza»")
 
                 End Function)
 
@@ -903,10 +912,9 @@ Namespace Ui
 
                     pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
 
-                    Dim analizza As Button = Bottone(pannello, "btnAnalizza")
-                    Assert.AreNotEqual("Riconfronta", analizza.Text,
-                                       "niente da rifare: la candidatura è in pari col profilo")
-                    Assert.IsFalse(analizza.Enabled, "e il bottone resta spento com'era")
+                    Assert.IsFalse(Bottone(pannello, "btnRiconfronta").Visible,
+                                   "niente da rifare: la candidatura è in pari col profilo, e " &
+                                   "quel che non serve non deve nemmeno esserci")
 
                 End Function)
 
@@ -969,8 +977,8 @@ Namespace Ui
 
                     pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
 
-                    Assert.AreEqual("Riconfronta", Bottone(pannello, "btnAnalizza").Text,
-                                    "il gesto resta a disposizione anche a candidatura partita")
+                    Assert.IsTrue(Bottone(pannello, "btnRiconfronta").Visible,
+                                  "il gesto resta a disposizione anche a candidatura partita")
 
                 End Function)
 
@@ -994,8 +1002,8 @@ Namespace Ui
 
                     pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
 
-                    Assert.AreNotEqual("Riconfronta", Bottone(pannello, "btnAnalizza").Text,
-                                       "sulla scartata il gesto non si propone")
+                    Assert.IsFalse(Bottone(pannello, "btnRiconfronta").Visible,
+                                   "sulla scartata il gesto non si propone")
 
                 End Function)
 

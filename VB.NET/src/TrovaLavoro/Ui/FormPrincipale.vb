@@ -519,9 +519,37 @@ Public Class FormPrincipale
     ''' La voce «📄 Documenti» della barra (T9d): porta a P6 da fermo, senza passare da un
     ''' flusso. Si torna alla Home, che è la casa di chi si sposta con la barra.
     ''' </summary>
+    ''' <summary>
+    ''' Alla voce «📄 Documenti» della barra: si va a guardare i documenti — quelli della
+    ''' candidatura che si ha in mano, se ce n'è una.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Perché la candidatura aperta ha la precedenza</b> (dal 2026-09-02). Prima
+    ''' questa voce chiamava soltanto <c>ApriQualcosaAsync</c>, che sceglie da sé: tiene quel
+    ''' che il pannello aveva già, altrimenti il 📄 CV base, altrimenti <b>l'ultima
+    ''' candidatura con documenti</b>. Chi stava guardando una candidatura nella scheda e
+    ''' premeva «Documenti» poteva quindi trovarsi davanti i documenti di <b>un'altra</b>,
+    ''' senza che niente glielo dicesse se non il nome nella tendina. Il difetto è venuto
+    ''' fuori usando il programma: una candidatura col profilo obsoleto rifiutava di
+    ''' rigenerare, e passando di qui «Rigenera» funzionava — perché a video non c'era più
+    ''' lei, ma un'altra candidatura che col profilo era in pari. Due pannelli su due
+    ''' argomenti diversi, e nessun modo di accorgersene.</para>
+    ''' <para><b>E perché guardare non genera.</b> Si passa <c>generaSeManca:=False</c>: da
+    ''' qui l'utente ha chiesto di guardare, non di spendere una chiamata all'AI. Se i
+    ''' documenti non ci sono ancora, il pannello lo dice e rimanda al gesto che li scrive,
+    ''' «Genera CV + lettera», che è una richiesta esplicita e sta dov'è sempre stata.</para>
+    ''' </remarks>
     Private Async Sub btnDocumenti_Click(sender As Object, e As EventArgs) Handles btnDocumenti.Click
 
         VaiAiDocumenti(pnlHome, btnHome)
+
+        Dim aperta As Opportunita = pnlOpportunita.Candidatura
+
+        If aperta IsNot Nothing Then
+            Await pnlDocumenti.MostraLaCandidaturaAsync(aperta, generaSeManca:=False)
+            Return
+        End If
+
         Await pnlDocumenti.ApriQualcosaAsync()
 
     End Sub

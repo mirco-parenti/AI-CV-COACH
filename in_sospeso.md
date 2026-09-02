@@ -534,6 +534,64 @@ collaudi verdi **non** dicono, dichiarate invece di darle per provate (regola 15
   aprendo il programma. Da guardare una volta: che il nome sia centrato e che accanto non
   resti niente. *(cap. 03.5, 13.5; `FinestraAvvio`, la finestra «Informazioni su…».)*
 
+## Dalla spia del profilo e dal clic sullo splash (2026-09-02)
+
+*Le candidature e i documenti dicono adesso, ciascuno dove si vede, se sono nati dal profilo
+di oggi: una lucina verde o rossa con la sua parola accanto (cap. 03.8). Il banco ne
+sorveglia la **decisione** — quale stato per quale versione, con che parola e che inchiostro
+— e quella parte è coperta da tredici collaudi nuovi, otto dei quali visti rossi
+falsificando. Quel che resta qui sotto è ciò che il banco **non** può vedere, dichiarato
+invece di darlo per provato (regola 15).*
+
+- **Il disegno delle spie non è sorvegliato: solo la decisione lo è.** Che
+  `lblSpiaProfilo` in P4 non finisca sopra le stelle quando sono lunghe («Match non
+  calcolabile» è la scritta più larga) né sotto lo stato della candidatura, che le due spie
+  di P6 e quella di P2 compaiano davvero al posto giusto e spariscano da spente, che la
+  colonna «Profilo» della Home — che dal 2026-09-02 **apre** la coda — non spinga fuori il
+  Ruolo su una finestra stretta: sono tutte cose che si vedono **aprendo il programma**. Il
+  banco misura testo e colore delle celle, non dove finiscono i pixel — e su un pannello mai
+  appeso a un Form `.Visible` risponde male comunque. Da riguardare con più attenzione dopo
+  il 2026-09-02, perché le parole della spia si sono **allungate** di tre caratteri
+  («profilo usato: corrente» al posto di «profilo allineato») e con loro sono cambiate due
+  misure decise a occhio: `lblSpiaProfilo` da 172 a 230 px — spazio ceduto da
+  `lblStatoCandidatura`, che è allineata a destra e lo lasciava vuoto — e `colProfilo` da 170
+  a 190. *(cap. 03.6, 03.8; `PannelloOpportunita.Designer.vb` righe `lblSpiaProfilo` e
+  `lblStatoCandidatura`, `PannelloDocumenti.Designer.vb`, `PannelloProfilo.Designer.vb`,
+  `PannelloHome.Designer.vb` riga `colProfilo`.)*
+- **Il rifiuto «prima si rifà il match» non è mai stato visto dal vivo.** Il banco sa che
+  l'AI non viene chiamata e che il messaggio nomina «Riconfronta», ma la finestra che lo dice
+  non si apre affatto nel banco (serve un Form attorno al pannello). Da provare a mano, ed è
+  un giro solo: cambiare il profilo, aprire una candidatura confrontata prima, premere
+  «Rigenera» — deve rifiutare e indicare la strada — poi tornare in P4, premere
+  «⚠ Riconfronta», e da lì «Rigenera» deve funzionare. Da guardare anche che i **due export**
+  restino accesi mentre il rifiuto vale: quel che è già scritto si deve poter ancora mandare.
+  *(cap. 08.4, 12 A7; `PannelloDocumenti.MotivoProfiloNonPiuQuello`.)*
+- **Che la barra apra la candidatura giusta non lo vede il banco.** La scelta sta in
+  `FormPrincipale.btnDocumenti_Click`, che è codice di una finestra: il banco prova i due
+  pannelli, non chi li mette in fila. Da guardare a mano, ed è il giro che ha stanato il
+  difetto: apri una candidatura nella scheda, premi **«📄 Documenti»** in barra, e controlla
+  che la tendina «Documento:» in cima porti **il nome di quella** e non di un'altra. Su una
+  candidatura senza documenti la pagina deve restare vuota dicendo dove si scrivono, **senza
+  generarli**. *(cap. 03.6 P6, 12 A7; `FormPrincipale.btnDocumenti_Click`.)*
+- **«⚠ Riconfronta» non è mai stato visto comparire e sparire dal vivo.** Il banco sa che
+  c'è quando serve e che non c'è quando non serve, ma non sa **come sta** nella fascia dei
+  comandi: che la sua comparsa non spinga «Scarta» fuori dal bordo su una finestra stretta,
+  che sparendo non lasci un buco, e che facendo da «Annulla» durante l'attesa il nome più
+  corto non balli. Da guardare aprendo una candidatura col profilo cambiato: rispondere
+  **«Annulla»** alla finestra e controllare che il bottone resti lì — è esattamente il caso
+  per cui è nato. *(cap. 03.6 P4; `PannelloOpportunita` riga `btnRiconfronta`.)*
+- **Il clic che chiude la schermata d'avvio non è sorvegliato dal banco.** La strada è il
+  filtro dei messaggi dell'applicazione (`PreFilterMessage`), e un collaudo che lo provasse
+  davvero dovrebbe far girare un ciclo di messaggi vero con due finestre — cioè la cosa che
+  il banco non fa apposta. Da provare **a mano**, ed è un gesto solo: aprire il programma e
+  cliccare **fuori** dalla schermata, sulla finestra dietro. *(cap. 03.4; `FinestraAvvio.PreFilterMessage`.)*
+- **Le due spie di P6 e quella di P2 non sono mai state viste su dati veri.** Il 2 settembre
+  la prova è stata fatta su una cartella dati usa-e-getta seminata apposta (tre candidature:
+  una rossa, una verde, una spenta), che è il modo giusto per vedere i tre stati affiancati
+  ma non passa da un CV e da una lettera generati per davvero. Da guardare, la prossima volta
+  che si genera un documento: che la spia in cima alla colonna dica la stessa cosa della riga
+  di stato che sta più su, e che non si contraddicano. *(cap. 03.6 P6, P2.)*
+
 ## Chiuse
 
 - ✅ **Il flusso D non ha più nessun segno nell'interfaccia** *(aperta il 2026-08-31, **chiusa

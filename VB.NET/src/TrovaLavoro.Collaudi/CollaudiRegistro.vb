@@ -315,6 +315,44 @@ Namespace Dati
         End Sub
 
         <TestMethod>
+        Public Sub LaVocePortaLaVersioneDiProfiloDelConfronto()
+
+            ' Dal 2026-09-02. La coda della Home non apre le candidature: legge il registro,
+            ' e senza questo campo la spia del profilo lì resterebbe spenta su tutto — cioè
+            ' muta proprio dove si guardano tutte insieme. Il giro completo conta più del
+            ' campo: basta che ComeJson lo dimentichi, e la spia si spegne in silenzio senza
+            ' che niente diventi rosso.
+            ConArchivioTemporaneo(
+                Sub(indice, candidature, cartella)
+                    Dim o As Opportunita = Candidatura("Rossi S.p.A.")
+                    o.VersioneProfilo = "2026-09-02_101500"
+                    candidature.Salva(o)
+                    indice.Salva(indice.Carica())
+
+                    Dim riletto As Registro = Registro.DaJson(File.ReadAllText(cartella.FileRegistro))
+
+                    Assert.AreEqual("2026-09-02_101500", riletto.Voci.Single().VersioneProfilo,
+                                    "la firma del profilo deve sopravvivere al giro sul file")
+                End Sub)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub UnRegistroScrittoPrimaDiOggiNonSiRompe()
+
+            ' Un file salvato prima che il campo esistesse non ha «versione_profilo». Non è
+            ' un guasto: è un «non lo so», e la spia su un non-lo-so resta spenta (v.
+            ' CollaudiSpiaDelProfilo). Buttare via il registro per un campo mancante sarebbe
+            ' peggio del campo mancante.
+            Dim voce As VoceRegistro = VoceRegistro.DaJson(
+                JsonNode.Parse("{""cartella"": ""2026-08-10_rossi"", ""azienda"": ""Rossi S.p.A.""}").AsObject())
+
+            Assert.IsNotNull(voce, "la voce si legge lo stesso")
+            Assert.IsTrue(String.IsNullOrEmpty(voce.VersioneProfilo), "e la versione resta vuota")
+
+        End Sub
+
+        <TestMethod>
         Public Sub UnaVoceSenzaCartellaNonServeANiente()
             ' La cartella è l'identità della voce: senza, non si sa nemmeno di chi parla.
             Dim letto As Registro = Registro.DaJson(

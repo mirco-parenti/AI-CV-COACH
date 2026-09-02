@@ -67,6 +67,24 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
 | Si toglie la data, e **solo** la data | `TrovaLavoro/Ai/IdModello.vb` | la regex diventa `-\d+$` invece di `-\d{8}$` | `QuelCheNonEUnaDataResta`, `DueModelliDiversiRestanoDiversi`, `LAliasNonSiRaddoppiaConLaSuaVersioneDatata`, `UnRitiratoEntraLoStessoAncheOraCheSiRiconosconoGliAlias` |
 | In «Informazioni» nessun controllo ne copre un altro | `TrovaLavoro/Ui/FinestraInformazioni.Designer.vb` | `btnControllaVersione` torna in `Point(120, 464)`, sopra la riga del copyright | `NessunControlloNeCopreUnAltro` |
 | E nessuno esce dalla finestra | `TrovaLavoro/Ui/FinestraInformazioni.Designer.vb` | `btnComeFunziona` va in `Point(14, 700)`, sotto il bordo | `TuttoStaDentroLaFinestra` |
+| **La spia del profilo** — spenta su ciò che non è stato fatto | `TrovaLavoro/Ui/SpiaDelProfilo.vb` | in `Leggi` la guardia diventa `If archivio Is Nothing Then Return Spenta` | `SenzaNienteDaGiudicareNonSiAccendeNiente`, `SuUnaMaiConfrontataLaSpiaRestaSpenta` |
+| Una versione non annotata resta un dubbio, non un verde | `TrovaLavoro/Ui/SpiaDelProfilo.vb` | si toglie da `Leggi` la riga `If String.IsNullOrEmpty(versione) Then Return Spenta` | `UnaVersioneNonAnnotataLasciaLaSpiaSpenta` |
+| Il profilo sparito non si racconta come cresciuto | `TrovaLavoro/Ui/SpiaDelProfilo.vb` | in `Leggi` il ramo `CELaVersione` diventa irraggiungibile (`If False AndAlso …`) | `UnProfiloRifattoDaCapoLoDiceConLeSueParole` |
+| **Il riconfronto** — il suo comando è **a video**, non solo scritto bene | `TrovaLavoro/Ui/PannelloOpportunita.vb` | in `AggiornaComandi` `inFascia` diventa sempre `False` | `IlProfiloCresciutoAccendeIlRiconfronto`, `LaGiaSpeditaTieneIlGestoMaNonLoPropone` |
+| **La coda della Home** — la spia apre la riga e il match la segue | `TrovaLavoro/Ui/PannelloHome.Designer.vb` | l'`AddRange` di `lvwCoda` torna `{colMatch, colProfilo, …}` | `IlPunteggioELaDataSiLeggonoIncolonnati` |
+| Gli indici delle colonne sono quelli veri della lista | `TrovaLavoro/Ui/PannelloHome.vb` | le costanti tornano ai numeri di prima della colonna «Profilo» (`ColonnaAzienda = 1` …) | `CliccandoUnIntestazioneSiOrdinaERiCliccandolaSiGira`, `OrdinandoPerProfiloLeDaRifareSiTrovanoTutteInsieme` |
+| Cliccando «Profilo» si ordina per la **spia**, non per altro | `TrovaLavoro/Ui/PannelloHome.vb` | si toglia da `ConfrontaSecondoLaColonna` il `Case ColonnaProfilo` | `OrdinandoPerProfiloLeDaRifareSiTrovanoTutteInsieme` |
+| La spia dice **queste** parole, e il banco le legge dove si vedono | `TrovaLavoro/Ui/SpiaDelProfilo.vb` | `ParolaDisallineato` torna `"profilo disallineato"` | `NellaCodaLaSpiaDelProfiloSiVedeESiLegge`, `UnProfiloCresciutoAccendeIlRosso` |
+| **Prima il match, poi i documenti** — il cancello guarda anche il profilo *cresciuto* | `TrovaLavoro/Ui/PannelloDocumenti.vb` | in `MotivoProfiloNonPiuQuello` il ramo `CambiatoDopo` diventa irraggiungibile (`If False AndAlso …`) | `UnProfiloSoloCresciutoFermaLaRigenerazione`, `SuUnProfiloCresciutoLaLetteraNonSiRiallinea` |
+| …e **non** si chiude su chi non ha una versione annotata | `TrovaLavoro/Ui/PannelloDocumenti.vb` | lo stesso ramo diventa sempre vero (`If True OrElse …`) | `SenzaVersioneAnnotataNonSiFermaNiente` |
+| Col profilo obsoleto «Rigenera» **non si preme affatto** | `TrovaLavoro/Ui/PannelloDocumenti.vb` | in `AggiornaComandi` si toglie `Not daRimettereInPari` da `btnRigenera.Enabled` | `ColProfiloObsoletoRigeneraNonSiPremeAffatto` |
+| …e la riga di stato lo **dice** invece di invitare a rigenerare | `TrovaLavoro/Ui/PannelloDocumenti.vb` | in `MostraLaCandidaturaAsync` il ramo `nonPiuQuello` diventa irraggiungibile | `ColProfiloObsoletoRigeneraNonSiPremeAffatto` |
+| Guardare i documenti dalla barra **non** fa partire una generazione | `TrovaLavoro/Ui/PannelloDocumenti.vb` | in `MostraLaCandidaturaAsync` la guardia `If Not generaSeManca` diventa irraggiungibile | `ArrivandoDallaBarraSiGuardaSenzaGenerare` |
+| Il rosso della spia è quello che si legge sull'avorio | `TrovaLavoro/Ui/SpiaDelProfilo.vb` | in `Rossa` si mette `StileApp.Pericolo` al posto di `RossoCritico` | `IDueInchiostriSonoQuelliCheSiLeggonoSullAvorio`, `NellaCodaLaSpiaDelProfiloSiVedeESiLegge` |
+| La spia porta sempre la sua parola (cap. 03.8) | `TrovaLavoro/Ui/SpiaDelProfilo.vb` | `Scritta` restituisce il solo `Pallino` | `LaSpiaPortaSempreLaSuaParolaEnonSoloIlPallino`, `NellaCodaLaSpiaDelProfiloSiVedeESiLegge` |
+| Le correzioni non salvate valgono già il rosso | `TrovaLavoro/Ui/SpiaDelProfilo.vb` | in `Leggi` il ramo `giaCambiato` diventa irraggiungibile | `LeCorrezioniNonSalvateValgonoGiaIlRosso` |
+| Il registro conserva la firma del profilo | `TrovaLavoro/Dati/Registro.vb` | si toglie `{"versione_profilo", VersioneProfilo}` da `ComeJson` | `LaVocePortaLaVersioneDiProfiloDelConfronto` |
+| Nella coda la cella della spia ha il suo inchiostro | `TrovaLavoro/Ui/PannelloHome.vb` | si toglie la chiamata `TingiLaSpia(riga, spia)` da `RigaDellaVoce` | `NellaCodaLaSpiaDelProfiloSiVedeESiLegge` |
 | Un 404 non è un guasto: è «non c'è nessuna versione» | `TrovaLavoro/Motore/ControlloVersione.vb` | si toglie il ramo `If risposta.StatusCode = HttpStatusCode.NotFound` | `SenzaNessunaVersionePubblicataNonSiParlaDiGuasti` |
 | «Chiudi» delle Impostazioni non scorre via | `TrovaLavoro/Ui/FinestraImpostazioni.Designer.vb` | `btnChiudi` torna dentro `pnlContenuto` invece che nella fascia | `ChiudiRestaInVistaAncheQuandoIlContenutoNonCiSta`, `QuandoSiScorreNienteFinisceSottoLaBarra` |
 | E la fascia si ancora davvero al fondo | `TrovaLavoro/Ui/FinestraImpostazioni.Designer.vb` | `pnlFascia.Dock` diventa `DockStyle.None` | `ChiudiRestaInVistaAncheQuandoIlContenutoNonCiSta` |
@@ -146,6 +164,16 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
   chiamate del modello predefinito. La falsificazione difende il collaudo dal codice, non il
   collaudo dai propri dati: quelli si difendono solo **guardando la cosa vera** — qui, aprendo
   le Impostazioni e leggendo che cosa c'è scritto nelle tendine. *(2026-08-27.)*
+
+- **Una candidatura senza versione di profilo teneva verde un collaudo per il motivo
+  sbagliato.** Il collaudo che sorveglia la spia spenta nella coda della Home usava una
+  candidatura mai confrontata **e** senza versione annotata: due ragioni per restare spenta,
+  e a tenerla spenta bastava la seconda. Cancellando il controllo sulle stelle il collaudo
+  restava **verde**, e la falsificazione lo ha stanato perché ne era caduto uno solo dei due
+  attesi — il rosso *mancante* è una notizia quanto quello di troppo. Adesso quella
+  candidatura una versione ce l'ha, ed è per giunta una che non esiste: se il controllo
+  cadesse, la spia non tornerebbe grigia per caso ma **rossa** su una candidatura mai
+  giudicata. *(2026-09-02.)*
 
 ## Quel che manca
 
