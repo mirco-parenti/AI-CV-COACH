@@ -951,6 +951,102 @@ Namespace Ui
 
         End Function
 
+        ''' <summary>
+        ''' Tornando in vista, la spia riguarda lo storico (2026-09-03).
+        ''' </summary>
+        ''' <remarks>
+        ''' Il difetto si vedeva tutto in una schermata sola: si salvava il profilo in P2,
+        ''' si tornava qui <b>dalla barra</b>, e «⚠ Riconfronta» compariva — perché lo
+        ''' decide <c>AggiornaComandi</c>, che questo pannello già rifaceva entrando in
+        ''' vista — mentre a due centimetri la spia diceva ancora «profilo usato:
+        ''' corrente». Due segnali opposti nella stessa pagina, e nessun modo di sapere
+        ''' quale dei due mente. Dalla Home non si vedeva, perché di là si passa da
+        ''' <c>MostraLOpportunita</c>, che la spia la rifà: il buco era solo nella strada
+        ''' che non ricarica niente.
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function LaSpiaSiRifaTornandoInVista() As Task
+
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    pannello.RiapriLaCandidatura(ConfrontataCon(contesto.Archivio.Versioni().Last()))
+
+                    Dim spia As Label = Etichetta(pannello, "lblSpiaProfilo")
+                    Assert.Contains(SpiaDelProfilo.ParolaAllineato, spia.Text,
+                                    "aperta adesso, è in pari col profilo di oggi")
+
+                    IlProfiloCambia(contesto)
+
+                    ' Il gesto della barra: la finestra mostra un pannello solo per volta,
+                    ' e al pannello non dice altro che «adesso tocchi a te».
+                    pannello.Visible = False
+                    pannello.Visible = True
+
+                    Assert.Contains(SpiaDelProfilo.ParolaDisallineato, spia.Text,
+                                    "tornando in vista la spia è tornata a guardare lo storico")
+                    Assert.IsTrue(Bottone(pannello, "btnRiconfronta").Visible,
+                                  "e dice la stessa cosa del bottone, che di suo compariva già")
+
+                    Await Task.CompletedTask
+                End Function)
+
+        End Function
+
+''' <summary>
+''' Quante righe di testo in più di quelle che ci stanno: 0 se il testo entra tutto.
+''' </summary>
+''' <remarks>
+''' Una <c>Label</c> senza <c>AutoSize</c> non va a capo all'infinito: quel che eccede
+''' l'altezza non si vede e non lo dice nessuno. È il difetto trovato guardando l'app il
+''' 2026-09-03 — a cadere fuori era la riga «Vai in «Confronta…» e premi «⚠ Riconfronta»»,
+''' cioè l'unica che diceva che fare — e questa misura esiste perché non torni.
+''' </remarks>
+        Private Shared Function RigheTagliate(etichetta As Label) As Integer
+
+            Dim serve As Size = TextRenderer.MeasureText(
+                etichetta.Text, etichetta.Font,
+                New Size(etichetta.Width, Integer.MaxValue), TextFormatFlags.WordBreak)
+
+            If serve.Height <= etichetta.Height Then Return 0
+
+            Dim altezzaRiga As Integer = Math.Max(1, etichetta.Font.Height)
+            Return CInt(Math.Ceiling((serve.Height - etichetta.Height) / altezzaRiga))
+
+        End Function
+
+''' <summary>
+''' Il racconto col disallineamento entra nella riga di stato (2026-09-03).
+''' </summary>
+''' <remarks>
+''' Qui la riga porta due cose: il racconto della riapertura, che da solo prende due delle
+''' tre righe, e il disallineamento. Il testo disteso non ci stava, e a sparire era la
+''' seconda metà. Il perché per esteso lo dicono la finestra e il suggerimento della spia,
+''' che lo spazio ce l'hanno.
+''' </remarks>
+        <TestMethod>
+        Public Async Function IlDisallineamentoEntraNellaRigaDiStato() As Task
+
+            Await ConPannelloAsync(
+                PipelineFinta(),
+                Async Function(pannello, contesto) As Task
+
+                    Dim aperta As Opportunita = ConfrontataCon(contesto.Archivio.Versioni().Last())
+                    Dim dove As String = contesto.Opportunita.Salva(aperta)
+
+                    IlProfiloCambia(contesto)
+                    pannello.RiapriLaCandidatura(contesto.Opportunita.Carica(dove))
+
+                    Dim riga As Label = Etichetta(pannello, "lblStatoOpportunita")
+                    Assert.Contains("Riconfronta", riga.Text, "la riga dice il gesto da fare")
+                    Assert.AreEqual(0, RigheTagliate(riga), "e ci sta dentro: " & riga.Text)
+
+                    Await Task.CompletedTask
+                End Function)
+
+        End Function
+
         <TestMethod>
         Public Async Function LaGiaSpeditaTieneIlGestoMaNonLoPropone() As Task
 

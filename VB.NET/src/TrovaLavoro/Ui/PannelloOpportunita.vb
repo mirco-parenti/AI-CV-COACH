@@ -10,22 +10,22 @@ Imports TrovaLavoro.Ai
 Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Motore
 
-''' <summary>
-''' Pannello P4 — l'opportunità (cap. 03.6; cap. 12, A5): l'annuncio come l'AI l'ha
-''' capito, il match in stelle, i giudizi voce per voce e le note che li spiegano.
-''' </summary>
-''' <remarks>
-''' <para><b>La fascia d'ingresso</b> in cima è la porta da cui un annuncio entra: fino a
-''' T5 è l'unica, e anche dopo resta la strada di chi ha in mano un testo e basta
-''' (cap. 12.3). A confronto avvenuto si richiude, per lasciare spazio ai giudizi.</para>
-''' <para><b>«Analizza» fa due passi, non uno.</b> Fra l'analisi dell'annuncio e il
-''' confronto l'utente non deve decidere niente: la decisione vera — generare o no i
-''' documenti — viene dopo, quando le stelle si vedono (cap. 12, A5→A7). I due passi si
-''' chiamano perciò di fila, e l'attesa dice a che punto è.</para>
-''' <para><b>Qui non si giudica.</b> I giudizi sono dell'AI, il punteggio è di
-''' <see cref="CalcoloMatch"/>, e ciò che si mostra è la vista di sola lettura
-''' <see cref="VistaConfronto"/>: il pannello disegna, non decide.</para>
-''' </remarks>
+    ''' <summary>
+    ''' Pannello P4 — l'opportunità (cap. 03.6; cap. 12, A5): l'annuncio come l'AI l'ha
+    ''' capito, il match in stelle, i giudizi voce per voce e le note che li spiegano.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>La fascia d'ingresso</b> in cima è la porta da cui un annuncio entra: fino a
+    ''' T5 è l'unica, e anche dopo resta la strada di chi ha in mano un testo e basta
+    ''' (cap. 12.3). A confronto avvenuto si richiude, per lasciare spazio ai giudizi.</para>
+    ''' <para><b>«Analizza» fa due passi, non uno.</b> Fra l'analisi dell'annuncio e il
+    ''' confronto l'utente non deve decidere niente: la decisione vera — generare o no i
+    ''' documenti — viene dopo, quando le stelle si vedono (cap. 12, A5→A7). I due passi si
+    ''' chiamano perciò di fila, e l'attesa dice a che punto è.</para>
+    ''' <para><b>Qui non si giudica.</b> I giudizi sono dell'AI, il punteggio è di
+    ''' <see cref="CalcoloMatch"/>, e ciò che si mostra è la vista di sola lettura
+    ''' <see cref="VistaConfronto"/>: il pannello disegna, non decide.</para>
+    ''' </remarks>
 Public Class PannelloOpportunita
     Implements IPannelloArea
 
@@ -156,6 +156,15 @@ Public Class PannelloOpportunita
     ''' l'archivio, che guarda il disco a ogni domanda: bastava tornare a chiedergliela.
     ''' Se un'opportunità è già in mostra, il racconto non si tocca: quella riga dice a che
     ''' punto è il confronto, e riscriverla come se si ricominciasse sarebbe una bugia.
+    ''' <para><b>Anche la spia, dal 2026-09-03.</b> Qui si rifaceva solo lo stato dei
+    ''' comandi, e per un pannello che entra in vista era già la cosa giusta — solo,
+    ''' incompleta: la spia è nata il giorno prima e questo posto non l'ha saputo. Il
+    ''' risultato si vedeva tutto in una schermata sola: si salvava il profilo, si tornava
+    ''' qui dalla barra, e «⚠ Riconfronta» <i>compariva</i> — perché lo decide
+    ''' <see cref="AggiornaComandi"/> — mentre a due centimetri la spia diceva ancora
+    ''' «profilo usato: corrente». Due cose che si contraddicono nella stessa pagina, e chi
+    ''' guarda non ha modo di sapere quale delle due sta mentendo. Dalla Home non si vedeva,
+    ''' perché di là si passa da <see cref="MostraLOpportunita"/>, che la spia la rifà.</para>
     ''' </remarks>
     Protected Overrides Sub OnVisibleChanged(e As EventArgs)
 
@@ -164,6 +173,7 @@ Public Class PannelloOpportunita
         If Not Visible OrElse _contesto Is Nothing Then Return
 
         If _opportunita Is Nothing Then RaccontaDaDoveSiComincia()
+        MostraLaSpiaDelProfilo()
         AggiornaComandi()
 
     End Sub
@@ -372,6 +382,33 @@ Public Class PannelloOpportunita
     ''' venga, e di un dubbio non si fa un allarme (v. <c>CELaVersione</c>, che di una
     ''' versione vuota risponde di sì).</para>
     ''' </remarks>
+    ''' <summary>
+    ''' Lo stesso, in una riga sola: quel che sta nella riga di stato accanto al racconto.
+    ''' </summary>
+    ''' <remarks>
+    ''' Il perché disteso lo dicono la finestra della riapertura e il suggerimento della spia,
+    ''' che hanno lo spazio per dirlo. Qui no: la riga è alta 46 px e il racconto («Riaperta
+    ''' da…, confronto fatto…») ne prende già due terzi.
+    ''' </remarks>
+    Private Function DisallineatoInBreve() As String
+
+        If _opportunita Is Nothing OrElse _contesto Is Nothing Then Return Nothing
+        If Not _opportunita.Confrontata Then Return Nothing
+
+        Dim versione As String = _opportunita.VersioneProfilo
+
+        If Not _contesto.Archivio.CELaVersione(versione) Then
+            Return "Profilo del confronto eliminato: rifallo con «⚠ Riconfronta»."
+        End If
+
+        If _contesto.Archivio.CambiatoDopo(versione) Then
+            Return "Profilo cambiato dopo il confronto: rifallo con «⚠ Riconfronta»."
+        End If
+
+        Return Nothing
+
+    End Function
+
     Private Function ProfiloDisallineato() As String
 
         If _opportunita Is Nothing OrElse _contesto Is Nothing Then Return Nothing
@@ -380,15 +417,14 @@ Public Class PannelloOpportunita
         Dim versione As String = _opportunita.VersioneProfilo
 
         If Not _contesto.Archivio.CELaVersione(versione) Then
-            Return "Questa candidatura è stata confrontata con un profilo che adesso non c'è " &
-                   "più: quello di allora è stato eliminato, e le stelle e i giudizi che vedi " &
-                   "raccontano ancora lui."
+            Return "Il profilo con cui l'hai confrontata è stato eliminato: stelle e giudizi " &
+                   "raccontano ancora quello."
         End If
 
         If _contesto.Archivio.CambiatoDopo(versione) Then
-            Return "Hai cambiato il profilo dopo questo confronto: le stelle e i giudizi che " &
-                   "vedi sono quelli di allora, e se è cambiato un requisito eliminatorio — la " &
-                   "patente, un titolo, una disponibilità — il punteggio di oggi sarebbe un altro."
+            Return "Hai cambiato il profilo dopo il confronto: stelle e giudizi sono quelli di " &
+                   "allora. Se è cambiato un requisito eliminatorio (patente, titolo, " &
+                   "disponibilità) oggi il punteggio sarebbe un altro."
         End If
 
         Return Nothing
@@ -501,16 +537,14 @@ Public Class PannelloOpportunita
     Private Function SpiegazioneDelRiconfronto() As String
 
         Dim testo As String =
-            "Rifaccio il confronto fra questo annuncio e il tuo profilo di oggi. L'annuncio " &
-            "non lo rileggo: quello resta com'è." & vbLf & vbLf &
-            "Le stelle e i giudizi che vedi adesso vengono sostituiti dai nuovi, e quelli di " &
-            "prima non si recuperano."
+            "Rifaccio il confronto fra questo annuncio e il tuo profilo di oggi." & vbLf & vbLf &
+            " · Cambiano: stelle e giudizi. I vecchi non si recuperano." & vbLf &
+            " · Resta: l'annuncio, che non rileggo."
 
         If ConDocumentiScritti() Then
-            testo &= vbLf & vbLf &
-                     "Il 🎯 CV e la ✉️ lettera già scritti invece non si toccano: restano dove " &
-                     "sono e si possono ancora esportare. Nascono dai giudizi di prima — per " &
-                     "allinearli al confronto nuovo, rigenerali da «Documenti»."
+            testo &= vbLf &
+                     " · Restano: 🎯 CV e ✉️ lettera, ma nati dai giudizi di prima." & vbLf &
+                     "   Per allinearli: «Rigenera», in «Documenti»."
         End If
 
         ' Su una candidatura già partita c'è una perdita in più, e va detta per nome: il
@@ -519,9 +553,8 @@ Public Class PannelloOpportunita
         ' da nessuna parte — e quel numero non serviva a decidere, serviva a ricordare.
         If GiaPartita() Then
             testo &= vbLf & vbLf &
-                     "Attenzione: questa candidatura è già partita. Le stelle con cui l'hai " &
-                     "mandata non restano da nessuna parte — nemmeno nella Home, che le " &
-                     "rilegge da qui."
+                     "⚠ Già inviata: con quante stelle l'hai mandata non resterà scritto da " &
+                     "nessuna parte, nemmeno nella Home."
         End If
 
         Return testo
@@ -587,8 +620,8 @@ Public Class PannelloOpportunita
                 ' più, e chi esporta senza saperlo manda un testo scritto su un'altra misura.
                 If riconfronto AndAlso ConDocumentiScritti() Then
                     RaccontaUnAvviso(racconto & vbLf &
-                                     "Il 🎯 CV e la ✉️ lettera di prima restano dove sono, ma nascono " &
-                                     "dai giudizi di allora: rigenerali da «Documenti» per allinearli.")
+                                     "🎯 CV e ✉️ lettera restano, ma nati dai giudizi di prima: " &
+                                     "«Rigenera», in «Documenti».")
                 Else
                     RaccontaLoStato(racconto, StileApp.TestoSecondario)
                 End If
@@ -722,7 +755,11 @@ Public Class PannelloOpportunita
         If disallineato Is Nothing Then
             RaccontaLoStato(racconto, StileApp.TestoSecondario)
         Else
-            RaccontaUnAvviso(racconto & vbLf & disallineato)
+            ' Il perché per esteso sta nella finestra e nel suggerimento della spia: qui ci
+            ' vuole quel che ci sta. La riga è alta tre righe di testo e il racconto ne
+            ' occupa già due; quel che avanza non va a capo, sparisce — e a sparire sarebbe
+            ' la coda, cioè il gesto da fare (2026-09-03).
+            RaccontaUnAvviso(racconto & vbLf & DisallineatoInBreve())
         End If
 
         AggiornaComandi()
@@ -798,11 +835,8 @@ Public Class PannelloOpportunita
         If Not FinestraConferma.Chiedi(
             Me, "Il profilo non è più quello del confronto",
             motivo & vbLf & vbLf &
-            "Posso rifare il confronto adesso, sull'annuncio che è già qui: non lo rileggo, " &
-            "quindi è una chiamata sola, e le stelle tornano a dire quello che direbbero oggi." &
-            vbLf & vbLf &
-            "Se preferisci farlo più tardi, il bottone «⚠ Riconfronta» resta in fondo alla " &
-            "pagina finché il profilo non torna in pari.",
+            "Lo rifaccio adesso: una chiamata sola, l'annuncio non lo rileggo." & vbLf &
+            "Più tardi: «⚠ Riconfronta», in fondo alla pagina.",
             "Riconfronta ora") Then Return
 
         Await ConfrontaLaRiapertaAsync()

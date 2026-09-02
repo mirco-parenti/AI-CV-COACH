@@ -123,6 +123,12 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
 | La scartata resta chiusa anche al riconfronto | `TrovaLavoro/Ui/PannelloOpportunita.vb` | si toglie da `DaRiconfrontare` la riga sullo stato `Scartata` | `LaScartataNonSiRiconfronta` |
 | La porta del confronto si apre a chi i giudizi ce li ha già | `TrovaLavoro/Ui/PannelloOpportunita.vb` | `ConfrontaLaRiapertaAsync` torna a uscire appena vede `Confrontata` | `IlRiconfrontoRifaIGiudiziSenzaRileggereLAnnuncio` |
 | La riga sopra il 📄 CV base non è una didascalia | `TrovaLavoro/Ui/PannelloDocumenti.vb` | `RaccontaDaDoveViene` torna a `RaccontaLoStato(…, TestoSecondario)` per tutti i casi | `UnCvBaseDiUnProfiloVecchioLoDiceInveceDiRifarsi` |
+| I documenti portano la **loro** versione, non quella del match (2026-09-03) | `TrovaLavoro/Ui/PannelloDocumenti.vb` | in `MostraLeSpie`, `versione` torna a leggere `_candidatura.VersioneProfilo` | `DopoIlRiconfrontoLeSpieDeiDocumentiRestanoRosse` |
+| `stato.json` scrive la versione dei documenti | `TrovaLavoro/Dati/ArchivioOpportunita.vb` | si toglie la riga `{"versione_documenti", …}` dall'oggetto scritto | `LaVersioneDeiDocumentiViaggiaAParte` |
+| Un file scritto prima la eredita dal confronto | `TrovaLavoro/Dati/ArchivioOpportunita.vb` | alla rilettura, `VersioneDeiDocumenti = scrittiCon` senza il ripiego su `VersioneProfilo` | `UnFileVecchioEreditaLaVersioneDalConfronto` |
+| La spia di P4 si rifà quando il pannello torna in vista | `TrovaLavoro/Ui/PannelloOpportunita.vb` | si toglie `MostraLaSpiaDelProfilo()` da `OnVisibleChanged` | `LaSpiaSiRifaTornandoInVista` |
+| Alla riga di stato va il testo che ci **entra** — P6 | `TrovaLavoro/Ui/PannelloDocumenti.vb` | in `NonSiPuoRiscrivere`, `RaccontaUnAvviso(motivo)` invece di `MotivoInBreve()` | `IlRifiutoEntraNellaRigaDiStato` (dichiara quante righe cadono fuori: tre) |
+| Alla riga di stato va il testo che ci **entra** — P4 | `TrovaLavoro/Ui/PannelloOpportunita.vb` | in `MostraLOpportunita`, `racconto & vbLf & disallineato` invece di `DisallineatoInBreve()` | `IlDisallineamentoEntraNellaRigaDiStato` |
 
 ## Tre cose imparate falsificando, che valgono più della tabella
 
@@ -174,6 +180,17 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
   candidatura una versione ce l'ha, ed è per giunta una che non esiste: se il controllo
   cadesse, la spia non tornerebbe grigia per caso ma **rossa** su una candidatura mai
   giudicata. *(2026-09-02.)*
+
+- **Un testo che non ci sta non è un difetto di stile: è un pezzo di programma che non
+  arriva.** La `Label` di stato è alta tre righe e non ha `AutoSize`: quel che eccede non va
+  a capo da qualche parte, sparisce, e a sparire è sempre la **coda** — cioè, in un avviso
+  scritto bene, proprio il gesto da fare. A video restava «i giudizi sono quelli di allora»,
+  con «Rigenera» spento e nessuna indicazione, mentre «Vai in «Confronta ★ ANNUNCIO - CV» e
+  premi «⚠ Riconfronta»» era stato scritto, misurato dal banco e mai visto da nessuno. Il
+  collaudo che lo sorveglia non guarda il testo: lo **misura** con `TextRenderer.MeasureText`
+  contro la dimensione vera dell'etichetta, e falsificandolo dice quante righe cadono fuori.
+  È l'unica forma in cui questa regola resta vera anche quando qualcuno riscriverà quei
+  messaggi. *(2026-09-03.)*
 
 ## Quel che manca
 

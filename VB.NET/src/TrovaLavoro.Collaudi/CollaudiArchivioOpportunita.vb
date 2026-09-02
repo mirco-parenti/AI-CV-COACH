@@ -66,6 +66,61 @@ Namespace Dati
 
         End Sub
 
+        ''' <summary>
+        ''' La versione dei documenti si scrive e si rilegge, separata da quella del
+        ''' confronto (2026-09-03).
+        ''' </summary>
+        <TestMethod>
+        Public Sub LaVersioneDeiDocumentiViaggiaAParte()
+
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim o As Opportunita = OpportunitaDiProva()
+                    o.VersioneDeiDocumenti = "2026-08-09_180000"
+
+                    Dim dove As String = archivio.Salva(o)
+                    Dim riletta As Opportunita = archivio.Carica(dove)
+
+                    Assert.AreEqual("2026-08-10_092500", riletta.VersioneProfilo,
+                                    "quella del confronto resta la sua")
+                    Assert.AreEqual("2026-08-09_180000", riletta.VersioneDeiDocumenti,
+                                    "e i documenti portano la loro, che è un'altra")
+                End Sub)
+
+        End Sub
+
+        ''' <summary>
+        ''' Un file scritto prima del 2026-09-03 non ha il campo, e allora lo eredita.
+        ''' </summary>
+        ''' <remarks>
+        ''' Fino a quel giorno le due versioni erano la stessa cosa per costruzione — i
+        ''' documenti nascevano dal confronto e riconfrontare non si poteva — quindi
+        ''' l'eredità non è una stima: è il valore vero. Senza, ogni candidatura già in
+        ''' archivio si riaprirebbe con le due spie spente, e resterebbero al buio proprio
+        ''' quelle di chi non ha fatto niente di male.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub UnFileVecchioEreditaLaVersioneDalConfronto()
+
+            ConArchivioTemporaneo(
+                Sub(archivio, cartella)
+                    Dim dove As String = archivio.Salva(OpportunitaDiProva())
+
+                    ' Si torna indietro nel tempo: si toglie dallo stato.json il campo che
+                    ' quel giorno non c'era.
+                    Dim percorso As String = Path.Combine(dove, "stato.json")
+                    Dim stato As JsonObject = CType(JsonNode.Parse(File.ReadAllText(percorso)), JsonObject)
+                    stato.Remove("versione_documenti")
+                    File.WriteAllText(percorso, stato.ToJsonString())
+
+                    Dim riletta As Opportunita = archivio.Carica(dove)
+
+                    Assert.AreEqual("2026-08-10_092500", riletta.VersioneDeiDocumenti,
+                                    "senza il campo, i documenti valgono quanto il confronto")
+                End Sub)
+
+        End Sub
+
         <TestMethod>
         Public Sub LaCartellaHaIlNomeParlante()
             ConArchivioTemporaneo(

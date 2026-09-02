@@ -769,10 +769,9 @@ Public Class FinestraImpostazioni
         ' Livello 5: si spiega e si parte da «No», come lo «Scarta» di P4 (cap. 03.3).
         Dim risposta As DialogResult = MessageBox.Show(
             Me,
-            "Butto via cronologia, cache e cookie del browser che usi per cercare annunci." & vbLf & vbLf &
-            "Le tue candidature, il profilo e le ricerche salvate non si toccano: sparisce " &
-            "solo quel che il browser si è ricordato per strada. Dovrai rifare gli accessi " &
-            "ai portali dove eri entrato.",
+            "Butto via cronologia, cache e cookie del browser degli annunci." & vbLf & vbLf &
+            "Candidature, profilo e ricerche salvate non si toccano." & vbLf &
+            "Dovrai rifare gli accessi ai portali.",
             "Svuota i dati di navigazione", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
             MessageBoxDefaultButton.Button2)
 

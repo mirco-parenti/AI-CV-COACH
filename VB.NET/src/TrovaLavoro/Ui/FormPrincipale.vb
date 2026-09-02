@@ -1141,8 +1141,9 @@ Public Class FormPrincipale
         If inSospeso.Count = 0 Then Return
 
         Dim risposta As DialogResult = MessageBox.Show(
-            $"Hai {String.Join(" e ", inSospeso)}." & vbLf &
-            "Se chiudi adesso, quel lavoro va perso. Vuoi chiudere lo stesso?",
+            "Hai del lavoro in sospeso:" & vbLf &
+            " · " & String.Join(vbLf & " · ", inSospeso) & vbLf & vbLf &
+            "Chiudendo adesso va perso. Chiudo lo stesso?",
             Me.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2)
 
         e.Cancel = (risposta <> DialogResult.Yes)

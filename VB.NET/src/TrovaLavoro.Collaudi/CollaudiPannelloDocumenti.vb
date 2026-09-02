@@ -1635,7 +1635,7 @@ Namespace Ui
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
 
                     Assert.IsEmpty(generatore.LavoriChiesti(), "l'AI non è stata chiamata affatto")
-                    Assert.Contains("non c'è più", Etichetta(pannello, "lblStatoDocumenti").Text,
+                    Assert.Contains("è stato eliminato", Etichetta(pannello, "lblStatoDocumenti").Text,
                                     "e il pannello dice cos'è successo")
 
                     ' Dal 2026-09-02 il consiglio è cambiato perché è cambiato il programma:
@@ -1695,7 +1695,7 @@ Namespace Ui
 
                     Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(),
                                     "la lettera non è stata riscritta")
-                    Assert.Contains("non c'è più", Etichetta(pannello, "lblStatoDocumenti").Text)
+                    Assert.Contains("è stato eliminato", Etichetta(pannello, "lblStatoDocumenti").Text)
                 End Function)
 
         End Function
@@ -1768,6 +1768,124 @@ Namespace Ui
                     Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(),
                                     "la lettera non è stata riscritta")
                     Assert.Contains("Riconfronta", Etichetta(pannello, "lblStatoDocumenti").Text)
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Dopo un riconfronto le due spie dei documenti restano <b>rosse</b> (2026-09-03).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È il difetto trovato usando il programma: si riconfronta una candidatura
+        ''' col profilo di oggi, il match torna in pari — giustamente — e passando di qua le
+        ''' due lucine diventavano verdi su un 🎯 CV e una ✉️ lettera che nessuno aveva
+        ''' riscritto. La spia leggeva la versione del <b>confronto</b>, che il riconfronto
+        ''' aggiorna, invece di quella dei <b>documenti</b>, che nessuno aveva toccato: un
+        ''' campo solo per due domande diverse, e finché non si poteva riconfrontare le due
+        ''' risposte coincidevano sempre.</para>
+        ''' <para>Il pannello lo <i>diceva</i> già, nella riga di stato del riconfronto
+        ''' («restano dove sono, ma nascono dai giudizi di allora»): la lucina diceva il
+        ''' contrario, nella stessa applicazione. Fra due segnali che si contraddicono, chi
+        ''' guarda crede a quello che costa meno — il colore.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function DopoIlRiconfrontoLeSpieDeiDocumentiRestanoRosse() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.VersioneProfilo = contesto.Archivio.Versioni().Last()
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.Contains(SpiaDelProfilo.ParolaAllineato,
+                                    Etichetta(pannello, "lblSpiaCv").Text,
+                                    "appena scritti, i documenti sono del profilo di oggi")
+
+                    ' Il profilo cambia, e si riconfronta: è quel che fa P4, che rifà il
+                    ' match e lascia dove sono i documenti di prima.
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+                    candidatura.VersioneProfilo = contesto.Archivio.Versioni().Last()
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura, generaSeManca:=False)
+
+                    Assert.Contains(SpiaDelProfilo.ParolaDisallineato,
+                                    Etichetta(pannello, "lblSpiaCv").Text,
+                                    "il CV è ancora quello di prima, e la spia lo dice")
+                    Assert.Contains(SpiaDelProfilo.ParolaDisallineato,
+                                    Etichetta(pannello, "lblSpiaLettera").Text,
+                                    "e la lettera con lui")
+                    Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(),
+                                    "guardare non ha riscritto niente")
+                End Function)
+
+        End Function
+
+''' <summary>
+''' Quante righe di testo in più di quelle che ci stanno: 0 se il testo entra tutto.
+''' </summary>
+''' <remarks>
+''' Una <c>Label</c> senza <c>AutoSize</c> non va a capo all'infinito: quel che eccede
+''' l'altezza non si vede e non lo dice nessuno. È il difetto trovato guardando l'app il
+''' 2026-09-03 — a cadere fuori era la riga «Vai in «Confronta…» e premi «⚠ Riconfronta»»,
+''' cioè l'unica che diceva che fare — e questa misura esiste perché non torni.
+''' </remarks>
+        Private Shared Function RigheTagliate(etichetta As Label) As Integer
+
+            Dim serve As Size = TextRenderer.MeasureText(
+                etichetta.Text, etichetta.Font,
+                New Size(etichetta.Width, Integer.MaxValue), TextFormatFlags.WordBreak)
+
+            If serve.Height <= etichetta.Height Then Return 0
+
+            Dim altezzaRiga As Integer = Math.Max(1, etichetta.Font.Height)
+            Return CInt(Math.Ceiling((serve.Height - etichetta.Height) / altezzaRiga))
+
+        End Function
+
+''' <summary>
+''' Il rifiuto entra nella riga di stato, tutt'e due i rami (2026-09-03).
+''' </summary>
+''' <remarks>
+''' Il testo pieno ne voleva sei righe e la riga ne tiene tre: a video si leggeva «i
+''' giudizi sono quelli di allora», con «Rigenera» spento e nessuna indicazione — perché
+''' l'indicazione stava nella metà caduta fuori. Adesso alla riga va
+''' <c>MotivoInBreve</c>, e alla finestra il testo intero.
+''' </remarks>
+        <TestMethod>
+        Public Async Function IlRifiutoEntraNellaRigaDiStato() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.VersioneProfilo = contesto.Archivio.Versioni().Last()
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    ' Il profilo cresce: il rifiuto arriva nella riga.
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+                    Await pannello.RigeneraAsync()
+
+                    Dim riga As Label = Etichetta(pannello, "lblStatoDocumenti")
+                    Assert.Contains("Riconfronta", riga.Text, "la riga dice il gesto da fare")
+                    Assert.AreEqual(0, RigheTagliate(riga),
+                                    "e ci sta dentro: " & riga.Text)
+
+                    ' L'altro ramo, quello grave: il profilo di allora non c'è più.
+                    candidatura.VersioneProfilo = "2020-01-01_000000"
+                    Await pannello.RigeneraAsync()
+
+                    Assert.Contains("Riconfronta", riga.Text)
+                    Assert.AreEqual(0, RigheTagliate(riga),
+                                    "anche il rifiuto del profilo eliminato ci sta: " & riga.Text)
                 End Function)
 
         End Function
@@ -1904,7 +2022,7 @@ Namespace Ui
                     Assert.AreEqual("it", candidatura.Lingua, "la lingua non è cambiata")
                     Assert.AreEqual("Italiano", Scelta(pannello, "cmbLingua").Text,
                                     "e la tendina è tornata dov'era")
-                    Assert.Contains("non c'è più", Etichetta(pannello, "lblStatoDocumenti").Text,
+                    Assert.Contains("è stato eliminato", Etichetta(pannello, "lblStatoDocumenti").Text,
                                     "al posto della domanda c'è il motivo")
                     Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(),
                                     "e l'AI non è stata richiamata")

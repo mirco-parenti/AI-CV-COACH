@@ -762,9 +762,8 @@ Public Class PannelloEmail
             ' prevedere prima — cercare per nome quale programma sia, e se sia già vivo, è
             ' fragile quanto i portali per selettore (R5) — quindi non si indovina: si
             ' avverte, e chi non ne ha bisogno legge una riga in più.
-            Racconta("Messaggio preparato e aperto nel tuo programma di posta. " &
-                     "Se non era già aperto può metterci qualche secondo, e la prima " &
-                     "finestra a volte resta vuota: in quel caso chiudila e premi di nuovo. " &
+            Racconta("Messaggio aperto nel tuo programma di posta. Può metterci qualche " &
+                     "secondo; se la finestra resta vuota, chiudila e premi di nuovo." & vbLf &
                      "Quando l'hai spedito, torna qui e dimmelo.", StileApp.TestoSecondario)
 
         Catch ex As Exception When TypeOf ex Is Win32Exception OrElse

@@ -306,6 +306,7 @@ Namespace Dati
                 {"date_stati", StatiOpportunita.DateComeJson(o.DateStati)},
                 {"lingua", o.Lingua},
                 {"versione_profilo", o.VersioneProfilo},
+                {"versione_documenti", o.VersioneDeiDocumenti},
                 {"azienda", o.Azienda},
                 {"titolo", o.Titolo},
                 {"fonte", o.Fonte},
@@ -371,6 +372,16 @@ Namespace Dati
             If Not String.IsNullOrEmpty(lingua) Then o.Lingua = lingua
 
             o.VersioneProfilo = CampiJson.Testo(stato, "versione_profilo")
+
+            ' Da qui in poi i documenti portano la loro versione, separata da quella del
+            ' confronto (2026-09-03). Nei file scritti prima il campo non c'è, e allora la
+            ' si eredita da quella del confronto: fino a ieri erano la stessa cosa per
+            ' costruzione — riconfrontare non si poteva — quindi l'eredità non è una stima,
+            ' è il valore vero. Senza, ogni candidatura già in archivio si riaprirebbe con
+            ' le due spie spente, e a spegnersi sarebbero proprio quelle di chi non ha
+            ' fatto niente di male.
+            Dim scrittiCon As String = CampiJson.Testo(stato, "versione_documenti")
+            o.VersioneDeiDocumenti = If(String.IsNullOrEmpty(scrittiCon), o.VersioneProfilo, scrittiCon)
 
             ' Da T5b in poi. Nei file scritti prima questi due campi non ci sono, e
             ' <c>CampiJson.Testo</c> restituisce <c>Nothing</c>: un'opportunità vecchia si

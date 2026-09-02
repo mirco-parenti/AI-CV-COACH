@@ -230,10 +230,9 @@ Public Class PannelloRicerca
             Await vista.EnsureCoreWebView2Async(Await _motore.AmbienteAsync()).ConfigureAwait(True)
 
         Catch ex As ErroreBrowser When ex.MotoreAssente
-            FuoriUso("Per cercare gli annunci serve il componente WebView2 di Windows, che su " &
-                     "questo computer non c'è: si scarica dal sito ufficiale Microsoft " &
-                     "(https://developer.microsoft.com/microsoft-edge/webview2/). Puoi comunque " &
-                     $"incollare il testo di un annuncio nel pannello «{NomiUi.Confronto}».",
+            FuoriUso("Manca il componente WebView2 di Windows, che serve al browser: si scarica " &
+                     "dal sito Microsoft (developer.microsoft.com/microsoft-edge/webview2/)." & vbLf &
+                     $"Intanto puoi incollare un annuncio in «{NomiUi.Confronto}».",
                      unGuasto:=False)
             Return
 
@@ -593,14 +592,12 @@ Public Class PannelloRicerca
                      "apri il singolo annuncio e premi di nuovo.")
 
             AvvisaLUtente(avvisa,
-                "Questa sembra la pagina con l'elenco degli annunci, non un annuncio solo: " &
-                "leggendola tutta metterei insieme decine di offerte diverse, e il punteggio " &
-                "in stelle non vorrebbe dire niente." & vbLf & vbLf &
-                "Apri l'annuncio che ti interessa: clic destro sul suo titolo, poi " &
-                "«Apri collegamento in una nuova finestra» — si apre qui dentro, da solo. " &
-                "Quando lo vedi, premi di nuovo «Cattura annuncio»." & vbLf & vbLf &
-                "Oppure selezionane il testo qui con il mouse: se trovo una selezione, leggo " &
-                "quella e basta.")
+                "Questa è la pagina con l'elenco, non un annuncio solo: leggendola tutta " &
+                "metterei insieme decine di offerte, e le stelle non direbbero niente." &
+                vbLf & vbLf &
+                "Apri il singolo annuncio — clic destro sul titolo, «Apri collegamento in una " &
+                "nuova finestra» — e premi di nuovo «Cattura annuncio»." & vbLf &
+                "Oppure selezionane il testo col mouse: leggo quello.")
 
             Return
 

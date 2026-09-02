@@ -118,11 +118,43 @@ Namespace Motore
         Public Property Email As JsonNode
 
         ''' <summary>
-        ''' La versione di profilo da cui i documenti sono nati (il nome che
-        ''' <c>ArchivioProfilo.Salva</c> restituisce): è ciò che tiene spiegabile un CV
-        ''' già inviato anche a profilo evoluto (cap. 11.1).
+        ''' La versione di profilo con cui è stato fatto il <b>confronto</b> (il nome che
+        ''' <c>ArchivioProfilo.Salva</c> restituisce): è ciò che tiene spiegabile un
+        ''' punteggio già letto anche a profilo evoluto (cap. 11.1).
         ''' </summary>
+        ''' <remarks>
+        ''' <b>Dal 2026-09-03 dice del solo confronto</b>, e i documenti hanno la loro
+        ''' (<see cref="VersioneDeiDocumenti"/>). Fin qui ne bastava una perché le due
+        ''' coincidevano sempre: i documenti nascono dal confronto, e il confronto si faceva
+        ''' una volta sola. «⚠ Riconfronta» ha rotto quella coincidenza — rifà il match e
+        ''' lascia dove sono il 🎯 CV e la ✉️ lettera — e un campo solo, che il riconfronto
+        ''' aggiorna, faceva dire alle spie dei documenti che erano in pari col profilo di
+        ''' oggi mentre erano quelli di prima. Un verde che si guadagna senza fare niente è
+        ''' esattamente quello di cui non ci si può fidare.
+        ''' </remarks>
         Public Property VersioneProfilo As String
+
+        ''' <summary>
+        ''' La versione di profilo con cui il 🎯 CV mirato e la ✉️ lettera sono stati
+        ''' <b>scritti</b>; vuota finché non ne è stato scritto nessuno.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È il gemello di <see cref="Dati.CvBase.VersioneProfilo"/>, che il 📄 CV base
+        ''' aveva dal primo giorno: un documento porta addosso da dove viene, invece di
+        ''' lasciarlo dedurre da quel che gli sta intorno. Le due spie di P6 leggono questa;
+        ''' il cancello di «Rigenera» continua a leggere l'altra, perché quel che a lui serve
+        ''' sapere è se i <i>giudizi</i> su cui scriverebbe sono ancora quelli buoni.</para>
+        ''' <para><b>Una sola per tutt'e due i documenti</b>, e non una per ciascuno: nascono
+        ''' dalla stessa generazione. L'unico gesto che ne riscrive uno solo è «Rigenera la
+        ''' lettera», che la riallinea a un CV riscritto a mano, e apposta non la tocca: così
+        ''' dopo un riconfronto le due spie restano rosse tutt'e due, la lettera di oggi
+        ''' insieme al CV di prima. Fra un rosso di troppo e un verde di troppo si sbaglia
+        ''' dalla parte che non rassicura.</para>
+        ''' <para>Si annota <b>prima</b> di generare, non dopo: se la generazione si ferma a
+        ''' metà, il CV che è arrivato viene davvero da lì — e se non arriva niente la spia
+        ''' resta spenta lo stesso, perché a spegnerla è l'assenza del documento.</para>
+        ''' </remarks>
+        Public Property VersioneDeiDocumenti As String
 
         ''' <summary>
         ''' La lingua dei documenti. A T4 è sempre l'italiano: il campo <c>lingua</c>

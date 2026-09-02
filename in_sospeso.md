@@ -592,6 +592,27 @@ invece di darlo per provato (regola 15).*
   che si genera un documento: che la spia in cima alla colonna dica la stessa cosa della riga
   di stato che sta più su, e che non si contraddicano. *(cap. 03.6 P6, P2.)*
 
+## Dalle spie oneste e dai messaggi potati (2026-09-03)
+
+- **La misura del troncamento sorveglia solo due righe di stato su otto.** Il collaudo che
+  pesa il testo contro la dimensione vera dell'etichetta (`RigheTagliate`) esiste per P4 e
+  P6, che sono i due punti dove il difetto è stato **visto**. Le altre righe hanno etichette
+  di misure tutte diverse — Ricerca 692×36, Email 506×32, Profilo 1070×34, più quelle di
+  Home, Impostazioni e Backup — e i loro messaggi sono stati accorciati **a stima**, non
+  misurati. Finché quella misura non c'è anche per loro, che i testi ci stiano è un'opinione.
+  *(`falsificazioni.md`, la lezione del 2026-09-03.)*
+- **Otto dei sedici messaggi accorciati non sono stati riletti a video.** Guardati davvero:
+  la finestra della riapertura, il rifiuto dei documenti in P6 e la riga di stato di P4.
+  Provati dal banco ma mai visti: l'avviso della pagina di elenco nella ricerca, il PDF senza
+  WebView2, l'email aperta nel programma di posta, il lavoro in sospeso alla chiusura, lo
+  svuota-dati-di-navigazione, il riallineo della lettera. Da guardare passando di lì.
+- **La rigenerazione della sola lettera lascia rosse tutt'e due le spie.** Se dopo un
+  riconfronto si riallinea la sola ✉️ lettera a un 🎯 CV riscritto a mano, la lettera è di
+  oggi e il CV di prima, ma la versione annotata è una sola e resta quella vecchia: due rossi
+  dove uno sarebbe verde. È una scelta — fra un rosso di troppo e un verde di troppo si
+  sbaglia dalla parte che non rassicura — e il posto dove eventualmente si sdoppia è
+  documentato in `Opportunita.VersioneDeiDocumenti`. Da rivedere solo se capita davvero.
+
 ## Chiuse
 
 - ✅ **Il flusso D non ha più nessun segno nell'interfaccia** *(aperta il 2026-08-31, **chiusa

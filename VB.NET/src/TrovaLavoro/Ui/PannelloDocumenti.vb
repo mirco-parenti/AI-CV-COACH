@@ -14,28 +14,28 @@ Imports TrovaLavoro.Dati
 Imports TrovaLavoro.Documenti
 Imports TrovaLavoro.Motore
 
-''' <summary>
-''' Pannello P6 — i documenti (cap. 03.6; cap. 12, A7): il 🎯 CV mirato e la ✉️ lettera
-''' accanto all'annuncio da cui nascono, oppure il 📄 CV base accanto a una colonna vuota,
-''' perché quello un annuncio non ce l'ha.
-''' </summary>
-''' <remarks>
-''' <para><b>Nato intero nella struttura, riempito una tappa alla volta</b> (cap. 03.6):
-''' anteprime ed esportazioni funzionavano dal primo giorno, «Prepara email» si è acceso
-''' con T6, la scelta della lingua con T7 (il prima/dopo dell'anti-slop si accese lì e fu
-''' tolto a T9d, e con lui la sua casella). Chi guarda l'applicazione a metà strada deve
-''' vedere dove sta andando, e i comandi che ancora non fanno niente si mostrano spenti,
-''' non nascosti.</para>
-''' <para><b>Le anteprime passano dalla pagina di blocchi</b>, non dal JSON: le stampanti
-''' sono tre — DOCX, PDF e questa, a video — e leggono tutte lo stesso modello (cap. 05.3).
-''' Se l'anteprima leggesse il JSON per conto suo, mostrerebbe un documento che i file non
-''' contengono, proprio dove l'utente controlla.</para>
-''' <para><b>Rientrare non rigenera.</b> Un'opportunità che ha già i suoi documenti li
-''' mostra e basta: rifarli costa un'attesa e dei token, e li cambierebbe sotto il naso di
-''' chi li aveva già letti. A rifarli è «Rigenera», che lo dichiara. Da T7d la regola vale
-''' anche per il 📄 CV base, che fino ad allora era l'unico documento a rinascere a ogni
-''' visita — e l'unico che, senza AI, non si potesse più riesportare.</para>
-''' </remarks>
+    ''' <summary>
+    ''' Pannello P6 — i documenti (cap. 03.6; cap. 12, A7): il 🎯 CV mirato e la ✉️ lettera
+    ''' accanto all'annuncio da cui nascono, oppure il 📄 CV base accanto a una colonna vuota,
+    ''' perché quello un annuncio non ce l'ha.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Nato intero nella struttura, riempito una tappa alla volta</b> (cap. 03.6):
+    ''' anteprime ed esportazioni funzionavano dal primo giorno, «Prepara email» si è acceso
+    ''' con T6, la scelta della lingua con T7 (il prima/dopo dell'anti-slop si accese lì e fu
+    ''' tolto a T9d, e con lui la sua casella). Chi guarda l'applicazione a metà strada deve
+    ''' vedere dove sta andando, e i comandi che ancora non fanno niente si mostrano spenti,
+    ''' non nascosti.</para>
+    ''' <para><b>Le anteprime passano dalla pagina di blocchi</b>, non dal JSON: le stampanti
+    ''' sono tre — DOCX, PDF e questa, a video — e leggono tutte lo stesso modello (cap. 05.3).
+    ''' Se l'anteprima leggesse il JSON per conto suo, mostrerebbe un documento che i file non
+    ''' contengono, proprio dove l'utente controlla.</para>
+    ''' <para><b>Rientrare non rigenera.</b> Un'opportunità che ha già i suoi documenti li
+    ''' mostra e basta: rifarli costa un'attesa e dei token, e li cambierebbe sotto il naso di
+    ''' chi li aveva già letti. A rifarli è «Rigenera», che lo dichiara. Da T7d la regola vale
+    ''' anche per il 📄 CV base, che fino ad allora era l'unico documento a rinascere a ogni
+    ''' visita — e l'unico che, senza AI, non si potesse più riesportare.</para>
+    ''' </remarks>
 Public Class PannelloDocumenti
     Implements IPannelloArea
 
@@ -377,7 +377,7 @@ Public Class PannelloDocumenti
             Dim nonPiuQuello As String = MotivoProfiloNonPiuQuello()
 
             If nonPiuQuello IsNot Nothing Then
-                RaccontaUnAvviso(nonPiuQuello)
+                RaccontaUnAvviso(MotivoInBreve())
             Else
                 RaccontaLoStato("Rileggili con calma: se qualcosa non ti convince, puoi rigenerarli.",
                                 StileApp.TestoSecondario)
@@ -590,22 +590,17 @@ Public Class PannelloDocumenti
         ' CambiatoDopo risponde di sì, e il caso grave verrebbe raccontato con le parole di
         ' quello lieve. È lo stesso ordine di SpiaDelProfilo.Leggi.
         If Not _contesto.Archivio.CELaVersione(versione) Then
-            Return "Questa candidatura è stata confrontata con un profilo che adesso non c'è più: " &
-                   "quello di allora è stato eliminato, e i giudizi e i documenti raccontano ancora lui." &
-                   vbLf &
-                   "Riscriverli sul profilo di oggi mescolerebbe due storie diverse. Torna in " &
-                   $"«{NomiUi.Confronto}» e premi «⚠ Riconfronta»: rifaccio il confronto sull'annuncio " &
-                   "che è già lì, e da quel momento questi documenti si possono riscrivere."
+            Return "Il profilo con cui è stata confrontata è stato eliminato: giudizi e documenti " &
+                   "raccontano ancora quello." & vbLf & vbLf &
+                   "Riscriverli adesso mescolerebbe due storie diverse." & vbLf &
+                   $"Vai in «{NomiUi.Confronto}» e premi «⚠ Riconfronta»: una chiamata sola."
         End If
 
         If _contesto.Archivio.CambiatoDopo(versione) Then
-            Return "Hai cambiato il profilo dopo il confronto di questa candidatura: i giudizi e le " &
-                   "stelle che decidono cosa mettere in risalto sono ancora quelli di allora." &
-                   vbLf &
-                   "Prima si rifà il match, poi si scrivono i documenti — altrimenti verrebbero " &
-                   $"scritti sulla misura sbagliata senza dirlo. Torna in «{NomiUi.Confronto}» e premi " &
-                   "«⚠ Riconfronta»: è una chiamata sola, l'annuncio non lo rileggo, e da quel " &
-                   "momento questi documenti si possono scrivere."
+            Return "Hai cambiato il profilo dopo il confronto: i giudizi che decidono cosa mettere " &
+                   "in risalto sono quelli di allora." & vbLf & vbLf &
+                   "Prima si rifà il match, poi si scrivono i documenti." & vbLf &
+                   $"Vai in «{NomiUi.Confronto}» e premi «⚠ Riconfronta»: una chiamata sola."
         End If
 
         Return Nothing
@@ -633,7 +628,10 @@ Public Class PannelloDocumenti
     ''' </remarks>
     Private Sub NonSiPuoRiscrivere(motivo As String)
 
-        RaccontaUnAvviso(motivo)
+        ' Alla riga va la versione corta, alla finestra quella intera: la riga è alta tre
+        ' righe di testo e taglia il resto senza dirlo — e a cadere è sempre la coda, cioè
+        ' proprio il gesto da fare, che è l'unica cosa che serve davvero (2026-09-03).
+        RaccontaUnAvviso(MotivoInBreve())
 
         If FindForm() Is Nothing Then Return
 
@@ -641,6 +639,39 @@ Public Class PannelloDocumenti
                         MessageBoxButtons.OK, MessageBoxIcon.Warning)
 
     End Sub
+
+    ''' <summary>
+    ''' Lo stesso rifiuto in una riga: perché, e dove si va a rimediare.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Non è un riassunto per brevità: è il testo che <b>arriva</b>. La riga di stato
+    ''' è larga 400 px e alta 46 — tre righe scarse — e quel che avanza non va a capo da
+    ''' qualche parte: sparisce. Il testo pieno ne voleva sei, e a video se ne leggevano tre:
+    ''' l'utente vedeva «i giudizi sono quelli di allora», con «Rigenera» spento e nessuna
+    ''' indicazione di che fare, perché l'indicazione stava nella metà caduta fuori.</para>
+    ''' <para>Chi arriva qui dalla barra non vede nessuna finestra — <c>MostraLaCandidatura</c>
+    ''' racconta e basta — quindi questa riga è tutto quel che avrà: il gesto ci sta dentro,
+    ''' non in coda.</para>
+    ''' </remarks>
+    Private Function MotivoInBreve() As String
+
+        If _sulCvBase OrElse _candidatura Is Nothing OrElse _contesto Is Nothing Then Return Nothing
+
+        Dim versione As String = _candidatura.VersioneProfilo
+
+        If Not _contesto.Archivio.CELaVersione(versione) Then
+            Return "Il profilo del confronto è stato eliminato: prima si rifà il match. " &
+                   $"Vai in «{NomiUi.Confronto}» e premi «⚠ Riconfronta»."
+        End If
+
+        If _contesto.Archivio.CambiatoDopo(versione) Then
+            Return "Hai cambiato il profilo dopo il confronto: prima si rifà il match. " &
+                   $"Vai in «{NomiUi.Confronto}» e premi «⚠ Riconfronta»."
+        End If
+
+        Return Nothing
+
+    End Function
 
     ''' <summary>Se il profilo ha avuto altre versioni dopo quella da cui nacque il CV.</summary>
     ''' <remarks>
@@ -653,6 +684,30 @@ Public Class PannelloDocumenti
         If _contesto Is Nothing Then Return False
 
         Return _contesto.Archivio.CambiatoDopo(versioneDelCv)
+
+    End Function
+
+    ''' <summary>
+    ''' La versione di profilo corrente, da annotare su quel che si sta per scrivere.
+    ''' </summary>
+    ''' <remarks>
+    ''' Gemella di <c>PannelloOpportunita.VersioneInUso</c>, che fa lo stesso per il
+    ''' confronto: l'ultima dello storico è la corrente, perché il profilo si salva sempre
+    ''' da una porta sola. Non sapere da dove nasce un documento è un peccato veniale — la
+    ''' spia resta spenta, e una spia spenta non promette niente — e non vale il prezzo di
+    ''' fermare una generazione che l'utente ha appena chiesto.
+    ''' </remarks>
+    Private Function VersioneDelProfiloInUso() As String
+
+        If _contesto Is Nothing Then Return Nothing
+
+        Try
+            Return _contesto.Archivio.Versioni().LastOrDefault()
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            Return Nothing
+        End Try
 
     End Function
 
@@ -739,6 +794,11 @@ Public Class PannelloDocumenti
 
         Dim profilo As Profilo = LeggiIlProfilo()
         If profilo Is Nothing Then Return
+
+        ' I documenti che stanno per nascere portano la versione di adesso, e la portano da
+        ' prima di nascere: se la generazione si ferma a metà, quel che è arrivato viene
+        ' davvero da lì (v. Opportunita.VersioneDeiDocumenti).
+        _candidatura.VersioneDeiDocumenti = VersioneDelProfiloInUso()
 
         Using filo As New CancellationTokenSource()
 
@@ -1344,8 +1404,8 @@ Public Class PannelloDocumenti
         If _candidatura.RiscrittureDellaLettera.CEQualcosa AndAlso
            MessageBox.Show(
                "Il CV è cambiato: riscrivo la lettera perché racconti la stessa storia?" & vbLf &
-               "Anche la lettera l'avevi riscritta a mano, e quel testo verrebbe sostituito." & vbLf &
-               "Se dici di no, resta com'è e te lo ricordo io con «Rigenera la lettera».",
+               "Anche la lettera l'avevi riscritta a mano: quel testo verrebbe sostituito." & vbLf &
+               "Se no, resta com'è: te lo ricordo con «Rigenera la lettera».",
                NomeProdotto, MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
                MessageBoxDefaultButton.Button2) <> DialogResult.Yes Then
 
@@ -1525,9 +1585,8 @@ Public Class PannelloDocumenti
                 _contesto.Opportunita.Salva(_candidatura)
             End If
 
-            Return $"Ho salvato {quanti}: è quello che esce adesso in DOCX, in PDF e nell'email." & vbLf &
-                   "Vale per questo documento: se un fatto è sbagliato, correggilo nel profilo — " &
-                   "è di lì che viene, e alla prossima rigenerazione tornerebbe com'era."
+            Return $"Ho salvato {quanti}: è quel che esce in DOCX, PDF ed email." & vbLf &
+                   "Se un fatto è sbagliato, correggilo nel profilo: di qui tornerebbe com'era."
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse
                                    TypeOf ex Is UnauthorizedAccessException
@@ -1625,7 +1684,9 @@ Public Class PannelloDocumenti
             Return
         End If
 
-        Dim versione As String = If(_candidatura Is Nothing, Nothing, _candidatura.VersioneProfilo)
+        ' La versione dei DOCUMENTI, non quella del confronto: dal 2026-09-03 sono due
+        ' cose diverse, e questa è la metà che riguarda quel che si sta guardando.
+        Dim versione As String = If(_candidatura Is Nothing, Nothing, _candidatura.VersioneDeiDocumenti)
 
         Accendi(lblSpiaCv, versione, _candidatura IsNot Nothing AndAlso _candidatura.Cv IsNot Nothing)
         Accendi(lblSpiaLettera, versione, _candidatura IsNot Nothing AndAlso _candidatura.Lettera IsNot Nothing)
@@ -1787,6 +1848,7 @@ Public Class PannelloDocumenti
         ' pannello non deve mostrare un CV vecchio accanto a una lettera nuova.
         _candidatura.Cv = Nothing
         _candidatura.Lettera = Nothing
+        _candidatura.VersioneDeiDocumenti = Nothing
         _candidatura.RiscrittureDelCv.Dimentica()
         _candidatura.RiscrittureDellaLettera.Dimentica()
         _candidatura.LetteraGenerata = Nothing
@@ -1843,7 +1905,7 @@ Public Class PannelloDocumenti
         Dim nonPiuQuello As String = MotivoProfiloNonPiuQuello()
         If nonPiuQuello IsNot Nothing Then
             AllestisciLaTendina(comEra)
-            RaccontaUnAvviso(nonPiuQuello)
+            RaccontaUnAvviso(MotivoInBreve())
             Return
         End If
 
