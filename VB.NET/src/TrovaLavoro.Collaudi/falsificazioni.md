@@ -136,6 +136,8 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
 | Il registro porta i documenti | `TrovaLavoro/Dati/Registro.vb` | si toglie il blocco `{"documenti", …}` da `VoceRegistro.ComeJson` | `LaVocePortaIDocumentiELaLoroVersione`, e con lui `UnIndiceCheCombaciaSiLeggeDalFile` — che cade perché senza quel blocco **ogni** indice si rifà, ed è la rete che si vede funzionare |
 | Un indice che non sa dei documenti si rifà | `TrovaLavoro/Dati/Registro.vb` | in `ArchivioRegistro.Carica` si toglie l'`AndAlso letto.SaDireTutto` | `UnIndiceCheNonSaDeiDocumentiSiRifa` |
 | Il testo della colonna «Stato» ci **entra** | `TrovaLavoro/Ui/PannelloHome.Designer.vb` | `colStato.Width` torna a 200, che era la stima prima di misurare | `IlTestoDelloStatoCiStaNellaSuaColonna` |
+| A spia rossa il suggerimento dice **cosa fare** | `TrovaLavoro/Ui/PannelloDocumenti.vb` | in `Accendi`, il tooltip torna a essere sempre `spia.Perche` | `IlSuggerimentoDellaSpiaRossaDiceCosaFare` |
+| …e solo a spia rossa | `TrovaLavoro/Ui/PannelloDocumenti.vb` | in `Accendi`, il tooltip diventa sempre `SuggerimentoObsoleti` | `IlSuggerimentoDellaSpiaRossaDiceCosaFare` |
 
 ## Tre cose imparate falsificando, che valgono più della tabella
 

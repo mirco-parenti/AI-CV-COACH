@@ -3068,3 +3068,21 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Quando è tutto in pari, la colonna non aggiunge niente.** Nessun «in pari» accanto alle spunte: la conferma è la spunta stessa, e una rassicurazione ripetuta su ogni riga diventa rumore che si smette di leggere. Il rosso compare solo quando c'è qualcosa da fare.
 
 > 💡 **Quella colonna diceva come chiamo le cose io, non cosa manca a chi si candida.** «Interessante», «Generata»: sono i nomi degli stati di una macchina, e li avevo messi in cruscotto perché erano già lì, non perché rispondessero a una domanda. La domanda vera di una riga in quell'elenco è una sola — *cosa mi manca per mandarla?* — e la risposta non stava da nessuna parte: né a video, né nell'indice che quel video legge. È il tipo di difetto che nessun collaudo può trovare, perché non c'è niente di rotto: c'è solo una domanda a cui il programma non aveva mai provato a rispondere.
+
+### Step 2.68 — Un avviso vale dove si può fare quel che dice
+
+*Avevo dettato io il testo del suggerimento: «Hai generato questo documento basandoti su un profilo obsoleto, clicca «Rigenera»…». Chiesto per la riga rossa della Home, dove quel bottone non c'è.*
+
+**Cosa ho fatto**
+- **Ho messo il messaggio in ▤ Documenti**, sulle due lucine del 🎯 CV e della ✉️ lettera, che è il pannello dove «Rigenera» sta a due centimetri dalla spia. Nella coda della Home il suggerimento è tornato quello di prima: dice cosa è successo e non promette gesti che lì non si possono fare.
+- **Compare solo a lucina rossa.** A verde resta «È nato dal profilo di oggi»: un rimedio offerto a chi non ha niente da riparare è rumore, e insegna a non leggere i suggerimenti.
+- **1435 verdi**, due falsificazioni nuove: se il suggerimento torna a spiegare senza dire che fare cade, e cade anche se lo dice pure a lucina verde.
+
+**Cosa ho imparato**
+- **Il rosso in un suggerimento non si può fare.** Volevo «profilo obsoleto» scritto in rosso lì dentro: il tooltip lo disegna Windows come testo nudo, e colorare una parola vorrebbe dire sostituire il meccanismo dei suggerimenti con uno disegnato a mano. Il colore ce l'ha la lucina accanto — e la frase adesso **nomina** l'obsolescenza invece di affidarla a un colore che lì non arriva.
+- **Un avviso vale dove si può fare quel che dice.** È il gemello della lezione di ieri sulle righe tagliate: là l'istruzione c'era e non arrivava a video, qui sarebbe arrivata benissimo in una schermata senza il bottone che nomina. Il posto giusto di un rimedio non è dove si vede il problema, è dove si può risolvere.
+
+**Cosa ho deciso e perché**
+- **Il testo l'ho scritto io e l'ho lasciato quasi intatto**, cambiando solo le virgolette di «Rigenera» in quelle a caporale che il programma usa per i nomi dei bottoni. Vale anche sul 📄 CV base, che da lì si rigenera allo stesso modo.
+
+> 💡 **Ho chiesto un messaggio per la schermata sbagliata, e la modifica giusta è stata spostarlo.** Il testo era buono: era il posto a non esserlo. Se l'avessi messo dov'è nato, avrei avuto un avviso perfettamente scritto che manda a cercare un bottone in una pagina che non ce l'ha — cioè un modo nuovo di far perdere tempo a chi legge, con la faccia di un aiuto.

@@ -1694,6 +1694,11 @@ Public Class PannelloDocumenti
     End Sub
 
     ''' <summary>Mette una spia su un'etichetta, o la fa sparire se non c'è niente da dire.</summary>
+    ''' <remarks>
+    ''' A spia rossa il suggerimento non spiega soltanto: <b>dice cosa fare</b>, e lo dice
+    ''' qui perché qui il gesto si può fare — «Rigenera» sta in questa fascia, a due
+    ''' centimetri dalla spia (v. <see cref="SuggerimentoObsoleti"/>).
+    ''' </remarks>
     Private Sub Accendi(dove As Label, versione As String, ceQualcosa As Boolean)
 
         Dim spia As LetturaSpia = SpiaDelProfilo.Spenta
@@ -1705,9 +1710,28 @@ Public Class PannelloDocumenti
         dove.Text = spia.Scritta
         dove.ForeColor = spia.Colore
         dove.Visible = spia.Accesa
-        _suggerimenti.SetToolTip(dove, spia.Perche)
+        _suggerimenti.SetToolTip(dove, If(spia.Stato = StatoSpia.Disallineato,
+                                          SuggerimentoObsoleti, spia.Perche))
 
     End Sub
+
+    ''' <summary>
+    ''' Quel che il suggerimento dice quando la spia è rossa: cosa è successo, e il gesto
+    ''' che lo chiude.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Prende il posto del <see cref="LetturaSpia.Perche"/> invece di aggiungersi:
+    ''' quello racconta <i>perché</i> una cosa non è più in pari con parole che valgono nei
+    ''' quattro punti in cui la spia compare, e non può nominare un bottone che esiste solo
+    ''' qui. Il rimedio è di questo pannello, e la frase che lo nomina vive con lui.</para>
+    ''' <para>Il testo l'ha dettato Mirco il 2026-09-03. La stessa frase <b>non</b> va nella
+    ''' coda della Home, dove pure la riga dei documenti obsoleti si vede: lì «Rigenera» non
+    ''' c'è, e un'istruzione che manda a premere un bottone assente è peggio di nessuna
+    ''' istruzione — è la lezione del giorno prima, presa dal verso giusto.</para>
+    ''' </remarks>
+    Friend Const SuggerimentoObsoleti As String =
+        "Hai generato questo documento basandoti su un profilo obsoleto, clicca " &
+        "«Rigenera» per riadattare i documenti al nuovo profilo."
 
     ''' <summary>
     ''' Mette la tendina sulla lingua della candidatura senza che questo conti come una

@@ -2,6 +2,7 @@
 Imports System.IO
 Imports System.IO.Compression
 Imports System.Linq
+Imports System.Reflection
 Imports System.Text.Json.Nodes
 Imports System.Threading.Tasks
 Imports System.Windows.Forms
@@ -1822,6 +1823,67 @@ Namespace Ui
                     Assert.AreEqual("cv_mirato → lettera", generatore.LavoriChiesti(),
                                     "guardare non ha riscritto niente")
                 End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Il suggerimento della spia rossa dice <b>cosa fare</b>, non solo cosa è
+        ''' successo (2026-09-03, testo dettato da Mirco).
+        ''' </summary>
+        ''' <remarks>
+        ''' Sta in questo pannello e in nessun altro dei quattro in cui la spia compare,
+        ''' perché è l'unico dove «Rigenera» c'è: la stessa frase nella coda della Home
+        ''' manderebbe a premere un bottone che lì non esiste. Per questo il collaudo
+        ''' guarda due cose — che la frase nomini il gesto, e che a spia <b>verde</b> non
+        ''' compaia affatto: un rimedio offerto a chi non ha niente da riparare è rumore.
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function IlSuggerimentoDellaSpiaRossaDiceCosaFare() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.VersioneProfilo = contesto.Archivio.Versioni().Last()
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim suggerimenti As ToolTip = SuggerimentiDelPannello(pannello)
+                    Assert.DoesNotContain("Rigenera",
+                                          suggerimenti.GetToolTip(Etichetta(pannello, "lblSpiaCv")),
+                                          "in pari non c'è niente da riadattare")
+
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+                    candidatura.VersioneProfilo = contesto.Archivio.Versioni().Last()
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura, generaSeManca:=False)
+
+                    For Each spia As String In {"lblSpiaCv", "lblSpiaLettera"}
+                        Dim detto As String = suggerimenti.GetToolTip(Etichetta(pannello, spia))
+
+                        Assert.Contains("profilo obsoleto", detto, $"{spia}: cosa è successo")
+                        Assert.Contains("«Rigenera»", detto, $"{spia}: e il gesto che lo chiude")
+                    Next
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Il fornitore di suggerimenti del pannello. Non è un controllo e non si trova con
+        ''' <c>Controls.Find</c>: è un componente, e da fuori si arriva solo al campo che lo
+        ''' tiene (come in <c>CollaudiMarchio</c>).
+        ''' </summary>
+        Private Shared Function SuggerimentiDelPannello(pannello As Control) As ToolTip
+
+            Dim campo As FieldInfo = pannello.GetType().GetField(
+                "_suggerimenti", BindingFlags.Instance Or BindingFlags.NonPublic)
+
+            Assert.IsNotNull(campo, "il pannello ha ancora il suo fornitore di suggerimenti")
+
+            Return DirectCast(campo.GetValue(pannello), ToolTip)
 
         End Function
 
