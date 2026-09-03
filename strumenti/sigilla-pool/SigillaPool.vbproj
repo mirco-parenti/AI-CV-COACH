@@ -10,8 +10,10 @@
        calcolassero l'impronta ognuno a modo suo, prima o poi divergerebbero e il pool
        risulterebbe modificato senza esserlo.
 
-       Il comando «Sigilla pool» delle Impostazioni (T9) chiamerà lo stesso metodo, e
-       allora questo attrezzo potrà restare per chi lavora da riga di comando. -->
+       Le Impostazioni, arrivate a T9b (2026-08-21), quel comando non l'hanno preso:
+       il manifest vive nel repo accanto ai prompt, e un eseguibile distribuito
+       sigillerebbe qualcosa che nessuno rileggerà mai (cap. 04.5). In P8 è andata la
+       sola diagnosi. Questo attrezzo non è un anticipo: è la casa del sigillo. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>

@@ -3142,3 +3142,76 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **E mi scrivo cosa costa**, perché una decisione senza il suo prezzo scritto fra sei mesi sembra gratis: da adesso il banco lo faccio girare **io**, sulla mia macchina, e non c'è più nessuno che provi il progetto su una **installazione pulita**. Se un giorno compilasse solo grazie a qualcosa che sta sul mio disco e non nel repository, non me lo direbbe più nessuno. La copertura misurata e l'elenco delle falsificazioni restano: quelli vivono nel banco, non su GitHub.
 
 > 💡 **Ho chiesto di togliere una cosa dicendo che non aveva mai funzionato, e non era vero.** Il bello è che verificarlo è costato un comando solo. Non mi pento della scelta — è mia, e il motivo per cui la faccio è buono anche coi numeri veri davanti — ma mi resta che la premessa era falsa e stavo per prendere una decisione su quella. La differenza fra «lo tolgo perché non funziona» e «lo tolgo perché mi dà notizie che non so leggere» non cambia il gesto: cambia se fra sei mesi saprò perché l'ho fatto.
+
+### Step 2.72 — Il rito ha trovato la giornata che nessuno aveva raccontato
+
+*Undici commit dall'ultimo «aggiorna-tutto», e mi aspettavo una passata di ordinaria
+manutenzione: allineare il README, aggiungere due righe alla guida. Invece ha trovato tre cose
+che nessuno stava cercando, e la più grossa è un buco qui dentro: il **31 agosto** ho lavorato
+tutto il giorno sul prodotto — lo scudo dell'attesa, la barra che gli è cresciuta sotto,
+«Elimina candidatura», l'avorio esteso alle sei pagine — e di quella giornata il diario non ha
+una riga.*
+
+**Cosa ho fatto**
+- **Prima di scrivere, ho fatto girare il banco**: **1440 verdi, 0 rossi**. Versione **1.0.000**
+  e Pool **1.13**, con le **29 impronte** del manifest ricalcolate una per una sul testo
+  normalizzato a LF: tutte uguali, nessun bump da fare — in queste sessioni nessun prompt è
+  stato toccato.
+- **Il `README.md` ha ripreso il filo dal 2 settembre**: la pull request che «aspetta la mia
+  mano» era fusa da un giorno, e mancavano il riconfronto, la spia, il cancello sui documenti,
+  le due colonne della coda e l'integrazione continua tolta. La **`GUIDA.md`** ha preso le due
+  cose che un utente *vede e fa*: cosa dicono «Stato» ed «Esito» nella Home, e i due gesti in
+  ordine — prima «⚠ Riconfronta», poi «Rigenera» — con il perché «Rigenera» resta spento finché
+  il match è vecchio.
+- **Tre scostamenti nei capitoli di progetto.** Il cap. 03 rimandava **tre volte** alla 3.8 per
+  la spia del profilo, e la 3.8 della spia non parlava affatto: adesso c'è, con i suoi tre stati
+  — compreso lo **spento**, che non è il caso residuo ma una scelta. Il cap. 13.7 diceva che gli
+  attrezzi sono cinque e sono sei. E la cronaca del cap. 14 saltava dal 1º al 3 settembre: ho
+  scritto le due voci che mancavano, il 31 agosto e il 2–3 settembre.
+- **`strumenti/README.md` non nominava `apri-app.bat` nella sua tabella**, pur avendone una
+  sezione intera più sotto: chi legge l'indice non sapeva che l'attrezzo esiste. E il commento
+  in testa a `SigillaPool.vbproj` era rimasto alla decisione **non ancora presa** — «il comando
+  delle Impostazioni chiamerà lo stesso metodo» — mentre a T9b si è deciso il contrario.
+- **`falsificazioni.md` nominava due collaudi che non esistono più.** Tre nomi su 166 non si
+  trovano nel banco: due perché il meccanismo che difendevano — l'ombreggiatura sotto il
+  puntatore fatta a mano — è stato tolto il 1º settembre passando a `FlatStyle.Standard`, dove
+  la disegna Windows; il terzo perché il collaudo era stato **rinominato**, e la riga vecchia
+  era rimasta lì col nome di prima. La prima riga adesso è marcata superata e dice perché, la
+  seconda porta il nome giusto: un elenco di falsificazioni che manda a cercare un collaudo
+  inesistente è peggio di una riga in meno, perché fa credere a una difesa che non c'è.
+- **Tre riserve nuove in `in_sospeso.md`** (la giornata senza Step, la colonna «Esito» mai vista
+  con un esito vero, i passaggi che vivono dopo una finestra modale) e **un'idea** in
+  `idee_future.md`: se un giorno l'integrazione continua si rivuole, si riparte dal
+  `timeout-minutes` che le mancava.
+
+**Cosa ho imparato**
+- **Un rimando è una promessa fatta a nome di un altro capitolo, e quello non lo sa.** Le tre
+  righe che dicevano «(3.8)» sono nate in tre giorni diversi, ognuna corretta quando è stata
+  scritta: nessuna delle tre è mai andata a controllare se la 3.8 avesse poi ricevuto la sua
+  parte. Un puntatore si scrive in un secondo e nessuno lo rilegge mai — è il difetto più
+  economico da fare e il più difficile da vedere.
+- **Una tabella in cima a un file non si aggiorna da sé quando si scrive in fondo.** L'attrezzo
+  nuovo aveva avuto la sua sezione, curata, con le trappole pagate: quello che non aveva avuto
+  era la riga nell'indice, cioè l'unico posto che qualcuno legge davvero.
+- **Un numero che gira di documento in documento non diventa vero.** Stavo per scrivere
+  «quattordici falsificazioni nuove» in due posti: veniva dalla mia nota di ripresa e valeva per
+  l'**ultima** sessione, non per il periodo intero. Contate una per una sul diff, sono
+  **quarantadue**. Il numero era comodo e sbagliato di tre volte, e nessuno lo avrebbe più
+  ricontato.
+- **Il diario non ha buchi visibili.** Gli Step sono numerati di fila, 2.57 poi 2.58, e fra
+  quei due numeri c'è una giornata intera di lavoro sul prodotto. Se non fosse per la regola 16
+  — rileggere anche quel che era stato *promesso*, non solo quel che è stato fatto — non
+  l'avrebbe trovata nessuno, perché non c'è niente di rotto da nessuna parte.
+
+**Dove ho faticato**
+- **A decidere fin dove arriva il rito.** La cronaca del 31 agosto nel cap. 14 l'ho fatta
+  scrivere: è documentazione di progetto, e i fatti stanno nei commit. Lo **Step** no. Quello è
+  la voce di chi ha deciso — cosa mi ero chiesto quel giorno, cosa mi aveva convinto — e un rito
+  che la ricostruisse dai messaggi di commit produrrebbe una pagina verosimile e falsa. Resta
+  come riserva aperta, da scrivere o da lasciare, ma dichiarata.
+
+> 💡 **Il rito serve proprio per quel che non ha lasciato traccia.** Le cose rotte le trova il
+> banco, i debiti li trova `in_sospeso.md`, le promesse mancate le trova la rilettura degli
+> impegni. Ma una giornata di lavoro **riuscita**, committata e mai raccontata non fa scattare
+> niente: non è un difetto, non è un debito, non è un collaudo rosso. È solo assenza — e
+> l'assenza si vede unicamente se qualcuno, ogni tanto, rilegge tutto di fila.

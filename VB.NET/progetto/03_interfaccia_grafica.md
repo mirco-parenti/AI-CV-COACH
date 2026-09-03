@@ -767,6 +767,23 @@ Prefissi standard, nome semantico in PascalCase: `pnl` (Panel), `btn` (Button),
 - **Badge di stato** (pannellino 115×26 con etichetta bold centrata): verde OK, azzurro
   info, giallo attenzione, rosso errore — usati per lo stato delle opportunità e delle
   chiamate AI.
+- **La spia del profilo** *(dal 2026-09-02)*: la lucina che dice se quel che si sta
+  guardando — un punteggio, un CV, una lettera — è nato dal profilo di **oggi**. È un
+  pallino «●» con la sua parola accanto, e ha **tre** stati, non due. **Corrente**: verde,
+  «profilo usato: corrente». **Obsoleto**: rosso, «profilo usato: obsoleto». **Spenta**:
+  niente, e non è il caso residuo ma una scelta — di una candidatura mai confrontata non
+  c'è nessuna versione da giudicare, e un verde lì direbbe «in pari» di una cosa che non
+  esiste. Di un dubbio non si fa un allarme, ma nemmeno una promessa. Il **perché** sta nel
+  tooltip, ed è diverso a seconda di com'è successo: il profilo corretto e non ancora
+  salvato, la versione di allora **eliminata**, il profilo cambiato dopo — quest'ultimo
+  ricorda che se nel frattempo è cambiato un **requisito eliminatorio** la risposta di oggi
+  sarebbe un'altra. Vive in tre posti: la colonna «Profilo del match» della coda in P1
+  (subito dopo il Match, perché **del match** parla), accanto alle stelle in P4, e in cima
+  a **ciascuna** delle due colonne di P6 — due, non una, perché chi guarda la lettera
+  guarda la lettera. Il **rimedio** invece si scrive in un posto solo, P6: là il tooltip
+  rosso nomina «Rigenera», che è lì a due centimetri; nella coda della Home no, perché
+  quel bottone in quella schermata non c'è, e un avviso vale dove si può fare quel che
+  dice *(2026-09-03)*.
 - Operazioni AI in corso: indicatore nella barra di stato — che **compare per questo** e
   se ne va appena finito — + testo in streaming dove previsto (cap. 02); mai una
   finestra bloccata.

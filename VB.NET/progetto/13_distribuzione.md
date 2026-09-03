@@ -211,8 +211,8 @@ VB.NET/
   *E a **T9b** (2026-08-21) si è deciso che nelle Impostazioni non ci andrà mai: il
   manifest sta nel repo, non nella cartella dati, e un exe distribuito non avrebbe nulla di
   utile da sigillare (cap. 04.5). Questo strumento non è più un anticipo: è il posto.*
-  *Dal **2026-08-30** gli attrezzi sono **cinque**, e due meritano una riga qui perché
-  toccano proprio questo capitolo.* **`aggiorna-riferimento.bat`** rifà in una manciata di
+  *Dal **2026-08-30** gli attrezzi sono cinque — **sei** dal 2026-09-02 —, e tre meritano
+  una riga qui perché toccano proprio questo capitolo.* **`aggiorna-riferimento.bat`** rifà in una manciata di
   secondi l'**eseguibile di riferimento** — un file unico e autonomo sul Desktop, con **gli
   stessi parametri del 13.2** — e alla fine ne stampa l'identità: versione, commit,
   dimensione, SHA-256. Nasce perché fino a lì «l'eseguibile su cui si prova» erano due file
@@ -225,6 +225,14 @@ VB.NET/
   quello stesso file per mostrare l'applicazione dal vivo, e **`collauda-copioni/`**, il
   banco dei due script di `LettorePagina` provati su DOM finti (cap. 06.4). Come gli altri,
   nessuno di loro entra in una pubblicazione.*
+  *Il sesto è **`apri-app.bat`** (dal **2026-09-02**), che quel riferimento lo **apre** — e
+  poi va a guardare se la finestra è comparsa **davvero**, dichiarando pid, titolo e secondi
+  aspettati. Esiste perché `start`, invocato da WSL su un percorso con gli spazi, a volte
+  esce a zero senza aver aperto niente: l'esito non si crede, si verifica. E la verifica ha
+  due insidie che il file stesso spiega — di `TrovaLavoro.exe` ce n'è più d'uno (il server
+  MCP del prodotto non ha finestre) e al primissimo avvio la finestra principale non esiste
+  ancora, perché davanti ci stanno l'informativa e la richiesta della chiave. Non compila
+  nulla e non chiude nulla: apre, e riferisce.*
 - Build di sviluppo da Visual Studio (o `dotnet build` da riga di comando Windows);
   collaudi con `dotnet test` da `VB.NET/src` (cap. 14).
 - Lo script `publish.bat` in `src/` produce l'exe di rilascio con i parametri del

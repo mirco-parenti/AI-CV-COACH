@@ -427,6 +427,16 @@ giudice per la prima volta.
   sono esattamente quelle che si ripagherebbero la volta dopo. Se dovesse servire ancora (una
   cartella nuova, una demo da preparare, una macchina da consegnare) vale la pena che stia in
   `strumenti/` col suo caso di prova, invece che in `C:\Temp`. *(2026-08-30 — Step 2.56.)*
+- **L'integrazione continua, se un giorno la si rivuole, con il tetto di tempo** — il workflow
+  che faceva girare il banco su una macchina di GitHub a ogni push è stato **tolto** il 3
+  settembre, e non perché non funzionasse: 19 run riusciti su 22, con l'unico appeso e i due
+  annullati tutti dello stesso giorno. Il difetto vero era una riga mancante — senza
+  `timeout-minutes` un job che non parte resta appeso fino a **sei ore** invece di morire e
+  diventare rosso, e un semaforo che resta giallo si smette di guardare. Chi lo rifacesse
+  parta da lì, e sappia che quel che si ricompra è la sola cosa che si è persa: **qualcuno che
+  provi il progetto su un'installazione pulita**, cioè che si accorga se un giorno compilasse
+  solo grazie a qualcosa che sta sul disco di chi lavora e non nel repository. *(2026-09-03 —
+  Step 2.71; il prezzo della scelta è scritto in coda al cap. 14.)*
 
 ## Realizzate
 

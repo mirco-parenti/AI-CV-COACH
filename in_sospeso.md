@@ -613,6 +613,34 @@ invece di darlo per provato (regola 15).*
   sbaglia dalla parte che non rassicura — e il posto dove eventualmente si sdoppia è
   documentato in `Opportunita.VersioneDeiDocumenti`. Da rivedere solo se capita davvero.
 
+## Dalla coda che dice a che punto sei, e dal rito che l'ha riletta (2026-09-03)
+
+- **Il 31 agosto non ha uno Step nel diario.** Quel giorno ha toccato il prodotto in quattro
+  punti — lo scudo dell'attesa al centro dello schermo e la barra che gli è cresciuta sotto,
+  «Elimina candidatura» al posto del bottone morto in Home, l'avorio della soglia esteso alle
+  sei pagine — e il banco è passato da 1257 a 1335 verdi. Il codice c'è, i collaudi ci sono, e
+  dal 2026-09-03 c'è anche la cronaca nel cap. 14; **manca la voce di chi l'ha deciso**, che è
+  l'unica cosa che il diario sa dire e nessun altro file può ricostruire. Non l'ha trovato
+  nessun controllo sul fatto: l'ha trovato il rito, cercando la giornata che nessuno aveva
+  preso in mano (regola 16). Se lo Step si scrive, lo detta Mirco. *(2026-09-03, durante
+  «aggiorna-tutto»; i fatti stanno nei commit `a89e4e3`, `060f804`, `583071d`, `4a0189a`,
+  `716c882` e ora nel cap. 14.)*
+- **La colonna «Esito» non è mai stata vista con un esito vero.** La prova dal vivo del 3
+  settembre ha guardato le due candidature di prova, che hanno `esito` vuoto e non sono mai
+  state spedite: a video quella colonna ha mostrato solo il trattino. Colloquio, Rifiutata,
+  Assunto 🎉, Scartata e i **giorni di silenzio** di una spedita li ha visti solo il banco.
+  Serve una candidatura seminata con un esito e una data di spedizione — ricordando che il
+  `registro.json` non si rigenera per un file cambiato dentro una cartella (cap. 07.3): va
+  cancellato. *(2026-09-03 — cap. 07, `EsitoCandidatura.vb`.)*
+- **Nessuno ha censito gli altri passaggi che vivono dopo una finestra modale.** Il 3 settembre
+  una falsificazione non ha fatto cadere niente perché il codice che difendeva stava **dentro
+  il gestore di un bottone, dopo una finestra di scelta file** — un posto dove il banco non
+  arriva, perché nessuno lo può chiamare senza un dito umano. Lì la cura è stata portare la
+  composizione fuori dal gestore (`RiepilogoDi`, `VociInVista`); ma il difetto è di famiglia, e
+  quanti altri gestori calcolino qualcosa **dopo** un `ShowDialog` invece di limitarsi a
+  chiedere e a scrivere non l'ha contato nessuno. *(2026-09-03 — la lezione è in
+  `falsificazioni.md`; Step 2.70.)*
+
 ## Chiuse
 
 - ✅ **Il flusso D non ha più nessun segno nell'interfaccia** *(aperta il 2026-08-31, **chiusa

@@ -1327,6 +1327,38 @@ il prodotto.
 candidature e documenti sono ora quelli di una persona inventata. Non tocca il repo — quelle
 cartelle vivono in `%APPDATA%` — ma è la condizione che rende mostrabile una schermata.*
 
+*Dopo T9 — **l'attesa che si vede da lontano, e un bottone che elimina** (2026-08-31).* Una
+giornata sola, tutta sul prodotto, e il banco passa da **1257** a **1335** verdi.
+
+- **Lo scudo dell'attesa, al centro dello schermo** (cap. 03.8). I due segnali di prima erano
+  entrambi piccoli — la rotellina del puntatore e la riga in fondo alla fascia di stato — e
+  un'attesa di trenta secondi va detta anche a chi si è alzato. È una **finestra a strati**, non
+  un controllo: lo scudo ha i bordi sfumati, e un colore-chiave lascerebbe l'alone. Non prende
+  niente a nessuno — né fuoco né Alt-Tab — e soprattutto **non mangia i clic**, perché
+  «Annulla» sta proprio sotto. Poi, guardandolo a video, è stato **alzato di venti pixel** sopra
+  il centro geometrico: una figura appesa esattamente a metà sembra che stia cadendo. E sotto
+  gli è cresciuta una **barra** che si riempie sul tempo e non arriva mai in fondo da sola —
+  quanto duri una chiamata all'AI non lo sa nessuno, nemmeno il modello che sta scrivendo la
+  risposta — con un tetto al **95 %**: l'ultimo ventesimo lo riempie il fatto.
+- **«Elimina candidatura» prende il posto di un bottone morto.** «Aggiorna profilo» era in Home
+  dal T5c come segnaposto del **flusso D**, che non è mai arrivato: un bottone grigio che non si
+  accende mai smette di dire «più avanti» e comincia a dire «rotto». Al suo posto la
+  cancellazione della singola candidatura, che il cap. 11.5 prometteva dall'inizio e il cap. 03.6
+  collocava «dove la candidatura si guarda». Con lei la `FinestraConferma` di **livello 5** — la
+  sorella minore di quella critica, senza la parola da ricopiare, col verbo sul bottone che
+  agisce: un «Sì» risponde alla domanda, «Confermo» risponde alla conseguenza. E P4, P6 e P7
+  imparano a **dimenticare**: tutti e tre scrivono nella cartella della candidatura, e un oggetto
+  che sopravvive alla propria cartella la ricreerebbe.
+- **L'avorio della soglia entra con l'utente e resta** (cap. 03.2). Fino a lì il programma si
+  apriva su un menu avorio e poi mandava in sei stanze grigie: adesso le sei pagine — e le
+  Impostazioni, che sono la settima porta — portano lo stesso avorio, con **due token nuovi**
+  invece di una modifica ai vecchi, così la geografia di una schermata non si sposta: cambia
+  solo la temperatura. `TestoSecondario` scende a `#68717A` perché sul fondo nuovo il grigio di
+  ieri stava a 4,39 : 1, sotto il 4,5 che WCAG chiede al testo piccolo. E nella barra in alto
+  **due simboli** cambiano: GDI non disegna emoji a colori, i glifi di ripiego non hanno la
+  stessa statura, e la vecchia stella era alta come una x — accanto ad ANNUNCIO in maiuscolo si
+  leggeva come un refuso, non come un'icona.
+
 *Dopo T9 — **la revisione di finalizzazione** (2026-09-01, ramo `feature/finalizzazione`).*
 La seconda lettura da fuori, e la più larga: tre fasi condotte col tutor su tutto il prodotto,
 con una regola scritta in apertura — **nessun fix senza approvazione, voce per voce** — e la
@@ -1379,6 +1411,38 @@ Versione **1.0.000** e **Pool 1.13** restano dove erano: nessun prompt è stato 
 agosto. Le due voci aperte dal giro D — rifarlo sull'eseguibile giusto e la firma del codice —
 restano tali, e con la prima aspetta ancora il tag `v1.0`.
 
+
+*Dopo T9 — **la spia del profilo, e la coda che dice cosa manca** (2026-09-02 → 2026-09-03).*
+Fusa la revisione in `main` (pull request #1), il lavoro cambia natura: non più le tappe di un
+piano — quello si è chiuso con T9 — ma **rifiniture che nascono aprendo il programma e
+guardandolo**, quasi tutte partite da una frase di Mirco davanti allo schermo. Il banco passa da
+**1394** a **1440** verdi, con **quarantadue** falsificazioni nuove tutte viste rosse; versione
+**1.0.000** e **Pool 1.13** restano dove erano.
+
+- **Il quarto mestiere di «Analizza»: «⚠ Riconfronta»** (cap. 03 P4, cap. 08). Cambiata la
+  patente — cioè un requisito **eliminatorio** — le candidature di prima mostravano ancora le
+  stelle di allora e non c'era modo di rifarle. Il gesto compare solo quando ha una ragione, e
+  rifà il solo secondo passo sull'annuncio già strutturato.
+- **La spia del profilo** (cap. 03.8), che dice riga per riga e documento per documento se quel
+  che si guarda è nato dal profilo di oggi: la colonna «Profilo del match» in P1, le stelle in
+  P4, e **due** spie in P6, una per colonna. Con lei il cancello che **rovescia** una regola di
+  otto giorni prima: prima si rifà il match, poi si scrivono i documenti (cap. 12).
+- **Un campo che rispondeva a due domande** è diventato due: `VersioneProfilo` per il match,
+  `VersioneDeiDocumenti` per i documenti. Coincidevano per costruzione finché i documenti
+  nascevano sempre dal confronto; il riconfronto non ha creato il difetto, ha tolto la
+  coincidenza. Insieme, **sedici messaggi accorciati** e una misura nuova: le righe di stato
+  **troncano in silenzio**, e a cadere fuori è sempre la coda, cioè l'istruzione.
+- **La coda della Home dice a che punto è la candidatura** (cap. 07): non più i nomi degli stati
+  interni ma «CV mirato ✓ · lettera ✓ · email ✓», con l'email spuntata quando è **partita**; una
+  colonna **«Esito»** nuova accanto; l'ordine Azienda · Ruolo · Profilo del match · Match ·
+  Stato · Esito · Da dove · Aggiornata. Per rispondere serviva un dato che l'indice non aveva:
+  `registro.json` porta ora un blocco `documenti`, e un indice che non ce l'ha si **rigenera**
+  invece di essere usato — «no» e «non lo so» si scrivono diversi. Il **riepilogo esportato**
+  dice le stesse due colonne, col testo delle tappe scritto in un posto solo; e il rimedio della
+  spia rossa sta in **P6**, dove «Rigenera» esiste, non nella Home dove quel bottone non c'è.
+- **Fuori dal prodotto**: il marchio perde il timbro (`prompt-logo.md`, revisione 5) e nasce
+  `strumenti/apri-app.bat`, il lanciatore che va a guardare se la finestra è comparsa davvero
+  (cap. 13.7).
 
 *Dopo T9 — **l'integrazione continua tolta** (2026-09-03).* Il workflow
 `.github/workflows/collaudi.yml`, nato il 26 agosto dalla revisione del giro D per rispondere a

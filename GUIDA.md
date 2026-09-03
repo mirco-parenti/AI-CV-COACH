@@ -82,6 +82,25 @@ curriculum, subito e **senza spendere niente**. Non prende il posto del CV che s
 sta accanto — lì il sommario e le descrizioni delle esperienze sono scritti, qui restano le tue
 parole com'erano — e la differenza fra i due è esattamente quello che ci ha messo l'AI.
 
+Nella **Home** ogni candidatura è una riga, e due colonne rispondono alle due domande che uno
+si fa scorrendo l'elenco. **Stato** dice a che punto è la procedura — «CV mirato ✓ · lettera ✓
+· email ✓», le tre voci sempre tutte e tre, così in un colpo d'occhio vedi quel che manca; e
+l'email si spunta quando è **partita**, non quando ne esiste una bozza. **Esito** dice com'è
+andata: quello che hai dichiarato tu — *Colloquio*, *Rifiutata*, *Assunto 🎉* — oppure, per una
+spedita di cui non hai ancora notizie, da quanti giorni tace.
+
+**Quando cambi il profilo, quel che era già stato deciso invecchia.** Le stelle di una
+candidatura le ha date l'AI leggendo il profilo di quel giorno, e il CV e la lettera sono nati
+dallo stesso. Se poi aggiungi un'esperienza o correggi un titolo, quei giudizi e quei documenti
+**restano dove sono** — potrebbero essere quelli che hai già spedito, ed è l'unica traccia di
+cosa hai mandato — ma accanto compare una **lucina rossa**: nella Home la colonna *Profilo del
+match*, e in *Documenti* una spia per il CV e una per la lettera. Rimetterli in pari sono due
+gesti, e in quest'ordine: prima **«⚠ Riconfronta»** in *Confronta ★ ANNUNCIO - CV*, che rifà le
+stelle col profilo di oggi; poi **«Rigenera»** in *Documenti*, che riscrive CV e lettera sul
+giudizio appena fatto. Finché non hai riconfrontato, «Rigenera» resta spento apposta — un CV
+mirato su stelle vecchie è mirato al bersaglio sbagliato — e la Home lo dice scrivendo la
+colonna *Stato* in rosso, con un «⚠ obsoleti».
+
 ---
 
 ## La chiave API: dove si prende e quanto costa
