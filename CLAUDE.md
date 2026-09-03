@@ -37,7 +37,7 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    (progetto *e* codice), `strumenti/` (gli attrezzi di sviluppo, dal 2026-08-10),
    `immagini/` (gli asset del marchio, dal 2026-08-22), `README.md`,
    `GUIDA.md` (la guida per chi usa il programma, dal 2026-08-27),
-   `LICENSE` e `.github/workflows/` (dal 2026-08-26), `diario_di_bordo.md`,
+   `LICENSE` (dal 2026-08-26), `diario_di_bordo.md`,
    `idee_future.md`, `in_sospeso.md`, questo
    `CLAUDE.md` e ogni altra regola o documentazione di progetto che nascerà.
    **`HTML+JS/` è fuori dal rito** *(dal 2026-08-06)*: il prototipo è congelato, non è
@@ -240,7 +240,6 @@ un file nuovo, aggiungi qui la sua riga.
 | `README.md` | Aggiorna la sezione **Stato** (riga in cima + "## Stato del progetto") e "Tecnologie previste" se cambiano; non riscrivere il resto della presentazione. |
 | `GUIDA.md` | **Guida di chi usa il programma**, non di chi lo costruisce: si aggiorna quando cambia qualcosa che l'utente **vede o fa** — un requisito, un passo del primo avvio, un messaggio d'errore, dove finiscono i dati. Non ci entra nulla di implementativo, e non si duplica lo stato del progetto: quello sta nel README. *(dal 2026-08-27.)* |
 | `LICENSE` | **Statico**: la licenza del repository. Si tocca solo se la licenza cambia davvero. *(dal 2026-08-26.)* |
-| `.github/workflows/*.yml` | L'integrazione continua che fa girare il banco a ogni push. Come il codice: non si riscrive per allineamento, si tocca quando il banco o la piattaforma cambiano. *(dal 2026-08-26.)* |
 | `diario_di_bordo.md` | **Aggiungi un nuovo `### Step X.Y`** (intro corsivo, sezioni, 💡, prima persona). **Mai** riscrivere gli step passati. |
 | `idee_future.md` | Aggiungi le idee nuove / spunta quelle realizzate con ✅ + puntatore; quando si accumulano, raccoglile in una sezione «Realizzate» in fondo (così il backlog attivo resta solo-futuro e non induce in errore); non copiare lo stato. |
 | `in_sospeso.md` | Aggiungi le voci rimaste indietro nella tappa appena chiusa (cosa manca · perché · dove ne parla il progetto, con la data); sposta in «Chiuse» quelle risolte, dicendo come. Solo cose **già dentro il perimetro**: le idee da valutare restano in `idee_future.md`. Non copiare lo stato. |

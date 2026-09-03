@@ -3124,3 +3124,21 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Le stesse colonne, non colonne «più comode per Excel».** Avevo pensato a campi separati (`cv: sì/no`, `lettera: sì/no`) che in un foglio si filtrano meglio; ma il capitolo promette «esce quel che si vede», e un file che dice le stesse cose in un'altra forma è un secondo posto che fra un anno racconterà un'altra storia. Chi vuole filtrare ha comunque una colonna sola da guardare.
 
 > 💡 **Cambiare una cosa in due posti costa il doppio; cambiarla in uno e dimenticarne un altro costa molto di più.** Il foglio esportato non era rotto: era rimasto indietro di un giorno, e diceva di questo programma una parola che il programma non usa più. Chi lo apre non ha l'applicazione davanti per accorgersene — è proprio il posto in cui una bugia sopravvive più a lungo.
+
+### Step 2.71 — Ho tolto l'integrazione continua, e mi sono scritto cosa costa
+
+*Due run appesi in due giorni mi avevano convinto che non avesse mai funzionato. I numeri dicevano un'altra cosa; l'ho tolta lo stesso, e questa volta la decisione la scrivo insieme al suo prezzo.*
+
+**Cosa ho fatto**
+- **Ho eliminato `.github/workflows/collaudi.yml`**, il file che faceva girare il banco su una macchina di GitHub a ogni push. Con lui sono andati via i suoi puntatori: la riga del perimetro e quella della tabella nel `CLAUDE.md`, e la frase del `README.md` che prometteva «l'integrazione continua» — un repository pubblico che promette una cosa che non c'è è peggio di uno che non la promette.
+- **Ho lasciato la storia dov'era.** La voce chiusa in `in_sospeso.md` e la cronaca del giro D nel cap. 14 dicono cosa fu fatto il 26 agosto, ed è vero: non si riscrive. La decisione di oggi è un paragrafo **nuovo**, in fondo alla cronologia del capitolo.
+
+**Cosa ho imparato**
+- **La mia impressione era sbagliata, e i numeri stavano a un comando di distanza.** «Non è mai funzionata, sono sempre restate appese»: in realtà **19 run riusciti su 22**, due annullati da me e uno appeso. E tutti e due i blocchi erano del 2 settembre, a poche ore l'uno dall'altro — cioè esattamente il giorno in cui me ne sono accorto. Quando una cosa si rompe due volte di fila sembra che si sia sempre rotta.
+- **Il difetto vero era un'altra cosa, e piccola.** Il workflow non aveva un tetto di tempo: senza `timeout-minutes`, un job incastrato resta appeso fino a **sei ore** invece di morire e diventare rosso. Non era il banco a non finire — era il runner Windows che ogni tanto non parte, e nessuno lo spegneva.
+
+**Cosa ho deciso e perché**
+- **L'ho tolta comunque**, sapendo che la cura tecnica sarebbe stata una riga. Non voglio uno strumento che mi dà notizie che non so leggere: un run appeso per tre ore non mi dice né sì né no, e un semaforo che resta giallo si smette di guardare.
+- **E mi scrivo cosa costa**, perché una decisione senza il suo prezzo scritto fra sei mesi sembra gratis: da adesso il banco lo faccio girare **io**, sulla mia macchina, e non c'è più nessuno che provi il progetto su una **installazione pulita**. Se un giorno compilasse solo grazie a qualcosa che sta sul mio disco e non nel repository, non me lo direbbe più nessuno. La copertura misurata e l'elenco delle falsificazioni restano: quelli vivono nel banco, non su GitHub.
+
+> 💡 **Ho chiesto di togliere una cosa dicendo che non aveva mai funzionato, e non era vero.** Il bello è che verificarlo è costato un comando solo. Non mi pento della scelta — è mia, e il motivo per cui la faccio è buono anche coi numeri veri davanti — ma mi resta che la premessa era falsa e stavo per prendere una decisione su quella. La differenza fra «lo tolgo perché non funziona» e «lo tolgo perché mi dà notizie che non so leggere» non cambia il gesto: cambia se fra sei mesi saprò perché l'ho fatto.

@@ -1380,6 +1380,28 @@ agosto. Le due voci aperte dal giro D — rifarlo sull'eseguibile giusto e la fi
 restano tali, e con la prima aspetta ancora il tag `v1.0`.
 
 
+*Dopo T9 — **l'integrazione continua tolta** (2026-09-03).* Il workflow
+`.github/workflows/collaudi.yml`, nato il 26 agosto dalla revisione del giro D per rispondere a
+«il rigore è affidato alla disciplina, non a uno strumento», **non c'è più**: l'ha tolto Mirco,
+ed è una sua decisione di conduzione, non una conseguenza tecnica.
+
+Lo storico dice che aveva funzionato: **19 run riusciti su 22**, due annullati a mano e uno
+rimasto appeso — e i due blocchi erano tutti e due del 2 settembre, a poche ore di distanza,
+mentre il banco in locale gira in ventidue secondi. La causa non era il codice ma il runner
+Windows, che ogni tanto non parte; e il workflow non aveva un `timeout-minutes`, quindi un job
+incastrato restava lì fino al tetto di sei ore invece di morire e diventare rosso. La cura
+tecnica sarebbe stata quella riga. La scelta è stata un'altra, e va scritta insieme al suo
+prezzo: **da qui il banco lo fa girare solo chi lavora**, sulla sua macchina, e non esiste più
+nessuno che provi il progetto su una **installazione pulita** — è la cosa che l'integrazione
+continua sapeva fare e che nessun collaudo locale può sostituire, perché sulla postazione di
+sviluppo l'SDK, i file di prova e le variabili d'ambiente ci sono già. Se un giorno il progetto
+compilasse soltanto grazie a qualcosa che sta sul disco di aviolab03 e non nel repository,
+adesso non lo direbbe più nessuno.
+
+Restano in piedi gli altri due strumenti nati con lei — la **copertura misurata**
+(`coverlet.collector`) e l'**elenco versionato delle falsificazioni** — che vivono nel banco e
+non dipendono da GitHub.
+
 ## Ordine e dipendenze
 
 ```
