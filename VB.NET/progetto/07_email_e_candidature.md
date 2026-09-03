@@ -344,8 +344,13 @@ l'utente.
   motivo è che le due domande sono diverse e finché rispondevano nello stesso posto se ne
   poteva leggere una sola: «Generata» diceva che i documenti c'erano ma non se valevano
   ancora, e «Rifiutata» copriva l'una e l'altra. Quel che l'utente **dichiara** — l'esito, lo
-  scarto — sta a destra; quel che si legge dalla **cartella** sta a sinistra. Il riepilogo
-  esportato non cambia: continua a scrivere la parola dell'esito.)*
+  scarto — sta a destra; quel che si legge dalla **cartella** sta a sinistra. Il **riepilogo
+  esportato segue**, il giorno stesso: due colonne, `stato` con le tre tappe e `esito` con la
+  parola dell'esito, perché «esce quel che si vede» vale anche quando quel che si vede
+  cambia — un foglio che continuasse a dire «Generata» racconterebbe di questo programma una
+  parola che nel programma non c'è più. L'avviso sui documenti di ieri ci entra solo se chi
+  esporta lo passa: la risposta sta nello storico del profilo, e chi compone il testo il
+  disco non lo tocca.)*
 
 Uno stato che prima nessuno raggiungeva ha toccato anche **P7**: chi ripremeva «L'ho
 spedita» su una candidatura che aveva già un esito — per rimandare la stessa email —

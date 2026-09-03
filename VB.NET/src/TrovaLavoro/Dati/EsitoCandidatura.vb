@@ -111,6 +111,31 @@ Namespace Dati
         ''' portano accanto anche i giorni di silenzio — ma la parola è la stessa, ed è
         ''' questa la ragione per cui continua a vivere in un posto solo.</para>
         ''' </remarks>
+        ''' <summary>
+        ''' Com'è finita: l'esito quando c'è, lo scarto quando è stato deciso, <b>vuoto</b>
+        ''' quando non c'è ancora niente da dire.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È la colonna «Esito» — della Home e del riepilogo esportato — e tiene
+        ''' insieme le due cose che <b>nessun file può sapere</b> e che dice l'utente. Sta
+        ''' qui per la stessa ragione di <see cref="EtichettaDi"/>: la scrivono in due, e
+        ''' due posti divergono.</para>
+        ''' <para>Vuoto e non un trattino: chi apre il foglio di calcolo vuole una cella
+        ''' vuota, non un carattere da togliere. Il trattino lo mette la Home, che è
+        ''' l'unica a cui serve far vedere che la colonna c'è.</para>
+        ''' <para>Lo scarto viene prima dell'esito e non si contendono mai il posto: dallo
+        ''' scarto non si arriva all'esito né viceversa. Viene prima perché è la notizia che
+        ''' spiega perché quella riga è lì e ferma.</para>
+        ''' </remarks>
+        Public Shared Function ComEAndata(stato As StatoOpportunita, esito As EsitoCandidatura?) As String
+
+            If stato = StatoOpportunita.Scartata Then Return StatiOpportunita.Etichetta(stato)
+            If esito.HasValue Then Return Etichetta(esito.Value)
+
+            Return String.Empty
+
+        End Function
+
         Public Shared Function EtichettaDi(stato As StatoOpportunita, esito As EsitoCandidatura?) As String
 
             If stato = StatoOpportunita.Esito AndAlso esito.HasValue Then Return Etichetta(esito.Value)

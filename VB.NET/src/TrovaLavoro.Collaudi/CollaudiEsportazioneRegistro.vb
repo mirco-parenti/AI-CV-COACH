@@ -128,7 +128,8 @@ Namespace Dati
 
             ' «Esce quel che si vede» (cap. 07.3): nella Home la colonna dice «Rifiutata»,
             ' e chi apre il foglio deve leggere la stessa parola — «Con esito», da solo,
-            ' non racconta niente a chi non ha l'applicazione davanti.
+            ' non racconta niente a chi non ha l'applicazione davanti. Dal 2026-09-03 quella
+            ' parola sta nella colonna «esito», che è dove la mette anche la coda.
             Dim finita As VoceRegistro = Voce("Acme", "Magazziniere", 3.5)
             finita.Stato = StatoOpportunita.Esito
             finita.Esito = EsitoCandidatura.Rifiutata
@@ -136,10 +137,83 @@ Namespace Dati
             Dim testo As String = EsportazioneRegistro.Componi(
                 {finita}, FormatoEsportazione.Csv)
 
-            Assert.Contains("Rifiutata", testo)
+            Assert.AreEqual("Rifiutata", Colonna(testo, "esito"))
             Assert.DoesNotContain("Con esito", testo)
 
         End Sub
+
+        <TestMethod>
+        Public Sub NelRiepilogoLoStatoDiceAChePuntoELaProcedura()
+
+            ' Il riepilogo esce dalla coda, e dal 2026-09-03 la coda non dice più il nome
+            ' dello stato. Se questo file continuasse a scrivere «Generata», chi lo apre
+            ' leggerebbe di quel programma una parola che nel programma non c'è più.
+            Dim candidatura As VoceRegistro = Voce("Acme", "Magazziniere", 3.5)
+            candidatura.CEIlCvMirato = True
+
+            Dim testo As String = EsportazioneRegistro.Componi({candidatura}, FormatoEsportazione.Csv)
+
+            Assert.AreEqual("CV mirato ✓ · lettera – · email –", Colonna(testo, "stato"),
+                            "le tre tappe, come nella coda")
+            Assert.IsEmpty(Colonna(testo, "esito"),
+                           "non è finita in nessun modo: la cella resta vuota, non un trattino")
+            Assert.DoesNotContain("Generata", testo, "il nome dello stato non esce più")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub IlRiepilogoDichiaraIDocumentiObsoletiSeGlieloSiDice()
+
+            ' La domanda «questi documenti sono ancora del profilo di oggi?» ha la risposta
+            ' nello storico del profilo, e questo modulo il disco non lo tocca: chi chiama
+            ' porta l'elenco delle cartelle. Chi non lo porta ottiene un riepilogo che di
+            ' obsolescenza non parla — non uno che la nega.
+            Dim candidatura As VoceRegistro = Voce("Acme", "Magazziniere", 3.5)
+            candidatura.CEIlCvMirato = True
+            candidatura.CELaLettera = True
+
+            Dim zitto As String = EsportazioneRegistro.Componi({candidatura}, FormatoEsportazione.Csv)
+            Assert.DoesNotContain("obsoleti", zitto, "senza l'elenco non si pronuncia")
+
+            Dim detto As String = EsportazioneRegistro.Componi(
+                {candidatura}, FormatoEsportazione.Csv, Nothing,
+                New HashSet(Of String)({candidatura.Cartella}))
+
+            Assert.Contains(StatiOpportunita.AvvisoObsoleti, Colonna(detto, "stato"),
+                            "e con l'elenco lo scrive nella stessa colonna della coda")
+
+        End Sub
+
+        <TestMethod>
+        Public Sub LeColonneDelRiepilogoSonoQuelleDellaCoda()
+
+            Dim testo As String = EsportazioneRegistro.Componi(
+                {Voce("Acme", "Magazziniere", 3.5)}, FormatoEsportazione.Csv)
+
+            Assert.Contains("stato;esito;fonte", RigheDi(testo)(0),
+                            "«esito» sta fra «stato» e «fonte», come nella coda")
+
+        End Sub
+
+        ''' <summary>
+        ''' Il valore di quella colonna nella prima riga di dati di un CSV.
+        ''' </summary>
+        ''' <remarks>
+        ''' Si cerca l'intestazione per <b>nome</b> e non per posizione: un collaudo che
+        ''' contasse le colonne a mano andrebbe riscritto a ogni colonna nuova, e sarebbe
+        ''' verde per caso il giorno in cui due si scambiano di posto.
+        ''' </remarks>
+        Private Shared Function Colonna(csv As String, quale As String) As String
+
+            Dim righe As String() = RigheDi(csv)
+            Dim intestazioni As String() = righe(0).Split(EsportazioneRegistro.Separatore)
+
+            Dim dove As Integer = Array.IndexOf(intestazioni, quale)
+            Assert.IsGreaterThanOrEqualTo(0, dove, $"la colonna «{quale}» esiste")
+
+            Return righe(1).Split(EsportazioneRegistro.Separatore)(dove)
+
+        End Function
 
         Private Shared Function Voce(azienda As String, titolo As String, stelle As Double?) As VoceRegistro
 

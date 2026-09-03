@@ -120,6 +120,69 @@ Namespace Dati
 
         End Function
 
+        ''' <summary>
+        ''' A che punto è la procedura, in una riga: il 🎯 CV mirato, la ✉️ lettera,
+        ''' l'email spedita — e in coda l'avviso, quando i documenti che ci sono non
+        ''' vengono dal profilo di oggi.
+        ''' </summary>
+        ''' <param name="documentiObsoleti">
+        ''' Se i documenti di questa voce sono nati da un profilo che non è più quello di
+        ''' adesso. Arriva da fuori perché la risposta sta nello storico del profilo, che
+        ''' questa classe non ha e non deve avere.
+        ''' </param>
+        ''' <remarks>
+        ''' <para>Sta qui, e non nel pannello che la disegna, perché a scriverla sono in
+        ''' <b>due</b>: la colonna «Stato» della Home e il riepilogo esportato (cap. 07.3,
+        ''' «esce quel che si vede»). È la stessa ragione per cui l'etichetta di uno stato
+        ''' vive in questa classe invece che nei pannelli — due posti divergono, e chi
+        ''' legge il foglio non ha l'applicazione davanti per accorgersene.</para>
+        ''' <para>Le tre voci ci sono <b>sempre tutte e tre</b>, con la spunta o col
+        ''' trattino: in un elenco si guarda in giù, e in giù si incolonna solo ciò che sta
+        ''' sempre nello stesso posto.</para>
+        ''' </remarks>
+        Public Shared Function Procedura(voce As VoceRegistro, documentiObsoleti As Boolean) As String
+
+            If voce Is Nothing Then Throw New ArgumentNullException(NameOf(voce))
+
+            Dim scritta As String = $"CV mirato {Segno(voce.CEIlCvMirato)} · " &
+                                    $"lettera {Segno(voce.CELaLettera)} · " &
+                                    $"email {Segno(Spedita(voce.Stato))}"
+
+            If documentiObsoleti Then scritta &= "  " & AvvisoObsoleti
+
+            Return scritta
+
+        End Function
+
+        ''' <summary>Quel che si scrive in coda alla procedura quando i documenti sono di ieri.</summary>
+        ''' <remarks>
+        ''' Corto per forza: nella coda della Home la cella si legge tutta o non serve a
+        ''' niente, e con questa coda la riga più lunga misura 239 px contro i 250 della
+        ''' colonna (v. i collaudi che la misurano). Il perché per esteso sta altrove — nel
+        ''' suggerimento della riga, e in P6 accanto al bottone che lo chiude.
+        ''' </remarks>
+        Public Const AvvisoObsoleti As String = "⚠ obsoleti"
+
+        ''' <summary>Il segno di un passo fatto, e quello di un passo che manca.</summary>
+        Private Shared Function Segno(fatto As Boolean) As String
+            Return If(fatto, "✓", "–")
+        End Function
+
+        ''' <summary>
+        ''' Se la candidatura è partita. Lo dice lo stato e nient'altro: dopo l'invio si va
+        ''' solo verso l'esito, e da lì non si torna indietro.
+        ''' </summary>
+        ''' <remarks>
+        ''' A spedire è il programma di posta dell'utente, e l'unica prova che
+        ''' l'applicazione può avere è la sua parola: una bozza scritta e mai mandata non è
+        ''' una candidatura partita.
+        ''' </remarks>
+        Public Shared Function Spedita(stato As StatoOpportunita) As Boolean
+
+            Return stato = StatoOpportunita.Inviata OrElse stato = StatoOpportunita.Esito
+
+        End Function
+
         ''' <summary>Come lo stato si mostra all'utente: in italiano, con l'iniziale grande.</summary>
         Public Shared Function Etichetta(stato As StatoOpportunita) As String
 

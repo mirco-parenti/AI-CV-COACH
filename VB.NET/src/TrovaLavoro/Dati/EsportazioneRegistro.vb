@@ -43,8 +43,13 @@ Namespace Dati
         ''' </summary>
         Private Const Quando As String = "yyyy-MM-dd HH:mm"
 
+        ''' <summary>
+        ''' Le colonne del riepilogo, nell'ordine in cui escono. «esito» è nata il
+        ''' 2026-09-03 insieme a quella della Home, e «stato» ha cambiato mestiere con lei:
+        ''' dice a che punto è la procedura, non più il nome dello stato interno.
+        ''' </summary>
         Private ReadOnly Intestazioni As String() = {
-            "stelle", "eliminatorio", "azienda", "ruolo", "stato", "fonte", "link",
+            "stelle", "eliminatorio", "azienda", "ruolo", "stato", "esito", "fonte", "link",
             "lingua", "creata", "aggiornata", "cartella"}
 
         ''' <summary>
@@ -57,15 +62,39 @@ Namespace Dati
         ''' Entra solo nel markdown: un CSV con una frase in cima non è più una tabella, e
         ''' il foglio di calcolo se ne accorgerebbe con una colonna sballata.
         ''' </param>
+        ''' <param name="documentiObsoleti">
+        ''' Le cartelle le cui candidature hanno documenti nati da un profilo che non è più
+        ''' quello di oggi. Arrivano <b>già decise</b> da chi chiama, perché la risposta sta
+        ''' nello storico del profilo: questo modulo non tocca il disco, ed è la ragione per
+        ''' cui i collaudi possono leggerlo senza montare niente. Chi non le passa ottiene
+        ''' un riepilogo che di obsolescenza non parla, invece di uno che la nega.
+        ''' </param>
         Public Function Componi(voci As IEnumerable(Of VoceRegistro),
                                 formato As FormatoEsportazione,
-                                Optional contesto As String = Nothing) As String
+                                Optional contesto As String = Nothing,
+                                Optional documentiObsoleti As ISet(Of String) = Nothing) As String
 
             Dim elenco As New List(Of VoceRegistro)
             If voci IsNot Nothing Then elenco.AddRange(voci)
 
-            If formato = FormatoEsportazione.Markdown Then Return ComeMarkdown(elenco, contesto)
-            Return ComeCsv(elenco)
+            If formato = FormatoEsportazione.Markdown Then
+                Return ComeMarkdown(elenco, contesto, documentiObsoleti)
+            End If
+
+            Return ComeCsv(elenco, documentiObsoleti)
+
+        End Function
+
+        ''' <summary>Se i documenti di questa voce risultano di ieri.</summary>
+        ''' <remarks>
+        ''' Non può chiamarsi «Obsoleti»: il parametro omonimo di chi la chiama la coprirebbe,
+        ''' e in VB la chiamata verrebbe letta come un indice sull'insieme (BC30516, già visto
+        ''' altre volte in questo progetto).
+        ''' </remarks>
+        Private Function DocumentiDiIeri(voce As VoceRegistro, quali As ISet(Of String)) As Boolean
+
+            Return quali IsNot Nothing AndAlso Not String.IsNullOrEmpty(voce.Cartella) AndAlso
+                   quali.Contains(voce.Cartella)
 
         End Function
 
@@ -74,20 +103,22 @@ Namespace Dati
             Return If(formato = FormatoEsportazione.Markdown, ".md", ".csv")
         End Function
 
-        Private Function ComeCsv(voci As List(Of VoceRegistro)) As String
+        Private Function ComeCsv(voci As List(Of VoceRegistro), obsoleti As ISet(Of String)) As String
 
             Dim testo As New StringBuilder()
             testo.AppendLine(String.Join(Separatore, Intestazioni))
 
             For Each voce As VoceRegistro In voci
-                testo.AppendLine(String.Join(Separatore, Campi(voce).Select(AddressOf ProtettoPerCsv)))
+                testo.AppendLine(String.Join(
+                    Separatore, Campi(voce, DocumentiDiIeri(voce, obsoleti)).Select(AddressOf ProtettoPerCsv)))
             Next
 
             Return testo.ToString()
 
         End Function
 
-        Private Function ComeMarkdown(voci As List(Of VoceRegistro), contesto As String) As String
+        Private Function ComeMarkdown(voci As List(Of VoceRegistro), contesto As String,
+                                      obsoleti As ISet(Of String)) As String
 
             Dim testo As New StringBuilder()
             testo.AppendLine("# Registro delle candidature")
@@ -110,7 +141,8 @@ Namespace Dati
             testo.AppendLine("|" & String.Join("|", Intestazioni.Select(Function(i) "---")) & "|")
 
             For Each voce As VoceRegistro In voci
-                testo.AppendLine("| " & String.Join(" | ", Campi(voce).Select(AddressOf ProtettoPerMarkdown)) & " |")
+                testo.AppendLine("| " & String.Join(
+                    " | ", Campi(voce, DocumentiDiIeri(voce, obsoleti)).Select(AddressOf ProtettoPerMarkdown)) & " |")
             Next
 
             Return testo.ToString()
@@ -118,18 +150,24 @@ Namespace Dati
         End Function
 
         ''' <summary>I campi di una voce, nell'ordine delle intestazioni.</summary>
-        Private Function Campi(voce As VoceRegistro) As String()
+        ''' <param name="documentiObsoleti">
+        ''' Se i documenti di questa voce non vengono dal profilo di oggi: la stessa cosa
+        ''' che nella coda fa diventare rossa la cella.
+        ''' </param>
+        Private Function Campi(voce As VoceRegistro, documentiObsoleti As Boolean) As String()
 
-            ' Da T9c la colonna «stato» porta la stessa parola che si legge nella Home —
-            ' «esce quel che si vede» (cap. 07.3), e «Rifiutata» dice quel che «Con esito»
-            ' tace. (Il commento sta qui e non dentro le graffe: in VB una riga di solo
-            ' commento in mezzo a un initializer spezza la continuazione implicita.)
+            ' Le due colonne del «a che punto sono» escono dagli stessi due posti da cui le
+            ' prende la Home — «esce quel che si vede» (cap. 07.3). Dal 2026-09-03 sono due:
+            ' quel che si legge dalla cartella e quel che dichiara l'utente. (Il commento
+            ' sta qui e non dentro le graffe: in VB una riga di solo commento in mezzo a un
+            ' initializer spezza la continuazione implicita.)
             Return New String() {
                 If(voce.Stelle.HasValue, voce.Stelle.Value.ToString("0.0", CultureInfo.CurrentCulture), ""),
                 If(voce.GateEliminatorio, "sì", "no"),
                 If(voce.Azienda, ""),
                 If(voce.Titolo, ""),
-                EsitiCandidatura.EtichettaDi(voce.Stato, voce.Esito),
+                StatiOpportunita.Procedura(voce, documentiObsoleti),
+                EsitiCandidatura.ComEAndata(voce.Stato, voce.Esito),
                 If(voce.Fonte, ""),
                 If(voce.Link, ""),
                 If(voce.Lingua, ""),

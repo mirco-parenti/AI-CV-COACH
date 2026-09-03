@@ -3105,3 +3105,22 @@ Niente di tecnicamente difficile — un parametro e due costanti. Il punto vero 
 - **Il perché del «no» sta accanto al codice, non in una chat.** Nel designer, sopra la colonna, ci sono ora l'inchiostro unico per cella, i 225 px contro 260 e l'ordinamento che si perderebbe. Fra sei mesi quella domanda tornerà — è una domanda ragionevole — e la risposta dev'essere lì.
 
 > 💡 **La proposta era sbagliata, il problema no.** Le due colonne *sembravano* scollegate davvero: era vero il fastidio, non il rimedio che avevo in mente. Fondere sarebbe costato un controllo ridisegnato a mano, un ordinamento e un colore che mente; nominare il legame è costato una parola nell'intestazione. Quando una cosa non si può fare, vale la pena chiedersi cosa volevo davvero da quella cosa — quasi sempre c'è una strada più corta di quella che avevo immaginato.
+
+### Step 2.70 — Il foglio esportato raccontava un programma che non esiste più
+
+*Cambiata la colonna «Stato» della Home, il riepilogo che si esporta continuava a scrivere «Generata»: una parola che nell'applicazione non compare più da nessuna parte. L'ho allineato — e allineandolo ho scoperto che quel file non lo sorvegliava quasi nessuno.*
+
+**Cosa ho fatto**
+- **Le due colonne del riepilogo sono quelle della coda**: `stato` con le tre tappe («CV mirato ✓ · lettera ✓ · email –») ed `esito` nuova, con la parola dell'esito o dello scarto. Nel foglio l'esito vuoto è una **cella vuota**, non un trattino: il trattino serve a video, dove fa vedere che la colonna c'è, e in un foglio di calcolo sarebbe un carattere da togliere.
+- **Il testo delle tappe l'ho spostato dove può viverne uno solo.** Adesso a scriverlo sono in due — la Home e il riepilogo — e due posti divergono: sta in `StatiOpportunita`, accanto alle etichette degli stati, che stanno lì per la stessa ragione da agosto.
+- **L'avviso «⚠ obsoleti» entra nel foglio solo se chi esporta lo passa.** La risposta sta nello storico del profilo, e il modulo che compone il testo il disco non lo tocca — è la ragione per cui i collaudi lo leggono senza montare niente. Chi non passa l'elenco ottiene un riepilogo che di obsolescenza **non parla**, invece di uno che la nega.
+- **Provato sull'applicazione vera**: esportato il CSV dalla coda e letto il file. Poi ho seminato a mano un documento di ieri per vedere anche l'altro caso, e la prima volta l'avviso non c'era — giustamente: il `registro.json` non si rigenera per un file cambiato *dentro* una cartella (cap. 07.3). Tolto l'indice, l'avviso è comparso. **1440 verdi**, tre falsificazioni nuove.
+
+**Cosa ho imparato**
+- **Una falsificazione che non fa cadere niente non dice che il codice è solido: dice che il collaudo non c'è.** Ho riscritto da capo il contenuto di una colonna del riepilogo e il banco è rimasto tutto verde: i collaudi di quel file guardavano le virgolette, il punto e virgola, le formule di Excel — mai *cosa* ci fosse scritto. E la falsificazione che toglieva alla Home il passaggio dei documenti obsoleti non ha fatto cadere nulla, perché quel passaggio viveva **dentro il gestore di un bottone, dopo una finestra di scelta file**: un posto dove il banco non arriva.
+- **Il codice che sta dopo una finestra modale è codice non collaudato.** Non per cattiveria: perché nessuno lo può chiamare senza un dito umano. La cura è stata portare la composizione fuori dal gestore — due funzioni, `RiepilogoDi` e `VociInVista` — e provarla di lì. Il bottone adesso fa solo quel che deve fare un bottone: chiedere il file e scrivere.
+
+**Cosa ho deciso e perché**
+- **Le stesse colonne, non colonne «più comode per Excel».** Avevo pensato a campi separati (`cv: sì/no`, `lettera: sì/no`) che in un foglio si filtrano meglio; ma il capitolo promette «esce quel che si vede», e un file che dice le stesse cose in un'altra forma è un secondo posto che fra un anno racconterà un'altra storia. Chi vuole filtrare ha comunque una colonna sola da guardare.
+
+> 💡 **Cambiare una cosa in due posti costa il doppio; cambiarla in uno e dimenticarne un altro costa molto di più.** Il foglio esportato non era rotto: era rimasto indietro di un giorno, e diceva di questo programma una parola che il programma non usa più. Chi lo apre non ha l'applicazione davanti per accorgersene — è proprio il posto in cui una bugia sopravvive più a lungo.

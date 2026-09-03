@@ -730,66 +730,32 @@ Public Class PannelloHome
     ''' </remarks>
     Private Shared Function ProceduraScritta(voce As VoceRegistro, documenti As LetturaSpia) As String
 
-        Dim scritta As String = $"CV mirato {Segno(voce.CEIlCvMirato)} · " &
-                                $"lettera {Segno(voce.CELaLettera)} · " &
-                                $"email {Segno(Spedita(voce))}"
-
-        If documenti.Stato = StatoSpia.Disallineato Then scritta &= "  " & AvvisoObsoleti
-
-        Return scritta
-
-    End Function
-
-    ''' <summary>Quel che si scrive in coda alla procedura quando i documenti sono di ieri.</summary>
-    ''' <remarks>
-    ''' Corto per forza: la cella si legge tutta o non serve a niente, e con questa coda la
-    ''' riga più lunga misura 239 px contro i 250 della colonna (v. i collaudi che la
-    ''' misurano). Il perché per esteso sta nel suggerimento della riga, che è dove uno lo
-    ''' va a cercare — la stessa divisione del lavoro delle righe di stato di P4 e P6.
-    ''' </remarks>
-    Friend Const AvvisoObsoleti As String = "⚠ obsoleti"
-
-    ''' <summary>Il segno di un passo fatto, e quello di un passo che manca.</summary>
-    Private Shared Function Segno(fatto As Boolean) As String
-        Return If(fatto, "✓", "–")
-    End Function
-
-    ''' <summary>
-    ''' Se la candidatura è partita. Lo dice lo stato e nient'altro: dopo l'invio si va
-    ''' solo verso l'esito, e da lì non si torna indietro (cap. 07.3).
-    ''' </summary>
-    Private Shared Function Spedita(voce As VoceRegistro) As Boolean
-
-        Return voce.Stato = StatoOpportunita.Inviata OrElse voce.Stato = StatoOpportunita.Esito
+        Return StatiOpportunita.Procedura(voce, documenti.Stato = StatoSpia.Disallineato)
 
     End Function
 
     ''' <summary>
-    ''' Com'è finita: l'esito quando c'è, lo scarto quando è stato deciso, i giorni di
-    ''' silenzio quando una spedita è ferma da troppo, il trattino quando non c'è ancora
-    ''' niente da dire.
+    ''' Com'è andata, come si legge in colonna: quel che dice l'archivio, più i giorni di
+    ''' silenzio di una spedita ferma da troppo, e il trattino quando non c'è niente.
     ''' </summary>
     ''' <remarks>
-    ''' <para>Questa colonna nasce il 2026-09-03 da quella «Stato», che ha cambiato
-    ''' mestiere. Tiene insieme le due cose che <b>nessun file può sapere</b> e che dice
-    ''' l'utente — com'è andata, e se ha lasciato perdere — mentre a sinistra restano
-    ''' quelle che si leggono dalla cartella.</para>
-    ''' <para>Lo scarto viene prima dell'esito, e non capita mai che si contendano il
-    ''' posto: dallo scarto non si arriva all'esito né viceversa
-    ''' (<c>StatiOpportunita</c>). Viene prima lo stesso, perché è la notizia che spiega
-    ''' perché quella riga è lì e ferma.</para>
+    ''' Il testo viene da <see cref="EsitiCandidatura.ComEAndata"/>, che lo scrive anche nel
+    ''' riepilogo esportato. Qui si aggiungono le due cose che valgono solo a video: i
+    ''' giorni, che dipendono da <i>oggi</i> e in un file esportato invecchierebbero, e il
+    ''' trattino, che serve a far vedere che la colonna c'è — in un foglio di calcolo
+    ''' sarebbe un carattere da togliere.
     ''' </remarks>
     Private Shared Function EsitoScritto(voce As VoceRegistro, giorniDiAttesa As Integer?) As String
 
-        If voce.Stato = StatoOpportunita.Scartata Then Return StatiOpportunita.Etichetta(voce.Stato)
-        If voce.Esito.HasValue Then Return EsitiCandidatura.Etichetta(voce.Esito.Value)
+        Dim detto As String = EsitiCandidatura.ComEAndata(voce.Stato, voce.Esito)
+        If detto <> String.Empty Then Return detto
+
         If giorniDiAttesa.HasValue Then Return $"{giorniDiAttesa.Value} gg"
 
         Return "—"
 
     End Function
 
-    ''' <summary>
     ''' Dà il suo inchiostro alle celle che hanno qualcosa da segnalare — la spia del
     ''' profilo, e i documenti obsoleti — lasciando alle altre quello della riga.
     ''' </summary>
@@ -944,7 +910,7 @@ Public Class PannelloHome
 
         If voce.CEIlCvMirato Then quante += 1
         If voce.CELaLettera Then quante += 1
-        If Spedita(voce) Then quante += 1
+        If StatiOpportunita.Spedita(voce.Stato) Then quante += 1
 
         Return quante
 
@@ -1161,7 +1127,7 @@ Public Class PannelloHome
     ''' </summary>
     Private Sub btnEsportaRegistro_Click(sender As Object, e As EventArgs) Handles btnEsportaRegistro.Click
 
-        Dim voci As List(Of VoceRegistro) = Ordinate(Filtrate()).ToList()
+        Dim voci As List(Of VoceRegistro) = VociInVista()
         If voci.Count = 0 Then Return
 
         Using scelta As New SaveFileDialog()
@@ -1182,7 +1148,7 @@ Public Class PannelloHome
                    FormatoEsportazione.Markdown, FormatoEsportazione.Csv)
 
             Try
-                Scrivi(scelta.FileName, EsportazioneRegistro.Componi(voci, formato, CosaSiStaGuardando(voci.Count)))
+                Scrivi(scelta.FileName, RiepilogoDi(voci, formato))
 
                 RaccontaLoStato($"Elenco esportato: {voci.Count} " &
                                 $"{If(voci.Count = 1, "candidatura", "candidature")} in «{scelta.FileName}».",
@@ -1213,6 +1179,55 @@ Public Class PannelloHome
         File.WriteAllText(percorso, testo, New System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier:=conSegno))
 
     End Sub
+
+    ''' <summary>
+    ''' Il riepilogo di queste candidature, pronto da scrivere su un file.
+    ''' </summary>
+    ''' <remarks>
+    ''' Sta fuori dal gestore del bottone per una ragione sola: <b>si possa collaudare</b>.
+    ''' Dentro il gestore c'è una finestra di scelta file, e quel che le sta dopo il banco
+    ''' non lo vede — infatti il 2026-09-03 la falsificazione «la Home esporta senza dire
+    ''' quali documenti sono di ieri» non fece cadere niente, e a mancare non era un
+    ''' controllo sull'esportazione ma un collaudo su <i>chi la chiama</i>.
+    ''' </remarks>
+    Public Function RiepilogoDi(voci As List(Of VoceRegistro),
+                                formato As FormatoEsportazione) As String
+
+        Return EsportazioneRegistro.Componi(voci, formato,
+                                            CosaSiStaGuardando(voci.Count),
+                                            ConDocumentiObsoleti(voci))
+
+    End Function
+
+    ''' <summary>
+    ''' Le candidature che la coda sta mostrando, nell'ordine in cui si vedono: è quel che
+    ''' finisce nel riepilogo (cap. 07.3, «esce quel che si vede»).
+    ''' </summary>
+    Public Function VociInVista() As List(Of VoceRegistro)
+        Return Ordinate(Filtrate()).ToList()
+    End Function
+
+    ''' <summary>
+    ''' Quali di queste candidature hanno documenti nati da un profilo che non è più quello
+    ''' di oggi: è la stessa domanda che nella coda fa diventare rossa la cella.
+    ''' </summary>
+    ''' <remarks>
+    ''' La risposta la sa il pannello e non il modulo che compone il riepilogo, perché sta
+    ''' nello <b>storico del profilo</b>: chiederla di lì vorrebbe dire dare le chiavi dei
+    ''' dati a chi deve solo mettere in fila del testo. Si calcola una volta per
+    ''' esportazione, non una per riga.
+    ''' </remarks>
+    Private Function ConDocumentiObsoleti(voci As IEnumerable(Of VoceRegistro)) As ISet(Of String)
+
+        Dim quali As New HashSet(Of String)(StringComparer.Ordinal)
+
+        For Each voce As VoceRegistro In voci
+            If SpiaDeiDocumenti(voce).Stato = StatoSpia.Disallineato Then quali.Add(voce.Cartella)
+        Next
+
+        Return quali
+
+    End Function
 
     ''' <summary>
     ''' Cosa si sta guardando, detto in una riga: la data, i filtri in vigore e quante

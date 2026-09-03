@@ -706,6 +706,48 @@ Namespace Ui
                 End Sub, AddressOf TreCandidature)
         End Sub
 
+        <TestMethod>
+        Public Sub IlRiepilogoEsportatoDiceQuelloCheLaCodaMostra()
+
+            ' «Esce quel che si vede» (cap. 07.3) preso alla lettera: le stesse tappe, lo
+            ' stesso avviso sui documenti di ieri. Il collaudo esiste perché il 2026-09-03
+            ' la falsificazione «la Home esporta senza dire quali documenti sono di ieri»
+            ' non fece cadere niente: l'esportazione era sorvegliata, chi la chiama no.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Dim riepilogo As String = pannello.RiepilogoDi(
+                        pannello.VociInVista(), FormatoEsportazione.Csv)
+
+                    Assert.Contains("CV mirato ✓ · lettera ✓ · email –", riepilogo,
+                                    "le tappe, come nella colonna «Stato»")
+                    Assert.Contains(StatiOpportunita.AvvisoObsoleti, riepilogo,
+                                    "e l'avviso, perché quei documenti sono di un altro profilo")
+                    Assert.DoesNotContain("Generata", riepilogo,
+                                          "il nome dello stato non si vede più da nessuna parte")
+                End Sub, semina:=AddressOf MatchDiOggiDocumentiDiIeri)
+
+        End Sub
+
+        <TestMethod>
+        Public Sub NelRiepilogoNonEntraQuelloCheIFiltriNascondono()
+
+            ' Il riepilogo esce dalla coda, non dall'archivio: se il filtro sta mostrando una
+            ' candidatura sola, il foglio ne porta una — e la riga in testa dice quali filtri
+            ' erano in vigore, altrimenti fra sei mesi si scambia per l'elenco intero.
+            ConPannelloHome(
+                Sub(pannello, contesto)
+                    Tendina(pannello, "cboMostra").SelectedIndex = 2
+
+                    Dim riepilogo As String = pannello.RiepilogoDi(
+                        pannello.VociInVista(), FormatoEsportazione.Markdown)
+
+                    Assert.Contains("Rossi S.p.A.", riepilogo, "la generata c'è")
+                    Assert.DoesNotContain("Bianchi S.r.l.", riepilogo, "le altre no")
+                    Assert.Contains("stato: Generate", riepilogo, "e si dice cosa si stava guardando")
+                End Sub, AddressOf TreCandidature)
+
+        End Sub
+
         ' ==================================================================
         ' Il profilo in sintesi
         ' ==================================================================

@@ -139,6 +139,9 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
 | Le intestazioni e le costanti delle colonne restano in pari | `TrovaLavoro/Ui/PannelloHome.Designer.vb` | nell'`AddRange` di `lvwCoda` si rimettono `colMatch` e `colRuolo` nell'ordine di prima, lasciando le costanti come stanno | `IlPunteggioELaDataSiLeggonoIncolonnati`, **e nessun altro** — ed è la cosa da sapere: le celle vanno dove dicono le costanti, quindi finiscono sotto l'intestazione sbagliata senza che nessun `SubItems(n)` se ne accorga. È il difetto del 2026-09-02 (si cliccava «Azienda» e ordinava per ruolo), e a sorvegliarlo c'è quel collaudo solo |
 | A spia rossa il suggerimento dice **cosa fare** | `TrovaLavoro/Ui/PannelloDocumenti.vb` | in `Accendi`, il tooltip torna a essere sempre `spia.Perche` | `IlSuggerimentoDellaSpiaRossaDiceCosaFare` |
 | …e solo a spia rossa | `TrovaLavoro/Ui/PannelloDocumenti.vb` | in `Accendi`, il tooltip diventa sempre `SuggerimentoObsoleti` | `IlSuggerimentoDellaSpiaRossaDiceCosaFare` |
+| Il riepilogo esportato dice quel che dice la coda | `TrovaLavoro/Dati/EsportazioneRegistro.vb` | in `Campi`, le due colonne tornano a `EsitiCandidatura.EtichettaDi` e a un campo vuoto | `NelRiepilogoLoStatoDiceComEAndata`, `NelRiepilogoLoStatoDiceAChePuntoELaProcedura`, `IlRiepilogoDichiaraIDocumentiObsoletiSeGlieloSiDice` |
+| …e chi lo chiama gli passa gli obsoleti | `TrovaLavoro/Ui/PannelloHome.vb` | in `RiepilogoDi` si toglie l'argomento `ConDocumentiObsoleti(voci)` | `IlRiepilogoEsportatoDiceQuelloCheLaCodaMostra` |
+| Nel riepilogo entra solo quel che si vede | `TrovaLavoro/Ui/PannelloHome.vb` | `VociInVista` restituisce `_registro.Voci` invece delle voci filtrate e ordinate | `NelRiepilogoNonEntraQuelloCheIFiltriNascondono` |
 
 ## Tre cose imparate falsificando, che valgono più della tabella
 
@@ -201,6 +204,18 @@ e quando si vuole sapere se una parte del banco è sorvegliata davvero o è verd
   contro la dimensione vera dell'etichetta, e falsificandolo dice quante righe cadono fuori.
   È l'unica forma in cui questa regola resta vera anche quando qualcuno riscriverà quei
   messaggi. *(2026-09-03.)*
+
+- **Un modulo può essere sorvegliato benissimo, e chi lo chiama per niente.** Il 2026-09-03
+  la colonna «stato» del riepilogo esportato è stata **riscritta da capo** — da «Generata» a
+  «CV mirato ✓ · lettera ✓ · email –» — e il banco è rimasto **tutto verde**: i collaudi
+  dell'esportazione guardavano le virgolette, il punto e virgola, le formule di Excel, mai
+  *cosa* ci fosse scritto in quella colonna. Peggio: la falsificazione che toglieva alla Home
+  l'elenco dei documenti obsoleti passati all'esportazione non fece cadere **niente**, perché
+  quel passaggio viveva dentro il gestore di un bottone, dopo una finestra di scelta file —
+  cioè in un posto dove il banco non arriva. La cura è stata **spostare la composizione fuori
+  dal gestore** (`RiepilogoDi`, `VociInVista`) e collaudarla di lì. La lezione: quando una
+  falsificazione non fa cadere niente, la prima cosa da chiedersi non è se il codice è
+  robusto, ma se il collaudo esiste. *(2026-09-03.)*
 
 ## Quel che manca
 
