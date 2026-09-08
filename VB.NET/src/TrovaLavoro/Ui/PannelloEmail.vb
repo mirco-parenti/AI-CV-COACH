@@ -1579,6 +1579,7 @@ Public Class PannelloEmail
             _comandi = New FasciaDeiComandi(pnlAzioni)
             _comandi.ASinistra(btnTornaAiDocumenti, btnRiscrivi, btnDocumenti)
             _comandi.ADestra(btnHoSpedito, btnPreparaEmail)
+            _comandi.Racconta(lblStatoEmail)
         End If
 
         _comandi.Disponi(Math.Max(AltezzaMinimaAzioni, _ingombroLogo.Height))

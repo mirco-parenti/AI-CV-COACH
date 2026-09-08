@@ -957,6 +957,41 @@ Prefissi standard, nome semantico in PascalCase: `pnl` (Panel), `btn` (Button),
   poteva premere c'era, ed era corretto — ma stava nell'angolo opposto dello schermo,
   dove nessuno guardava: chi voleva premere il bottone stava guardando il bottone, e
   l'applicazione sembrava rotta. Una spiegazione che non si trova non è una spiegazione.
+- **E la riga che racconta sta fra la casella e i bottoni, al centro** *(2026-09-08)*.
+  È la regola qui sopra applicata a sé stessa, cinque tappe dopo. Fino a questa data la riga
+  di stato di ogni pannello viveva **in alto a destra**, nell'intestazione: un angolo che
+  l'occhio visita solo se già sa che lì c'è qualcosa — e mentre si lavora l'occhio sta due
+  volte più in basso, sulla casella in cui si scrive e sul bottone che si sta per premere.
+  Un errore raccontato là è un errore raccontato a nessuno, ed è esattamente il difetto di
+  T4c con un altro soggetto. Adesso la riga compare **sotto l'area dei dati e sopra la fascia
+  dei comandi**, centrata: sulla strada che l'occhio fa comunque per andare dal testo al
+  bottone.
+  - **Centrata sulla schermata, non sullo spazio libero.** Il pannello del logo (3.5) occupa
+    l'angolo in basso a sinistra, e la riga deve stargli alla larga; ma prendersi tutto e
+    solo ciò che avanza la farebbe cadere spostata a destra rispetto alla casella che le sta
+    sopra. Il margine è perciò lo **stesso** da una parte e dall'altra — quello dettato dal
+    logo, che è l'ostacolo più largo dei due — e il centro della riga torna a essere il
+    centro della schermata. Si perde un po' di larghezza a destra, e si guadagna una riga che
+    l'occhio trova senza cercarla.
+  - **A posarla è la fascia dei comandi** (3.4), non i pannelli. Quanto vuoto resti sopra i
+    bottoni lo sa solo lei — dipende da quante righe i comandi hanno preso a quella larghezza
+    — e sette geometrie ricopiate tornerebbero a divergere come divergevano le due file di
+    bottoni prima del 2026-08-14. La fascia garantisce al racconto un **pavimento di tre
+    righe** di testo: alla larghezza normale non serve, perché il logo le impone già 188 px e
+    sopra i comandi ne avanzano più di cento, ma sotto i 1350 px il logo passa in compatta e
+    senza quel conto al racconto resterebbero sei pixel. Il posto si tiene **sempre**, anche
+    a riga vuota: una fascia che cresce quando compare un avviso farebbe ballare l'area dei
+    dati proprio nell'istante in cui c'è qualcosa da leggere. Tre righe perché tre ne ha il
+    più lungo dei messaggi a testo fisso; l'unico che può sfondarle è l'elenco dei file
+    esportati di P6, che in una finestra stretta finisce nei puntini — e si è preferito
+    questo a rubare all'area dei dati un posto che quasi nessuno userebbe.
+  - **P3 perde la sua geometria** *(stesso giorno)*. La ricerca era l'unico pannello a
+    disporsi la fascia da sé, con il racconto **di fianco** ai due bottoni invece che in alto
+    a destra: non una scelta, ma un residuo — la fascia condivisa è del 2026-08-14, quella
+    geometria è più vecchia. Ne veniva che l'avviso stava in due posti diversi a seconda
+    della schermata, e in nessuno dei due dove si guarda. Ora sono sette su sette, e P3 entra
+    anche nel collaudo di sistema che sorveglia le sovrapposizioni, da cui era rimasto fuori
+    proprio perché la sua fascia era d'altra natura.
 - **Un contatore concorda la parola col numero.** *(Imparato in T5c, 2026-08-13.)* I
   contatori della Home dicevano «1 scartate», perché il numero era una variabile e la
   parola no. Il caso «uno» sembra il meno importante — è quasi sempre più di uno — ma

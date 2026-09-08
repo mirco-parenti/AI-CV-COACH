@@ -3356,3 +3356,69 @@ tre.*
 > riapro quasi mai, perché l'ho appena visto. Se n'è accorto un collaudo solo perché è andato
 > a leggere il documento **dopo** che era nato, invece di fidarsi di quello che mostrava lo
 > schermo un istante prima.
+
+### Step 2.75 — L'angolo in cui non guardavo mentre lavoravo
+
+*Il messaggio con cui il programma mi parla — «Errore — …», «Ho scritto…», «Profilo cambiato
+dopo il confronto» — stava in alto a destra, nell'intestazione di ogni schermata. Me ne sono
+accorto usandolo: mentre lavoro guardo la casella in cui scrivo e il bottone che sto per
+premere, e quell'angolo non lo guardo mai. L'ho spostato dove l'occhio passa comunque.*
+
+**Cosa ho fatto**
+- **Ho spostato la riga di stato in tutte e sette le schermate**: da «in alto a destra
+  nell'intestazione» a «sotto le caselle e sopra i bottoni, al centro». Caselle e bottoni non
+  li ho toccati: lo spazio dove il messaggio va adesso c'era già — la fascia dei comandi è
+  alta 188 px perché deve cedere l'angolo al pannello del logo, e sopra i bottoni ne
+  avanzavano più di cento, vuoti.
+- **A posare la riga è la fascia dei comandi**, che è di tutti i pannelli, non ognuno per sé.
+  Quanto vuoto resti sopra i bottoni lo sa solo lei: dipende da quante righe i comandi hanno
+  preso a quella larghezza.
+- **P3 ha perso la sua geometria**, ed è la cosa che non mi aspettavo di trovare. La ricerca
+  era l'unica schermata a disporsi la fascia da sola, col messaggio **di fianco** ai bottoni
+  invece che in alto a destra: non una scelta, un residuo più vecchio della fascia condivisa.
+  L'avviso stava quindi in due posti diversi a seconda di dove mi trovavo, e in nessuno dei
+  due dove guardo.
+- **Cinque collaudi nuovi** (1453 → 1458), e li ho provati a far fallire uno per uno: tolto
+  il posto riservato al messaggio, centrato lo spazio libero invece della schermata, fatto
+  arrivare la riga fino ai bottoni, rimessa l'etichetta di P7 nell'intestazione. Quattro
+  guasti, e ogni volta è diventato rosso quello che doveva.
+- **L'ho guardata dal vivo**, schermata per schermata, a finestra piena e alla misura minima.
+
+**Cosa ho imparato**
+- **Era la lezione di T4c con un altro soggetto.** Il 10 agosto avevo scritto una regola:
+  *il motivo per cui un bottone è spento si scrive sotto quel bottone, non altrove nella
+  schermata*, perché una spiegazione che non si trova non è una spiegazione. La riga di stato
+  violava esattamente quella regola da sempre, e non l'aveva vista nessuno — nemmeno io che
+  l'avevo scritta — perché la regola parlava di bottoni e questo era un messaggio.
+- **Il caso stretto non si ricava da quello largo.** Sopra i 1350 px il logo è grande e impone
+  188 px di fascia: spazio da vendere. Sotto, il logo passa in compatta, la fascia scende a 68
+  e al messaggio sarebbero rimasti **sei pixel** — invisibile, e in silenzio. La cura che
+  funziona nel caso normale poteva essere una cura che non c'è nel caso raro.
+
+**Dove ho faticato**
+- **Due righe o tre.** Avevo riservato due righe di testo, e la finestra stretta sembrava a
+  posto. Poi sono andato a misurare i messaggi veri invece di guardarli: ce n'è uno da **tre**
+  righe (P7, quando il destinatario viene dall'annuncio *e* la rifinitura non è riuscita) e
+  uno che cresce con quanti file ho esportato. Con due righe il primo si sarebbe tagliato in
+  una finestra piccola. Sono passato a tre.
+- **Il secondo resta scoperto**, e lo scrivo invece di far finta di no: l'elenco dei file
+  esportati di P6 può superare tre righe, e in una finestra stretta finisce nei puntini.
+
+**Cosa ho deciso e perché**
+- **Centrata sulla schermata, non sullo spazio che avanza.** Il logo occupa l'angolo in basso
+  a sinistra e la riga deve stargli alla larga; prendersi tutto e solo il resto l'avrebbe
+  fatta cadere spostata a destra rispetto alla casella che le sta sopra. Ho messo lo stesso
+  margine da tutte e due le parti: si perde larghezza a destra, e si guadagna una riga che
+  sta dove l'occhio la cerca.
+- **Il posto si tiene sempre, anche a riga vuota.** Una fascia che cresce quando compare un
+  avviso farebbe ballare l'area dei dati proprio nell'istante in cui c'è qualcosa da leggere.
+- **Meglio i puntini che rubare spazio ai dati.** Per il caso rarissimo — finestra stretta e
+  messaggio lunghissimo — ho preferito un troncamento che si vede a una fascia più alta per
+  tutti e sempre.
+
+> 💡 **Un'informazione messa in un posto che nessuno guarda è un'informazione che non hai
+> dato.** Il messaggio c'era, era giusto, era colorato bene e portava pure la parola davanti
+> — «Errore — », «Attenzione — » — che avevo aggiunto il primo settembre proprio perché si
+> distinguesse. Tutto vero e tutto inutile: stava in un angolo dove, mentre lavoro, non
+> guardo mai. Le due volte che me ne sono accorto in questo progetto non è stato leggendo il
+> codice: è stato usandolo.

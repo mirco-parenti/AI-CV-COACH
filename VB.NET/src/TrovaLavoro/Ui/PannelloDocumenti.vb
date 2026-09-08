@@ -639,9 +639,12 @@ Public Class PannelloDocumenti
     ''' </summary>
     ''' <remarks>
     ''' <para>La riga da sola non bastava, ed è il difetto trovato usando il programma il
-    ''' 2026-09-02: sta in alto a destra, mentre chi ha appena premuto «Rigenera» guarda il
-    ''' riquadro in mezzo — dove non compare niente. Un bottone che non fa niente e non dice
-    ''' niente si legge come un guasto, e manda a cercare il difetto dove non è.</para>
+    ''' 2026-09-02: allora stava <b>in alto a destra</b>, mentre chi ha appena premuto
+    ''' «Rigenera» guarda il riquadro in mezzo — dove non compariva niente. Un bottone che non
+    ''' fa niente e non dice niente si legge come un guasto, e manda a cercare il difetto dove
+    ''' non è. Dal <b>2026-09-08</b> la riga sta fra i riquadri e i comandi (cap. 03.8), cioè
+    ''' molto più vicina a chi guarda; la finestra resta lo stesso, perché un rifiuto che
+    ''' ferma un gesto appena fatto va detto <b>nel momento</b> in cui il gesto si ferma.</para>
     ''' <para>La riga <b>resta</b> comunque, e non è un doppione: la finestra si chiude e
     ''' quel che ha detto se ne va con lei, mentre la riga rimane lì per chi torna a
     ''' guardare la schermata cinque minuti dopo.</para>
@@ -2332,6 +2335,7 @@ Public Class PannelloDocumenti
             _comandi = New FasciaDeiComandi(pnlAzioni)
             _comandi.ASinistra(btnTornaIndietro, btnRigenera, btnRigeneraLettera, btnModificaTesti)
             _comandi.ADestra(btnPreparaEmail, btnEsportaPdf, btnEsportaDocx)
+            _comandi.Racconta(lblStatoDocumenti)
         End If
 
         _comandi.Disponi(Math.Max(AltezzaMinimaAzioni, _ingombroLogo.Height))

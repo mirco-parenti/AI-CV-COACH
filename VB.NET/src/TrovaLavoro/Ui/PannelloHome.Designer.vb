@@ -58,7 +58,6 @@ Partial Class PannelloHome
         '
         Me.pnlIntestazione.Controls.Add(Me.lblTitolo)
         Me.pnlIntestazione.Controls.Add(Me.lblSottotitolo)
-        Me.pnlIntestazione.Controls.Add(Me.lblStatoHome)
         Me.pnlIntestazione.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlIntestazione.Location = New System.Drawing.Point(14, 14)
         Me.pnlIntestazione.Name = "pnlIntestazione"
@@ -324,13 +323,16 @@ Partial Class PannelloHome
         '
         'pnlAzioni
         '
-        ' Solo bottoni: la riga di stato sta in alto a destra nell'intestazione, come in
-        ' P4. Qui sotto il pannello logo si prende l'angolo sinistro (v. IPannelloArea),
-        ' e un'etichetta in mezzo ai bottoni finirebbe sotto di lui o sopra di loro.
+        ' Bottoni e riga di stato. Fino al 2026-09-08 qui c'erano i soli bottoni, e questo
+        ' commento diceva che un'etichetta in mezzo a loro sarebbe finita sotto il logo o
+        ' sopra di loro: era vero di un'etichetta posata a mano. A posarla adesso è la
+        ' FasciaDeiComandi, che sa dove comincia lo spazio buono e quanto vuoto resta sopra
+        ' la prima riga di comandi (cap. 03.8).
         Me.pnlAzioni.Controls.Add(Me.btnApriCandidatura)
         Me.pnlAzioni.Controls.Add(Me.btnNuovaRicerca)
         Me.pnlAzioni.Controls.Add(Me.btnEsportaRegistro)
         Me.pnlAzioni.Controls.Add(Me.btnEliminaCandidatura)
+        Me.pnlAzioni.Controls.Add(Me.lblStatoHome)
         Me.pnlAzioni.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.pnlAzioni.Location = New System.Drawing.Point(14, 682)
         Me.pnlAzioni.Name = "pnlAzioni"
@@ -373,14 +375,16 @@ Partial Class PannelloHome
         '
         'lblStatoHome
         '
-        Me.lblStatoHome.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        ' La posizione qui è solo un seme: a posarla è FasciaDeiComandi, che la mette nel
+        ' vuoto fra i dati e i comandi, centrata sulla schermata (cap. 03.8).
+        Me.lblStatoHome.AutoEllipsis = True
         Me.lblStatoHome.Font = StileApp.FontDidascalia
         Me.lblStatoHome.ForeColor = StileApp.TestoSecondario
-        Me.lblStatoHome.Location = New System.Drawing.Point(706, 4)
+        Me.lblStatoHome.Location = New System.Drawing.Point(273, 8)
         Me.lblStatoHome.Name = "lblStatoHome"
-        Me.lblStatoHome.Size = New System.Drawing.Size(400, 46)
-        Me.lblStatoHome.TabIndex = 2
-        Me.lblStatoHome.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.lblStatoHome.Size = New System.Drawing.Size(560, 126)
+        Me.lblStatoHome.TabIndex = 4
+        Me.lblStatoHome.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'PannelloHome
         '

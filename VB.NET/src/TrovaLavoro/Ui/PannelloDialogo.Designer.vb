@@ -46,7 +46,6 @@ Partial Class PannelloDialogo
         '
         Me.pnlIntestazione.Controls.Add(Me.lblTitolo)
         Me.pnlIntestazione.Controls.Add(Me.lblSottotitolo)
-        Me.pnlIntestazione.Controls.Add(Me.lblStatoDialogo)
         Me.pnlIntestazione.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlIntestazione.Location = New System.Drawing.Point(14, 14)
         Me.pnlIntestazione.Name = "pnlIntestazione"
@@ -75,14 +74,16 @@ Partial Class PannelloDialogo
         '
         'lblStatoDialogo
         '
-        Me.lblStatoDialogo.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        ' La posizione qui è solo un seme: a posarla è FasciaDeiComandi, che la mette nel
+        ' vuoto fra i dati e i comandi, centrata sulla schermata (cap. 03.8).
+        Me.lblStatoDialogo.AutoEllipsis = True
         Me.lblStatoDialogo.Font = StileApp.FontDidascalia
         Me.lblStatoDialogo.ForeColor = StileApp.TestoSecondario
-        Me.lblStatoDialogo.Location = New System.Drawing.Point(706, 4)
+        Me.lblStatoDialogo.Location = New System.Drawing.Point(273, 8)
         Me.lblStatoDialogo.Name = "lblStatoDialogo"
-        Me.lblStatoDialogo.Size = New System.Drawing.Size(400, 46)
-        Me.lblStatoDialogo.TabIndex = 2
-        Me.lblStatoDialogo.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.lblStatoDialogo.Size = New System.Drawing.Size(560, 126)
+        Me.lblStatoDialogo.TabIndex = 3
+        Me.lblStatoDialogo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'pnlConversazione
         '
@@ -223,6 +224,7 @@ Partial Class PannelloDialogo
         Me.pnlAzioni.Controls.Add(Me.btnTornaAlProfilo)
         Me.pnlAzioni.Controls.Add(Me.btnRicomincia)
         Me.pnlAzioni.Controls.Add(Me.btnPortaNelProfilo)
+        Me.pnlAzioni.Controls.Add(Me.lblStatoDialogo)
         Me.pnlAzioni.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.pnlAzioni.Location = New System.Drawing.Point(14, 682)
         Me.pnlAzioni.Name = "pnlAzioni"

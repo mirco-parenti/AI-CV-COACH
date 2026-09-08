@@ -65,7 +65,6 @@ Partial Class PannelloOpportunita
         '
         Me.pnlIntestazione.Controls.Add(Me.lblTitolo)
         Me.pnlIntestazione.Controls.Add(Me.lblSottotitolo)
-        Me.pnlIntestazione.Controls.Add(Me.lblStatoOpportunita)
         Me.pnlIntestazione.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlIntestazione.Location = New System.Drawing.Point(14, 14)
         Me.pnlIntestazione.Name = "pnlIntestazione"
@@ -94,14 +93,16 @@ Partial Class PannelloOpportunita
         '
         'lblStatoOpportunita
         '
-        Me.lblStatoOpportunita.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        ' La posizione qui è solo un seme: a posarla è FasciaDeiComandi, che la mette nel
+        ' vuoto fra i dati e i comandi, centrata sulla schermata (cap. 03.8).
+        Me.lblStatoOpportunita.AutoEllipsis = True
         Me.lblStatoOpportunita.Font = StileApp.FontDidascalia
         Me.lblStatoOpportunita.ForeColor = StileApp.TestoSecondario
-        Me.lblStatoOpportunita.Location = New System.Drawing.Point(706, 4)
+        Me.lblStatoOpportunita.Location = New System.Drawing.Point(273, 8)
         Me.lblStatoOpportunita.Name = "lblStatoOpportunita"
-        Me.lblStatoOpportunita.Size = New System.Drawing.Size(400, 46)
-        Me.lblStatoOpportunita.TabIndex = 2
-        Me.lblStatoOpportunita.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.lblStatoOpportunita.Size = New System.Drawing.Size(560, 126)
+        Me.lblStatoOpportunita.TabIndex = 6
+        Me.lblStatoOpportunita.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'pnlIngresso
         '
@@ -364,6 +365,7 @@ Partial Class PannelloOpportunita
         Me.pnlAzioni.Controls.Add(Me.btnEsito)
         Me.pnlAzioni.Controls.Add(Me.btnScarta)
         Me.pnlAzioni.Controls.Add(Me.btnGeneraDocumenti)
+        Me.pnlAzioni.Controls.Add(Me.lblStatoOpportunita)
         Me.pnlAzioni.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.pnlAzioni.Location = New System.Drawing.Point(14, 682)
         Me.pnlAzioni.Name = "pnlAzioni"

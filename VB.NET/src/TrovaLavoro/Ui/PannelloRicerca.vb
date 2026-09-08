@@ -158,6 +158,12 @@ Public Class PannelloRicerca
     ''' </summary>
     Private _browserFuoriUso As Boolean
 
+    ''' <summary>Quanto spazio si prende il pannello del logo, che copre l'angolo della fascia.</summary>
+    Private _ingombroLogo As Size
+
+    ''' <summary>La fascia dei comandi in fondo: la geometria è quella di tutti i pannelli.</summary>
+    Private _comandi As FasciaDeiComandi
+
     ''' <summary>
     ''' L'utente ha catturato un annuncio dalla pagina aperta: la finestra lo porta alla
     ''' scheda della candidatura. Il pannello non conosce gli altri pannelli — dice cosa
@@ -1080,29 +1086,41 @@ Public Class PannelloRicerca
     Public Sub ImpostaIngombroLogo(ingombro As Size) Implements IPannelloArea.ImpostaIngombroLogo
 
         ' Come negli altri pannelli: a cedere il posto al logo è la fascia delle azioni,
-        ' dove ci sono bottoni e non dati (v. IPannelloArea).
-        pnlAzioni.Height = Math.Max(AltezzaMinimaAzioni, ingombro.Height)
+        ' dove ci sono bottoni e non dati (v. IPannelloArea). L'altezza la decide la
+        ' fascia stessa: almeno quella che il logo sfonda, di più se serve.
+        _ingombroLogo = ingombro
         pnlAzioni.Padding = New Padding(ingombro.Width + StileApp.DistanzaControlli, 0, 0, 0)
 
         DisponiLeAzioni()
 
     End Sub
 
-    ''' <summary>Mette i due comandi sul fondo della fascia, col racconto a destra.</summary>
+    ''' <summary>
+    ''' Rifà la disposizione dei comandi in fondo al pannello. Qui resta la sola cosa che
+    ''' sa questo pannello — <b>quali</b> comandi vanno da che parte; la geometria la sa la
+    ''' <see cref="FasciaDeiComandi"/>, che è di tutti i pannelli.
+    ''' </summary>
+    ''' <remarks>
+    ''' Fino al 2026-09-08 questa fascia si disponeva da sé, ed era l'unica: due bottoni
+    ''' posati a mano e il racconto <b>di fianco</b>, nello spazio che avanzava a destra.
+    ''' La differenza non era una scelta di questo pannello ma un residuo — la fascia
+    ''' condivisa è del 2026-08-14, questa geometria è più vecchia — e si vedeva: qui
+    ''' l'avviso stava accanto ai comandi, nelle altre sei schermate in alto a destra, e in
+    ''' nessuna delle due dove l'occhio guarda. Adesso il racconto sta sopra i comandi in
+    ''' tutte e sette (cap. 03.8), e questo pannello non ha più una geometria sua.
+    ''' </remarks>
     Private Sub DisponiLeAzioni()
 
-        Dim riga As Integer = pnlAzioni.Height - StileApp.MargineRiquadro - StileApp.BottoneStandard.Height
+        If _comandi Is Nothing Then
+            _comandi = New FasciaDeiComandi(pnlAzioni)
 
-        btnCattura.Location = New Point(pnlAzioni.Padding.Left, riga)
+            ' L'annuncio prima del CV: è il mestiere di questo pannello, e l'altro è la
+            ' coda di T5 che ci si è appoggiata (cap. 06.7).
+            _comandi.ASinistra(btnCattura, btnImportaCv)
+            _comandi.Racconta(lblStatoRicerca)
+        End If
 
-        ' L'annuncio prima del CV: è il mestiere di questo pannello, e l'altro è la coda
-        ' di T5 che ci si è appoggiata (cap. 06.7).
-        btnImportaCv.Location = New Point(btnCattura.Right + StileApp.DistanzaControlli, riga)
-
-        Dim doveComincia As Integer = btnImportaCv.Right + StileApp.DistanzaControlli
-        lblStatoRicerca.Location = New Point(doveComincia, riga + 6)
-        lblStatoRicerca.Width = Math.Max(0, pnlAzioni.ClientSize.Width -
-                                            StileApp.MargineRiquadro - doveComincia)
+        _comandi.Disponi(Math.Max(AltezzaMinimaAzioni, _ingombroLogo.Height))
 
     End Sub
 

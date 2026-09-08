@@ -116,7 +116,6 @@ Partial Class PannelloProfilo
         '
         Me.pnlIntestazione.Controls.Add(Me.lblTitolo)
         Me.pnlIntestazione.Controls.Add(Me.lblSottotitolo)
-        Me.pnlIntestazione.Controls.Add(Me.lblStatoProfilo)
         Me.pnlIntestazione.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlIntestazione.Location = New System.Drawing.Point(14, 14)
         Me.pnlIntestazione.Name = "pnlIntestazione"
@@ -145,14 +144,16 @@ Partial Class PannelloProfilo
         '
         'lblStatoProfilo
         '
-        Me.lblStatoProfilo.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        ' La posizione qui è solo un seme: a posarla è FasciaDeiComandi, che la mette nel
+        ' vuoto fra i dati e i comandi, centrata sulla schermata (cap. 03.8).
+        Me.lblStatoProfilo.AutoEllipsis = True
         Me.lblStatoProfilo.Font = StileApp.FontDidascalia
         Me.lblStatoProfilo.ForeColor = StileApp.TestoSecondario
-        Me.lblStatoProfilo.Location = New System.Drawing.Point(706, 4)
+        Me.lblStatoProfilo.Location = New System.Drawing.Point(273, 8)
         Me.lblStatoProfilo.Name = "lblStatoProfilo"
-        Me.lblStatoProfilo.Size = New System.Drawing.Size(400, 46)
-        Me.lblStatoProfilo.TabIndex = 2
-        Me.lblStatoProfilo.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.lblStatoProfilo.Size = New System.Drawing.Size(560, 126)
+        Me.lblStatoProfilo.TabIndex = 8
+        Me.lblStatoProfilo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'grpDatiPersonali
         '
@@ -917,6 +918,7 @@ Partial Class PannelloProfilo
         Me.pnlAzioni.Controls.Add(Me.btnEsportaBackup)
         Me.pnlAzioni.Controls.Add(Me.btnSalva)
         Me.pnlAzioni.Controls.Add(Me.btnEliminaProfilo)
+        Me.pnlAzioni.Controls.Add(Me.lblStatoProfilo)
         Me.pnlAzioni.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.pnlAzioni.Location = New System.Drawing.Point(14, 558)
         Me.pnlAzioni.Name = "pnlAzioni"

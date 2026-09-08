@@ -1290,6 +1290,7 @@ Public Class PannelloHome
             ' opposto rispetto a «Salva profilo» (cap. 03.6).
             _comandi.ASinistra(btnApriCandidatura, btnEsportaRegistro, btnEliminaCandidatura)
             _comandi.ADestra(btnNuovaRicerca)
+            _comandi.Racconta(lblStatoHome)
         End If
 
         _comandi.Disponi(Math.Max(AltezzaMinimaAzioni, _ingombroLogo.Height))

@@ -659,3 +659,15 @@ collaudare un comando distruttivo su dati veri senza distruggere niente.
   moltiplicando per il DPI la sbaglia, e poi crede a un difetto o ne scusa uno vero per il
   motivo sbagliato. Il fattore si **misura**: si chiede una misura più piccola del minimo e
   si rilegge il rettangolo che Windows concede.
+- **Una cartella dati nuova apre l'informativa, e nessun attrezzo la vede.** *(2026-09-08,
+  provando la riga di stato al centro.)* `avvia_app` con `dati` su una cartella mai usata è
+  il modo giusto di provare ciò che scrive — ma al primo avvio su quella cartella il
+  programma mostra l'informativa (cap. 11.2), che è una finestra **sua**, non un
+  `MessageBox`. Da lì in poi `controlli`, `clic` e perfino `rispondi_finestra` rispondono
+  tutti **«TrovaLavoro non ha una finestra aperta»** — che si legge come «l'app non è
+  partita» ed è invece «l'app è partita e sta aspettando te». Ci si perde un quarto d'ora a
+  cercare un avvio fallito che non è fallito.
+  Il modo di accorgersene subito è `schermata` con `cosa: "desktop"`, che riprende lo
+  schermo intero invece della finestra dell'applicazione: l'informativa si vede lì, con i
+  suoi due bottoni. Il modo di non incontrarla è **preparare la cartella** prima di avviare,
+  scrivendoci un `impostazioni.json` con `"informativa_vista": true`.

@@ -232,6 +232,7 @@ Public Class PannelloProfilo
             _comandi.ASinistra(btnImporta, btnImportaDaSito, btnDialogo, btnAggiornamento)
             _comandi.ADestra(btnGeneraCv1, btnEsportaBackup, btnSalva)
             _comandi.Critici(btnEliminaProfilo)
+            _comandi.Racconta(lblStatoProfilo)
         End If
 
         _comandi.Disponi(Math.Max(AltezzaMinimaAzioni, _ingombroLogo.Height))
@@ -321,7 +322,7 @@ Public Class PannelloProfilo
 
     End Sub
 
-    ''' <summary>Il testo del riquadro in alto a destra: cos'è questo profilo, in una riga.</summary>
+    ''' <summary>Il testo della riga di stato: cos'è questo profilo, in una riga.</summary>
     Private Function RiassuntoDelProfilo() As String
 
         Dim quando As Date? = _contesto.Archivio.UltimoSalvataggio

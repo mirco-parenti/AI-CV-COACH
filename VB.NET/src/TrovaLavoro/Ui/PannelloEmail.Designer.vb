@@ -53,7 +53,6 @@ Partial Class PannelloEmail
         '
         Me.pnlIntestazione.Controls.Add(Me.lblTitolo)
         Me.pnlIntestazione.Controls.Add(Me.lblSottotitolo)
-        Me.pnlIntestazione.Controls.Add(Me.lblStatoEmail)
         Me.pnlIntestazione.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlIntestazione.Location = New System.Drawing.Point(14, 14)
         Me.pnlIntestazione.Name = "pnlIntestazione"
@@ -82,15 +81,16 @@ Partial Class PannelloEmail
         '
         'lblStatoEmail
         '
-        Me.lblStatoEmail.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        ' La posizione qui è solo un seme: a posarla è FasciaDeiComandi, che la mette nel
+        ' vuoto fra i dati e i comandi, centrata sulla schermata (cap. 03.8).
+        Me.lblStatoEmail.AutoEllipsis = True
         Me.lblStatoEmail.Font = StileApp.FontDidascalia
         Me.lblStatoEmail.ForeColor = StileApp.TestoSecondario
-        Me.lblStatoEmail.Location = New System.Drawing.Point(600, 0)
+        Me.lblStatoEmail.Location = New System.Drawing.Point(273, 8)
         Me.lblStatoEmail.Name = "lblStatoEmail"
-        Me.lblStatoEmail.Size = New System.Drawing.Size(506, 32)
-        Me.lblStatoEmail.TextAlign = System.Drawing.ContentAlignment.TopRight
-        Me.lblStatoEmail.TabIndex = 2
+        Me.lblStatoEmail.Size = New System.Drawing.Size(560, 126)
+        Me.lblStatoEmail.TabIndex = 5
+        Me.lblStatoEmail.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'pnlCampi
         '
@@ -253,6 +253,7 @@ Partial Class PannelloEmail
         Me.pnlAzioni.Controls.Add(Me.btnDocumenti)
         Me.pnlAzioni.Controls.Add(Me.btnHoSpedito)
         Me.pnlAzioni.Controls.Add(Me.btnPreparaEmail)
+        Me.pnlAzioni.Controls.Add(Me.lblStatoEmail)
         Me.pnlAzioni.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.pnlAzioni.Location = New System.Drawing.Point(14, 682)
         Me.pnlAzioni.Name = "pnlAzioni"

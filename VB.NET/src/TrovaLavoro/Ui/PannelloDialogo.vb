@@ -1294,6 +1294,7 @@ Public Class PannelloDialogo
             _comandi = New FasciaDeiComandi(pnlAzioni)
             _comandi.ASinistra(btnTornaAlProfilo, btnRicomincia)
             _comandi.ADestra(btnPortaNelProfilo)
+            _comandi.Racconta(lblStatoDialogo)
         End If
 
         _comandi.Disponi(Math.Max(AltezzaMinimaAzioni, _ingombroLogo.Height))

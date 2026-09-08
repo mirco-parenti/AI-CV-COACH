@@ -62,7 +62,6 @@ Partial Class PannelloDocumenti
         '
         Me.pnlIntestazione.Controls.Add(Me.lblTitolo)
         Me.pnlIntestazione.Controls.Add(Me.lblSottotitolo)
-        Me.pnlIntestazione.Controls.Add(Me.lblStatoDocumenti)
         Me.pnlIntestazione.Dock = System.Windows.Forms.DockStyle.Top
         Me.pnlIntestazione.Location = New System.Drawing.Point(14, 14)
         Me.pnlIntestazione.Name = "pnlIntestazione"
@@ -91,14 +90,16 @@ Partial Class PannelloDocumenti
         '
         'lblStatoDocumenti
         '
-        Me.lblStatoDocumenti.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        ' La posizione qui è solo un seme: a posarla è FasciaDeiComandi, che la mette nel
+        ' vuoto fra i dati e i comandi, centrata sulla schermata (cap. 03.8).
+        Me.lblStatoDocumenti.AutoEllipsis = True
         Me.lblStatoDocumenti.Font = StileApp.FontDidascalia
         Me.lblStatoDocumenti.ForeColor = StileApp.TestoSecondario
-        Me.lblStatoDocumenti.Location = New System.Drawing.Point(706, 4)
+        Me.lblStatoDocumenti.Location = New System.Drawing.Point(273, 8)
         Me.lblStatoDocumenti.Name = "lblStatoDocumenti"
-        Me.lblStatoDocumenti.Size = New System.Drawing.Size(400, 46)
-        Me.lblStatoDocumenti.TabIndex = 2
-        Me.lblStatoDocumenti.TextAlign = System.Drawing.ContentAlignment.TopRight
+        Me.lblStatoDocumenti.Size = New System.Drawing.Size(560, 126)
+        Me.lblStatoDocumenti.TabIndex = 7
+        Me.lblStatoDocumenti.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'pnlOpzioni
         '
@@ -360,6 +361,7 @@ Partial Class PannelloDocumenti
         Me.pnlAzioni.Controls.Add(Me.btnEsportaDocx)
         Me.pnlAzioni.Controls.Add(Me.btnEsportaPdf)
         Me.pnlAzioni.Controls.Add(Me.btnPreparaEmail)
+        Me.pnlAzioni.Controls.Add(Me.lblStatoDocumenti)
         Me.pnlAzioni.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.pnlAzioni.Location = New System.Drawing.Point(14, 682)
         Me.pnlAzioni.Name = "pnlAzioni"

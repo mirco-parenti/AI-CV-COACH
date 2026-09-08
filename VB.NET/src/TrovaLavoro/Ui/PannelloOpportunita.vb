@@ -436,8 +436,9 @@ Public Class PannelloOpportunita
     ''' del profilo di oggi.
     ''' </summary>
     ''' <remarks>
-    ''' <para>Questo pannello lo <b>diceva già</b>, dal 2026-09-02: nella riga di stato in
-    ''' alto a destra, in una finestra alla riapertura, e nel bottone «Riconfronta». Tre modi
+    ''' <para>Questo pannello lo <b>diceva già</b>, dal 2026-09-02: nella riga di stato — che
+    ''' allora stava in alto a destra e dal 2026-09-08 sta sopra i comandi (cap. 03.8) —, in
+    ''' una finestra alla riapertura, e nel bottone «Riconfronta». Tre modi
     ''' che hanno tutti lo stesso limite — arrivano una volta, e chi li ha già letti o chiusi
     ''' torna a guardare le stelle senza più niente accanto. La spia non annuncia:
     ''' <b>resta</b>, ed è la differenza fra un avviso e un'etichetta.</para>
@@ -1441,6 +1442,7 @@ Public Class PannelloOpportunita
             _comandi = New FasciaDeiComandi(pnlAzioni)
             _comandi.ASinistra(btnNuovoAnnuncio, btnRiconfronta, btnBrainstorm, btnEsito, btnScarta)
             _comandi.ADestra(btnGeneraDocumenti)
+            _comandi.Racconta(lblStatoOpportunita)
         End If
 
         _comandi.Disponi(Math.Max(AltezzaMinimaAzioni, _ingombroLogo.Height))

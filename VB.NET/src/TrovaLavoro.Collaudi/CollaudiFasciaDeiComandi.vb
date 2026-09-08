@@ -163,11 +163,12 @@ Namespace Ui
         Public Sub NessunPannelloSovrapponeIProprioComandiANessunaLarghezza()
             ' Il collaudo di sistema: la geometria sta in un posto solo, ma i comandi li
             ' dichiara ogni pannello, e un pannello che ne aggiunge uno troppo largo
-            ' tornerebbe a sovrapporli. P3 non c'è perché la sua fascia è d'altra natura —
-            ' due bottoni e un'etichetta elastica, che non può accavallarsi a nessuno.
+            ' tornerebbe a sovrapporli. P3 è entrato il 2026-09-08: fino a quel giorno la
+            ' sua fascia era d'altra natura — due bottoni posati a mano e un'etichetta
+            ' elastica di fianco — e adesso è quella di tutti.
             Dim pannelli As New List(Of Control) From {
                 New PannelloHome(), New PannelloProfilo(), New PannelloOpportunita(),
-                New PannelloDialogo(), New PannelloDocumenti()}
+                New PannelloDialogo(), New PannelloDocumenti(), New PannelloRicerca()}
 
             Try
                 For Each pannello As Control In pannelli
@@ -219,6 +220,171 @@ Namespace Ui
             End Try
         End Sub
 
+        ' ==================================================================
+        ' La riga che racconta (cap. 03.8)
+        ' ==================================================================
+
+        <TestMethod>
+        Public Sub IlRaccontoStaSopraIComandiENonLiTocca()
+
+            Using banco As New BancoDiProva(larghezza:=1106, altezza:=188)
+
+                banco.ConLogo(273)
+                Dim riga As Label = banco.Racconto()
+
+                banco.Comandi.ASinistra(banco.Bottone("A", 190), banco.Bottone("B", 130))
+                banco.Comandi.ADestra(banco.Bottone("C", 190))
+                banco.Comandi.Disponi(altezzaMinima:=188)
+
+                For Each comando As Button In banco.Comandi_Bottoni()
+                    Assert.IsFalse(riga.Bounds.IntersectsWith(comando.Bounds),
+                                   $"il racconto copre «{comando.Text}»")
+                    Assert.IsLessThanOrEqualTo(comando.Top, riga.Bottom,
+                                               $"il racconto sta sopra «{comando.Text}», non in mezzo")
+                Next
+
+                Assert.IsGreaterThanOrEqualTo(0, riga.Top, "e resta dentro la fascia")
+                Assert.IsGreaterThanOrEqualTo(banco.Fascia.Padding.Left, riga.Left,
+                                              "senza finire sotto il logo")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Il centro della riga è il centro della <b>schermata</b>, non quello dello spazio
+        ''' che avanza a destra del logo: sopra c'è la casella di testo, centrata sul
+        ''' pannello, e una riga centrata sull'avanzo si leggerebbe come spostata a destra.
+        ''' </summary>
+        <TestMethod>
+        Public Sub IlRaccontoECentratoSullaSchermataNonSulloSpazioCheAvanza()
+
+            Using banco As New BancoDiProva(larghezza:=1106, altezza:=188)
+
+                banco.ConLogo(273)
+                Dim riga As Label = banco.Racconto()
+
+                banco.Comandi.ASinistra(banco.Bottone("A", 190))
+                banco.Comandi.Disponi(altezzaMinima:=188)
+
+                Assert.AreEqual(riga.Left, banco.Fascia.ClientSize.Width - riga.Right,
+                                "lo stesso margine a destra e a sinistra")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Il caso stretto: sotto i 1350 px il logo passa in compatta e la fascia non ha
+        ''' più i 188 px che il logo grande le imponeva. Senza un posto tenuto da parte, al
+        ''' racconto resterebbero sei pixel — cioè niente, e per giunta in silenzio.
+        ''' </summary>
+        <TestMethod>
+        Public Sub LaFasciaTieneIlPostoAlRaccontoAncheQuandoIlLogoNonGlieloChiede()
+
+            Using banco As New BancoDiProva(larghezza:=1060, altezza:=68)
+
+                banco.ConLogo(142)
+                Dim riga As Label = banco.Racconto()
+
+                banco.Comandi.ASinistra(banco.Bottone("A", 190))
+                banco.Comandi.Disponi(altezzaMinima:=68)
+
+                Assert.IsGreaterThan(68, banco.Fascia.Height,
+                                     "la fascia è cresciuta per far posto al racconto")
+
+                ' Tre righe, che è quel che chiede il più lungo dei messaggi a testo fisso:
+                ' quello di P7 con il destinatario preso dall'annuncio e la rifinitura non
+                ' riuscita. Il numero non si prende da FasciaDeiComandi apposta — un metro
+                ' preso dalla cosa da misurare non la può bocciare.
+                Assert.IsGreaterThanOrEqualTo(3 * riga.Font.Height, riga.Height,
+                                              "e il posto è di tre righe di testo")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Una fascia senza racconto non paga niente: chi non lo dichiara ha la fascia di
+        ''' prima, alta uguale.
+        ''' </summary>
+        <TestMethod>
+        Public Sub UnaFasciaSenzaRaccontoNonTienePostoANessuno()
+
+            Using banco As New BancoDiProva(larghezza:=1060, altezza:=60)
+
+                banco.Comandi.ASinistra(banco.Bottone("A", 190))
+                banco.Comandi.Disponi(altezzaMinima:=60)
+
+                Assert.AreEqual(60, banco.Fascia.Height, "alta quanto le è stato chiesto")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Il collaudo di sistema del racconto, su tutte e sette le schermate. Difende due
+        ''' cose insieme: che la riga sia davvero <b>nella fascia</b> — fino al 2026-09-08
+        ''' stava in alto a destra, dove chi lavora non guarda — e che lì non pesti i piedi
+        ''' a nessun comando, a nessuna larghezza.
+        ''' </summary>
+        <TestMethod>
+        Public Sub InTuttiIPannelliIlRaccontoStaSopraIComandiENonLiCopre()
+
+            Dim pannelli As New List(Of Control) From {
+                New PannelloHome(), New PannelloProfilo(), New PannelloOpportunita(),
+                New PannelloDialogo(), New PannelloDocumenti(), New PannelloEmail(),
+                New PannelloRicerca()}
+
+            Try
+                For Each pannello As Control In pannelli
+
+                    Dim nome As String = pannello.GetType().Name
+                    Dim fascia As Panel = DirectCast(
+                        pannello.Controls.Find("pnlAzioni", searchAllChildren:=True).Single(), Panel)
+
+                    ' Se qualcuno la rimettesse nell'intestazione, qui non ci sarebbe più.
+                    Dim riga As Label = fascia.Controls.OfType(Of Label)().Single()
+
+                    Assert.AreEqual(ContentAlignment.MiddleCenter, riga.TextAlign,
+                                    $"{nome}: il racconto è centrato")
+
+                    For Each larghezza As Integer In Larghezze
+
+                        ' Sotto i 1350 px di finestra il logo passa in compatta (cap. 03.5).
+                        Dim ingombro As Size = If(larghezza < 1350, New Size(130, 68), New Size(261, 188))
+
+                        ' Il caso peggiore è quello in cui la fascia è piena: si accende
+                        ' tutto, compresi i comandi che di norma non ci sono (R7).
+                        For Each comando As Button In fascia.Controls.OfType(Of Button)()
+                            comando.Visible = True
+                        Next
+
+                        pannello.Width = larghezza
+                        DirectCast(pannello, IPannelloArea).ImpostaIngombroLogo(ingombro)
+
+                        For Each comando As Button In fascia.Controls.OfType(Of Button)()
+                            Assert.IsFalse(riga.Bounds.IntersectsWith(comando.Bounds),
+                                $"{nome} a {larghezza} px: il racconto copre «{comando.Text}»")
+                            Assert.IsLessThanOrEqualTo(comando.Top, riga.Bottom,
+                                $"{nome} a {larghezza} px: il racconto non sta sopra «{comando.Text}»")
+                        Next
+
+                        Assert.IsGreaterThanOrEqualTo(fascia.Padding.Left, riga.Left,
+                            $"{nome} a {larghezza} px: il racconto finisce sotto il logo")
+                        Assert.IsGreaterThanOrEqualTo(3 * riga.Font.Height, riga.Height,
+                            $"{nome} a {larghezza} px: al racconto non restano tre righe di spazio")
+
+                    Next
+                Next
+            Finally
+                For Each pannello As Control In pannelli
+                    pannello.Dispose()
+                Next
+            End Try
+
+        End Sub
+
         ''' <summary>
         ''' Un pannello finto con la sua fascia: serve a collaudare la geometria senza
         ''' passare da un pannello vero, dove le larghezze dei bottoni sono quelle che sono
@@ -252,6 +418,30 @@ Namespace Ui
                 _bottoni.Add(nuovo)
 
                 Return nuovo
+
+            End Function
+
+            ''' <summary>
+            ''' Il posto che il pannello del logo si prende in fondo a sinistra: nella
+            ''' fascia vera è un <c>Padding</c>, e da lì in poi comincia lo spazio buono.
+            ''' </summary>
+            Public Sub ConLogo(larghezza As Integer)
+                Fascia.Padding = New Padding(larghezza, 0, 0, 0)
+            End Sub
+
+            ''' <summary>La riga che racconta, già dentro la fascia e già dichiarata.</summary>
+            Public Function Racconto() As Label
+
+                ' Il nome della variabile non può essere «racconto»: coprirebbe la
+                ' funzione che la contiene (BC30530).
+                Dim nata As New Label With {
+                    .Font = StileApp.FontDidascalia,
+                    .TextAlign = ContentAlignment.MiddleCenter}
+
+                Fascia.Controls.Add(nata)
+                Comandi.Racconta(nata)
+
+                Return nata
 
             End Function
 

@@ -337,14 +337,16 @@ Partial Class PannelloRicerca
         '
         'lblStatoRicerca
         '
-        Me.lblStatoRicerca.Anchor = CType(((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        ' La posizione qui è solo un seme: a posarla è FasciaDeiComandi, che la mette nel
+        ' vuoto fra i dati e i comandi, centrata sulla schermata (cap. 03.8).
+        Me.lblStatoRicerca.AutoEllipsis = True
         Me.lblStatoRicerca.Font = StileApp.FontDidascalia
         Me.lblStatoRicerca.ForeColor = StileApp.TestoSecondario
-        Me.lblStatoRicerca.Location = New System.Drawing.Point(414, 20)
+        Me.lblStatoRicerca.Location = New System.Drawing.Point(273, 8)
         Me.lblStatoRicerca.Name = "lblStatoRicerca"
-        Me.lblStatoRicerca.Size = New System.Drawing.Size(692, 36)
+        Me.lblStatoRicerca.Size = New System.Drawing.Size(560, 126)
         Me.lblStatoRicerca.TabIndex = 2
+        Me.lblStatoRicerca.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'PannelloRicerca
         '
