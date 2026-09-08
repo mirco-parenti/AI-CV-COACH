@@ -3488,3 +3488,61 @@ linea era la spia — nata quella mattina.*
 > della cosa giusta, perché il soggetto non è uno stato — è una scelta, e le scelte le
 > verifica solo chi guarda lo schermo e si chiede *«di cosa mi sta parlando?»*. Il mio dubbio
 > era sui bottoni; i bottoni stavano bene.
+
+### Step 2.77 — «L'ho generato, e non lo posso allegare»
+
+*Ho aperto l'email per guardare le due lucine nuove e mi sono accorto di un'altra cosa: fra
+gli allegati il mio 🎯 CV mirato non c'era. E l'avevo appena generato.*
+
+**Cosa ho fatto**
+- **Ho fatto guardare i dati invece di ragionarci sopra**, e la risposta era lì: nella
+  cartella della candidatura c'erano `cv.json` e `lettera.json`, e **nessuna cartella
+  `out\`**. Generare scrive il documento; i **file** nascono solo premendo «Esporta» in
+  *Documenti*. L'elenco «Cosa allego» mostra file, quindi per lui quel CV non esisteva.
+- **Ho esteso ai due documenti della candidatura la promessa che stamattina avevo fatto al
+  📄 CV base**: la voce compare comunque, marcata «(da scrivere)», e spuntandola il file
+  nasce — senza chiamare l'AI, perché è impaginazione.
+- **Documento per documento**, non tutto-o-niente: un CV già esportato e una lettera generata
+  dopo sono uno scritto e una da scrivere.
+- **Quattro falsificazioni viste rosse**: tolte le voci promesse, fatte arrivare spuntate,
+  la spunta mandata sul primo file scritto invece che su quello chiesto, e il «già scritto»
+  fatto confrontare i nomi interi invece delle radici.
+
+**Cosa ho imparato**
+- **Un'asimmetria che avevo creato io, stamattina, senza vederla.** Avevo chiesto che il CV
+  base fosse *sempre* allegabile e l'avevamo fatto; nello stesso giro nessuno si è chiesto
+  se valesse anche per i due documenti che uno vuole davvero mandare. Le cure fatte su un
+  caso vanno riguardate sui casi gemelli, e il gemello qui era in bella vista.
+- **Le voci nuove hanno reso quasi indistinguibili le due spie.** Un'ora prima avevo fatto
+  guardare alla spia degli allegati l'**elenco** invece della candidatura, e nel mio
+  screenshot la lucina si spegneva. Adesso che i documenti in elenco ci sono sempre, le due
+  condizioni danno la stessa risposta in ogni caso costruibile. Non è tempo buttato — il
+  soggetto della spia adesso è quello giusto, e la spia del **messaggio** resta un'aggiunta
+  vera — ma è onesto dirlo: la differenza visibile è sparita, e l'ha fatta sparire la cura
+  successiva.
+
+**Dove ho faticato**
+- **Cinque collaudi sono diventati rossi**, e nessuno era sbagliato: davano per scontato un
+  elenco fatto di soli file. Li ho riscritti facendo esportare i documenti coi **nomi veri**
+  invece che con nomi inventati — è la sola condizione in cui il programma li riconosce come
+  già scritti — e cercando le righe per **nome** invece che per indice.
+- **La trappola dei nomi coperti in VB mi ha morso tre volte in una sera**: `allegati`,
+  `casella` e `generata` come variabili locali coprivano le funzioni omonime, e l'errore
+  parla di «classe non indicizzabile», che non fa pensare a quello.
+
+**Cosa ho deciso e perché**
+- **Le voci promesse arrivano spente.** Una voce che arrivasse spuntata scriverebbe dei file
+  per il solo fatto che si è aperta la schermata.
+- **Spuntandone una nascono tutti e due i documenti, in tutti e due i formati**, come fa
+  «Esporta»: chi ne vuole un altro se lo trova già in elenco.
+- **Il marcatore è «(da scrivere)» e basta.** L'avevo scritto «lo scrivo quando lo spunti»,
+  e a video si leggeva «(lo scrivo quando»: la colonna è larga 360 px e un elenco a spunte
+  non manda a capo né mette i puntini, taglia. Una promessa monca è peggio di nessuna
+  promessa.
+
+> 💡 **La cura di stamattina era giusta e incompleta, e a dirlo non è stato un collaudo.**
+> Il CV base «sempre allegabile» era una richiesta mia, precisa, ed è stata fatta bene:
+> collaudi verdi, falsificazioni viste rosse, documentazione. Nessuno di quei controlli
+> poteva dire che la stessa mancanza esisteva a due centimetri, sui documenti più importanti
+> dei due. L'ha detto l'unica cosa che guarda tutto insieme: aprire il programma e cercare
+> quel che mi serviva.

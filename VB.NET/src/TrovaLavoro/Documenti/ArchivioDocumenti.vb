@@ -158,6 +158,51 @@ Namespace Documenti
 
             If opportunita Is Nothing Then Throw New ArgumentNullException(NameOf(opportunita))
 
+            Return ScriviAsync(ArchivioOpportunita.CartellaOut(opportunita),
+                               LavoriDellaCandidatura(opportunita, quali), formati)
+
+        End Function
+
+        ''' <summary>
+        ''' Come si chiameranno il 🎯 CV e la ✉️ lettera di questa candidatura, <b>senza</b>
+        ''' scriverli: il nome del PDF di ciascuno, nell'ordine in cui nascerebbero.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È il gemello di <see cref="NomeDelCvBase"/>, e nasce per la stessa ragione:
+        ''' P7 deve poter mettere in elenco un file che ancora non esiste, e lo scriverà
+        ''' quando l'utente lo spunta (cap. 07.1). Fino al 2026-09-08 sera quella promessa
+        ''' valeva per il solo 📄 CV base — e i due documenti che uno vuole davvero mandare,
+        ''' generati e mai esportati, in elenco non comparivano affatto.</para>
+        ''' <para>Passa di qui, e non da una regola sua, perché i nomi veri li calcola
+        ''' <see cref="LavoriDellaCandidatura"/>, che è la stessa funzione: due modi di
+        ''' calcolare un nome sono due nomi che prima o poi divergono, e l'elenco finirebbe
+        ''' per promettere un file che poi nasce chiamandosi in un altro modo.</para>
+        ''' <para>Si promette il solo <b>PDF</b>: è il formato che si manda a un'azienda, e
+        ''' due voci che promettono lo stesso documento sarebbero una scelta finta.
+        ''' Spuntandolo si scrivono comunque tutti e due i formati, come fa «Esporta» in P6.
+        ''' </para>
+        ''' </remarks>
+        Public Shared Function NomiDellaCandidatura(opportunita As Opportunita) As IReadOnlyList(Of String)
+
+            If opportunita Is Nothing Then Throw New ArgumentNullException(NameOf(opportunita))
+
+            Dim nomi As New List(Of String)
+
+            For Each lavoro As Lavoro In LavoriDellaCandidatura(opportunita, DocumentiDaScrivere.Entrambi)
+                nomi.Add(lavoro.Nome & NomiDocumenti.EstensionePdf)
+            Next
+
+            Return nomi
+
+        End Function
+
+        ''' <summary>
+        ''' I documenti di una candidatura da scrivere, con il nome che avranno: è il posto
+        ''' unico in cui si decide <b>che cosa</b> nasce e <b>come si chiama</b>.
+        ''' </summary>
+        Private Shared Function LavoriDellaCandidatura(opportunita As Opportunita,
+                                                       quali As DocumentiDaScrivere) As List(Of Lavoro)
+
             Dim lavori As New List(Of Lavoro)
 
             ' Una volta sola, e prima di tutto: la stessa lingua deve decidere le etichette
@@ -178,7 +223,7 @@ Namespace Documenti
                     NomiDocumenti.Lettera(opportunita.Azienda, opportunita.Creata, lingua)))
             End If
 
-            Return ScriviAsync(ArchivioOpportunita.CartellaOut(opportunita), lavori, formati)
+            Return lavori
 
         End Function
 

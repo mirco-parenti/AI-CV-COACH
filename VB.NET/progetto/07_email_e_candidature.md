@@ -76,7 +76,7 @@ Email (P7) prepara la bozza:
   - **La voce c'è anche quando il file non c'è.** Un CV base esiste appena l'AI lo scrive,
     ma i *file* nascono solo se qualcuno preme «Esporta» in P6 — cioè quasi mai, per chi
     arriva qui dalla Home. Allora l'elenco **promette**: mostra il nome che il PDF avrà,
-    dicendo «lo scrivo quando lo spunti», e alla spunta lo scrive davvero (DOCX e PDF, come
+    dicendo «(📄 CV base, da scrivere)», e alla spunta lo scrive davvero (DOCX e PDF, come
     «Esporta»). Nessuna chiamata all'AI: è impaginazione, non scrittura. Il nome promesso lo
     calcola la stessa funzione che poi lo battezza — promettere un nome e scriverne un altro
     sarebbe peggio del non promettere — e la spunta finisce su quel che è **davvero** nato:
@@ -87,6 +87,32 @@ Email (P7) prepara la bozza:
     (R6, cap. 08.4): qui P6 non c'è a ricordarlo, e senza di lui la sola copia che **esce di
     casa** racconterebbe più di quanto l'utente abbia voluto raccontare. Vale anche per il
     nome promesso, che si calcola sulla stessa pagina che poi nascerà.
+- **E la stessa promessa vale per il 🎯 CV mirato e la ✉️ lettera** *(dalla sera dello stesso
+  giorno)*. Il punto qui sopra ha curato il CV base e ha lasciato scoperti proprio i due
+  documenti che uno vuole mandare: **generarli non li rende allegabili**, perché generare
+  scrive il `cv.json` e la `lettera.json`, mentre i *file* nascono solo premendo «Esporta» in
+  P6. Chi arriva in P7 dalla Home di là non è mai passato, e si trovava a preparare un'email
+  di candidatura senza poterci allegare la candidatura. *Trovato da Mirco davanti al
+  programma, poche ore dopo: «non vedo il 🎯 CV mirato da allegare, eppure l'ho generato».*
+  - **Documento per documento, non tutto-o-niente.** Un CV già esportato e una lettera
+    generata dopo sono uno scritto e una da scrivere, e l'elenco lo sa dire: la promessa si
+    aggiunge solo per quel che su disco non c'è. A riconoscere il già scritto è la **radice**
+    del nome e non il nome intero — si promette il PDF, ma sul disco può esserci il solo
+    DOCX, ed è lo stesso documento: confrontando i nomi interi l'elenco mostrerebbe due volte
+    la stessa cosa, una come file e una come promessa.
+  - **Spuntando nascono tutti e due, in tutti e due i formati**, come fa «Esporta»: chi ne
+    vuole un altro se lo trova già in elenco invece di doverlo far nascere con una seconda
+    spunta. I file restano nella cartella della candidatura, che è la loro casa (cap. 11.1):
+    di lì li prende l'email, e di lì li ritrova P6 la volta dopo. Nessuna chiamata all'AI.
+  - **La spunta finisce sul documento chiesto**, cercato per radice del nome fra quelli
+    appena nati. Prendere «il primo PDF» sarebbe più corto e sbagliato: i documenti scritti
+    insieme sono due, e chi ha spuntato la lettera si vedrebbe spuntare il CV.
+  - **Il marcatore della promessa è corto — «(da scrivere)» — e non per stile** *(visto a
+    video la stessa sera)*. La colonna è larga 360 px, i nomi di una candidatura portano
+    dentro azienda e data — quaranta caratteri e più — e un elenco a spunte non manda a capo
+    né mette i puntini: **taglia**. La prima versione diceva «lo scrivo quando lo spunti» e a
+    video si leggeva «(lo scrivo quando», cioè una promessa monca. Per la stessa ragione il
+    CV base promesso dice ora «(📄 CV base, da scrivere)».
 - **Dell'elenco su disco ci si fida per le categorie, non per l'esistenza.** Gli attestati
   proposti sono solo quelli che **ci sono ancora** nella cartella: è la stessa regola con
   cui si rifanno i documenti della candidatura, applicata a file che vivono fuori da qui.

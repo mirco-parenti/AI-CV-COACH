@@ -72,6 +72,22 @@ Public Class PannelloEmail
     ''' </remarks>
     Private _cvBaseDaScrivere As String
 
+    ''' <summary>
+    ''' I nomi che avranno i file del 🎯 CV mirato e della ✉️ lettera di questa candidatura,
+    ''' quando in elenco c'è la loro voce ma il file ancora no. Vuoto quando i file ci sono.
+    ''' </summary>
+    ''' <remarks>
+    ''' Stessa promessa del 📄 CV base, estesa ai due documenti che uno vuole davvero mandare
+    ''' <i>(2026-09-08, sera, chiedendolo Mirco: «non vedo il 🎯 CV mirato da allegare, eppure
+    ''' l'ho generato»)</i>. Il difetto era vero e non era una svista: generare scrive il
+    ''' <c>cv.json</c>, mentre i <b>file</b> nascono solo premendo «Esporta» in P6 — e questo
+    ''' elenco mostra file. Chi arriva qui dalla Home non è mai passato di là, e si trovava a
+    ''' mandare un'email di candidatura senza poterci allegare la candidatura.
+    ''' I nomi li calcola <see cref="ArchivioDocumenti.NomiDellaCandidatura"/>, cioè la stessa
+    ''' funzione che poi li battezza davvero.
+    ''' </remarks>
+    Private ReadOnly _documentiDaScrivere As New List(Of String)
+
     ''' <summary>La candidatura a cui l'email appartiene; <c>Nothing</c> finché non ne arriva una.</summary>
     Private _candidatura As Opportunita
 
@@ -598,12 +614,31 @@ Public Class PannelloEmail
     Private Sub RiempiGliAllegati()
 
         _bozza.Allegati.Clear()
+        _documentiDaScrivere.Clear()
+
+        Dim giaSuDisco As New List(Of String)
 
         For Each percorso As String In DocumentiDellaCandidatura()
+            giaSuDisco.Add(Path.GetFileName(percorso))
             _bozza.Allegati.Add(New AllegatoScelto With {
                 .Nome = Path.GetFileName(percorso),
                 .Origine = OrigineAllegato.Candidatura,
                 .Scelto = ConvieneAllegarlo(percorso)})
+        Next
+
+        ' Quel che è stato generato e mai esportato si promette, come il 📄 CV base: la voce
+        ' c'è, dice che il file nascerà spuntandola, e arriva **spenta** — una voce che
+        ' arrivasse spuntata scriverebbe dei file per il solo fatto che si è aperta la
+        ' schermata. Documento per documento, non tutto-o-niente: un CV già esportato e una
+        ' lettera generata dopo sono uno scritto e una da scrivere, e l'elenco lo sa dire.
+        For Each promesso As String In NomiPromessiDellaCandidatura()
+            If GiaScritto(giaSuDisco, promesso) Then Continue For
+
+            _documentiDaScrivere.Add(promesso)
+            _bozza.Allegati.Add(New AllegatoScelto With {
+                .Nome = promesso,
+                .Origine = OrigineAllegato.Candidatura,
+                .Scelto = False})
         Next
 
         ' Il 📄 CV base non è di questa candidatura e non è un attestato: sta accanto al
@@ -794,6 +829,13 @@ Public Class PannelloEmail
     ''' Se quel file <b>non c'è ancora</b> e nascerà spuntandolo: allora la riga lo dice,
     ''' invece di far credere che sia già lì.
     ''' </param>
+    ''' <remarks>
+    ''' Il marcatore della promessa è <b>corto</b>, e non per stile: la colonna è larga 360 px,
+    ''' i nomi dei documenti di una candidatura portano dentro azienda e data — quaranta
+    ''' caratteri e più — e un elenco a spunte non manda a capo né mette i puntini: taglia. La
+    ''' prima versione diceva «lo scrivo quando lo spunti» e a video si leggeva «(lo scrivo
+    ''' quando», cioè una promessa monca. Visto guardando il programma, il 2026-09-08 sera.
+    ''' </remarks>
     Private Shared Function EtichettaAllegato(allegato As AllegatoScelto,
                                               Optional daScrivere As Boolean = False) As String
 
@@ -804,11 +846,11 @@ Public Class PannelloEmail
 
             Case OrigineAllegato.Profilo
                 Return allegato.Nome & If(daScrivere,
-                                          "  (il tuo 📄 CV base — lo scrivo quando lo spunti)",
+                                          "  (📄 CV base, da scrivere)",
                                           "  (il tuo 📄 CV base)")
 
             Case Else
-                Return allegato.Nome
+                Return allegato.Nome & If(daScrivere, "  (da scrivere)", "")
 
         End Select
 
@@ -888,12 +930,72 @@ Public Class PannelloEmail
     End Function
 
     ''' <summary>Se questo allegato è la voce che promette un file ancora da scrivere.</summary>
+    ''' <remarks>
+    ''' Le voci che promettono sono di due specie, e vengono da due cartelle diverse: il
+    ''' 📄 CV base sta accanto al profilo, il 🎯 CV mirato e la ✉️ lettera nella
+    ''' <c>out\</c> della candidatura. A scriverle sono due funzioni diverse, ed è la
+    ''' ragione per cui qui si guarda anche l'<b>origine</b> e non il solo nome.
+    ''' </remarks>
     Private Function DaScrivere(allegato As AllegatoScelto) As Boolean
 
-        Return allegato IsNot Nothing AndAlso
-               allegato.Origine = OrigineAllegato.Profilo AndAlso
-               Not String.IsNullOrEmpty(_cvBaseDaScrivere) AndAlso
-               String.Equals(allegato.Nome, _cvBaseDaScrivere, StringComparison.OrdinalIgnoreCase)
+        If allegato Is Nothing Then Return False
+
+        Select Case allegato.Origine
+
+            Case OrigineAllegato.Profilo
+                Return Not String.IsNullOrEmpty(_cvBaseDaScrivere) AndAlso
+                       String.Equals(allegato.Nome, _cvBaseDaScrivere, StringComparison.OrdinalIgnoreCase)
+
+            Case OrigineAllegato.Candidatura
+                Return _documentiDaScrivere.Any(
+                    Function(n) String.Equals(n, allegato.Nome, StringComparison.OrdinalIgnoreCase))
+
+            Case Else
+                Return False
+
+        End Select
+
+    End Function
+
+    ''' <summary>
+    ''' Come si chiameranno i file di questa candidatura, se e quando nasceranno.
+    ''' </summary>
+    ''' <remarks>
+    ''' Un JSON malformato non è una notizia da dare da qui — a darla è P6, che di quei
+    ''' documenti è la casa: in un elenco di allegati vuol dire soltanto che non c'è niente
+    ''' da promettere, e fermare la preparazione di un'email per questo sarebbe
+    ''' sproporzionato. È la stessa scelta di <see cref="CvBaseSuDisco"/>.
+    ''' </remarks>
+    Private Function NomiPromessiDellaCandidatura() As IReadOnlyList(Of String)
+
+        If _candidatura Is Nothing Then Return Array.Empty(Of String)()
+
+        Try
+            Return ArchivioDocumenti.NomiDellaCandidatura(_candidatura)
+
+        Catch ex As Exception When TypeOf ex Is System.Text.Json.JsonException OrElse
+                                   TypeOf ex Is InvalidOperationException
+            Return Array.Empty(Of String)()
+        End Try
+
+    End Function
+
+    ''' <summary>
+    ''' Se di quel documento un file c'è già, in un formato qualunque.
+    ''' </summary>
+    ''' <remarks>
+    ''' Si confronta la <b>radice</b> del nome e non il nome intero: si promette il PDF, ma
+    ''' su disco può esserci il solo DOCX — ed è lo stesso documento, non uno da scrivere di
+    ''' nuovo. Confrontando i nomi interi l'elenco mostrerebbe due volte la stessa cosa, una
+    ''' come file e una come promessa.
+    ''' </remarks>
+    Private Shared Function GiaScritto(giaSuDisco As List(Of String), promesso As String) As Boolean
+
+        Dim radice As String = Path.GetFileNameWithoutExtension(promesso)
+
+        Return giaSuDisco.Any(
+            Function(n) String.Equals(Path.GetFileNameWithoutExtension(n), radice,
+                                      StringComparison.OrdinalIgnoreCase))
 
     End Function
 
@@ -931,8 +1033,12 @@ Public Class PannelloEmail
                 salvato.Cv, Nothing, FormatiDocumento.Entrambi, salvato.Lingua,
                 salvato.Tolte).ConfigureAwait(True)
 
+            ' Il nome promesso si prende **prima** del riempimento: quello lo cancella,
+            ' perché adesso il file c'è e la voce non promette più niente.
+            Dim promesso As String = _cvBaseDaScrivere
+
             RiempiGliAllegati()
-            SpuntaIlCvBase(scritti)
+            SpuntaIlNato(scritti, promesso, OrigineAllegato.Profilo)
 
             Racconta("Il 📄 CV base è pronto e spuntato: l'ho scritto accanto al tuo profilo." & vbLf &
                      "Se il messaggio nomina gli allegati, fallo riscrivere.", StileApp.TestoSecondario)
@@ -947,20 +1053,42 @@ Public Class PannelloEmail
 
     End Function
 
-    ''' <summary>Spunta il file appena scritto: il PDF se è nato, altrimenti quel che c'è.</summary>
-    Private Sub SpuntaIlCvBase(scritti As IReadOnlyList(Of String))
+    ''' <summary>
+    ''' Spunta il file appena scritto: quello che era stato promesso, se è nato; altrimenti
+    ''' lo stesso documento in un altro formato.
+    ''' </summary>
+    ''' <remarks>
+    ''' Il ripiego non è uno scrupolo: la promessa è sempre il <b>PDF</b>, e il PDF vuole una
+    ''' stampante — che nel banco non c'è, e là nasce il solo DOCX. Si cerca perciò per
+    ''' <b>radice</b> del nome, che è la stessa nei due formati; solo se non si trova
+    ''' nemmeno quella si ripiega sul primo file scritto. Cercare il primo PDF qualunque
+    ''' sarebbe più corto e sbagliato: di documenti scritti insieme ce ne sono due, e chi ha
+    ''' spuntato la lettera si vedrebbe spuntare il CV.
+    ''' </remarks>
+    Private Sub SpuntaIlNato(scritti As IReadOnlyList(Of String), promesso As String,
+                             origine As OrigineAllegato)
 
         If scritti Is Nothing OrElse scritti.Count = 0 Then Return
 
-        Dim ilPdf As String = scritti.FirstOrDefault(
-            Function(f) Path.GetExtension(f).Equals(NomiDocumenti.EstensionePdf,
+        Dim nati As List(Of String) = scritti.Select(Function(f) Path.GetFileName(f)).ToList()
+        Dim radice As String = If(String.IsNullOrEmpty(promesso),
+                                  Nothing, Path.GetFileNameWithoutExtension(promesso))
+
+        Dim dellaStessaRadice As List(Of String) = nati.Where(
+            Function(n) radice IsNot Nothing AndAlso
+                        String.Equals(Path.GetFileNameWithoutExtension(n), radice,
+                                      StringComparison.OrdinalIgnoreCase)).ToList()
+
+        Dim quale As String = dellaStessaRadice.FirstOrDefault(
+            Function(n) Path.GetExtension(n).Equals(NomiDocumenti.EstensionePdf,
                                                     StringComparison.OrdinalIgnoreCase))
 
-        Dim nome As String = Path.GetFileName(If(ilPdf, scritti(0)))
+        If quale Is Nothing Then quale = dellaStessaRadice.FirstOrDefault()
+        If quale Is Nothing Then quale = nati(0)
 
         For Each allegato As AllegatoScelto In _bozza.Allegati
-            If allegato.Origine = OrigineAllegato.Profilo AndAlso
-               String.Equals(allegato.Nome, nome, StringComparison.OrdinalIgnoreCase) Then
+            If allegato.Origine = origine AndAlso
+               String.Equals(allegato.Nome, quale, StringComparison.OrdinalIgnoreCase) Then
                 allegato.Scelto = True
             End If
         Next
@@ -972,15 +1100,62 @@ Public Class PannelloEmail
     End Sub
 
     ''' <summary>
-    ''' Fa partire la scrittura del 📄 CV base senza aspettarla: la spunta è un evento
+    ''' Mantiene la promessa sui documenti della candidatura: li scrive nella sua
+    ''' <c>out\</c> e spunta quello che l'utente ha chiesto.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Nessuna chiamata all'AI: il 🎯 CV e la ✉️ lettera esistono già come JSON, e qui
+    ''' si <b>impaginano</b>. È esattamente quel che fa «Esporta» in P6, ed è per questo che
+    ''' si scrivono tutti e due i documenti in tutti e due i formati e non solo quello
+    ''' spuntato: chi ne vuole un altro se lo trova già in elenco invece di doverlo far
+    ''' nascere con una seconda spunta.</para>
+    ''' <para>I file restano nella cartella della candidatura, che è la loro casa (cap.
+    ''' 11.1): di lì li prende l'email, e di lì li ritrova P6 la prossima volta.</para>
+    ''' </remarks>
+    Public Async Function AllegaIDocumentiDellaCandidaturaAsync(promesso As String) As Task
+
+        If _documenti Is Nothing OrElse _candidatura Is Nothing Then Return
+
+        Try
+            Racconta("Scrivo il 🎯 CV e la ✉️ lettera di questa candidatura, così puoi allegarli…",
+                     StileApp.TestoSecondario)
+
+            Dim scritti As IReadOnlyList(Of String) =
+                Await _documenti.ScriviCandidaturaAsync(_candidatura).ConfigureAwait(True)
+
+            RiempiGliAllegati()
+            SpuntaIlNato(scritti, promesso, OrigineAllegato.Candidatura)
+
+            Racconta("Pronti e spuntati: li ho scritti nella cartella di questa candidatura." & vbLf &
+                     "Se il messaggio nomina gli allegati, fallo riscrivere.", StileApp.TestoSecondario)
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            ' L'elenco torna a dire il vero: la voce promessa resta lì, spenta, e la
+            ' promessa si può riprovare.
+            RiempiGliAllegati()
+            RaccontaUnErrore($"Non sono riuscita a scrivere i documenti della candidatura: {ex.Message}")
+        End Try
+
+    End Function
+
+    ''' <summary>
+    ''' Fa partire la scrittura del file promesso senza aspettarla: la spunta è un evento
     ''' sincrono, e da lì non si può attendere niente.
     ''' </summary>
-    Private Async Sub AvviaLaScritturaDelCvBase()
+    ''' <remarks>
+    ''' Le due promesse hanno due scrittori, perché scrivono in due cartelle diverse: il
+    ''' 📄 CV base accanto al profilo, gli altri due nella <c>out\</c> della candidatura.
+    ''' </remarks>
+    Private Async Sub AvviaLaScrittura(allegato As AllegatoScelto)
 
-        Await AllegaIlCvBaseAsync().ConfigureAwait(True)
+        If allegato.Origine = OrigineAllegato.Profilo Then
+            Await AllegaIlCvBaseAsync().ConfigureAwait(True)
+        Else
+            Await AllegaIDocumentiDellaCandidaturaAsync(allegato.Nome).ConfigureAwait(True)
+        End If
 
     End Sub
-
     ''' <summary>I file prodotti per questa candidatura, in ordine di nome.</summary>
     Private Function DocumentiDellaCandidatura() As IEnumerable(Of String)
 
@@ -1027,7 +1202,7 @@ Public Class PannelloEmail
         ' La voce del 📄 CV base non ancora esportato promette un file: spuntandola, la
         ' promessa si mantiene adesso. Il racconto lo fa quel lavoro, che ha di più da dire.
         If allegato.Scelto AndAlso DaScrivere(allegato) Then
-            AvviaLaScritturaDelCvBase()
+            AvviaLaScrittura(allegato)
             Return
         End If
 

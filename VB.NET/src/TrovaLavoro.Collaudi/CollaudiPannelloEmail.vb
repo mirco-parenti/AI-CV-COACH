@@ -321,18 +321,23 @@ Namespace Ui
 
             Await ConPannelloAsync(compositore,
                 Async Function(pannello, contesto, candidatura)
-                    ScriviDocumenti(candidatura, "CV_Luca_Rossi.pdf", "CV_Luca_Rossi.docx", "Lettera_Rossi.pdf")
+                    ' I nomi veri, non due inventati: sono la sola condizione in cui
+                    ' l'elenco li riconosce come già scritti e non li promette (2026-09-08).
+                    Dim nomi As IReadOnlyList(Of String) = EsportaIDocumenti(candidatura)
+                    Dim cvInDocx As String = Path.ChangeExtension(nomi(0), ".docx")
+                    ScriviDocumenti(candidatura, cvInDocx)
 
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
 
                     Dim elenco As CheckedListBox = Allegati(pannello)
-                    Assert.HasCount(3, elenco.Items, "i tre file scritti")
+                    Assert.HasCount(3, elenco.Items,
+                                    "i tre file scritti, e nessuna promessa: ci sono già tutti")
 
                     ' Il PDF si spunta da sé: è il formato che si apre uguale dappertutto.
                     ' Il DOCX resta lì, spento, per chi lo vuole (cap. 07.1).
-                    Assert.IsTrue(SpuntatoQuello(elenco, "CV_Luca_Rossi.pdf"), "il CV in PDF")
-                    Assert.IsTrue(SpuntatoQuello(elenco, "Lettera_Rossi.pdf"), "la lettera in PDF")
-                    Assert.IsFalse(SpuntatoQuello(elenco, "CV_Luca_Rossi.docx"), "il DOCX no")
+                    Assert.IsTrue(SpuntatoQuello(elenco, nomi(0)), "il CV in PDF")
+                    Assert.IsTrue(SpuntatoQuello(elenco, nomi(1)), "la lettera in PDF")
+                    Assert.IsFalse(SpuntatoQuello(elenco, cvInDocx), "il DOCX no")
                 End Function)
 
         End Function
@@ -922,7 +927,7 @@ Namespace Ui
 
             Await ConPannelloAsync(compositore,
                 Async Function(pannello, contesto, candidatura)
-                    ScriviDocumenti(candidatura, "CV_Luca_Rossi.pdf")
+                    Dim nomi As IReadOnlyList(Of String) = EsportaIDocumenti(candidatura)
                     CartellaDocumentiCon(contesto,
                                          attestati:={"HACCP.pdf"},
                                          altri:={"busta_paga.pdf"})
@@ -932,13 +937,17 @@ Namespace Ui
                     Dim elenco As CheckedListBox = Allegati(pannello)
                     Dim voci As String() = elenco.Items.Cast(Of String)().ToArray()
 
-                    Assert.HasCount(2, voci, "il documento generato e l'attestato")
-                    Assert.AreEqual("CV_Luca_Rossi.pdf", voci(0), "prima quel che è nato per questa candidatura")
-                    Assert.Contains("HACCP.pdf", voci(1), "poi l'attestato")
-                    Assert.Contains("dai tuoi documenti", voci(1), "e si vede da dove viene")
+                    Assert.HasCount(3, voci, "i due documenti generati e l'attestato")
+                    Assert.AreEqual(nomi(0), voci(0), "prima quel che è nato per questa candidatura")
+
+                    ' Per nome e non per indice: l'attestato viene dopo i documenti, e
+                    ' quanti siano dipende da quanti ne ha la candidatura.
+                    Dim ilSuo As Integer = RigaCon(elenco, "HACCP.pdf")
+                    Assert.IsGreaterThanOrEqualTo(0, ilSuo, "l'attestato c'è")
+                    Assert.Contains("dai tuoi documenti", voci(ilSuo), "e si vede da dove viene")
 
                     Assert.IsTrue(elenco.GetItemChecked(0), "il CV in PDF parte")
-                    Assert.IsFalse(elenco.GetItemChecked(1), "l'attestato aspetta la spunta")
+                    Assert.IsFalse(elenco.GetItemChecked(ilSuo), "l'attestato aspetta la spunta")
 
                     ' Quel che l'AI mette in «altro» non si propone: una busta paga non si
                     ' manda a un'azienda per sbaglio.
@@ -962,7 +971,11 @@ Namespace Ui
 
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
 
-                    Assert.IsEmpty(Allegati(pannello).Items, "niente da allegare: quel file non c'è più")
+                    ' Non «l'elenco è vuoto»: dal 2026-09-08 sera i documenti della
+                    ' candidatura, generati e mai esportati, ci sono comunque come promesse.
+                    ' Quel che non ci deve essere è l'attestato sparito dal disco.
+                    Assert.AreEqual(-1, RigaCon(Allegati(pannello), "HACCP"),
+                                    "quel file non c'è più: non si propone")
                 End Function)
 
         End Function
@@ -977,13 +990,15 @@ Namespace Ui
 
             Await ConPannelloAsync(compositore,
                 Async Function(pannello, contesto, candidatura)
-                    ScriviDocumenti(candidatura, "CV_Luca_Rossi.pdf")
+                    Dim nomi As IReadOnlyList(Of String) = EsportaIDocumenti(candidatura)
                     CartellaDocumentiCon(contesto, attestati:={"HACCP.pdf"})
 
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
 
+                    ' Si spunta per nome e non per indice: da quando l'elenco può contenere
+                    ' anche le voci promesse, l'indice 1 non è più l'attestato.
                     Dim elenco As CheckedListBox = Allegati(pannello)
-                    elenco.SetItemChecked(1, True)
+                    elenco.SetItemChecked(RigaCon(elenco, "HACCP.pdf"), True)
 
                     Casella(pannello, "txtDestinatario").Text = "lavoro@rossi.it"
                     pannello.PreparaIlMessaggio()
@@ -993,7 +1008,7 @@ Namespace Ui
 
                     Dim eml As String = File.ReadAllText(scritti(0), Encoding.ASCII)
 
-                    Assert.Contains("filename=""CV_Luca_Rossi.pdf""", eml, "il CV generato")
+                    Assert.Contains($"filename=""{nomi(0)}""", eml, "il CV generato")
                     Assert.Contains("filename=""HACCP.pdf""", eml, "e l'attestato preso dai documenti dell'utente")
                 End Function)
 
@@ -1118,6 +1133,31 @@ Namespace Ui
 
         End Function
 
+        ''' <summary>
+        ''' Esporta davvero i documenti della candidatura: i file prendono i <b>nomi che il
+        ''' programma darebbe loro</b>, che è la sola condizione in cui l'elenco smette di
+        ''' prometterli e li mostra come file (2026-09-08 sera).
+        ''' </summary>
+        Private Shared Function EsportaIDocumenti(candidatura As Opportunita) As IReadOnlyList(Of String)
+
+            Dim nomi As IReadOnlyList(Of String) = ArchivioDocumenti.NomiDellaCandidatura(candidatura)
+            ScriviDocumenti(candidatura, nomi.ToArray())
+
+            Return nomi
+
+        End Function
+
+        ''' <summary>La riga dell'elenco che contiene quel pezzo di nome, o -1.</summary>
+        Private Shared Function RigaCon(elenco As CheckedListBox, frammento As String) As Integer
+
+            For indice As Integer = 0 To elenco.Items.Count - 1
+                If CStr(elenco.Items(indice)).Contains(frammento) Then Return indice
+            Next
+
+            Return -1
+
+        End Function
+
         ''' <summary>Mette nella <c>out\</c> della candidatura dei file veri da allegare.</summary>
         Private Shared Sub ScriviDocumenti(candidatura As Opportunita, ParamArray nomi As String())
 
@@ -1181,7 +1221,7 @@ Namespace Ui
                         FirstOrDefault(Function(v) v.Contains("CV base"))
 
                     Assert.IsNotNull(promessa, "la voce c'è anche se il file no")
-                    Assert.Contains("lo scrivo quando lo spunti", promessa,
+                    Assert.Contains("da scrivere", promessa,
                                     "e dice che il file non c'è ancora, invece di far credere che sia lì")
                     Assert.IsFalse(SpuntatoQuello(elenco, promessa), "spenta, come tutte le sue")
 
@@ -1197,6 +1237,74 @@ Namespace Ui
                     Assert.DoesNotContain("lo scrivo quando", riga, "che non è più una promessa")
                     Assert.IsTrue(SpuntatoQuello(elenco, riga),
                                   "ed è spuntato: l'utente l'ha chiesto spuntandolo")
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Il 🎯 CV mirato e la ✉️ lettera generati e mai esportati si <b>promettono</b>, e
+        ''' spuntandoli nascono davvero (2026-09-08, sera).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È la promessa del 📄 CV base estesa ai due documenti che uno vuole davvero
+        ''' mandare, e nasce da una frase di Mirco davanti al programma: «non vedo il 🎯 CV
+        ''' mirato da allegare, eppure l'ho generato». Aveva ragione, ed era vero: generare
+        ''' scrive il <c>cv.json</c>, mentre i <b>file</b> nascono solo premendo «Esporta» in
+        ''' P6 — e questo elenco mostra file. Chi arriva qui dalla Home di là non è mai
+        ''' passato, e si trovava a mandare un'email di candidatura senza poterci allegare la
+        ''' candidatura.</para>
+        ''' <para>Nel banco la stampante PDF non c'è, quindi nasce il solo DOCX: è la ragione
+        ''' per cui la spunta finisce su quel che è <b>davvero</b> nato — cercato per radice
+        ''' del nome — invece che sul nome promesso, che è sempre quello del PDF.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function IDocumentiMaiEsportatiSiPromettonoEPoiSiScrivono() As Task
+
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ' Il 🎯 CV e la ✉️ lettera ci sono come JSON; la out\ della candidatura
+                    ' non esiste nemmeno.
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim elenco As CheckedListBox = Allegati(pannello)
+                    Dim promesse As String() = RigheDi(elenco).
+                        Where(Function(v) v.Contains("da scrivere")).ToArray()
+
+                    Assert.HasCount(2, promesse, "il 🎯 CV e la ✉️ lettera, promessi tutti e due")
+
+                    For Each riga As String In promesse
+                        Assert.IsFalse(SpuntatoQuello(elenco, riga), "spente, come tutte le promesse")
+                    Next
+
+                    ' Si spunta la ✉️ lettera, che è la **seconda**: se la spunta finisse
+                    ' sul primo file scritto — la scorciatoia che verrebbe da scrivere — chi
+                    ' ha chiesto la lettera si vedrebbe spuntare il CV, e il collaudo sarebbe
+                    ' verde lo stesso spuntando il primo.
+                    Dim promesso As String = ArchivioDocumenti.NomiDellaCandidatura(candidatura)(1)
+                    Await pannello.AllegaIDocumentiDellaCandidaturaAsync(promesso)
+
+                    Dim nati As String() = Directory.GetFiles(
+                        Path.Combine(candidatura.Cartella, ArchivioOpportunita.NomeCartellaOut))
+
+                    Assert.IsNotEmpty(nati, "adesso i file ci sono davvero")
+
+                    Dim radice As String = Path.GetFileNameWithoutExtension(promesso)
+                    Dim suo As String = RigheDi(elenco).FirstOrDefault(
+                        Function(v) v.StartsWith(radice))
+
+                    Assert.IsNotNull(suo, "l'elenco mostra il file nato, col suo nome vero")
+                    Assert.DoesNotContain("da scrivere", suo, "che non è più una promessa")
+                    Assert.IsTrue(SpuntatoQuello(elenco, suo),
+                                  "ed è spuntato: l'utente l'ha chiesto spuntandolo")
+
+                    ' E il documento nato non si ripropone anche come promessa: il file è il
+                    ' DOCX, la promessa era il PDF, e a riconoscerli come la stessa cosa è la
+                    ' radice del nome.
+                    Assert.AreEqual(-1, RigaCon(elenco, "da scrivere"),
+                                    "nessuna promessa resta in piedi")
                 End Function)
 
         End Function
@@ -1419,57 +1527,61 @@ Namespace Ui
         End Function
 
         ''' <summary>
-        ''' La spia sopra gli <b>allegati</b> parla dei file che stanno nell'elenco, non dei
-        ''' documenti che la candidatura ha in pancia.
+        ''' La spia sopra gli <b>allegati</b> parla dei documenti <i>di questa candidatura</i>,
+        ''' e non del 📄 CV base né degli attestati: quelli dal profilo di oggi vengono per
+        ''' definizione, o dal profilo non nascono affatto.
         ''' </summary>
         ''' <remarks>
-        ''' <para>È il difetto trovato guardando il programma la sera del 2026-09-08, con la
-        ''' spia nata quel giorno stesso. Si accendeva chiedendo <i>«questa candidatura ha un
-        ''' CV o una lettera?»</i> — un fatto che con l'elenco lì sotto non c'entrava — e su
-        ''' una candidatura i cui documenti non erano mai stati esportati diventava rossa
-        ''' sopra due file scritti quel giorno, dicendo di riesportare roba che lì non
-        ''' c'era.</para>
-        ''' <para>Le due metà del collaudo hanno lo stesso identico stato del profilo: quel
-        ''' che cambia è solo se in <c>out\</c> c'è un file. Contano tutt'e due, perché il
-        ''' rosso è facile da far comparire e la cosa difficile è che <b>non</b> compaia
-        ''' quando non deve.</para>
+        ''' <para>Nasce il 2026-09-08 sera dal difetto trovato guardando il programma: la
+        ''' spia si accendeva chiedendo <i>«questa candidatura ha un CV o una lettera?»</i> e
+        ''' diventava rossa sopra un elenco che conteneva il solo 📄 CV base scritto quel
+        ''' giorno, dicendo di riesportare roba che lì non c'era.</para>
+        ''' <para><b>Poche ore dopo quel caso è sparito</b>, e va detto: i documenti generati
+        ''' e mai esportati adesso l'elenco li <i>promette</i> (cap. 07.1), quindi ci sono
+        ''' sempre, e la condizione «guarda l'elenco» e quella «guarda la candidatura» danno
+        ''' oggi la stessa risposta in tutti i casi che si possono costruire. Quel che resta,
+        ''' ed è quel che questo collaudo difende, è il <b>soggetto</b>: se domani in elenco
+        ''' finisse un'altra origine, la spia non deve accendersi per lei.</para>
         ''' </remarks>
         <TestMethod>
-        Public Async Function LaSpiaDegliAllegatiGuardaLElencoNonLaCandidatura() As Task
+        Public Async Function LaSpiaDegliAllegatiParlaSoloDeiDocumentiDellaCandidatura() As Task
 
             Dim compositore As New CompositoreFinto
             compositore.Dara(EmailScritta).Dara(EmailScritta).Dara(EmailScritta)
 
             Await ConPannelloAsync(compositore,
                 Async Function(pannello, contesto, candidatura)
-                    ' In elenco c'è un 📄 CV base già esportato — che dal profilo di oggi
-                    ' viene per definizione — e nient'altro. Il 🎯 CV e la ✉️ lettera della
-                    ' candidatura ci sono, ma come JSON: nessuno li ha mai esportati.
-                    ScriviCvBaseEsportato(contesto, "CV_base.pdf")
+                    ' Una candidatura senza documenti propri, e un profilo cambiato sotto:
+                    ' in elenco ci sono il 📄 CV base esportato e un attestato, e di quei due
+                    ' non c'è niente di vecchio da dire.
+                    candidatura.Cv = Nothing
+                    candidatura.Lettera = Nothing
                     candidatura.VersioneDeiDocumenti = contesto.Archivio.Versioni().Last()
                     contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+
+                    ScriviCvBaseEsportato(contesto, "CV_base.pdf")
+                    CartellaDocumentiCon(contesto, attestati:={"HACCP.pdf"})
 
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
 
                     Dim spiaAllegati As Label = Etichetta(pannello, "lblSpiaDocumenti")
-                    Dim spiaTesto As Label = Etichetta(pannello, "lblSpiaCorpo")
 
-                    ' Senza questa riga l'asserto qui sotto sarebbe verde anche su un
-                    ' elenco vuoto, cioè per il motivo sbagliato.
-                    Assert.IsNotEmpty(Allegati(pannello).Items, "in elenco c'è il CV base")
-
+                    ' Senza questa riga l'asserto qui sotto sarebbe verde anche su un elenco
+                    ' vuoto, cioè per il motivo sbagliato.
+                    Assert.HasCount(2, Allegati(pannello).Items, "il CV base e l'attestato")
                     Assert.IsEmpty(spiaAllegati.Text,
-                                   "di quei due file non ne parte nessuno: non c'è niente da giudicare")
-                    Assert.Contains(SpiaDelProfilo.ParolaDisallineato, spiaTesto.Text,
-                                    "mentre il testo viene dalla lettera vecchia, e quello va detto")
+                                   "di quelle due origini non c'è niente da giudicare")
 
-                    ' Adesso il 🎯 CV mirato è stato esportato davvero: da qui in poi fra gli
-                    ' allegati c'è un file che non viene dal profilo di oggi.
-                    ScriviDocumenti(candidatura, "CV_mirato.pdf")
-                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    ' Adesso la candidatura i suoi documenti ce li ha. Non sono stati
+                    ' esportati, ma in elenco compaiono lo stesso come promesse — e
+                    ' spuntandole partirebbero vecchie: la spia deve dirlo prima.
+                    Dim conDocumenti As Opportunita = Generata(contesto)
+                    conDocumenti.VersioneDeiDocumenti = candidatura.VersioneDeiDocumenti
+
+                    Await pannello.MostraLaCandidaturaAsync(conDocumenti)
 
                     Assert.Contains(SpiaDelProfilo.ParolaDisallineato, spiaAllegati.Text,
-                                    "adesso sì: uno di quei file sta per partire")
+                                    "quei due, spuntati, partirebbero dal profilo di ieri")
 
                     Dim detto As String = SuggerimentiDelPannello(pannello).GetToolTip(spiaAllegati)
                     Assert.Contains("Torna ai documenti", detto, "il gesto che in questa schermata c'è")
