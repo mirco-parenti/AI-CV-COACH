@@ -263,17 +263,20 @@ Partial Class PannelloHome
         ' incontra se quel numero vale ancora, poi il numero. Fino al 2026-09-03 stavano
         ' nell'altro verso, e a scambiarli non è stata una teoria — è che azienda e ruolo
         ' vogliono stare vicini, e il punteggio con la sua qualifica dopo di loro.
-        ' Si chiama «Profilo del match» e non «Profilo» dal 2026-09-03: due colonne che
+        ' Si chiama «Profilo usato per il match» e non «Profilo» dal 2026-09-03: due colonne che
         ' parlano della stessa cosa sembravano scollegate, e l'idea di fonderle in una si
         ' fermava sul limite di sempre — un ListView dà un inchiostro per cella, e lucina
         ' rossa e stelle nere nella stessa cella vorrebbero dire ridisegnare a mano tutta
         ' la coda. Il legame lo dichiara l'intestazione: costa una parola, e lascia intatti
         ' i due colori e i due ordinamenti (le due domande restano diverse — «quanto vale»
         ' e «quali sono da rifare»).
-        ' 150 basta: la scritta più lunga — «● profilo usato: obsoleto» — misura 136 px col
-        ' carattere della coda, e l'intestazione 98; misurati, non stimati (v. i collaudi).
-        Me.colProfilo.Text = "Profilo del match"
-        Me.colProfilo.Width = 150
+        ' 160 servono: col carattere della coda l'intestazione misura 140 px — è lei la più
+        ' larga, non il contenuto, che si ferma a 136 («● profilo usato: obsoleto») —, e a
+        ' un'intestazione tagliata non resterebbe la parola che spiega la colonna. Misurati,
+        ' non stimati (v. i collaudi). Erano 150 finché l'intestazione diceva «Profilo del
+        ' match» e misurava 98: il nome per esteso, dal 2026-09-08, ne chiede dieci in più.
+        Me.colProfilo.Text = "Profilo usato per il match"
+        Me.colProfilo.Width = 160
         '
         'colMatch
         '

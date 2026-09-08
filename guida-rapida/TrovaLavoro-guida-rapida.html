@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>TrovaLavoro — Guida rapida</title>
+<style>
+  @page { size: A4 landscape; margin: 0; }
+
+  :root {
+    --rosso:        #FA0825;   /* il rosso del marchio: filetti e numeri */
+    --rosso-testo:  #B00013;   /* lo stesso rosso, leggibile a corpo piccolo */
+    --blu:          #0B06B0;   /* il blu Aviolab */
+    --inchiostro:   #212529;
+    --grigio:       #68717A;
+    --avorio:       #FFFAF0;
+    --pagina:       #F8F4EB;
+    --bordo:        #DEE2E6;
+    --verde:        #1E7E34;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #ffffff; }
+
+  body {
+    font-family: "Segoe UI", "Segoe UI Variable", system-ui, sans-serif;
+    color: var(--inchiostro);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .foglio {
+    width: 297mm; height: 210mm;
+    padding: 6.5mm 8mm 4mm 8mm;
+    background: #ffffff;
+    display: flex; flex-direction: column;
+    page-break-after: always;
+  }
+  .foglio:last-child { page-break-after: auto; }
+
+  /* ---------- testata ---------- */
+  .testata { display: flex; align-items: flex-start; justify-content: space-between; gap: 6mm; }
+  .titolo { font-size: 19.5pt; font-weight: 800; letter-spacing: -0.2pt; line-height: 1.05; white-space: nowrap; }
+  .titolo .t1 { color: var(--inchiostro); }
+  .titolo .t2 { color: var(--rosso); }
+  .titolo .coda { font-weight: 600; font-size: 15pt; margin-left: 3mm; }
+  .titolo .foglioN { font-weight: 600; color: var(--grigio); font-size: 10.5pt; margin-left: 2mm; }
+  .occhiello { font-size: 7.8pt; color: var(--grigio); margin-top: 1.2mm; max-width: 205mm; line-height: 1.3; }
+  .marchio { display: flex; align-items: center; gap: 2.2mm; padding-top: 0.6mm; }
+  .marchio img { width: 8.6mm; height: 8.6mm; }
+  .marchio span { font-size: 12.5pt; font-weight: 800; color: var(--blu); letter-spacing: 0.1pt; }
+
+  .filetto { height: 1.6px; background: var(--rosso); margin: 1.9mm 0 2.2mm 0; }
+
+  /* ---------- la striscia della barra dei comandi ---------- */
+  .barra { display: flex; flex-wrap: wrap; align-items: center; gap: 1.2mm; margin-bottom: 2.4mm; }
+  .chip {
+    background: var(--blu); color: #fff; border-radius: 2.4px;
+    padding: 0.55mm 1.5mm; font-size: 7.5pt; font-weight: 600; white-space: nowrap;
+  }
+  .etich { font-size: 7.5pt; color: var(--grigio); }
+
+  /* ---------- griglia dei riquadri ---------- */
+  .griglia { flex: 1; column-count: 3; column-gap: 4.5mm; }
+
+  .box {
+    break-inside: avoid; -webkit-column-break-inside: avoid;
+    border: 1.3px solid var(--rosso); border-radius: 4px;
+    background: var(--avorio);
+    padding: 1.9mm 2.4mm 2.1mm 2.4mm;
+    margin-bottom: 2.5mm;
+  }
+  .box.servizio { border-color: var(--blu); background: #FBFCFF; }
+
+  .box h2 {
+    margin: 0 0 1.2mm 0; font-size: 9.3pt; font-weight: 700; line-height: 1.15;
+    display: flex; align-items: baseline; gap: 1.8mm;
+  }
+  .n {
+    flex: 0 0 auto;
+    width: 4.6mm; height: 4.6mm; line-height: 4.6mm;
+    border-radius: 50%; background: var(--rosso); color: #fff;
+    font-size: 7.6pt; font-weight: 700; text-align: center;
+    transform: translateY(0.35mm);
+  }
+  .box.servizio .n { background: var(--blu); }
+  .passo { margin-left: auto; font-size: 7pt; font-weight: 600; color: var(--grigio); white-space: nowrap; }
+
+  .box p { margin: 0 0 1mm 0; font-size: 8pt; line-height: 1.25; }
+  .box p:last-child, .box ul:last-child, .box .cit:last-child { margin-bottom: 0; }
+
+  .box ul { margin: 0 0 1mm 0; padding-left: 3.4mm; font-size: 8pt; line-height: 1.25; }
+  .box li { margin-bottom: 0.5mm; }
+  .box li:last-child { margin-bottom: 0; }
+
+  .cmd  { color: var(--rosso-testo); font-weight: 700; }
+  .via  { color: var(--blu); font-weight: 600; }
+  .ok   { color: var(--verde); font-weight: 700; }
+  .mono { font-family: Consolas, "Cascadia Mono", monospace; font-size: 7.6pt; }
+
+  .cit {
+    margin: 1.1mm 0 0 0; padding: 1mm 1.8mm;
+    background: var(--pagina); border-left: 2px solid var(--bordo);
+    font-size: 7.6pt; font-style: italic; color: #4c545c; line-height: 1.24;
+  }
+  .box.servizio .cit { background: #F2F4FB; }
+
+  table.err { width: 100%; border-collapse: collapse; font-size: 7.6pt; margin-top: 0.4mm; }
+  table.err td { border-top: 1px solid var(--bordo); padding: 0.7mm 0.6mm; vertical-align: top; line-height: 1.25; }
+  table.err tr:first-child td { border-top: none; }
+  table.err td:first-child { width: 44%; color: var(--rosso-testo); font-weight: 600; }
+
+  /* ---------- piede ---------- */
+  .piede { border-top: 1.6px solid var(--rosso); padding-top: 1.7mm; margin-top: 0.8mm; }
+  .piede .regola { font-size: 8pt; line-height: 1.3; }
+  .piede .legale { font-size: 6.9pt; color: var(--grigio); margin-top: 1.1mm; }
+</style>
+</head>
+<body>
+
+<!-- ============================ FACCIATA 1 ============================ -->
+<div class="foglio">
+
+  <div class="testata">
+    <div>
+      <div class="titolo"><span class="t1">Trova</span><span class="t2">Lavoro</span><span class="coda">Guida rapida</span><span class="foglioN">1 · dal primo avvio alla candidatura spedita</span></div>
+      <div class="occhiello">Racconti <strong>una volta</strong> chi sei; poi, per ogni annuncio, il programma ti dice quanto ci somigli e ti scrive un CV e una lettera su misura. Le sei mosse sono tutte qui, in ordine: tienila accanto al monitor.</div>
+    </div>
+    <div class="marchio"><img src="data:image/png;base64,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" alt=""><span>AVIOLAB AI</span></div>
+  </div>
+
+  <div class="filetto"></div>
+
+  <div class="barra">
+    <span class="etich">La barra in alto è sempre lì, e sono le stanze del programma:</span>
+    <span class="chip">🎮 Menu</span><span class="chip">🏠 Le mie candidature</span><span class="chip">👤 Profilo</span><span class="chip">🔍 Ricerca</span><span class="chip">Confronta ★ ANNUNCIO - CV</span><span class="chip">▤ Documenti</span><span class="chip">⚙ Impostazioni</span><span class="chip">?</span>
+    <span class="etich">— il <strong>🎮 Menu</strong> porta nelle stesse, ed è la pagina da cui si parte quando non sai ancora dove andare.</span>
+  </div>
+
+  <div class="griglia">
+
+    <div class="box">
+      <h2><span class="n">1</span>Il primo avvio e la chiave</h2>
+      <p>Apri <span class="mono">TrovaLavoro.exe</span>: non c'è niente da installare. Se Windows avvisa che «il PC è protetto», scegli <span class="cmd">Ulteriori informazioni</span> → <span class="cmd">Esegui comunque</span>.</p>
+      <ul>
+        <li>La schermata di avvio si salta con un clic o con <span class="cmd">Invio</span>.</li>
+        <li>Leggi l'<strong>informativa</strong> — che cosa esce dal tuo PC, dove restano i dati, che spesa comporta — e premi <span class="cmd">Ho capito</span>. Compare una volta sola: la riapri quando vuoi col <span class="cmd">?</span> in fondo alla barra.</li>
+        <li>Incolla la chiave <span class="mono">sk-ant-…</span>, premi <span class="cmd">Prova la chiave</span> (due secondi, non consuma niente) e poi <span class="cmd">Salva la chiave</span>.</li>
+      </ul>
+      <p>Non ce l'hai? Su <span class="mono">console.anthropic.com</span>: account, un po' di credito, e la chiave è fatta. Il programma non ha abbonamenti: quel che consumi lo paghi <em>a loro</em>, a consumo.</p>
+      <div class="cit"><span class="cmd">Non adesso</span> è una risposta: entri lo stesso e funziona tutto tranne l'AI. La chiave resta sul tuo computer, cifrata, e non te la rimostra mai per intero.</div>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">2</span>👤 Profilo — racconta chi sei</h2>
+      <p>Si fa <strong>una volta sola</strong> e vale per tutte le candidature. Tre porte, scegli la tua:</p>
+      <ul>
+        <li><span class="cmd">IMPORTA CV DA UN FILE</span> — un CV che hai già (PDF, DOCX, TXT, MD): lo legge e ne ricava il profilo.</li>
+        <li><span class="cmd">IMPORTA CV DA LINKEDIN</span> — apre il browser interno: porti a video la <em>tua</em> pagina e premi <span class="cmd">Importa CV da questa pagina</span>.</li>
+        <li><span class="cmd">COSTRUISCI IL TUO CV - DIALOGO GUIDATO</span> — un argomento per volta (nome, contatti, patente, lavori, esperienze informali, competenze, studi), e prima di registrare qualcosa ti mostra cosa ha capito. Alla fine, <span class="cmd">Porta nel profilo</span>.</li>
+      </ul>
+      <p>Poi <strong>rileggi</strong> le schede (esperienze di lavoro e informali, competenze, studi), correggi quel che serve e premi <span class="cmd">Salva profilo</span>: niente entra senza il tuo sì.</p>
+      <div class="cit"><span class="cmd">Genera 📄 CV-1 base</span> mette il tuo profilo in forma di curriculum: subito, senza AI e <strong>senza spendere niente</strong>.</div>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">3</span>🔍 Ricerca — porta dentro un annuncio</h2>
+      <ul>
+        <li>Scegli il portale in <span class="cmd">Cerca su</span> (Indeed · Jooble · Subito.it · <em>Cerca «lavora con noi»</em>), scrivi <span class="cmd">cosa</span> e <span class="cmd">dove</span>, premi <span class="cmd">Cerca</span>. Navighi come in un browser qualunque; se serve, fai login come te stesso.</li>
+        <li>Una ricerca che rifarai: <span class="cmd">Salva questa ricerca</span>, e la ritrovi in <span class="cmd">Ricerche salvate</span> (<span class="cmd">Apri</span> · <span class="cmd">Dimentica</span>).</li>
+        <li>Hai già il <strong>link</strong>? Incollalo in <span class="cmd">Indirizzo</span> e premi <span class="cmd">Vai</span>.</li>
+        <li>Quando l'annuncio è a video: <span class="cmd">Cattura annuncio</span>: entra nella coda con azienda, ruolo e link.</li>
+      </ul>
+      <div class="cit">Hai solo il <strong>testo</strong> dell'annuncio, arrivato per email o letto altrove? Non serve la Ricerca: si incolla direttamente nel riquadro qui accanto.</div>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">4</span>Confronta ★ — le stelle <span class="passo">passo 1 di 2</span></h2>
+      <p>Incolla il testo nella casella <span class="cmd">Incolla qui il testo dell'annuncio</span> e premi <span class="cmd">Analizza</span> (su una candidatura già in coda il pulsante dice <span class="cmd">Confronta</span>).</p>
+      <ul>
+        <li>Esce il punteggio — <span class="mono">★★★☆☆ 3,4 su 5</span> — e la tabella dei requisiti: <span class="ok">✓</span> soddisfatto · <strong>~</strong> in parte · <strong>✗</strong> no · <strong>?</strong> non determinabile.</li>
+        <li><span class="cmd">⛔</span> segna un requisito <strong>eliminatorio</strong> (una patente, un titolo): mette il tetto a 1 stella. Sotto <strong>1,5</strong> il programma sconsiglia la candidatura — sconsiglia, non impedisce.</li>
+        <li>Per capire il perché: <span class="cmd">Lettura d'insieme</span> e <span class="cmd">L'annuncio come l'ho capito</span>.</li>
+        <li><span class="cmd">Brainstorm</span> apre <em>«Ragioniamo su questa candidatura»</em>: decidi con l'AI cosa mettere davanti e come nominare quel che manca, poi <span class="cmd">Trasforma in appunti</span> per fissarlo.</li>
+      </ul>
+      <p>Non fa per te? <span class="cmd">Scarta</span> (resta nell'elenco, in grigio). Ti convince? <span class="cmd">Genera CV + lettera</span>.</p>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">5</span>▤ Documenti — 🎯 CV e lettera <span class="passo">passo 2 di 2</span></h2>
+      <p>Ci arrivi da <span class="cmd">Genera CV + lettera</span>. La <span class="cmd">Lingua</span> (Italiano · Inglese) la propone leggendo l'annuncio, e la cambi tu.</p>
+      <ul>
+        <li>Rileggi nelle schede <span class="cmd">CV</span> · <span class="cmd">Annuncio</span> · <span class="cmd">Lettera di presentazione</span>: CV e lettera sono scritti solo su quel che hai dichiarato nel profilo.</li>
+        <li><span class="cmd">Modifica i testi</span> — riscrivi a mano campo per campo, e con <span class="cmd">Togli →</span> / <span class="cmd">← Rimetti</span> scegli quali voci entrano in <em>questo</em> CV: il profilo non si tocca, e per le altre candidature valgono ancora.</li>
+        <li><span class="cmd">Esporta DOCX</span> · <span class="cmd">Esporta PDF</span>, scegliendo nella tendina <em>CV e lettera</em>, <em>Solo il CV</em> o <em>Solo la lettera</em>.</li>
+        <li><span class="cmd">Rigenera</span> rifà tutto da capo (dicendoti prima cosa butterebbe via); <span class="cmd">⚠ Rigenera la lettera</span> rifà solo quella.</li>
+      </ul>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">6</span>✉️ L'email — la spedisci tu</h2>
+      <p><span class="cmd">Prepara email</span> apre <em>«L'email di candidatura»</em>: <span class="cmd">A</span>, <span class="cmd">Oggetto</span>, <span class="cmd">Il messaggio</span> e <span class="cmd">Cosa allego</span>, già compilati dove si poteva.</p>
+      <ul>
+        <li>Gli <strong>attestati</strong> arrivano spenti: li accendi tu. La cartella dove stanno si indica una volta, da <span class="cmd">Documenti da allegare…</span></li>
+        <li>Il messaggio non ti piace? <span class="cmd">Fallo riscrivere</span>. Oppure riscrivilo tu: quel che scrivi resta.</li>
+        <li><span class="cmd">Prepara l'email</span> scrive il file <span class="mono">.eml</span> e lo apre nel <strong>tuo</strong> programma di posta, allegati compresi. Il tasto <strong>Invia</strong> è lì, ed è tuo.</li>
+        <li>Tornato nel programma, premi <span class="cmd">L'ho spedita</span>: solo allora la candidatura risulta inviata, con data e ora.</li>
+      </ul>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">+</span>Che cosa serve (e che cosa no)</h2>
+      <ul>
+        <li><strong>Windows 11 a 64 bit</strong> e <strong>un file solo</strong>, <span class="mono">TrovaLavoro.exe</span>: niente da installare, nessuna DLL da mettere accanto, nessun diritto di amministratore. Sta anche su una chiavetta.</li>
+        <li>Una <strong>connessione a Internet</strong>, per l'AI e per la ricerca. Senza, il programma si apre lo stesso e ti dice che cosa non può fare.</li>
+        <li>La <strong>chiave API</strong> del riquadro 1: è la sola cosa da procurarsi.</li>
+      </ul>
+      <p><strong>Non</strong> servono Microsoft Word (i DOCX li scrive da sé), Acrobat, un account su questo programma né una registrazione da qualche parte.</p>
+    </div>
+
+  </div>
+
+  <div class="piede">
+    <div class="regola"><strong>Una regola che viene prima di tutte.</strong> Il programma <strong>non inventa</strong>: se per quell'annuncio ti manca qualcosa te lo dice, invece di riempire il vuoto con una frase che suona bene. E non spedisce niente al posto tuo — CV, lettera ed email si rileggono prima di mandarli.</div>
+    <div class="legale">TrovaLavoro 1.0 · Guida rapida per chi lo usa (facciata 1 di 2) · La guida completa è nel file GUIDA.md · © 2026 Aviolab AI · Tutti i diritti riservati</div>
+  </div>
+
+</div>
+
+<!-- ============================ FACCIATA 2 ============================ -->
+<div class="foglio">
+
+  <div class="testata">
+    <div>
+      <div class="titolo"><span class="t1">Trova</span><span class="t2">Lavoro</span><span class="coda">Guida rapida</span><span class="foglioN">2 · tenere in mano il lavoro</span></div>
+      <div class="occhiello">Una candidatura non finisce quando parte l'email. Qui c'è dove si guarda a che punto sei, che cosa fare quando il tuo profilo cambia, dove stanno i tuoi dati e come portarli via.</div>
+    </div>
+    <div class="marchio"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAhOUlEQVR42u2dd5xV1bXHv3uffc6t02BgGGYMSFOpM4iggoqKGMUCYjCWZ42xYI0tie8lLz3mRWNiib0jGqMogi2xGwsI0kR6kZlhgGH6rafs98cFFekzd+beQdbnc/+Y+dxz7l57/fbaq+21YT/tp/20n/bTftpP30USLX3wyus+Pm3hHHFuIh5xpdg/kZkgDyW7Fhsb73jYuLVf4eFNLXmHaumPr1kRLVswJzgpmXARHRIAmpij8EkPw/DQuuMx4bqS0p6xGukr+g3QvgBQSjYJ0YwQEYTseOJP2gbDhq5jxfJ8YjGFIXUHVAEWhqShczgv2dJXtFh0hnBtIVuziWSOEraia1GUJ595hRNPXkPc8XVENlJjltrL02G33QFAR1X8GhxtcMXk+RzUt5YrrppHfk6MpCPpmCSAOpEBAGjdEacrapuUD67mgosWsX5DiKFDN3DBRQtJelZHlb8nRNJrfwAYTlJI3aFg4HkCKeCGm2eTl5/AtiXRqMnlk+dzYM9a4knV4Ra/EK4HA5x2B4AQ6CycDxJJg0jSRyRpbfeJOWFOPnkVJ52ymoYGCyEgHjcoPaCJ666fg4tvJ8+m/pelYNdat3xkLYa81DqebVaA7UkGDa6hb986YjGFEHqb1Y+U3HTLbLSX+luIlCXT2OBjwhnLWbSgkC/X5eIzt11QUmo8T/D+e6XEYwqZJR6DEAIhSAghnHYHAOBmHQAcg4JOcR587A00Guebhp0WSKlJJiWRiLmNCes4AsPQ3Hb7e2jNtqpNCwoK4kydcjCvvd4LAy+reJZCetBybdziLcDzrPg3V1g2UMC0eeudnjz0wCBM5RGNmMSiWz4xRSRikkwa2/kvQqQ0QiRiEo1+45moiesK1qzJ5fe/OQLHkVmz+rduehoSohWCaDEAkq6XJNtIgMLlb3cMZc3qPPx+N7Wiv/HZnV/zzY+nIRSyeej+wSxe2oWAZWcdw0LIVsmhxQBQwk1IobMuEuSzHNZWFnDvPWUEAi0XmNYQCtp8vqiQBx8Ygint7MO7EEhJIjMA8CtHCA+y0DK2ZJInHhvI7FnFhMN2i6x3IUApj7/cfig1tSEs5WYfowiUEHZGAGBZOEJoLwtnBUt5NEV8/OkPw4nFFErtPQJCIZvXXunFtOf74VcJspWkITKjAYJ5MimEcHQWRtE1oITDrFndqF4fQqm9x6lheLzwfB8SjoUysjMAIACljHhGAFCQI5NSYmflHgA42uSiixfRq089iYSx98+7krPPXUrASmzrTmab0WvJzAAgGFJJIYVNFubRY0mTfn1quHzyPBJxo0XviEZMjh+zlrPO+YK4m415gpTuVaaIZUYDFMuENISdbV6A9sBDcu31c+jWLdKi1b/VC0gkDK65bi7dujaSsI3s4lODkAKlMgSA7geYCUOSdQCIOhbHHLWWMycto7HRanHSWgiIxhT9Dqrjiivn4Wgz63Y7IcC0RDQjADi4l5WQUmcVAFxPEArY3PLzWYRCKe9IKW+bz64AYRh6m++ayiMaNbnkxwspH7KemJ1N2UKBkALL0pkBwKBeobhU2NnkBSQck4lnLmXEiPXUbAqQTBokEl9/kgljhx6B1mypC4R4XG3zTKTJJBS0ueqauSiVSgpli6sjJSjltWoLaAWkeyWk8YUtRPbsjX5l8/GH3Rk7ZhK2LbeBpgZcT3HjTR9zxsRl1Nf7vtIGpulhJw0mX3ECa9bkY0j3W6pWgwCfcnBdkS3yR0iNYbjRDAGAhETHsikjaEjNmpV52Mgd6CWNh8ltvxvO0cdUEAza2LZEa8jNTXL3X4cyY2Y/BPZ2z2pAovFbTlYVwknpgSeaWvWOlhsgAiGNJpFFW4AGTMslaNkEtvs4hMwYS5Z34eEHB5GTk0RrCAQcVq3K4+67ylAiucNng5aN33LILkqlt21PZgYAqRUnI2DQYUiAKW0euG8wny/qTCjk4Pe73P3XoVRU5eM3nY7DiwYpPHx+HcsYACy/0ZzuMwGeJ7CTbRd58ymXmtoQd94xjIKCOLM+KWbKU/3xGck28/K28iTSK38MQyfzC1Q8cwCwjKavh5Oe4IZheHQqjGO3UfhVA34jybTn+zJzRi/uu3cIkZiFMtomr+XplCta0DlO0k0nTwLDkPGuRf5oxgDg89EoZHoKxAUQtX2MPWkt9zzwbxACt41cLsPQaBeuvHQMb7zak4Bqu9qWmO3jpFNXc/f9b6IR6XMjtUAaJIq6icxtAf6g0SDTtAfYjiQYSHLF5HmcPmEFEyYuJ+60XQxeKY8N1SHsZNuVedmOJBxKcPmV8xh/xgpOPXUlsbTxJFGGjA0crDOnAUyfbpRGeqqCEp7FOed+wYgj1lNf7+P6Gz6lc34Uuw1j8JbltmmNX9KzOP+Czzls+AYaGyx+ctOn5OfFsJ108CSQppssHxGMZA4AlttkGK3fAhK2QUlxA1dfM5d43CAaMRk4qIYfXbaAZBbG4PeMJ8UBJfVcOXkesZhBc7PJkPKNXHzJQpKemQb5C6R047l6YMYCQXgO9XJPjCedErLeYXgGPEwmX/0fevepZ/NmP0JAc7PJpZctYNrzfVm2ohADZ8d+v/BQZvsXJmktdpoh3MrT1dfOpceBDdRu4SkaMbn8ivlMn9aHFas775Qny0gdWd+l/KVEGl6jlK0rCm1ldsOul8ZWE07v3LJXmj496lMG0Le+FksaHHxIHeec98U22btEwqBL1yg3/XQWv/vNSExhbxOF04BSmnjcoLo6hGzHEnVPC/x+h54HNmwXck7xpBg4cDM/PGcJTY1fh5zjcYNuxRFuuGU2f/z9EVhye55M5dHQ6KO2NoAU3q42AKSU9a22hVrzcF6BGTFkwtFaqJ3qaS1IOIobbpnNaaevpL7eD98QlvYEgaCDUm5qMsVXGo6Geh+nnLqKY46pSG0zYluvITcvwY3Xj+apKQMIWe1Xpe65qUzcX+56mwGDaog0m9uMzfMEwaCNUt52PNXX+zh9/AqOO/7LLQH9bb0TKTTnnT2O9RvCBKxdAUAQ8BkNGQVA6QFWRCk7iiZ356pKYycF9983hHGnrqJT5xi2s+2q8bxUt4sdxdkdR5KTm9xOq+TmJvjwP6W8OK0vPqN9I3hKedQ2BHj4wUE8/MRrKOXhafEtngSOs2OeXFeSuwOeOnWK88jDA/no4+4ETHuXARMhNf6Qqmu9L9EKOmSor8kwZWR3XkDQtPl0TgmPPjSIQMDBTkps++uPu4sAidZs891UAkcQjZr88XfDaY762iyIsysKqCTPT+vHzOm9CQYdnO14EnvFkzQ0a9bkcvufhiPRu0w6aUBKQcAvMguAY49WTcrwYrt9jUhV6d57dzkrlucTDLZ8xWqdUv3PP3cQb73Tk2CGSral1Liu4PY/DaOx0UKZrbNBQkGb++8pY+XqznuQeBJICYGwqM0oAIpzypuUacf3pEmQz3SorM7lrr8eis/X8kMWPp/LhuoQd95xKBIvo/2JgqbN7LklPPVEf3LyEi12h0Mhm7lzi3jk4UGYMrFHi0AqsAJ2ZjWAECIhpKwXe5gk98kEU6cezDtvHUAw1LIDLX6/ywP3DWHp8sJd75PtQGKrZrurnBXLCvD73RZpEtuR3PF/w2ho9mPt4RkGQ7l4DpszCgAAwzRqxB4uQ9P0iMb8THmqf4sOW1g+h5Ur83n4wUGYWVKP6jdtvqzsxBOPDmjRWUS/32HR/C68MqMX/j126QWGdD3D8OoyDoBgUNXtKQBcV2KpJKeetrJFSRHXMSgqilA+dAM2KitKURxXYpkJho9Yj23v/XQmEoqDDqnlqKMriO9hnyLtCQxDxLuX+JszDoBw2NgkpWZ3XUoEEHN8jB+/nFNOW0kksvceqOsKgkGHn/58FuFAos1SxntDcdfHD36wlJNPWUUkaraIp3A4yU0/nU3Ab+PsUcpYYJpG04BB4caMAyAQkDXS2P1aTDoGnfKjXHfjp7iuaHFnzuZmk+GHV3Hu+YtJZLizV9Ix6NK5mWuvn5Na/S3kqanJYuSoSs4+ZzEJ19oDzSYxLSLHnmBkHgDBkFdjKL1r5jUkPZNLL5vPoME1RCKtS4bEY4rJV39GaUkD8UzV6muwPZPLLptP/wGbiUZbx9PWU0glxY3Ed5cBFQLDtKO9igY3ZBwAnrY3KuXtMmEXsxX9+tRw6WULUmHT1qrduKJXrwauumYurjYy0r0rZpv0P3gjF/94Ic3NrddEsZiiT596rpj8GY5Wu+RJCAPDELWtTQRBq5NBEDBFrWE4ntZC7igf4HkC09L84pcf0vvAeurq/ViWu52BEI2YeK7YxrLXOpWzT7V6+WbCKVVZc/nl83ltxoG89/4B7dq+xfMEls/jf37xEQf2aKCuwY/1reDN1mjltwWptSAQsHdwQEWgPZg8+TNem3kgH35UslOehJD4fGxKBy+tBkBpr3CjMhuaQeTuMCGkIeRPMnNmb157vVdKyN/yDIq6NXPjzbMxlN4mhBoK2Sz5ojP33nso2tXbtH3TGoJBJ9UAQrZv9w6tIeRLMv3lPsyc2Xs7j8ZxFEPKNnDZFfOIRtU2z+XmJvj3v3rwz+f6I6Wz7eGVLTwlksYueNJIKQiHVXYA4IhRZv2zj4tGtNhhQsgwNPGYwdRnDmHnjrtB3751XHjJoq9y50JopIQ//eEwps8YCOxY25k4+CyH9jyiZhiaWEwxderOeJJMe6E3ZeXVHDmqiqbG1BZhWR4NDT5+9YsjWbS4O+DsNU9agzIglGNVZwUATjm+R92N1sYt5wPcHSkAhGCX6dp4UvHXO4Yx9sQ15BckiMcN8vOTvDy9NzNm9iGgmndZupWJ84lC6F3wpIkk/dx+22EcNvxlDEPjuIJwTpL77j2MRYu7ErIiu7Exd8KTFhgmhEL2xnTwIVs/EYXNpuHVi1ZcG+K3HFas7sT9fy8jGLIxzdRKueP/huFpsqw3355F6oIqwVvv9uCFf/YjJzdBIOCwbGkn7ru3DFO0IhkGGKaLoZzqLAGAQJlmtRCtUyaWSPLIwwOZN7crxUURnnh0AHM+607QtOmIJGTqPOGddxzKpo1BcnKS/O0vQ9mwKQfLbLnNorVAGa4nDTMtGiAtTnQ4x9wgpbslGtgyTWCaHvWNAe69u5yuXWP8/d4ylHA66K0EWzwky2bJsi48/dQhHH1MBc8+ezB+o5Xpay0wTdnUu6+vISs0AEBuvlklpWi1P+5XSV5/tScXnPd9NqwPbte0uSOSZSR56L4hXHf1cdgJmYaOYxLLkg3Hjw3VZZEGcKqVCbYtWrViDamJRRSzZhUTsDq+8FMA8KheH6SyMkzAclpf4S4MlM9tGj2isDZrAGAYXpUy0+OLS6n3GeFvNdqU8lB4aTneIKTENJxNQpTE0jLf6XiJLyA3KuU6Wkv2U9uSFBLLZ65P2/vS8ZKyw806yyfr0ftvkGxTbaJTwbG8fLMqXe9MyxYw6aTCzX/9daQ+7pmFOB0HBMLzEDh0lLvvPDQ+F8IFRkVWAaB794PqBhyyqq44Uo82krh+P1l/oE9rPL+FGwp2gLOHKffa9vsJ5wTodUC0MqsAIITwPvx8blXJB+sJ3/804SVr8Swfnj97r2ITdoTNo49nxS+vwohEs1r8bsCPthT585bQbfo0T0dF1Z3ZBAAAaanKTRPGUDGgN8XPv0H3qTMJVn8JBPBMi2y7ZEzYzZiNUXQW33zt+X14Ph/hJSspnTKd4pf+hav8jatuuLCWbAMAtlwnGmMk8vNYec0FVE38PsX/eIXuz76Kf0M1rgzgWWbWTK6yTVwh8VyNl023HmiN5/fhBnyEVnxJydSX6Tbt31h1dYCP5EGFtavPmlDDrTdlFwCSicQ6qSTSdpB1jSQLcll1/UVUnzGW7s/MpNtzr+PfXINjBNBmB7ugsb0E77Nwg36Cayrp/sxMil94A9+mGlwVwPbnYroetpJ1v+3dO/s0gGO46+xkEiEEGo1M2siETaJrZ1bcfCnrJ46lZMrLdHvxTaz6OhwVQCuTDtn9Ic32nWcp3FAAf+VGejz4LMXPvkpg/XpcGcD253z9RSlxlFX5vhBu1gFAu2aNMGSDYRh5jrMlkidAJpLIeIJ4aTHLf3EVVZNOpnTKdLpOfwuzqRHXDKIN9d0DgtZoy8QJBfFtqOGAx6fR/ZmZBNdV4IrUiv/295EGdMr5Mq1bYbpe5BdikxBslobM267QRQhkPIGMJ4j2KmXpr6+l6gcnUfrki3R99T1UtGkLEIx9Hwhao02FEw5iba7ne8++QvcpLxNatQZP+LYX/DbSMqBzp7VZCYCKIUM2F83/tDbgD/Ta1feMWAJiCZoP6cUXt91E1VnjKH1yGoVvfIiKR3GtIFrug0DQGq0UTk4Qs76J0qdepuSplwgvXYmHifOVqt+J16I1mIrmYDA7AXCWEN578+ZUGMoYtiffN6KpBpeNZQfzefnPKZi1gNLHp1H41seIZGwLEMQ+IngDJxxERWIUP/capY+/RO7nS9AoHH94z9xsDXFLuVHpVmQlAAAsv7VWSAOtNXt6YtiIxEAI6oYPpn7YIDr9Zy4lT7xA5/fmIDwPxxegQ1aFaNCGxA0HMeIJuk1/m9LHppE373M0co8F/zUANNpn1cWOPnwTj92VnQDA85ahvT0W/jdXiWqOghBsPnoYtUeUUfjeLEofn0bBh/NSvf59wY4RstegpcDNCSJth8I3/sMBj75Awaz5KW/JF2ohHwIv6N8w98Kx1VycpRogYSc/8jQxwzACrtsCT0VrVGMzWko2jTmSzaOGUfjmR5Q+/iL5cxaikbj+QPYKXwiccADheXR6bzYHPDqNTu/PQZAGTWYqYkWdZ/1IdmlO55DTCoANxupFxV7fRZbPd1gsGm3xJAqtUQ3NaMNgwymj2Tx6BF1e/4DSJ14kd+EXaNSWhFO2CB7cYAAtBAWfzKf00Wl0fvsTpOfgWEFopS0jXQ/yQiT69XmFd9I79LRWcEwaOMk2hHjNNNPTCVN4HmZ9E6CpnjiWeU/cxpLf/oTmg3qi4k3IeOavdHWDAZxwiLzPvmDAdb9n8IU/p8ubH6CVieMPtVr4AIbWRApyqtecedx/0j3+tMdkHYcZ8UT8Fiml5aUjyC4EwvVQ9Y1oU1F17qls+v7RFL30JiVTphNatQYtfLi+9s08ugE/2lTkLlhK6ePT6PLq+xiJGK4Z3GsDb/cIUCS7Fb47auzY9VkPgKbKynm53+s+3+f3t3wb2BkQHBdV14jnM1l38UQ2jjuGbi/8i+5TZxBaV4Er/Hg+q01jCKkMnUV48QpKn5xO15ff/iqQ5QTCaf9p4XqQl0NT/17P8376+Ul7Ed+4ceOSUojn07IN7AIIZl0DbjjI2ivO5rNn/sLK6y4mWZSPGW9A2umv8vF8Fk5+DoEvq+j7v3dRfvaNlDw7HZF0cQK5qShmG+BOaU1TYf6aOWdOerMtprNN0nKuk3ghHuXnSqncr/ICbQEE28Gsa8DOz2H1teezYfwYuk99hW7Pv46/ZhOuEcBrTeZRg+czcYMBgqsrUlnNf76Ov7YGRwW3hG01bdagQGuwfMR6lrx0xgkjatviJ9qkjPfoshHLXU+/4Q+2g8smBDJpY9Y3pTKPP/0Rnz1zB2svmoQbDmDGGxF7C8ItGTq7IAertoFetz9C+Q9/Qo8HpqAaotj+PLRq+wSW4XokC3ISm0aPmNJWv9FmddzC0I84trP3QaHWMJNIYtY3ESspYvn/XMncqX9m3TkT0H4TM96EcN1d7wwaPKWwC3JRDRF63vM05Wf/hF53P4ZV04Djz91Sy9A+eQopDSKlRe8PvOXqT9vqN9qsMiO5of4tuuTP8QcCh6bVGNyTlRNPYGzJPC777bWsP+tkSp94ia4z3kXFmnDM0HaqNpWhC2FtqqXkmRmUTJlBaM1a3N1l6NpqAbkeOj+XhvKBD23TGSP9IYy2ow8WzLvMH/Lf19zQmNF4vhsMoJUkb+4XlD72IoVvfICyN1N12gQW3/mzVKCttpGiV96h5KmXyFm2Eg8L1+f7+iqE9hy+BtNxaRjQe9H0eU+MOF8WRzucBgCIJZ2pnhG/URV16RNLxDMGAAFoIag9+lA2H3MYebMX0utvD+P5LYxYnJKpMyiZ+hKhlUsBhcYPOBgJJ0PjdSG3E41DD7mvLYVPe+B61oxXbvje3CV/bq6vRxsZzOboLW3WnZSLGOvRnUTXTlib6zGaIgjXQWhJxk+3aQhaFgmplzcdN2rYsGHDGtvy59q8OjM47V+P5Lz6/uSiqi8P1Bm8ZjZ1AiiKE+xG1cQTqR5/HP7KjfT99T1UnncaleedRvTAEoxYHJnIYFMKAbm5eTSa8u4xed0a2+Hn2p7WXXTt1aUvvv03pzmCNtp3iQnbQbkxEgWdqZ44lqqzxxHpVQpSUPD+XMrOuxmDOLGu3Vl/1kmsn3QSsdJuqEgUkbTb3XbxB/y4trMkmqgZccKwE9ocAO2yJI+Z+9Hi4uemnxrcUFvktUuVz5awcbIZNydM1VnjWPqrq6meMAbP70NFYiAl/sqNFL38Dp4KoJpjdP7kUwrf+AgjGiPa+3vYXTohXHeL+yjaDwCuc9PospGftIur2R4/Ml7K5tqR5b/xOuUhnTbs6bc1cRRvRJsGVZNO47On/8zSX11NrEd3zPomZCK5w43Xs0xsfw6+qhr63P4A5WffwAEPPYeMJnAKctHKoE1bkmoIh0Mk4vEP69dWPd2eBnI7GTda1Bx1xiudZ3/+fRsvvStKAK6HSkZxrCA1J4+i4vzxNA45GGE7GLHtPRA3FCBv1kKGXHQrCIGWcrtYgiRJU9/eVJ53GhtPPRY7PxejOYJw0q8RpJT4fJbjuN6JIwcMeau9xNJ+R3SE0FX3Trk1VLHhKN+69SEnTaeDhOdhJKN4ho+N3x/NugvPoGHYgJQmaGx58Yzr9+HiI7T8Sw765V/o/o9XqPiv8Ww66Wic/BxUUxTStDVorQnn5hBrbn5y5KCh7Sb89tUAWw3CST/+TenrH/63E4ttt+r2ctZQiSieVGw+dgQVF4yn/ogy0GBEo7uN1u5OA2wfXYwh8GgoH0DF+adTc8JI3IAfozmaStm2YiZ9fj/a9Sqjtjd8THl51T4NgH9onXviYePezZ23tMxWsoWCj6ER1I4aSsVFZ1A76lC0lCnjztN7xNXeAmDrPm0kYgg0dcMHU3HhBDaPPhzPp7YAQe/1jAohCOWESURiF40cXP5Ye8uj3U9pThKi8Yvb7rnev7H2NbNyg29vtgIjngqK1Q0fQsWF46k5dgTaNFMVxVsFL9p2ubj+AGhN/qwF5M9eSN2ooaw7fwK1Rw1DG1tAuIfGotaavPw8IpHoC6MyIPyMaICtVDHpst+WvPHhrU40uufqd0h/Ki6cQM3Ykbh+X6vUb4s0wLfJ06hkFM9Q1I4+jHUXTKD+8HK0ABXZzTakNf5AAM/zKt2YfcRRw4aty4QcMhaay1n06UdlM/81Kli5qaeH3qExZcTjKCdO44B+rLrhElbefAmNg/shE0mMWDwl9xZCWFsm/sqNdHvpLba0J2+R2+kpC4RBeMVqima+S3jZKpJdOhM9sBSt1JbqpB1Y/UqhTNNDc9HIIeWfZEoOGTuo/yshYhPvf/Qya3PdB8FlXxbapvGVUpLxOJIkzX17U3n+6Ww45VjsvBxUczRVJdxSgbWVhysFjj+McF2KXnmXwrc+YeP3j6Li/Ak7dUVzcnJobm6686hBQ6dlcuwZn8VVP/3fSaVPznxaVW82PM9F6gTRA3tQec6pVI8fQ7IwH9UcRdhOWoWeli1gZ1FI10XZEexwmI3jjqXivNNp7t8baduIaJzc/DwS8cRb1DePO/LII+PfaQAAVJ592a+7z/zgf2Jhi8pzT2P9xLEkigq3xOOdNhll2wHgG0BwHJQTxc7No/r046k491RE/34QjaxNxr3Rx5SVrcn03BvZAIA7Fn76zn+50QE1/z25/7rRw0DIlPA93WYQTYsNsPvwHp7yI+I2+fMWUvrye7jKiFYdVXbW8X37z8uGuc+OZj1C6Oe0vvSYNcuLO2k9sjGZpEP3if9W8ECbCkQQz+f3cuYsvvzE4j5vZ8vosqa578+EqBf1m8+1bWdJODd3tzeRdiQyHBeRn0vl2CNvLXz1qSezaWxZ1d35iPIj1tqRxFme7VSEwqF9AgSG4yBzc6g4bsTtPZ6654/ZNr6sa+991NChCyLx2Fmu42wOBoMdGgTScZDhHKqPG37/Ac/ed2NWjjEbB3Vc+WEfuonkmZ7r1IZCHVMTSMfBCIfZcNyhjxU/98CV2WrTZG2D/1Hlh72TSNoTPU9vCOeEOxQIlONi5ORQfcKIB3/w/CM/Qggva4GazRM5uvywd5IJ5zRP69U5eR3DMDRtB5GfS9XYkXcU/+PBH6ezqeN3DgAAR5eVzWpqTozzPD0vryA/i529lPDdokIqTxh5a8mzf7+hI7iyHeKOlzFDh37hxuwTnaT9Rl5+frueN9wz6Wss2yXRozi+afxxF5ZOvef3HcZW6SgDPWLw4I0Re+MZsWj0kXBOLso0s2NL8DxMDZEBvb5cc8UPJxTfe9vjHclY7VBtu48deGwEuGTWssULDGXcZqqgLxqNZkwjKMdBBINEhhz09oKrLrj0yLNOX9nhvJWO6F8P79f/r7bjni6EWJ6XX5ABja8xbRe6dKJ6zPB7nnn3n6d1ROF3WAAAHD2w7HVPOMcm44l/5uTmYFpWu2wJ0vWwkEQO7lFd/cOTzit+4dGrfiRlc0edxw590d/h/YZUHt5/4A9c17sSqM9tSwNRa0zbwcjLoWHkkJeX/WryUd3/8tspdHDaJ256HN6v/98RepRjO9ND4XCqzDqN2sBwXExpEOnXY1PlGWMm57/5j/FDzzxzxb4wd/vMVZ8j+5d9PuKg/qc7jnuJgLX5BQUow2gVEITnYToeuqgzjaPKnl78h+tGlT7w53uzObL3nQXAV9vCwQMeSTixUfF4/G5DqVhuXh5Cyr0Dgudh2i4qHCYy9JBPVp9z6vi8fz177vDx45fta/O1T97edMyg4RXA1f9ZsvBxx3FutixromkqGWmO4Hm76GbueZiuB6EQzd8rWtV4xOA7H3jgjod+JUSMfZS+E5f9frJiyXF43k881x1nmibRSISk3yJ/9iKGXHQrQoOhgXCQaHHntU1DBjz02V03P3RS157V7Kd9h2YvWzxm1rLFL3y4eEFi9sZ1esHUf2hNT63zB+vmQccvqz7/qp99sGlt8f6Z2teBsGLJkR9UrX5w3rP/rGkcetIn1Rdcc+kUrTvvn5nvGH08f37Jnz3Pv38m9tN+2k/7aT99B+n/AcYRXFGnmAXFAAAAAElFTkSuQmCC" alt=""><span>AVIOLAB AI</span></div>
+  </div>
+
+  <div class="filetto"></div>
+
+  <div class="griglia">
+
+    <div class="box">
+      <h2><span class="n">7</span>🏠 Le mie candidature</h2>
+      <p>È la prima porta del <strong>🎮 Menu</strong>, e tiene <strong>una riga per candidatura</strong>. Doppio clic (o <span class="cmd">Apri la candidatura</span>) e riprendi da dov'eri: annuncio, stelle, documenti e bozza dell'email sono lì.</p>
+      <ul>
+        <li>Colonne: <em>Azienda · Ruolo · Profilo usato per il match · Match · Stato · Esito · Da dove · Aggiornata</em>. Si ordina cliccando un'intestazione.</li>
+        <li><strong>Stato</strong> dice a che punto è la procedura — <span class="mono">CV mirato ✓ · lettera ✓ · email ✓</span>, sempre tutte e tre, così vedi al volo cosa manca. L'email si spunta quando è <em>partita</em>, non quando esiste una bozza.</li>
+        <li><strong>Esito</strong> lo dichiari tu, da <span class="cmd">Com'è andata…</span> nella scheda della candidatura: <em>In attesa — nessuna risposta · Colloquio · Rifiutata · Assunto 🎉</em>. Per una spedita senza risposta, ti dice da quanti giorni tace.</li>
+        <li>I filtri <span class="cmd">Stelle</span> («almeno 3 ★») e <span class="cmd">Mostra</span> (<em>Tutte · Da completare · Generate · Da sollecitare · Scartate</em>) si sommano; <span class="cmd">Esporta l'elenco…</span> lo porta fuori in CSV o markdown.</li>
+      </ul>
+      <p><span class="cmd">Elimina candidatura</span> chiede un <span class="cmd">Confermo</span> e poi cancella la sua cartella intera. Non c'è cestino: quel che avevi esportato altrove resta dov'è.</p>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">8</span>Quando cambi il profilo</h2>
+      <p>Le stelle e i documenti di una candidatura sono nati dal profilo di <em>quel</em> giorno. Se poi aggiungi un'esperienza o correggi un titolo, <strong>restano com'erano</strong> — sono la traccia di quel che hai spedito — e accanto si accende una <strong>lucina rossa</strong>: nella Home la colonna <em>Profilo usato per il match</em>, in Documenti una spia per il CV e una per la lettera.</p>
+      <p>Rimetterli in pari sono due gesti, <strong>in quest'ordine</strong>:</p>
+      <ul>
+        <li><strong>1.</strong> <span class="cmd">⚠ Riconfronta</span> in <em>Confronta ★</em>: rifà le stelle col profilo di oggi.</li>
+        <li><strong>2.</strong> <span class="cmd">Rigenera</span> in <em>Documenti</em>: riscrive CV e lettera sul giudizio appena fatto.</li>
+      </ul>
+      <div class="cit">Finché non hai riconfrontato, «Rigenera» resta spento <strong>apposta</strong>: un CV mirato su stelle vecchie è mirato al bersaglio sbagliato. La Home lo dice scrivendo <em>Stato</em> in rosso, con un «⚠ obsoleti».</div>
+    </div>
+
+    <div class="box servizio">
+      <h2><span class="n">9</span>⚙ Impostazioni — dall'alto in basso</h2>
+      <p>È un pannello unico che si scorre. In cima, <span class="via">Come funziona…</span> e <span class="via">Informazioni su…</span></p>
+      <ul>
+        <li><strong>Chiave API</strong> — <span class="cmd">Cambia la chiave…</span> (e la riprovi lì).</li>
+        <li><strong>Documenti che l'applicazione scrive</strong> — lingua predefinita e <span class="cmd">Rifinisci i testi generati (anti-slop)</span>.</li>
+        <li><strong>Candidature spedite</strong> — <em>«Ricordamele se non rispondono entro: … giorni»</em> (zero per spegnere il promemoria).</li>
+        <li><strong>Cartelle</strong> — <span class="cmd">Apri la cartella dati</span> e <span class="cmd">Gestisci i documenti…</span>, dove riconosce i tuoi attestati.</li>
+        <li><strong>Sotto il cofano</strong> — i due modelli AI: uno per il <em>ragionamento</em> (confronto, mitigazione, testi), uno per le <em>elaborazioni testuali</em>. Si scelgono da un elenco che chiede lui.</li>
+        <li><strong>Quanto è costato</strong> — chiamate, token e una stima in dollari, in totale e negli ultimi 30 giorni, scritti lì; <span class="cmd">Apri il conto delle chiamate</span> apre il foglio con una riga per chiamata. È una stima di listino: la verità resta la fattura di Anthropic.</li>
+        <li><strong>I tuoi dati</strong> — <span class="cmd">Backup…</span>, <span class="cmd">Svuota i dati di navigazione</span>, <span class="cmd">ELIMINA TUTTI I DATI</span>.</li>
+      </ul>
+    </div>
+
+    <div class="box servizio">
+      <h2><span class="n">10</span>I tuoi dati, e come portarli via</h2>
+      <p>Tutto in una cartella tua — <span class="mono">%APPDATA%\TrovaLavoro</span> — che le Impostazioni aprono con un clic: il <strong>profilo</strong> con lo storico, una <strong>cartella per ogni candidatura</strong> (annuncio, confronto, CV, lettera, email), il <strong>registro</strong> e le preferenze, in file leggibili con qualunque editor. L'unico illeggibile è la chiave: è una credenziale.</p>
+      <ul>
+        <li><span class="cmd">Backup…</span> apre <em>«Backup e ripristino»</em>: scegli <em>solo il profilo</em> (con storico e CV base) oppure <em>tutto</em> (profilo, registro e candidature), poi <span class="cmd">Esporta…</span> Esce <strong>un solo file <span class="mono">.json</span></strong>, da mettere dove vuoi.</li>
+        <li>Per rimetterle a posto: <span class="cmd">Scegli un file di backup…</span> → ti <strong>mostra prima</strong> cosa contiene e cosa sovrascriverebbe → <span class="cmd">Ripristina</span>. Il profilo che c'era finisce comunque nello storico.</li>
+        <li>Non entrano nel backup la <strong>chiave</strong> (legata a questo PC) né il diario dei guasti. I <span class="mono">.docx</span>, <span class="mono">.pdf</span> e <span class="mono">.eml</span> sono file normali: si copiano come gli altri.</li>
+      </ul>
+      <p>Per tenere i dati altrove: <span class="mono">TrovaLavoro.exe --dati "D:\candidature"</span> — e quando la cartella non è quella solita, il titolo della finestra te lo dice.</p>
+      <div class="cit"><span class="cmd">ELIMINA TUTTI I DATI</span> ricomincia da zero e chiede di <strong>scrivere una parola</strong> per confermare: è un gesto che non si disfa.</div>
+    </div>
+
+    <div class="box servizio">
+      <h2><span class="n">11</span>Se qualcosa va storto</h2>
+      <p>Ti dice sempre <strong>che cosa</strong> è successo e <strong>che cosa farci</strong>. I casi comuni:</p>
+      <table class="err">
+        <tr><td>«L'AI ha rifiutato la chiave API»</td><td>è sbagliata, scaduta o senza credito → <span class="via">Cambia la chiave…</span></td></tr>
+        <tr><td>«Non riesco a raggiungere l'AI»</td><td>manca la connessione: riprova quando torna, non hai perso niente</td></tr>
+        <tr><td>«Il modello … non è più disponibile»</td><td>è stato ritirato → <span class="via">Sotto il cofano</span>, scegline un altro</td></tr>
+        <tr><td>«Troppe richieste all'AI in poco tempo»</td><td>aspetta un minuto e riprova</td></tr>
+      </table>
+      <p style="margin-top:1.6mm"><span class="cmd">Copia diagnostica</span> (in <span class="via">Informazioni su…</span>) mette negli appunti un foglietto tecnico da incollare in un messaggio: <strong>senza la tua chiave e senza i tuoi testi</strong>.</p>
+      <p>Per i PDF e per la Ricerca serve <strong>WebView2</strong>, che in Windows 11 c'è già. Se mancasse, te lo dice col link Microsoft per installarlo.</p>
+    </div>
+
+    <div class="box servizio">
+      <h2><span class="n">12</span>Aggiornamenti e tasti utili</h2>
+      <p>Non si aggiorna da solo, ed è una scelta. In <span class="via">Informazioni su…</span> c'è <span class="cmd">Cerca aggiornamenti</span>: chiede a GitHub qual è l'ultima versione e te lo dice — <strong>finché non lo premi, verso GitHub non parte niente</strong>. Se ce n'è una nuova, scarichi il nuovo <span class="mono">.exe</span> e sostituisci il vecchio: i tuoi dati non si toccano.</p>
+      <ul>
+        <li><span class="cmd">Invio</span> spedisce il messaggio nel dialogo e nel brainstorm; <span class="cmd">Maiusc+Invio</span> va a capo senza spedire.</li>
+        <li><span class="cmd">Invio</span> in <em>cosa</em> / <em>dove</em> lancia la ricerca; in <em>Indirizzo</em> apre la pagina.</li>
+        <li><span class="cmd">Esc</span> chiude o annulla le finestre. Nelle conferme, però, Invio <strong>non</strong> conferma: un gesto che cancella qualcosa si preme apposta.</li>
+      </ul>
+    </div>
+
+    <div class="box servizio">
+      <h2><span class="n">+</span>Le domande che si fanno tutti</h2>
+      <ul>
+        <li><strong>«Spedisce al posto mio?»</strong> No: prepara il messaggio e lo apre nel tuo programma di posta. <em>Invia</em> lo premi tu.</li>
+        <li><strong>«I miei dati escono dal PC?»</strong> All'AI vanno solo i testi che le dai da lavorare, e solo mentre glieli dai. Niente telemetria, niente invii anonimi.</li>
+        <li><strong>«Posso portarlo su un altro PC?»</strong> Sì: copi l'exe, ripristini un backup e rimetti la chiave — quella non viaggia, è cifrata per questo PC.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="piede">
+    <div class="regola"><strong>Che cosa il programma non fa.</strong> Non inventa esperienze o titoli che tu non abbia dichiarato · non spedisce email al posto tuo · non manda statistiche d'uso a nessuno · non si aggiorna in silenzio · non condivide i tuoi dati: all'AI vanno solo i testi che le dai da lavorare, e solo nel momento in cui glieli dai.</div>
+    <div class="legale">TrovaLavoro 1.0 · Guida rapida per chi lo usa (facciata 2 di 2) · La guida completa è nel file GUIDA.md · © 2026 Aviolab AI · Tutti i diritti riservati</div>
+  </div>
+
+</div>
+
+</body>
+</html>

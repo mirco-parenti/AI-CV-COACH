@@ -93,13 +93,13 @@ spedita di cui non hai ancora notizie, da quanti giorni tace.
 candidatura le ha date l'AI leggendo il profilo di quel giorno, e il CV e la lettera sono nati
 dallo stesso. Se poi aggiungi un'esperienza o correggi un titolo, quei giudizi e quei documenti
 **restano dove sono** — potrebbero essere quelli che hai già spedito, ed è l'unica traccia di
-cosa hai mandato — ma accanto compare una **lucina rossa**: nella Home la colonna *Profilo del
-match*, e in *Documenti* una spia per il CV e una per la lettera. Rimetterli in pari sono due
-gesti, e in quest'ordine: prima **«⚠ Riconfronta»** in *Confronta ★ ANNUNCIO - CV*, che rifà le
-stelle col profilo di oggi; poi **«Rigenera»** in *Documenti*, che riscrive CV e lettera sul
-giudizio appena fatto. Finché non hai riconfrontato, «Rigenera» resta spento apposta — un CV
-mirato su stelle vecchie è mirato al bersaglio sbagliato — e la Home lo dice scrivendo la
-colonna *Stato* in rosso, con un «⚠ obsoleti».
+cosa hai mandato — ma accanto compare una **lucina rossa**: nella Home la colonna
+*Profilo usato per il match*, e in *Documenti* una spia per il CV e una per la lettera.
+Rimetterli in pari sono due gesti, e in quest'ordine: prima **«⚠ Riconfronta»** in
+*Confronta ★ ANNUNCIO - CV*, che rifà le stelle col profilo di oggi; poi **«Rigenera»** in
+*Documenti*, che riscrive CV e lettera sul giudizio appena fatto. Finché non hai riconfrontato,
+«Rigenera» resta spento apposta — un CV mirato su stelle vecchie è mirato al bersaglio
+sbagliato — e la Home lo dice scrivendo la colonna *Stato* in rosso, con un «⚠ obsoleti».
 
 ---
 

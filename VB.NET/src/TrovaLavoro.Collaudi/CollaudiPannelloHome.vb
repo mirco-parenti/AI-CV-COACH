@@ -572,7 +572,7 @@ Namespace Ui
 
                 Assert.AreEqual("Azienda", azienda.Text, "la prima dice di chi si parla")
                 Assert.AreEqual("Ruolo", coda.Columns(1).Text, "e la seconda di quale posto")
-                Assert.AreEqual("Profilo del match", coda.Columns(2).Text,
+                Assert.AreEqual("Profilo usato per il match", coda.Columns(2).Text,
                                 "poi se il giudizio vale ancora — e l'intestazione dice di che parla")
                 Assert.AreEqual("Match", coda.Columns(3).Text, "e il giudizio, che la spia qualifica")
                 Assert.AreEqual("Stato", coda.Columns(4).Text, "a che punto è la procedura")
