@@ -94,7 +94,9 @@ candidatura le ha date l'AI leggendo il profilo di quel giorno, e il CV e la let
 dallo stesso. Se poi aggiungi un'esperienza o correggi un titolo, quei giudizi e quei documenti
 **restano dove sono** — potrebbero essere quelli che hai già spedito, ed è l'unica traccia di
 cosa hai mandato — ma accanto compare una **lucina rossa**: nella Home la colonna
-*Profilo usato per il match*, e in *Documenti* una spia per il CV e una per la lettera.
+*Profilo usato per il match*, in *Documenti* una spia per il CV e una per la lettera, e
+nell'email una sopra il messaggio e una sopra gli allegati — lì sono due perché due sono le
+cose che parti: il testo, che nasce dalla lettera, e i file che alleghi.
 Rimetterli in pari sono due gesti, e in quest'ordine: prima **«⚠ Riconfronta»** in
 *Confronta ★ ANNUNCIO - CV*, che rifà le stelle col profilo di oggi; poi **«Rigenera»** in
 *Documenti*, che riscrive CV e lettera sul giudizio appena fatto. Finché non hai riconfrontato,

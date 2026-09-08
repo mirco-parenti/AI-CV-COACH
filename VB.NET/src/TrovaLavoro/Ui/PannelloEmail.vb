@@ -371,7 +371,7 @@ Public Class PannelloEmail
                 lstAllegati.Items.Clear()
             End Sub)
 
-        MostraLaSpiaDeiDocumenti()
+        MostraLeSpie()
         Racconta(racconto, StileApp.TestoSecondario)
 
         AggiornaComandi()
@@ -635,48 +635,102 @@ Public Class PannelloEmail
                 Next
             End Sub)
 
-        ' La spia sta sopra questo elenco e parla di questi file: si rifà con lui, o
-        ' racconterebbe gli allegati di prima.
-        MostraLaSpiaDeiDocumenti()
+        ' La spia degli allegati sta sopra questo elenco e parla di questi file: si rifà
+        ' con lui, o racconterebbe gli allegati di prima.
+        MostraLeSpie()
 
     End Sub
 
     ''' <summary>
-    ''' Accende la spia sopra gli allegati: se il 🎯 CV e la ✉️ lettera che stanno per
-    ''' partire vengono dal profilo di oggi (cap. 03.8).
+    ''' Accende le <b>due</b> spie del pannello: quella sopra il messaggio e quella sopra
+    ''' gli allegati (cap. 03.8).
     ''' </summary>
     ''' <remarks>
-    ''' <para><b>Perché anche qui, e perché sopra gli allegati.</b> Fino al 2026-09-08 la
-    ''' spia viveva in P1, P2, P4 e P6, e questo era l'unico posto dove i documenti si
-    ''' <b>consegnano</b> senza che nessuno dicesse da dove vengono. È l'ultima schermata
-    ''' prima che escano di casa: chi arriva qui dalla Home, o riprende una bozza di ieri,
-    ''' in P6 non ci passa affatto — e l'avviso che sta di là, per lui, non esiste.</para>
-    ''' <para>Legge la stessa versione delle due spie di P6, quella dei <b>documenti</b> e
-    ''' non quella del confronto, perché è dei documenti che parla. Il <b>rimedio</b> invece
-    ''' è di questa schermata, com'è regola: nomina «◀ Torna ai documenti», che è il bottone
-    ''' qui in fondo, e non «Rigenera», che qui non c'è.</para>
+    ''' <para><b>Perché anche qui.</b> Fino al 2026-09-08 la spia viveva in P1, P2, P4 e P6,
+    ''' e questo era l'unico posto dove i documenti si <b>consegnano</b> senza che nessuno
+    ''' dicesse da dove vengono. È l'ultima schermata prima che escano di casa: chi arriva
+    ''' qui dalla Home, o riprende una bozza di ieri, in P6 non ci passa affatto — e
+    ''' l'avviso che sta di là, per lui, non esiste.</para>
+    ''' <para><b>Perché due, dalla sera dello stesso giorno.</b> Nata una sola, sopra gli
+    ''' allegati, diceva «il 🎯 CV e la ✉️ lettera che stanno per partire» e si accendeva
+    ''' invece guardando se la <i>candidatura</i> avesse un CV o una lettera — cioè un fatto
+    ''' che con l'elenco lì sotto non c'entrava. Bastava una candidatura i cui documenti non
+    ''' fossero mai stati esportati per vederla rossa sopra due file scritti oggi, con un
+    ''' suggerimento che mandava a riesportare roba che lì non c'era. Trovata guardando il
+    ''' programma, non il codice.</para>
+    ''' <para>Il difetto però non era il rosso: era il <b>soggetto</b>. Di qui escono di casa
+    ''' due cose che si disallineano ognuna per conto suo — il <b>testo</b>, che nasce dalla
+    ''' ✉️ lettera, e i <b>file</b>, che sono quelli esportati e che rigenerare non tocca.
+    ''' Una spia sola doveva per forza mentire su una delle due. Adesso ognuna ha la sua,
+    ''' sopra la cosa di cui parla e col rimedio che a quella cosa si applica: è la stessa
+    ''' ragione per cui in P6 le spie sono due e non una in cima al pannello.</para>
+    ''' <para>Tutte e due leggono la versione dei <b>documenti</b> e non quella del
+    ''' confronto, perché è dei documenti che parlano.</para>
     ''' </remarks>
-    Private Sub MostraLaSpiaDeiDocumenti()
+    Private Sub MostraLeSpie()
+
+        Dim versione As String = If(_candidatura Is Nothing, Nothing, _candidatura.VersioneDeiDocumenti)
+
+        ' Il messaggio nasce dalla lettera e da nient'altro (v. CompositoreEmail): se la
+        ' lettera non è più del profilo di oggi non lo è nemmeno il testo — e non cambia
+        ' niente averlo fatto riscrivere un minuto fa, perché a riscriverlo si riparte
+        ' sempre da quella.
+        Accendi(lblSpiaCorpo,
+                versione,
+                _candidatura IsNot Nothing AndAlso _candidatura.Lettera IsNot Nothing,
+                SuggerimentoTestoObsoleto)
+
+        ' Gli allegati invece sono i file che stanno davvero nell'elenco qui accanto. Il CV
+        ' base viene dal profilo di oggi per definizione e gli attestati dal profilo non
+        ' nascono: a poter essere vecchio è solo un documento della candidatura, e se in
+        ' elenco non ce n'è nessuno non c'è niente da giudicare.
+        Accendi(lblSpiaDocumenti,
+                versione,
+                _bozza IsNot Nothing AndAlso
+                _bozza.Allegati.Any(Function(a) a.Origine = OrigineAllegato.Candidatura),
+                SuggerimentoAllegatiObsoleti)
+
+    End Sub
+
+    ''' <summary>Mette una spia su un'etichetta, o la fa sparire se non c'è niente da dire.</summary>
+    ''' <param name="rimedio">
+    ''' Che cosa dire a spia <b>rossa</b>: prende il posto del <see cref="LetturaSpia.Perche"/>,
+    ''' che racconta il perché con parole buone in tutte le schermate in cui la spia compare
+    ''' e proprio per questo non può nominare un bottone che sta solo qui.
+    ''' </param>
+    Private Sub Accendi(dove As Label, versione As String, ceQualcosa As Boolean, rimedio As String)
 
         Dim spia As LetturaSpia = SpiaDelProfilo.Spenta
 
-        If _contesto IsNot Nothing AndAlso _candidatura IsNot Nothing Then
-            spia = SpiaDelProfilo.Leggi(
-                _contesto.Archivio, _candidatura.VersioneDeiDocumenti,
-                _candidatura.Cv IsNot Nothing OrElse _candidatura.Lettera IsNot Nothing)
+        If _contesto IsNot Nothing Then
+            spia = SpiaDelProfilo.Leggi(_contesto.Archivio, versione, ceQualcosa)
         End If
 
-        lblSpiaDocumenti.Text = spia.Scritta
-        lblSpiaDocumenti.ForeColor = spia.Colore
-        lblSpiaDocumenti.Visible = spia.Accesa
-        _suggerimenti.SetToolTip(lblSpiaDocumenti, If(spia.Stato = StatoSpia.Disallineato,
-                                                      SuggerimentoObsoleti, spia.Perche))
+        dove.Text = spia.Scritta
+        dove.ForeColor = spia.Colore
+        dove.Visible = spia.Accesa
+        _suggerimenti.SetToolTip(dove, If(spia.Stato = StatoSpia.Disallineato, rimedio, spia.Perche))
 
     End Sub
 
     ''' <summary>
-    ''' Quel che il suggerimento dice a spia rossa: cosa è successo, e i <b>due</b> gesti
-    ''' che lo chiudono.
+    ''' Quel che dice la spia del <b>testo</b> quand'è rossa: da dove viene il messaggio, e
+    ''' i due gesti che lo rimettono in pari.
+    ''' </summary>
+    ''' <remarks>
+    ''' Sono due gesti e in <b>due schermate</b>, e non si può fare altrimenti: la lettera
+    ''' si rigenera di là, il messaggio si riscrive di qua, e farne uno solo lascia a metà.
+    ''' Nominarli in quest'ordine non è pignoleria — «Fallo riscrivere» premuto prima
+    ''' ripartirebbe dalla stessa lettera vecchia, e sembrerebbe non aver fatto niente.
+    ''' </remarks>
+    Private Const SuggerimentoTestoObsoleto As String =
+        "Il messaggio nasce dalla ✉️ lettera, e quella non viene dal profilo di oggi." & vbLf &
+        "Con «◀ Torna ai documenti» rigeneri la lettera, poi torna qui e premi " &
+        "«Fallo riscrivere»: in quest'ordine, o si riparte da quella di prima."
+
+    ''' <summary>
+    ''' Quel che dice la spia degli <b>allegati</b> quand'è rossa: cosa è successo, e i
+    ''' <b>due</b> gesti che lo chiudono.
     ''' </summary>
     ''' <remarks>
     ''' Sono due e non uno, ed è la differenza con P6: là il rimedio è «Rigenera» e finisce
@@ -686,8 +740,8 @@ Public Class PannelloEmail
     ''' Dire solo «rigenera» manderebbe a spedire gli stessi file di prima con la coscienza
     ''' a posto, che è peggio del non dire niente.
     ''' </remarks>
-    Private Const SuggerimentoObsoleti As String =
-        "Il 🎯 CV e la ✉️ lettera non vengono dal profilo di oggi." & vbLf &
+    Private Const SuggerimentoAllegatiObsoleti As String =
+        "Fra gli allegati ci sono documenti che non vengono dal profilo di oggi." & vbLf &
         "Con «◀ Torna ai documenti» li rigeneri, poi riesportali: qui si allegano i file " &
         "scritti, e quelli restano com'erano finché non li riscrivi."
 
@@ -705,7 +759,7 @@ Public Class PannelloEmail
 
         MyBase.OnVisibleChanged(e)
 
-        If Visible Then MostraLaSpiaDeiDocumenti()
+        If Visible Then MostraLeSpie()
 
     End Sub
 

@@ -3422,3 +3422,69 @@ premere, e quell'angolo non lo guardo mai. L'ho spostato dove l'occhio passa com
 > distinguesse. Tutto vero e tutto inutile: stava in un angolo dove, mentre lavoro, non
 > guardo mai. Le due volte che me ne sono accorto in questo progetto non è stato leggendo il
 > codice: è stato usandolo.
+
+### Step 2.76 — Una domanda sui bottoni, e la risposta stava nella lucina
+
+*Spostata la riga di stato, ho aperto l'email e mi è venuto un dubbio: i bottoni di P7 sono
+in linea col sistema delle spie e con il cancello che vieta di rigenerare quando il profilo
+è cambiato? La risposta è di sì. Solo che, mentre la cercavo, ho trovato che a non essere in
+linea era la spia — nata quella mattina.*
+
+**Cosa ho fatto**
+- **Ho verificato i cinque bottoni uno per uno**, e stanno tutti a posto. Il cancello del 2
+  settembre ferma chi **riscrive un documento partendo dal profilo**: in P7 non lo fa
+  nessuno. «Fallo riscrivere» chiama l'AI ma parte dalla ✉️ lettera e dall'annuncio — il
+  profilo non lo tocca affatto, e il compositore lo dichiara in testa a sé stesso: *«non è un
+  quarto generatore di documenti, parte da un documento già scritto e lo accorcia»*.
+  «Prepara l'email» impacchetta quel che c'è, la spunta del 📄 CV base impagina un CV che dal
+  profilo di oggi viene per definizione.
+- **Ho trovato invece la spia che diceva una cosa per un'altra.** Nello screenshot che
+  guardavo, gli unici due allegati erano il CV base scritto quel giorno, e sopra c'era scritto
+  in rosso «il 🎯 CV e la ✉️ lettera non vengono dal profilo di oggi», con l'invito a
+  riesportarli. Quei due file lì non c'erano: la candidatura non li aveva mai esportati. La
+  spia si accendeva chiedendo *«questa candidatura ha un CV o una lettera?»* — un fatto che
+  con l'elenco lì sotto non c'entra.
+- **Ho spezzato la spia in due**, una per cosa: sotto «Il messaggio» quella del **testo**,
+  sotto «Cosa allego» quella dei **file**. Ognuna col rimedio che alla sua cosa si applica.
+- **Tre collaudi** (1458 → 1460, uno riscritto e due nuovi), e tre falsificazioni viste
+  rosse: la vecchia condizione rimessa, i due suggerimenti scambiati di spia, la casella che
+  si riprende la riga della lucina.
+
+**Cosa ho imparato**
+- **Il difetto non era il rosso: era il soggetto.** Da questa schermata escono **due** cose,
+  e si disallineano ognuna per conto suo: il testo, che nasce dalla lettera, e i file, che
+  sono quelli esportati e che rigenerare non tocca. Una spia sola doveva per forza mentire
+  su una delle due — e infatti, guardata da vicino, quella rossa non era nemmeno un falso
+  allarme: era un allarme vero con l'etichetta sbagliata.
+- **Un cancello e una spia rispondono a due domande diverse.** Il cancello chiede «posso
+  scrivere?», la spia chiede «quel che sta uscendo da dove viene?». In P7 la prima risposta
+  è sempre sì, ed è giusto così — il cap. 12 lo dice: *quel che è già scritto si può ancora
+  mandare*. Proprio per questo qui il peso sta tutto sulle lucine, e una lucina che sbaglia
+  soggetto pesa il doppio.
+
+**Dove ho faticato**
+- **Il collaudo che avevo scritto la mattina difendeva il difetto.** Non era sbagliato: era
+  scritto sulla condizione sbagliata, e quindi diventava rosso appena la correggevo. L'ho
+  riscritto — è quello che adesso guarda la spia del testo — invece di cancellarlo.
+- **E il banco mi ha fatto notare una cosa vera**: nel primo tentativo l'elenco degli
+  allegati era vuoto, e il mio «la spia tace» sarebbe stato verde per il motivo sbagliato.
+  Ho dovuto mettere nel banco un CV base davvero esportato, perché l'asserto avesse qualcosa
+  da misurare.
+
+**Cosa ho deciso e perché**
+- **La spia degli allegati guarda l'elenco, non la candidatura.** Se in elenco non c'è
+  nessun documento della candidatura, non c'è niente da giudicare e tace. Il CV base e gli
+  attestati non possono essere vecchi: il primo viene dal profilo di oggi per definizione,
+  i secondi dal profilo non nascono.
+- **La spia del testo, invece, resta accesa comunque**, perché il messaggio da quella
+  lettera viene lo stesso — anche se di quella candidatura non parte nessun file.
+- **I due gesti del testo si nominano in ordine**: prima rigenerare la lettera di là, poi
+  far riscrivere il messaggio di qua. Al contrario si ripartirebbe dalla lettera vecchia, e
+  sembrerebbe non aver fatto niente.
+
+> 💡 **Una lucina nata la mattina mentiva la sera, e non l'ha trovata nessun collaudo.**
+> L'avevo scritta io, con il suo bel collaudo verde sui tre stati, e il collaudo era onesto:
+> provava che il rosso comparisse quando il profilo cambia. Non poteva provare che parlasse
+> della cosa giusta, perché il soggetto non è uno stato — è una scelta, e le scelte le
+> verifica solo chi guarda lo schermo e si chiede *«di cosa mi sta parlando?»*. Il mio dubbio
+> era sui bottoni; i bottoni stavano bene.

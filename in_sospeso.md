@@ -643,13 +643,24 @@ invece di darlo per provato (regola 15).*
 
 ## Dalle spie in sincrono e dal CV base allegabile (2026-09-08)
 
-- **Nessuna delle tre schermate curate è stata guardata a video.** Le spie sono interfaccia, e
-  il banco vede il dato e l'etichetta ma non l'occhio: restano da guardare dal vivo la lucina
-  del 📄 CV base in P6 subito dopo un «Rigenera», la spia nuova sopra gli allegati in P7 e
-  l'elenco «Cosa allego» col CV base dentro. Non è stato pigrizia: il server MCP di collaudo
-  non era acceso all'avvio della sessione — e i server MCP si caricano **solo** lì — e da un
-  processo di sfondo Windows nega il primo piano, quindi l'applicazione si può fotografare ma
-  non pilotare. *(2026-09-08 — cap. 03.8; Step 2.73.)*
+- **Le tre schermate curate non erano state guardate a video** — *due su tre lo sono state la
+  sera dello stesso giorno, e guardare ha trovato subito un difetto*. Le spie sono interfaccia,
+  e il banco vede il dato e l'etichetta ma non l'occhio. La spia sopra gli **allegati in P7** e
+  l'elenco «Cosa allego» col 📄 CV base dentro sono stati guardati: la lucina si accendeva
+  guardando la candidatura invece dell'elenco, e da lì sono nate le **due** spie di P7
+  (Step 2.76). Resta da guardare la terza: la lucina del **📄 CV base in P6 subito dopo un
+  «Rigenera»**, che costa una chiamata all'AI vera. *(2026-09-08 — cap. 03.8; Step 2.73, 2.76.)*
+  - *Come si è sbloccato*: il server MCP di collaudo non era acceso all'avvio della sessione —
+    e i server MCP si caricano **solo** lì — ma il suo `README` dice che gli si può parlare con
+    `curl`, ed è quel che si è fatto. Da ricordare la prossima volta, invece di rinunciare.
+
+- **La guida rapida non nomina le lucine dell'email** *(deciso di rimandare, 2026-09-08 sera)*.
+  La brochure elenca dove compare la lucina rossa — la Home e i Documenti — e dell'email non
+  dice niente, né delle due spie di P7 né di quella nata la mattina. `GUIDA.md` è stata
+  aggiornata; la guida rapida no, perché è **carta**: sta in due facciate strette, ogni parola
+  in più va ristampata in PDF e riguardata a occhio, e Mirco ha scelto di batterla insieme al
+  prossimo giro sulla brochure. *(cap. 03.8; la riga di `guida-rapida/**` nella tabella del
+  `CLAUDE.md`.)*
 
 ## Chiuse
 

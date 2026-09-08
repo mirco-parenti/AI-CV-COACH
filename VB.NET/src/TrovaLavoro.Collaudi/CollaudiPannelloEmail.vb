@@ -1368,20 +1368,20 @@ Namespace Ui
         End Sub
 
         ''' <summary>
-        ''' Anche l'email ha la sua spia: dice se il 🎯 CV e la ✉️ lettera che sta per
-        ''' allegare vengono dal profilo di oggi (2026-09-08, cap. 03.8).
+        ''' La spia sopra il <b>messaggio</b>: il testo nasce dalla ✉️ lettera, e la spia
+        ''' dice se quella lettera viene dal profilo di oggi (cap. 03.8).
         ''' </summary>
         ''' <remarks>
-        ''' <para>Era l'ultima schermata a non averla. Qui i documenti non si guardano, si
-        ''' <b>consegnano</b>: chi arriva dalla Home a riprendere una bozza di ieri in P6
-        ''' non passa affatto, e l'avviso che sta di là per lui non esiste.</para>
+        ''' <para>Era l'ultima schermata a non avere nessuna spia. Qui i documenti non si
+        ''' guardano, si <b>consegnano</b>: chi arriva dalla Home a riprendere una bozza di
+        ''' ieri in P6 non passa affatto, e l'avviso che sta di là per lui non esiste.</para>
         ''' <para>Il collaudo prova i tre stati e la <b>frase</b> del suggerimento, che qui
         ''' non può nominare «Rigenera» — quel bottone in questa schermata non c'è — e deve
-        ''' invece dire i due gesti veri: tornare ai documenti e <i>riesportarli</i>, perché
-        ''' ad allegarsi sono i file scritti e una rigenerazione non li tocca.</para>
+        ''' dire i due gesti veri, nel loro ordine: rigenerare la lettera di là, e solo poi
+        ''' far riscrivere il messaggio di qua.</para>
         ''' </remarks>
         <TestMethod>
-        Public Async Function LEmailDiceSeIDocumentiCheAllegaSonoDelProfiloDiOggi() As Task
+        Public Async Function LEmailDiceSeIlTestoNasceDaUnaLetteraDelProfiloDiOggi() As Task
 
             Dim compositore As New CompositoreFinto
             compositore.Dara(EmailScritta).Dara(EmailScritta).Dara(EmailScritta)
@@ -1392,17 +1392,17 @@ Namespace Ui
                     ' annotata sui documenti: la spia resta spenta, che non è «in pari».
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
 
-                    Dim spia As Label = Etichetta(pannello, "lblSpiaDocumenti")
-                    Assert.IsEmpty(spia.Text, "senza sapere da dove vengono, non si promette niente")
+                    Dim spia As Label = Etichetta(pannello, "lblSpiaCorpo")
+                    Assert.IsEmpty(spia.Text, "senza sapere da dove viene, non si promette niente")
 
                     candidatura.VersioneDeiDocumenti = contesto.Archivio.Versioni().Last()
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
 
                     Assert.Contains(SpiaDelProfilo.ParolaAllineato, spia.Text,
-                                    "sono nati dal profilo di adesso")
+                                    "la lettera è nata dal profilo di adesso")
 
-                    ' Il profilo cambia sotto i documenti già scritti: da qui in avanti
-                    ' quel che sta per partire racconta qualcun altro.
+                    ' Il profilo cambia sotto la lettera già scritta: da qui in avanti il
+                    ' messaggio racconta qualcun altro, e riscriverlo non lo rimette in pari.
                     contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
                     Await pannello.MostraLaCandidaturaAsync(candidatura)
 
@@ -1412,11 +1412,100 @@ Namespace Ui
                     Dim detto As String = SuggerimentiDelPannello(pannello).GetToolTip(spia)
                     Assert.Contains("Torna ai documenti", detto, "il gesto che in questa schermata c'è")
                     Assert.DoesNotContain("«Rigenera»", detto, "e non uno che qui non esiste")
+                    Assert.Contains("Fallo riscrivere", detto,
+                                    "e il secondo: rigenerata la lettera, il messaggio va rifatto")
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' La spia sopra gli <b>allegati</b> parla dei file che stanno nell'elenco, non dei
+        ''' documenti che la candidatura ha in pancia.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È il difetto trovato guardando il programma la sera del 2026-09-08, con la
+        ''' spia nata quel giorno stesso. Si accendeva chiedendo <i>«questa candidatura ha un
+        ''' CV o una lettera?»</i> — un fatto che con l'elenco lì sotto non c'entrava — e su
+        ''' una candidatura i cui documenti non erano mai stati esportati diventava rossa
+        ''' sopra due file scritti quel giorno, dicendo di riesportare roba che lì non
+        ''' c'era.</para>
+        ''' <para>Le due metà del collaudo hanno lo stesso identico stato del profilo: quel
+        ''' che cambia è solo se in <c>out\</c> c'è un file. Contano tutt'e due, perché il
+        ''' rosso è facile da far comparire e la cosa difficile è che <b>non</b> compaia
+        ''' quando non deve.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function LaSpiaDegliAllegatiGuardaLElencoNonLaCandidatura() As Task
+
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta).Dara(EmailScritta).Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ' In elenco c'è un 📄 CV base già esportato — che dal profilo di oggi
+                    ' viene per definizione — e nient'altro. Il 🎯 CV e la ✉️ lettera della
+                    ' candidatura ci sono, ma come JSON: nessuno li ha mai esportati.
+                    ScriviCvBaseEsportato(contesto, "CV_base.pdf")
+                    candidatura.VersioneDeiDocumenti = contesto.Archivio.Versioni().Last()
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim spiaAllegati As Label = Etichetta(pannello, "lblSpiaDocumenti")
+                    Dim spiaTesto As Label = Etichetta(pannello, "lblSpiaCorpo")
+
+                    ' Senza questa riga l'asserto qui sotto sarebbe verde anche su un
+                    ' elenco vuoto, cioè per il motivo sbagliato.
+                    Assert.IsNotEmpty(Allegati(pannello).Items, "in elenco c'è il CV base")
+
+                    Assert.IsEmpty(spiaAllegati.Text,
+                                   "di quei due file non ne parte nessuno: non c'è niente da giudicare")
+                    Assert.Contains(SpiaDelProfilo.ParolaDisallineato, spiaTesto.Text,
+                                    "mentre il testo viene dalla lettera vecchia, e quello va detto")
+
+                    ' Adesso il 🎯 CV mirato è stato esportato davvero: da qui in poi fra gli
+                    ' allegati c'è un file che non viene dal profilo di oggi.
+                    ScriviDocumenti(candidatura, "CV_mirato.pdf")
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.Contains(SpiaDelProfilo.ParolaDisallineato, spiaAllegati.Text,
+                                    "adesso sì: uno di quei file sta per partire")
+
+                    Dim detto As String = SuggerimentiDelPannello(pannello).GetToolTip(spiaAllegati)
+                    Assert.Contains("Torna ai documenti", detto, "il gesto che in questa schermata c'è")
+                    Assert.DoesNotContain("«Rigenera»", detto, "e non uno che qui non esiste")
                     Assert.Contains("riesporta", detto,
                                     "gli allegati sono i file scritti: vanno rifatti anche quelli")
                 End Function)
 
         End Function
+
+        ''' <summary>
+        ''' Anche la spia del messaggio si è presa una riga sua, fra «Il messaggio» e la
+        ''' casella, senza rubarla a nessuno.
+        ''' </summary>
+        ''' <remarks>
+        ''' Stessa misura della gemella sugli allegati, e per la stessa ragione: infilare una
+        ''' riga in un riquadro a posizioni fisse vuol dire spostare in giù quel che viene
+        ''' dopo e accorciarlo dello stesso tanto, o va a finire fuori dal pannello. Qui si
+        ''' misura, che costa meno di guardare e non dimentica.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LaSpiaDelMessaggioHaUnaRigaSuaFraIlTitoloELaCasella()
+
+            Using pannello As New PannelloEmail()
+
+                Dim titolo As Label = Etichetta(pannello, "lblCorpo")
+                Dim spia As Label = Etichetta(pannello, "lblSpiaCorpo")
+                Dim riquadro As TextBox = Casella(pannello, "txtCorpo")
+
+                Assert.IsGreaterThanOrEqualTo(titolo.Bottom, spia.Top, "la spia sta sotto «Il messaggio»")
+                Assert.IsGreaterThanOrEqualTo(spia.Bottom, riquadro.Top, "e sopra la casella, senza accavallarsi")
+                Assert.AreEqual(titolo.Left, spia.Left, "incolonnata col titolo di cui continua la riga")
+
+            End Using
+
+        End Sub
 
         ''' <summary>
         ''' La spia si è presa una riga sua fra «Cosa allego» e l'elenco, e non l'ha rubata

@@ -29,6 +29,7 @@ Partial Class PannelloEmail
         Me.pnlCorpo = New System.Windows.Forms.Panel()
         Me.pnlTesto = New System.Windows.Forms.Panel()
         Me.lblCorpo = New System.Windows.Forms.Label()
+        Me.lblSpiaCorpo = New System.Windows.Forms.Label()
         Me.txtCorpo = New System.Windows.Forms.TextBox()
         Me.pnlAllegati = New System.Windows.Forms.Panel()
         Me.lblAllegati = New System.Windows.Forms.Label()
@@ -153,6 +154,7 @@ Partial Class PannelloEmail
         'pnlTesto
         '
         Me.pnlTesto.Controls.Add(Me.lblCorpo)
+        Me.pnlTesto.Controls.Add(Me.lblSpiaCorpo)
         Me.pnlTesto.Controls.Add(Me.txtCorpo)
         Me.pnlTesto.Dock = System.Windows.Forms.DockStyle.Fill
         Me.pnlTesto.Location = New System.Drawing.Point(0, 0)
@@ -170,6 +172,20 @@ Partial Class PannelloEmail
         Me.lblCorpo.TabIndex = 0
         Me.lblCorpo.Text = "Il messaggio"
         '
+        'lblSpiaCorpo
+        '
+        ' La spia del profilo sopra il testo (v. SpiaDelProfilo): dice se la ✉️ lettera da
+        ' cui il messaggio nasce viene dal profilo di oggi. È la gemella di quella sugli
+        ' allegati, e sono due perché parlano di due cose che possono disallinearsi da sole:
+        ' il testo viene dalla lettera, i file sono quelli esportati (cap. 03.8).
+        Me.lblSpiaCorpo.Font = StileApp.FontTitoloGruppo
+        Me.lblSpiaCorpo.ForeColor = StileApp.TestoSecondario
+        Me.lblSpiaCorpo.Location = New System.Drawing.Point(0, 22)
+        Me.lblSpiaCorpo.Name = "lblSpiaCorpo"
+        Me.lblSpiaCorpo.Size = New System.Drawing.Size(360, 18)
+        Me.lblSpiaCorpo.TabIndex = 1
+        Me.lblSpiaCorpo.Visible = False
+        '
         'txtCorpo
         '
         Me.txtCorpo.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
@@ -177,12 +193,12 @@ Partial Class PannelloEmail
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.txtCorpo.BackColor = StileApp.FondoCasella
         Me.txtCorpo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.txtCorpo.Location = New System.Drawing.Point(0, 22)
+        Me.txtCorpo.Location = New System.Drawing.Point(0, 44)
         Me.txtCorpo.Multiline = True
         Me.txtCorpo.Name = "txtCorpo"
         Me.txtCorpo.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
-        Me.txtCorpo.Size = New System.Drawing.Size(734, 500)
-        Me.txtCorpo.TabIndex = 1
+        Me.txtCorpo.Size = New System.Drawing.Size(734, 478)
+        Me.txtCorpo.TabIndex = 2
         '
         'pnlAllegati
         '
@@ -344,6 +360,7 @@ Partial Class PannelloEmail
     Friend WithEvents pnlCorpo As System.Windows.Forms.Panel
     Friend WithEvents pnlTesto As System.Windows.Forms.Panel
     Friend WithEvents lblCorpo As System.Windows.Forms.Label
+    Friend WithEvents lblSpiaCorpo As System.Windows.Forms.Label
     Friend WithEvents txtCorpo As System.Windows.Forms.TextBox
     Friend WithEvents pnlAllegati As System.Windows.Forms.Panel
     Friend WithEvents lblAllegati As System.Windows.Forms.Label
