@@ -38,6 +38,15 @@ Namespace Ui
             "{""tipo"": ""cv_base"", ""intestazione"": {""nome"": ""Luca Ferrari"", ""citta"": ""Modena""}," &
             """sommario"": ""Il ritratto del profilo."", ""competenze"": [""Uso del muletto""]}"
 
+        ''' <summary>
+        ''' Un 📄 CV base con due competenze: una si lascia fuori e l'altra resta, che è
+        ''' l'unico modo di vedere se il taglio dell'utente arriva fino al file (R6).
+        ''' </summary>
+        Private Const CvBaseConDueVoci As String =
+            "{""tipo"": ""cv_base"", ""intestazione"": {""nome"": ""Luca Ferrari"", ""citta"": ""Modena""}," &
+            """sommario"": ""Il ritratto del profilo.""," &
+            """competenze"": [""Uso del muletto"", ""Gestione del magazzino""]}"
+
         Private Const Lettera As String =
             "{""tipo"": ""lettera_mirata"", ""apertura"": ""Spettabile Azienda,""," &
             """corpo"": ""Ho quattro anni di magazzino."", ""chiusura"": ""Cordiali saluti,""," &
@@ -1107,6 +1116,44 @@ Namespace Ui
                     Assert.HasCount(1, scritti, "il file c'è")
                     Assert.Contains("Questo l'ho scritto io.", TestoDelDocx(scritti(0)),
                                     "e dentro c'è il testo dell'utente, non quello dell'AI")
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Le voci lasciate fuori non tornano nel 📄 CV base esportato (R6, 2026-09-08).
+        ''' </summary>
+        ''' <remarks>
+        ''' Il gemello di <see cref="IlTestoRiscrittoEQuelloCheEsce"/>, preso dall'altro
+        ''' capo: lì si guarda che il testo riscritto a mano esca, qui che la voce tolta
+        ''' <b>non</b> esca. L'anteprima impaginava col taglio dell'utente e l'esportazione
+        ''' senza, così le voci lasciate fuori tornavano nel DOCX e nel PDF — cioè proprio
+        ''' nei due file che poi si mandano. Sulla candidatura non è mai successo, perché
+        ''' <c>ScriviCandidaturaAsync</c> se le porta dietro: era un'asimmetria fra i due
+        ''' documenti, non una scelta.
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function LeVociLasciateFuoriRestanoFuoriDalCvBaseEsportato() As Task
+
+            Await ConPannelloAsync(
+                Nothing,
+                Async Function(pannello, contesto, documenti)
+                    contesto.Archivio.SalvaCvBase(JsonNode.Parse(CvBaseConDueVoci),
+                                                  contesto.Archivio.Versioni().LastOrDefault(), "it")
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    pannello.SegnaLeVociLasciateFuori(
+                        New List(Of String) From {"competenze¦gestione del magazzino"})
+
+                    Await pannello.EsportaAsync(FormatiDocumento.Docx)
+
+                    Dim scritti As String() = Directory.GetFiles(contesto.Cartella.CartellaOutProfilo, "*.docx")
+                    Assert.HasCount(1, scritti, "il file c'è")
+
+                    Dim dentro As String = TestoDelDocx(scritti(0))
+                    Assert.Contains("Uso del muletto", dentro, "la voce tenuta c'è")
+                    Assert.DoesNotContain("Gestione del magazzino", dentro,
+                                          "e quella lasciata fuori non è tornata dentro")
                 End Function)
 
         End Function

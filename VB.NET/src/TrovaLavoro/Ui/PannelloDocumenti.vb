@@ -1277,7 +1277,12 @@ Public Class PannelloDocumenti
     Private Function ScriviAsync(formati As FormatiDocumento) As Task(Of IReadOnlyList(Of String))
 
         If _cvBase IsNot Nothing Then
-            Return _documenti.ScriviCvBaseAsync(_cvBase, Nothing, formati, _linguaCvBase)
+            ' Il taglio dell'utente viaggia col documento: l'anteprima qui accanto impagina
+            ' senza le voci lasciate fuori, e il file esportato deve dire la stessa cosa
+            ' (R6, cap. 08.4). La candidatura lo fa da sempre — ScriviCandidaturaAsync si
+            ' porta dietro VociTolteDalCv —, il CV base no: era un'asimmetria, non una scelta.
+            Return _documenti.ScriviCvBaseAsync(_cvBase, Nothing, formati, _linguaCvBase,
+                                                _vociTolteDalCvBase)
         End If
 
         ' Senza cartella non c'è un «dove»: l'opportunità arriva qui già salvata da P4, ma

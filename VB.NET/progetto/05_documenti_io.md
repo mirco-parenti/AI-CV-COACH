@@ -1,4 +1,4 @@
-# 05 — Documenti: ingresso e uscita
+﻿# 05 — Documenti: ingresso e uscita
 
 *Come entrano i documenti dell'utente (CV esistenti, attestati) e come escono quelli
 generati (CV in DOCX e PDF). Regola guida: un solo modello di contenuto, più
@@ -138,7 +138,13 @@ non saprebbe quale dei due è vero. Nella stessa famiglia sta la prosa **riscrit
 quel che l'utente cambia in «Modifica i testi» entra nel JSON che si stampa, e vive accanto
 al documento invece che nella sessione, così sopravvive alla chiusura del programma. Il
 disegno per esteso è in cap. 08.4, dove nasce; qui basta sapere che il modello di contenuto
-in uscita non coincide più, riga per riga, col JSON generato.
+in uscita non coincide più, riga per riga, col JSON generato. *Emendato il **2026-09-08**: «nello stesso identico
+modo» descriveva il filtro, non le strade che gli passano davanti. Il taglio va
+**consegnato** a `PaginaCv`, e per il 📄 CV base non glielo consegnava nessuno fuori
+dall'anteprima: l'esportazione e il CV base allegato a un'email uscivano interi (il racconto
+sta in cap. 08.4). Un parametro facoltativo non ha mai un predefinito neutro — qui il
+predefinito voleva dire «documento intero», cioè il contrario di quel che l'utente aveva
+chiesto.*
 
 ## 5.4 Uscita DOCX
 

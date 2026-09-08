@@ -1,4 +1,4 @@
-# In sospeso — AI-CV-COACH
+﻿# In sospeso — AI-CV-COACH
 
 Raccolta **unica** delle cose **già decise e dentro il perimetro** che sono rimaste
 indietro: una tappa si è chiusa lo stesso, ma qualcosa aspetta il momento giusto, una
@@ -650,15 +650,21 @@ invece di darlo per provato (regola 15).*
   non era acceso all'avvio della sessione — e i server MCP si caricano **solo** lì — e da un
   processo di sfondo Windows nega il primo piano, quindi l'applicazione si può fotografare ma
   non pilotare. *(2026-09-08 — cap. 03.8; Step 2.73.)*
-- **Le voci lasciate fuori non arrivano al 📄 CV base esportato.** L'anteprima di P6 impagina il
-  CV base passando `_vociTolteDalCvBase`, l'esportazione no: `ScriviAsync` chiama
-  `ScriviCvBaseAsync` senza quel parametro, e nel DOCX e nel PDF le voci tolte **tornano**. Sulla
-  candidatura invece funziona, perché `ScriviCandidaturaAsync` passa `opportunita.VociTolteDalCv`:
-  è un'asimmetria fra i due documenti, non una scelta. Trovata di sfuggita lavorando agli
-  allegati e **non toccata**, perché era fuori dal mandato di quella sessione. *(2026-09-08 —
-  cap. 08.4 (R6), `PannelloDocumenti.ScriviAsync`.)*
 
 ## Chiuse
+
+- ✅ **Le voci lasciate fuori non arrivavano al 📄 CV base esportato** *(aperta e **chiusa il
+  2026-09-08**, poche ore dopo)*. L'anteprima di P6 impaginava col taglio dell'utente e
+  l'esportazione senza, così nel DOCX e nel PDF le voci tolte **tornavano** — cioè proprio nei
+  due file che si mandano. Curandola si è visto che i posti smemorati erano **tre** e non uno:
+  `PannelloDocumenti.ScriviAsync`, il 📄 CV base allegato a un'email in P7
+  (`AllegaIlCvBaseAsync`) e il **nome promesso** nell'elenco degli allegati, che si calcolava
+  su una pagina diversa da quella che poi nasce. Due collaudi nuovi la sorvegliano guardando
+  **dentro** il `.docx` scritto, e prima della cura sono stati visti rossi tutti e due; il
+  terzo punto non è falsificabile — oggi il nome non dipende dalle voci — ed è dichiarato tale
+  nel diario invece di essere spacciato per sorvegliato. Resta fuori l'anteprima del CV base
+  in P2, che impagina il **ritratto del profilo** e non il documento generato. *(cap. 08.4
+  (R6), emendato; cap. 07.1; diario Step 2.74.)*
 
 - ✅ **Il flusso D non ha più nessun segno nell'interfaccia** *(aperta il 2026-08-31, **chiusa
   il 2026-09-01** dalla revisione di finalizzazione — non facendolo, ma decidendo)*. La voce

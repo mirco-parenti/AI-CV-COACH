@@ -1,5 +1,6 @@
 ﻿Imports System.Drawing
 Imports System.IO
+Imports System.IO.Compression
 Imports System.Linq
 Imports System.Text
 Imports System.Text.Json.Nodes
@@ -38,6 +39,15 @@ Namespace Ui
         Private Const CvBaseScritto As String =
             "{""tipo"": ""cv_base"", ""intestazione"": {""nome"": ""Luca Ferrari"", ""citta"": ""Forlì""}," &
             """sommario"": ""Il ritratto del profilo."", ""competenze"": [""Uso del muletto""]}"
+
+        ''' <summary>
+        ''' Lo stesso 📄 CV base, ma con due competenze: una si lascia fuori e l'altra
+        ''' resta, che è l'unico modo di vedere se il taglio arriva fino all'allegato (R6).
+        ''' </summary>
+        Private Const CvBaseConDueVoci As String =
+            "{""tipo"": ""cv_base"", ""intestazione"": {""nome"": ""Luca Ferrari"", ""citta"": ""Forlì""}," &
+            """sommario"": ""Il ritratto del profilo.""," &
+            """competenze"": [""Uso del muletto"", ""Gestione del magazzino""]}"
 
         Private Const AnnuncioLetto As String =
             "{""titolo"": ""Magazziniere"", ""azienda"": ""Rossi S.p.A."", ""sede"": [""Forlì""]}"
@@ -1192,6 +1202,46 @@ Namespace Ui
         End Function
 
         ''' <summary>
+        ''' Il 📄 CV base scritto per essere allegato non riporta le voci lasciate fuori
+        ''' (R6, 2026-09-08).
+        ''' </summary>
+        ''' <remarks>
+        ''' Qui il documento nasce da <see cref="PannelloEmail.AllegaIlCvBaseAsync"/>, che
+        ''' impagina il CV salvato accanto al profilo — e il taglio dell'utente viaggia con
+        ''' lui, nel <c>cv_base.json</c>, perché in questo pannello P6 non c'è a ricordarlo.
+        ''' È la copia peggiore in cui sbagliarsi: è l'unica che esce di casa.
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function IlCvBaseAllegatoNonRiportaLeVociLasciateFuori() As Task
+
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    Dim fuori As New VociTolte()
+                    fuori.Togli("competenze¦gestione del magazzino", Date.Now)
+
+                    contesto.Archivio.SalvaCvBase(JsonNode.Parse(CvBaseConDueVoci),
+                                                  contesto.Archivio.Versioni().Last(),
+                                                  "it", Nothing, Nothing, fuori)
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+                    Await pannello.AllegaIlCvBaseAsync()
+
+                    Dim nati As String() = Directory.GetFiles(
+                        contesto.Cartella.CartellaOutProfilo, "*.docx")
+                    Assert.HasCount(1, nati, "il 📄 CV base è nato per essere allegato")
+
+                    Dim dentro As String = TestoDelDocx(nati(0))
+                    Assert.Contains("Uso del muletto", dentro, "la voce tenuta c'è")
+                    Assert.DoesNotContain("Gestione del magazzino", dentro,
+                                          "e quella lasciata fuori non è tornata dentro")
+                End Function)
+
+        End Function
+
+        ''' <summary>
         ''' Aprendo un documento in P6, l'email lo segue — <b>senza</b> far scrivere niente
         ''' all'AI (2026-09-08).
         ''' </summary>
@@ -1416,6 +1466,23 @@ Namespace Ui
 
         Private Shared Function PoolInesistente() As String
             Return Path.Combine(Path.GetTempPath(), "pool-inesistente")
+        End Function
+
+        ''' <summary>Il testo dentro un <c>.docx</c>: l'XML del documento, tag compresi.</summary>
+        ''' <remarks>
+        ''' La gemella di quella in <c>CollaudiPannelloDocumenti</c>, e serve alla stessa
+        ''' domanda sola: «questa frase c'è dentro?». Sta qui e non in un posto comune per
+        ''' la ragione di <see cref="Casella"/> e delle altre — ogni banco di pannello porta
+        ''' con sé i suoi attrezzi, e si legge senza saltare altrove.
+        ''' </remarks>
+        Private Shared Function TestoDelDocx(percorso As String) As String
+
+            Using archivio As ZipArchive = ZipFile.OpenRead(percorso)
+                Using lettore As New StreamReader(archivio.GetEntry("word/document.xml").Open())
+                    Return lettore.ReadToEnd()
+                End Using
+            End Using
+
         End Function
 
         Private Shared Function Casella(pannello As Control, nome As String) As TextBox

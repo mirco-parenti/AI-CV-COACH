@@ -1,4 +1,4 @@
-# 08 — Qualità del testo (anti-slop)
+﻿# 08 — Qualità del testo (anti-slop)
 
 *Un CV o una lettera che «sanno di intelligenza artificiale» danneggiano il candidato.
 Questo capitolo definisce come i testi in prosa vengono resi naturali — senza toccare i
@@ -164,7 +164,18 @@ perde contro la forma.*
   Da tutto questo discende la quarta: **togliere una voce invecchia la lettera** esattamente
   come riscriverne un testo, e la spia «⚠ Rigenera la lettera» guarda la più recente delle
   due date. Il sommario e il corpo della lettera, invece, impronta non ne hanno e non si
-  tolgono: non sono voci del documento, **sono** il documento.
+  tolgono: non sono voci del documento, **sono** il documento. *Emendato il **2026-09-08**: «il
+  filtro è uno solo» era vero, e non bastava. `PaginaCv` filtra, ma soltanto per chi il
+  taglio glielo passa, e al 📄 CV base non glielo passava nessuno: la candidatura se lo
+  porta dietro (`ScriviCandidaturaAsync` → `VociTolteDalCv`), mentre l'esportazione del CV
+  base da P6 e il CV base allegato a un'email in P7 chiamavano `ScriviCvBaseAsync` senza il
+  suo ultimo parametro — così nell'anteprima la voce era fuori e nel DOCX e nel PDF
+  **tornava dentro**, cioè proprio nei due file che si mandano. Un filtro unico non
+  garantisce un documento unico: garantisce che, quando il taglio arriva, sia applicato allo
+  stesso modo. Adesso arriva da tutte e tre le strade — l'anteprima di P6, la sua
+  esportazione e l'allegato di P7, che lo rilegge dal `cv_base.json` perché lì P6 non c'è a
+  ricordarlo — e due collaudi guardano **dentro** il file scritto, invece che nel codice che
+  lo scrive.*
 - **Una candidatura può sopravvivere al profilo da cui è nata, e allora non si riscrive**
   *(rifiniture prima del giro D, 2026-08-24)*. Alla generazione arrivano tre cose: il profilo
   di **oggi**, il CV e i giudizi di **allora**. Se quel profilo è stato eliminato e rifatto, le

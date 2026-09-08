@@ -1,4 +1,4 @@
-# Diario di bordo – AI-CV-COACH
+﻿# Diario di bordo – AI-CV-COACH
 
 Questo file raccoglie appunti a caldo durante lo sviluppo del progetto.
 Serve a tenere traccia di cosa è stato fatto, cosa ho imparato, quali
@@ -3299,3 +3299,60 @@ sono venute fuori altre due cose che l'interfaccia non diceva.*
 > rispondeva bene. Sbagliato era **quando** si guardava — un istante prima che il dato
 > cambiasse. Sono i difetti che nessun collaudo sui dati può vedere, perché nei dati non c'è
 > niente da vedere: bisogna guardare il vetro, e sapere a che ora lo si guarda.
+
+### Step 2.74 — Quel che avevo lasciato fuori tornava nel file che parte
+
+*Poche ore fa, lavorando agli allegati, era saltata fuori una cosa storta e l'avevo solo
+annotata: le voci che tolgo da un 📄 CV base spariscono dall'anteprima e ricompaiono nel DOCX
+e nel PDF. L'ho ripresa dal capo giusto, e i posti che se ne dimenticavano non erano uno ma
+tre.*
+
+**Cosa ho fatto**
+- **Ho fatto scrivere i due collaudi prima della cura**, e li ho visti rossi tutti e due:
+  guardano **dentro** il file scritto — aprono il `.docx`, che è uno zip, e cercano la frase.
+  Il rosso diceva esattamente la cosa giusta: «Uso del muletto» c'era, e c'era anche
+  «Gestione del magazzino», che avevo lasciato fuori.
+- **La cura è in tre punti, non uno**: l'esportazione del CV base da P6, il CV base che si
+  allega a un'email in P7 (la strada nata stamattina) e il **nome promesso** nell'elenco
+  degli allegati. Tutti e tre chiamavano la funzione che scrive il CV base senza passarle il
+  taglio, e il taglio era lì a portata di mano — dentro il `cv_base.json`, salvato accanto al
+  documento.
+- **Ho lasciato fuori un quarto candidato**: l'anteprima del CV base nella scheda del profilo
+  (P2). Quella non impagina il documento generato, impagina il **ritratto del profilo**, e il
+  profilo è intero per definizione: togliergli delle voci lì vorrebbe dire mostrare un
+  profilo che non è quello che ho scritto.
+- **Il banco è passato da 1451 a 1453 collaudi**, tutti verdi.
+
+**Cosa ho imparato**
+- **Un filtro unico non garantisce un documento unico.** Nel progetto c'era scritto, e con
+  ragione, che il filtro delle voci tolte è uno solo: `PaginaCv`, che copre anteprima, DOCX,
+  PDF e HTML in un colpo. Era vero e non bastava, perché quella funzione filtra **solo per
+  chi il taglio glielo passa** — e per il CV base non glielo passava nessuno. Un punto unico
+  di passaggio garantisce che, quando l'informazione arriva, tutti la trattino allo stesso
+  modo; non garantisce che arrivi.
+- **La simmetria mancante era la traccia.** La candidatura funzionava da sempre, il CV base
+  no, e i due passano dalla stessa impaginazione: quando due strade gemelle si comportano in
+  modo diverso, non è mai una scelta — è una dimenticanza che non ha ancora fatto rumore.
+
+**Dove ho faticato**
+- **Il terzo punto non l'ho potuto vedere rosso.** Il nome del file oggi non dipende dalle
+  voci del CV — viene da chi è e da quando è —, quindi calcolarlo con o senza il taglio dà
+  la stessa parola, e un collaudo su quello sarebbe verde comunque, cioè cieco. L'ho curato
+  lo stesso, e lo scrivo qui invece di far finta che sia sorvegliato: è coerenza, non una
+  cura provata.
+
+**Cosa ho deciso e perché**
+- **Curare anche quel che oggi non fa danno.** La funzione che promette il nome esiste
+  apposta perché il nome promesso e il nome scritto non divergano mai: calcolarli su due
+  pagine diverse è il primo passo verso la divergenza, e costa una parola evitarlo.
+- **Il collaudo guarda dentro il file, non dentro il codice.** Avrei potuto verificare che la
+  chiamata passa il parametro giusto: sarebbe stato un collaudo che ripete il codice invece
+  di misurarlo. Aprire lo zip e cercare la frase costa cinque righe in più e resta vero anche
+  se un domani l'impaginazione cambia strada.
+
+> 💡 **L'anteprima e il file erano due documenti diversi, e nessuno poteva accorgersene
+> guardando l'anteprima.** È il difetto peggiore da vedere usando il programma: quel che
+> guardo prima di esportare è giusto, e a essere sbagliato è quel che parte — che io non
+> riapro quasi mai, perché l'ho appena visto. Se n'è accorto un collaudo solo perché è andato
+> a leggere il documento **dopo** che era nato, invece di fidarsi di quello che mostrava lo
+> schermo un istante prima.

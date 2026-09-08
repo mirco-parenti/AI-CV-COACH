@@ -797,7 +797,11 @@ Public Class PannelloEmail
         Dim salvato As Dati.CvBase = CvBaseSuDisco()
         If salvato Is Nothing OrElse salvato.Cv Is Nothing Then Return quali
 
-        _cvBaseDaScrivere = ArchivioDocumenti.NomeDelCvBase(salvato.Cv, Nothing, salvato.Lingua) &
+        ' Con le stesse voci tolte di cui poi lo si scrive: oggi il nome non dipende da
+        ' loro, ma calcolarlo su una pagina diversa da quella che nascerà è il primo passo
+        ' verso i due nomi divergenti che questa funzione esiste apposta per evitare.
+        _cvBaseDaScrivere = ArchivioDocumenti.NomeDelCvBase(salvato.Cv, Nothing, salvato.Lingua,
+                                                           salvato.Tolte) &
                             NomiDocumenti.EstensionePdf
         quali.Add(_cvBaseDaScrivere)
 
@@ -866,8 +870,12 @@ Public Class PannelloEmail
         Try
             Racconta("Scrivo il tuo 📄 CV base, così puoi allegarlo…", StileApp.TestoSecondario)
 
+            ' Le voci lasciate fuori viaggiano col CV su disco: qui P6 non c'è a
+            ' ricordarle, e senza di loro l'allegato direbbe più di quanto l'utente abbia
+            ' voluto dire — nella sola copia che esce di casa (R6, cap. 08.4).
             Dim scritti As IReadOnlyList(Of String) = Await _documenti.ScriviCvBaseAsync(
-                salvato.Cv, Nothing, FormatiDocumento.Entrambi, salvato.Lingua).ConfigureAwait(True)
+                salvato.Cv, Nothing, FormatiDocumento.Entrambi, salvato.Lingua,
+                salvato.Tolte).ConfigureAwait(True)
 
             RiempiGliAllegati()
             SpuntaIlCvBase(scritti)

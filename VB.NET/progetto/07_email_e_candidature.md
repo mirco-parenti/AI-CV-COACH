@@ -1,4 +1,4 @@
-# 07 — Email di candidatura e registro
+﻿# 07 — Email di candidatura e registro
 
 *L'ultimo miglio: trasformare CV e lettera in una candidatura partita davvero, e
 tenerne il conto fino a esaurire le opportunità.*
@@ -82,6 +82,11 @@ Email (P7) prepara la bozza:
     sarebbe peggio del non promettere — e la spunta finisce su quel che è **davvero** nato:
     dove la stampante PDF non c'è, il PDF non esce, e una spunta sul file mancante
     allegherebbe il nulla in silenzio.
+  - **E porta con sé quel che l'utente aveva lasciato fuori** *(dal 2026-09-08)*. L'allegato
+    si impagina dal `cv_base.json`, dove il taglio dell'utente vive accanto al documento
+    (R6, cap. 08.4): qui P6 non c'è a ricordarlo, e senza di lui la sola copia che **esce di
+    casa** racconterebbe più di quanto l'utente abbia voluto raccontare. Vale anche per il
+    nome promesso, che si calcola sulla stessa pagina che poi nascerà.
 - **Dell'elenco su disco ci si fida per le categorie, non per l'esistenza.** Gli attestati
   proposti sono solo quelli che **ci sono ancora** nella cartella: è la stessa regola con
   cui si rifanno i documenti della candidatura, applicata a file che vivono fuori da qui.
