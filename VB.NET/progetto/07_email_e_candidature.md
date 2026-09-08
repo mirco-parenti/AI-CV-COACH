@@ -65,6 +65,23 @@ Email (P7) prepara la bozza:
   classificazione ha messo in «altro» non compare affatto: una busta paga non deve poter
   finire in un'email per sbaglio, e il posto per correggere una categoria è la finestra di
   conferma, non l'elenco degli allegati.
+- **Il 📄 CV base si può sempre allegare** *(dal 2026-09-08)*. L'elenco pescava da due
+  cartelle — la `out\` della candidatura e la cartella documenti — e il CV base non sta in
+  nessuna delle due: vive accanto al **profilo**, perché non è di nessuna candidatura
+  (cap. 11.1). Il risultato era che non compariva affatto, e chi voleva mandarlo doveva
+  allegarlo a mano dal programma di posta — cioè uscire dall'applicazione per fare una cosa
+  che l'applicazione sa fare. Adesso è la **terza origine** di un allegato, e arriva
+  **spento** come gli attestati: su una candidatura il PDF del 🎯 CV mirato è già spuntato,
+  e due CV nella stessa email si annullano a vicenda.
+  - **La voce c'è anche quando il file non c'è.** Un CV base esiste appena l'AI lo scrive,
+    ma i *file* nascono solo se qualcuno preme «Esporta» in P6 — cioè quasi mai, per chi
+    arriva qui dalla Home. Allora l'elenco **promette**: mostra il nome che il PDF avrà,
+    dicendo «lo scrivo quando lo spunti», e alla spunta lo scrive davvero (DOCX e PDF, come
+    «Esporta»). Nessuna chiamata all'AI: è impaginazione, non scrittura. Il nome promesso lo
+    calcola la stessa funzione che poi lo battezza — promettere un nome e scriverne un altro
+    sarebbe peggio del non promettere — e la spunta finisce su quel che è **davvero** nato:
+    dove la stampante PDF non c'è, il PDF non esce, e una spunta sul file mancante
+    allegherebbe il nulla in silenzio.
 - **Dell'elenco su disco ci si fida per le categorie, non per l'esistenza.** Gli attestati
   proposti sono solo quelli che **ci sono ancora** nella cartella: è la stessa regola con
   cui si rifanno i documenti della candidatura, applicata a file che vivono fuori da qui.

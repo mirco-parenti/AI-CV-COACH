@@ -196,6 +196,22 @@ Public Class PannelloDocumenti
     ''' <summary>L'AI ha cominciato o finito di lavorare: la barra si blocca (cap. 02.6).</summary>
     Public Event LavoroAiCambiato As EventHandler
 
+    ''' <summary>
+    ''' È cambiato il documento in mostra, e con lui la candidatura da cui viene: chi
+    ''' ascolta la ritrova in <see cref="Candidatura"/>, ed è <c>Nothing</c> quando quel che
+    ''' si guarda è il 📄 CV base.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Nasce il 2026-09-08 da una richiesta di Mirco: la tendina «📄 Documento:» è la
+    ''' porta da cui questo pannello si usa, e finché non lo diceva a nessuno il Confronto e
+    ''' l'Email restavano su un'<b>altra</b> candidatura — l'ultima aperta dalla Home — senza
+    ''' che niente lo segnalasse. Chi saltava da un 🎯 CV mirato all'altro si trovava sotto
+    ''' gli occhi il match di una terza.</para>
+    ''' <para>Non porta dati apposta: la candidatura ce l'ha già la property, e un evento con
+    ''' addosso una copia sarebbe una seconda verità da tenere allineata.</para>
+    ''' </remarks>
+    Public Event DocumentoInMostraCambiato As EventHandler
+
     Public Sub New()
 
         InitializeComponent()
@@ -360,6 +376,12 @@ Public Class PannelloDocumenti
         AllestisciLaTendinaDeiDocumenti()
         Mostra()
 
+        ' Qui e non in coda: da qui in giù la funzione ha cinque uscite diverse — documenti
+        ' già pronti, lettera da riallineare, profilo non più quello, generazione, rifiuto —
+        ' e il pannello ha già cambiato padrone in tutte. Chi ascolta deve saperlo adesso,
+        ' non in una delle cinque.
+        RaiseEvent DocumentoInMostraCambiato(Me, EventArgs.Empty)
+
         ' Già generati: si guardano e basta. A rifarli c'è «Rigenera», che lo dichiara.
         If candidatura.Cv IsNot Nothing AndAlso candidatura.Lettera IsNot Nothing Then
 
@@ -428,6 +450,10 @@ Public Class PannelloDocumenti
 
         AllestisciLaTendinaDeiDocumenti()
         Mostra()
+
+        ' Prima del ripesco: quella è l'uscita più battuta di tutte — il 📄 CV base già su
+        ' disco — e un evento sollevato dopo non partirebbe quasi mai.
+        RaiseEvent DocumentoInMostraCambiato(Me, EventArgs.Empty)
 
         If RipescaIlCvBase() Then Return
 
@@ -744,8 +770,18 @@ Public Class PannelloDocumenti
 
                 Await RifinisciIlCvBaseAsync(filo.Token).ConfigureAwait(True)
 
+                ' Prima si mette per iscritto da dove nasce, poi si dipinge. La spia in
+                ' cima alla colonna legge `_versioneDelCvBase`, che è ArchiviaIlCvBase ad
+                ' aggiornare: chiamata prima, `Mostra()` la dipingeva con la versione di un
+                ' attimo fa — spenta la prima volta, rossa dopo una rigenerazione — e
+                ' nessuno tornava più a ridipingerla, finché non si usciva dal pannello e
+                ' si rientrava (difetto visto dal vivo il 2026-09-08). È l'ordine che
+                ' GeneraLaCandidaturaAsync ha da sempre, ed è il motivo per cui il 🎯 CV
+                ' mirato e la ✉️ lettera non ne hanno mai sofferto.
+                Dim detto As String = ArchiviaIlCvBase()
+
                 Mostra()
-                RaccontaLoStato(ArchiviaIlCvBase(), StileApp.TestoSecondario)
+                RaccontaLoStato(detto, StileApp.TestoSecondario)
 
             Catch ex As OperationCanceledException
                 RaccontaLoStato("Generazione annullata: non ho scritto niente.", StileApp.TestoSecondario)

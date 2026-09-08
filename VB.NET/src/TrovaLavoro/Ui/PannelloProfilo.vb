@@ -1002,6 +1002,15 @@ Public Class PannelloProfilo
 
             _modificato = False
             AggiornaComandi()
+
+            ' Salvare cambia il profilo di riferimento — ogni «Salva» aggiunge una versione
+            ' allo storico — e la scheda del 📄 CV base ne parla: senza questa riga la spia
+            ' restava ferma a un istante fa e continuava a dire «non l'hai ancora salvato»
+            ' a chi aveva appena salvato, finché non si cambiava scheda (2026-09-08). È lo
+            ' stesso difetto di P6, dall'altro capo: là il documento cambiava sotto la
+            ' lucina, qui il profilo con cui la si legge.
+            AggiornaIlCvBase()
+
             RaccontaLoStato(RiassuntoDelProfilo(), StileApp.TestoSecondario)
 
         Catch ex As Exception When TypeOf ex Is IOException OrElse

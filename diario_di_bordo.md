@@ -3215,3 +3215,87 @@ una riga.*
 > impegni. Ma una giornata di lavoro **riuscita**, committata e mai raccontata non fa scattare
 > niente: non è un difetto, non è un debito, non è un collaudo rosso. È solo assenza — e
 > l'assenza si vede unicamente se qualcuno, ogni tanto, rilegge tutto di fila.
+
+### Step 2.73 — Il vetro dipinto un istante prima del dato
+
+*Usando il programma ho visto una lucina che mentiva: rigeneravo il CV base con i dati nuovi
+e restava rossa. Il documento era giusto, e a sbagliare era solo il vetro. Tirando quel filo
+sono venute fuori altre due cose che l'interfaccia non diceva.*
+
+**Cosa ho fatto**
+- **Ho fatto scrivere il collaudo prima della cura**, e ha trovato il difetto **peggiore** di
+  come l'avevo visto io: non è che la lucina resta rossa dopo una rigenerazione — alla
+  **prima** generazione del 📄 CV base non si accende affatto. È spenta, cioè non promette e
+  non avvisa, mentre il CV è appena nato dal profilo di oggi.
+- **La causa era un ordine di due righe** in `GeneraIlCvBaseAsync`: `Mostra()` dipingeva la
+  spia, e solo la riga dopo `ArchiviaIlCvBase` portava la versione a quella di adesso. Il
+  vetro veniva dipinto un istante prima che il dato cambiasse, e nessuno tornava a
+  ridipingerlo — usciva onesto solo se uscivo dal pannello e rientravo. Il modello giusto ce
+  l'avevo già in casa: la candidatura annota la versione **prima** di chiamare l'AI, ed è per
+  questo che il 🎯 CV mirato e la ✉️ lettera non ne hanno mai sofferto.
+- **Il gemello, dall'altro capo, in P2**: «Salva profilo» scriveva una versione nuova e non
+  ridipingeva la scheda del CV base. Lì il colore non cambiava — rosso prima, rosso dopo — e a
+  mentire era il **suggerimento**, che continuava a mandarmi a salvare una cosa appena
+  salvata.
+- **Ho dato una spia anche all'email.** Era l'ultima schermata a non averla, ed è l'unica dove
+  i documenti non si guardano: si **consegnano**. Chi riprende una bozza di ieri arrivando
+  dalla Home in P6 non ci passa affatto, e l'avviso che sta di là per lui non esiste. Il suo
+  suggerimento rosso nomina **due** gesti invece di uno — «◀ Torna ai documenti» *e
+  riesportare* — perché lì si allegano i file già scritti, e rigenerare non li tocca.
+- **Poi ho chiesto due cose che mi mancavano usandolo.** La prima: il 📄 CV base deve
+  **sempre** essere allegabile a un'email. Non compariva mai, perché l'elenco pescava da due
+  cartelle e lui vive in una terza, accanto al profilo. Adesso c'è, spento come gli attestati,
+  e c'è **anche quando il file non è mai stato esportato**: la riga promette («lo scrivo
+  quando lo spunti») e alla spunta il file nasce, senza chiamare l'AI.
+- La seconda: **la tendina «📄 Documento:» deve trascinarsi dietro le altre schermate.** Se
+  apro il CV mirato di una candidatura, il Confronto deve mostrare *quel* match e l'email deve
+  essere *quella*; sul CV base tutti e due si svuotano, perché non nasce da un annuncio e a
+  nessuno si manda. Prima si allineavano solo passando dalla Home, e saltando fra due CV
+  mirati mi ritrovavo davanti il giudizio di una terza candidatura senza che niente lo
+  dicesse.
+- **Il banco è passato da 1440 a 1451 collaudi**, e ogni collaudo nuovo l'ho visto **rosso**:
+  due prima della cura, sei rompendo apposta il codice appena curato.
+
+**Cosa ho imparato**
+- **Un collaudo può guardare il dato e non vedere il difetto.** Il difetto delle spie è vissuto
+  per giorni dentro un banco tutto verde: i collaudi sulla spia provavano la funzione pura, e
+  quelli sul CV base guardavano il file finito su disco. Nessuno guardava l'**etichetta**, che è
+  l'unica delle tre cose che io guardo davvero.
+- **Una promessa si mantiene con la stessa funzione con cui la si fa.** Per mettere nell'elenco
+  un CV base non ancora esportato bisogna scriverne il nome prima che il file esista. Se quel
+  nome lo calcolasse una regola sua, un giorno prometterebbe un file che poi nasce chiamandosi
+  in un altro modo: adesso lo calcola la stessa funzione che poi lo battezza.
+- **Allinearsi non è chiedere.** Far seguire l'email al documento aperto era comodo; farlo
+  chiamando l'AI sarebbe stato un disastro — ogni giro di tendina una chiamata pagata per un
+  messaggio che non ho chiesto. Vale anche per il Confronto, che si allinea senza aprire la
+  finestra del riconfronto: quella è la risposta a un gesto mio, non a uno sguardo.
+
+**Dove ho faticato**
+- **A guardare il risultato.** Le spie sono interfaccia e vanno viste a video, ma il server MCP
+  di collaudo non era acceso all'avvio della sessione — e i server MCP si caricano solo lì. Da
+  fuori l'applicazione si può fotografare ma non pilotare: Windows nega il primo piano a un
+  processo di sfondo, e un clic mandato lo stesso finisce nella finestra di qualcun altro. È
+  successo, e da lì in poi c'è una guardia che controlla chi ha il primo piano prima di
+  premere qualsiasi cosa.
+- **A tenere separato quel che non era mio.** Mentre lavoravo, nel working tree sono comparse
+  modifiche fatte in parallelo — il copyright timbrato dentro i PNG del marchio. Non le ho
+  toccate e le ho messe in un commit loro: mescolarle a una sessione sulle lucine avrebbe reso
+  illeggibile tutti e due.
+
+**Cosa ho deciso e perché**
+- **La regola nuova sta nel cap. 03.8**: *la spia si ridipinge col suo documento, non un
+  istante prima*. Detta così sembra una pignoleria d'ordine, ed è invece il difetto di questa
+  giornata: vale nei due versi, perché a disallinearsi sono in due — può cambiare il
+  **documento** sotto la lucina, o il **profilo** con cui la si legge.
+- **Il CV base allegato arriva spento**, come gli attestati. Su una candidatura il PDF del CV
+  mirato è già spuntato, e due CV nella stessa email si annullano a vicenda: il programma me lo
+  mette a portata di mano, a sceglierlo sono io.
+- **«Rigenera la lettera» continua a non aggiornare la versione dei documenti**, ed è una
+  scelta scritta mesi fa che ho lasciato dov'era: fra un rosso di troppo e un verde di troppo,
+  si sbaglia dalla parte che non rassicura.
+
+> 💡 **Il difetto non era nel dato, era nel momento.** Ogni pezzo era giusto: il CV nasceva dal
+> profilo di oggi, la versione finiva su disco corretta, la funzione che legge la spia
+> rispondeva bene. Sbagliato era **quando** si guardava — un istante prima che il dato
+> cambiasse. Sono i difetti che nessun collaudo sui dati può vedere, perché nei dati non c'è
+> niente da vedere: bisogna guardare il vetro, e sapere a che ora lo si guarda.

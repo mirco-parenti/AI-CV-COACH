@@ -13,6 +13,19 @@ Namespace Motore
         ''' <summary>Un file della cartella documenti dell'utente (cap. 05.2).</summary>
         Documenti
 
+        ''' <summary>
+        ''' Un documento del <b>profilo</b>: il 📄 CV base, che sta nella <c>out\</c> del
+        ''' profilo perché non appartiene a nessuna candidatura (cap. 11.1).
+        ''' </summary>
+        ''' <remarks>
+        ''' È la terza origine, ed è nata il 2026-09-08 da una richiesta di Mirco: «il CV
+        ''' base deve <b>sempre</b> essere allegabile». Prima le origini erano due e il CV
+        ''' base non era né dell'una né dell'altra — non stava nella cartella della
+        ''' candidatura, non era un attestato — quindi nell'elenco non compariva affatto, e
+        ''' per mandarlo bisognava allegarlo a mano dal programma di posta.
+        ''' </remarks>
+        Profilo
+
     End Enum
 
     ''' <summary>
@@ -37,7 +50,7 @@ Namespace Motore
 
             Return New JsonObject From {
                 {"nome", Nome},
-                {"da", If(Origine = OrigineAllegato.Documenti, "documenti", "candidatura")},
+                {"da", NomeOrigine(Origine)},
                 {"scelto", Scelto}}
 
         End Function
@@ -52,9 +65,37 @@ Namespace Motore
 
             Return New AllegatoScelto With {
                 .Nome = nome,
-                .Origine = If(CampiJson.Testo(scritto, "da") = "documenti",
-                              OrigineAllegato.Documenti, OrigineAllegato.Candidatura),
+                .Origine = OrigineDalNome(CampiJson.Testo(scritto, "da")),
                 .Scelto = CampiJson.Vero(scritto, "scelto", quandoManca:=True)}
+
+        End Function
+
+        ''' <summary>Come si scrive un'origine nel file, e come si rilegge.</summary>
+        ''' <remarks>
+        ''' Stanno vicine apposta: sono le due metà della stessa convenzione, e separarle
+        ''' vorrebbe dire che un giorno una impara una parola che l'altra non sa. Una parola
+        ''' sconosciuta vale <see cref="OrigineAllegato.Candidatura"/>, che è dove stavano
+        ''' tutti gli allegati prima che le origini fossero più d'una: un file scritto da una
+        ''' versione futura non fa perdere la bozza.
+        ''' </remarks>
+        Private Shared Function NomeOrigine(origine As OrigineAllegato) As String
+
+            Select Case origine
+                Case OrigineAllegato.Documenti : Return "documenti"
+                Case OrigineAllegato.Profilo : Return "profilo"
+                Case Else : Return "candidatura"
+            End Select
+
+        End Function
+
+        ''' <inheritdoc cref="NomeOrigine"/>
+        Private Shared Function OrigineDalNome(scritta As String) As OrigineAllegato
+
+            Select Case scritta
+                Case "documenti" : Return OrigineAllegato.Documenti
+                Case "profilo" : Return OrigineAllegato.Profilo
+                Case Else : Return OrigineAllegato.Candidatura
+            End Select
 
         End Function
 
@@ -115,15 +156,24 @@ Namespace Motore
         ''' <param name="allegato">L'allegato da ritrovare.</param>
         ''' <param name="cartellaCandidatura">La cartella dell'opportunità (non la sua <c>out\</c>).</param>
         ''' <param name="cartellaDocumenti">La cartella documenti dell'utente; può mancare.</param>
+        ''' <param name="cartellaOutProfilo">
+        ''' La <c>out\</c> del profilo, dove sta il 📄 CV base esportato; può mancare.
+        ''' </param>
         Public Shared Function PercorsoDi(allegato As AllegatoScelto,
                                           cartellaCandidatura As String,
-                                          Optional cartellaDocumenti As String = Nothing) As String
+                                          Optional cartellaDocumenti As String = Nothing,
+                                          Optional cartellaOutProfilo As String = Nothing) As String
 
             If allegato Is Nothing OrElse String.IsNullOrWhiteSpace(allegato.Nome) Then Return Nothing
 
             If allegato.Origine = OrigineAllegato.Documenti Then
                 If String.IsNullOrWhiteSpace(cartellaDocumenti) Then Return Nothing
                 Return Path.Combine(cartellaDocumenti, allegato.Nome)
+            End If
+
+            If allegato.Origine = OrigineAllegato.Profilo Then
+                If String.IsNullOrWhiteSpace(cartellaOutProfilo) Then Return Nothing
+                Return Path.Combine(cartellaOutProfilo, allegato.Nome)
             End If
 
             If String.IsNullOrWhiteSpace(cartellaCandidatura) Then Return Nothing

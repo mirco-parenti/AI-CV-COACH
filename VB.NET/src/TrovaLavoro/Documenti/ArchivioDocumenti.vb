@@ -95,14 +95,48 @@ Namespace Documenti
 
             Dim scritta As String = LinguaDocumenti.PerDocumenti(lingua)
             Dim pagina As PaginaDocumento = Impaginazione.PaginaCv(cv, scritta, tolte)
-            Dim giorno As Date = If(quando = Nothing, Date.Today, quando)
-
-            ' Nessuna azienda: il CV base non nasce da un annuncio, e il suo nome lo dice
-            ' non nominandone nessuna (cap. 05.6).
-            Dim nome As String = NomiDocumenti.Cv(DiChiE(pagina), String.Empty, giorno, scritta)
 
             Return ScriviAsync(_cartella.CartellaOutProfilo,
-                               New List(Of Lavoro) From {New Lavoro(pagina, nome)}, formati)
+                               New List(Of Lavoro) From {New Lavoro(pagina, BattezzaIlCvBase(pagina, quando, scritta))},
+                               formati)
+
+        End Function
+
+        ''' <summary>
+        ''' Come si chiamerà il file del 📄 CV base scritto in un certo giorno — <b>senza
+        ''' scriverlo</b>, e senza estensione.
+        ''' </summary>
+        ''' <remarks>
+        ''' Serve a P7, che nell'elenco degli allegati deve poter nominare un file che
+        ''' ancora non esiste: lo scriverà quando l'utente lo spunta (cap. 07.1). Passa di
+        ''' qui e non da una regola sua, perché <see cref="ScriviCvBaseAsync"/> lo battezza
+        ''' con la stessa funzione: due modi di calcolare quel nome sono due nomi che prima
+        ''' o poi divergono, e l'elenco finirebbe per promettere un file che poi nasce
+        ''' chiamandosi in un altro modo.
+        ''' </remarks>
+        Public Shared Function NomeDelCvBase(cv As JsonNode,
+                                             Optional quando As Date = Nothing,
+                                             Optional lingua As String = Nothing,
+                                             Optional tolte As VociTolte = Nothing) As String
+
+            If cv Is Nothing Then Throw New ArgumentNullException(NameOf(cv))
+
+            Dim scritta As String = LinguaDocumenti.PerDocumenti(lingua)
+
+            Return BattezzaIlCvBase(Impaginazione.PaginaCv(cv, scritta, tolte), quando, scritta)
+
+        End Function
+
+        ''' <summary>Il nome del 📄 CV base, in un posto solo.</summary>
+        ''' <remarks>
+        ''' Nessuna azienda: il CV base non nasce da un annuncio, e il suo nome lo dice
+        ''' non nominandone nessuna (cap. 05.6).
+        ''' </remarks>
+        Private Shared Function BattezzaIlCvBase(pagina As PaginaDocumento,
+                                                 quando As Date, scritta As String) As String
+
+            Return NomiDocumenti.Cv(DiChiE(pagina), String.Empty,
+                                    If(quando = Nothing, Date.Today, quando), scritta)
 
         End Function
 

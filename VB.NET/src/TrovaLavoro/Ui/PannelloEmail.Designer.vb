@@ -32,6 +32,7 @@ Partial Class PannelloEmail
         Me.txtCorpo = New System.Windows.Forms.TextBox()
         Me.pnlAllegati = New System.Windows.Forms.Panel()
         Me.lblAllegati = New System.Windows.Forms.Label()
+        Me.lblSpiaDocumenti = New System.Windows.Forms.Label()
         Me.lstAllegati = New System.Windows.Forms.CheckedListBox()
         Me.lblNotaAllegati = New System.Windows.Forms.Label()
         Me.pnlAzioni = New System.Windows.Forms.Panel()
@@ -186,6 +187,7 @@ Partial Class PannelloEmail
         'pnlAllegati
         '
         Me.pnlAllegati.Controls.Add(Me.lblAllegati)
+        Me.pnlAllegati.Controls.Add(Me.lblSpiaDocumenti)
         Me.pnlAllegati.Controls.Add(Me.lstAllegati)
         Me.pnlAllegati.Controls.Add(Me.lblNotaAllegati)
         Me.pnlAllegati.Dock = System.Windows.Forms.DockStyle.Right
@@ -204,6 +206,20 @@ Partial Class PannelloEmail
         Me.lblAllegati.TabIndex = 0
         Me.lblAllegati.Text = "Cosa allego"
         '
+        'lblSpiaDocumenti
+        '
+        ' La spia del profilo sopra l'elenco degli allegati (v. SpiaDelProfilo): dice se i
+        ' documenti che stanno per partire vengono dal profilo di oggi. Sta qui e non in
+        ' cima al pannello perché parla proprio di quei file, ed è l'ultima schermata in cui
+        ' si possono ancora guardare prima che escano di casa.
+        Me.lblSpiaDocumenti.Font = StileApp.FontTitoloGruppo
+        Me.lblSpiaDocumenti.ForeColor = StileApp.TestoSecondario
+        Me.lblSpiaDocumenti.Location = New System.Drawing.Point(0, 22)
+        Me.lblSpiaDocumenti.Name = "lblSpiaDocumenti"
+        Me.lblSpiaDocumenti.Size = New System.Drawing.Size(360, 18)
+        Me.lblSpiaDocumenti.TabIndex = 1
+        Me.lblSpiaDocumenti.Visible = False
+        '
         'lstAllegati
         '
         Me.lstAllegati.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
@@ -213,10 +229,10 @@ Partial Class PannelloEmail
         Me.lstAllegati.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lstAllegati.CheckOnClick = True
         Me.lstAllegati.IntegralHeight = False
-        Me.lstAllegati.Location = New System.Drawing.Point(0, 22)
+        Me.lstAllegati.Location = New System.Drawing.Point(0, 44)
         Me.lstAllegati.Name = "lstAllegati"
-        Me.lstAllegati.Size = New System.Drawing.Size(360, 460)
-        Me.lstAllegati.TabIndex = 1
+        Me.lstAllegati.Size = New System.Drawing.Size(360, 438)
+        Me.lstAllegati.TabIndex = 2
         '
         'lblNotaAllegati
         '
@@ -227,7 +243,7 @@ Partial Class PannelloEmail
         Me.lblNotaAllegati.Location = New System.Drawing.Point(0, 488)
         Me.lblNotaAllegati.Name = "lblNotaAllegati"
         Me.lblNotaAllegati.Size = New System.Drawing.Size(360, 40)
-        Me.lblNotaAllegati.TabIndex = 2
+        Me.lblNotaAllegati.TabIndex = 3
         Me.lblNotaAllegati.Text = "Spunta quelli da mandare. Il messaggio li nomina: se li cambi, fallo riscrivere."
         '
         'pnlAzioni
@@ -330,6 +346,7 @@ Partial Class PannelloEmail
     Friend WithEvents txtCorpo As System.Windows.Forms.TextBox
     Friend WithEvents pnlAllegati As System.Windows.Forms.Panel
     Friend WithEvents lblAllegati As System.Windows.Forms.Label
+    Friend WithEvents lblSpiaDocumenti As System.Windows.Forms.Label
     Friend WithEvents lstAllegati As System.Windows.Forms.CheckedListBox
     Friend WithEvents lblNotaAllegati As System.Windows.Forms.Label
     Friend WithEvents pnlAzioni As System.Windows.Forms.Panel

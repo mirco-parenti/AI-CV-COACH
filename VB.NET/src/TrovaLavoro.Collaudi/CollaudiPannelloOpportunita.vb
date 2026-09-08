@@ -857,6 +857,88 @@ Namespace Ui
 
         End Function
 
+        ' ==================================================================
+        ' Seguire il documento aperto in P6 (2026-09-08)
+        ' ==================================================================
+
+        ''' <summary>
+        ''' Aprendo un documento in P6, il Confronto mostra la candidatura di quel
+        ''' documento; sul 📄 CV base si svuota, perché quel CV non nasce da un annuncio.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È la richiesta di Mirco dell'8 settembre 2026. Prima questo pannello si
+        ''' allineava <b>solo</b> aprendo una candidatura dalla Home: chi saltava da un
+        ''' 🎯 CV mirato all'altro con la tendina di P6 si ritrovava qui il match di una
+        ''' terza candidatura — l'ultima aperta di là — e niente lo diceva.</para>
+        ''' <para>Quel che il collaudo <b>non</b> può guardare è che il riconfronto non
+        ''' venga proposto: quella finestra, nel banco, non si apre comunque (v.
+        ''' <c>NonSiPuoRiscrivere</c> in P6 e la guardia <c>FindForm() Is Nothing</c>), e un
+        ''' assert lì sarebbe verde per il motivo sbagliato. A garantirlo è il parametro di
+        ''' <c>Riapri</c>, che si legge in due righe.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function IlConfrontoSegueIlDocumentoApertoInDocumenti() As Task
+
+            Await ConPannelloAsync(Nothing,
+                Async Function(pannello, contesto)
+                    Dim candidatura As Opportunita = ConfrontataCon(contesto.Archivio.Versioni().Last())
+                    contesto.Opportunita.Salva(candidatura)
+
+                    pannello.SegueIlDocumento(candidatura)
+
+                    Assert.AreSame(candidatura, pannello.Candidatura,
+                                   "il pannello ha preso in carico la candidatura di quel documento")
+                    Assert.IsNotEmpty(Etichetta(pannello, "lblStelle").Text,
+                                      "e il suo giudizio è a video, senza che nessuno l'abbia riaperta dalla Home")
+
+                    ' In P6 si passa al 📄 CV base: un CV che non nasce da un annuncio non
+                    ' ha nessun match, e lasciare a video quello di prima sarebbe la stessa
+                    ' bugia di adesso, al contrario.
+                    pannello.SegueIlDocumento(Nothing)
+
+                    Assert.IsNull(pannello.Candidatura, "il pannello ha lasciato andare la candidatura")
+                    Assert.IsEmpty(Etichetta(pannello, "lblStelle").Text, "e le stelle di prima sono sparite")
+                    Assert.Contains("CV base", Etichetta(pannello, "lblStatoOpportunita").Text,
+                                    "con detto perché qui non c'è niente")
+
+                    Await Task.CompletedTask
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Rientrare sullo stesso documento non ridipinge niente: la riga di stato continua
+        ''' a dire quel che stava dicendo.
+        ''' </summary>
+        ''' <remarks>
+        ''' P6 annuncia il cambio a ogni sua apertura, anche quando il padrone è lo stesso —
+        ''' arrivando da «Genera CV+lettera», per esempio, che è proprio questa candidatura.
+        ''' Senza questa scorciatoia il pannello si riscriverebbe addosso il racconto della
+        ''' riapertura, cancellando l'avviso che aveva appena dato.
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function SeguireLoStessoDocumentoNonRiscriveLaRiga() As Task
+
+            Await ConPannelloAsync(Nothing,
+                Async Function(pannello, contesto)
+                    Dim candidatura As Opportunita = ConfrontataCon(contesto.Archivio.Versioni().Last())
+                    contesto.Opportunita.Salva(candidatura)
+
+                    pannello.SegueIlDocumento(candidatura)
+
+                    Dim riga As Label = Etichetta(pannello, "lblStatoOpportunita")
+                    riga.Text = "Quel che il pannello stava dicendo"
+
+                    pannello.SegueIlDocumento(candidatura)
+
+                    Assert.AreEqual("Quel che il pannello stava dicendo", riga.Text,
+                                    "sulla stessa candidatura non si ridipinge, e la riga resta")
+
+                    Await Task.CompletedTask
+                End Function)
+
+        End Function
+
         ''' <summary>Salva un'altra versione del profilo: da qui in poi quella di prima è vecchia.</summary>
         Private Shared Sub IlProfiloCambia(contesto As ContestoApp)
             contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))

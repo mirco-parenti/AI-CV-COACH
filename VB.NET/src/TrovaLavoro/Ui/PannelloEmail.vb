@@ -53,6 +53,25 @@ Public Class PannelloEmail
     ''' <summary>La passata anti-slop (cap. 08); <c>Nothing</c> quando l'AI non c'è.</summary>
     Private _rifinitura As Rifinitura
 
+    ''' <summary>
+    ''' Chi scrive i documenti su disco; serve a un mestiere solo — mettere il 📄 CV base
+    ''' fra gli allegati quando non è ancora stato esportato (cap. 07.1).
+    ''' </summary>
+    Private _documenti As ArchivioDocumenti
+
+    ''' <summary>
+    ''' Il nome che il file del 📄 CV base <b>avrà</b>, quando nell'elenco c'è la sua voce
+    ''' ma il file ancora no; <c>Nothing</c> quando il file c'è già o un CV base non esiste.
+    ''' </summary>
+    ''' <remarks>
+    ''' È la voce che promette invece di mostrare, ed è l'unica dell'elenco a farlo: la
+    ''' promessa si mantiene alla spunta, scrivendo il file (v.
+    ''' <see cref="AllegaIlCvBaseAsync"/>). Il nome lo calcola
+    ''' <see cref="ArchivioDocumenti.NomeDelCvBase"/>, cioè lo stesso che poi lo battezza
+    ''' davvero: promettere un nome e scriverne un altro sarebbe peggio del non promettere.
+    ''' </remarks>
+    Private _cvBaseDaScrivere As String
+
     ''' <summary>La candidatura a cui l'email appartiene; <c>Nothing</c> finché non ne arriva una.</summary>
     Private _candidatura As Opportunita
 
@@ -155,17 +174,29 @@ Public Class PannelloEmail
     ''' </param>
     Public Sub Collega(contesto As ContestoApp, Optional compositore As ICompositoreEmail = Nothing,
                        Optional classificatore As IClassificatoreDocumenti = Nothing,
-                       Optional rifinitura As Rifinitura = Nothing)
+                       Optional rifinitura As Rifinitura = Nothing,
+                       Optional documenti As ArchivioDocumenti = Nothing)
 
         If contesto Is Nothing Then Throw New ArgumentNullException(NameOf(contesto))
         _contesto = contesto
         _compositore = If(compositore, contesto.Email)
         _classificatore = If(classificatore, contesto.Classificatore)
         _rifinitura = If(rifinitura, contesto.Rifinitura)
+        _documenti = documenti
 
         AggiornaComandi()
 
     End Sub
+
+    ''' <summary>
+    ''' La candidatura di cui è questa email; <c>Nothing</c> quando il pannello non ne ha
+    ''' nessuna. Come in P4 e P6: chi instrada legge di qui invece di tenersene una copia.
+    ''' </summary>
+    Public ReadOnly Property Candidatura As Opportunita
+        Get
+            Return _candidatura
+        End Get
+    End Property
 
     ''' <summary>Se in questo momento l'AI sta scrivendo l'email.</summary>
     Public ReadOnly Property AiAlLavoro As Boolean
@@ -188,7 +219,16 @@ Public Class PannelloEmail
     ''' <b>com'era</b> — comprese le correzioni fatte a mano — e l'AI non viene disturbata:
     ''' riscrivere sopra il lavoro di ieri sarebbe il modo peggiore di essere utili.
     ''' </summary>
-    Public Async Function MostraLaCandidaturaAsync(candidatura As Opportunita) As Task
+    ''' <param name="scriviSeManca">
+    ''' Se, non trovando nessuna bozza salvata, il messaggio si fa scrivere all'AI. È
+    ''' <c>True</c> per chi è arrivato qui premendo «Prepara email», cioè chiedendola; è
+    ''' <c>False</c> quando il pannello si sta solo <b>allineando</b> al documento aperto in
+    ''' P6 (v. <see cref="SegueIlDocumentoAsync"/>), perché cambiare documento in un'altra
+    ''' schermata non è chiedere un'email — e una navigazione che fa partire una
+    ''' generazione è una spesa che nessuno ha chiesto (cap. 12.7).
+    ''' </param>
+    Public Async Function MostraLaCandidaturaAsync(candidatura As Opportunita,
+                                                   Optional scriviSeManca As Boolean = True) As Task
 
         _candidatura = candidatura
         If _candidatura Is Nothing Then Return
@@ -242,7 +282,43 @@ Public Class PannelloEmail
         ' dell'utente, e sostituirglielo sarebbe cancellargli una decisione.
         ProponiIlDestinatario()
 
+        If Not scriviSeManca Then
+            AggiornaComandi()
+            Racconta("Questa è l'email di ciò che stai guardando in «Documenti». " &
+                     "Il messaggio lo scrivo quando lo chiedi: premi «Fallo riscrivere».",
+                     StileApp.TestoSecondario)
+            Return
+        End If
+
         Await ScriviLaBozzaAsync()
+
+    End Function
+
+    ''' <summary>
+    ''' Segue il documento aperto in P6: prende in carico la sua candidatura, o si svuota se
+    ''' quel documento è il 📄 CV base — che a nessuna azienda si manda (2026-09-08).
+    ''' </summary>
+    ''' <remarks>
+    ''' Gemella di <c>PannelloOpportunita.SegueIlDocumento</c>, e con lo stesso riguardo: si
+    ''' allinea senza chiedere niente e senza <b>spendere</b> niente. Là il riguardo era non
+    ''' aprire una finestra, qui è non chiamare l'AI — l'email è l'unico dei tre pannelli
+    ''' che, arrivando, scriverebbe un testo a pagamento.
+    ''' </remarks>
+    Public Async Function SegueIlDocumentoAsync(candidatura As Opportunita) As Task
+
+        If AiAlLavoro Then Return
+
+        If candidatura Is Nothing Then
+            Svuota("Stai guardando il 📄 CV base: quello non si manda a nessuno, perché non " &
+                   "nasce da un annuncio. L'email nasce da una candidatura.")
+            Return
+        End If
+
+        If _candidatura IsNot Nothing AndAlso
+           String.Equals(_candidatura.Cartella, candidatura.Cartella,
+                         StringComparison.OrdinalIgnoreCase) Then Return
+
+        Await MostraLaCandidaturaAsync(candidatura, scriviSeManca:=False).ConfigureAwait(True)
 
     End Function
 
@@ -263,9 +339,26 @@ Public Class PannelloEmail
             Return False
         End If
 
+        Svuota("La candidatura per cui era questa email è stata eliminata.")
+
+        Return True
+
+    End Function
+
+    ''' <summary>
+    ''' Riporta il pannello a com'è senza candidatura, e dice perché ci è tornato.
+    ''' </summary>
+    ''' <remarks>
+    ''' Come in P4: le ragioni sono due — la candidatura eliminata
+    ''' (<see cref="Dimentica"/>) e il 📄 CV base aperto in P6
+    ''' (<see cref="SegueIlDocumentoAsync"/>) — e il pannello da svuotare è uno solo.
+    ''' </remarks>
+    Private Sub Svuota(racconto As String)
+
         _candidatura = Nothing
         _destinatarioVieneDallAnnuncio = False
         _bozza = New BozzaEmail()
+        _cvBaseDaScrivere = Nothing
         DimenticaIlLavoroAMano()
 
         _suggerimenti.SetToolTip(txtDestinatario, Nothing)
@@ -278,14 +371,12 @@ Public Class PannelloEmail
                 lstAllegati.Items.Clear()
             End Sub)
 
-        Racconta("La candidatura per cui era questa email è stata eliminata.",
-                 StileApp.TestoSecondario)
+        MostraLaSpiaDeiDocumenti()
+        Racconta(racconto, StileApp.TestoSecondario)
 
         AggiornaComandi()
 
-        Return True
-
-    End Function
+    End Sub
 
     ''' <summary>
     ''' Vero quando la bozza salvata è in una lingua e i documenti della candidatura in
@@ -515,6 +606,19 @@ Public Class PannelloEmail
                 .Scelto = ConvieneAllegarlo(percorso)})
         Next
 
+        ' Il 📄 CV base non è di questa candidatura e non è un attestato: sta accanto al
+        ' profilo, ed è la terza cartella da cui questo elenco pesca (2026-09-08). Arriva
+        ' **spento**, come gli attestati: il PDF del 🎯 CV mirato è già spuntato qui sopra,
+        ' e due CV nella stessa email si annullano a vicenda.
+        _cvBaseDaScrivere = Nothing
+
+        For Each nome As String In DocumentiDelProfilo()
+            _bozza.Allegati.Add(New AllegatoScelto With {
+                .Nome = nome,
+                .Origine = OrigineAllegato.Profilo,
+                .Scelto = False})
+        Next
+
         For Each attestato As DocumentoClassificato In AttestatiDaProporre()
             _bozza.Allegati.Add(New AllegatoScelto With {
                 .Nome = attestato.Nome,
@@ -526,9 +630,82 @@ Public Class PannelloEmail
             Sub()
                 lstAllegati.Items.Clear()
                 For Each allegato As AllegatoScelto In _bozza.Allegati
-                    lstAllegati.Items.Add(EtichettaAllegato(allegato), allegato.Scelto)
+                    lstAllegati.Items.Add(EtichettaAllegato(allegato, DaScrivere(allegato)),
+                                          allegato.Scelto)
                 Next
             End Sub)
+
+        ' La spia sta sopra questo elenco e parla di questi file: si rifà con lui, o
+        ' racconterebbe gli allegati di prima.
+        MostraLaSpiaDeiDocumenti()
+
+    End Sub
+
+    ''' <summary>
+    ''' Accende la spia sopra gli allegati: se il 🎯 CV e la ✉️ lettera che stanno per
+    ''' partire vengono dal profilo di oggi (cap. 03.8).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para><b>Perché anche qui, e perché sopra gli allegati.</b> Fino al 2026-09-08 la
+    ''' spia viveva in P1, P2, P4 e P6, e questo era l'unico posto dove i documenti si
+    ''' <b>consegnano</b> senza che nessuno dicesse da dove vengono. È l'ultima schermata
+    ''' prima che escano di casa: chi arriva qui dalla Home, o riprende una bozza di ieri,
+    ''' in P6 non ci passa affatto — e l'avviso che sta di là, per lui, non esiste.</para>
+    ''' <para>Legge la stessa versione delle due spie di P6, quella dei <b>documenti</b> e
+    ''' non quella del confronto, perché è dei documenti che parla. Il <b>rimedio</b> invece
+    ''' è di questa schermata, com'è regola: nomina «◀ Torna ai documenti», che è il bottone
+    ''' qui in fondo, e non «Rigenera», che qui non c'è.</para>
+    ''' </remarks>
+    Private Sub MostraLaSpiaDeiDocumenti()
+
+        Dim spia As LetturaSpia = SpiaDelProfilo.Spenta
+
+        If _contesto IsNot Nothing AndAlso _candidatura IsNot Nothing Then
+            spia = SpiaDelProfilo.Leggi(
+                _contesto.Archivio, _candidatura.VersioneDeiDocumenti,
+                _candidatura.Cv IsNot Nothing OrElse _candidatura.Lettera IsNot Nothing)
+        End If
+
+        lblSpiaDocumenti.Text = spia.Scritta
+        lblSpiaDocumenti.ForeColor = spia.Colore
+        lblSpiaDocumenti.Visible = spia.Accesa
+        _suggerimenti.SetToolTip(lblSpiaDocumenti, If(spia.Stato = StatoSpia.Disallineato,
+                                                      SuggerimentoObsoleti, spia.Perche))
+
+    End Sub
+
+    ''' <summary>
+    ''' Quel che il suggerimento dice a spia rossa: cosa è successo, e i <b>due</b> gesti
+    ''' che lo chiudono.
+    ''' </summary>
+    ''' <remarks>
+    ''' Sono due e non uno, ed è la differenza con P6: là il rimedio è «Rigenera» e finisce
+    ''' lì, perché là il documento <i>è</i> il JSON che si sta guardando. Qui si allegano i
+    ''' <b>file scritti</b> — quelli che <see cref="DocumentiDellaCandidatura"/> trova nella
+    ''' cartella — e rigenerare non li tocca: restano com'erano finché non si riesporta.
+    ''' Dire solo «rigenera» manderebbe a spedire gli stessi file di prima con la coscienza
+    ''' a posto, che è peggio del non dire niente.
+    ''' </remarks>
+    Private Const SuggerimentoObsoleti As String =
+        "Il 🎯 CV e la ✉️ lettera non vengono dal profilo di oggi." & vbLf &
+        "Con «◀ Torna ai documenti» li rigeneri, poi riesportali: qui si allegano i file " &
+        "scritti, e quelli restano com'erano finché non li riscrivi."
+
+    ''' <summary>
+    ''' Rientrando nel pannello, la spia si rilegge.
+    ''' </summary>
+    ''' <remarks>
+    ''' È la lezione di P4, presa dal verso giusto invece che dopo: dalla barra si può
+    ''' andare in P6, rigenerare i documenti e tornare qui senza passare da
+    ''' <see cref="MostraLaCandidaturaAsync"/> — e la lucina resterebbe quella di prima,
+    ''' cioè direbbe una cosa vera cinque minuti fa. Il profilo può anche essere cambiato
+    ''' nel frattempo, che è l'altra metà della stessa domanda.
+    ''' </remarks>
+    Protected Overrides Sub OnVisibleChanged(e As EventArgs)
+
+        MyBase.OnVisibleChanged(e)
+
+        If Visible Then MostraLaSpiaDeiDocumenti()
 
     End Sub
 
@@ -554,18 +731,193 @@ Public Class PannelloEmail
     End Function
 
     ''' <summary>
-    ''' Come si legge un allegato nell'elenco. Quelli che vengono dalla cartella documenti
-    ''' lo dicono: nella stessa lista ci sono file appena generati per questa candidatura e
-    ''' file che l'utente ha da anni, e sapere da dove viene ciascuno è ciò che permette di
-    ''' spuntarli con cognizione.
+    ''' Come si legge un allegato nell'elenco. Quelli che non vengono da questa candidatura
+    ''' lo dicono: nella stessa lista ci sono file generati un minuto fa, il 📄 CV base che
+    ''' vale per tutte le candidature e file che l'utente ha da anni, e sapere da dove viene
+    ''' ciascuno è ciò che permette di spuntarli con cognizione.
     ''' </summary>
-    Private Shared Function EtichettaAllegato(allegato As AllegatoScelto) As String
+    ''' <param name="daScrivere">
+    ''' Se quel file <b>non c'è ancora</b> e nascerà spuntandolo: allora la riga lo dice,
+    ''' invece di far credere che sia già lì.
+    ''' </param>
+    Private Shared Function EtichettaAllegato(allegato As AllegatoScelto,
+                                              Optional daScrivere As Boolean = False) As String
 
-        If allegato.Origine <> OrigineAllegato.Documenti Then Return allegato.Nome
+        Select Case allegato.Origine
 
-        Return $"{allegato.Nome}  (dai tuoi documenti)"
+            Case OrigineAllegato.Documenti
+                Return $"{allegato.Nome}  (dai tuoi documenti)"
+
+            Case OrigineAllegato.Profilo
+                Return allegato.Nome & If(daScrivere,
+                                          "  (il tuo 📄 CV base — lo scrivo quando lo spunti)",
+                                          "  (il tuo 📄 CV base)")
+
+            Case Else
+                Return allegato.Nome
+
+        End Select
 
     End Function
+
+    ''' <summary>
+    ''' I file del 📄 CV base che si possono allegare: quelli già esportati accanto al
+    ''' profilo e, se non ce n'è ancora nessuno, il nome che il PDF <b>avrà</b>.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>La voce c'è comunque, ed è la richiesta di Mirco del 2026-09-08: il CV base
+    ''' dev'essere <b>sempre</b> allegabile. Prima l'elenco guardava due cartelle — la
+    ''' <c>out\</c> della candidatura e la cartella documenti — e il CV base non stava in
+    ''' nessuna delle due: chi voleva mandarlo doveva allegarlo a mano dal programma di
+    ''' posta, cioè uscire dal programma per fare una cosa che il programma sa fare.</para>
+    ''' <para>Quando i file non ci sono si promette il <b>PDF</b> e non tutti e due: è il
+    ''' formato che si manda a un'azienda (v. <see cref="ConvieneAllegarlo"/>), e due voci
+    ''' che promettono la stessa cosa sarebbero una scelta finta. Spuntandolo si scrivono
+    ''' comunque tutti e due i formati, come fa «Esporta» in P6, e il DOCX resta nell'elenco
+    ''' per chi lo vuole.</para>
+    ''' </remarks>
+    Private Function DocumentiDelProfilo() As List(Of String)
+
+        Dim quali As New List(Of String)
+        If _contesto Is Nothing Then Return quali
+
+        Dim cartella As String = _contesto.Cartella.CartellaOutProfilo
+
+        If Directory.Exists(cartella) Then
+            quali.AddRange(
+                Directory.EnumerateFiles(cartella).
+                    Where(Function(f) Not f.EndsWith(ScrittoreEml.Estensione,
+                                                     StringComparison.OrdinalIgnoreCase)).
+                    Select(Function(f) Path.GetFileName(f)).
+                    OrderBy(Function(n) n, StringComparer.CurrentCultureIgnoreCase))
+        End If
+
+        If quali.Count > 0 Then Return quali
+
+        Dim salvato As Dati.CvBase = CvBaseSuDisco()
+        If salvato Is Nothing OrElse salvato.Cv Is Nothing Then Return quali
+
+        _cvBaseDaScrivere = ArchivioDocumenti.NomeDelCvBase(salvato.Cv, Nothing, salvato.Lingua) &
+                            NomiDocumenti.EstensionePdf
+        quali.Add(_cvBaseDaScrivere)
+
+        Return quali
+
+    End Function
+
+    ''' <summary>
+    ''' Il 📄 CV base salvato col profilo, o <c>Nothing</c> se non ce n'è o non si lascia
+    ''' leggere.
+    ''' </summary>
+    ''' <remarks>
+    ''' Qui un file illeggibile non è una notizia da dare — a darla è P2, che di quel CV è
+    ''' la casa (cap. 11.1): in un elenco di allegati significa solo che non c'è niente da
+    ''' proporre, e fermare la preparazione di un'email per questo sarebbe sproporzionato.
+    ''' </remarks>
+    Private Function CvBaseSuDisco() As Dati.CvBase
+
+        If _contesto Is Nothing Then Return Nothing
+
+        Try
+            Return _contesto.Archivio.CaricaCvBase()
+
+        Catch ex As Exception When TypeOf ex Is System.Text.Json.JsonException OrElse
+                                   TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            Return Nothing
+        End Try
+
+    End Function
+
+    ''' <summary>Se questo allegato è la voce che promette un file ancora da scrivere.</summary>
+    Private Function DaScrivere(allegato As AllegatoScelto) As Boolean
+
+        Return allegato IsNot Nothing AndAlso
+               allegato.Origine = OrigineAllegato.Profilo AndAlso
+               Not String.IsNullOrEmpty(_cvBaseDaScrivere) AndAlso
+               String.Equals(allegato.Nome, _cvBaseDaScrivere, StringComparison.OrdinalIgnoreCase)
+
+    End Function
+
+    ''' <summary>
+    ''' Mantiene la promessa della voce: scrive il 📄 CV base accanto al profilo e lo lascia
+    ''' spuntato fra gli allegati.
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>È pubblica perché la chiama il banco: la spunta la fa partire da
+    ''' <see cref="lstAllegati_ItemCheck"/>, che è sincrono e non può aspettare una scrittura
+    ''' — e un collaudo che non può attendere il lavoro guarderebbe l'elenco un istante
+    ''' prima che cambi.</para>
+    ''' <para>Scrive DOCX <b>e</b> PDF, come «Esporta» in P6, e poi spunta quello che è
+    ''' davvero nato: se la stampante PDF non c'è — su una macchina senza WebView, o nel
+    ''' banco — il PDF non esce e non solleva niente, e una spunta lasciata sul file
+    ''' promesso allegherebbe il nulla.</para>
+    ''' </remarks>
+    Public Async Function AllegaIlCvBaseAsync() As Task
+
+        If _documenti Is Nothing OrElse _contesto Is Nothing Then Return
+
+        Dim salvato As Dati.CvBase = CvBaseSuDisco()
+        If salvato Is Nothing OrElse salvato.Cv Is Nothing Then
+            RaccontaUnAvviso("Un 📄 CV base non c'è ancora: si scrive in «Documenti».")
+            Return
+        End If
+
+        Try
+            Racconta("Scrivo il tuo 📄 CV base, così puoi allegarlo…", StileApp.TestoSecondario)
+
+            Dim scritti As IReadOnlyList(Of String) = Await _documenti.ScriviCvBaseAsync(
+                salvato.Cv, Nothing, FormatiDocumento.Entrambi, salvato.Lingua).ConfigureAwait(True)
+
+            RiempiGliAllegati()
+            SpuntaIlCvBase(scritti)
+
+            Racconta("Il 📄 CV base è pronto e spuntato: l'ho scritto accanto al tuo profilo." & vbLf &
+                     "Se il messaggio nomina gli allegati, fallo riscrivere.", StileApp.TestoSecondario)
+
+        Catch ex As Exception When TypeOf ex Is IOException OrElse
+                                   TypeOf ex Is UnauthorizedAccessException
+            ' L'elenco torna a dire il vero: la voce promessa resta lì, spenta, e la
+            ' promessa si può riprovare.
+            RiempiGliAllegati()
+            RaccontaUnErrore($"Non sono riuscita a scrivere il 📄 CV base: {ex.Message}")
+        End Try
+
+    End Function
+
+    ''' <summary>Spunta il file appena scritto: il PDF se è nato, altrimenti quel che c'è.</summary>
+    Private Sub SpuntaIlCvBase(scritti As IReadOnlyList(Of String))
+
+        If scritti Is Nothing OrElse scritti.Count = 0 Then Return
+
+        Dim ilPdf As String = scritti.FirstOrDefault(
+            Function(f) Path.GetExtension(f).Equals(NomiDocumenti.EstensionePdf,
+                                                    StringComparison.OrdinalIgnoreCase))
+
+        Dim nome As String = Path.GetFileName(If(ilPdf, scritti(0)))
+
+        For Each allegato As AllegatoScelto In _bozza.Allegati
+            If allegato.Origine = OrigineAllegato.Profilo AndAlso
+               String.Equals(allegato.Nome, nome, StringComparison.OrdinalIgnoreCase) Then
+                allegato.Scelto = True
+            End If
+        Next
+
+        ' Dentro Riempiendo: cambiare una spunta scatena ItemCheck, e da lì ripartirebbe
+        ' la scrittura che è appena finita.
+        Riempiendo(Sub() MostraLeSpunte())
+
+    End Sub
+
+    ''' <summary>
+    ''' Fa partire la scrittura del 📄 CV base senza aspettarla: la spunta è un evento
+    ''' sincrono, e da lì non si può attendere niente.
+    ''' </summary>
+    Private Async Sub AvviaLaScritturaDelCvBase()
+
+        Await AllegaIlCvBaseAsync().ConfigureAwait(True)
+
+    End Sub
 
     ''' <summary>I file prodotti per questa candidatura, in ordine di nome.</summary>
     Private Function DocumentiDellaCandidatura() As IEnumerable(Of String)
@@ -607,7 +959,15 @@ Public Class PannelloEmail
         If _riempimenti > 0 Then Return
         If e.Index < 0 OrElse e.Index >= _bozza.Allegati.Count Then Return
 
-        _bozza.Allegati(e.Index).Scelto = (e.NewValue = CheckState.Checked)
+        Dim allegato As AllegatoScelto = _bozza.Allegati(e.Index)
+        allegato.Scelto = (e.NewValue = CheckState.Checked)
+
+        ' La voce del 📄 CV base non ancora esportato promette un file: spuntandola, la
+        ' promessa si mantiene adesso. Il racconto lo fa quel lavoro, che ha di più da dire.
+        If allegato.Scelto AndAlso DaScrivere(allegato) Then
+            AvviaLaScritturaDelCvBase()
+            Return
+        End If
 
         ' Il messaggio nomina gli allegati: cambiarli senza rifarlo scrivere lascia un
         ' testo che promette un file che non parte più. Non si riscrive da sé — sarebbe
@@ -1158,7 +1518,8 @@ Public Class PannelloEmail
         For Each allegato As AllegatoScelto In _bozza.AllegatiScelti()
 
             Dim percorso As String = BozzaEmail.PercorsoDi(
-                allegato, _candidatura.Cartella, _contesto?.Raccolta.Cartella)
+                allegato, _candidatura.Cartella, _contesto?.Raccolta.Cartella,
+                _contesto?.Cartella.CartellaOutProfilo)
 
             ' Un file sparito nel frattempo non ferma il messaggio: l'utente ha appena
             ' guardato l'elenco, e bloccare tutto per un file in meno sarebbe sproporzionato.

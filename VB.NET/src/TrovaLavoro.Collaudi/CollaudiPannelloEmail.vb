@@ -1,4 +1,4 @@
-Imports System.Drawing
+﻿Imports System.Drawing
 Imports System.IO
 Imports System.Linq
 Imports System.Text
@@ -33,6 +33,11 @@ Namespace Ui
             "{""tipo"": ""lettera_mirata"", ""apertura"": ""Spettabile Azienda,""," &
             """corpo"": ""Ho quattro anni di magazzino."", ""chiusura"": ""Cordiali saluti,""," &
             """firma"": {""nome"": ""Luca Ferrari"", ""email"": ""luca@example.it""}}"
+
+        ''' <summary>Un 📄 CV base come lo scrive l'AI: quel che conta è che abbia un nome.</summary>
+        Private Const CvBaseScritto As String =
+            "{""tipo"": ""cv_base"", ""intestazione"": {""nome"": ""Luca Ferrari"", ""citta"": ""Forlì""}," &
+            """sommario"": ""Il ritratto del profilo."", ""competenze"": [""Uso del muletto""]}"
 
         Private Const AnnuncioLetto As String =
             "{""titolo"": ""Magazziniere"", ""azienda"": ""Rossi S.p.A."", ""sede"": [""Forlì""]}"
@@ -1070,8 +1075,11 @@ Namespace Ui
                     contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
 
                     pannello.CreateControl()
+                    ' Senza stampante PDF, come in CollaudiPannelloDocumenti: qui si guarda
+                    ' il pannello, e il PDF ha il suo banco a parte.
                     pannello.Collega(contesto, compositore, Nothing,
-                                     If(rifinitore Is Nothing, Nothing, New Rifinitura(rifinitore)))
+                                     If(rifinitore Is Nothing, Nothing, New Rifinitura(rifinitore)),
+                                     New ArchivioDocumenti(contesto.Cartella))
 
                     Await prova(pannello, contesto, Generata(contesto))
                 End Using
@@ -1112,6 +1120,174 @@ Namespace Ui
 
         End Sub
 
+        ''' <summary>
+        ''' Mette nella <c>out\</c> del <b>profilo</b> dei finti file di 📄 CV base già
+        ''' esportati: è l'altra cartella da cui l'email pesca, e non è di nessuna
+        ''' candidatura (cap. 11.1).
+        ''' </summary>
+        Private Shared Sub ScriviCvBaseEsportato(contesto As ContestoApp, ParamArray nomi As String())
+
+            Dim cartella As String = contesto.Cartella.CartellaOutProfilo
+            Directory.CreateDirectory(cartella)
+
+            For Each nome As String In nomi
+                File.WriteAllText(Path.Combine(cartella, nome), $"finto: {nome}")
+            Next
+
+        End Sub
+
+        ''' <summary>
+        ''' Il 📄 CV base mai esportato compare lo stesso, dicendo che il file non c'è
+        ''' ancora; spuntandolo lo si scrive davvero (2026-09-08).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È la seconda metà di «sempre allegabile», e senza di lei la prima è una
+        ''' mezza promessa: un CV base esiste appena l'AI lo scrive, mentre i <b>file</b>
+        ''' nascono solo se qualcuno preme «Esporta» in P6 — cioè quasi mai, se uno arriva
+        ''' qui dalla Home. La voce c'è comunque e lo dichiara; il file lo scrive la spunta,
+        ''' senza chiamare l'AI: è impaginazione, non scrittura.</para>
+        ''' <para>Nel banco la stampante PDF non c'è (vuole una WebView e il thread
+        ''' dell'interfaccia), quindi nasce il solo DOCX — ed è la ragione per cui la spunta
+        ''' finisce su quel che è <b>davvero</b> nato invece che sul nome promesso: una
+        ''' spunta sul file mancante allegherebbe il nulla, in silenzio.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function IlCvBaseMaiEsportatoSiPrometteEPoiSiScrive() As Task
+
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ' Un 📄 CV base c'è, ma nessuno l'ha mai esportato: su disco c'è il solo
+                    ' cv_base.json, e la sua cartella out\ non esiste nemmeno.
+                    contesto.Archivio.SalvaCvBase(JsonNode.Parse(CvBaseScritto),
+                                                  contesto.Archivio.Versioni().Last())
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim elenco As CheckedListBox = Allegati(pannello)
+                    Dim promessa As String = RigheDi(elenco).
+                        FirstOrDefault(Function(v) v.Contains("CV base"))
+
+                    Assert.IsNotNull(promessa, "la voce c'è anche se il file no")
+                    Assert.Contains("lo scrivo quando lo spunti", promessa,
+                                    "e dice che il file non c'è ancora, invece di far credere che sia lì")
+                    Assert.IsFalse(SpuntatoQuello(elenco, promessa), "spenta, come tutte le sue")
+
+                    Await pannello.AllegaIlCvBaseAsync()
+
+                    Dim nati As String() = Directory.GetFiles(contesto.Cartella.CartellaOutProfilo)
+                    Assert.IsNotEmpty(nati, "adesso il file c'è davvero")
+
+                    Dim riga As String = RigheDi(elenco).
+                        FirstOrDefault(Function(v) v.StartsWith(Path.GetFileName(nati(0))))
+
+                    Assert.IsNotNull(riga, "l'elenco mostra il file nato, col suo nome vero")
+                    Assert.DoesNotContain("lo scrivo quando", riga, "che non è più una promessa")
+                    Assert.IsTrue(SpuntatoQuello(elenco, riga),
+                                  "ed è spuntato: l'utente l'ha chiesto spuntandolo")
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Aprendo un documento in P6, l'email lo segue — <b>senza</b> far scrivere niente
+        ''' all'AI (2026-09-08).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È la metà delicata della richiesta di Mirco. Che l'email segua il documento
+        ''' è comodo; che lo faccia chiamando il compositore sarebbe un disastro: cambiare
+        ''' voce in una tendina spenderebbe una chiamata a ogni giro, per un messaggio che
+        ''' nessuno ha chiesto. Perciò questo pannello, quando si allinea, riprende la bozza
+        ''' salvata se c'è e altrimenti resta vuoto dicendolo — il messaggio si scrive con
+        ''' «Fallo riscrivere», che è un gesto.</para>
+        ''' <para>Sul 📄 CV base si svuota: quel CV non si manda a nessuno, perché non nasce
+        ''' da un annuncio e non ha un'azienda a cui andare.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function LEmailSegueIlDocumentoSenzaChiamareLAi() As Task
+
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ScriviDocumenti(candidatura, "CV_Ferrari_Rossi.pdf")
+
+                    Await pannello.SegueIlDocumentoAsync(candidatura)
+
+                    Assert.AreSame(candidatura, pannello.Candidatura,
+                                   "l'email è di quella candidatura")
+                    Assert.IsEmpty(compositore.AllegatiNominati,
+                                   "e nessuno ha chiesto all'AI di scrivere: allinearsi non è chiedere")
+                    Assert.IsEmpty(Casella(pannello, "txtCorpo").Text, "il messaggio non c'è ancora")
+                    Assert.Contains("Fallo riscrivere", Etichetta(pannello, "lblStatoEmail").Text,
+                                    "e la riga dice qual è il gesto che lo scrive")
+
+                    ' In P6 si passa al 📄 CV base: non c'è nessuna azienda a cui mandarlo.
+                    Await pannello.SegueIlDocumentoAsync(Nothing)
+
+                    Assert.IsNull(pannello.Candidatura, "il pannello ha lasciato andare la candidatura")
+                    Assert.IsEmpty(Allegati(pannello).Items, "e con lei i suoi allegati")
+                    Assert.Contains("non si manda a nessuno", Etichetta(pannello, "lblStatoEmail").Text,
+                                    "detto con le parole del perché")
+                End Function)
+
+        End Function
+
+        ''' <summary>Le righe dell'elenco degli allegati, come si leggono.</summary>
+        Private Shared Function RigheDi(elenco As CheckedListBox) As List(Of String)
+
+            Return elenco.Items.Cast(Of Object)().Select(Function(v) CStr(v)).ToList()
+
+        End Function
+
+        ''' <summary>
+        ''' Il 📄 CV base si può allegare all'email, sempre: anche se non appartiene a
+        ''' questa candidatura e sta in un'altra cartella (2026-09-08).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>L'elenco «Cosa allego» guardava due posti — la <c>out\</c> della
+        ''' candidatura e la cartella documenti — e il 📄 CV base non sta né nell'una né
+        ''' nell'altra: vive accanto al <b>profilo</b>, perché non è di nessuna candidatura
+        ''' (cap. 11.1). Il risultato era che un CV base esportato non compariva da nessuna
+        ''' parte, e per mandarlo bisognava allegarlo a mano dal programma di posta.</para>
+        ''' <para>Arriva <b>spento</b>, come gli attestati: su una candidatura il PDF del
+        ''' 🎯 CV mirato è già spuntato, e due CV nella stessa email si annullano a vicenda.
+        ''' Il programma lo mette a portata di mano; a sceglierlo è chi si candida.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function IlCvBaseSiPuoSempreAllegare() As Task
+
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ScriviDocumenti(candidatura, "CV_Ferrari_Rossi.pdf")
+                    ScriviCvBaseEsportato(contesto, "CV_Ferrari_2026-09-08.pdf")
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim elenco As CheckedListBox = Allegati(pannello)
+                    Dim righe As List(Of String) =
+                        elenco.Items.Cast(Of Object)().Select(Function(v) CStr(v)).ToList()
+
+                    Dim riga As String = righe.FirstOrDefault(
+                        Function(v) v.StartsWith("CV_Ferrari_2026-09-08.pdf"))
+
+                    Assert.IsNotNull(riga, "il 📄 CV base è fra le cose che si possono allegare")
+                    Assert.Contains("CV base", riga,
+                                    "e la riga dice di chi è: non è un documento di questa candidatura")
+                    Assert.IsFalse(SpuntatoQuello(elenco, riga),
+                                   "arriva spento: il 🎯 CV mirato è già spuntato, e due CV si annullano")
+                    Assert.IsTrue(SpuntatoQuello(elenco, "CV_Ferrari_Rossi.pdf"),
+                                  "e non ha rubato la spunta al CV di questa candidatura")
+                End Function)
+
+        End Function
+
         <TestMethod>
         Public Sub IlTastoTabPercorreLaFasciaComeLaLeggeLOcchio()
 
@@ -1140,6 +1316,103 @@ Namespace Ui
             End Using
 
         End Sub
+
+        ''' <summary>
+        ''' Anche l'email ha la sua spia: dice se il 🎯 CV e la ✉️ lettera che sta per
+        ''' allegare vengono dal profilo di oggi (2026-09-08, cap. 03.8).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>Era l'ultima schermata a non averla. Qui i documenti non si guardano, si
+        ''' <b>consegnano</b>: chi arriva dalla Home a riprendere una bozza di ieri in P6
+        ''' non passa affatto, e l'avviso che sta di là per lui non esiste.</para>
+        ''' <para>Il collaudo prova i tre stati e la <b>frase</b> del suggerimento, che qui
+        ''' non può nominare «Rigenera» — quel bottone in questa schermata non c'è — e deve
+        ''' invece dire i due gesti veri: tornare ai documenti e <i>riesportarli</i>, perché
+        ''' ad allegarsi sono i file scritti e una rigenerazione non li tocca.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function LEmailDiceSeIDocumentiCheAllegaSonoDelProfiloDiOggi() As Task
+
+            Dim compositore As New CompositoreFinto
+            compositore.Dara(EmailScritta).Dara(EmailScritta).Dara(EmailScritta)
+
+            Await ConPannelloAsync(compositore,
+                Async Function(pannello, contesto, candidatura)
+                    ' Una candidatura scritta prima del 2026-09-03 non ha nessuna versione
+                    ' annotata sui documenti: la spia resta spenta, che non è «in pari».
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Dim spia As Label = Etichetta(pannello, "lblSpiaDocumenti")
+                    Assert.IsEmpty(spia.Text, "senza sapere da dove vengono, non si promette niente")
+
+                    candidatura.VersioneDeiDocumenti = contesto.Archivio.Versioni().Last()
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.Contains(SpiaDelProfilo.ParolaAllineato, spia.Text,
+                                    "sono nati dal profilo di adesso")
+
+                    ' Il profilo cambia sotto i documenti già scritti: da qui in avanti
+                    ' quel che sta per partire racconta qualcun altro.
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.Contains(SpiaDelProfilo.ParolaDisallineato, spia.Text,
+                                    "e la lucina lo dice prima che il messaggio parta")
+
+                    Dim detto As String = SuggerimentiDelPannello(pannello).GetToolTip(spia)
+                    Assert.Contains("Torna ai documenti", detto, "il gesto che in questa schermata c'è")
+                    Assert.DoesNotContain("«Rigenera»", detto, "e non uno che qui non esiste")
+                    Assert.Contains("riesporta", detto,
+                                    "gli allegati sono i file scritti: vanno rifatti anche quelli")
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' La spia si è presa una riga sua fra «Cosa allego» e l'elenco, e non l'ha rubata
+        ''' a nessuno.
+        ''' </summary>
+        ''' <remarks>
+        ''' Il riquadro degli allegati è a posizioni fisse: infilarci una riga vuol dire
+        ''' spostare l'elenco in giù e accorciarlo dello stesso tanto, o va a finire sotto
+        ''' la nota in fondo — che è il genere di cosa che a video si vede solo se la lista
+        ''' è piena. Qui si misura, che costa meno di guardare e non dimentica.
+        ''' </remarks>
+        <TestMethod>
+        Public Sub LaSpiaHaUnaRigaSuaFraIlTitoloELElenco()
+
+            Using pannello As New PannelloEmail()
+
+                Dim titolo As Label = Etichetta(pannello, "lblAllegati")
+                Dim spia As Label = Etichetta(pannello, "lblSpiaDocumenti")
+                Dim elenco As CheckedListBox = Allegati(pannello)
+                Dim nota As Label = Etichetta(pannello, "lblNotaAllegati")
+
+                Assert.IsGreaterThanOrEqualTo(titolo.Bottom, spia.Top, "la spia sta sotto «Cosa allego»")
+                Assert.IsGreaterThanOrEqualTo(spia.Bottom, elenco.Top, "e sopra l'elenco, senza accavallarsi")
+                Assert.IsGreaterThanOrEqualTo(elenco.Bottom, nota.Top, "e l'elenco resta sopra la nota in fondo")
+                Assert.AreEqual(titolo.Left, spia.Left, "incolonnata col titolo di cui continua la riga")
+
+            End Using
+
+        End Sub
+
+        ''' <summary>
+        ''' Il fornitore di suggerimenti del pannello: non è un controllo e non si trova con
+        ''' <c>Controls.Find</c>, si arriva solo al campo che lo tiene (come in
+        ''' <c>CollaudiPannelloDocumenti</c>).
+        ''' </summary>
+        Private Shared Function SuggerimentiDelPannello(pannello As Control) As ToolTip
+
+            Dim campo As System.Reflection.FieldInfo = pannello.GetType().GetField(
+                "_suggerimenti", System.Reflection.BindingFlags.Instance Or
+                                 System.Reflection.BindingFlags.NonPublic)
+
+            Assert.IsNotNull(campo, "il pannello ha ancora il suo fornitore di suggerimenti")
+
+            Return DirectCast(campo.GetValue(pannello), ToolTip)
+
+        End Function
 
         Private Shared Function PoolInesistente() As String
             Return Path.Combine(Path.GetTempPath(), "pool-inesistente")

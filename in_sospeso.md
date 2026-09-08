@@ -641,6 +641,23 @@ invece di darlo per provato (regola 15).*
   chiedere e a scrivere non l'ha contato nessuno. *(2026-09-03 — la lezione è in
   `falsificazioni.md`; Step 2.70.)*
 
+## Dalle spie in sincrono e dal CV base allegabile (2026-09-08)
+
+- **Nessuna delle tre schermate curate è stata guardata a video.** Le spie sono interfaccia, e
+  il banco vede il dato e l'etichetta ma non l'occhio: restano da guardare dal vivo la lucina
+  del 📄 CV base in P6 subito dopo un «Rigenera», la spia nuova sopra gli allegati in P7 e
+  l'elenco «Cosa allego» col CV base dentro. Non è stato pigrizia: il server MCP di collaudo
+  non era acceso all'avvio della sessione — e i server MCP si caricano **solo** lì — e da un
+  processo di sfondo Windows nega il primo piano, quindi l'applicazione si può fotografare ma
+  non pilotare. *(2026-09-08 — cap. 03.8; Step 2.73.)*
+- **Le voci lasciate fuori non arrivano al 📄 CV base esportato.** L'anteprima di P6 impagina il
+  CV base passando `_vociTolteDalCvBase`, l'esportazione no: `ScriviAsync` chiama
+  `ScriviCvBaseAsync` senza quel parametro, e nel DOCX e nel PDF le voci tolte **tornano**. Sulla
+  candidatura invece funziona, perché `ScriviCandidaturaAsync` passa `opportunita.VociTolteDalCv`:
+  è un'asimmetria fra i due documenti, non una scelta. Trovata di sfuggita lavorando agli
+  allegati e **non toccata**, perché era fuori dal mandato di quella sessione. *(2026-09-08 —
+  cap. 08.4 (R6), `PannelloDocumenti.ScriviAsync`.)*
+
 ## Chiuse
 
 - ✅ **Il flusso D non ha più nessun segno nell'interfaccia** *(aperta il 2026-08-31, **chiusa

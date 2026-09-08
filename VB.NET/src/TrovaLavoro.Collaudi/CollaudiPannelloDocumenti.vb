@@ -1872,6 +1872,165 @@ Namespace Ui
         End Function
 
         ''' <summary>
+        ''' Rigenerato il 📄 CV base, la sua spia torna verde <b>subito</b>: nella stessa
+        ''' schermata, senza uscire dal pannello e rientrarci.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È il difetto trovato usando il programma l'8 settembre 2026. Si correggeva
+        ''' il profilo, si rigenerava il 📄 CV base — che nasceva giusto, dal profilo di
+        ''' adesso — e la lucina restava <b>rossa</b>. Chi guardava aveva in mano un
+        ''' documento nuovo e un'etichetta che lo dava per vecchio, e l'unico modo di
+        ''' sbugiardarla era uscire dal pannello e tornarci.</para>
+        ''' <para>La causa era un ordine di due righe: <c>Mostra()</c> dipingeva la spia, e
+        ''' solo dopo <c>ArchiviaIlCvBase</c> portava <c>_versioneDelCvBase</c> a quella di
+        ''' oggi. Il vetro veniva dipinto un istante prima che il dato cambiasse, e nessuno
+        ''' tornava a ridipingerlo. La candidatura non ne soffriva perché fa il contrario —
+        ''' annota la versione prima di chiamare l'AI — ed è il modello che c'era già in
+        ''' casa.</para>
+        ''' <para><b>Perché nessuno dei 1440 collaudi lo vedeva.</b> Quelli sulla spia
+        ''' provavano la funzione pura (<c>CollaudiSpiaDelProfilo</c>), quelli sul CV base
+        ''' guardavano il <b>dato</b> finito su disco. Il difetto viveva nello spazio fra i
+        ''' due — l'etichetta a video — che è l'unica delle tre cose che l'utente guarda.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function RigenerandoIlCvBaseLaSuaSpiaTornaVerdeSubito() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase).Dara(CvBase)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.Contains(SpiaDelProfilo.ParolaAllineato,
+                                    Etichetta(pannello, "lblSpiaCv").Text,
+                                    "appena scritto, il CV base è del profilo di oggi")
+
+                    ' Il profilo cambia: da qui in avanti il CV di prima ritrae qualcuno
+                    ' che non è più quello, e rientrando la spia lo dichiara.
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.Contains(SpiaDelProfilo.ParolaDisallineato,
+                                    Etichetta(pannello, "lblSpiaCv").Text,
+                                    "il CV è di ieri, e la spia lo dice")
+
+                    ' Il gesto che rimette in pari, fatto restando dov'è: è la schermata in
+                    ' cui il difetto si vedeva.
+                    Await pannello.RigeneraAsync()
+
+                    Assert.AreEqual("cv_base → cv_base", generatore.LavoriChiesti(),
+                                    "il CV è stato riscritto davvero")
+                    Assert.Contains(SpiaDelProfilo.ParolaAllineato,
+                                    Etichetta(pannello, "lblSpiaCv").Text,
+                                    "e la lucina si spegne con lui, senza uscire e rientrare")
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' La stessa domanda sui documenti di una candidatura: rigenerati, le due spie
+        ''' tornano verdi subito.
+        ''' </summary>
+        ''' <remarks>
+        ''' È il <b>contro-esempio</b> di <see cref="RigenerandoIlCvBaseLaSuaSpiaTornaVerdeSubito"/>,
+        ''' e nasce già verde: <c>GeneraLaCandidaturaAsync</c> annota
+        ''' <c>VersioneDeiDocumenti</c> prima di chiamare l'AI, quindi <c>Mostra()</c> trova
+        ''' il dato buono. Sta qui perché quell'ordine è la cosa da non rompere: è il
+        ''' modello a cui il 📄 CV base è stato riportato, e un collaudo che lo sorveglia
+        ''' vale più di un commento che lo raccomanda.
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function RigenerandoLaCandidaturaLeSueSpieTornanoVerdiSubito() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvMirato).Dara(Lettera).Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    candidatura.VersioneProfilo = contesto.Archivio.Versioni().Last()
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    ' Il profilo cambia e si rifà il match: è quel che fa «⚠ Riconfronta» in
+                    ' P4 — la versione del confronto torna a oggi, i documenti restano
+                    ' quelli di prima. Senza questo passo «Rigenera» non si preme nemmeno.
+                    contesto.Archivio.Salva(TrovaLavoro.Dati.Profilo.DaJson(CasiDiCollaudo.Profilo()))
+                    candidatura.VersioneProfilo = contesto.Archivio.Versioni().Last()
+
+                    Await pannello.MostraLaCandidaturaAsync(candidatura, generaSeManca:=False)
+
+                    Assert.Contains(SpiaDelProfilo.ParolaDisallineato,
+                                    Etichetta(pannello, "lblSpiaCv").Text,
+                                    "prima di rigenerare, i documenti sono ancora quelli di ieri")
+
+                    Await pannello.RigeneraAsync()
+
+                    For Each spia As String In {"lblSpiaCv", "lblSpiaLettera"}
+                        Assert.Contains(SpiaDelProfilo.ParolaAllineato,
+                                        Etichetta(pannello, spia).Text,
+                                        $"{spia}: riscritto adesso, dal profilo di adesso")
+                    Next
+                End Function)
+
+        End Function
+
+        ''' <summary>
+        ''' Cambiando documento, il pannello lo dice: è così che il Confronto e l'Email si
+        ''' allineano a quel che si sta guardando (2026-09-08).
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>L'evento non porta dati e chi ascolta legge <see cref="PannelloDocumenti.Candidatura"/>:
+        ''' una copia attaccata all'evento sarebbe una seconda verità da tenere allineata.
+        ''' Sul 📄 CV base quella property è <c>Nothing</c>, ed è esattamente il segnale che
+        ''' serve — «quel che guardo non viene da nessuna candidatura».</para>
+        ''' <para>Il collaudo guarda anche <b>quante volte</b> parte, e non è pignoleria:
+        ''' l'evento è nato in coda alle due funzioni, dove le uscite anticipate sono cinque
+        ''' e la più battuta di tutte — il CV base ripescato da disco — non ci arrivava mai.
+        ''' Contarlo è il modo di accorgersi che sta nel posto sbagliato.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Async Function CambiareDocumentoLoAnnunciaAChiAscolta() As Task
+
+            Dim generatore As New GeneratoreFinto
+            generatore.Dara(CvBase).Dara(CvMirato).Dara(Lettera)
+
+            Await ConPannelloAsync(
+                generatore,
+                Async Function(pannello, contesto, documenti)
+                    Dim padroni As New List(Of String)
+                    AddHandler pannello.DocumentoInMostraCambiato,
+                        Sub() padroni.Add(If(pannello.Candidatura Is Nothing,
+                                             "cv base", pannello.Candidatura.Cartella))
+
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.AreEqual("cv base", padroni.LastOrDefault(),
+                                    "sul 📄 CV base non c'è nessuna candidatura, e si dice")
+
+                    Dim candidatura As Opportunita = Confrontata(contesto)
+                    Await pannello.MostraLaCandidaturaAsync(candidatura)
+
+                    Assert.AreEqual(candidatura.Cartella, padroni.LastOrDefault(),
+                                    "aperta una candidatura, è la sua")
+
+                    ' Rientrare sul CV base già scritto: è l'uscita più battuta, quella su
+                    ' cui l'evento non partiva quando stava in coda.
+                    Await pannello.MostraIlCvBaseAsync()
+
+                    Assert.AreEqual("cv base", padroni.LastOrDefault(),
+                                    "e anche rileggendolo da disco, senza rigenerare niente")
+                    Assert.AreEqual(3, padroni.Count, "tre aperture, tre annunci")
+                    Assert.AreEqual("cv_base → cv_mirato → lettera", generatore.LavoriChiesti(),
+                                    "e il rientro non ha riscritto nessun documento")
+                End Function)
+
+        End Function
+
+        ''' <summary>
         ''' Il fornitore di suggerimenti del pannello. Non è un controllo e non si trova con
         ''' <c>Controls.Find</c>: è un componente, e da fuori si arriva solo al campo che lo
         ''' tiene (come in <c>CollaudiMarchio</c>).

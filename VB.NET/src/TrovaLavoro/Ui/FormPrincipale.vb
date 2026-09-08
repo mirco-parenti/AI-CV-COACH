@@ -284,9 +284,14 @@ Public Class FormPrincipale
         pnlProfilo.Collega(_contesto)
         pnlDialogo.Collega(_contesto)
         pnlOpportunita.Collega(_contesto)
-        pnlDocumenti.Collega(_contesto, New ArchivioDocumenti(_contesto.Cartella, _stampante))
+        ' Uno solo per tutti e due: P6 li scrive e P7 può doverlo fare per il 📄 CV base
+        ' che sta per allegare (cap. 07.1). Due archivi sulla stessa cartella scriverebbero
+        ' le stesse cose in due modi che un giorno divergono.
+        Dim documenti As New ArchivioDocumenti(_contesto.Cartella, _stampante)
+
+        pnlDocumenti.Collega(_contesto, documenti)
         pnlRicerca.Collega(_contesto, _motoreBrowser)
-        pnlEmail.Collega(_contesto)
+        pnlEmail.Collega(_contesto, documenti:=documenti)
 
     End Sub
 
@@ -721,6 +726,33 @@ Public Class FormPrincipale
         Handles pnlEmail.LavoroAiCambiato
 
         BarraDiNavigazione(libera:=Not pnlEmail.AiAlLavoro)
+
+    End Sub
+
+    ''' <summary>
+    ''' Il documento aperto in P6 è cambiato: il Confronto e l'Email lo seguono
+    ''' (2026-09-08).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>È la richiesta di Mirco: la tendina «📄 Documento:» è la porta da cui P6 si
+    ''' usa, e prima non lo diceva a nessuno. Chi apriva il 🎯 CV mirato di una candidatura
+    ''' si ritrovava, nelle altre due schermate, quella aperta per ultima dalla Home — un
+    ''' match e un'email che parlavano di un'altra azienda, senza niente che lo dicesse. Sul
+    ''' 📄 CV base i due pannelli si <b>svuotano</b>, perché quel CV non nasce da un annuncio
+    ''' e a nessuno si manda.</para>
+    ''' <para>L'instradamento sta qui e non nei pannelli, come tutti gli altri: i tre non si
+    ''' conoscono fra loro, e a farli parlare è sempre e solo la finestra (cap. 03.4).</para>
+    ''' <para>I due <c>Segue…</c> sono garbati per costruzione — nessuna finestra, nessuna
+    ''' chiamata all'AI — perché qui non è l'utente a chiedere il match o l'email: sta
+    ''' guardando un documento, e le altre due schermate si stanno solo mettendo in pari.</para>
+    ''' </remarks>
+    Private Async Sub pnlDocumenti_DocumentoInMostraCambiato(sender As Object, e As EventArgs) _
+        Handles pnlDocumenti.DocumentoInMostraCambiato
+
+        Dim candidatura As Opportunita = pnlDocumenti.Candidatura
+
+        pnlOpportunita.SegueIlDocumento(candidatura)
+        Await pnlEmail.SegueIlDocumentoAsync(candidatura)
 
     End Sub
 

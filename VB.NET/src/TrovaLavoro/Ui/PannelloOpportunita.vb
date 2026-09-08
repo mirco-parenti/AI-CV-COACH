@@ -721,6 +721,54 @@ Public Class PannelloOpportunita
     Public Sub RiapriLaCandidatura(candidatura As Opportunita)
 
         If candidatura Is Nothing Then Throw New ArgumentNullException(NameOf(candidatura))
+
+        Riapri(candidatura, proponendoIlRiconfronto:=True)
+
+    End Sub
+
+    ''' <summary>
+    ''' Mette a video la candidatura del documento che si sta guardando in P6, o svuota il
+    ''' pannello se quel documento è il 📄 CV base — che di annuncio non ne ha uno
+    ''' (2026-09-08).
+    ''' </summary>
+    ''' <remarks>
+    ''' <para>Nasce da una richiesta di Mirco: cambiando documento dalla tendina di P6, il
+    ''' Confronto deve seguirlo. Prima si allineava solo aprendo una candidatura dalla Home,
+    ''' e chi saltava da un CV mirato all'altro si ritrovava sotto gli occhi il match di una
+    ''' <b>terza</b> candidatura — quella aperta per ultima da lì — senza che niente lo
+    ''' dicesse.</para>
+    ''' <para><b>Non propone il riconfronto</b>, ed è l'unica differenza con
+    ''' <see cref="RiapriLaCandidatura"/>: quella finestra è la risposta a un gesto —
+    ''' «riapri questa candidatura» — mentre qui l'utente sta guardando un documento in
+    ''' un'altra schermata, e non ha chiesto niente a questa. Un pannello che si allinea da
+    ''' sé non deve anche mettersi a fare domande. Il bottone «⚠ Riconfronta» resta dov'è,
+    ''' per chi arriva e lo vuole.</para>
+    ''' <para>Se quella candidatura è <b>già</b> quella in mostra non si fa niente: il
+    ''' pannello verrebbe ridipinto identico, ma la sua riga di stato no — e ci si
+    ''' perderebbe quel che stava dicendo.</para>
+    ''' </remarks>
+    Public Sub SegueIlDocumento(candidatura As Opportunita)
+
+        If AiAlLavoro Then Return
+
+        If candidatura Is Nothing Then
+            Svuota("Stai guardando il 📄 CV base, che non nasce da un annuncio: qui non c'è " &
+                   "nessun match da mostrare." & vbLf &
+                   "Incolla un annuncio e premi «Analizza», o apri una candidatura dalla Home.")
+            Return
+        End If
+
+        If _opportunita IsNot Nothing AndAlso
+           String.Equals(_opportunita.Cartella, candidatura.Cartella,
+                         StringComparison.OrdinalIgnoreCase) Then Return
+
+        Riapri(candidatura, proponendoIlRiconfronto:=False)
+
+    End Sub
+
+    ''' <inheritdoc cref="RiapriLaCandidatura"/>
+    Private Sub Riapri(candidatura As Opportunita, proponendoIlRiconfronto As Boolean)
+
         If AiAlLavoro Then Return
 
         _opportunita = candidatura
@@ -764,7 +812,7 @@ Public Class PannelloOpportunita
 
         AggiornaComandi()
 
-        ProponiIlRiconfronto()
+        If proponendoIlRiconfronto Then ProponiIlRiconfronto()
 
     End Sub
 
@@ -865,6 +913,26 @@ Public Class PannelloOpportunita
             Return False
         End If
 
+        Svuota("La candidatura che era qui è stata eliminata: incolla il testo di " &
+               "un altro annuncio e premi «Analizza».")
+
+        Return True
+
+    End Function
+
+    ''' <summary>
+    ''' Riporta il pannello a com'è quando non ha nessuna candidatura per le mani, e dice
+    ''' perché ci è tornato.
+    ''' </summary>
+    ''' <remarks>
+    ''' Le ragioni sono due e vogliono parole diverse — la candidatura eliminata
+    ''' (<see cref="Dimentica"/>) e il 📄 CV base aperto in P6
+    ''' (<see cref="SegueIlDocumento"/>) — ma il pannello da svuotare è lo stesso, e due
+    ''' svuotamenti scritti due volte sono due che un giorno si dimenticano una casella
+    ''' diversa.
+    ''' </remarks>
+    Private Sub Svuota(racconto As String)
+
         _opportunita = Nothing
 
         txtAnnuncio.Clear()
@@ -872,14 +940,11 @@ Public Class PannelloOpportunita
         MostraLaValutazione(Nothing)
         FasciaDIngresso(aperta:=True)
 
-        RaccontaLoStato("La candidatura che era qui è stata eliminata: incolla il testo di " &
-                        "un altro annuncio e premi «Analizza».", StileApp.TestoSecondario)
+        RaccontaLoStato(racconto, StileApp.TestoSecondario)
 
         AggiornaComandi()
 
-        Return True
-
-    End Function
+    End Sub
 
     ''' <summary>
     ''' La versione di profilo con cui si sta confrontando: è ciò che tiene spiegabile un

@@ -1,6 +1,7 @@
 Imports System.Drawing
 Imports System.IO
 Imports System.Linq
+Imports System.Reflection
 Imports System.Threading.Tasks
 Imports System.Windows.Forms
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
@@ -865,6 +866,86 @@ Namespace Ui
                 Assert.AreEqual(salva.Right, elimina.Right, "allineato al margine destro come gli altri")
             End Using
         End Sub
+
+        ' ==================================================================
+        ' La scheda «📄 CV base»
+        ' ==================================================================
+
+        ''' <summary>
+        ''' Salvato il profilo, la spia del 📄 CV base smette di rimandare al salvataggio:
+        ''' quel che si legge deve raccontare l'adesso, non l'attimo prima.
+        ''' </summary>
+        ''' <remarks>
+        ''' <para>È il gemello stretto del difetto di P6 (2026-09-08), e viene dallo stesso
+        ''' lato: <c>btnSalva_Click</c> scriveva una versione nuova nello storico e non
+        ''' tornava a ridipingere la scheda del CV base, che <c>AggiornaIlCvBase</c> rifà
+        ''' solo entrandoci o correggendo un campo.</para>
+        ''' <para>Qui la lucina resta <b>rossa</b> prima e dopo — prima perché il profilo è
+        ''' cambiato a video, dopo perché è cambiato su disco — e proprio per questo il
+        ''' colore non basta a scoprirlo: a mentire è il <b>suggerimento</b>, che continua a
+        ''' rimandare a un salvataggio già fatto. Perciò il collaudo prova la <b>frase</b>:
+        ''' uno sul colore sarebbe verde comunque, cioè verde per il motivo sbagliato.</para>
+        ''' </remarks>
+        <TestMethod>
+        Public Sub SalvatoIlProfiloLaSpiaDelCvBaseNonRimandaPiuAlSalvataggio()
+
+            ConProfiloSalvato(
+                Sub(pannello, archivio)
+                    ' Un 📄 CV base già scritto, nato dal profilo che c'è adesso.
+                    archivio.SalvaCvBase(System.Text.Json.Nodes.JsonNode.Parse(CvBaseDiProva),
+                                         archivio.Versioni().Last())
+
+                    Dim schede As TabControl = DirectCast(
+                        pannello.Controls.Find("tabSezioni", searchAllChildren:=True).Single(), TabControl)
+                    schede.SelectedTab = schede.TabPages.Cast(Of TabPage)().
+                        Single(Function(s) s.Name = "tabCvBase")
+
+                    Dim spia As Label = Etichetta(pannello, "lblSpiaCvBase")
+                    Dim suggerimenti As ToolTip = SuggerimentiDelPannello(pannello)
+
+                    Assert.Contains(SpiaDelProfilo.ParolaAllineato, spia.Text,
+                                    "il CV base è il ritratto del profilo di adesso")
+
+                    ' Si corregge il profilo: la spia diventa rossa prima ancora del
+                    ' salvataggio, perché il profilo a video è già un altro.
+                    Casella(pannello, "txtTelefono").Text = "333 1234567"
+
+                    Assert.Contains(SpiaDelProfilo.ParolaDisallineato, spia.Text,
+                                    "corretto il profilo, il CV di prima non lo ritrae più")
+                    Assert.Contains("non l'hai ancora salvato", suggerimenti.GetToolTip(spia),
+                                    "e il perché è quello: manca il salvataggio")
+
+                    Bottone(pannello, "btnSalva").PerformClick()
+
+                    Assert.HasCount(2, archivio.Versioni(), "il salvataggio ha aggiunto una versione")
+                    Assert.Contains(SpiaDelProfilo.ParolaDisallineato, spia.Text,
+                                    "il CV base è ancora quello di prima: la lucina resta rossa")
+                    Assert.DoesNotContain("non l'hai ancora salvato", suggerimenti.GetToolTip(spia),
+                                          "ma il salvataggio è appena stato fatto, e la frase non può dire il contrario")
+                End Sub)
+
+        End Sub
+
+        ''' <summary>Un 📄 CV base qualunque: quel che conta è che ce ne sia uno.</summary>
+        Private Const CvBaseDiProva As String =
+            "{""tipo"": ""cv_base"", ""intestazione"": {""nome"": ""Luca Ferrari""}," &
+            """sommario"": ""Il ritratto del profilo.""}"
+
+        ''' <summary>
+        ''' Il fornitore di suggerimenti del pannello: non è un controllo e non si trova con
+        ''' <c>Controls.Find</c>, si arriva solo al campo che lo tiene (come in
+        ''' <c>CollaudiPannelloDocumenti</c>).
+        ''' </summary>
+        Private Shared Function SuggerimentiDelPannello(pannello As Control) As ToolTip
+
+            Dim campo As FieldInfo = pannello.GetType().GetField(
+                "_suggerimenti", BindingFlags.Instance Or BindingFlags.NonPublic)
+
+            Assert.IsNotNull(campo, "il pannello ha ancora il suo fornitore di suggerimenti")
+
+            Return DirectCast(campo.GetValue(pannello), ToolTip)
+
+        End Function
 
         ''' <summary>Quel che l'AI risponde sul testo della pagina: la forma di «importa_cv».</summary>
         Private Shared Function ProfiloDiRitorno() As String
