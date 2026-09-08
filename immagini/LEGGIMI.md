@@ -34,6 +34,26 @@ testo si è alzata per far posto al timbro, e con lei sono cresciute le misure d
 formati — la testata passa da 1200×972 a 1200×1052, la schermata di avvio da 800×648 a
 800×702. Il sottotitolo, che era `#DDE5F7`, è diventato bianco pieno.)*
 
+*(Dal 2026-09-08 il disegno è **ripulito**: se n'erano andati via i residui del vecchio
+sfondo rosso, che restavano attaccati ai contorni delle figure — undici righe larghe 4 px
+dentro le sagome, un migliaio di schegge del colore di fondo finite nello spicchio
+sbagliato e una macchia sotto la mano che regge la chiave inglese. In tutto poco più di
+2.400 pixel sul master, lo 0,16%. Il disegno **non è stato ridisegnato**: i pixel sbagliati
+hanno preso il colore di quel che li circondava, le misure e il testo non sono cambiati di
+un pixel. La ricetta sta in `LOGO PROJECT`, negli strumenti `ripulisci-residui.py` e
+`ripulisci-macchia.py`.)*
+
+**Il copyright viaggia dentro i file.** Tutti i PNG del marchio — i due di qui e le due
+risorse dell'applicazione — si portano nei **dati nascosti** la riga
+`Copyright 2026 by Mirco Parenti - Aviolab AI`, scritta in due forme perché i programmi non
+leggono tutti la stessa cosa: il chunk PNG `tEXt` «Copyright», che è quello che mostra
+Windows in *Proprietà → Dettagli*, e un pacchetto XMP `dc:rights` per Adobe e i programmi di
+fotoritocco. Non cambia **un pixel**: i chunk si infilano nel file senza ricomprimere
+l'immagine, e infatti questi quattro restano identici agli originali in `LOGO PROJECT`. La
+firma nasce di là — la scrivono da soli lo script di composizione e `timbra-copyright.py` —
+e qui arriva già dentro i file che si copiano. L'icona `TrovaLavoro.ico` è l'unica **senza**:
+il formato ICO non ha un posto dove metterla.
+
 **Lo stesso disegno vive anche dentro l'applicazione**, in due risorse compilate
 nell'eseguibile — quindi cambiarle vuole una build. La schermata di avvio
 (`../VB.NET/src/TrovaLavoro/Risorse/schermata-avvio.png`, 800×702) nasce da questa sorgente
