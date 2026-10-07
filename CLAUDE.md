@@ -237,7 +237,7 @@ un file nuovo, aggiungi qui la sua riga.
 
 | File | Come aggiornarlo con "aggiorna-tutto" |
 |---|---|
-| `README.md` | Aggiorna la sezione **Stato** (riga in cima + "## Stato del progetto") e "Tecnologie previste" se cambiano; non riscrivere il resto della presentazione. |
+| `README.md` | 🔖 **È la vetrina, non la cronaca**: l'aggiornamento tocca la tabella **«Storia del progetto»** (una riga per tappa, mai paragrafi) e le sezioni che descrivono cosa fa il programma e com'è fatto, se cambiano. Il racconto va nel diario. *(Proposta il 2026-10-07, dopo che la riga «Stato» era cresciuta a 65.000 caratteri a forza di aggiunte.)* |
 | `GUIDA.md` | **Guida di chi usa il programma**, non di chi lo costruisce: si aggiorna quando cambia qualcosa che l'utente **vede o fa** — un requisito, un passo del primo avvio, un messaggio d'errore, dove finiscono i dati. Non ci entra nulla di implementativo, e non si duplica lo stato del progetto: quello sta nel README. *(dal 2026-08-27.)* |
 | `guida-rapida/**` | **La guida rapida che si dà a chi usa il programma**: il sorgente HTML e il PDF stampabile (due facciate A4 orizzontali) che ne nasce. Stessa regola di `GUIDA.md` — si tocca quando cambia qualcosa che l'utente **vede o fa**, mai per implementazione o per lo stato del progetto — con due obblighi in più, perché è carta: un **comando rinominato va corretto qui carattere per carattere**, e ogni modifica all'HTML si chiude **ristampando il PDF** (Chrome o Edge, `--headless --print-to-pdf`, A4 orizzontale) e **riguardando le due facciate**, perché il contenuto deve stare dentro la pagina e a dirlo è solo l'occhio. *(dal 2026-09-04.)* |
 | `LICENSE` | **Statico**: la licenza del repository. Si tocca solo se la licenza cambia davvero. *(dal 2026-08-26.)* |
