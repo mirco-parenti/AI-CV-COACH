@@ -21,6 +21,10 @@ Convenzione di scrittura: **"io" = Mirco, "tu" = tu, l'assistente.**
    corsivo, sezioni *Cosa ho fatto / Cosa ho imparato / Dove ho faticato / Cosa ho
    deciso e perché*, callout 💡, **prima persona** (io = Mirco), in italiano.
    **Non riscrivere gli step passati** (sono storia): lavoro nuovo = step nuovo.
+   🔖 *Eccezione: una riscrittura di **forma** decisa da Mirco è ammessa, purché contenuto,
+   titoli e ordine degli Step restino quelli. È il caso del 2026-10-09, che ha separato le
+   voci: **io** = Mirco, **l'assistente** = l'AI, **il tutor**; le decisioni di Mirco in
+   grassetto. Gli Step nuovi seguono la stessa convenzione.*
 3. **Asset durevoli vs usa-e-getta**: investi qualità sui **durevoli = PROMPT + SCHEMA**,
    che ora vivono nel **pool** (cap. 04). Sono l'unica cosa migrata pari pari dal
    prototipo, e sopravvivranno anche a questa fase. L'impalcatura del prototipo —

@@ -42,6 +42,7 @@ dalla 15.2.*
   serve; nel momento in cui qualcuno lo **scarica**, Windows mostra il blocco
   «Windows ha protetto il PC», che un utente non pratico legge come «è un virus».
   Costo: qualche centinaio di euro l'anno più un dispositivo fisico per la chiave.
+  *Decisa il 2026-10-09:* l'exe della release 1.0 è firmato da Aviolab AI (cap. 13.6).
 - **Auto-update** — per un'app personale è complessità senza guadagno.
 - **Terze lingue (fr, de…)** — il pool le ammette per costruzione; fuori perimetro.
 - **Generazione assistita dell'email di sollecito (follow-up)** — nella 1.0 resta il

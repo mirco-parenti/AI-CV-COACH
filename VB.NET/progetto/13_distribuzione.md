@@ -180,6 +180,12 @@ certificato è un'opzione futura annotata in cap. 15, non un prerequisito.
 lo legge come «è un virus» e si ferma. È il momento in cui la firma del codice smette di
 essere un'opzione.
 
+*Aggiornamento del 2026-10-09:* quel momento è arrivato. La 1.0 esce come release su GitHub e
+l'eseguibile è **firmato da Aviolab AI** (certificato Certum, timestamp DigiCert). La firma
+si mette **dopo** `publish.bat` e **prima** del caricamento, e cambia l'impronta SHA-256:
+quella da annotare accanto al tag è dell'exe firmato. SmartScreen può avvisare lo stesso nei
+primi tempi, finché il programma non accumula reputazione; README e `GUIDA.md` lo dicono.
+
 ## 13.7 L'area di sviluppo nel repo
 
 ```
@@ -328,6 +334,11 @@ dell'eseguibile vero, che nessun collaudo automatico copre.*
 significa: non **firma** il codice — SmartScreen avviserà (13.6); non pubblica niente
 online — l'eseguibile si porta a mano sulla macchina che deve provarlo; e non aggiorna
 nessuno — l'aggiornamento è manuale (13.8).
+
+*Aggiornamento del 2026-10-09:* le prime due non valgono più. Dalla 1.0 l'exe di
+`publish.bat` va a **firmare** ad Aviolab (13.6) e si pubblica **online**, come release
+GitHub col tag `v<maggiore>.<minore>`: è da lì che lo scarica chi vuole provarlo, ed è lì
+che guarda il controllo versione (13.8). L'aggiornamento resta manuale.
 
 *La prima volta è stata la **1.0.000**, il 2026-08-24 (sesto tempo di T9e), e questa
 sequenza è il resoconto di come è andata: **1110 collaudi verdi**, cartella svuotata,

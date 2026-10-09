@@ -293,6 +293,9 @@ nasce una sola, più stretta — la **sorella cattiva col DPI alto**, che quella
 che qui non si può provare — così sotto restano le due che non dipendono da noi (il giro D e
 il certificato per la firma) più quella.
 
+**Aggiornamento del 2026-10-09**: la firma del codice è fatta ed è in «Chiuse». Delle due che
+non dipendono da noi resta il **giro D da rifare**; il tag `v1.0` non lo aspetta più.
+
 - ⚠ **Il giro D è aperto: due voci non provate, e tre riserve provate su un eseguibile che non
   le conteneva.** `D1` (l'exe su un PC senza runtime) e `R-b` (la barra delle Impostazioni a
   scala 150 %) su quella macchina non si sono potute fare. Le altre tre riserve stanno peggio
@@ -308,12 +311,6 @@ il certificato per la firma) più quella.
   quel codice non l'ha toccato nessuno — mentre `R-a`, `R-b` e `R-c` **no**: il giro si rifà
   con l'eseguibile ripubblicato dal commit vero, e sono quattro voci, non sette.
   *(cap. 13.10; reperto D-R1 della revisione.)*
-
-- **La firma del codice.** Senza un certificato per organizzazione SmartScreen ferma chiunque
-  scarichi l'eseguibile, e un avviso di quel genere — su un programma che poi chiede una chiave
-  API — brucia la fiducia prima ancora dell'avvio. **Migrata da `idee_future.md`** il
-  2026-08-27: lì stava dal 5 agosto con la condizione «quando l'app circolerà oltre il
-  portfolio», e la revisione dichiara quel momento arrivato. *(cap. 13.6.)*
 
 - **A DPI alto il `clic` dello strumento di collaudo manca ancora il bersaglio**
   *(annotata il 2026-08-29, la trappola è del 2026-08-23)*. È la sorella della voce chiusa
@@ -656,10 +653,18 @@ invece di darlo per provato (regola 15).*
 
 ## Chiuse
 
+- ✅ **La firma del codice** *(aperta il 2026-08-27, **chiusa il 2026-10-09**)*. L'eseguibile
+  della release 1.0 è firmato da **Aviolab AI** con un certificato Certum, valido fino al
+  30-11-2027, e porta il timestamp DigiCert, così la firma resta valida anche dopo la scadenza.
+  SmartScreen può avvisare lo stesso nei primi tempi, finché il programma non accumula
+  reputazione: la firma toglie l'«editore sconosciuto», non l'avviso. README e `GUIDA.md` ora
+  lo dicono. *(cap. 13.6.)*
+
 - ✅ **Il tag `v1.0` e la release** *(aperta il 2026-08-24, **chiusa il 2026-10-09**)*. Il
-  tag aspettava il giro D, e poi un eseguibile che sapesse dire da quale commit nasce. Ora c'è
-  tutto: l'exe è compilato con `publish.bat` da `main` pulito (commit `104e59f`, nessun
-  «+modificato»), **firmato da Aviolab AI** con timestamp, e pubblicato come release
+  tag doveva aspettare il giro D rifatto; Mirco ha deciso di **non aspettarlo più**, e il giro
+  D resta aperto per conto suo, più sopra. L'exe è compilato con `publish.bat` da `main`
+  pulito (commit `104e59f`, nessun «+modificato»), **firmato da Aviolab AI** con timestamp, e
+  pubblicato come release
   **TrovaLavoro 1.0** su GitHub. Il tag `v1.0` sta su `104e59f` e porta l'impronta SHA-256
   dell'exe firmato (`b8ad7847…6bae802`), la stessa riletta riscaricando il file dalla
   release. Il controllo versione dell'app, che finora riceveva `404`, adesso trova `v1.0`.
