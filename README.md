@@ -43,6 +43,14 @@ Due regole del prodotto, scritte dentro i prompt e sorvegliate dai collaudi:
 
 ## Per chi vuole usarlo
 
+**Vuoi provarlo?** L'eseguibile pronto è nelle
+**[Releases](https://github.com/mirco-parenti/AI-CV-COACH/releases)**: scarica `TrovaLavoro.exe`
+dall'ultima versione. È un file solo, non c'è niente da installare (nemmeno .NET); serve
+Windows 11 a 64 bit e una chiave API di Anthropic tua. L'exe non è firmato, quindi al primo
+avvio Windows può mostrare l'avviso SmartScreen: *Ulteriori informazioni → Esegui comunque*.
+La prova è consentita per uso personale e di valutazione; **copiarlo, modificarlo e
+ridistribuirlo restano vietati** (v. [Licenza](#licenza)).
+
 La guida d'uso è in **[`GUIDA.md`](GUIDA.md)**: requisiti, primo avvio, la chiave API e quanto
 costa, dove finiscono i dati, il backup. È scritta per chi usa il programma; questo README è per chi vuole capire com'è fatto.
 
@@ -135,7 +143,9 @@ Quello che è rimasto indietro sta in [`in_sospeso.md`](in_sospeso.md), le idee 
 
 Il sorgente è pubblicato per essere **letto**: come portfolio, per studio e per verificare il
 lavoro svolto. **Non** è una licenza open source: usarlo, modificarlo o ridistribuirlo richiede
-un'autorizzazione scritta. I termini completi sono in [`LICENSE`](LICENSE).
+un'autorizzazione scritta. Unica eccezione: l'eseguibile pubblicato nelle Releases si può
+scaricare ed eseguire per uso personale e di valutazione. I termini completi sono in
+[`LICENSE`](LICENSE).
 
 ---
 
