@@ -245,14 +245,6 @@ difetto: sono cose che aspettano una mano o una macchina.*
   perché è l'unica prova possibile del vincolo più rigido del progetto (un exe che parte dove
   non c'è niente). Installarlo prima brucia la sola macchina disponibile per quella prova, e
   non si torna indietro. *(cap. 13.1; cap. 14, T1 e T9e.)*
-- **Il tag `v1.0` è rimandato, non dimenticato.** Va sul commit di `main`, e si mette **dopo**
-  il giro D: se quella prova trovasse qualcosa, la 1.0 taggata sarebbe una versione che si sa
-  già di dover correggere. Oggi il repository non ha nessun tag di rilascio. *(cap. 13.9;
-  cap. 14, il sesto tempo di T9e.)* **Aggiornamento del 2026-08-27**: quella prova **ha
-  trovato qualcosa** — non nel prodotto, nel legame fra eseguibile e commit — quindi il tag
-  aspetta ancora; e quando arriverà dovrà andare sul commit **effettivamente pubblicato**,
-  con l'impronta SHA-256 dell'eseguibile annotata accanto.
-
 ## Da questa passata della regola 16 su T1→T8 (2026-08-25)
 
 *La passata è stata fatta ed è in «Chiuse»: 250 impegni riletti su dieci tappe, **nessuno mai
@@ -663,6 +655,15 @@ invece di darlo per provato (regola 15).*
   `CLAUDE.md`.)*
 
 ## Chiuse
+
+- ✅ **Il tag `v1.0` e la release** *(aperta il 2026-08-24, **chiusa il 2026-10-09**)*. Il
+  tag aspettava il giro D, e poi un eseguibile che sapesse dire da quale commit nasce. Ora c'è
+  tutto: l'exe è compilato con `publish.bat` da `main` pulito (commit `104e59f`, nessun
+  «+modificato»), **firmato da Aviolab AI** con timestamp, e pubblicato come release
+  **TrovaLavoro 1.0** su GitHub. Il tag `v1.0` sta su `104e59f` e porta l'impronta SHA-256
+  dell'exe firmato (`b8ad7847…6bae802`), la stessa riletta riscaricando il file dalla
+  release. Il controllo versione dell'app, che finora riceveva `404`, adesso trova `v1.0`.
+  *(cap. 13.9; cap. 14, il sesto tempo di T9e.)*
 
 - ✅ **Le voci lasciate fuori non arrivavano al 📄 CV base esportato** *(aperta e **chiusa il
   2026-09-08**, poche ore dopo)*. L'anteprima di P6 impaginava col taglio dell'utente e

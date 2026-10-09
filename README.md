@@ -46,8 +46,9 @@ Due regole del prodotto, scritte dentro i prompt e sorvegliate dai collaudi:
 **Vuoi provarlo?** L'eseguibile pronto è nelle
 **[Releases](https://github.com/mirco-parenti/AI-CV-COACH/releases)**: scarica `TrovaLavoro.exe`
 dall'ultima versione. È un file solo, non c'è niente da installare (nemmeno .NET); serve
-Windows 11 a 64 bit e una chiave API di Anthropic tua. L'exe non è firmato, quindi al primo
-avvio Windows può mostrare l'avviso SmartScreen: *Ulteriori informazioni → Esegui comunque*.
+Windows 11 a 64 bit e una chiave API di Anthropic tua. L'exe è firmato da Aviolab AI; nei
+primi tempi Windows SmartScreen può comunque mostrare un avviso, finché il programma non
+accumula reputazione: *Ulteriori informazioni → Esegui comunque*.
 La prova è consentita per uso personale e di valutazione; **copiarlo, modificarlo e
 ridistribuirlo restano vietati** (v. [Licenza](#licenza)).
 

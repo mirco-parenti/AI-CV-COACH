@@ -44,8 +44,10 @@ installarlo, e tutto quello che non lo usa continua a funzionare.
    anche su una chiavetta. Non sparpaglia file: i tuoi dati vanno altrove (v. *Dove
    finiscono i tuoi dati*).
 2. **Al primo doppio clic Windows può avvisarti** che «il PC è protetto» e che
-   l'applicazione non è riconosciuta. Succede a ogni programma non firmato con un
-   certificato commerciale. Per procedere: *Ulteriori informazioni* → *Esegui comunque*.
+   l'applicazione non è riconosciuta. Il programma è firmato da Aviolab AI, ma Windows si
+   fida di un programma nuovo solo dopo che molte persone l'hanno scaricato: nei primi tempi
+   l'avviso può comparire lo stesso. Per procedere: *Ulteriori informazioni* → *Esegui
+   comunque*.
 3. **Compare la schermata di avvio** — il marchio del programma — e resta una decina di
    secondi, il tempo di leggerla, mentre TrovaLavoro si prepara. Se hai fretta la mandi via
    subito con **un clic o premendo Invio**; e se c'è qualcosa da chiederti se ne va da sola,
