@@ -124,6 +124,7 @@ dell'assistente.
 | T9 → 1.0 | 21 – 24 ago | Backup, Impostazioni, esiti e promemoria, rifinitura, rilascio **1.0.000** |
 | Revisione | 1 – 2 set | Sicurezza, interfaccia e confronto fra il promesso e il fatto (pull request #1) |
 | Rifiniture | da settembre | Nascono usando il programma: il riconfronto, lo stato della procedura nella Home, le spie |
+| Release | 9 ott | L'exe firmato da Aviolab AI e pubblicato nelle [Releases](https://github.com/mirco-parenti/AI-CV-COACH/releases) di GitHub |
 
 Il dettaglio di ogni passo, compresi gli errori, sta nel [`diario_di_bordo.md`](diario_di_bordo.md).
 Quello che è rimasto indietro sta in [`in_sospeso.md`](in_sospeso.md), le idee per il futuro in
