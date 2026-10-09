@@ -6,8 +6,7 @@
 **senza inventare niente**. *AI-CV-COACH* è il nome del progetto e del repository;
 *TrovaLavoro* è il nome del programma che ne è nato.
 
-**Stato:** versione **1.0** rilasciata il 2026-08-24; da allora si fanno rifiniture.
-Il racconto passo per passo sta nel [`diario_di_bordo.md`](diario_di_bordo.md).
+**Stato:** versione **1.0** rilasciata il 2026-08-24.
 
 ## Che cosa fa
 
@@ -45,14 +44,7 @@ Due regole del prodotto, scritte dentro i prompt e sorvegliate dai collaudi:
 ## Per chi vuole usarlo
 
 La guida d'uso è in **[`GUIDA.md`](GUIDA.md)**: requisiti, primo avvio, la chiave API e quanto
-costa, dove finiscono i dati, il backup. È scritta per chi usa il programma; questo README è
-per chi vuole capire com'è fatto.
-
-L'eseguibile **non è versionato qui**, perché pesa oltre 100 MB: ingloba il runtime .NET. Si
-costruisce con `VB.NET/src/publish.bat`, e la procedura completa è nel §13.9 di
-[`VB.NET/progetto/13_distribuzione.md`](VB.NET/progetto/13_distribuzione.md). L'exe non è
-firmato, quindi al primo avvio Windows mostra l'avviso SmartScreen: «Ulteriori informazioni →
-Esegui comunque». Prima, leggi la [licenza](#licenza).
+costa, dove finiscono i dati, il backup. È scritta per chi usa il programma; questo README è per chi vuole capire com'è fatto.
 
 ## Com'è fatto
 
